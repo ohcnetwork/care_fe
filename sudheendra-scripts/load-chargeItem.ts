@@ -6,6 +6,7 @@ dotenv.config({ path: [".env.local", ".env"] });
 
 import {
   type BaseConfig,
+  LoaderResult,
   type ProcessedRow,
   colorize,
   createScriptConfig,
@@ -92,7 +93,7 @@ function getTaxComponents(taxRate?: string) {
 function processCsvData(rows: Record<string, string>[]): ChargeItemData[] {
   return rows.map((row) => {
     const basePrice = parseFloat(row["Base Price"].replace(/[^\d.-]/g, ""));
-    const slug_value = createSlug(row.Service);
+    const slug_value = row.slug;
     const taxRate = row["Tax Rate"] || row["RATE"] || row["Tax"] || undefined;
 
     return {
@@ -100,7 +101,7 @@ function processCsvData(rows: Record<string, string>[]): ChargeItemData[] {
       basePrice: isNaN(basePrice) ? 0 : basePrice,
       slug_value: slug_value,
       taxRate: taxRate,
-      category: createSlug(row.category || "service"),
+      category: `f-${process.env.FACILITY_ID}-${createSlug(row.category || "service")}`,
       description: row.description || `Service: ${row.Service}`,
       status:
         (row.status as ChargeItemDefinitionStatus) ||
@@ -137,6 +138,30 @@ async function upsertChargeItemDefinition(
   );
 }
 // Main function
+
+async function mockInsert(config: BaseConfig): Promise<LoaderResult> {
+  logger(colorize("Loading data...", 0));
+  const csvRows = await loadData(config);
+
+  if (csvRows.length === 0) {
+    throw new Error("No valid rows found in CSV file");
+  }
+
+  let processedData = processCsvData(csvRows);
+
+  // Remove duplicates
+  processedData = removeDuplicates(processedData);
+
+  return {
+    successful: processedData.map((item) => item.slug_value),
+    failed: [],
+    results: processedData.map((item) => ({
+      success: true,
+      item: item,
+    })),
+  };
+}
+
 async function main(configOverride?: Partial<BaseConfig>) {
   // If configOverride is provided, don't merge CLI args (called programmatically)
   // Otherwise, merge CLI args (called from command line)
@@ -152,6 +177,10 @@ async function main(configOverride?: Partial<BaseConfig>) {
           SCRIPT_DEFAULTS.outputFile,
         ),
       );
+
+  if (finalConfig.skipInsert) {
+    return mockInsert(finalConfig);
+  }
 
   try {
     logger(colorize("Starting charge item definition loader...", 0));
@@ -224,12 +253,28 @@ async function main(configOverride?: Partial<BaseConfig>) {
     // Update output data with status
     outputData = outputData.map((row) => {
       const result = results.find((r) => r.item.slug_value === row.Slug_value);
+
+      // Handle error message properly - convert objects to strings
+      let errorMessage = "";
+      if (!result?.success && result?.error) {
+        if (typeof result.error === "string") {
+          errorMessage = result.error;
+        } else if (result.error.errorText) {
+          errorMessage = result.error.errorText;
+        } else if (result.error.message) {
+          errorMessage = result.error.message;
+        } else {
+          // If it's an object without message/errorText, stringify it
+          errorMessage = JSON.stringify(result.error);
+        }
+      } else if (!result?.success) {
+        errorMessage = "Unknown error";
+      }
+
       return {
         ...row,
         Status: result?.success ? "Success" : "Failed",
-        "Error Message": result?.success
-          ? ""
-          : result?.error || "Unknown error",
+        "Error Message": errorMessage,
       };
     });
 

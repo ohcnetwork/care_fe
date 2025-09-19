@@ -12,7 +12,6 @@ import {
   type ProcessedRow,
   colorize,
   createScriptConfig,
-  createSlug,
   ensureAuthentication,
   getLogger,
   loadData,
@@ -135,7 +134,7 @@ function processCsvData(
 
     return {
       title: row.title,
-      slug_value: createSlug(row.title),
+      slug_value: row.slug,
       status:
         (row.status as SpecimenDefinitionStatus) ||
         SpecimenDefinitionStatus.active,
@@ -231,10 +230,26 @@ async function main(configOverride?: Partial<BaseConfig>) {
     // Update output data with status
     outputData = outputData.map((row) => {
       const result = results.find((r) => r.item.slug_value === row.Slug_value);
+
+      // Handle error message properly - convert objects to strings
+      let errorMessage = "";
+      if (result?.error) {
+        if (typeof result.error === "string") {
+          errorMessage = result.error;
+        } else if (result.error.errorText) {
+          errorMessage = result.error.errorText;
+        } else if (result.error.message) {
+          errorMessage = result.error.message;
+        } else {
+          // If it's an object without message/errorText, stringify it
+          errorMessage = JSON.stringify(result.error);
+        }
+      }
+
       return {
         ...row,
         Status: result?.success ? "Success" : "Failed",
-        Errors: result?.error?.errorText || "",
+        Errors: errorMessage,
       };
     });
 

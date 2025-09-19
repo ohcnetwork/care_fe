@@ -11,6 +11,7 @@ import { main as loadSpecimens } from "./load-specimenDefinition.js";
 import {
   type BaseConfig,
   type ProcessedRow,
+  type ValidationRule,
   colorize,
   createScriptConfig,
   createSlug,
@@ -27,6 +28,7 @@ import {
   processApiResults,
   removeDuplicates,
   showCliHelp,
+  validateRowCodes,
   writeOutputCsv,
 } from "./utils.js";
 
@@ -119,117 +121,147 @@ const SCRIPT_DEFAULTS = {
   outputDir: path.join(__dirname, "output"),
 };
 
-// Function to process CSV data
-async function processCsvData(
-  rows: Record<string, string>[],
+// Validation rules for activity definition codes
+const ACTIVITY_VALIDATION_RULES: ValidationRule[] = [
+  {
+    rowPrefix: "code",
+    valuesetUrl:
+      "/api/v1/valueset/activity-definition-procedure-code/validate_codes/",
+    defaultCode: "71388002", // Default procedure code
+    defaultSystem: "http://snomed.info/sct",
+    defaultDisplay: "Procedure",
+    batchSize: 20,
+  },
+  // You can easily add more validation rules here:
+  // {
+  //   rowPrefix: "body_site",
+  //   valuesetUrl: "/api/v1/valueset/body-site/validate_codes/",
+  //   defaultCode: "123456789",
+  //   defaultSystem: "http://snomed.info/sct",
+  //   defaultDisplay: "Test Body Site",
+  //   batchSize: 20,
+  // },
+];
+
+// Helper function to create ActivityData from a row with validated code
+function createActivityDataFromRow(
+  row: Record<string, string>,
+  validatedCode: Code | null,
   config: BaseConfig,
-): Promise<ActivityData[]> {
-  const results: ActivityData[] = [];
+): ActivityData {
+  // Create code from validated row data
+  const finalCode = {
+    system: row.code_system || ACTIVITY_VALIDATION_RULES[0].defaultSystem,
+    code: row.code_value || ACTIVITY_VALIDATION_RULES[0].defaultCode,
+    display: row.code_display || ACTIVITY_VALIDATION_RULES[0].defaultDisplay,
+  };
+  const bodySite = parseCode(
+    row.body_site_system,
+    row.body_site_code,
+    row.body_site_display,
+  );
 
-  for (const row of rows) {
-    // Parse code fields
-    let code = parseCode(row.code_system, row.code_value, row.code_display);
-    const bodySite = parseCode(
-      row.body_site_system,
-      row.body_site_code,
-      row.body_site_display,
-    );
+  // Parse diagnostic report LOINC codes as Code objects
+  const diagnosticReportCodes: Code[] = [];
+  if (row.diagnostic_report_loinc_codes) {
+    const codes = row.diagnostic_report_loinc_codes
+      .split(";")
+      .map((s: string) => s.trim())
+      .filter((s: string) => s);
 
-    // If code is missing but we have a title, try to lookup the code
-    if (!code && row.title) {
-      //skip row
-      /* logger(colorize(`Looking up code for activity: ${row.title}`, 2));
-      code = await lookupCode(row.title, config);
-      if (code) {
-        logger(
-          colorize(
-            `Found code for "${row.title}": ${code.code} - ${code.display}`,
-            0,
-          ),
-        );
+    for (const codeStr of codes) {
+      // Assuming format: "system|code|display" or just "code"
+      const parts = codeStr.split("|");
+      if (parts.length >= 2) {
+        diagnosticReportCodes.push({
+          system: parts[0],
+          code: parts[1],
+          display: parts[2] || parts[1],
+        });
       } else {
-        logger(colorize(`No code found for "${row.title}"`, 1));
-      } */
-    }
-
-    // Parse diagnostic report LOINC codes as Code objects
-    const diagnosticReportCodes: Code[] = [];
-    if (row.diagnostic_report_loinc_codes) {
-      const codes = row.diagnostic_report_loinc_codes
-        .split(";")
-        .map((s: string) => s.trim())
-        .filter((s: string) => s);
-
-      for (const codeStr of codes) {
-        // Assuming format: "system|code|display" or just "code"
-        const parts = codeStr.split("|");
-        if (parts.length >= 2) {
+        // Default to LOINC system if no system specified
+        const code = parseCode("http://loinc.org", codeStr, codeStr);
+        if (code) {
           diagnosticReportCodes.push({
-            system: parts[0],
-            code: parts[1],
-            display: parts[2] || parts[1],
+            system: code.system,
+            code: code.code,
+            display: code.display,
           });
-        } else {
-          // Default to LOINC system if no system specified
-          const code = parseCode("http://loinc.org", codeStr, codeStr);
-          if (code) {
-            diagnosticReportCodes.push({
-              system: code.system,
-              code: code.code,
-              display: code.display,
-            });
-          }
         }
       }
     }
-    // filter out rows with no code
-    rows = rows.filter((r) => r.code);
-
-    results.push({
-      title: row.title,
-      slug_value: createSlug(row.title),
-      description: row.description,
-      usage: row.usage || "",
-      status: (row.status as Status) || Status.active,
-      classification:
-        (row.classification as Classification) || Classification.laboratory,
-      kind: Kind.service_request,
-      category: createSlug(row.category || "laboratory"),
-      observation_slugs: row.observation_slugs
-        ? row.observation_slugs
-            .split(";")
-            .map((s: string) => s.trim())
-            .filter((s: string) => s)
-            .map((s: string) => createSlug(s))
-        : [],
-      specimen_slugs: row.specimen_slugs
-        ? row.specimen_slugs
-            .split(";")
-            .map((s: string) => s.trim())
-            .filter((s: string) => s)
-            .map((s: string) => createSlug(s))
-        : [],
-      charge_item_slugs: row.charge_item_slugs
-        ? row.charge_item_slugs
-            .split(";")
-            .map((s: string) => s.trim())
-            .filter((s: string) => s)
-            .map((s: string) => createSlug(s))
-        : [],
-      diagnostic_report_loinc_codes: diagnosticReportCodes,
-      code: code || undefined,
-      body_site: bodySite || undefined,
-      derived_from_uri: row.derived_from_uri || undefined,
-      locations: row.locations
-        ? row.locations
-            .split(";")
-            .map((s: string) => s.trim())
-            .filter((s: string) => s)
-        : [],
-    });
   }
 
-  return results;
+  return {
+    title: row.title,
+    slug_value: row.slug,
+    description: row.description,
+    usage: row.usage || "",
+    status: (row.status as Status) || Status.active,
+    classification:
+      (row.classification as Classification) || Classification.laboratory,
+    kind: Kind.service_request,
+    category: `f-${config.facilityId}-${createSlug(row.category || "laboratory")}`,
+    observation_slugs: row.observation_slugs
+      ? row.observation_slugs
+          .split(",")
+          .map((s: string) => s.trim())
+          .filter((s: string) => s)
+          .map((s: string) => `f-${config.facilityId}-${s}`)
+      : [],
+    specimen_slugs: row.specimen_slugs
+      ? row.specimen_slugs
+          .split(",")
+          .map((s: string) => s.trim())
+          .filter((s: string) => s)
+          .map((s: string) => `f-${config.facilityId}-${s}`)
+      : [],
+    charge_item_slugs: row.charge_item_slugs
+      ? row.charge_item_slugs
+          .split(",")
+          .map((s: string) => s.trim())
+          .filter((s: string) => s)
+          .map((s: string) => `f-${config.facilityId}-${s}`)
+      : [],
+    diagnostic_report_loinc_codes: [], //diagnosticReportCodes,
+    code: finalCode,
+    body_site: bodySite || undefined,
+    derived_from_uri: row.derived_from_uri || undefined,
+    locations: row.locations
+      ? row.locations
+          .split(",")
+          .map((s: string) => s.trim())
+          .filter((s: string) => s)
+      : [],
+  };
+}
+
+// Function to process CSV data using flexible validation
+async function processCsvData(
+  rows: Record<string, string>[],
+  config: BaseConfig,
+): Promise<{ data: ActivityData[]; substitutions: Map<string, string> }> {
+  // Validate codes using the flexible validation system
+  const { validatedRows, substitutions } = await validateRowCodes(
+    rows,
+    config,
+    ACTIVITY_VALIDATION_RULES,
+  );
+
+  // Process validated rows into ActivityData
+  const results: ActivityData[] = [];
+  for (const row of validatedRows) {
+    try {
+      const activityData = createActivityDataFromRow(row, null, config);
+      results.push(activityData);
+    } catch (error: any) {
+      logger(
+        colorize(`Error processing row "${row.title}": ${error.message}`, 1),
+      );
+    }
+  }
+
+  return { data: results, substitutions };
 }
 
 // Function to check if dependencies are available
@@ -335,7 +367,11 @@ async function main(configOverride?: Partial<BaseConfig>) {
     logger(colorize("\n=== Loading Dependencies ===", 0));
 
     // Load charge items
-    logger(colorize("Loading charge items...", 2));
+    if (finalConfig.skipInsert) {
+      logger(colorize("Skipping charge item loading...", 1));
+    } else {
+      logger(colorize("Loading charge items...", 2));
+    }
     const chargeItemResults = await loadChargeItems({
       ...authenticatedConfig,
       inputFile: path.join(__dirname, "ChargeItemDefinition.csv"),
@@ -361,7 +397,11 @@ async function main(configOverride?: Partial<BaseConfig>) {
     });
 
     // Load observations
-    logger(colorize("Loading observations...", 2));
+    if (finalConfig.skipInsert) {
+      logger(colorize("Skipping observation loading...", 1));
+    } else {
+      logger(colorize("Loading observations...", 2));
+    }
     const observationResults = await loadObservations({
       ...authenticatedConfig,
       inputFile: path.join(__dirname, "ObservationDefinition.csv"),
@@ -396,16 +436,20 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     // Process data
     logger(colorize("Processing data...", 0));
-    let processedData = await processCsvData(csvRows, finalConfig);
+    const { data: processedData, substitutions } = await processCsvData(
+      csvRows,
+      finalConfig,
+    );
 
     // Remove duplicates
-    processedData = removeDuplicates(processedData);
+    const uniqueProcessedData = removeDuplicates(processedData);
 
     // Create output data for CSV
-    let outputData: ProcessedRow[] = processedData.map((item) => ({
+    let outputData: ProcessedRow[] = uniqueProcessedData.map((item) => ({
       Title: item.title,
       Slug_value: item.slug_value,
       Status: "Pending",
+      Code_Substitution: substitutions.get(item.slug_value) || "",
     }));
 
     // Step 4: Check dependencies and prepare for batch processing
@@ -414,12 +458,18 @@ async function main(configOverride?: Partial<BaseConfig>) {
     const invalidActivities: { item: ActivityData; error: string }[] = [];
 
     const availableSlugs = {
-      observations: observationResults.successful,
-      specimens: specimenResults.successful,
-      chargeItems: chargeItemResults.successful,
+      observations: observationResults.successful.map(
+        (slug) => `f-${finalConfig.facilityId}-${slug}`,
+      ),
+      specimens: specimenResults.successful.map(
+        (slug) => `f-${finalConfig.facilityId}-${slug}`,
+      ),
+      chargeItems: chargeItemResults.successful.map(
+        (slug) => `f-${finalConfig.facilityId}-${slug}`,
+      ),
     };
 
-    for (const item of processedData) {
+    for (const item of uniqueProcessedData) {
       // Check dependencies
       const dependencyCheck = checkDependencies(item, availableSlugs);
 
@@ -479,16 +529,63 @@ async function main(configOverride?: Partial<BaseConfig>) {
       const result = allResults.find(
         (r) => r.item.slug_value === row.Slug_value,
       );
+
+      // Handle error message properly - convert objects to strings
+      let errorMessage = "";
+      if (result?.error) {
+        if (typeof result.error === "string") {
+          errorMessage = result.error;
+        } else if (result.error.message) {
+          errorMessage = result.error.message;
+        } else if (result.error.errorText) {
+          errorMessage = result.error.errorText;
+        } else {
+          // If it's an object without message/errorText, stringify it
+          errorMessage = JSON.stringify(result.error);
+        }
+      }
+
       return {
         ...row,
         Status: result?.success ? "Success" : "Failed",
-        Errors: result?.error?.message || result?.error?.errorText || "",
+        Errors: errorMessage,
+        Code_Substitution: row.Code_Substitution, // Preserve substitution info
       };
     });
 
-    // Write output CSV
+    // Write output CSV with dynamic substitution columns
     logger(colorize("Writing output CSV...", 0));
-    await writeOutputCsv(outputData, finalConfig.outputFile);
+
+    // Add substitution data to each row
+    const outputDataWithSubstitutions = outputData.map((row) => {
+      const rowWithSubstitutions: Record<string, any> = { ...row };
+
+      // Add substitution columns for each validation rule
+      ACTIVITY_VALIDATION_RULES.forEach((rule) => {
+        const substitutionKey = `${rule.rowPrefix}_Substitution`;
+        rowWithSubstitutions[substitutionKey] =
+          substitutions.get(`${row.Slug_value}.${rule.rowPrefix}`) || "";
+      });
+
+      return rowWithSubstitutions;
+    });
+
+    // Create custom headers with substitution columns
+    const customHeaders = [
+      "Title",
+      "Slug_value",
+      "Status",
+      "Errors",
+      ...ACTIVITY_VALIDATION_RULES.map(
+        (rule) => `${rule.rowPrefix}_Substitution`,
+      ),
+    ];
+
+    await writeOutputCsv(
+      outputDataWithSubstitutions,
+      finalConfig.outputFile,
+      customHeaders,
+    );
 
     // Process and return results
     return processApiResults(allResults, "activity");

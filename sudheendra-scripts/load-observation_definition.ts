@@ -1,10 +1,10 @@
 import dotenv from "dotenv";
-import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
 import {
   type BaseConfig,
+  type ValidationRule,
   colorize,
   createScriptConfig,
   createSlug,
@@ -17,6 +17,8 @@ import {
   parseCliArgs,
   parseCode,
   showCliHelp,
+  validateRowCodes,
+  writeOutputCsv,
 } from "./utils.js";
 
 import { Code } from "@/types/base/code/code";
@@ -84,6 +86,7 @@ interface ProcessedRow {
   Title: string;
   Status: string;
   Errors?: string;
+  Code_Substitution?: string;
 }
 
 // Remove duplicate constants - they're imported from types now
@@ -102,6 +105,34 @@ const SCRIPT_DEFAULTS = {
   inputFile: path.join(__dirname, "observation_definitions.csv"),
   outputFile: path.join(__dirname, "observations-output.csv"),
 };
+
+// Validation rules for observation definition codes
+const OBSERVATION_VALIDATION_RULES: ValidationRule[] = [
+  {
+    rowPrefix: "code",
+    valuesetUrl: "/api/v1/valueset/system-observation/validate_codes/",
+    defaultCode: "104922-0", // Laboratory test details panel
+    defaultSystem: "http://loinc.org",
+    defaultDisplay: "Laboratory test details panel",
+    batchSize: 20,
+  },
+  {
+    rowPrefix: "method",
+    valuesetUrl: "/api/v1/valueset/system-collection-method/validate_codes/",
+    defaultCode: "386053000",
+    defaultSystem: "http://snomed.info/sct",
+    defaultDisplay: "Technique",
+    batchSize: 20,
+  },
+  // {
+  //   rowPrefix: "body_site",
+  //   valuesetUrl: "/api/v1/valueset/body-site/validate_codes/",
+  //   defaultCode: "123456789",
+  //   defaultSystem: "http://snomed.info/sct",
+  //   defaultDisplay: "Test Body Site",
+  //   batchSize: 20,
+  // },
+];
 
 /**
  * CSV parsing helpers
@@ -207,25 +238,31 @@ function parseComponents(
   return [];
 }
 
-function csvRowToObservationDefinition(
-  row: CSVRow,
+// Helper function to create ParsedObservationDefinition from a row with validated code
+function createObservationDefinitionFromRow(
+  row: Record<string, string>,
   facilityId: string,
 ): ParsedObservationDefinition {
-  const code = parseCode(row.code_system, row.code_value, row.code_display);
-  if (!code) throw new Error(`Invalid code data for row: ${row.title}`);
+  // Create code from validated row data
+  const finalCode = {
+    system: row.code_system || OBSERVATION_VALIDATION_RULES[0].defaultSystem,
+    code: row.code_value || OBSERVATION_VALIDATION_RULES[0].defaultCode,
+    display: row.code_display || OBSERVATION_VALIDATION_RULES[0].defaultDisplay,
+  };
 
   const bodySite = parseCode(
-    row.body_site_system,
+    row.body_site_system || "http://snomed.info/sct",
     row.body_site_code,
     row.body_site_display,
   );
   const method = parseCode(
-    row.method_system,
+    row.method_system ||
+      "http://terminology.hl7.org/CodeSystem/observation-methods",
     row.method_code,
     row.method_display,
   );
   const permittedUnit = parseCode(
-    row.permitted_unit_system,
+    row.permitted_unit_system || "http://unitsofmeasure.org",
     row.permitted_unit_code,
     row.permitted_unit_display,
   );
@@ -238,12 +275,12 @@ function csvRowToObservationDefinition(
   const category = row.category || "laboratory";
 
   return {
-    slug_value: createSlug(row.title),
+    slug_value: row.slug,
     title: row.title,
     status,
     description: row.description,
     category,
-    code,
+    code: finalCode,
     permitted_data_type:
       (row.permitted_data_type as QuestionType) || QuestionType.string,
     component: parseComponents(row.component),
@@ -254,6 +291,17 @@ function csvRowToObservationDefinition(
     facility: facilityId,
     qualified_ranges: [],
   };
+}
+
+// Legacy function for backward compatibility
+function csvRowToObservationDefinition(
+  row: CSVRow,
+  facilityId: string,
+): ParsedObservationDefinition {
+  return createObservationDefinitionFromRow(
+    row as unknown as Record<string, string>,
+    facilityId,
+  );
 }
 
 function validateObservationDefinition(
@@ -353,6 +401,23 @@ async function upsertObservationDefinition(
   return await response.json();
 }
 
+async function mockInsert(config: BaseConfig) {
+  const rawRows = await loadData(config);
+  if (rawRows.length === 0) throw new Error("No valid rows found in CSV file");
+
+  // Convert generic rows to typed CSVRow objects
+  const rows: CSVRow[] = rawRows.map((row) => row as unknown as CSVRow);
+
+  return {
+    successful: rows.map((item) => item.slug),
+    failed: [],
+    results: rows.map((item) => ({
+      success: true,
+      item: item,
+    })),
+  };
+}
+
 /**
  * Main script
  */
@@ -372,6 +437,10 @@ async function main(configOverride?: Partial<BaseConfig>) {
         ),
       );
 
+  if (finalConfig.skipInsert) {
+    return mockInsert(finalConfig);
+  }
+
   try {
     logger(colorize("Starting observation definition loader...", 0));
 
@@ -388,24 +457,53 @@ async function main(configOverride?: Partial<BaseConfig>) {
 
     logger(colorize(`Processing ${rows.length} observation definitions...`, 0));
 
-    // Process all rows and prepare for batch API call
-    const validDefinitions: ParsedObservationDefinition[] = [];
-    const invalidRows: { row: CSVRow; errors: string[] }[] = [];
+    // Validate codes using the flexible validation system
+    const { validatedRows, substitutions } = await validateRowCodes(
+      rows as unknown as Record<string, string>[],
+      finalConfig,
+      OBSERVATION_VALIDATION_RULES,
+    );
 
-    for (const row of rows) {
+    // Process validated rows into ParsedObservationDefinition
+    const processedDefinitions: ParsedObservationDefinition[] = [];
+    for (const row of validatedRows) {
       try {
-        const definition = csvRowToObservationDefinition(
+        const definition = createObservationDefinitionFromRow(
           row,
           finalConfig.facilityId,
         );
+        processedDefinitions.push(definition);
+      } catch (error: any) {
+        logger(
+          colorize(`Error processing row "${row.title}": ${error.message}`, 1),
+        );
+      }
+    }
+
+    // Validate processed definitions
+    const validDefinitions: ParsedObservationDefinition[] = [];
+    const invalidRows: { row: CSVRow; errors: string[] }[] = [];
+
+    for (const definition of processedDefinitions as ParsedObservationDefinition[]) {
+      try {
         const errors = validateObservationDefinition(definition);
         if (errors.length > 0) {
-          invalidRows.push({ row, errors });
+          // Find the original row for error reporting
+          const originalRow = rows.find(
+            (r) => r.slug === definition.slug_value,
+          );
+          if (originalRow) {
+            invalidRows.push({ row: originalRow, errors });
+          }
         } else {
           validDefinitions.push(definition);
         }
       } catch (error: any) {
-        invalidRows.push({ row, errors: [error.message] });
+        // Find the original row for error reporting
+        const originalRow = rows.find((r) => r.slug === definition.slug_value);
+        if (originalRow) {
+          invalidRows.push({ row: originalRow, errors: [error.message] });
+        }
       }
     }
 
@@ -444,29 +542,69 @@ async function main(configOverride?: Partial<BaseConfig>) {
         Title: row.title || "UNKNOWN",
         Status: "Validation Failed",
         Errors: errors.join("; "),
+        Code_Substitution: substitutions.get(row.slug) || "",
       });
     });
 
     // Add results from batch processing
     results.forEach((result) => {
+      // Handle error message properly - convert objects to strings
+      let errorMessage = "";
+      if (result.error) {
+        if (typeof result.error === "string") {
+          errorMessage = result.error;
+        } else if (result.error.errorText) {
+          errorMessage = result.error.errorText;
+        } else if (result.error.message) {
+          errorMessage = result.error.message;
+        } else {
+          // If it's an object without message/errorText, stringify it
+          errorMessage = JSON.stringify(result.error);
+        }
+      }
+
       processedRows.push({
         Slug_value: result.item.slug_value,
         Title: result.item.title,
         Status: result.success ? "Success" : "Failed",
-        Errors: result.error?.errorText || result.error?.message || "",
+        Errors: errorMessage,
+        Code_Substitution: substitutions.get(result.item.slug_value) || "",
       });
     });
 
-    const csvOutput = [
-      "Slug,Title,Status,Errors",
-      ...processedRows.map(
-        (r: ProcessedRow) =>
-          `"${r.Slug_value}","${r.Title}","${r.Status}","${r.Errors || ""}"`,
+    // Add substitution data to each row
+    const outputDataWithSubstitutions = processedRows.map((row) => {
+      const rowWithSubstitutions: Record<string, any> = { ...row };
+
+      // Add substitution columns for each validation rule
+      OBSERVATION_VALIDATION_RULES.forEach((rule) => {
+        const substitutionKey = `${rule.rowPrefix}_Substitution`;
+        rowWithSubstitutions[substitutionKey] =
+          substitutions.get(`${row.Slug_value}.${rule.rowPrefix}`) || "";
+      });
+
+      return rowWithSubstitutions;
+    });
+
+    // Create custom headers with substitution columns
+    const customHeaders = [
+      "Slug_value",
+      "Title",
+      "Status",
+      "Errors",
+      ...OBSERVATION_VALIDATION_RULES.map(
+        (rule) => `${rule.rowPrefix}_Substitution`,
       ),
-    ].join("\n");
-    fs.writeFileSync(finalConfig.outputFile, csvOutput, "utf-8");
+    ];
+
+    await writeOutputCsv(
+      outputDataWithSubstitutions,
+      finalConfig.outputFile,
+      customHeaders,
+    );
 
     logger(colorize(`Output written to ${finalConfig.outputFile}`, 0));
+
     logger(colorize(`Total processed: ${processedRows.length}`, 0));
     logger(
       colorize(
@@ -482,13 +620,13 @@ async function main(configOverride?: Partial<BaseConfig>) {
     );
 
     if (results.filter((r) => !r.success).length > 0) {
-      logger(colorize("\nFailed items:", 1));
+      //logger(colorize("\nFailed items:", 1));
       results
         .filter((r) => !r.success)
         .forEach((r) => {
           const errorMessage =
             r.error?.errorText || r.error?.message || JSON.stringify(r.error);
-          logger(colorize(`- ${r.item.title}: ${errorMessage}`, 1));
+          //logger(colorize(`- ${r.item.title}: ${errorMessage}`, 1));
         });
     }
 

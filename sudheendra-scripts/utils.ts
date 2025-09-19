@@ -227,6 +227,7 @@ export interface BaseConfig {
   outputFile: string;
   facilityId: string;
   apiBaseUrl: string;
+  skipInsert?: boolean;
   parser?: "local" | "google-sheets";
   googleSheetId?: string;
   sheetName?: string;
@@ -765,17 +766,37 @@ export async function makeBatchApiCall<T>(
 export async function writeOutputCsv(
   data: ProcessedRow[],
   outputFile: string,
+  customHeaders?: string[],
 ): Promise<void> {
   if (data.length === 0) {
     console.log("No data to write");
     return;
   }
 
-  const headers = Object.keys(data[0]);
+  const headers = customHeaders || Object.keys(data[0]);
+
+  // Function to properly escape CSV values
+  const escapeCsvValue = (value: any): string => {
+    if (value === null || value === undefined) {
+      return "";
+    }
+
+    // If it's an object, stringify it and escape quotes
+    if (typeof value === "object") {
+      const jsonString = JSON.stringify(value);
+      // Escape double quotes by doubling them for CSV
+      return `"${jsonString.replace(/"/g, '""')}"`;
+    }
+
+    // Convert to string and escape quotes
+    const stringValue = String(value);
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  };
+
   const csvContent = [
     headers.join(","),
     ...data.map((row) =>
-      headers.map((header) => `"${row[header] || ""}"`).join(","),
+      headers.map((header) => escapeCsvValue(row[header])).join(","),
     ),
   ].join("\n");
 
@@ -848,8 +869,12 @@ export function processApiResults<T>(
   results: ApiResult<T>[],
   itemName: string = "item",
 ): LoaderResult {
-  const successful = results.filter((r) => r.success).map((r) => r.item.slug);
-  const failed = results.filter((r) => !r.success).map((r) => r.item.slug);
+  const successful = results
+    .filter((r) => r.success)
+    .map((r) => r.item.slug_value);
+  const failed = results
+    .filter((r) => !r.success)
+    .map((r) => r.item.slug_value);
 
   // Log summary
   console.log(`\n=== ${itemName} Summary ===`);
@@ -859,7 +884,6 @@ export function processApiResults<T>(
 
   // Log failed items with details
   if (failed.length > 0) {
-    console.log(`\nFailed ${itemName}s:`);
     results
       .filter((r) => !r.success)
       .forEach((r) => {
@@ -881,6 +905,7 @@ export function handleApiError(error: any, item: any): ApiResult {
       item,
     };
   } else {
+    //console.log(`Error: ${JSON.stringify(error)}`);
     return {
       success: false,
       error,
@@ -961,6 +986,10 @@ export function mergeConfigWithCli<T extends BaseConfig>(
 
   if (cliArgs["api-base-url"]) {
     cliConfig.apiBaseUrl = cliArgs["api-base-url"];
+  }
+
+  if (cliArgs["skip-insert"]) {
+    cliConfig.skipInsert = true;
   }
 
   // Merge in order: defaultConfig -> override -> cliConfig
@@ -1086,8 +1115,12 @@ export async function createResourceCategories(
     config,
   );
 
-  const successful = results.filter((r) => r.success).map((r) => r.item.slug);
-  const failed = results.filter((r) => !r.success).map((r) => r.item.slug);
+  const successful = results
+    .filter((r) => r.success)
+    .map((r) => r.item.slug_value);
+  const failed = results
+    .filter((r) => !r.success)
+    .map((r) => r.item.slug_value);
 
   logger(
     colorize(
@@ -1183,4 +1216,396 @@ export function parseCode(
     code: cleanCode,
     display: display?.trim() || cleanCode,
   };
+}
+
+/**
+ * Validate multiple codes against a valueset using batch endpoint
+ * @param codes - Array of codes to validate with their systems
+ * @param valuesetUrl - The valueset validation endpoint URL (should end with /validate_codes/)
+ * @param config - Configuration for API calls
+ * @returns Promise<Map<string, boolean>> - Map of code -> validation result
+ */
+export async function validateCodesInValuesetBatch(
+  codes: Array<{ code: string; system: string }>,
+  valuesetUrl: string,
+  config: BaseConfig,
+  batchSize: number = 100,
+): Promise<Map<string, boolean>> {
+  const logger = getLogger();
+  const results = new Map<string, boolean>();
+
+  if (codes.length === 0) {
+    return results;
+  }
+
+  // Split codes into smaller batches
+  const batches = [];
+  for (let i = 0; i < codes.length; i += batchSize) {
+    batches.push(codes.slice(i, i + batchSize));
+  }
+
+  logger(
+    colorize(
+      `Batch validating ${codes.length} codes in ${batches.length} batches of ${batchSize}...`,
+      0,
+    ),
+  );
+
+  // Process each batch
+  for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+    const batch = batches[batchIndex];
+
+    try {
+      // Prepare batch request body
+      const requestBody = {
+        datapoints: batch.map(({ code, system }) => ({ code, system })),
+      };
+
+      logger(
+        colorize(
+          `Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} codes)...`,
+          0,
+        ),
+      );
+
+      const response = await fetch(valuesetUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(config),
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        logger(
+          colorize(
+            `Failed to batch validate codes in batch ${batchIndex + 1}: ${response.status} ${response.statusText}`,
+            1,
+          ),
+        );
+        logger(colorize(JSON.stringify(await response.json()), 1));
+
+        // Mark all codes in this batch as invalid
+        batch.forEach(({ code }) => results.set(code, false));
+        continue;
+      }
+
+      const data = await response.json();
+
+      // Process batch results - expecting {results: {code: boolean, ...}}
+      if (data.results && typeof data.results === "object") {
+        batch.forEach(({ code }, index) => {
+          //example of data.results: [{"468993001":false},{"256452006":false}]
+          const isValid = data.results[index][code] === true;
+          results.set(code, isValid);
+        });
+      } else {
+        logger(
+          colorize(
+            `Unexpected batch validation response format in batch ${batchIndex + 1}: ${JSON.stringify(data)}`,
+            1,
+          ),
+        );
+        // Mark all codes in this batch as invalid
+        batch.forEach(({ code }) => results.set(code, false));
+      }
+
+      logger(
+        colorize(
+          `Batch ${batchIndex + 1} completed: ${batch.filter(({ code }) => results.get(code)).length}/${batch.length} codes valid`,
+          0,
+        ),
+      );
+    } catch (error) {
+      logger(
+        colorize(`Error in batch ${batchIndex + 1} validation: ${error}`, 1),
+      );
+      // Mark all codes in this batch as invalid
+      batch.forEach(({ code }) => results.set(code, false));
+    }
+  }
+
+  logger(
+    colorize(
+      `All batch validation completed: ${Array.from(results.values()).filter(Boolean).length}/${codes.length} codes valid`,
+      0,
+    ),
+  );
+
+  return results;
+}
+
+/**
+ * Validate multiple codes against a valueset (sequential API calls with delays)
+ * @param codes - Array of codes to validate with their systems
+ * @param valuesetUrl - The valueset validation endpoint URL
+ * @param config - Configuration for API calls
+ * @returns Promise<Map<string, boolean>> - Map of code -> validation result
+ */
+export async function validateCodesInValueset(
+  codes: Array<{ code: string; system: string }>,
+  valuesetUrl: string,
+  config: BaseConfig,
+): Promise<Map<string, boolean>> {
+  const logger = getLogger();
+  const results = new Map<string, boolean>();
+
+  // Process codes sequentially with delays to prevent API overload
+  for (let i = 0; i < codes.length; i++) {
+    const { code, system } = codes[i];
+
+    if (results.has(code)) {
+      continue;
+    }
+
+    try {
+      const requestBody = {
+        code: code,
+        system: system,
+      };
+
+      logger(colorize(`Validating code ${i + 1}/${codes.length}: ${code}`, 0));
+
+      const response = await fetch(valuesetUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(config),
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        logger(
+          colorize(
+            `Failed to validate code ${code}: ${response.status} ${response.statusText}`,
+            1,
+          ),
+        );
+        logger(colorize(JSON.stringify(await response.json()), 1));
+        results.set(code, false);
+      } else {
+        const data = await response.json();
+
+        // Process result - assuming API returns {result: boolean} or similar
+        const isValid =
+          data.result === true || data.valid === true || data.isValid === true;
+
+        results.set(code, isValid);
+      }
+    } catch (error) {
+      logger(colorize(`Error validating code ${code}: ${error}`, 1));
+      results.set(code, false);
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Batch validate and substitute codes with defaults if not in valueset
+ * @param codes - Array of codes to validate with their systems and defaults
+ * @param valuesetUrl - The valueset validation endpoint URL
+ * @param config - Configuration for API calls
+ * @param batchSize - Number of codes to validate per batch (default: 10)
+ * @returns Promise<Map<string, {code: string, isValid: boolean}>> - Map of original code -> result
+ */
+export async function batchValidateAndSubstituteCodes(
+  codes: Array<{
+    code: string;
+    system: string;
+    defaultCode: string;
+    rowIndex: number;
+  }>,
+  valuesetUrl: string,
+  config: BaseConfig,
+  batchSize: number = 50,
+): Promise<Map<number, { code: string; isValid: boolean; rowIndex: number }>> {
+  const logger = getLogger();
+  const results = new Map<
+    number,
+    { code: string; isValid: boolean; rowIndex: number }
+  >();
+
+  // First, validate all codes - try batch endpoint first, fallback to sequential
+  const codesToValidate = codes.map(({ code, system, rowIndex }) => ({
+    code,
+    system,
+    rowIndex,
+  }));
+
+  let validationResults: Map<string, boolean>;
+
+  // Check if we should use batch endpoint (URL ends with /validate_codes/)
+  if (valuesetUrl.endsWith("/validate_codes/")) {
+    validationResults = await validateCodesInValuesetBatch(
+      codesToValidate,
+      valuesetUrl,
+      config,
+      batchSize, // use configurable batch size
+    );
+  } else {
+    // Fallback to sequential validation with delays
+    validationResults = await validateCodesInValueset(
+      codesToValidate,
+      valuesetUrl,
+      config,
+    );
+  }
+
+  // Process results and apply substitutions
+  codes.forEach(({ code, defaultCode, rowIndex }) => {
+    const isValid = validationResults.get(code) || false;
+
+    if (isValid) {
+      results.set(rowIndex, { code, isValid, rowIndex });
+    } else {
+      results.set(rowIndex, { code: defaultCode, isValid: false, rowIndex });
+    }
+  });
+
+  return results;
+}
+
+/**
+ * Validation rule for a specific code field using rowPrefix
+ */
+export interface ValidationRule {
+  rowPrefix: string; // e.g., "code", "method", "body_site", "permitted_unit"
+  valuesetUrl: string;
+  defaultCode: string;
+  defaultSystem: string;
+  defaultDisplay: string;
+  batchSize?: number;
+}
+
+/**
+ * Flexible validation function that can handle multiple code fields per row
+ */
+export async function validateRowCodes(
+  rows: Record<string, string>[],
+  config: BaseConfig,
+  validationRules: ValidationRule[],
+  batchSize: number = 50,
+): Promise<{
+  validatedRows: Record<string, string>[];
+  substitutions: Map<string, string>;
+}> {
+  const logger = getLogger();
+  const substitutions = new Map<string, string>();
+  const validatedRows = [...rows]; // Start with a copy
+
+  // Process each validation rule
+  for (const rule of validationRules) {
+    // Construct field names from rowPrefix
+    const fieldName = `${rule.rowPrefix}_value`;
+    const systemField = `${rule.rowPrefix}_system`;
+    const displayField = `${rule.rowPrefix}_display`;
+
+    // Collect codes for this rule
+    const codesToValidate: Array<{
+      code: string;
+      system: string;
+      defaultCode: string;
+      rowIndex: number;
+      fieldName: string;
+    }> = [];
+
+    for (let i = 0; i < validatedRows.length; i++) {
+      const row = validatedRows[i];
+      const codeValue = row[fieldName];
+      const systemValue = row[systemField] || rule.defaultSystem;
+      const displayValue = row[displayField] || rule.defaultDisplay;
+
+      // Only validate if code exists and is not empty
+      if (codeValue && codeValue.trim() !== "") {
+        codesToValidate.push({
+          code: codeValue,
+          system: systemValue,
+          defaultCode: rule.defaultCode,
+          rowIndex: i,
+          fieldName: fieldName,
+        });
+      }
+    }
+
+    // Batch validate codes for this rule
+    if (codesToValidate.length > 0) {
+      logger(
+        colorize(
+          `Validating ${codesToValidate.length} ${rule.rowPrefix} codes...`,
+          0,
+        ),
+      );
+
+      const validationResults = await batchValidateAndSubstituteCodes(
+        codesToValidate,
+        `${config.apiBaseUrl}${rule.valuesetUrl}`,
+        config,
+        batchSize,
+      );
+
+      // Apply validation results
+      validationResults.forEach((result, rowIndex) => {
+        const codeInfo = codesToValidate.find((c) => c.rowIndex === rowIndex);
+        if (codeInfo) {
+          const row = validatedRows[codeInfo.rowIndex];
+
+          if (!result.isValid) {
+            substitutions.set(
+              `${row.slug}.${rule.rowPrefix}`,
+              `${codeInfo.code} -> ${result.code}`,
+            );
+          }
+
+          // Update the row with validated code
+          validatedRows[codeInfo.rowIndex] = {
+            ...row,
+            [fieldName]: result.code,
+            [displayField]:
+              result.code === rule.defaultCode
+                ? rule.defaultDisplay
+                : row[displayField] || rule.defaultDisplay,
+          };
+        }
+      });
+    }
+
+    // Handle empty codes by setting defaults
+    for (let i = 0; i < validatedRows.length; i++) {
+      const row = validatedRows[i];
+      const codeValue = row[fieldName];
+
+      if (!codeValue || codeValue.trim() === "") {
+        substitutions.set(
+          `${row.slug}.${rule.rowPrefix}`,
+          `(empty) -> ${rule.defaultCode}`,
+        );
+
+        validatedRows[i] = {
+          ...row,
+          [fieldName]: rule.defaultCode,
+          [systemField]: rule.defaultSystem,
+          [displayField]: rule.defaultDisplay,
+        };
+      }
+    }
+  }
+
+  return { validatedRows, substitutions };
+}
+
+/**
+ * Simplified validation for single code field (backward compatibility)
+ */
+export async function validateSingleCodeField(
+  rows: Record<string, string>[],
+  config: BaseConfig,
+  rule: ValidationRule,
+): Promise<{
+  validatedRows: Record<string, string>[];
+  substitutions: Map<string, string>;
+}> {
+  return validateRowCodes(rows, config, [rule]);
 }
