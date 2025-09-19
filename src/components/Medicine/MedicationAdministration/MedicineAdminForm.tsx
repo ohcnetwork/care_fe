@@ -286,6 +286,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
             name={`${formId}isPastTime`}
             value={isPastTime ? "yes" : "no"}
             onValueChange={(newValue: string) => {
+              if (!newValue) return;
               setIsPastTime(newValue === "yes");
               if (newValue === "no") {
                 const now = new Date().toISOString();
