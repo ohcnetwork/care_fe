@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   CartesianGrid,
@@ -14,6 +15,7 @@ import {
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Card } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Popover,
   PopoverContent,
@@ -28,7 +30,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Avatar } from "@/components/Common/Avatar";
 
@@ -114,6 +115,7 @@ export const ObservationVisualizer = ({
   canAccess,
 }: ObservationVisualizerProps) => {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState("search");
 
   // Flatten all codes for a single API request
   const allCodes = codeGroups.flatMap((group) => group.codes);
@@ -239,56 +241,62 @@ export const ObservationVisualizer = ({
     };
   });
 
+  const tabKeys = [
+    { value: "graph", label: t("graph") },
+    { value: "data", label: t("recent_data") },
+    { value: "history", label: t("full_history") },
+  ];
   return (
     <div
       className="grid gap-4"
       style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
     >
-      {processedDataByGroup.map((group, groupIndex) => (
-        <Card key={groupIndex} className="p-4">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <h3 className="text-sm font-medium">{group.title}</h3>
-              <Popover>
-                <PopoverTrigger className="!px-0">
-                  <CareIcon
-                    icon="l-info-circle"
-                    className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer"
-                  />
-                </PopoverTrigger>
-                <PopoverContent
-                  className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"
-                  side="bottom"
-                  align="start"
-                  sideOffset={4}
-                  collisionPadding={16}
-                >
-                  <div className="space-y-2">
-                    <div className="font-medium">Observations:</div>
-                    {group.codes.map((code) => (
-                      <div key={code.code} className="text-xs">
-                        {code.display} ({code.code})
-                      </div>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
+      {processedDataByGroup.map((group, groupIndex) => {
+        return (
+          <Card key={groupIndex} className="p-4">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <h3 className="text-sm font-medium">{group.title}</h3>
+                <Popover>
+                  <PopoverTrigger className="!px-0">
+                    <CareIcon
+                      icon="l-info-circle"
+                      className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer"
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"
+                    side="bottom"
+                    align="start"
+                    sideOffset={4}
+                    collisionPadding={16}
+                  >
+                    <div className="space-y-2">
+                      <div className="font-medium">Observations:</div>
+                      {group.codes.map((code) => (
+                        <div key={code.code} className="text-xs">
+                          {code.display} ({code.code})
+                        </div>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
-          </div>
-          <Tabs defaultValue="graph" className="w-full">
-            <TabsList className="flex w-full">
-              <TabsTrigger className="flex-1" value="graph">
-                {t("graph")}
-              </TabsTrigger>
-              <TabsTrigger className="flex-1" value="data">
-                {t("recent_data")}
-              </TabsTrigger>
-              <TabsTrigger className="flex-1" value="history">
-                {t("full_history")}
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="graph">
+            {/* FilterTabs replaces Tabs */}
+            <div className="mb-4">
+              <FilterTabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                options={tabKeys.map((tab) => tab.value)}
+                variant="underline"
+                showAllOption={false}
+                maxVisibleTabs={3}
+                showMoreDropdown={false}
+              />
+            </div>
+            {/* Tab content */}
+            {activeTab === "graph" && (
               <div style={{ height: `${height}px` }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
@@ -343,9 +351,8 @@ export const ObservationVisualizer = ({
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-            </TabsContent>
-
-            <TabsContent value="data">
+            )}
+            {activeTab === "data" && (
               <div className="max-h-[400px] overflow-auto">
                 <Table>
                   <TableHeader>
@@ -426,18 +433,17 @@ export const ObservationVisualizer = ({
                   </TableBody>
                 </Table>
               </div>
-            </TabsContent>
-
-            <TabsContent value="history">
+            )}
+            {activeTab === "history" && (
               <ObservationHistoryTable
                 patientId={patientId}
                 encounterId={encounterId}
                 codes={group.codes}
               />
-            </TabsContent>
-          </Tabs>
-        </Card>
-      ))}
+            )}
+          </Card>
+        );
+      })}
     </div>
   );
 };

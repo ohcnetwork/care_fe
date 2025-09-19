@@ -683,7 +683,10 @@ export function ResourceDefinitionCategoryPicker<T>({
     </Command>
   );
 
-  const tabOptions = [t("search"), t("favorites")];
+  const tabOptions = [
+    { value: "search", label: t("search") },
+    { value: "favorites", label: t("favorites") },
+  ];
 
   return (
     <div className="space-y-2">
@@ -762,19 +765,19 @@ export function ResourceDefinitionCategoryPicker<T>({
                   <FilterTabs
                     value={activeTab}
                     onValueChange={setActiveTab}
-                    options={tabOptions}
+                    options={tabOptions.map((tab) => tab.value)}
                     variant="underline"
                     showMoreDropdown={false}
                     maxVisibleTabs={2}
-                    defaultVisibleOptions={tabOptions}
+                    defaultVisibleOptions={tabOptions.map((tab) => tab.value)}
                     showAllOption={false}
                   />
                 </div>
                 <div className="flex-1 min-h-0 overflow-hidden">
-                  {activeTab === "search" && (
+                  {activeTab === t("search") && (
                     <div className="h-full mt-0">{renderMainContent()}</div>
                   )}
-                  {activeTab === "favorites" && (
+                  {activeTab === t("favorites") && (
                     <div className="h-full mt-0">
                       {renderFavoritesContent()}
                     </div>
