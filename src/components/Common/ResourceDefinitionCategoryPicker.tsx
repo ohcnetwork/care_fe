@@ -29,13 +29,13 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -683,6 +683,8 @@ export function ResourceDefinitionCategoryPicker<T>({
     </Command>
   );
 
+  const tabOptions = [t("search"), t("favorites")];
+
   return (
     <div className="space-y-2">
       {isMobile ? (
@@ -755,29 +757,30 @@ export function ResourceDefinitionCategoryPicker<T>({
             </div>
 
             {enableFavorites ? (
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="flex flex-col flex-1 min-h-0"
-              >
+              <div className="flex flex-col flex-1 min-h-0">
                 <div className="px-4 py-3 border-b flex-shrink-0">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="search">{t("search")}</TabsTrigger>
-                    <TabsTrigger value="favorites">
-                      {t("favorites")} ({favorites.length})
-                    </TabsTrigger>
-                  </TabsList>
+                  <FilterTabs
+                    value={activeTab}
+                    onValueChange={setActiveTab}
+                    options={tabOptions}
+                    variant="underline"
+                    showMoreDropdown={false}
+                    maxVisibleTabs={2}
+                    defaultVisibleOptions={tabOptions}
+                    showAllOption={false}
+                  />
                 </div>
-
                 <div className="flex-1 min-h-0 overflow-hidden">
-                  <TabsContent value="search" className="h-full mt-0" autoFocus>
-                    {renderMainContent()}
-                  </TabsContent>
-                  <TabsContent value="favorites" className="h-full mt-0">
-                    {renderFavoritesContent()}
-                  </TabsContent>
+                  {activeTab === "search" && (
+                    <div className="h-full mt-0">{renderMainContent()}</div>
+                  )}
+                  {activeTab === "favorites" && (
+                    <div className="h-full mt-0">
+                      {renderFavoritesContent()}
+                    </div>
+                  )}
                 </div>
-              </Tabs>
+              </div>
             ) : (
               <div className="flex-1 min-h-0">{renderMainContent()}</div>
             )}
