@@ -8,7 +8,7 @@ interface RadioInputProps extends React.ComponentProps<typeof RadioGroup> {
     label: string;
     value: string;
   }[];
-  Required?: boolean;
+  required?: boolean;
 }
 
 export default function RadioInput({ options, ...props }: RadioInputProps) {
@@ -28,7 +28,7 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
           key={`${option.value}-${props.value}`} // to prevent race condition
           onClick={() => {
             if (!props.disabled) {
-              if (props.value === option.value && !props.Required) {
+              if (props.value === option.value && !props.required) {
                 props.onValueChange?.("");
               } else {
                 props.onValueChange?.(option.value.toString());
