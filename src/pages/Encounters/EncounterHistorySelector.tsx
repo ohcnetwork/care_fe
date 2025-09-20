@@ -76,8 +76,8 @@ function EncounterCard({
       {isSelected && (
         <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
       )}
-      <CardContent className="flex flex-col px-4 py-3 gap-2">
-        <div className="flex justify-between items-center">
+      <CardContent className="flex flex-col p-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
           <div className="flex flex-col gap-1">
             <span className="text-base font-semibold">
               {t(`encounter_class__${encounter.encounter_class}`)}
@@ -85,28 +85,8 @@ function EncounterCard({
             <span className="text-sm font-medium text-gray-700">
               {encounter.facility.name}
             </span>
-            {encounter.tags.length > 0 && (
-              <HoverCard openDelay={150}>
-                <HoverCardTrigger className="hidden md:block">
-                  <div className="flex items-center py-1 pr-1 gap-2">
-                    <Tags className="size-4 text-gray-700" />
-                    <span className="text-sm text-gray-700 font-medium">
-                      {t("encounter_tag_count", {
-                        count: encounter.tags.length,
-                      })}
-                    </span>
-                  </div>
-                </HoverCardTrigger>
-                <HoverCardContent
-                  className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90 shadow-lg"
-                  side="right"
-                >
-                  <EncounterTagHoverCard encounter={encounter} />
-                </HoverCardContent>
-              </HoverCard>
-            )}
           </div>
-          <div className="flex flex-col gap-1 pt-0.5 items-end">
+          <div className="flex flex-col md:items-end gap-1">
             <span className="text-sm text-gray-600 whitespace-nowrap">
               {encounter.period.start && (
                 <span>
@@ -128,25 +108,45 @@ function EncounterCard({
             <Badge
               variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
               size="sm"
-              className=" whitespace-nowrap"
+              className="whitespace-nowrap"
             >
               {t(`encounter_status__${encounter.status}`)}
             </Badge>
           </div>
         </div>
         {encounter.tags.length > 0 && (
-          <div className="md:hidden flex flex-wrap gap-2">
-            {encounter.tags.map((tag) => (
-              <Badge
-                key={tag.id}
-                variant="secondary"
-                className="capitalize"
-                title={tag.description}
+          <>
+            <div className="md:hidden flex flex-wrap gap-2 pt-2">
+              {encounter.tags.map((tag) => (
+                <Badge
+                  key={tag.id}
+                  variant="secondary"
+                  className="capitalize"
+                  title={tag.description}
+                >
+                  {getTagHierarchyDisplay(tag)}
+                </Badge>
+              ))}
+            </div>
+            <HoverCard openDelay={150}>
+              <HoverCardTrigger className="hidden md:block self-start">
+                <div className="flex items-center py-1 pr-1 gap-2">
+                  <Tags className="size-4 text-gray-700" />
+                  <span className="text-sm text-gray-700 font-medium">
+                    {t("encounter_tag_count", {
+                      count: encounter.tags.length,
+                    })}
+                  </span>
+                </div>
+              </HoverCardTrigger>
+              <HoverCardContent
+                className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90 shadow-lg"
+                side="right"
               >
-                {getTagHierarchyDisplay(tag)}
-              </Badge>
-            ))}
-          </div>
+                <EncounterTagHoverCard encounter={encounter} />
+              </HoverCardContent>
+            </HoverCard>
+          </>
         )}
       </CardContent>
     </Card>
