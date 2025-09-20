@@ -53,7 +53,7 @@ export const AppointmentFormSection = ({
               resource_type: value,
             });
           }}
-          required={true}
+          Required
         />
       </div>
       <div className="flex flex-col">

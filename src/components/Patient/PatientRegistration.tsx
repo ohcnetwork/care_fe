@@ -516,11 +516,8 @@ const PatientBasicsContent = ({
             <FormControl>
               <RadioInput
                 {...field}
-                onValueChange={(val) => {
-                  if (val) {
-                    field.onChange(val);
-                  }
-                }}
+                onValueChange={field.onChange}
+                Required
                 value={field.value ?? undefined}
                 options={GENDER_TYPES.map((g) => ({
                   value: g.id,
