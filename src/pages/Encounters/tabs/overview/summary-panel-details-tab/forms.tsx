@@ -35,6 +35,11 @@ export const Forms = () => {
               <Plus className="text-gray-950" />
             </Button>
           }
+          mobileTrigger={
+            <Button variant="ghost" size="sm">
+              <Plus className="text-gray-950" />
+            </Button>
+          }
           subjectType="encounter"
         />
       </div>

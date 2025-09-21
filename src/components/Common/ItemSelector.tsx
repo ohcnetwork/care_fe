@@ -115,6 +115,7 @@ export function ItemSelector<T = any>({
 }: ItemSelectorProps<T>) {
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
+  const [searchValue, setSearchValue] = React.useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
 
   // Convert value to array for consistent handling
@@ -129,6 +130,15 @@ export function ItemSelector<T = any>({
     () => options.filter((option) => selectedValues.includes(option.value)),
     [options, selectedValues],
   );
+
+  // Filter options based on search input when no external onSearch is provided
+  const filteredOptions = React.useMemo(() => {
+    if (!searchValue || onSearch) return options; // Don't filter if empty or external filtering
+
+    return options.filter((option) =>
+      option.label.toLowerCase().includes(searchValue.toLowerCase()),
+    );
+  }, [options, searchValue, onSearch]);
 
   // Handle selection
   const handleSelect = (selectedValue: string) => {
@@ -227,14 +237,17 @@ export function ItemSelector<T = any>({
     <Command filter={onSearch ? () => 1 : undefined}>
       <CommandInput
         placeholder={searchPlaceholder}
-        onValueChange={onSearch}
+        onValueChange={(value) => {
+          setSearchValue(value);
+          onSearch?.(value); // Call external onSearch if provided
+        }}
         className="outline-hidden border-none ring-0 shadow-none text-base"
         autoFocus
       />
       <CommandList className="max-h-[300px] overflow-y-auto">
         {loading ? (
           <CardListSkeleton count={3} />
-        ) : options.length === 0 ? (
+        ) : filteredOptions.length === 0 ? (
           <CommandEmpty>{noResultsMessage}</CommandEmpty>
         ) : null}
 
@@ -251,13 +264,21 @@ export function ItemSelector<T = any>({
             </CommandItem>
           )}
 
-          {options.map((option) => {
+          {filteredOptions.map((option) => {
             const isSelected = selectedValues.includes(option.value);
             return (
               <CommandItem
                 key={option.value}
                 value={option.label}
                 onSelect={() => handleSelect(option.value)}
+                onTouchStart={(e) => {
+                  // fix for ios touch event
+                  if (document.activeElement instanceof HTMLElement) {
+                    document.activeElement.blur();
+                    e.stopPropagation(); //
+                    setTimeout(() => handleSelect(option.value), 10); //
+                  }
+                }}
                 className={cn(
                   "cursor-pointer",
                   option.disabled && "opacity-50 pointer-events-none",
@@ -292,7 +313,7 @@ export function ItemSelector<T = any>({
         </DrawerTrigger>
         <DrawerContent
           aria-describedby={undefined}
-          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
+          className="min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg"
         >
           <DrawerTitle className="sr-only">{title || t("select")}</DrawerTitle>
           <div className="mt-6 h-full pb-safe flex-1 overflow-y-auto">
