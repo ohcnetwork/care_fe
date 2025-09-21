@@ -272,13 +272,11 @@ export function ItemSelector<T = any>({
                 value={option.label}
                 onSelect={() => handleSelect(option.value)}
                 onTouchStart={(e) => {
-                  // Don't use preventDefault here
+                  // fix for ios touch event
                   if (document.activeElement instanceof HTMLElement) {
                     document.activeElement.blur();
-                    // Immediately trigger selection after blur
-                    // handleSelect(option.value);
-                    e.stopPropagation(); // Prevent event bubbling
-                    setTimeout(() => handleSelect(option.value), 10); // Slight delay for iOS
+                    e.stopPropagation(); //
+                    setTimeout(() => handleSelect(option.value), 10); //
                   }
                 }}
                 className={cn(

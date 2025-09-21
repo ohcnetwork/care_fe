@@ -17,6 +17,7 @@ import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 interface QuestionnaireSearchProps {
   placeholder?: string;
   trigger?: React.ReactNode;
+  mobileTrigger?: React.ReactNode;
   onSelect?: (questionnaire: QuestionnaireDetail) => void;
   subjectType?: string;
   disabled?: boolean;
@@ -26,6 +27,7 @@ interface QuestionnaireSearchProps {
 export function QuestionnaireSearch({
   placeholder,
   trigger,
+  mobileTrigger,
   size = "default",
   onSelect = (selected) => navigate(`questionnaire/${selected.slug}`),
   subjectType,
@@ -48,7 +50,7 @@ export function QuestionnaireSearch({
     enabled: true,
   });
 
-  const mobileTrigger = (
+  const defaultMobileTrigger = (
     <Button
       data-cy="add-questionnaire-button"
       variant="outline"
@@ -104,7 +106,7 @@ export function QuestionnaireSearch({
         icon: <CareIcon icon="l-file-export" className="mr-2 size-4" />,
       }))}
       triggerButton={trigger || defaultTrigger}
-      mobileTrigger={mobileTrigger}
+      mobileTrigger={mobileTrigger || defaultMobileTrigger}
       onSearch={setSearch}
       disabled={disabled}
       renderOption={(option) => (
