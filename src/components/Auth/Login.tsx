@@ -29,8 +29,7 @@ import {
 import { PasswordInput } from "@/components/ui/input-password";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import {FilterTabs} from "@/components/ui/filter-tabs"
 import CircularProgress from "@/components/Common/CircularProgress";
 import LanguageSelectorLogin from "@/components/Common/LanguageSelectorLogin";
 
@@ -356,40 +355,37 @@ const Login = (props: LoginProps) => {
             <Card className="mx-4">
               <CardHeader className="space-y-1 px-4">
                 <CardTitle className="text-2xl font-bold">
-                  Welcome back
+                  {t("welcome_back")}
                 </CardTitle>
                 <CardDescription>
-                  Choose your login method to continue
+                  {t("choose_login_method")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Tabs
-                  defaultValue="staff"
-                  value={mode}
-                  onValueChange={(value) => {
-                    setQueryParams({ mode: value as LoginMode });
-                    if (value === "staff") {
-                      resetPatientLogin();
-                    } else {
-                      setForgotPassword(false);
-                    }
-                  }}
-                >
-                  <TabsList className="flex w-full">
-                    <TabsTrigger className="flex-1" value="staff">
-                      {t("staff_login")}
-                    </TabsTrigger>
-                    <TabsTrigger className="flex-1" value="patient">
-                      {t("patient_login")}
-                    </TabsTrigger>
-                  </TabsList>
+                <div className="flex w-full">
+                  <FilterTabs
+                    value={mode}
+                    onValueChange={(value) => {
+                      setQueryParams({ mode: value as LoginMode });
+                      if (value === "staff") {
+                        resetPatientLogin();
+                      } else {
+                        setForgotPassword(false);
+                      }
+                    }}
+                    options={[{value:"staff", label: "staff_login"},{value: "patient", label: "patient_login"}]}
+                    variant="background"
+                    className="flex-1 mb-2"
+                    showAllOption={false}
+                  />
+                </div>
 
                   {/* Staff Login */}
-                  <TabsContent value="staff">
-                    {!forgotPassword ? (
+                  {mode === "staff" && (
+                    !forgotPassword ? (
                       <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="username">Username</Label>
+                          <Label htmlFor="username">{t("username")}</Label>
                           <Input
                             id="username"
                             name="username"
@@ -410,7 +406,7 @@ const Login = (props: LoginProps) => {
                           )}
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="password">Password</Label>
+                          <Label htmlFor="password">{t("password")}</Label>
                           <PasswordInput
                             id="password"
                             name="password"
@@ -485,14 +481,14 @@ const Login = (props: LoginProps) => {
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="forgot_username">Username</Label>
+                            <Label htmlFor="forgot_username">{t("username")}</Label>
                             <Input
                               id="forgot_username"
                               name="username"
                               type="text"
                               value={form.username}
                               onChange={handleChange}
-                              placeholder="Enter your username"
+                              placeholder={t("enter_your_username")}
                               className={cn(
                                 errors.username &&
                                   "border-red-500 focus-visible:ring-red-500",
@@ -519,11 +515,11 @@ const Login = (props: LoginProps) => {
                           </Button>
                         </div>
                       </form>
-                    )}
-                  </TabsContent>
+                    )
+                  )}
 
                   {/* Patient Login */}
-                  <TabsContent value="patient">
+                  {mode === "patient" && (
                     <form onSubmit={handlePatientLogin} className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="phone">{t("phone_number")}</Label>
@@ -641,8 +637,7 @@ const Login = (props: LoginProps) => {
                         </div>
                       )}
                     </form>
-                  </TabsContent>
-                </Tabs>
+                  )}
               </CardContent>
             </Card>
 
