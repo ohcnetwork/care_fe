@@ -1927,6 +1927,7 @@
   "enter_longitude": "Enter longitude",
   "enter_lot_number": "Enter lot number",
   "enter_manufacturer": "Enter manufacturer name",
+  "maximum_characters_allowed":"Maximum {{count}} characters are allowed",
   "enter_max_value": "Enter maximum value",
   "enter_message": "Start typing...",
   "enter_min_value": "Enter minimum value",
