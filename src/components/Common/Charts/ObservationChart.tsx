@@ -251,199 +251,197 @@ export const ObservationVisualizer = ({
       className="grid gap-4"
       style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
     >
-      {processedDataByGroup.map((group, groupIndex) => {
-        return (
-          <Card key={groupIndex} className="p-4">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-1">
-                <h3 className="text-sm font-medium">{group.title}</h3>
-                <Popover>
-                  <PopoverTrigger className="!px-0">
-                    <CareIcon
-                      icon="l-info-circle"
-                      className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer"
-                    />
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"
-                    side="bottom"
-                    align="start"
-                    sideOffset={4}
-                    collisionPadding={16}
-                  >
-                    <div className="space-y-2">
-                      <div className="font-medium">Observations:</div>
-                      {group.codes.map((code) => (
-                        <div key={code.code} className="text-xs">
-                          {code.display} ({code.code})
-                        </div>
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
+      {processedDataByGroup.map((group, groupIndex) => (
+        <Card key={groupIndex} className="p-4">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              <h3 className="text-sm font-medium">{group.title}</h3>
+              <Popover>
+                <PopoverTrigger className="!px-0">
+                  <CareIcon
+                    icon="l-info-circle"
+                    className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer"
+                  />
+                </PopoverTrigger>
+                <PopoverContent
+                  className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"
+                  side="bottom"
+                  align="start"
+                  sideOffset={4}
+                  collisionPadding={16}
+                >
+                  <div className="space-y-2">
+                    <div className="font-medium">Observations:</div>
+                    {group.codes.map((code) => (
+                      <div key={code.code} className="text-xs">
+                        {code.display} ({code.code})
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
-            {/* FilterTabs replaces Tabs */}
-            <div className="mb-4">
-              <FilterTabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                options={tabOptions.map((tab) => tab.value)}
-                variant="underline"
-                showAllOption={false}
-                maxVisibleTabs={3}
-                showMoreDropdown={false}
-              />
-            </div>
-            {/* Tab content */}
-            {activeTab === "graph" && (
-              <div style={{ height: `${height}px` }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={group.data}
-                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="time"
-                      type="number"
-                      domain={["dataMin", "dataMax"]}
-                      scale="time"
-                      tickFormatter={(value) => {
+          </div>
+
+          <div className="mb-4">
+            <FilterTabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              options={tabOptions}
+              variant="underline"
+              showAllOption={false}
+              maxVisibleTabs={3}
+              showMoreDropdown={false}
+            />
+          </div>
+
+          {activeTab === "graph" && (
+            <div style={{ height: `${height}px` }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={group.data}
+                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="time"
+                    type="number"
+                    domain={["dataMin", "dataMax"]}
+                    scale="time"
+                    tickFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+                    }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis
+                    domain={group.yAxisDomain || ["auto", "auto"]}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip
+                    labelFormatter={(value) => {
+                      if (typeof value === "number") {
                         const date = new Date(value);
-                        return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
-                      }}
-                      angle={-45}
-                      textAnchor="end"
-                      height={60}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis
-                      domain={group.yAxisDomain || ["auto", "auto"]}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip
-                      labelFormatter={(value) => {
-                        if (typeof value === "number") {
-                          const date = new Date(value);
-                          return formatChartDate(date.toISOString()).display;
+                        return formatChartDate(date.toISOString()).display;
+                      }
+                      return value;
+                    }}
+                  />
+                  <Legend />
+                  {group.codes.map((code, codeIndex) => {
+                    if (!code.display) return null;
+                    return (
+                      <Line
+                        key={code.code}
+                        type="monotone"
+                        dataKey={code.display}
+                        stroke={
+                          group.color ||
+                          DEFAULT_COLORS[codeIndex % DEFAULT_COLORS.length]
                         }
-                        return value;
-                      }}
-                    />
-                    <Legend />
-                    {group.codes.map((code, codeIndex) => {
-                      if (!code.display) return null;
-                      return (
-                        <Line
-                          key={code.code}
-                          type="monotone"
-                          dataKey={code.display}
-                          stroke={
-                            group.color ||
-                            DEFAULT_COLORS[codeIndex % DEFAULT_COLORS.length]
-                          }
-                          dot={true}
-                          connectNulls
-                        />
-                      );
-                    })}
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-            {activeTab === "data" && (
-              <div className="max-h-[400px] overflow-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Time</TableHead>
-                      <TableHead>Values</TableHead>
-                      <TableHead>Entered By</TableHead>
-                      <TableHead>Notes</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {group.data.map((row) => {
-                      // Get all observations for this timestamp
-                      const observations = group.codes
-                        .map((code) => {
-                          if (!code.display) return null;
-                          const details = row[`${code.display}_details`] as
-                            | ObservationDetails
-                            | undefined;
-                          if (!details) return null;
-                          return {
-                            code,
-                            details,
-                          };
-                        })
-                        .filter((x): x is NonNullable<typeof x> => x !== null);
+                        dot={true}
+                        connectNulls
+                      />
+                    );
+                  })}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+          {activeTab === "data" && (
+            <div className="max-h-[400px] overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Time</TableHead>
+                    <TableHead>Values</TableHead>
+                    <TableHead>Entered By</TableHead>
+                    <TableHead>Notes</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {group.data.map((row) => {
+                    // Get all observations for this timestamp
+                    const observations = group.codes
+                      .map((code) => {
+                        if (!code.display) return null;
+                        const details = row[`${code.display}_details`] as
+                          | ObservationDetails
+                          | undefined;
+                        if (!details) return null;
+                        return {
+                          code,
+                          details,
+                        };
+                      })
+                      .filter((x): x is NonNullable<typeof x> => x !== null);
 
-                      if (observations.length === 0) return null;
+                    if (observations.length === 0) return null;
 
-                      return (
-                        <TableRow key={row.timestamp}>
-                          <TableCell>{row.timestamp}</TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              {observations.map(({ code, details }) => (
-                                <div
-                                  key={code.code}
-                                  className="flex items-center gap-2"
-                                >
-                                  <span className="font-medium">
-                                    {code.display}:
-                                  </span>
-                                  <span>{details.value}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Avatar
-                                name={observations[0].details.enteredBy}
-                                className="size-6"
-                              />
-                              <span>{observations[0].details.enteredBy}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              {observations.map(
-                                ({ code, details }) =>
-                                  details.note && (
-                                    <div
-                                      key={code.code}
-                                      className="text-sm text-gray-500"
-                                    >
-                                      <span className="font-medium">
-                                        {code.display}:
-                                      </span>{" "}
-                                      {details.note}
-                                    </div>
-                                  ),
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-            {activeTab === "history" && (
-              <ObservationHistoryTable
-                patientId={patientId}
-                encounterId={encounterId}
-                codes={group.codes}
-              />
-            )}
-          </Card>
-        );
-      })}
+                    return (
+                      <TableRow key={row.timestamp}>
+                        <TableCell>{row.timestamp}</TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            {observations.map(({ code, details }) => (
+                              <div
+                                key={code.code}
+                                className="flex items-center gap-2"
+                              >
+                                <span className="font-medium">
+                                  {code.display}:
+                                </span>
+                                <span>{details.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Avatar
+                              name={observations[0].details.enteredBy}
+                              className="size-6"
+                            />
+                            <span>{observations[0].details.enteredBy}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            {observations.map(
+                              ({ code, details }) =>
+                                details.note && (
+                                  <div
+                                    key={code.code}
+                                    className="text-sm text-gray-500"
+                                  >
+                                    <span className="font-medium">
+                                      {code.display}:
+                                    </span>{" "}
+                                    {details.note}
+                                  </div>
+                                ),
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+          {activeTab === "history" && (
+            <ObservationHistoryTable
+              patientId={patientId}
+              encounterId={encounterId}
+              codes={group.codes}
+            />
+          )}
+        </Card>
+      ))}
     </div>
   );
 };

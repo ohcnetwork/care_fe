@@ -78,11 +78,11 @@ export const FilesTab = ({
       <FilterTabs
         value={allowedTabs.includes(activeTab as TabType) ? activeTab : "all"}
         onValueChange={setActiveTab}
-        options={tabOptions.map((tab) => tab.value)}
+        options={tabOptions}
         variant="background"
         showAllOption={false}
         maxVisibleTabs={3}
-        showMoreDropdown={false}
+        className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
       />
 
       {(activeTab === "all" || !allowedTabs.includes(activeTab as TabType)) && (
@@ -96,7 +96,12 @@ export const FilesTab = ({
       )}
 
       {activeTab === "discharge_summary" && encounter && (
-        <DischargeTab type={type} encounter={encounter} canEdit={canEdit} />
+        <DischargeTab
+          type={type}
+          encounter={encounter}
+          canEdit={canEdit}
+          // facilityId={facilityId || ""}
+        />
       )}
 
       {activeTab === "drawings" && (

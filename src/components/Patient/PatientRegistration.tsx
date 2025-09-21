@@ -540,9 +540,11 @@ const PatientBasicsContent = ({
                 <FilterTabs
                   value={field.value}
                   onValueChange={field.onChange}
-                  options={["dob", "age"]}
+                  options={[
+                    { value: "dob", label: t("date") },
+                    { value: "age", label: t("age") },
+                  ]}
                   variant="background"
-                  showMoreDropdown={false}
                   showAllOption={false}
                 />
                 {field.value === "dob" && (

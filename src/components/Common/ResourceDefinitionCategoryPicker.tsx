@@ -765,11 +765,10 @@ export function ResourceDefinitionCategoryPicker<T>({
                   <FilterTabs
                     value={activeTab}
                     onValueChange={setActiveTab}
-                    options={tabOptions.map((tab) => tab.value)}
+                    options={tabOptions}
                     variant="underline"
-                    showMoreDropdown={false}
+                    className="px-4 py-3 border-b flex-shrink-0"
                     maxVisibleTabs={2}
-                    defaultVisibleOptions={tabOptions.map((tab) => tab.value)}
                     showAllOption={false}
                   />
                 </div>
