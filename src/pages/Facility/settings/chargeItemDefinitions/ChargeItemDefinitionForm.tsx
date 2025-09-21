@@ -7,7 +7,7 @@ import { FieldErrors, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
 
-import Autocomplete from "@/components/ui/autocomplete";
+import { ItemSelector } from "@/components/Common/ItemSelector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -98,7 +98,7 @@ const monetaryComponentIsEqual = <T extends MonetaryComponent>(a: T, b: T) => {
   );
 };
 
-// Component for monetary component selection with autocomplete
+// Component for monetary component selection with ItemSelector
 function MonetaryComponentSelectionSection({
   title,
   description,
@@ -138,13 +138,13 @@ function MonetaryComponentSelectionSection({
     return component.factor ?? component.amount ?? 0;
   };
 
-  // Convert components to autocomplete options
+  // Convert components to ItemSelector options
   const availableOptions = components
     .filter((c) => !isComponentSelected(c))
     .map((c) => ({ label: c.title, value: c.title }));
 
-  // Function to handle selection from autocomplete
-  const handleAutocompleteChange = (value: string) => {
+  // Function to handle selection from ItemSelector
+  const handleItemSelectorChange = (value: string) => {
     if (!value) return;
     const component = components.find((c) => c.title === value);
     if (component) {
@@ -236,14 +236,30 @@ function MonetaryComponentSelectionSection({
 
       {/* Add New Component */}
       <div className="mt-4">
-        <Autocomplete
+        <ItemSelector
+          title={t(
+            type === MonetaryComponentType.tax ? "add_tax" : "add_discount",
+          )}
+          searchPlaceholder={t(
+            type === MonetaryComponentType.tax
+              ? "search_taxes"
+              : "search_discounts",
+          )}
+          noResultsMessage={t(
+            type === MonetaryComponentType.tax
+              ? "no_taxes_found"
+              : "no_discounts_found",
+          )}
           options={availableOptions}
-          value=""
-          onChange={handleAutocompleteChange}
+          onChange={(value) => {
+            if (value && !Array.isArray(value)) {
+              handleItemSelectorChange(value);
+            }
+          }}
           placeholder={t(
             type === MonetaryComponentType.tax ? "add_tax" : "add_discount",
           )}
-          className="border-gray-200"
+          className="border-gray-300"
         />
       </div>
     </div>
