@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -36,6 +37,8 @@ import {
   InventoryStatusOptions,
 } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
+import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { ProductKnowledgeSelect } from "./ProductKnowledgeSelect";
 
 interface InventoryListProps {
   facilityId: string;
@@ -49,15 +52,28 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
     disableCache: true,
   });
 
+  // State to store the selected product knowledge object
+  const [selectedProductKnowledge, setSelectedProductKnowledge] = useState<
+    ProductKnowledgeBase | undefined
+  >(undefined);
+
+  // Clear selected product knowledge when query parameter is cleared
+  useEffect(() => {
+    if (!qParams.product_knowledge_id) {
+      setSelectedProductKnowledge(undefined);
+    }
+  }, [qParams.product_knowledge_id]);
+
   const { data, isLoading } = useQuery({
     queryKey: ["inventory", facilityId, locationId, qParams],
-    queryFn: query(inventoryApi.list, {
+    queryFn: query.debounced(inventoryApi.list, {
       pathParams: { facilityId, locationId },
       queryParams: {
         status: qParams.status,
         facility: facilityId,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        product_knowledge: qParams.product_knowledge_id,
       },
     }),
   });
@@ -66,27 +82,44 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
     <Page
       title={t("inventory")}
       options={
-        <Select
-          value={qParams.status ? qParams.status : "all"}
-          onValueChange={(value: InventoryStatus | "all") =>
-            updateQuery({ status: value === "all" ? undefined : value })
-          }
-        >
-          <SelectTrigger className="max-w-42">
-            <div className="flex items-center gap-2">
-              <CareIcon icon="l-filter" className="size-4" />
-              <SelectValue placeholder={t("status")} />
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("all_statuses")}</SelectItem>
-            {InventoryStatusOptions.map((status) => (
-              <SelectItem key={status} value={status}>
-                {t(status)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-3">
+          {/* Product Knowledge Selector */}
+          <div className="w-64">
+            <ProductKnowledgeSelect
+              value={selectedProductKnowledge}
+              onChange={(productKnowledge: ProductKnowledgeBase) => {
+                setSelectedProductKnowledge(productKnowledge);
+                updateQuery({
+                  product_knowledge_id: productKnowledge?.id || undefined,
+                });
+              }}
+              placeholder={t("search_product_knowledge")}
+            />
+          </div>
+
+          {/* Status Filter */}
+          <Select
+            value={qParams.status ? qParams.status : "all"}
+            onValueChange={(value: InventoryStatus | "all") =>
+              updateQuery({ status: value === "all" ? undefined : value })
+            }
+          >
+            <SelectTrigger className="max-w-42">
+              <div className="flex items-center gap-2">
+                <CareIcon icon="l-filter" className="size-4" />
+                <SelectValue placeholder={t("status")} />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("all_statuses")}</SelectItem>
+              {InventoryStatusOptions.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {t(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       }
     >
       <div className="mt-3">
