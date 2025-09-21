@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -23,7 +24,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -78,9 +78,9 @@ export function LocationSheet({
   encounter,
   open,
   onOpenChange,
-  defaultTab = "assign",
 }: LocationSheetProps) {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState("search");
   const [showDischargeDialog, setShowDischargeDialog] = useState(false);
   const [showOccupiedDialog, setShowOccupiedDialog] = useState(false);
   const [selectedDischargedBed, setSelectedDischargedBed] =
@@ -842,6 +842,11 @@ export function LocationSheet({
     setSelectedBed(null);
   };
 
+  const tabOptions = [
+    { value: "assign", label: t("assign_location") },
+    { value: "history", label: t("location_history") },
+  ];
+
   return (
     <>
       <Sheet
@@ -861,34 +866,28 @@ export function LocationSheet({
             </SheetTitle>
           </SheetHeader>
 
-          <Tabs defaultValue={defaultTab} className="mt-2">
-            <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
-              <TabsTrigger
-                value="assign"
-                className="border-0 data-[state=active]:border-b-2 px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {t("assign_location")}
-              </TabsTrigger>
-              <TabsTrigger
-                value="history"
-                className="border-0 data-[state=active]:border-b px-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {t("location_history")}
-              </TabsTrigger>
-            </TabsList>
+          <div className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
+            <FilterTabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              options={tabOptions.map((tab) => tab.value)}
+              variant="underline"
+              showAllOption={false}
+              showMoreDropdown={false}
+            />
+          </div>
 
-            <TabsContent value="assign" className="mt-2">
-              <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)] p-3 md:p-4">
-                {renderScreen()}
-              </ScrollArea>
-            </TabsContent>
+          {activeTab === "assign" && (
+            <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)] p-3 md:p-4">
+              {renderScreen()}
+            </ScrollArea>
+          )}
 
-            <TabsContent value="history" className="mt-2">
-              <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)]">
-                <LocationHistoryComponent history={history} />
-              </ScrollArea>
-            </TabsContent>
-          </Tabs>
+          {activeTab === "history" && (
+            <ScrollArea className="h-[calc(100vh-13rem)] md:h-[calc(100vh-8rem)]">
+              <LocationHistoryComponent history={history} />
+            </ScrollArea>
+          )}
         </SheetContent>
       </Sheet>
 

@@ -241,7 +241,7 @@ export const ObservationVisualizer = ({
     };
   });
 
-  const tabKeys = [
+  const tabOptions = [
     { value: "graph", label: t("graph") },
     { value: "data", label: t("recent_data") },
     { value: "history", label: t("full_history") },
@@ -288,7 +288,7 @@ export const ObservationVisualizer = ({
               <FilterTabs
                 value={activeTab}
                 onValueChange={setActiveTab}
-                options={tabKeys.map((tab) => tab.value)}
+                options={tabOptions.map((tab) => tab.value)}
                 variant="underline"
                 showAllOption={false}
                 maxVisibleTabs={3}

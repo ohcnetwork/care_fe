@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Form,
   FormControl,
@@ -32,7 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import useAppHistory from "@/hooks/useAppHistory";
 import { tzAwareDateTime } from "@/lib/validators";
@@ -537,12 +537,14 @@ const PatientBasicsContent = ({
             <FormItem>
               <FormLabel aria-required>{t("date_of_birth_or_age")}</FormLabel>
               <div className="flex gap-1 items-start">
-                <Tabs value={field.value} onValueChange={field.onChange}>
-                  <TabsList className="mt-0.25">
-                    <TabsTrigger value="dob">{t("date")}</TabsTrigger>
-                    <TabsTrigger value="age">{t("age")}</TabsTrigger>
-                  </TabsList>
-                </Tabs>
+                <FilterTabs
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={["date", "age"]}
+                  variant="background"
+                  showMoreDropdown={false}
+                  showAllOption={false}
+                />
                 {field.value === "dob" && (
                   <FormField
                     control={form.control}
