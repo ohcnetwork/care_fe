@@ -237,7 +237,6 @@ export function PurchaseOrders({ facilityId, locationId }: Props) {
             variant="underline"
             showMoreDropdown
             maxVisibleTabs={maxVisibleTabs}
-            defaultVisibleOptions={TABS_CONFIG.map((tab) => tab.value)}
             showAllOption={false}
           />
         </div>

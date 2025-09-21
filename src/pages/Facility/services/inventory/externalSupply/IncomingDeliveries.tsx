@@ -109,11 +109,10 @@ export function IncomingDeliveries({ facilityId, locationId }: Props) {
           <FilterTabs
             value={currentTab}
             onValueChange={handleTabChange}
-            options={TABS_CONFIG.map((tab) => tab.value)}
+            options={TABS_CONFIG}
             variant="underline"
             showMoreDropdown
             maxVisibleTabs={maxVisibleTabs}
-            defaultVisibleOptions={TABS_CONFIG.map((tab) => tab.value)}
             showAllOption={false}
           />
           <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
