@@ -7,6 +7,7 @@ import {
   Folder,
   FolderOpen,
   Home,
+  MoreHorizontal,
   Search,
   Star,
   X,
@@ -147,6 +148,7 @@ export function ResourceDefinitionCategoryPicker<T>({
     undefined,
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const [breadcrumbsExpanded, setBreadcrumbsExpanded] = useState(false);
 
   // Fetch categories for current level
   const { data: categoriesResponse, isLoading: isLoadingCategories } = useQuery(
@@ -291,6 +293,7 @@ export function ResourceDefinitionCategoryPicker<T>({
       { slug: categorySlug, title: categoryTitle },
     ]);
     setCurrentParent(categorySlug);
+    setBreadcrumbsExpanded(false);
     resetSearch();
   };
 
@@ -349,12 +352,14 @@ export function ResourceDefinitionCategoryPicker<T>({
     } else {
       setCurrentParent(newBreadcrumbs[index].slug);
     }
+    setBreadcrumbsExpanded(false);
     resetSearch();
   };
 
   const handleBackToRoot = () => {
     setBreadcrumbs([]);
     setCurrentParent(undefined);
+    setBreadcrumbsExpanded(false);
     resetSearch();
   };
 
@@ -397,7 +402,7 @@ export function ResourceDefinitionCategoryPicker<T>({
 
     return (
       <div className="flex items-center gap-1">
-        <Folder className="size-4 text-gray-500 flex-shrink-0" />
+        <Folder className="size-2.5 text-gray-500 flex-shrink-0" />
         <span className="truncate">
           {pathParts.length === 0
             ? definition.title || t("select_category")
@@ -455,19 +460,42 @@ export function ResourceDefinitionCategoryPicker<T>({
             <Home className="size-3 mr-1" />
             {t("root")}
           </Button>
-          {breadcrumbs.map((breadcrumb, index) => (
-            <div key={breadcrumb.slug} className="flex items-center">
+          {breadcrumbs.length <= 2 || breadcrumbsExpanded ? (
+            breadcrumbs.map((breadcrumb, index) => (
+              <div key={breadcrumb.slug} className="flex items-center">
+                <ChevronRight className="size-3 mx-1 text-gray-500" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleBreadcrumbClick(index)}
+                  className="h-6 px-2 text-xs hover:bg-white"
+                >
+                  {breadcrumb.title}
+                </Button>
+              </div>
+            ))
+          ) : (
+            <>
               <ChevronRight className="size-3 mx-1 text-gray-500" />
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleBreadcrumbClick(index)}
+                onClick={() => setBreadcrumbsExpanded(true)}
                 className="h-6 px-2 text-xs hover:bg-white"
               >
-                {breadcrumb.title}
+                <MoreHorizontal className="size-3" />
               </Button>
-            </div>
-          ))}
+              <ChevronRight className="size-3 mx-1 text-gray-500" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleBreadcrumbClick(breadcrumbs.length - 1)}
+                className="h-6 px-2 text-xs hover:bg-white"
+              >
+                {breadcrumbs[breadcrumbs.length - 1].title}
+              </Button>
+            </>
+          )}
         </div>
       </div>
     );
@@ -538,9 +566,9 @@ export function ResourceDefinitionCategoryPicker<T>({
               }
               className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200"
             >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
                 <div className="flex-shrink-0">
-                  <FolderOpen className="size-5 text-gray-500" />
+                  <FolderOpen className="size-4.5 text-gray-500" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="font-medium text-sm truncate">
@@ -570,9 +598,9 @@ export function ResourceDefinitionCategoryPicker<T>({
             onSelect={() => handleCategorySelect(category.slug, category.title)}
             className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200"
           >
-            <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
               <div className="flex-shrink-0">
-                <FolderOpen className="size-5 text-gray-500" />
+                <FolderOpen className="size-4.5 text-gray-500" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="font-medium text-sm truncate">
@@ -598,7 +626,10 @@ export function ResourceDefinitionCategoryPicker<T>({
         key={definition.id}
         value={definition.title}
         onSelect={() => handleDefinitionSelect(definition)}
-        className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200 last:border-b-0"
+        className={cn(
+          "flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200 last:border-b-0",
+          searchQuery && definition.category && "py-1",
+        )}
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="min-w-0 flex-1">
@@ -660,11 +691,11 @@ export function ResourceDefinitionCategoryPicker<T>({
           <div className="text-xs mt-1">{t("items_will_appear_here")}</div>
         </div>
       ) : (
-        <div className="p-2 space-y-1">
+        <div className="p-2">
           {recentlyUsed.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between p-3 rounded-md hover:bg-gray-50 cursor-pointer"
+              className="flex items-center justify-between px-3 py-1 border-b rounded-md hover:bg-gray-50  cursor-pointer last:border-b-0"
               onClick={() => handleDefinitionSelect(item)}
             >
               <div className="min-w-0 flex-1">
@@ -698,11 +729,11 @@ export function ResourceDefinitionCategoryPicker<T>({
           <div className="text-xs mt-1">{t("click_star_to_add")}</div>
         </div>
       ) : (
-        <div className="p-2 space-y-1">
+        <div className="p-2">
           {favorites.map((favorite) => (
             <div
               key={favorite.id}
-              className="flex items-center justify-between p-3 rounded-md hover:bg-gray-50 cursor-pointer"
+              className="flex items-center justify-between px-3 py-1 rounded-md border-b hover:bg-gray-50 cursor-pointer last:border-b-0"
               onClick={() => handleDefinitionSelect(favorite)}
             >
               <div className="min-w-0 flex-1">
@@ -758,6 +789,7 @@ export function ResourceDefinitionCategoryPicker<T>({
             resetSearch();
             setBreadcrumbs([]);
             setCurrentParent(undefined);
+            setBreadcrumbsExpanded(false);
             setActiveTab("search");
           }}
         >
@@ -873,6 +905,7 @@ export function ResourceDefinitionCategoryPicker<T>({
             resetSearch();
             setBreadcrumbs([]);
             setCurrentParent(undefined);
+            setBreadcrumbsExpanded(false);
             setFavSubTab("recent");
           }}
           modal
@@ -918,7 +951,7 @@ export function ResourceDefinitionCategoryPicker<T>({
               <div
                 className={cn(
                   "flex flex-col min-w-0",
-                  enableFavorites ? "flex-1 min-w-72" : "w-full",
+                  enableFavorites ? "flex-1 min-w-72 max-w-96" : "w-full",
                 )}
               >
                 {/* Header with current location */}
@@ -972,12 +1005,12 @@ export function ResourceDefinitionCategoryPicker<T>({
                           </div>
                         </div>
                       ) : (
-                        <div className="p-2 space-y-1">
+                        <div className="p-2">
                           {recentlyUsed.map(
                             (item: BaseCategoryPickerDefinition) => (
                               <div
                                 key={item.id}
-                                className="flex items-center justify-between p-3 rounded-md hover:bg-gray-50 cursor-pointer"
+                                className="flex items-center justify-between px-3 py-1 border-b last:border-0 hover:bg-gray-50 cursor-pointer"
                                 onClick={() => handleDefinitionSelect(item)}
                               >
                                 <div className="min-w-0 flex-1">
@@ -1006,12 +1039,12 @@ export function ResourceDefinitionCategoryPicker<T>({
                         </div>
                       </div>
                     ) : (
-                      <div className="p-2 space-y-1">
+                      <div className="p-2">
                         {favorites.map(
                           (favorite: BaseCategoryPickerDefinition) => (
                             <div
                               key={favorite.id}
-                              className="flex items-center justify-between p-3 rounded-md hover:bg-gray-50 cursor-pointer"
+                              className="flex items-center justify-between px-3 py-1 border-b last:border-0 hover:bg-gray-50 cursor-pointer"
                               onClick={() => handleDefinitionSelect(favorite)}
                             >
                               <div className="min-w-0 flex-1">
