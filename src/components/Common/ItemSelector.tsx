@@ -306,7 +306,7 @@ export function ItemSelector<T = any>({
         className="outline-hidden border-none ring-0 shadow-none text-base md:text-sm"
         autoFocus={!isIOS}
       />
-      <CommandList className="overflow-hidden h-[300px]">
+      <CommandList className="">
         {loading ? (
           <CardListSkeleton count={3} />
         ) : filteredOptions.length === 0 &&
@@ -315,7 +315,7 @@ export function ItemSelector<T = any>({
         ) : null}
 
         {useSideBySide && enableFavorites ? (
-          <div className="flex" style={{ height: "300px" }}>
+          <div className="flex">
             <div className="w-1/2 overflow-auto">
               <CommandGroup>
                 {clearable && selectedValues.length > 0 && (
@@ -353,7 +353,7 @@ export function ItemSelector<T = any>({
                         <div className="flex items-center justify-between w-full gap-2">
                           <div className="flex items-center gap-2 min-w-0">
                             {option.icon}
-                            <span className="truncate">{option.label}</span>
+                            <span className="text-wrap">{option.label}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             {enableFavorites && onToggleFavorite && (
@@ -409,7 +409,7 @@ export function ItemSelector<T = any>({
                     )}
                 </div>
                 {!favoriteItems || favoriteItems.length === 0 ? (
-                  <div className="flex items-center flex-col justify-center h-[200px] text-xs text-gray-500 p-4">
+                  <div className="flex items-center flex-col justify-center text-xs text-gray-500 p-4">
                     <p>{noFavoritesMessage}</p>
                     <p>{t("click_star_to_add")}</p>
                   </div>
@@ -435,7 +435,7 @@ export function ItemSelector<T = any>({
                           <div className="flex items-center justify-between w-full gap-2">
                             <div className="flex items-center gap-2 min-w-0">
                               {option.icon}
-                              <span className="truncate">{option.label}</span>
+                              <span className="text-wrap">{option.label}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               {onToggleFavorite && (
@@ -502,7 +502,7 @@ export function ItemSelector<T = any>({
                         <div className="flex items-center justify-between w-full gap-2">
                           <div className="flex items-center gap-2 min-w-0">
                             {option.icon}
-                            <span className="truncate">{option.label}</span>
+                            <span className="text-wrap">{option.label}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             {enableFavorites && onToggleFavorite && (
@@ -558,7 +558,7 @@ export function ItemSelector<T = any>({
                     )}
                 </div>
                 {!favoriteItems || favoriteItems.length === 0 ? (
-                  <div className="flex items-center flex-col justify-center h-[200px] text-xs text-gray-500 p-4">
+                  <div className="flex items-center flex-col justify-center text-xs text-gray-500 p-4">
                     <p>{noFavoritesMessage}</p>
                     <p>{t("click_star_to_add")}</p>
                   </div>
@@ -584,7 +584,7 @@ export function ItemSelector<T = any>({
                           <div className="flex items-center justify-between w-full gap-2">
                             <div className="flex items-center gap-2 min-w-0">
                               {option.icon}
-                              <span className="truncate">{option.label}</span>
+                              <span className="text-wrap">{option.label}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               {onToggleFavorite && (

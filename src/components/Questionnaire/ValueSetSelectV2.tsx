@@ -1,6 +1,6 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,6 @@ interface Props {
   controlledOpen?: boolean;
   showCode?: boolean;
   title?: string;
-  asSheet?: boolean;
   closeOnSelect?: boolean;
 }
 
@@ -47,13 +46,11 @@ export default function ValueSetSelectV2({
   closeOnSelect = true,
   showCode = false,
   title,
-  asSheet = false,
 }: Props) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
   const queryClient = useQueryClient();
-  const inputRef = useRef<HTMLInputElement>(null);
 
   // Fetch value set options
   const searchQuery = useQuery({
@@ -168,8 +165,14 @@ export default function ValueSetSelectV2({
     );
 
     if (selectedOption?.data) {
-      onSelect(selectedOption.data);
-      addRecentMutation.mutate(selectedOption.data);
+      const cleanedCode: Code = {
+        code: selectedOption.data.code,
+        system: selectedOption.data.system,
+        display: selectedOption.data.display,
+      };
+
+      onSelect(cleanedCode);
+      addRecentMutation.mutate(cleanedCode);
     }
   };
 
@@ -196,9 +199,7 @@ export default function ValueSetSelectV2({
       onSearch={setSearch}
       popoverClassName="min-w-[400px] w-full md:max-w-[600px]"
       className={cn(
-        isMobile && asSheet
-          ? "border border-primary rounded-md px-2"
-          : undefined,
+        isMobile ? "border border-primary rounded-md px-2" : undefined,
       )}
       open={controlledOpen || internalOpen}
       onOpenChange={setInternalOpen}
@@ -215,9 +216,8 @@ export default function ValueSetSelectV2({
             )
           : undefined
       }
-      // Pass special mobile trigger for asSheet mode
       mobileTrigger={
-        isMobile && asSheet ? (
+        isMobile ? (
           <Button
             variant="outline"
             role="combobox"
@@ -249,7 +249,7 @@ export default function ValueSetSelectV2({
             variant="outline"
             role="combobox"
             className={cn(
-              "justify-between truncate",
+              "justify-between  text-wrap",
               !value?.display && "text-gray-400",
             )}
             disabled={disabled}
