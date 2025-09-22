@@ -107,7 +107,7 @@ export default function QueueFormSheet({
         set_is_primary: queue.is_primary,
       });
     }
-  }, [queue, isEditMode, form]);
+  }, [queue, isEditMode, form, isOpen]);
 
   // Reset form when sheet opens/closes
   useEffect(() => {
@@ -200,9 +200,7 @@ export default function QueueFormSheet({
         ) : (
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(onSubmit, (errors) => {
-                console.error("Form validation errors:", errors);
-              })}
+              onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-6 mt-6"
             >
               {/* Queue Name */}

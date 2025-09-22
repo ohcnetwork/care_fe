@@ -3,6 +3,7 @@ import { Redirect } from "raviger";
 import FacilityUsers from "@/components/Facility/FacilityUsers";
 import ResourceCreate from "@/components/Resource/ResourceForm";
 
+import BedAvailabilityDashboard from "@/pages/Facility/BedAvailabilityDashboard";
 import { FacilityLayout } from "@/pages/Facility/FacilityLayout";
 
 import { AppRoutes, RouteParams } from "@/Routers/AppRouter";
@@ -29,6 +30,9 @@ const FacilityRoutes: AppRoutes = {
   "/facility": () => <Redirect to="/" />,
   "/facility/:facilityId/overview": ({ facilityId }) => (
     <FacilityOverview facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/bed-availability": ({ facilityId }) => (
+    <BedAvailabilityDashboard facilityId={facilityId} />
   ),
   "/facility/:facilityId/users": ({ facilityId }) => (
     <FacilityUsers facilityId={facilityId} />
