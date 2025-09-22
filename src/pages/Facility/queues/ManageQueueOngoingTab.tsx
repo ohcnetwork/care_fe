@@ -138,34 +138,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                           <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-3 border border-gray-100">
                             <DoorOpenIcon className="size-6 text-gray-700" />
                             <span className="text-sm font-semibold text-gray-700">
-                              {t("no_patient_is_being_called")}
-                            </span>
-                            <CallNextPatientButton
-                              subQueueId={subQueue.id}
-                              facilityId={facilityId}
-                              queueId={queueId}
-                              variant="outline"
-                              size="lg"
-                            >
-                              <Megaphone />
-                              {t("call_next_patient")}
-                            </CallNextPatientButton>
-                          </div>
-                        }
-                      />
-                      <div className="border border-gray-300 border-dashed" />
-                      <OngoingQueueTokenCardsList
-                        facilityId={facilityId}
-                        queueId={queueId}
-                        qParams={{
-                          status: TokenStatus.CREATED,
-                          sub_queue: subQueue.id,
-                        }}
-                        emptyState={
-                          <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-3 border border-gray-100">
-                            <DoorOpenIcon className="size-6 text-gray-700" />
-                            <span className="text-sm font-semibold text-gray-700">
-                              {t("no_patient_is_being_called")}
+                              {t("no_patient_is_being_served")}
                             </span>
                             <CallNextPatientButton
                               subQueueId={subQueue.id}
@@ -181,6 +154,17 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
                         }
                       />
                     </div>
+                    <OngoingQueueTokenCardsList
+                      facilityId={facilityId}
+                      queueId={queueId}
+                      qParams={{
+                        status: TokenStatus.CREATED,
+                        sub_queue: subQueue.id,
+                      }}
+                      header={
+                        <div className="border border-gray-300 border-dashed" />
+                      }
+                    />
                   </div>
                 </div>
               </>

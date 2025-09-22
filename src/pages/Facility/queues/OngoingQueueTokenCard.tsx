@@ -26,7 +26,9 @@ import {
 import {
   BringToFront,
   Check,
+  CircleDot,
   ExternalLink,
+  Megaphone,
   MoreHorizontal,
   OctagonX,
   RedoDot,
@@ -89,9 +91,6 @@ export function OngoingQueueTokenCard({
               "border border-primary-500",
           )}
         >
-          {token?.status === TokenStatus.IN_PROGRESS && (
-            <div className="absolute top-1/2 -translate-y-1/2 left-0 w-1 h-8 rounded-r-sm bg-primary-500" />
-          )}
           <div className="flex flex-col">
             {token ? (
               <Link
@@ -126,28 +125,6 @@ export function OngoingQueueTokenCard({
           <div className="flex items-center gap-3">
             {token ? (
               <div className="flex gap-2 items-center justify-center p-2 bg-gray-100 border border-gray-200 rounded-lg">
-                {!!token.sub_queue &&
-                  [TokenStatus.CREATED, TokenStatus.IN_PROGRESS].includes(
-                    token.status,
-                  ) && (
-                    <div className="flex gap-1 items-center">
-                      <div
-                        className={cn(
-                          "size-2 border rounded-full",
-                          token.status === TokenStatus.CREATED &&
-                            "border-indigo-500 bg-indigo-200",
-                          token.status === TokenStatus.IN_PROGRESS &&
-                            "border-primary-500 bg-primary-200",
-                        )}
-                      />
-                      <span className="text-sm font-medium">
-                        {token.status === TokenStatus.CREATED && t("called")}
-                        {token.status === TokenStatus.IN_PROGRESS &&
-                          t("now_serving")}
-                        :
-                      </span>
-                    </div>
-                  )}
                 <span className="text-lg font-bold text-black">
                   {renderTokenNumber(token)}
                 </span>
@@ -182,32 +159,22 @@ export function OngoingQueueTokenCard({
       {token && (
         <>
           <ContextMenuContent>
-            {/* Assign to Service Point */}
-            {[TokenStatus.CREATED, TokenStatus.UNFULFILLED].includes(
-              token.status,
-            ) && (
+            {token.status === TokenStatus.CREATED && token.sub_queue && (
               <ContextMenuItem
-                onClick={() => setShowAssignToServicePointDialog(true)}
+                onClick={() =>
+                  updateToken({
+                    status: TokenStatus.IN_PROGRESS,
+                    note: token.note,
+                    sub_queue: token.sub_queue?.id,
+                  })
+                }
               >
-                <TicketCheck className="size-4 mr-2" />
-                {t("assign_to_service_point")}
+                <CircleDot className="size-4 mr-2" />
+                {t("mark_as_now_serving")}
               </ContextMenuItem>
             )}
-
             {token.status === TokenStatus.IN_PROGRESS && (
               <>
-                <ContextMenuItem
-                  onClick={() =>
-                    updateToken({
-                      status: TokenStatus.CREATED,
-                      note: token.note,
-                      sub_queue: undefined,
-                    })
-                  }
-                >
-                  <RotateCcw className="size-4 mr-2" />
-                  {t("move_back_to_waiting")}
-                </ContextMenuItem>
                 <ContextMenuItem
                   onClick={() =>
                     updateToken({
@@ -219,6 +186,30 @@ export function OngoingQueueTokenCard({
                 >
                   <Check className="size-4 mr-2" />
                   {t("mark_as_complete")}
+                </ContextMenuItem>
+                <ContextMenuItem
+                  onClick={() =>
+                    updateToken({
+                      status: TokenStatus.CREATED,
+                      note: token.note,
+                      sub_queue: token.sub_queue?.id,
+                    })
+                  }
+                >
+                  <Megaphone className="size-4 mr-2" />
+                  {t("move_to_calling")}
+                </ContextMenuItem>
+                <ContextMenuItem
+                  onClick={() =>
+                    updateToken({
+                      status: TokenStatus.CREATED,
+                      note: token.note,
+                      sub_queue: undefined,
+                    })
+                  }
+                >
+                  <RotateCcw className="size-4 mr-2" />
+                  {t("move_to_waiting")}
                 </ContextMenuItem>
                 <ContextMenuItem
                   onClick={() =>
@@ -235,14 +226,21 @@ export function OngoingQueueTokenCard({
               </>
             )}
 
-            {token.sub_queue && (
-              <ContextMenuItem
-                onClick={() => setShowAssignToServicePointDialog(true)}
-              >
-                <RedoDot className="size-4 mr-2" />
-                {t("reassign_service_point")}
-              </ContextMenuItem>
-            )}
+            <ContextMenuItem
+              onClick={() => setShowAssignToServicePointDialog(true)}
+            >
+              {token.sub_queue ? (
+                <>
+                  <RedoDot className="size-4 mr-2" />
+                  {t("reassign_service_point")}
+                </>
+              ) : (
+                <>
+                  <TicketCheck className="size-4 mr-2" />
+                  {t("assign_to_service_point")}
+                </>
+              )}
+            </ContextMenuItem>
 
             <ContextMenuSeparator />
             {/* Cancel Token */}
@@ -297,11 +295,13 @@ export function OngoingQueueTokenCardsList({
   queueId,
   qParams,
   emptyState,
+  header,
 }: {
   facilityId: string;
   queueId: string;
   qParams: Record<string, unknown>;
   emptyState?: React.ReactNode;
+  header?: React.ReactNode;
 }) {
   const { ref, inView } = useInView();
 
@@ -334,6 +334,7 @@ export function OngoingQueueTokenCardsList({
     <div className="flex flex-col gap-4">
       {tokens.length > 0 ? (
         <>
+          {header}
           {tokens.map((token) => (
             <OngoingQueueTokenCard
               key={token.id}
