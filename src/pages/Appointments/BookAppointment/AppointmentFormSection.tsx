@@ -18,8 +18,6 @@ interface AppointmentFormSectionProps {
   setSelectedTags: (tags: TagConfig[]) => void;
   reason: string;
   setReason: (reason: string) => void;
-  setSelectedResourceType: (resourceType: SchedulableResourceType) => void;
-  selectedResourceType: SchedulableResourceType;
   selectedResource: ScheduleResourceFormState;
   setSelectedResource: (resource: ScheduleResourceFormState) => void;
 }
@@ -29,15 +27,13 @@ export const AppointmentFormSection = ({
   setSelectedTags,
   reason,
   setReason,
-  setSelectedResourceType,
-  selectedResourceType,
   selectedResource,
   setSelectedResource,
 }: AppointmentFormSectionProps) => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col gap-8 p-4 w-114 bg-white shadow rounded-lg">
+    <>
       <div className="flex flex-col">
         <Label className="mb-2 text-sm font-medium text-gray-950">
           {t("select_resource_type")}
@@ -47,19 +43,22 @@ export const AppointmentFormSection = ({
             label: t(`resource_type__${type}`),
             value: type,
           }))}
-          value={selectedResourceType}
+          value={selectedResource.resource_type}
           onValueChange={(value: SchedulableResourceType) => {
-            setSelectedResourceType(value);
+            if (selectedResource.resource_type === value) {
+              return;
+            }
             setSelectedResource({
               resource: null,
               resource_type: value,
             });
           }}
+          required={true}
         />
       </div>
       <div className="flex flex-col">
         <Label className="mb-2 text-sm font-medium text-gray-950">
-          {t(`schedulable_resource__${selectedResourceType}`)}
+          {t(`schedulable_resource__${selectedResource.resource_type}`)}
         </Label>
         <ResourceSelector
           facilityId={facilityId}
@@ -88,6 +87,6 @@ export const AppointmentFormSection = ({
           className="min-h-10 px-3 py-2"
         />
       </div>
-    </div>
+    </>
   );
 };
