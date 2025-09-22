@@ -336,14 +336,14 @@ export function ItemSelector<T = any>({
                       key={option.value}
                       value={option.label}
                       onSelect={() => handleSelect(option.value)}
-                      onTouchStart={(e) => {
-                        // fix for ios touch event
-                        if (document.activeElement instanceof HTMLElement) {
-                          document.activeElement.blur();
-                          e.stopPropagation();
-                          setTimeout(() => handleSelect(option.value), 10);
-                        }
-                      }}
+                      // onTouchStart={(e) => {
+                      //   // fix for ios touch event
+                      //   if (document.activeElement instanceof HTMLElement) {
+                      //     document.activeElement.blur();
+                      //     e.stopPropagation();
+                      //     setTimeout(() => handleSelect(option.value), 10);
+                      //   }
+                      // }}
                       className={cn(
                         "cursor-pointer",
                         option.disabled && "opacity-50 pointer-events-none",
@@ -493,14 +493,14 @@ export function ItemSelector<T = any>({
                       key={option.value}
                       value={option.label}
                       onSelect={() => handleSelect(option.value)}
-                      onTouchStart={(e) => {
-                        // fix for ios touch event
-                        if (document.activeElement instanceof HTMLElement) {
-                          document.activeElement.blur();
-                          e.stopPropagation();
-                          setTimeout(() => handleSelect(option.value), 10);
-                        }
-                      }}
+                      // onTouchStart={(e) => {
+                      //   // fix for ios touch event
+                      //   if (document.activeElement instanceof HTMLElement) {
+                      //     document.activeElement.blur();
+                      //     e.stopPropagation();
+                      //     setTimeout(() => handleSelect(option.value), 10);
+                      //   }
+                      // }}
                       className={cn(
                         "cursor-pointer",
                         option.disabled && "opacity-50 pointer-events-none",
