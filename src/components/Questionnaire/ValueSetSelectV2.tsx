@@ -8,7 +8,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
-import { ItemSelector, SelectOption } from "@/components/Common/ItemSelector";
+import { ItemSelector } from "@/components/Common/ItemSelector/index";
+import type { SelectOption } from "@/components/Common/ItemSelector/types";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -178,46 +179,43 @@ export default function ValueSetSelectV2({
 
   return (
     <ItemSelector
-      value={value?.code || null}
-      onChange={handleSelect}
-      options={options}
-      favoriteItems={favoriteOptions}
-      enableFavorites={true}
-      showTabs={isMobile}
-      useSideBySide={!isMobile}
-      title={title}
-      placeholder={placeholder}
-      searchPlaceholder="Search..."
-      noResultsMessage="No results found"
-      loading={searchQuery.isFetching}
-      disabled={disabled}
-      closeOnSelect={closeOnSelect}
-      clearable={false}
-      onToggleFavorite={handleToggleFavorite}
-      noFavoritesMessage="No starred items"
-      onClearAllFavorites={handleClearAllFavorites}
-      onSearch={setSearch}
-      popoverClassName="min-w-[400px] w-full md:max-w-[600px]"
-      className={cn(
-        isMobile ? "border border-primary rounded-md px-2" : undefined,
-      )}
-      open={controlledOpen || internalOpen}
-      onOpenChange={setInternalOpen}
-      hideTrigger={hideTrigger}
-      renderSelection={
-        value && !hideTrigger
-          ? () => (
-              <span className="flex items-center">
-                {value.display}
-                {showCode && (
-                  <span className="text-xs ml-1">({value.code})</span>
+      selection={{
+        value: value?.code || null,
+        onChange: handleSelect,
+        options: options,
+        clearable: false,
+      }}
+      ui={{
+        title,
+        placeholder,
+        searchPlaceholder: "Search...",
+        noResultsMessage: "No results found",
+        loading: searchQuery.isFetching,
+        disabled,
+        className: cn(
+          isMobile ? "border border-primary rounded-md px-2" : undefined,
+        ),
+        triggerButton:
+          !isMobile && !hideTrigger ? (
+            <Button
+              variant="outline"
+              role="combobox"
+              className={cn(
+                "justify-between text-wrap",
+                !value?.display && "text-gray-400",
+              )}
+              disabled={disabled}
+            >
+              <span className="truncate">
+                {value?.display || placeholder}
+                {value?.display && showCode && (
+                  <span className="text-xs ml-1">({value?.code})</span>
                 )}
               </span>
-            )
-          : undefined
-      }
-      mobileTrigger={
-        isMobile ? (
+              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+            </Button>
+          ) : undefined,
+        mobileTrigger: isMobile ? (
           <Button
             variant="outline"
             role="combobox"
@@ -241,29 +239,39 @@ export default function ValueSetSelectV2({
               </span>
             </div>
           </Button>
-        ) : undefined
-      }
-      triggerButton={
-        !isMobile && !hideTrigger ? (
-          <Button
-            variant="outline"
-            role="combobox"
-            className={cn(
-              "justify-between  text-wrap",
-              !value?.display && "text-gray-400",
-            )}
-            disabled={disabled}
-          >
-            <span className="truncate">
-              {value?.display || placeholder}
-              {value?.display && showCode && (
-                <span className="text-xs ml-1">({value?.code})</span>
-              )}
-            </span>
-            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-          </Button>
-        ) : undefined
-      }
+        ) : undefined,
+      }}
+      layout={{
+        popoverClassName: "min-w-[400px] w-full md:max-w-[600px]",
+        closeOnSelect,
+        open: controlledOpen || internalOpen,
+        onOpenChange: setInternalOpen,
+        hideTrigger,
+      }}
+      search={{
+        onSearch: setSearch,
+      }}
+      render={{
+        renderSelection:
+          value && !hideTrigger
+            ? () => (
+                <span className="flex items-center">
+                  {value.display}
+                  {showCode && (
+                    <span className="text-xs ml-1">({value.code})</span>
+                  )}
+                </span>
+              )
+            : undefined,
+      }}
+      favorites={{
+        enable: true,
+        layout: isMobile ? "tabs" : "sideBySide",
+        items: favoriteOptions,
+        onToggle: handleToggleFavorite,
+        onClearAll: handleClearAllFavorites,
+        noItemsMessage: "No starred items",
+      }}
     />
   );
 }

@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { ItemSelector } from "@/components/Common/ItemSelector";
+import { ItemSelector } from "@/components/Common/ItemSelector/index";
 import { Button } from "@/components/ui/button";
 
 import query from "@/Utils/request/query";
@@ -94,37 +94,46 @@ export function QuestionnaireSearch({
 
   return (
     <ItemSelector
-      title={t("questionnaire")}
-      placeholder={placeholder || t("add_questionnaire")}
-      searchPlaceholder={t("search_questionnaires")}
-      noResultsMessage={t("no_questionnaires_found")}
-      loading={isLoading}
-      options={(questionnaires?.results || []).map((item) => ({
-        value: item.id,
-        label: item.title,
-        data: item, // Store the full item for access in onChange
-        icon: <CareIcon icon="l-file-export" className="mr-2 size-4" />,
-      }))}
-      triggerButton={trigger || defaultTrigger}
-      mobileTrigger={mobileTrigger || defaultMobileTrigger}
-      onSearch={setSearch}
-      disabled={disabled}
-      renderOption={(option) => (
-        <div className="flex items-center w-full">
-          {option.icon}
-          <span>{option.label}</span>
-        </div>
-      )}
-      onChange={(value) => {
-        if (value && !Array.isArray(value)) {
-          // Find the selected questionnaire using the stored data
-          const option = (questionnaires?.results || []).find(
-            (item) => item.id === value,
-          );
-          if (option) {
-            onSelect(option);
+      selection={{
+        value: null,
+        options: (questionnaires?.results || []).map((item) => ({
+          value: item.id,
+          label: item.title,
+          data: item, // Store the full item for access in onChange
+          icon: <CareIcon icon="l-file-export" className="mr-2 size-4" />,
+        })),
+        onChange: (value) => {
+          if (value && !Array.isArray(value)) {
+            // Find the selected questionnaire using the stored data
+            const option = (questionnaires?.results || []).find(
+              (item) => item.id === value,
+            );
+            if (option) {
+              onSelect(option);
+            }
           }
-        }
+        },
+      }}
+      ui={{
+        title: t("questionnaire"),
+        placeholder: placeholder || t("add_questionnaire"),
+        searchPlaceholder: t("search_questionnaires"),
+        noResultsMessage: t("no_questionnaires_found"),
+        loading: isLoading,
+        triggerButton: trigger || defaultTrigger,
+        mobileTrigger: mobileTrigger || defaultMobileTrigger,
+        disabled,
+      }}
+      search={{
+        onSearch: setSearch,
+      }}
+      render={{
+        renderOption: (option) => (
+          <div className="flex items-center w-full">
+            {option.icon}
+            <span>{option.label}</span>
+          </div>
+        ),
       }}
     />
   );
