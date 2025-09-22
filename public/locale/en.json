@@ -3516,7 +3516,7 @@
   "period": "Period",
   "permanant_address_is_required": "Permanant address is required",
   "permanent_address": "Permanent Address",
-  "permanent_address_is_different": "Permanent address is different",
+  "permanent_address_is_different_from_current_address": "Permanent address is different from current address",
   "permission": "Permission",
   "permission_denied": "You do not have permission to perform this action",
   "permission_denied_encounter": "You do not have permission to view this encounter",
