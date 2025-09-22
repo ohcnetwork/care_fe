@@ -204,9 +204,7 @@ export default function AppointmentDetail(props: Props) {
     <Page title={t("appointment_details")} hideTitleOnPage>
       <div className="container mx-auto max-w-7xl mt-4">
         <div className="flex items-center gap-2 space-y-4">
-          <BackButton
-            to={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments`}
-          >
+          <BackButton>
             <ChevronLeft />
           </BackButton>
           <h4 className="font-semibold text-gray-800 mb-2">
