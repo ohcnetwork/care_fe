@@ -56,7 +56,6 @@ export const ScheduleResourceSelector = ({
               resource_type: selectedResource.resource_type,
             });
           }}
-          mode="kind"
           value={selectedResource.resource}
           mode="kind"
         />

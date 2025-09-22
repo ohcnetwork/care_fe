@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
-const atom = atomWithStorage<Record<string, string | undefined>>(
+const atom = atomWithStorage<Record<string, string>>(
   "care_queues_preferred_service_point_category",
   {},
   undefined,
@@ -14,14 +14,14 @@ const atom = atomWithStorage<Record<string, string | undefined>>(
 
 function usePreferredServicePointCategory({
   facilityId,
-  subQueueId,
 }: {
   facilityId: string;
-  subQueueId: string;
 }) {
   const { resourceType } = useScheduleResourceFromPath();
-  const [preferredServicePointCategory, setPreferredServicePointCategory] =
-    useAtom(atom);
+  const [
+    preferredServicePointCategoryIds,
+    setPreferredServicePointCategoryIds,
+  ] = useAtom(atom);
 
   const { data: tokenCategories } = useQuery({
     queryKey: ["tokenCategories", facilityId, resourceType],
@@ -34,26 +34,33 @@ function usePreferredServicePointCategory({
     }),
   });
 
+  const preferredServicePointCategories =
+    tokenCategories &&
+    Object.fromEntries(
+      Object.entries(preferredServicePointCategoryIds).map(
+        ([subQueueId, categoryId]) => [
+          subQueueId,
+          tokenCategories.results.find(({ id }) => id === categoryId),
+        ],
+      ),
+    );
+
+  const setPreferredServicePointCategory = (
+    subQueueId: string,
+    categoryId: string | null,
+  ) => {
+    const updated = { ...preferredServicePointCategoryIds };
+    if (categoryId) {
+      updated[subQueueId] = categoryId;
+    } else {
+      delete updated[subQueueId];
+    }
+    setPreferredServicePointCategoryIds(updated);
+  };
+
   return {
-    tokenCategories: tokenCategories?.results,
-
-    preferredServicePointCategory:
-      preferredServicePointCategory[subQueueId] != undefined && tokenCategories
-        ? tokenCategories.results.find(
-            (category) =>
-              category.id === preferredServicePointCategory[subQueueId],
-          )
-        : undefined,
-
-    setPreferredServicePointCategory: (categoryId: string | null) => {
-      const updated = { ...preferredServicePointCategory };
-      if (categoryId) {
-        updated[subQueueId] = categoryId;
-      } else {
-        delete updated[subQueueId];
-      }
-      setPreferredServicePointCategory(updated);
-    },
+    preferredServicePointCategories,
+    setPreferredServicePointCategory,
   } as const;
 }
 

@@ -295,35 +295,23 @@ const PAGE_SIZE = 50;
 export function OngoingQueueTokenCardsList({
   facilityId,
   queueId,
-  subQueueId,
-  status,
+  qParams,
   emptyState,
 }: {
   facilityId: string;
   queueId: string;
-  subQueueId?: string;
-  status: TokenStatus;
+  qParams: Record<string, unknown>;
   emptyState?: React.ReactNode;
 }) {
   const { ref, inView } = useInView();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: [
-        "infinite-tokens",
-        facilityId,
-        queueId,
-        { sub_queue: subQueueId, status },
-      ],
+      queryKey: ["infinite-tokens", facilityId, queueId, qParams],
       queryFn: async ({ pageParam = 0, signal }) => {
         const response = await query(tokenApi.list, {
           pathParams: { facility_id: facilityId, queue_id: queueId },
-          queryParams: {
-            sub_queue: subQueueId,
-            status,
-            limit: PAGE_SIZE,
-            offset: pageParam,
-          },
+          queryParams: { ...qParams, limit: PAGE_SIZE, offset: pageParam },
         })({ signal });
         return response;
       },
