@@ -51,7 +51,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -482,7 +481,7 @@ export default function DispenseDrawer({
         </div>
         <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full min-h-0 -m-4">
           {/* Selected Location */}
-          <div className="my-4 mr-4">
+          <div className="my-4 px-3 md:mr-4">
             <Button
               variant="outline"
               className="w-full justify-between border-gray-300 text-left h-auto py-1 px-2 bg-gray-50 hover:bg-gray-100"
@@ -511,7 +510,7 @@ export default function DispenseDrawer({
             </Button>
           </div>
 
-          <ScrollArea className="flex-1 h-0 pr-4">
+          <div className="flex-1 overflow-y-auto sm:pr-4 px-3">
             <Form {...form}>
               <form>
                 {fields.length === 0 ? (
@@ -547,421 +546,441 @@ export default function DispenseDrawer({
                   />
                 ) : (
                   <>
-                    <Table className="w-full border-separate border-spacing-y-2 px-1">
-                      <TableHeader>
-                        <TableRow className="divide-x">
-                          <TableHead className="rounded-tl-md bg-gray-100 border-none">
-                            <FormField
-                              control={form.control}
-                              name="items"
-                              render={() => (
-                                <FormItem className="mr-1.5">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={
-                                        form.watch("items").length > 0 &&
-                                        form
-                                          .watch("items")
-                                          .every((q) => q.isSelected)
-                                      }
-                                      onCheckedChange={(checked) => {
-                                        const items = form.getValues("items");
-                                        items.forEach((_, index) => {
-                                          form.setValue(
-                                            `items.${index}.isSelected`,
-                                            !!checked,
-                                          );
-                                        });
-                                      }}
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                          </TableHead>
-                          <TableHead className="bg-gray-100 text-gray-700">
-                            {t("items")}
-                          </TableHead>
-                          <TableHead className="bg-gray-100 text-gray-700">
-                            {t("select_lot")}
-                          </TableHead>
-                          <TableHead className="bg-gray-100 text-gray-700">
-                            {t("quantity")}
-                          </TableHead>
-                          <TableHead className="bg-gray-100 text-gray-700">
-                            {t("base_amount")}
-                          </TableHead>
-                          <TableHead className="bg-gray-100 rounded-tr-md text-gray-700">
-                            {t("expiry")}
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody className="bg-white">
-                        {fields.map((field, index) => {
-                          const productKnowledge =
-                            field.productKnowledge as ProductKnowledgeBase;
+                    <div className="overflow-x-auto">
+                      <Table className="w-full border-separate border-spacing-y-2 px-1">
+                        <TableHeader>
+                          <TableRow className="divide-x">
+                            <TableHead className="rounded-tl-md bg-gray-100 border-none">
+                              <FormField
+                                control={form.control}
+                                name="items"
+                                render={() => (
+                                  <FormItem className="mr-1.5">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={
+                                          form.watch("items").length > 0 &&
+                                          form
+                                            .watch("items")
+                                            .every((q) => q.isSelected)
+                                        }
+                                        onCheckedChange={(checked) => {
+                                          const items = form.getValues("items");
+                                          items.forEach((_, index) => {
+                                            form.setValue(
+                                              `items.${index}.isSelected`,
+                                              !!checked,
+                                            );
+                                          });
+                                        }}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </TableHead>
+                            <TableHead className="bg-gray-100 text-gray-700">
+                              {t("items")}
+                            </TableHead>
+                            <TableHead className="bg-gray-100 text-gray-700">
+                              {t("select_lot")}
+                            </TableHead>
+                            <TableHead className="bg-gray-100 text-gray-700">
+                              {t("quantity")}
+                            </TableHead>
+                            <TableHead className="bg-gray-100 text-gray-700">
+                              {t("base_amount")}
+                            </TableHead>
+                            <TableHead className="bg-gray-100 rounded-tr-md text-gray-700">
+                              {t("expiry")}
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody className="bg-white">
+                          {fields.map((field, index) => {
+                            const productKnowledge =
+                              field.productKnowledge as ProductKnowledgeBase;
 
-                          return (
-                            <TableRow
-                              key={field.id}
-                              className="hover:bg-gray-50 rounded-md shadow-sm divide-x"
-                            >
-                              <TableCell className="align-middle">
-                                <FormField
-                                  control={form.control}
-                                  name={`items.${index}.isSelected`}
-                                  render={({ field: formField }) => (
-                                    <FormItem>
-                                      <FormControl>
-                                        <Checkbox
-                                          checked={formField.value}
-                                          onCheckedChange={formField.onChange}
-                                        />
-                                      </FormControl>
-                                    </FormItem>
-                                  )}
-                                />
-                              </TableCell>
-                              <TableCell className="font-medium text-gray-950 text-base">
-                                {productKnowledge.name}
-                              </TableCell>
-                              {!productKnowledgeInventoriesMap[
-                                productKnowledge.id
-                              ]?.length ? (
-                                <TableCell colSpan={4} className="text-center">
-                                  <div className="flex items-center justify-center py-3 gap-2 italic">
-                                    <Badge
-                                      variant="destructive"
-                                      className="text-sm"
-                                    >
-                                      {t("no_stock_available")}
-                                    </Badge>
-                                    {t(
-                                      "no_stock_available_dispense_description",
+                            return (
+                              <TableRow
+                                key={field.id}
+                                className="hover:bg-gray-50 rounded-md shadow-sm divide-x"
+                              >
+                                <TableCell className="align-middle">
+                                  <FormField
+                                    control={form.control}
+                                    name={`items.${index}.isSelected`}
+                                    render={({ field: formField }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <Checkbox
+                                            checked={formField.value}
+                                            onCheckedChange={formField.onChange}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
                                     )}
-                                  </div>
+                                  />
                                 </TableCell>
-                              ) : (
-                                <>
-                                  <TableCell>
-                                    <div className="space-y-2">
-                                      <Popover>
-                                        <PopoverTrigger>
-                                          <Button
-                                            variant="outline"
-                                            className="w-auto min-w-40 h-auto justify-between px-2 border-gray-300 border"
-                                            type="button"
-                                          >
-                                            <div className="flex flex-col min-w-40 items-start gap-1 w-full">
-                                              {(() => {
-                                                const selectedLots = form
-                                                  .watch(`items.${index}.lots`)
-                                                  .filter(
-                                                    (lot) =>
-                                                      lot.selectedInventoryId,
-                                                  );
+                                <TableCell className="font-medium text-gray-950 text-base">
+                                  {productKnowledge.name}
+                                </TableCell>
+                                {!productKnowledgeInventoriesMap[
+                                  productKnowledge.id
+                                ]?.length ? (
+                                  <TableCell
+                                    colSpan={4}
+                                    className="text-center"
+                                  >
+                                    <div className="flex items-center justify-center py-3 gap-2 italic">
+                                      <Badge
+                                        variant="destructive"
+                                        className="text-sm"
+                                      >
+                                        {t("no_stock_available")}
+                                      </Badge>
+                                      {t(
+                                        "no_stock_available_dispense_description",
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                ) : (
+                                  <>
+                                    <TableCell>
+                                      <div className="space-y-2">
+                                        <Popover>
+                                          <PopoverTrigger>
+                                            <Button
+                                              variant="outline"
+                                              className="w-auto min-w-40 h-auto justify-between px-2 border-gray-300 border"
+                                              type="button"
+                                            >
+                                              <div className="flex flex-col min-w-40 items-start gap-1 w-full">
+                                                {(() => {
+                                                  const selectedLots = form
+                                                    .watch(
+                                                      `items.${index}.lots`,
+                                                    )
+                                                    .filter(
+                                                      (lot) =>
+                                                        lot.selectedInventoryId,
+                                                    );
 
-                                                if (selectedLots.length === 0) {
-                                                  return (
-                                                    <span className="text-gray-500">
-                                                      {t("select_stock")}
-                                                    </span>
-                                                  );
-                                                }
-
-                                                return selectedLots.map(
-                                                  (lot) => {
-                                                    const selectedInventory =
-                                                      productKnowledgeInventoriesMap[
-                                                        productKnowledge.id
-                                                      ]?.find(
-                                                        (inv) =>
-                                                          inv.id ===
-                                                          lot.selectedInventoryId,
-                                                      );
-
+                                                  if (
+                                                    selectedLots.length === 0
+                                                  ) {
                                                     return (
-                                                      <div
-                                                        key={
-                                                          lot.selectedInventoryId
+                                                      <span className="text-gray-500">
+                                                        {t("select_stock")}
+                                                      </span>
+                                                    );
+                                                  }
+
+                                                  return selectedLots.map(
+                                                    (lot) => {
+                                                      const selectedInventory =
+                                                        productKnowledgeInventoriesMap[
+                                                          productKnowledge.id
+                                                        ]?.find(
+                                                          (inv) =>
+                                                            inv.id ===
+                                                            lot.selectedInventoryId,
+                                                        );
+
+                                                      return (
+                                                        <div
+                                                          key={
+                                                            lot.selectedInventoryId
+                                                          }
+                                                          className="flex items-center justify-between w-full bg-gray-50 px-px py-px border-gray-200 border-1 rounded-sm text-gray-950"
+                                                        >
+                                                          <span className="font-medium text-sm ml-1">
+                                                            {
+                                                              selectedInventory
+                                                                ?.product.batch
+                                                                ?.lot_number
+                                                            }
+                                                          </span>
+                                                          <Badge
+                                                            variant={
+                                                              selectedInventory?.status ===
+                                                                "active" &&
+                                                              selectedInventory?.net_content >
+                                                                0
+                                                                ? "primary"
+                                                                : "destructive"
+                                                            }
+                                                            className="border-none rounded-sm"
+                                                          >
+                                                            {
+                                                              selectedInventory?.net_content
+                                                            }{" "}
+                                                            {selectedInventory
+                                                              ?.product
+                                                              .product_knowledge
+                                                              .base_unit
+                                                              .display ||
+                                                              t("units")}
+                                                          </Badge>
+                                                        </div>
+                                                      );
+                                                    },
+                                                  );
+                                                })()}
+                                              </div>
+                                              <ChevronDownIcon className="size-4 shrink-0" />
+                                            </Button>
+                                          </PopoverTrigger>
+                                          <PopoverContent className="w-auto p-0">
+                                            <div className="max-h-60 overflow-auto">
+                                              {productKnowledgeInventoriesMap[
+                                                productKnowledge.id
+                                              ]?.length ? (
+                                                productKnowledgeInventoriesMap[
+                                                  productKnowledge.id
+                                                ]?.map((inv) => {
+                                                  const currentLots =
+                                                    form.watch(
+                                                      `items.${index}.lots`,
+                                                    );
+                                                  const isSelected =
+                                                    currentLots.some(
+                                                      (lot) =>
+                                                        lot.selectedInventoryId ===
+                                                        inv.id,
+                                                    );
+
+                                                  return (
+                                                    <div
+                                                      key={inv.id}
+                                                      className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent"
+                                                      onClick={() => {
+                                                        const lots =
+                                                          form.getValues(
+                                                            `items.${index}.lots`,
+                                                          );
+
+                                                        if (isSelected) {
+                                                          form.setValue(
+                                                            `items.${index}.lots`,
+                                                            lots.filter(
+                                                              (lot) =>
+                                                                lot.selectedInventoryId !==
+                                                                inv.id,
+                                                            ),
+                                                          );
+                                                        } else {
+                                                          form.setValue(
+                                                            `items.${index}.lots`,
+                                                            [
+                                                              ...lots,
+                                                              {
+                                                                selectedInventoryId:
+                                                                  inv.id,
+                                                                quantity: 1,
+                                                              },
+                                                            ],
+                                                          );
                                                         }
-                                                        className="flex items-center justify-between w-full bg-gray-50 px-px py-px border-gray-200 border-1 rounded-sm text-gray-950"
-                                                      >
-                                                        <span className="font-medium text-sm ml-1">
+                                                      }}
+                                                    >
+                                                      <Checkbox
+                                                        checked={isSelected}
+                                                        className="mr-2"
+                                                      />
+                                                      <div className="flex-1 flex items-center justify-between">
+                                                        <span>
                                                           {
-                                                            selectedInventory
-                                                              ?.product.batch
+                                                            inv.product.batch
                                                               ?.lot_number
                                                           }
                                                         </span>
                                                         <Badge
                                                           variant={
-                                                            selectedInventory?.status ===
+                                                            inv.status ===
                                                               "active" &&
-                                                            selectedInventory?.net_content >
-                                                              0
+                                                            inv.net_content > 0
                                                               ? "primary"
                                                               : "destructive"
                                                           }
-                                                          className="border-none rounded-sm"
+                                                          className="ml-2"
                                                         >
-                                                          {
-                                                            selectedInventory?.net_content
-                                                          }{" "}
-                                                          {selectedInventory
-                                                            ?.product
+                                                          {inv.net_content}{" "}
+                                                          {inv.product
                                                             .product_knowledge
                                                             .base_unit
                                                             .display ||
                                                             t("units")}
                                                         </Badge>
                                                       </div>
-                                                    );
-                                                  },
-                                                );
-                                              })()}
-                                            </div>
-                                            <ChevronDownIcon className="size-4 shrink-0" />
-                                          </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0">
-                                          <div className="max-h-60 overflow-auto">
-                                            {productKnowledgeInventoriesMap[
-                                              productKnowledge.id
-                                            ]?.length ? (
-                                              productKnowledgeInventoriesMap[
-                                                productKnowledge.id
-                                              ]?.map((inv) => {
-                                                const currentLots = form.watch(
-                                                  `items.${index}.lots`,
-                                                );
-                                                const isSelected =
-                                                  currentLots.some(
-                                                    (lot) =>
-                                                      lot.selectedInventoryId ===
-                                                      inv.id,
-                                                  );
-
-                                                return (
-                                                  <div
-                                                    key={inv.id}
-                                                    className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent"
-                                                    onClick={() => {
-                                                      const lots =
-                                                        form.getValues(
-                                                          `items.${index}.lots`,
-                                                        );
-
-                                                      if (isSelected) {
-                                                        form.setValue(
-                                                          `items.${index}.lots`,
-                                                          lots.filter(
-                                                            (lot) =>
-                                                              lot.selectedInventoryId !==
-                                                              inv.id,
-                                                          ),
-                                                        );
-                                                      } else {
-                                                        form.setValue(
-                                                          `items.${index}.lots`,
-                                                          [
-                                                            ...lots,
-                                                            {
-                                                              selectedInventoryId:
-                                                                inv.id,
-                                                              quantity: 1,
-                                                            },
-                                                          ],
-                                                        );
-                                                      }
-                                                    }}
-                                                  >
-                                                    <Checkbox
-                                                      checked={isSelected}
-                                                      className="mr-2"
-                                                    />
-                                                    <div className="flex-1 flex items-center justify-between">
-                                                      <span>
-                                                        {
-                                                          inv.product.batch
-                                                            ?.lot_number
-                                                        }
-                                                      </span>
-                                                      <Badge
-                                                        variant={
-                                                          inv.status ===
-                                                            "active" &&
-                                                          inv.net_content > 0
-                                                            ? "primary"
-                                                            : "destructive"
-                                                        }
-                                                        className="ml-2"
-                                                      >
-                                                        {inv.net_content}{" "}
-                                                        {inv.product
-                                                          .product_knowledge
-                                                          .base_unit.display ||
-                                                          t("units")}
-                                                      </Badge>
                                                     </div>
-                                                  </div>
-                                                );
-                                              })
-                                            ) : (
-                                              <div className="p-4 text-center text-gray-500">
-                                                {t("no_lots_found")}
-                                              </div>
-                                            )}
-                                          </div>
-                                        </PopoverContent>
-                                      </Popover>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell className="space-y-2">
-                                    {form
-                                      .watch(`items.${index}.lots`)
-                                      .filter((lot) => lot.selectedInventoryId)
-                                      .map((lot) => {
-                                        const actualLotIndex = form
-                                          .watch(`items.${index}.lots`)
-                                          .findIndex(
-                                            (l) =>
-                                              l.selectedInventoryId ===
-                                              lot.selectedInventoryId,
-                                          );
-
-                                        return (
-                                          <div
-                                            key={lot.selectedInventoryId}
-                                            className="flex items-center gap-2"
-                                          >
-                                            <FormField
-                                              control={form.control}
-                                              name={`items.${index}.lots.${actualLotIndex}.quantity`}
-                                              render={({
-                                                field: formField,
-                                              }) => (
-                                                <FormItem>
-                                                  <FormControl>
-                                                    <Input
-                                                      type="number"
-                                                      min={0}
-                                                      {...formField}
-                                                      onChange={(e) => {
-                                                        formField.onChange(
-                                                          parseInt(
-                                                            e.target.value,
-                                                          ) || 0,
-                                                        );
-                                                      }}
-                                                      className="border-gray-300 border rounded-md w-24"
-                                                      placeholder="0"
-                                                    />
-                                                  </FormControl>
-                                                  <FormMessage />
-                                                </FormItem>
+                                                  );
+                                                })
+                                              ) : (
+                                                <div className="p-4 text-center text-gray-500">
+                                                  {t("no_lots_found")}
+                                                </div>
                                               )}
-                                            />
-                                          </div>
-                                        );
-                                      })}
-                                    {form
-                                      .watch(`items.${index}.lots`)
-                                      .filter((lot) => lot.selectedInventoryId)
-                                      .length === 0 && (
-                                      <div className="text-sm text-gray-500 py-2">
-                                        {t("select_lots_first")}
+                                            </div>
+                                          </PopoverContent>
+                                        </Popover>
                                       </div>
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    {form
-                                      .watch(`items.${index}.lots`)
-                                      .filter((lot) => lot.selectedInventoryId)
-                                      .map((lot) => {
-                                        const selectedInventory =
-                                          productKnowledgeInventoriesMap[
-                                            productKnowledge.id
-                                          ]?.find(
-                                            (inv) =>
-                                              inv.id ===
-                                              lot.selectedInventoryId,
-                                          );
+                                    </TableCell>
+                                    <TableCell className="space-y-2">
+                                      {form
+                                        .watch(`items.${index}.lots`)
+                                        .filter(
+                                          (lot) => lot.selectedInventoryId,
+                                        )
+                                        .map((lot) => {
+                                          const actualLotIndex = form
+                                            .watch(`items.${index}.lots`)
+                                            .findIndex(
+                                              (l) =>
+                                                l.selectedInventoryId ===
+                                                lot.selectedInventoryId,
+                                            );
 
-                                        return (
-                                          <div
-                                            key={lot.selectedInventoryId}
-                                            className="py-2.5 text-gray-950 font-normal text-base"
-                                          >
-                                            {selectedInventory?.product.charge_item_definition?.price_components
-                                              .filter(
-                                                (c) =>
-                                                  c.monetary_component_type ===
-                                                  MonetaryComponentType.base,
-                                              )
-                                              .map(
-                                                (c) =>
-                                                  `${c.code?.display || t("inr")} ${c.amount} `,
-                                              )
-                                              .join(" ") || "-"}
-                                          </div>
-                                        );
-                                      })}
-                                    {form
-                                      .watch(`items.${index}.lots`)
-                                      .filter((lot) => lot.selectedInventoryId)
-                                      .length === 0 && (
-                                      <div className="text-sm text-gray-500 py-2">
-                                        -
-                                      </div>
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    {form
-                                      .watch(`items.${index}.lots`)
-                                      .filter((lot) => lot.selectedInventoryId)
-                                      .map((lot) => {
-                                        const selectedInventory =
-                                          productKnowledgeInventoriesMap[
-                                            productKnowledge.id
-                                          ]?.find(
-                                            (inv) =>
-                                              inv.id ===
-                                              lot.selectedInventoryId,
+                                          return (
+                                            <div
+                                              key={lot.selectedInventoryId}
+                                              className="flex items-center gap-2"
+                                            >
+                                              <FormField
+                                                control={form.control}
+                                                name={`items.${index}.lots.${actualLotIndex}.quantity`}
+                                                render={({
+                                                  field: formField,
+                                                }) => (
+                                                  <FormItem>
+                                                    <FormControl>
+                                                      <Input
+                                                        type="number"
+                                                        min={0}
+                                                        {...formField}
+                                                        onChange={(e) => {
+                                                          formField.onChange(
+                                                            parseInt(
+                                                              e.target.value,
+                                                            ) || 0,
+                                                          );
+                                                        }}
+                                                        className="border-gray-300 border rounded-md w-24"
+                                                        placeholder="0"
+                                                      />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                  </FormItem>
+                                                )}
+                                              />
+                                            </div>
                                           );
+                                        })}
+                                      {form
+                                        .watch(`items.${index}.lots`)
+                                        .filter(
+                                          (lot) => lot.selectedInventoryId,
+                                        ).length === 0 && (
+                                        <div className="text-sm text-gray-500 py-2">
+                                          {t("select_lots_first")}
+                                        </div>
+                                      )}
+                                    </TableCell>
+                                    <TableCell>
+                                      {form
+                                        .watch(`items.${index}.lots`)
+                                        .filter(
+                                          (lot) => lot.selectedInventoryId,
+                                        )
+                                        .map((lot) => {
+                                          const selectedInventory =
+                                            productKnowledgeInventoriesMap[
+                                              productKnowledge.id
+                                            ]?.find(
+                                              (inv) =>
+                                                inv.id ===
+                                                lot.selectedInventoryId,
+                                            );
 
-                                        return (
-                                          <div
-                                            key={lot.selectedInventoryId}
-                                            className="py-2.5 text-gray-950 font-normal text-base"
-                                          >
-                                            {selectedInventory?.product
-                                              .expiration_date
-                                              ? formatDate(
-                                                  selectedInventory?.product
-                                                    .expiration_date,
-                                                  "MM/yyyy",
+                                          return (
+                                            <div
+                                              key={lot.selectedInventoryId}
+                                              className="py-2.5 text-gray-950 font-normal text-base"
+                                            >
+                                              {selectedInventory?.product.charge_item_definition?.price_components
+                                                .filter(
+                                                  (c) =>
+                                                    c.monetary_component_type ===
+                                                    MonetaryComponentType.base,
                                                 )
-                                              : "-"}
-                                          </div>
-                                        );
-                                      })}
-                                    {form
-                                      .watch(`items.${index}.lots`)
-                                      .filter((lot) => lot.selectedInventoryId)
-                                      .length === 0 && (
-                                      <div className="text-sm text-gray-500 py-2">
-                                        -
-                                      </div>
-                                    )}
-                                  </TableCell>
-                                </>
-                              )}
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
+                                                .map(
+                                                  (c) =>
+                                                    `${c.code?.display || t("inr")} ${c.amount} `,
+                                                )
+                                                .join(" ") || "-"}
+                                            </div>
+                                          );
+                                        })}
+                                      {form
+                                        .watch(`items.${index}.lots`)
+                                        .filter(
+                                          (lot) => lot.selectedInventoryId,
+                                        ).length === 0 && (
+                                        <div className="text-sm text-gray-500 py-2">
+                                          -
+                                        </div>
+                                      )}
+                                    </TableCell>
+                                    <TableCell>
+                                      {form
+                                        .watch(`items.${index}.lots`)
+                                        .filter(
+                                          (lot) => lot.selectedInventoryId,
+                                        )
+                                        .map((lot) => {
+                                          const selectedInventory =
+                                            productKnowledgeInventoriesMap[
+                                              productKnowledge.id
+                                            ]?.find(
+                                              (inv) =>
+                                                inv.id ===
+                                                lot.selectedInventoryId,
+                                            );
+
+                                          return (
+                                            <div
+                                              key={lot.selectedInventoryId}
+                                              className="py-2.5 text-gray-950 font-normal text-base"
+                                            >
+                                              {selectedInventory?.product
+                                                .expiration_date
+                                                ? formatDate(
+                                                    selectedInventory?.product
+                                                      .expiration_date,
+                                                    "MM/yyyy",
+                                                  )
+                                                : "-"}
+                                            </div>
+                                          );
+                                        })}
+                                      {form
+                                        .watch(`items.${index}.lots`)
+                                        .filter(
+                                          (lot) => lot.selectedInventoryId,
+                                        ).length === 0 && (
+                                        <div className="text-sm text-gray-500 py-2">
+                                          -
+                                        </div>
+                                      )}
+                                    </TableCell>
+                                  </>
+                                )}
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
 
                     <div className="my-4">
                       <ProductKnowledgeSelect
@@ -992,7 +1011,7 @@ export default function DispenseDrawer({
                 )}
               </form>
             </Form>
-          </ScrollArea>
+          </div>
         </div>
         {/* Footer */}
         {fields.length === 0 ? null : (
