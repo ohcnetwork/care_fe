@@ -11,7 +11,7 @@ import {
   Star,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -171,7 +171,7 @@ export function ResourceDefinitionCategoryPicker<T>({
         pathParams: { facilityId, ...listDefinitions.pathParams },
         queryParams: {
           category: currentParent || "",
-          ...(searchQuery ? { [searchParamName]: searchQuery } : {}), // Use dynamic search param name
+          ...(searchQuery ? { [searchParamName]: searchQuery } : {}),
           limit: 100,
           ...listDefinitions.queryParams,
         },
@@ -383,7 +383,7 @@ export function ResourceDefinitionCategoryPicker<T>({
     }
   };
 
-  const getFullPath = (definition: BaseCategoryPickerDefinition) => {
+  const getDisplayPath = (definition: BaseCategoryPickerDefinition) => {
     const pathParts = [];
     if (definition.category) {
       let current: ResourceCategoryParent | undefined = definition.category;
@@ -394,8 +394,19 @@ export function ResourceDefinitionCategoryPicker<T>({
         current = current.parent;
       }
     }
-    pathParts.push(definition.title);
-    return pathParts.join(" > ");
+
+    return (
+      <div className="flex items-center gap-1">
+        <Folder className="size-4 text-gray-500 flex-shrink-0" />
+        <span className="truncate">
+          {pathParts.length === 0
+            ? definition.title || t("select_category")
+            : pathParts.length > 2
+              ? `${pathParts[0]} > ... > ${pathParts[pathParts.length - 1]}`
+              : pathParts.join(" > ")}
+        </span>
+      </div>
+    );
   };
 
   const getDisplayValue = () => {
@@ -418,13 +429,6 @@ export function ResourceDefinitionCategoryPicker<T>({
     if (breadcrumbs.length === 0) return t("root");
     return breadcrumbs[breadcrumbs.length - 1]?.title || t("root");
   };
-
-  useEffect(() => {
-    if (searchQuery) {
-      setBreadcrumbs([]);
-      setCurrentParent(undefined);
-    }
-  }, [searchQuery]);
 
   const renderSearchInput = () => (
     <div className="px-3 border-b">
@@ -600,11 +604,6 @@ export function ResourceDefinitionCategoryPicker<T>({
           <div className="min-w-0 flex-1">
             <div className="font-medium text-sm break flex items-center justify-between gap-2">
               <span className="break-all">{definition.title}</span>
-              {definition.product_type && (
-                <Badge variant="secondary" className="text-xs flex-shrink-0">
-                  {t(definition.product_type)}
-                </Badge>
-              )}
             </div>
             {definition.description && (
               <div className="text-xs text-gray-500 truncate mt-0.5">
@@ -613,7 +612,7 @@ export function ResourceDefinitionCategoryPicker<T>({
             )}
             {searchQuery && definition.category && (
               <div className="text-xs text-gray-500 truncate mt-0.5">
-                {getFullPath(definition).split(` > ${definition.title}`)[0]}
+                {getDisplayPath(definition)}
               </div>
             )}
           </div>
@@ -671,18 +670,10 @@ export function ResourceDefinitionCategoryPicker<T>({
               <div className="min-w-0 flex-1">
                 <div className="font-medium text-sm break flex items-center justify-between gap-2">
                   <span className="break-all">{item.title}</span>
-                  {item.product_type && (
-                    <Badge
-                      variant="secondary"
-                      className="text-xs flex-shrink-0"
-                    >
-                      {t(item.product_type)}
-                    </Badge>
-                  )}
                 </div>
                 {item.category && (
                   <div className="text-xs text-gray-500 truncate mt-0.5">
-                    {getFullPath(item).split(` > ${item.title}`)[0]}
+                    {getDisplayPath(item)}
                   </div>
                 )}
               </div>
@@ -720,7 +711,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 </div>
                 {favorite.category && (
                   <div className="text-xs text-gray-500 truncate mt-0.5">
-                    {getFullPath(favorite).split(` > ${favorite.title}`)[0]}
+                    {getDisplayPath(favorite)}
                   </div>
                 )}
               </div>
@@ -927,7 +918,7 @@ export function ResourceDefinitionCategoryPicker<T>({
               <div
                 className={cn(
                   "flex flex-col min-w-0",
-                  enableFavorites ? "flex-1" : "w-full",
+                  enableFavorites ? "flex-1 min-w-72" : "w-full",
                 )}
               >
                 {/* Header with current location */}
@@ -938,11 +929,6 @@ export function ResourceDefinitionCategoryPicker<T>({
                       <span className="text-sm font-medium text-gray-600">
                         {getCurrentLevelTitle()}
                       </span>
-                      {breadcrumbs.length > 0 && (
-                        <Badge variant="secondary" className="text-xs truncate">
-                          {t("level")} {breadcrumbs.length + 1}
-                        </Badge>
-                      )}
                     </div>
                     {value && (
                       <Button
@@ -999,22 +985,10 @@ export function ResourceDefinitionCategoryPicker<T>({
                                     <span className="break-all">
                                       {item.title}
                                     </span>
-                                    {item.product_type && (
-                                      <Badge
-                                        variant="secondary"
-                                        className="text-xs flex-shrink-0"
-                                      >
-                                        {t(item.product_type)}
-                                      </Badge>
-                                    )}
                                   </div>
                                   {item.category && (
                                     <div className="text-xs text-gray-500 truncate mt-0.5">
-                                      {
-                                        getFullPath(item).split(
-                                          ` > ${item.title}`,
-                                        )[0]
-                                      }
+                                      {getDisplayPath(item)}
                                     </div>
                                   )}
                                 </div>
@@ -1046,11 +1020,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                                 </div>
                                 {favorite.category && (
                                   <div className="text-xs text-gray-500 truncate mt-0.5">
-                                    {
-                                      getFullPath(favorite).split(
-                                        ` > ${favorite.title}`,
-                                      )[0]
-                                    }
+                                    {getDisplayPath(favorite)}
                                   </div>
                                 )}
                               </div>
@@ -1087,8 +1057,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                     className="flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <Folder className="size-4 text-gray-500 flex-shrink-0" />
-                      <span className="truncate">{getFullPath(def)}</span>
+                      {getDisplayPath(def)}
                     </div>
                     <Button
                       variant="ghost"
