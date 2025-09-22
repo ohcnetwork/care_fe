@@ -1,14 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import { Avatar } from "@/components/Common/Avatar";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
@@ -21,16 +16,16 @@ import { getPermissions } from "@/common/Permissions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import patientApi from "@/types/emr/patient/patientApi";
+
 import {
-  TagConfig,
-  getTagHierarchyDisplay,
-} from "@/types/emr/tagConfig/tagConfig";
-
+  PatientDeceasedInfo,
+  PatientHeader,
+} from "@/components/Patient/PatientHeader";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
-
 export const PatientHome = (props: {
   facilityId?: string;
   id: string;
@@ -40,7 +35,7 @@ export const PatientHome = (props: {
 
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-
+  useFacilityShortcuts();
   const { data: patientData, isLoading } = useQuery({
     queryKey: ["patient", id],
     queryFn: query(patientApi.getPatient, {
@@ -56,7 +51,7 @@ export const PatientHome = (props: {
     hasPermission,
   );
 
-  const { canCreateAppointment } = getPermissions(
+  const { canWriteAppointment } = getPermissions(
     hasPermission,
     patientData?.permissions ?? [],
   );
@@ -73,78 +68,32 @@ export const PatientHome = (props: {
     return <div>{t("patient_not_found")}</div>;
   }
 
-  const tags = [...patientData.instance_tags, ...patientData.facility_tags];
-
   return (
     <Page
       title={t("patient_details")}
       options={
         <>
-          {facilityId && canCreateAppointment && (
-            <Button asChild variant="primary">
-              <Link
-                href={`/facility/${facilityId}/patient/${id}/book-appointment`}
-              >
-                {t("schedule_appointment")}
-              </Link>
-            </Button>
+          {facilityId && canWriteAppointment && (
+            <BookAppointmentSheet
+              patientId={id}
+              facilityId={facilityId}
+              trigger={
+                <Button variant="primary">{t("schedule_appointment")}</Button>
+              }
+            />
           )}
         </>
       }
     >
       <div className="mt-3 overflow-y-auto" data-testid="patient-dashboard">
-        <div className="px-3 md:px-0">
-          <div className="rounded-md bg-white p-3 shadow-xs">
-            <div>
-              <div className="flex flex-col justify-between gap-4 gap-y-2 md:flex-row">
-                <div className="flex flex-col gap-4 md:flex-row">
-                  <div className="flex flex-row gap-x-4 items-center">
-                    <div className="size-10 shrink-0 md:size-14">
-                      <Avatar
-                        className="size-10 font-semibold text-secondary-800 md:size-auto"
-                        name={patientData.name}
-                      />
-                    </div>
-
-                    <div className="space-y-1 md:mr-8">
-                      <div className="flex flex-col md:flex-row gap-x-4">
-                        <h1
-                          id="patient-name"
-                          className="text-base md:text-xl font-semibold capitalize text-gray-950 mb-2 leading-tight"
-                        >
-                          {patientData.name}
-                        </h1>
-                        {patientData.deceased_datetime && (
-                          <Badge
-                            variant="destructive"
-                            className="border-2 border-red-700 bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900"
-                          >
-                            <h3 className="text-xs font-normal sm:text-sm sm:font-medium">
-                              {t("time_of_death")}
-                              {": "}
-                              {dayjs(patientData.deceased_datetime).format(
-                                "DD MMM YYYY, hh:mm A",
-                              )}
-                            </h3>
-                          </Badge>
-                        )}
-                      </div>
-
-                      <h3 className="text-sm font-medium text-gray-600 capitalize whitespace-nowrap">
-                        {formatPatientAge(patientData, true)},{"  "}
-                        {t(`GENDER__${patientData.gender}`)}, {"  "}
-                        {patientData.blood_group?.replace("_", " ")}
-                      </h3>
-
-                      <PatientTags tags={tags} className="md:hidden" />
-                    </div>
-
-                    <PatientTags tags={tags} className="hidden md:flex" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="flex flex-col gap-2">
+          <PatientHeader
+            patient={patientData}
+            className="bg-white shadow-sm border-none rounded-sm"
+            facilityId={facilityId}
+            isPatientPage={true}
+          />
+          <PatientDeceasedInfo patient={patientData} />
         </div>
 
         <div
@@ -194,7 +143,22 @@ export const PatientHome = (props: {
                   <div className="font-semibold text-secondary-900">
                     {t("actions")}
                   </div>
+                  {/* Add link to patient home page */}
+
                   <div className="mt-2 h-full space-y-2">
+                    <Button asChild variant="outline" className="w-full">
+                      <Link
+                        href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                          {
+                            phone_number: patientData.phone_number,
+                            year_of_birth: patientData.year_of_birth.toString(),
+                            partial_id: patientData.id.slice(0, 5),
+                          },
+                        ).toString()}`}
+                      >
+                        {t("patient_home")}
+                      </Link>
+                    </Button>
                     <div className="space-y-3 text-left text-lg font-semibold text-secondary-900">
                       <div className="space-y-2">
                         <PLUGIN_Component
@@ -255,39 +219,5 @@ export const PatientHome = (props: {
         </div>
       </div>
     </Page>
-  );
-};
-
-const PatientTags = ({
-  tags,
-  className,
-}: {
-  tags: TagConfig[];
-  className: string;
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <div className={cn("flex flex-col gap-0.5 items-start", className)}>
-      <span className="text-xs text-gray-600 w-32 md:w-auto">
-        {t("tags")}:{" "}
-      </span>
-      {tags.length ? (
-        <div className="flex flex-wrap gap-1">
-          {tags.map((tag) => (
-            <Badge
-              key={tag.id}
-              variant="secondary"
-              size="sm"
-              className="text-xs"
-            >
-              {getTagHierarchyDisplay(tag)}
-            </Badge>
-          ))}
-        </div>
-      ) : (
-        <span className="text-sm font-semibold">--</span>
-      )}
-    </div>
   );
 };

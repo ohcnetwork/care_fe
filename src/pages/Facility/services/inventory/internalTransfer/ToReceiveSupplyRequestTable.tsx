@@ -259,7 +259,7 @@ export default function ToReceiveSupplyRequestTable({
                         {request.quantity}
                       </span>
                       <span className="text-gray-600 capitalize">
-                        {request.item.definitional?.dosage_form?.display}
+                        {request.item.base_unit.display}
                       </span>
                     </div>
                   </TableCell>

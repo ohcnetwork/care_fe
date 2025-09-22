@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Users } from "lucide-react";
+import { Bed, Calendar, Users } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -19,6 +19,7 @@ import { getPermissions } from "@/common/Permissions";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import facilityApi from "@/types/facility/facilityApi";
+import careConfig from "@careConfig";
 
 interface FacilityOverviewProps {
   facilityId: string;
@@ -50,10 +51,17 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       visible: canViewSchedule,
     },
     {
+      title: t("bed_availability_dashboard"),
+      description: t("view_real_time_bed_status"),
+      icon: Bed,
+      href: `/facility/${facilityId}/bed-availability`,
+      visible: true, // Available to all facility users
+    },
+    {
       title: t("encounters"),
       description: t("manage_facility_users"),
       icon: Users,
-      href: `/facility/${facilityId}/encounters`,
+      href: `/facility/${facilityId}/encounters/patients/${careConfig.defaultEncounterType || "all"}`,
       visible: canListEncounters,
     },
   ];
