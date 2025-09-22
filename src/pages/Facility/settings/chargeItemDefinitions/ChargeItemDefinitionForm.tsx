@@ -297,7 +297,15 @@ export function ChargeItemDefinitionForm({
     status: z.nativeEnum(ChargeItemDefinitionStatus),
     description: z.string().optional(),
     purpose: z.string().optional(),
-    derived_from_uri: z.string().url().optional(),
+    derived_from_uri: z
+      .string()
+      .optional()
+      .refine(
+        (val) => {
+          return !val || /^https?:\/\/.+/.test(val);
+        },
+        { message: "Please enter a valid URL" },
+      ),
     category: z.string(),
     price_components: z.array(priceComponentSchema).refine(
       (components) => {
@@ -329,9 +337,9 @@ export function ChargeItemDefinitionForm({
       title: initialData?.title || "",
       slug_value: initialData?.slug_config.slug_value || "",
       status: initialData?.status || ChargeItemDefinitionStatus.active,
-      description: initialData?.description,
-      purpose: initialData?.purpose,
-      derived_from_uri: initialData?.derived_from_uri,
+      description: initialData?.description || "",
+      purpose: initialData?.purpose || "",
+      derived_from_uri: initialData?.derived_from_uri || undefined,
       category: isUpdate ? initialData?.category.slug : categorySlug,
       price_components: initialData?.price_components.map((component) => ({
         ...mapPriceComponent(component),

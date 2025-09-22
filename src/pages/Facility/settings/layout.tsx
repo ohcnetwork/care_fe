@@ -223,7 +223,6 @@ const getRoutes = (facilityId: string) => ({
     <ProductKnowledgeForm facilityId={facilityId} slug={slug} />
   ),
   "/product": () => <ProductList facilityId={facilityId} />,
-  "/product/new": () => <ProductForm facilityId={facilityId} />,
   "/product/:id": ({ id }: { id: string }) => (
     <ProductView facilityId={facilityId} productId={id} />
   ),
