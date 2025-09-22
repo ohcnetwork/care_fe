@@ -692,7 +692,7 @@ export default function DispenseDrawer({
                                                           key={
                                                             lot.selectedInventoryId
                                                           }
-                                                          className="flex items-center justify-between w-full bg-gray-50 px-px py-px border-gray-200 border-1 rounded-sm text-gray-950"
+                                                          className="flex items-center justify-between w-full bg-gray-50 px-px py-px border-gray-200 border-1 rounded-sm text-gray-950 gap-1"
                                                         >
                                                           <span className="font-medium text-sm ml-1">
                                                             {
@@ -722,6 +722,33 @@ export default function DispenseDrawer({
                                                               .display ||
                                                               t("units")}
                                                           </Badge>
+                                                          {selectedInventory
+                                                            ?.product
+                                                            .expiration_date && (
+                                                            <Badge
+                                                              variant={
+                                                                selectedInventory.status ===
+                                                                  "active" &&
+                                                                new Date(
+                                                                  selectedInventory.product.expiration_date,
+                                                                ) >= new Date()
+                                                                  ? "primary"
+                                                                  : "destructive"
+                                                              }
+                                                            >
+                                                              {t("expiry")}:{" "}
+                                                              {selectedInventory
+                                                                .product
+                                                                .expiration_date
+                                                                ? formatDate(
+                                                                    selectedInventory
+                                                                      .product
+                                                                      .expiration_date,
+                                                                    "dd/MM/yyyy",
+                                                                  )
+                                                                : "-"}
+                                                            </Badge>
+                                                          )}
                                                         </div>
                                                       );
                                                     },
@@ -788,7 +815,7 @@ export default function DispenseDrawer({
                                                         checked={isSelected}
                                                         className="mr-2"
                                                       />
-                                                      <div className="flex-1 flex items-center justify-between">
+                                                      <div className="flex-1 flex items-center justify-between gap-1">
                                                         <span>
                                                           {
                                                             inv.product.batch
@@ -812,6 +839,30 @@ export default function DispenseDrawer({
                                                             .display ||
                                                             t("units")}
                                                         </Badge>
+                                                        {inv.product
+                                                          ?.expiration_date && (
+                                                          <Badge
+                                                            variant={
+                                                              inv.status ===
+                                                                "active" &&
+                                                              new Date(
+                                                                inv.product.expiration_date,
+                                                              ) >= new Date()
+                                                                ? "primary"
+                                                                : "destructive"
+                                                            }
+                                                          >
+                                                            {t("expiry")}:{" "}
+                                                            {inv.product
+                                                              .expiration_date
+                                                              ? formatDate(
+                                                                  inv.product
+                                                                    .expiration_date,
+                                                                  "dd/MM/yyyy",
+                                                                )
+                                                              : "-"}
+                                                          </Badge>
+                                                        )}
                                                       </div>
                                                     </div>
                                                   );
