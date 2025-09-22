@@ -32,7 +32,7 @@ interface ChargeItemsSectionProps {
   encounterId?: string;
   disableCreateChargeItems?: boolean;
   locationId?: string;
-  disableEdit?: boolean;
+  viewOnly?: boolean;
 }
 
 export function ChargeItemsSection({
@@ -44,7 +44,7 @@ export function ChargeItemsSection({
   encounterId,
   disableCreateChargeItems = false,
   locationId,
-  disableEdit = false,
+  viewOnly = false,
 }: ChargeItemsSectionProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -87,6 +87,10 @@ export function ChargeItemsSection({
     enabled: Boolean(patientId),
   });
 
+  if (viewOnly && chargeItems?.results.length === 0) {
+    return null;
+  }
+
   return (
     <>
       <Card className="bg-white shadow-sm rounded-md p-1">
@@ -94,7 +98,7 @@ export function ChargeItemsSection({
           <div className="flex items-center justify-between">
             <CardTitle>{t("charge_items")}</CardTitle>
             <div className="flex items-center gap-2">
-              {!disableEdit &&
+              {!viewOnly &&
                 (chargeItems?.results ?? []).filter(
                   (chargeItem) =>
                     chargeItem.status === ChargeItemStatus.billable,
@@ -117,7 +121,7 @@ export function ChargeItemsSection({
                     {t("create_invoice")}
                   </Button>
                 )}
-              {!disableCreateChargeItems && !disableEdit && (
+              {!disableCreateChargeItems && !viewOnly && (
                 <Button
                   variant="outline"
                   size="sm"

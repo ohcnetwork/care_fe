@@ -532,7 +532,7 @@ const AppointmentDetailsContent = ({
         serviceResourceType={ChargeItemServiceResource.appointment}
         sourceUrl={`/facility/${facility.id}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
         encounterId={appointment.associated_encounter?.id}
-        disableCreateChargeItems={true}
+        viewOnly={true}
       />
       <div className=" gap-4 grid grid-cols-1 md:grid-cols-2">
         <Card className="bg-white shadow-sm rounded-md p-1">
