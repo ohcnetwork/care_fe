@@ -16,6 +16,7 @@ import { addDays, differenceInYears, format, isBefore } from "date-fns";
 import {
   BanIcon,
   CheckCircle2Icon,
+  ChevronLeft,
   EyeIcon,
   Loader2,
   PlusSquare,
@@ -107,6 +108,7 @@ import {
 } from "@/Utils/utils";
 
 import { Avatar } from "@/components/Common/Avatar";
+import BackButton from "@/components/Common/BackButton";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import {
@@ -199,8 +201,18 @@ export default function AppointmentDetail(props: Props) {
   );
 
   return (
-    <Page title={t("appointment_details")}>
+    <Page title={t("appointment_details")} hideTitleOnPage>
       <div className="container mx-auto max-w-7xl mt-4">
+        <div className="flex items-center gap-2 space-y-4">
+          <BackButton
+            to={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments`}
+          >
+            <ChevronLeft />
+          </BackButton>
+          <h4 className="font-semibold text-gray-800 mb-2">
+            {t("appointment_details")}
+          </h4>
+        </div>
         {showSuccess && (
           <div className="mb-4 flex flex-col gap-2">
             <Alert className="bg-green-50 border-green-400 items-center">
