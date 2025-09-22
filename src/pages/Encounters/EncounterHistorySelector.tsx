@@ -325,6 +325,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             onClearFilter={handleClearFilter}
             placeholder={t("filter")}
             triggerButtonClassName="self-start"
+            facilityId={facilityId}
           />
         </div>
 

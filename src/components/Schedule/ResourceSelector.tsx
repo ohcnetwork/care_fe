@@ -56,6 +56,7 @@ export const ResourceSelector = ({
             });
           }}
           value={selectedResource.resource}
+          mode="kind"
         />
       );
 

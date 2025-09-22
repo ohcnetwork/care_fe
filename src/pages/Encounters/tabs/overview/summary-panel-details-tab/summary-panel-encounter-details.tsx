@@ -11,7 +11,10 @@ import { Separator } from "@/components/ui/separator";
 
 import query from "@/Utils/request/query";
 import { Avatar } from "@/components/Common/Avatar";
-import { StatusBadge } from "@/pages/Encounters/EncounterProperties";
+import {
+  EncounterClassBadge,
+  StatusBadge,
+} from "@/pages/Encounters/EncounterProperties";
 import { OverviewSidebarSheet } from "@/pages/Encounters/tabs/overview/overview-sidebar-sheet";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
@@ -19,11 +22,7 @@ import {
   AccountStatus,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
-import {
-  ENCOUNTER_CLASSES_COLORS,
-  ENCOUNTER_CLASS_ICONS,
-  ENCOUNTER_PRIORITY_COLORS,
-} from "@/types/emr/encounter/encounter";
+import { ENCOUNTER_PRIORITY_COLORS } from "@/types/emr/encounter/encounter";
 
 export const SummaryPanelEncounterDetails = () => {
   const { t } = useTranslation();
@@ -48,7 +47,6 @@ export const SummaryPanelEncounterDetails = () => {
   });
 
   if (!encounter) return null;
-  const EncounterClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
   return (
     <div className="flex flex-col gap-2">
       <div className="xl:hidden flex flex-col sm:flex-row p-3 bg-white -mt-1 rounded-lg gap-4 shadow">
@@ -69,16 +67,7 @@ export const SummaryPanelEncounterDetails = () => {
                   {t("encounter_class")}:
                 </span>
                 <div>
-                  <Badge
-                    variant={
-                      ENCOUNTER_CLASSES_COLORS[encounter.encounter_class]
-                    }
-                  >
-                    <EncounterClassIcon className="size-3" />
-                    <span className="whitespace-nowrap">
-                      {t(`encounter_class__${encounter.encounter_class}`)}
-                    </span>
-                  </Badge>
+                  <EncounterClassBadge encounter={encounter} />
                 </div>
               </div>
               <div>
