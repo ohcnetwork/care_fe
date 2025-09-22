@@ -51,16 +51,8 @@ interface AppointmentQuestionProps {
 }
 
 const APPOINTMENT_FIELDS: FieldDefinitions = {
-  REASON: {
-    key: "note",
-    required: true,
-  },
   SLOT: {
     key: "slot_id",
-    required: true,
-  },
-  TAGS: {
-    key: "tags",
     required: true,
   },
 } as const;
@@ -71,16 +63,8 @@ export function validateAppointmentQuestion(
   required: boolean,
 ): QuestionValidationError[] {
   return validateFields(value, questionId, {
-    REASON: {
-      ...APPOINTMENT_FIELDS.REASON,
-      required: required || value?.slot_id !== undefined,
-    },
     SLOT: {
       ...APPOINTMENT_FIELDS.SLOT,
-      required: required || value?.note !== undefined,
-    },
-    TAGS: {
-      ...APPOINTMENT_FIELDS.TAGS,
       required: required,
     },
   });
@@ -108,7 +92,7 @@ export function AppointmentQuestion({
   const values =
     (questionnaireResponse.values?.[0]?.value as CreateAppointmentQuestion[]) ||
     [];
-  const value = values[0] ?? { tags: [] };
+  const value = values[0] ?? { tags: [], note: "" };
 
   const handleUpdate = (updates: Partial<CreateAppointmentQuestion>) => {
     const updatedValue = { ...value, ...updates };

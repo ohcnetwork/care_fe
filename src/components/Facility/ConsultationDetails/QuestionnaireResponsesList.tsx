@@ -24,9 +24,6 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 import PaginationComponent from "@/components/Common/Pagination";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
-
-import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName, properCase } from "@/Utils/utils";
@@ -42,6 +39,8 @@ interface Props {
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
   canAccess?: boolean;
+  questionnaireId?: string;
+  renderItem?: (response: QuestionnaireResponse) => React.ReactNode;
 }
 
 export function formatValue(
@@ -157,14 +156,14 @@ function QuestionGroup({
     if (!hasAnyValue) return null;
 
     return (
-      <TableRow key={question.id}>
-        <TableCell className="py-1 pl-0 align-top">
+      <TableRow key={question.id} className="flex flex-col md:table-row">
+        <TableCell className="py-1 pl-0 align-top md:w-1/2">
           <div className="text-sm text-gray-600 break-words whitespace-normal">
             {question.text}
           </div>
         </TableCell>
         <TableCell
-          className="py-1 pr-0 align-top"
+          className="py-1 pr-0 align-top md:w-1/2"
           colSpan={response.note ? 1 : 2}
         >
           <div className="text-sm font-medium break-words whitespace-pre-wrap">
@@ -185,7 +184,7 @@ function QuestionGroup({
           </div>
         </TableCell>
         {response.note && (
-          <TableCell className="py-1 pr-0 align-top">
+          <TableCell className="py-1 pr-0 align-top text-right md:table-cell">
             <div className="flex justify-end">
               <Popover>
                 <PopoverTrigger asChild>
@@ -197,7 +196,7 @@ function QuestionGroup({
                     {t("see_note")}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-52 p-4">
+                <PopoverContent className="max-w-[90vw] p-4">
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">
                     {response.note}
                   </p>
@@ -325,14 +324,17 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                     if (!hasAnyValue) return null;
 
                     return (
-                      <TableRow key={question.id}>
-                        <TableCell className="py-1 pl-0 align-top">
+                      <TableRow
+                        key={question.id}
+                        className="flex flex-col md:table-row"
+                      >
+                        <TableCell className="py-1 pl-0 align-top md:w-1/2">
                           <div className="text-sm text-gray-600 break-words whitespace-normal">
                             {question.text}
                           </div>
                         </TableCell>
                         <TableCell
-                          className="py-1 pr-0 align-top"
+                          className="py-1 pr-0 align-top md:w-1/2"
                           colSpan={response.note ? 1 : 2}
                         >
                           <div className="text-sm font-medium break-words whitespace-pre-wrap">
@@ -356,7 +358,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                           </div>
                         </TableCell>
                         {response.note && (
-                          <TableCell className="py-1 pr-0 align-top text-right">
+                          <TableCell className="py-1 pr-0 align-top text-right md:table-cell">
                             <div className="flex justify-end">
                               <Popover>
                                 <PopoverTrigger asChild>
@@ -368,7 +370,7 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                                     {t("see_note")}
                                   </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-52 p-4">
+                                <PopoverContent className="max-w-[90vw] p-4">
                                   <p className="text-sm text-gray-700 whitespace-pre-wrap">
                                     {response.note}
                                   </p>
@@ -429,16 +431,16 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
         )}
       </div>
 
-      <div className="flex items-center justify-between border-t border-gray-200 mt-8 pt-4 text-sm text-gray-500">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-t border-gray-200 mt-8 pt-4 text-sm text-gray-500 gap-2">
         <div>
-          <span className="text-gray-600">filed by</span>{" "}
+          <span className="text-gray-600">{t("filed_by")}</span>{" "}
           <span className="font-medium text-gray-700">
             {formatName(item.created_by)}
             {item.created_by?.user_type && ` (${item.created_by.user_type})`}
           </span>
         </div>
         <div>
-          <span className="text-gray-600">at</span>{" "}
+          <span className="text-gray-600">{t("at")}</span>{" "}
           <span className="font-medium text-gray-700">
             {formatDateTime(item.created_date)}
           </span>
@@ -448,12 +450,13 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
   );
 }
 
-function ResponseCard({
+export function ResponseCard({
   item,
-  isPrintPreview,
+  onTitleClick,
 }: {
   item: QuestionnaireResponse;
   isPrintPreview?: boolean;
+  onTitleClick?: (questionnaireId: string) => void;
 }) {
   const isStructured = !item.questionnaire;
   const structuredType = Object.keys(item.structured_responses || {})[0];
@@ -462,24 +465,28 @@ function ResponseCard({
       ? properCase(structuredType.replace(/_/g, " "))
       : item.questionnaire?.title || "";
 
-  return isPrintPreview ? (
-    <Card className="shadow-none rounded-xl border border-gray-200">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-medium">{title}</CardTitle>
+  return (
+    <Card className="shadow-none border rounded-lg">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle
+          className="text-lg font-medium cursor-pointer hover:bg-gray-100 rounded px-1 -mx-1 transition-colors duration-200 p-2 pr-5"
+          onClick={() => {
+            if (item.questionnaire?.id && onTitleClick) {
+              onTitleClick(item.questionnaire.id);
+            }
+          }}
+        >
+          {title}
+        </CardTitle>
+        <PrintButton item={item} />
       </CardHeader>
       <CardContent>
         <ResponseCardContent item={item} />
       </CardContent>
     </Card>
-  ) : (
-    <EncounterAccordionLayout
-      title={isStructured && structuredType ? structuredType : title}
-      actionButton={<PrintButton item={item} />}
-    >
-      <ResponseCardContent item={item} />
-    </EncounterAccordionLayout>
   );
 }
+const RESULTS_PER_PAGE_LIMIT = 100;
 
 export default function QuestionnaireResponsesList({
   encounter,
@@ -487,12 +494,19 @@ export default function QuestionnaireResponsesList({
   isPrintPreview = false,
   onlyUnstructured,
   canAccess = true,
+  questionnaireId,
+  renderItem,
 }: Props) {
   const { t } = useTranslation();
   const [qParams, setQueryParams] = useQueryParams<{ page?: number }>();
 
   const { data: questionnarieResponses, isLoading } = useQuery({
-    queryKey: ["questionnaireResponses", patientId, qParams],
+    queryKey: [
+      "questionnaireResponses",
+      patientId,
+      qParams.page,
+      questionnaireId,
+    ],
     queryFn: query.paginated(patientApi.getQuestionnaireResponses, {
       pathParams: { patientId },
       queryParams: {
@@ -503,6 +517,7 @@ export default function QuestionnaireResponsesList({
         encounter: encounter?.id,
         only_unstructured: onlyUnstructured,
         subject_type: encounter ? "encounter" : "patient",
+        ...(questionnaireId ? { questionnaire: questionnaireId } : {}),
       },
       maxPages: isPrintPreview ? undefined : 1,
       pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,
@@ -534,11 +549,15 @@ export default function QuestionnaireResponsesList({
                 {questionnarieResponses?.results?.map(
                   (item: QuestionnaireResponse) => (
                     <li key={item.id}>
-                      <ResponseCard
-                        key={item.id}
-                        item={item}
-                        isPrintPreview={isPrintPreview}
-                      />
+                      {renderItem ? (
+                        renderItem(item)
+                      ) : (
+                        <ResponseCard
+                          key={item.id}
+                          item={item}
+                          isPrintPreview={isPrintPreview}
+                        />
+                      )}
                     </li>
                   ),
                 )}
