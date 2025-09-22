@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -45,6 +45,7 @@ import {
   QuestionnaireDetail,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import { update } from "cypress/types/lodash";
 
 function EmptyState() {
   const { t } = useTranslation();
@@ -255,28 +256,17 @@ export function QuestionnaireList() {
 
         <div className="mt-8 mb-4">
           <div className="w-full overflow-x-auto pb-1">
-            <Tabs
-              defaultValue="active"
+            <FilterTabs
               value={qParams.status || "active"}
-              onValueChange={(value) => updateQuery({ status: value })}
-            >
-              <div className="min-w-full sm:min-w-[50%] md:min-w-[40%]">
-                <TabsList className="flex w-full">
-                  <TabsTrigger value="active" className="flex-1">
-                    <FileCheckIcon className="size-4" />
-                    {t("active")}
-                  </TabsTrigger>
-                  <TabsTrigger value="draft" className="flex-1">
-                    <NotepadTextDashedIcon className="size-4" />
-                    {t("draft")}
-                  </TabsTrigger>
-                  <TabsTrigger value="retired" className="flex-1">
-                    <ArchiveIcon className="size-4" />
-                    {t("retired")}
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-            </Tabs>
+              onValueChange={(value) => updateQuery({status: value})}
+              options={[{value: "active", label: t("active"), icon: <FileCheckIcon className="size-4" />}, 
+                {value: "draft", label: t("draft"), icon:<NotepadTextDashedIcon className="size-4" />}, 
+                {value: "retired", label: t("retired"), icon: <ArchiveIcon className="size-4" />
+               }]}
+              variant="background"
+              className="min-w-full sm:min-w-[50%] md:min-w-[40%]"
+              showAllOption={false}
+            />
           </div>
         </div>
 
