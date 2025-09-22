@@ -457,7 +457,6 @@ const PatientBasicsContent = ({
                   placeholder={t("enter_phone_number")}
                   onChange={(value) => {
                     field.onChange(value);
-                    form.trigger("phone_number");
                     if (
                       form.getValues(
                         "emergency_phone_number_same_as_phone_number",
