@@ -47,6 +47,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Form,
   FormControl,
@@ -71,7 +72,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
 import { AnimatedWrapper } from "@/components/Common/AnimatedWrapper";
@@ -948,22 +948,27 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           </Button>
         </div>
       </div>
-
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as "edit" | "preview")}
-      >
-        <TabsList className="mb-4">
-          <TabsTrigger value="edit">
-            <ViewIcon className="size-4" />
-            {t("edit_form")}
-          </TabsTrigger>
-          <TabsTrigger value="preview">
-            <SquarePenIcon className="size-4" />
-            {t("form_preview")}
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="edit">
+      <div className="mb-4">
+        <FilterTabs
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as "edit" | "preview")}
+          options={[
+            {
+              value: "edit",
+              label: t("edit_form"),
+              icon: <ViewIcon className="size-4" />,
+            },
+            {
+              value: "preview",
+              label: "form_preview",
+              icon: <SquarePenIcon className="size-4" />,
+            },
+          ]}
+          showAllOption={false}
+        />
+      </div>
+      {activeTab === "edit" && (
+        <div>
           <div className="flex flex-col md:flex-row gap-2">
             <Card className="hidden lg:block w-60 sticky top-4 self-start h-fit max-h-screen overflow-y-auto rounded-none border-none bg-transparent shadow-none space-y-3 mt-2">
               <CardHeader className="p-0">
@@ -1315,25 +1320,25 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             title={t("questionnaire")}
             className="mt-4"
           />
-        </TabsContent>
+        </div>
+      )}
 
-        <TabsContent value="preview">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("preview")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <QuestionnaireForm
-                questionnaireSlug={id}
-                patientId="preview"
-                subjectType={form.watch("subject_type")}
-                encounterId="preview"
-                facilityId="preview"
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {activeTab === "preview" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("preview")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <QuestionnaireForm
+              questionnaireSlug={id}
+              patientId="preview"
+              subjectType={form.watch("subject_type")}
+              encounterId="preview"
+              facilityId="preview"
+            />
+          </CardContent>
+        </Card>
+      )}
       <Dialog
         open={showImportDialog}
         onOpenChange={(open) => {
