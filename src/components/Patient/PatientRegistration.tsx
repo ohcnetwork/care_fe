@@ -577,10 +577,18 @@ const PatientBasicsContent = ({
                       <FormItem className="w-full">
                         <FormControl>
                           <Input
+                            {...field}
+                            type="number"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             placeholder={t("age")}
+                            min={1}
+                            max={120}
                             value={field.value ?? ""}
                             onChange={(e) => {
-                              field.onChange(Number(e.target.value) || null);
+                              field.onChange(
+                                e.target.value ? Number(e.target.value) : null,
+                              );
                             }}
                           />
                         </FormControl>
