@@ -250,7 +250,7 @@ function FinishedTokenOptions({
     updateToken({
       status: TokenStatus.IN_PROGRESS,
       note: token.note,
-      sub_queue: token.sub_queue?.id,
+      sub_queue: token.sub_queue?.id || null,
     });
   };
 

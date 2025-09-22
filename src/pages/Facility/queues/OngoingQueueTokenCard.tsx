@@ -165,7 +165,7 @@ export function OngoingQueueTokenCard({
                   updateToken({
                     status: TokenStatus.IN_PROGRESS,
                     note: token.note,
-                    sub_queue: token.sub_queue?.id,
+                    sub_queue: token.sub_queue?.id || null,
                   })
                 }
               >
@@ -180,7 +180,7 @@ export function OngoingQueueTokenCard({
                     updateToken({
                       status: TokenStatus.FULFILLED,
                       note: token.note,
-                      sub_queue: token.sub_queue?.id,
+                      sub_queue: token.sub_queue?.id || null,
                     })
                   }
                 >
@@ -192,7 +192,7 @@ export function OngoingQueueTokenCard({
                     updateToken({
                       status: TokenStatus.CREATED,
                       note: token.note,
-                      sub_queue: token.sub_queue?.id,
+                      sub_queue: token.sub_queue?.id || null,
                     })
                   }
                 >
@@ -204,7 +204,7 @@ export function OngoingQueueTokenCard({
                     updateToken({
                       status: TokenStatus.CREATED,
                       note: token.note,
-                      sub_queue: undefined,
+                      sub_queue: null,
                     })
                   }
                 >
