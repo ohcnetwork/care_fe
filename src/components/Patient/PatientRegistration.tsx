@@ -725,7 +725,9 @@ const AdditionalDetailsContent = ({
                   onCheckedChange={(value) => field.onChange(!value)}
                 />
               </FormControl>
-              <FormLabel>{t("permanent_address_is_different")}</FormLabel>
+              <FormLabel>
+                {t("permanent_address_is_different_from_current_address")}
+              </FormLabel>
             </FormItem>
           )}
         />
