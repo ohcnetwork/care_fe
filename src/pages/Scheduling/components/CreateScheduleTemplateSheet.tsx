@@ -113,7 +113,7 @@ export default function CreateScheduleTemplateSheet({
                 >,
                 slot_size_in_minutes: z
                   .union([
-                    z.number().min(1, t("number_min_error", { min: 0 })),
+                    z.number().min(1, t("number_min_error", { min: 1 })),
                     z.undefined(),
                   ])
                   .refine((val) => val !== undefined, {
@@ -121,7 +121,7 @@ export default function CreateScheduleTemplateSheet({
                   }),
                 tokens_per_slot: z
                   .union([
-                    z.number().min(1, t("number_min_error", { min: 0 })),
+                    z.number().min(1, t("number_min_error", { min: 1 })),
                     z.undefined(),
                   ])
                   .refine((val) => val !== undefined, {
@@ -130,7 +130,7 @@ export default function CreateScheduleTemplateSheet({
                 is_auto_fill: z.boolean().optional(),
                 num_of_slots: z
                   .union([
-                    z.number().min(1, t("number_min_error", { min: 0 })),
+                    z.number().min(1, t("number_min_error", { min: 1 })),
                     z.undefined(),
                   ])
                   .refine((val) => val !== undefined, {
@@ -627,7 +627,7 @@ export default function CreateScheduleTemplateSheet({
                                       type="number"
                                       inputMode="numeric"
                                       pattern="[0-9]*"
-                                      min={0}
+                                      min={1}
                                       placeholder="e.g. 10"
                                       {...field}
                                       value={field.value ?? ""}
@@ -663,7 +663,7 @@ export default function CreateScheduleTemplateSheet({
                                       type="number"
                                       inputMode="numeric"
                                       pattern="[0-9]*"
-                                      min={0}
+                                      min={1}
                                       placeholder="e.g. 1"
                                       {...field}
                                       value={field.value ?? ""}
