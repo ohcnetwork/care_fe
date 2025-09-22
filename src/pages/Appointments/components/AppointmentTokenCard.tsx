@@ -130,7 +130,10 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
           <div>
             <Separator />
             <div className="pt-3 mx-4 flex gap-2 justify-between">
-              <Button variant="outline">
+              <Button
+                variant="link"
+                className="underline font-semibold text-base capitalize text-gray-950"
+              >
                 <Link
                   href={`/facility/${facility.id}/queues/${appointment.token?.queue.id}/practitioner/${appointment.resource.id}`}
                 >
@@ -141,9 +144,10 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
                 data-shortcut-id="print-token"
                 variant="outline"
                 onClick={() => print()}
+                className="text-base text-gray-950 font-semibold"
               >
                 <PrinterIcon className="size-4 mr-2" />
-                {t("print")}
+                {t("print_token")}
                 <ShortcutBadge actionId="print-token" />
               </Button>
             </div>
