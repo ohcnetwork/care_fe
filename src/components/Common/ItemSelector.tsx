@@ -278,8 +278,8 @@ export function ItemSelector<T = any>({
   // Content used in both mobile and desktop views
   const commandContent = (
     <Command filter={onSearch ? () => 1 : undefined} className="rounded-t-3xl">
-      <div className="py-3 px-3 border-b border-gray-200 flex justify-between items-center">
-        {title && <h3 className="text-base font-semibold">{title}</h3>}
+      {title && <h3 className="text-base font-semibold px-3">{title}</h3>}
+      <div className="py-2 px-2 border-b border-gray-200 flex justify-between items-center">
         {showTabs && enableFavorites && (
           <Tabs
             value={activeTab}
