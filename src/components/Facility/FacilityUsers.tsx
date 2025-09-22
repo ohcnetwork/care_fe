@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
 import SearchInput from "@/components/Common/SearchInput";
@@ -102,21 +102,26 @@ export default function FacilityUsers(props: { facilityId: string }) {
           }
           className="w-full max-w-sm"
         />
-        <Tabs
+        <FilterTabs
           value={activeTab}
           onValueChange={(value) => setActiveTab(value as "card" | "list")}
-        >
-          <TabsList className="flex">
-            <TabsTrigger value="card" id="user-card-view">
-              <CareIcon icon="l-credit-card" className="text-lg" />
-              <span>{t("card")}</span>
-            </TabsTrigger>
-            <TabsTrigger value="list" id="user-list-view">
-              <CareIcon icon="l-list-ul" className="text-lg" />
-              <span>{t("list")}</span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+          options={[
+            {
+              value: "card",
+              label: "card",
+              icon: <CareIcon icon="l-credit-card" className="text-lg" />,
+            },
+            {
+              value: "list",
+              label: "list",
+              icon: <CareIcon icon="l-list-ul" className="text-lg" />,
+            },
+          ]}
+          className="flex"
+          variant="background"
+          showAllOption={false}
+          maxVisibleTabs={2}
+        />
       </div>
       <div className="overflow-x-auto overflow-y-hidden">{usersList}</div>
     </Page>
