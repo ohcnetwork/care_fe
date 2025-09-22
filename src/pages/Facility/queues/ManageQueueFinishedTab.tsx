@@ -29,6 +29,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import {
+  BringToFront,
   DoorOpenIcon,
   ExternalLink,
   MoreHorizontal,
@@ -270,6 +271,19 @@ function FinishedTokenOptions({
           >
             <RotateCcw className="size-4" />
             {t("move_back_to_in_service")}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() =>
+              updateToken({
+                status: TokenStatus.UNFULFILLED,
+                note: token.note,
+                sub_queue: null,
+              })
+            }
+            disabled={isUpdating}
+          >
+            <BringToFront className="size-4" />
+            {t("move_to_awaiting_recall")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

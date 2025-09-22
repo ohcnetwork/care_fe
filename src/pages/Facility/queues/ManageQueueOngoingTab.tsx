@@ -265,7 +265,7 @@ function InServiceColumnOptions({
         id: token.id,
         status: TokenStatus.FULFILLED,
         note: token.note,
-        sub_queue: undefined,
+        sub_queue: null,
       })),
     });
   };
