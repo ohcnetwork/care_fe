@@ -25,10 +25,12 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Page from "@/components/Common/Page";
 
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { renderTokenNumber, TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { formatPatientAge } from "@/Utils/utils";
 
@@ -115,7 +117,9 @@ export default function ManageToken({
   tokenId,
 }: ManageTokenProps) {
   const { t } = useTranslation();
-  const { facility } = useCurrentFacility();
+  const { facility, isFacilityLoading } = useCurrentFacility();
+
+  useFacilityShortcuts();
 
   const {
     data: token,
@@ -132,7 +136,7 @@ export default function ManageToken({
     }),
   });
 
-  if (isLoading) {
+  if (isLoading || isFacilityLoading) {
     return (
       <Page title={t("loading")} hideTitleOnPage={true}>
         <LoadingSkeleton />
@@ -240,6 +244,7 @@ export default function ManageToken({
           <div className="grid md:grid-cols-1 grid-cols-2 grid-row-1 gap-4 items-center justify-center">
             {token.patient && (
               <Button
+                data-shortcut-id="patient-home"
                 variant="outline"
                 className="h-24 flex flex-col items-center justify-center gap-2 relative"
                 asChild
@@ -253,22 +258,19 @@ export default function ManageToken({
                     },
                   ).toString()}`}
                 >
-                  <div className="absolute top-2 right-2 text-xs text-muted-foreground">
-                    H
-                  </div>
+                  <ShortcutBadge actionId="patient-home" />
                   <Clipboard className="size-6" />
                   <span className="text-sm">{t("patient_home")}</span>
                 </Link>
               </Button>
             )}
             <Button
+              data-shortcut-id="print-token"
               variant="outline"
               className="h-24 flex flex-col items-center justify-center gap-2 relative"
               onClick={() => print()}
             >
-              <div className="absolute top-2 right-2 text-xs text-muted-foreground">
-                P
-              </div>
+              <ShortcutBadge actionId="print-token" />
               <Printer className="size-6" />
               <span className="text-sm">{t("print_token")}</span>
             </Button>

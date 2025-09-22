@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 import { Appointments } from "@/components/Patient/PatientDetailsTab/Appointments";
 import { PatientRead } from "@/types/emr/patient/patient";
 import PatientHomeEncounters from "./PatientHomeEncounters";
@@ -30,48 +28,60 @@ export default function PatientHomeTabs({
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("encounters");
 
+  const tabs = [
+    { id: "encounters", label: t("encounters"), alwaysVisible: true },
+    {
+      id: "appointments",
+      label: t("appointments"),
+      visible: canWriteAppointment,
+    },
+    { id: "tokens", label: t("tokens"), visible: canCreateToken },
+  ].filter((tab) => tab.alwaysVisible || tab.visible);
+
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="encounters" className="flex items-center gap-2">
-          <span>{t("encounters")}</span>
-        </TabsTrigger>
-        {canWriteAppointment && (
-          <TabsTrigger value="appointments" className="flex items-center gap-2">
-            <span>{t("appointments")}</span>
-          </TabsTrigger>
-        )}
-        {canCreateToken && (
-          <TabsTrigger value="tokens" className="flex items-center gap-2">
-            <span>{t("tokens")}</span>
-          </TabsTrigger>
-        )}
-      </TabsList>
+    <div className="w-full">
+      {/* Custom Navigation Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="flex space-x-8">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === tab.id
+                  ? "border-primary-600 text-primary-600"
+                  : "border-transparent text-gray-700 hover:text-gray-500 hover:border-gray-300"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
 
-      <TabsContent value="encounters" className="mt-4">
-        <PatientHomeEncounters
-          patientId={patientId}
-          facilityId={facilityId}
-          facilityPermissions={facilityPermissions}
-          canListEncounters={canListEncounters}
-        />
-      </TabsContent>
+      {/* Tab Content */}
+      <div className="mt-6">
+        {activeTab === "encounters" && (
+          <PatientHomeEncounters
+            patientId={patientId}
+            facilityId={facilityId}
+            facilityPermissions={facilityPermissions}
+            canListEncounters={canListEncounters}
+          />
+        )}
 
-      {canWriteAppointment && (
-        <TabsContent value="appointments" className="mt-4">
+        {activeTab === "appointments" && canWriteAppointment && (
           <Appointments
             patientData={patientData}
             facilityId={facilityId}
             patientId={patientId}
           />
-        </TabsContent>
-      )}
+        )}
 
-      {canCreateToken && (
-        <TabsContent value="tokens" className="mt-4">
+        {activeTab === "tokens" && canCreateToken && (
           <PatientHomeTokens patientId={patientId} facilityId={facilityId} />
-        </TabsContent>
-      )}
-    </Tabs>
+        )}
+      </div>
+    </div>
   );
 }

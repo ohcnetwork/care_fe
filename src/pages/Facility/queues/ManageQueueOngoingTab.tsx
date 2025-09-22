@@ -2,6 +2,12 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -10,7 +16,10 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
 import { getTokenQueueStatusCount } from "@/pages/Facility/queues/utils";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
@@ -39,6 +48,7 @@ import {
   MoreHorizontal,
   RotateCcw,
   SettingsIcon,
+  UserCheck,
   X,
 } from "lucide-react";
 import { Link } from "raviger";
@@ -59,11 +69,18 @@ export function ManageQueueOngoingTab({
   queueId,
   subQueues,
   resourceType,
+  resourceId,
 }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex space-x-4 overflow-x-auto w-full">
-        <WaitingTokensColumn facilityId={facilityId} queueId={queueId} />
+        <WaitingTokensColumn
+          facilityId={facilityId}
+          queueId={queueId}
+          resourceType={resourceType}
+          resourceId={resourceId}
+          subQueues={subQueues}
+        />
         <InServiceTokensColumn
           facilityId={facilityId}
           queueId={queueId}
@@ -198,9 +215,15 @@ function SubQueueColumn({
 function WaitingTokensColumn({
   facilityId,
   queueId,
+  resourceType,
+  resourceId,
+  subQueues,
 }: {
   facilityId: string;
   queueId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
+  subQueues: TokenSubQueueRead[];
 }) {
   const { ref, inView } = useInView();
 
@@ -250,7 +273,7 @@ function WaitingTokensColumn({
       title={t("waiting")}
       count={
         summary && (
-          <Badge size="sm" variant="blue">
+          <Badge size="sm">
             {getTokenQueueStatusCount(summary, TokenStatus.CREATED)}
           </Badge>
         )
@@ -271,6 +294,9 @@ function WaitingTokensColumn({
                     token={token}
                     facilityId={facilityId}
                     queueId={queueId}
+                    _resourceType={resourceType}
+                    _resourceId={resourceId}
+                    subQueues={subQueues}
                   />
                 }
               />
@@ -311,10 +337,10 @@ function InServiceTokensColumn({
 
   return (
     <QueueColumn
-      title={t("in_service")}
+      title={t("called_plus_now_serving")}
       count={
         summary && (
-          <Badge size="sm" variant="green">
+          <Badge size="sm">
             {getTokenQueueStatusCount(summary, TokenStatus.IN_PROGRESS)}
           </Badge>
         )
@@ -468,31 +494,35 @@ function InServiceColumnOptions({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-[200px]">
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger>{t("category")}</DropdownMenuSubTrigger>
+            <DropdownMenuSubTrigger>{t("set_category")}</DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
-              <DropdownMenuItem
-                onClick={() => setPreferredServicePointCategory(null)}
-                className={
-                  !preferredServicePointCategory?.id
-                    ? "bg-gray-100 dark:bg-gray-800"
-                    : ""
+              <RadioGroup
+                value={preferredServicePointCategory?.id || "all"}
+                onValueChange={(value) =>
+                  setPreferredServicePointCategory(
+                    value === "all" ? null : value,
+                  )
                 }
+                className="space-y-2 p-2"
               >
-                {t("all")}
-              </DropdownMenuItem>
-              {tokenCategories?.results.map((category) => (
-                <DropdownMenuItem
-                  key={category.id}
-                  onClick={() => setPreferredServicePointCategory(category.id)}
-                  className={
-                    preferredServicePointCategory?.id === category.id
-                      ? "bg-gray-100 dark:bg-gray-800"
-                      : ""
-                  }
-                >
-                  {category.name}
-                </DropdownMenuItem>
-              ))}
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="all" />
+                  <Label htmlFor="all" className="cursor-pointer">
+                    {t("all")}
+                  </Label>
+                </div>
+                {tokenCategories?.results.map((category) => (
+                  <div
+                    key={category.id}
+                    className="flex items-center space-x-2"
+                  >
+                    <RadioGroupItem value={category.id} id={category.id} />
+                    <Label htmlFor={category.id} className="cursor-pointer">
+                      {category.name}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
           <DropdownMenuItem onClick={() => setShowCompleteAllDialog(true)}>
@@ -583,18 +613,98 @@ function TokenCompleteConfirmDialog({
   );
 }
 
+function AssignToServicePointDialog({
+  open,
+  onOpenChange,
+  token,
+  subQueues,
+  onConfirm,
+  isLoading,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  token: TokenRead;
+  subQueues: TokenSubQueueRead[];
+  onConfirm: (subQueueId: string) => void;
+  isLoading: boolean;
+}) {
+  const { t } = useTranslation();
+  const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
+
+  const handleConfirm = () => {
+    if (selectedSubQueueId) {
+      onConfirm(selectedSubQueueId);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>{t("select_service_point")}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            {t("choose_service_point_to_call_patient", {
+              patientName: token.patient?.name,
+              tokenNumber: renderTokenNumber(token),
+            })}
+          </p>
+          <RadioGroup
+            value={selectedSubQueueId}
+            onValueChange={setSelectedSubQueueId}
+            className="space-y-3"
+          >
+            {subQueues.map((subQueue) => (
+              <div
+                key={subQueue.id}
+                className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <RadioGroupItem value={subQueue.id} id={subQueue.id} />
+                <label
+                  htmlFor={subQueue.id}
+                  className="flex-1 text-sm font-medium cursor-pointer"
+                >
+                  {subQueue.name}
+                </label>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
+        <div className="flex">
+          <Button
+            onClick={handleConfirm}
+            className="w-full"
+            disabled={!selectedSubQueueId || isLoading}
+          >
+            <UserCheck className="size-4 mr-2" />
+            {t("call_patient")}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function WaitingTokenOptions({
   token,
   facilityId,
   queueId,
+  _resourceType,
+  _resourceId,
+  subQueues,
 }: {
   token: TokenRead;
   facilityId: string;
   queueId: string;
+  _resourceType: SchedulableResourceType;
+  _resourceId: string;
+  subQueues: TokenSubQueueRead[];
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
 
   const { mutate: updateToken, isPending: isUpdating } = useMutation({
     mutationFn: mutate(tokenApi.update, {
@@ -624,7 +734,16 @@ function WaitingTokenOptions({
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, queueId],
       });
+      queryClient.invalidateQueries({
+        queryKey: [
+          "infinite-tokens",
+          facilityId,
+          queueId,
+          { status: TokenStatus.IN_PROGRESS },
+        ],
+      });
       setShowCancelDialog(false);
+      setShowAssignDialog(false);
     },
   });
 
@@ -632,6 +751,14 @@ function WaitingTokenOptions({
     updateToken({
       status: TokenStatus.CANCELLED,
       note: token.note,
+    });
+  };
+
+  const handleAssignToServicePoint = (subQueueId: string) => {
+    updateToken({
+      status: TokenStatus.IN_PROGRESS,
+      note: token.note,
+      sub_queue: subQueueId,
     });
   };
 
@@ -645,6 +772,13 @@ function WaitingTokenOptions({
           <MoreHorizontal className="size-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={() => setShowAssignDialog(true)}
+            disabled={isUpdating}
+          >
+            <UserCheck className="size-4" />
+            {t("assign_to_service_point")}
+          </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
             onClick={() => setShowCancelDialog(true)}
@@ -661,6 +795,15 @@ function WaitingTokenOptions({
         onOpenChange={setShowCancelDialog}
         token={token}
         onConfirm={handleCancelToken}
+        isLoading={isUpdating}
+      />
+
+      <AssignToServicePointDialog
+        open={showAssignDialog}
+        onOpenChange={setShowAssignDialog}
+        token={token}
+        subQueues={subQueues}
+        onConfirm={handleAssignToServicePoint}
         isLoading={isUpdating}
       />
     </>
@@ -823,12 +966,35 @@ export function TokenCard({
   token: TokenRead | null;
   options?: React.ReactNode;
 }) {
+  const { t } = useTranslation();
+
   return (
-    <div className="flex gap-3 items-center justify-between p-3 bg-white rounded-lg shadow">
+    <div
+      className={cn(
+        "relative flex gap-3 items-center justify-between p-3 bg-gray-50 rounded-lg shadow",
+        token?.status === TokenStatus.IN_PROGRESS &&
+          "border border-primary-500",
+      )}
+    >
+      {token?.status === TokenStatus.IN_PROGRESS && (
+        <div className="absolute top-1/2 -translate-y-1/2 left-0 w-1 h-8 rounded-r-sm bg-primary-500" />
+      )}
       <div className="flex flex-col">
         {token ? (
           <Link
-            href={`/facility/${facilityId}/queues/${token.queue.id}/tokens/${token.id}`}
+            href={
+              token.patient
+                ? `/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                    {
+                      phone_number: token.patient.phone_number,
+                      year_of_birth: token.patient.year_of_birth.toString(),
+                      partial_id: token.patient.id.slice(0, 5),
+                      queue_id: token.queue.id,
+                      token_id: token.id,
+                    },
+                  ).toString()}`
+                : "#"
+            }
             className="font-semibold hover:underline transition-colors"
           >
             <span className="font-semibold flex items-center gap-1">
@@ -839,13 +1005,18 @@ export function TokenCard({
         ) : (
           <Skeleton className="h-4 w-36 my-2" />
         )}
-        {/* <div className="flex items-center gap-1.5"></div> */}
         {/* TODO: do we show tags here? or something else? */}
       </div>
       <div className="flex items-center gap-3">
         {token ? (
-          <div className="min-h-14 p-2 bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center">
-            <span className="text-lg font-bold">
+          <div className="flex gap-2 items-center justify-center p-2 bg-gray-100 border border-gray-200 rounded-lg">
+            {token.status === TokenStatus.IN_PROGRESS && (
+              <div className="flex gap-1 items-center">
+                <div className="size-2 border border-primary-500 rounded-full bg-primary-200" />
+                <span className="text-sm font-medium">{t("now_serving")}:</span>
+              </div>
+            )}
+            <span className="text-lg font-bold text-black">
               {renderTokenNumber(token)}
             </span>
           </div>

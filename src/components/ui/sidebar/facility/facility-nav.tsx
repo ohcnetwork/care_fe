@@ -13,6 +13,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import careConfig from "@careConfig";
+import { Logs } from "lucide-react";
 
 interface FacilityNavProps {
   selectedFacility: FacilityBareMinimum | null;
@@ -51,7 +52,7 @@ function generateFacilityLinks(
     {
       name: t("queues"),
       url: `${baseUrl}/queues`,
-      icon: <CareIcon icon="d-calendar" />,
+      icon: <Logs />,
       visibility: permissions.canViewAppointments,
     },
     {
@@ -179,10 +180,10 @@ function generateFacilityLinks(
         //   name: t("patient_identifier_config"),
         //   url: `${baseUrl}/settings/patient_identifier_config`,
         // },
-        // {
-        //   name: t("tag_config"),
-        //   url: `${baseUrl}/settings/tag_config`,
-        // },
+        {
+          name: t("tag_config"),
+          url: `${baseUrl}/settings/tag_config`,
+        },
         // {
         //   name: t("report_builder"),
         //   url: `${baseUrl}/settings/report_builder/`,

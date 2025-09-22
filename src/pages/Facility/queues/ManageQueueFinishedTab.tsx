@@ -41,13 +41,7 @@ import { useInView } from "react-intersection-observer";
 
 const PAGE_SIZE = 50;
 
-const INACTIVE_TOKEN_STATUSES = [
-  TokenStatus.UNFULFILLED,
-  TokenStatus.COMPLETED,
-  TokenStatus.FULFILLED,
-  TokenStatus.CANCELLED,
-  TokenStatus.ENTERED_IN_ERROR,
-];
+const INACTIVE_TOKEN_STATUSES = [TokenStatus.FULFILLED, TokenStatus.CANCELLED];
 
 export function ManageQueueFinishedTab({
   facilityId,
@@ -120,7 +114,15 @@ export function ManageQueueFinishedTab({
                 <TableCell>
                   {token.patient ? (
                     <Link
-                      href={`/facility/${facilityId}/queues/${token.queue.id}/tokens/${token.id}`}
+                      href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                        {
+                          phone_number: token.patient.phone_number,
+                          year_of_birth: token.patient.year_of_birth.toString(),
+                          partial_id: token.patient.id.slice(0, 5),
+                          queue_id: token.queue.id,
+                          token_id: token.id,
+                        },
+                      ).toString()}`}
                       className="hover:underline transition-colors flex items-center gap-1"
                     >
                       {token.patient.name}

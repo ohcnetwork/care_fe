@@ -59,7 +59,7 @@ const codeSchema = z.object({
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  slug: z.string().min(1, "Slug is required"),
+  slug_value: z.string().min(1, "Slug is required"),
   product_type: z.nativeEnum(ProductKnowledgeType),
   status: z.nativeEnum(ProductKnowledgeStatus),
   alternate_identifier: z.string().trim().optional(),
@@ -112,7 +112,6 @@ export default function ProductKnowledgeForm({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
-  console.log(categorySlug);
   const isEditMode = Boolean(slug);
 
   const { data: existingData, isFetching } = useQuery({
@@ -182,11 +181,11 @@ function ProductKnowledgeFormContent({
     if (isEditMode && existingData) {
       return {
         name: existingData.name,
-        slug: existingData.slug,
+        slug_value: existingData.slug_config.slug_value,
         product_type: existingData.product_type,
         status: existingData.status,
         alternate_identifier: existingData.alternate_identifier || "",
-        category: existingData.category.slug,
+        category: existingData.category?.slug,
         code: existingData.code?.code ? existingData.code : null,
         base_unit: existingData.base_unit?.code ? existingData.base_unit : null,
         names: existingData.names || [],
@@ -221,7 +220,7 @@ function ProductKnowledgeFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "name") {
-        form.setValue("slug", generateSlug(value.name || ""), {
+        form.setValue("slug_value", generateSlug(value.name || ""), {
           shouldValidate: true,
         });
       }
@@ -354,7 +353,7 @@ function ProductKnowledgeFormContent({
                               field.onChange(e);
                               if (!isEditMode) {
                                 form.setValue(
-                                  "slug",
+                                  "slug_value",
                                   generateSlug(e.target.value || ""),
                                   {
                                     shouldValidate: true,
@@ -371,7 +370,7 @@ function ProductKnowledgeFormContent({
 
                   <FormField
                     control={form.control}
-                    name="slug"
+                    name="slug_value"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel aria-required>{t("slug")}</FormLabel>
@@ -407,7 +406,7 @@ function ProductKnowledgeFormContent({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger ref={field.ref}>
                               <SelectValue
                                 placeholder={t("select_product_type")}
                               />
@@ -510,7 +509,7 @@ function ProductKnowledgeFormContent({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger ref={field.ref}>
                               <SelectValue placeholder={t("status")} />
                             </SelectTrigger>
                           </FormControl>
@@ -595,7 +594,7 @@ function ProductKnowledgeFormContent({
                                     defaultValue={field.value}
                                   >
                                     <FormControl>
-                                      <SelectTrigger>
+                                      <SelectTrigger ref={field.ref}>
                                         <SelectValue
                                           placeholder={t("select_name_type")}
                                         />
@@ -769,7 +768,7 @@ function ProductKnowledgeFormContent({
                                     }}
                                   >
                                     <FormControl>
-                                      <SelectTrigger>
+                                      <SelectTrigger ref={field.ref}>
                                         <SelectValue
                                           placeholder={t(
                                             "duration_unit_placeholder",

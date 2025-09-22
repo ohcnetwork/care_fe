@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { TokenGenerate } from "@/types/tokens/token/token";
 import { TokenCategoryRead } from "@/types/tokens/tokenCategory/tokenCategory";
@@ -32,6 +33,7 @@ import tokenCategoryApis from "@/types/tokens/tokenCategory/tokenCategoryApi";
 interface TokenGenerationSheetProps {
   facilityId: string;
   appointmentId: string;
+  resourceType: SchedulableResourceType;
   trigger: React.ReactNode;
   onSuccess?: () => void;
 }
@@ -39,6 +41,7 @@ interface TokenGenerationSheetProps {
 export function TokenGenerationSheet({
   facilityId,
   appointmentId,
+  resourceType,
   trigger,
   onSuccess,
 }: TokenGenerationSheetProps) {
@@ -54,7 +57,7 @@ export function TokenGenerationSheet({
     queryFn: query(tokenCategoryApis.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        resource_type: "practitioner",
+        resource_type: resourceType,
       },
     }),
     enabled: isOpen && !!facilityId,

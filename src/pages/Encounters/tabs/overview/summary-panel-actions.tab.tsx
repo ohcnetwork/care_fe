@@ -17,7 +17,7 @@ export const SummaryPanelActionsTab = () => {
       assignLocation,
       manageDepartments,
       manageCareTeam,
-      dispenseConsumable,
+      dispense,
     },
     selectedEncounter,
   } = useEncounter();
@@ -40,8 +40,8 @@ export const SummaryPanelActionsTab = () => {
       onClick: manageDepartments,
     },
     {
-      label: t("dispense_consumable"),
-      onClick: dispenseConsumable,
+      label: t("dispense"),
+      onClick: dispense,
     },
   ] as const satisfies { label: string; onClick: () => void }[];
 
@@ -69,7 +69,7 @@ export const SummaryPanelActionsTab = () => {
             encounter={selectedEncounter}
             className={cn(
               buttonVariants({ variant: "outline" }),
-              "justify-start sm:@sm:justify-center sm:@sm:flex-1",
+              "justify-start sm:@sm:justify-center sm:@sm:flex-1 w-full",
             )}
           />
         )}

@@ -18,6 +18,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { getConditionValue } from "@/types/base/condition/condition";
 import {
   MonetaryComponent,
   MonetaryComponentOrder,
@@ -66,6 +67,7 @@ export function ChargeItemDefinitionDetail({
       ...chargeItemDefinition,
       status: ChargeItemDefinitionStatus.retired,
       category: chargeItemDefinition.category.slug,
+      slug_value: chargeItemDefinition.slug_config.slug_value,
     });
   };
 
@@ -142,7 +144,7 @@ export function ChargeItemDefinitionDetail({
     <Page title={chargeItemDefinition.title}>
       <div className="container mx-auto">
         <div className="mb-4">
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
             <div>
               <div className="mt-2 flex items-center gap-2">
                 <Badge
@@ -267,6 +269,30 @@ export function ChargeItemDefinitionDetail({
                         {index <
                           chargeItemDefinition.price_components.length - 1 && (
                           <Separator className="my-2" />
+                        )}
+                        {/* {component.conditions && ( */}
+                        {component.conditions && (
+                          <div>
+                            <p className="text-sm text-gray-500">
+                              {t("conditions")}
+                            </p>
+                            {component.conditions.map((condition, index) => {
+                              return (
+                                <div
+                                  key={index}
+                                  className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
+                                >
+                                  <span>
+                                    {condition.metric}{" "}
+                                    <span className="font-mono pr-2 ">
+                                      {condition.operation}
+                                    </span>
+                                    {getConditionValue(condition)}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
                         )}
                       </div>
                     ))}

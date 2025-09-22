@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import { Calendar, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { EncounterCard } from "@/components/Facility/EncounterCard";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,9 +12,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
-import query from "@/Utils/request/query";
+import { TimelineWrapper } from "@/components/Common/TimelineWrapper";
+import { TimelineEncounterCard } from "@/components/Facility/EncounterCard";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import query from "@/Utils/request/query";
 
 interface PatientHomeEncountersProps {
   patientId: string;
@@ -31,11 +35,10 @@ export default function PatientHomeEncounters({
   const { t } = useTranslation();
 
   const { data: encounters, isLoading: encounterLoading } = useQuery({
-    queryKey: ["encounters", "live", patientId],
+    queryKey: ["encounters", patientId],
     queryFn: query(encounterApi.list, {
       queryParams: {
         patient: patientId,
-        live: false,
       },
       silent: true,
     }),
@@ -48,63 +51,91 @@ export default function PatientHomeEncounters({
 
   if (encounterLoading) {
     return (
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle>{t("active_encounters")}</CardTitle>
-          <CardDescription>
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <div className="p-1.5 bg-blue-100 rounded-lg">
+              <Calendar className="size-4 text-blue-600" />
+            </div>
+            {t("active_encounters")}
+          </CardTitle>
+          <CardDescription className="text-sm">
             {t("view_and_manage_patient_encounters")}
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-3 pt-2">
-          <div className="animate-pulse space-y-3">
-            {[...Array(2)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-200 rounded-lg" />
-            ))}
-          </div>
+        <CardContent className="space-y-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex gap-3">
+              <div className="flex flex-col items-center">
+                {i > 0 && <Skeleton className="w-0.5 h-4 mb-1" />}
+                <Skeleton className="w-8 h-8 rounded-full" />
+                {i < 2 && <Skeleton className="w-0.5 h-4 mt-1" />}
+              </div>
+              <div className="flex-1 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2">
+                    <Skeleton className="h-6 w-20" />
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                  <Skeleton className="h-4 w-20" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-4">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle>{t("active_encounters")}</CardTitle>
-        <CardDescription>
-          {t("view_and_manage_patient_encounters")}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3 pt-2">
-        {encounters?.results && encounters.results.length > 0 ? (
-          <>
-            {encounters.results.map((encounter) => (
-              <EncounterCard
-                encounter={encounter}
-                key={encounter.id}
-                permissions={facilityPermissions}
-                facilityId={
-                  encounter.facility.id === facilityId ? facilityId : undefined
-                }
-              />
-            ))}
-          </>
-        ) : (
-          <div className="flex flex-col items-center justify-center p-6 md:p-8 text-center border rounded-lg border-dashed">
-            <div className="rounded-full bg-primary/10 p-2 md:p-3 mb-3 md:mb-4">
-              <CareIcon
-                icon="l-folder-open"
-                className="size-5 md:size-6 text-primary"
-              />
+    <>
+      {encounters?.results && encounters.results.length > 0 ? (
+        <TimelineWrapper>
+          {encounters.results.map((encounter, index) => (
+            <TimelineEncounterCard
+              encounter={encounter}
+              key={encounter.id}
+              permissions={facilityPermissions}
+              facilityId={
+                encounter.facility.id === facilityId ? facilityId : undefined
+              }
+              isLast={index === encounters.results.length - 1}
+              isFirst={index === 0}
+            />
+          ))}
+        </TimelineWrapper>
+      ) : (
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <div className="relative">
+            <div className="rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 p-4 mb-4 shadow-md">
+              <CareIcon icon="l-folder-open" className="size-8 text-blue-600" />
             </div>
-            <h3 className="text-base md:text-lg font-semibold mb-1">
-              {t("no_active_encounters_found")}
-            </h3>
-            <p className="text-xs md:text-sm text-gray-500">
-              {t("create_a_new_encounter_to_get_started")}
-            </p>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-xs font-bold">!</span>
+            </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+            {t("no_active_encounters_found")}
+          </h3>
+          <p className="text-gray-600 mb-4 text-sm max-w-md">
+            {t("create_a_new_encounter_to_get_started")}
+          </p>
+          <Button
+            size="sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+          >
+            <User className="size-3 mr-1.5" />
+            {t("create_encounter")}
+          </Button>
+        </div>
+      )}
+    </>
   );
 }

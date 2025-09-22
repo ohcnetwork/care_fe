@@ -139,7 +139,7 @@ export default function TokenCategoryView({
           {t("back")}
         </Button>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold">{tokenCategory.name}</h1>

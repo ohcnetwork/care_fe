@@ -13,12 +13,21 @@ import {
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, differenceInYears, format, isBefore } from "date-fns";
-import { BanIcon, EyeIcon, Loader2 } from "lucide-react";
-import { navigate } from "raviger";
+import {
+  BanIcon,
+  ExternalLinkIcon,
+  EyeIcon,
+  Loader2,
+  PrinterIcon,
+} from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
+
+import { ChargeItemsSection } from "@/components/Billing/ChargeItems/ChargeItemsSection";
+import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 
 import { cn } from "@/lib/utils";
 
@@ -53,25 +62,17 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import { ClickableAddress } from "@/components/Common/ClickableAddress";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
+import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import {
-  formatName,
-  getReadableDuration,
-  stringifyNestedObject,
-} from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -87,10 +88,27 @@ import {
   AppointmentFinalStatuses,
   AppointmentRead,
   AppointmentUpdateRequest,
+  formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import {
+  formatName,
+  getReadableDuration,
+  stringifyNestedObject,
+} from "@/Utils/utils";
 
-import { AppointmentSlotPicker } from "./components/AppointmentSlotPicker";
+import { formatPatientAddress } from "@/components/Patient/utils";
+import {
+  ResourceSelector,
+  ScheduleResourceFormState,
+} from "@/components/Schedule/ResourceSelector";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
+import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { AppointmentDateSelection } from "./BookAppointment/AppointmentDateSelection";
 
 interface Props {
   appointmentId: string;
@@ -102,7 +120,7 @@ export default function AppointmentDetail(props: Props) {
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
-
+  useFacilityShortcuts();
   const { canViewAppointments, canWriteAppointment } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],
@@ -184,14 +202,36 @@ export default function AppointmentDetail(props: Props) {
           <AppointmentDetails appointment={appointment} facility={facility} />
           <div className="mt-6">
             {appointment.token?.number ? (
-              <Card className="h-56 md:mx-4 p-8 flex flex-col items-center justify-center text-center">
-                <p className="text-xs uppercase tracking-wide text-gray-500">
-                  {t("token_no")}
-                </p>
-                <span className="mt-2 text-6xl font-bold tracking-tight">
-                  {appointment.token.number}
-                </span>
-              </Card>
+              <>
+                <div
+                  id="section-to-print"
+                  className="print:w-[400px] print:pt-4 mx-4"
+                >
+                  <TokenCard
+                    appointment={appointment}
+                    token={appointment.token}
+                    facility={facility}
+                  />
+                </div>
+                <div className="pt-3 mx-4 flex gap-2 justify-end">
+                  <Button variant="outline" asChild>
+                    <Link
+                      href={`/facility/${facility.id}/queues/${appointment.token?.queue.id}/practitioner/${appointment.resource.id}`}
+                    >
+                      {t("open")} <ExternalLinkIcon className="size-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    data-shortcut-id="print-token"
+                    variant="outline"
+                    onClick={() => print()}
+                  >
+                    <PrinterIcon className="size-4 mr-2" />
+                    {t("print")}
+                    <ShortcutBadge actionId="print-token" />
+                  </Button>
+                </div>
+              </>
             ) : (
               <div className="h-56 md:mx-4 border-2 border-dashed border-gray-300 bg-gray-50 rounded flex flex-col items-center justify-center text-center">
                 <span className="text-6xl text-gray-400 font-bold leading-none">
@@ -203,6 +243,7 @@ export default function AppointmentDetail(props: Props) {
                 <div className="mt-4">
                   <TokenGenerationSheet
                     facilityId={facility.id}
+                    resourceType={appointment.resource_type}
                     appointmentId={appointment.id}
                     trigger={
                       <Button variant="outline" size="lg" className="px-6">
@@ -393,7 +434,6 @@ const AppointmentDetails = ({
   appointment: AppointmentRead;
   facility: FacilityRead;
 }) => {
-  const { user } = appointment;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -475,7 +515,7 @@ const AppointmentDetails = ({
           </div>
           <div className="text-sm">
             <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-              <p className="font-medium">{t("tags")}</p>
+              <p className="font-medium">{t("tags", { count: 2 })}</p>
               <TagAssignmentSheet
                 entityType="appointment"
                 entityId={appointment.id}
@@ -565,25 +605,29 @@ const AppointmentDetails = ({
           </div>
           <div className="flex flex-row items-start gap-4 text-sm">
             <DrawingPinIcon className="size-5 text-gray-600 mt-1" />
-            <div className="min-w-0 flex-1">
-              <p className="font-medium break-words">
-                <ClickableAddress
-                  address={
-                    appointment.patient.address || t("no_address_provided")
-                  }
-                />
-              </p>
-              <p className="text-gray-600 break-words">
-                {stringifyNestedObject(appointment.patient.geo_organization)}
-              </p>
-              <p className="text-gray-600">
-                {t("pincode")}: {appointment.patient.pincode}
-              </p>
+            <div className="flex flex-col xl:flex-row xl:justify-between xl:items-end gap-2 w-full">
+              <div>
+                <p className="text-gray-600 break-words">
+                  {formatPatientAddress(appointment.patient.address) || (
+                    <span className="text-gray-500">
+                      {t("no_address_provided")}
+                    </span>
+                  )}
+                </p>
+                <p className="text-gray-600 break-words">
+                  {stringifyNestedObject(appointment.patient.geo_organization)}
+                </p>
+                <p className="text-gray-600">
+                  {t("pincode")}: {appointment.patient.pincode}
+                </p>
+              </div>
+              <PatientAddressLink address={appointment.patient.address} />
             </div>
           </div>
         </CardContent>
       </Card>
       <TokenGenerationSheet
+        resourceType={appointment.resource_type}
         facilityId={facility.id}
         appointmentId={appointment.id}
         trigger={
@@ -602,14 +646,26 @@ const AppointmentDetails = ({
           });
         }}
       />
+
+      <ChargeItemsSection
+        facilityId={facility.id}
+        resourceId={appointment.id}
+        patientId={appointment.patient.id}
+        serviceResourceType={ChargeItemServiceResource.appointment}
+        sourceUrl={`/facility/${facility.id}/patient/${appointment.patient.id}/appointments/${appointment.id}`}
+        encounterId={appointment.associated_encounter?.id}
+        disableCreateChargeItems={true}
+      />
       <Card>
         <CardHeader>
-          <CardTitle>{t("practitioner_information")}</CardTitle>
+          <CardTitle>{t("resource_information")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-2">
             <div className="text-sm">
-              <p className="font-medium">{formatName(user)}</p>
+              <p className="font-medium">
+                {formatScheduleResourceName(appointment)}
+              </p>
             </div>
             <Separator />
             <div className="text-sm">
@@ -643,16 +699,17 @@ const AppointmentActions = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
+  const [selectedResource, setSelectedResource] =
+    useState<ScheduleResourceFormState>(appointment);
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
   const [newNote, setNewVisitReason] = useState(appointment.note);
   const [oldNote, setRescheduleReason] = useState(appointment.note);
-  const [selectedPractitioner, setSelectedPractitioner] = useState(
-    appointment.user,
-  );
+
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
 
   const currentStatus = appointment.status;
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Allow check-in/start consultation as long as the appointment is before 24 hours ahead of slot's start time
   const canCheckIn = isBefore(
@@ -877,7 +934,9 @@ const AppointmentActions = ({
                 <div className="mt-6">
                   <div className="text-sm">
                     <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-                      <Label className="font-medium">{t("tags")}</Label>
+                      <Label className="font-medium">
+                        {t("tags", { count: 2 })}
+                      </Label>
                       <TagAssignmentSheet
                         entityType="appointment"
                         entityId={appointment.id}
@@ -912,21 +971,39 @@ const AppointmentActions = ({
                     value={newNote}
                     onChange={(e) => setNewVisitReason(e.target.value)}
                   />
-                  <div className="my-4">
-                    <Label className="mb-2">{t("select_practitioner")}</Label>
-                    <PractitionerSelector
+                  <div className="my-4 space-y-4">
+                    <div className="flex flex-col">
+                      <Label className="mb-2 text-sm font-medium text-gray-950">
+                        {t(
+                          `schedulable_resource__${selectedResource.resource_type}`,
+                        )}
+                      </Label>
+                      <ResourceSelector
+                        selectedResource={selectedResource}
+                        facilityId={facilityId}
+                        setSelectedResource={setSelectedResource}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <AppointmentDateSelection
                       facilityId={facilityId}
-                      selected={selectedPractitioner}
-                      onSelect={(user) => user && setSelectedPractitioner(user)}
+                      resourceId={selectedResource.resource?.id}
+                      resourceType={selectedResource.resource_type}
+                      currentAppointment={appointment}
+                      setSelectedDate={setSelectedDate}
+                      selectedDate={selectedDate}
+                    />
+                    <AppointmentSlotPicker
+                      selectedDate={selectedDate}
+                      facilityId={facilityId}
+                      resourceId={selectedResource.resource?.id}
+                      resourceType={selectedResource.resource_type}
+                      selectedSlotId={selectedSlotId}
+                      onSlotSelect={setSelectedSlotId}
+                      currentAppointment={appointment}
                     />
                   </div>
-                  <AppointmentSlotPicker
-                    facilityId={facilityId}
-                    resourceId={selectedPractitioner?.id}
-                    selectedSlotId={selectedSlotId}
-                    onSlotSelect={setSelectedSlotId}
-                    currentAppointment={appointment}
-                  />
 
                   <div className="flex justify-end gap-2 mt-6">
                     <Button

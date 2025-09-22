@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import PaginationComponent from "@/components/Common/Pagination";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
-import { EncounterCard } from "@/components/Facility/EncounterCard";
+import { TimelineEncounterCard } from "@/components/Facility/EncounterCard";
 import { PatientProps } from "@/components/Patient/PatientDetailsTab";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -21,6 +21,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 import { getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
+import { TimelineWrapper } from "@/components/Common/TimelineWrapper";
 import { usePermissions } from "@/context/PermissionContext";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 
@@ -125,16 +126,18 @@ const EncounterHistory = (props: PatientProps) => {
               )
             ) : (
               <ul className="grid gap-4">
-                {encounterData?.results?.map((encounter) => (
-                  <li key={encounter.id} className="w-full">
-                    <EncounterCard
-                      key={encounter.id}
-                      encounter={encounter}
-                      permissions={patientData.permissions ?? []}
-                      facilityId={facilityId}
-                    />
-                  </li>
-                ))}
+                <TimelineWrapper>
+                  {encounterData?.results?.map((encounter) => (
+                    <li key={encounter.id} className="w-full">
+                      <TimelineEncounterCard
+                        key={encounter.id}
+                        encounter={encounter}
+                        permissions={patientData.permissions ?? []}
+                        facilityId={facilityId}
+                      />
+                    </li>
+                  ))}
+                </TimelineWrapper>
                 <div className="flex w-full items-center justify-center">
                   <div
                     className={cn(

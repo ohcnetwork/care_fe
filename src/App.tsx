@@ -46,13 +46,13 @@ const App = () => {
                 </AuthUserProvider>
               </HistoryAPIProvider>
               <Toaster
-                position="top-right"
+                position="top-center"
                 theme="light"
                 richColors
                 expand
                 // For `richColors` to work, pass at-least an empty object.
                 // Refer: https://github.com/shadcn-ui/ui/issues/2234.
-                toastOptions={{ closeButton: true }}
+                toastOptions={{}}
               />
             </PluginEngine>
           </PubSubProvider>

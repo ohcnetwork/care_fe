@@ -21,6 +21,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -58,6 +66,7 @@ import {
   SupplyRequestStatus,
 } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
+import SupplyDeliveryTableForRequest from "./SupplyDeliveryTableForRequest";
 
 const receiveItemSchema = z.object({
   condition: z.nativeEnum(SupplyDeliveryCondition),
@@ -105,6 +114,11 @@ export default function ReceiveItem({
     variant: "primary",
   });
 
+  const [quantityMismatchDialog, setQuantityMismatchDialog] = useState<{
+    open: boolean;
+    data?: ReceiveItemForm;
+  }>({ open: false });
+
   const [qParams] = useQueryParams();
 
   const form = useForm<ReceiveItemForm>({
@@ -112,7 +126,7 @@ export default function ReceiveItem({
     defaultValues: {
       condition: SupplyDeliveryCondition.normal,
       receivingStatus: SupplyDeliveryStatus.completed,
-      markAsFullyReceived: false,
+      markAsFullyReceived: true,
     },
   });
 
@@ -142,6 +156,18 @@ export default function ReceiveItem({
     }),
     enabled: !!deliveryId,
   });
+
+  const { data: deliveries, isLoading: isLoadingDeliveries } = useQuery({
+    queryKey: ["deliveries", delivery?.supply_request?.id],
+    queryFn: query(supplyDeliveryApi.listSupplyDelivery, {
+      queryParams: {
+        supply_request: delivery?.supply_request?.id,
+        destination: locationId,
+      },
+    }),
+    enabled: !!delivery?.supply_request?.id,
+  });
+
   const { mutateAsync: updateSupplyDelivery, isPending: isUpdatingDelivery } =
     useMutation({
       mutationFn: mutate(supplyDeliveryApi.updateSupplyDeliveryAsReceiver, {
@@ -198,6 +224,7 @@ export default function ReceiveItem({
       toast.error(t("error_updating_delivery"));
     } finally {
       setDialog((d) => ({ ...d, open: false }));
+      setQuantityMismatchDialog({ open: false });
     }
   };
 
@@ -210,11 +237,33 @@ export default function ReceiveItem({
     navigate(makeUrl(path, cleanParams));
   };
 
+  const isRequestFullyReceived = () => {
+    const totalDeliveredQuantity = deliveries?.results.reduce(
+      (sum, delivery) => sum + delivery.supplied_item_quantity,
+      0,
+    );
+    return (
+      (totalDeliveredQuantity ?? 0) >= (delivery?.supply_request?.quantity ?? 0)
+    );
+  };
+
   const openDialog = (action: ActionType) => {
     if (!delivery) return;
     const currentReceivingStatus = form.watch("receivingStatus");
+    const markAsFullyReceived = form.watch("markAsFullyReceived");
 
     if (action === "receive") {
+      if (
+        currentReceivingStatus === SupplyDeliveryStatus.completed &&
+        markAsFullyReceived &&
+        delivery.supply_request &&
+        !isRequestFullyReceived()
+      ) {
+        const formData = form.getValues();
+        setQuantityMismatchDialog({ open: true, data: formData });
+        return;
+      }
+
       const isCompleted =
         currentReceivingStatus === SupplyDeliveryStatus.completed;
       const actionText =
@@ -233,7 +282,7 @@ export default function ReceiveItem({
                 1: <strong className="text-gray-900" />,
               }}
             />
-            {isCompleted && (
+            {isCompleted && !isRequestFullyReceived() && (
               <p className="mt-2">{t("you_cannot_change_once_submitted")}</p>
             )}
           </>
@@ -911,6 +960,70 @@ export default function ReceiveItem({
             </div>
           </div>
         )}
+
+        {deliveries?.results && deliveries?.results?.length > 1 && (
+          <div className="mx-4 bg-gray-100 rounded-md p-3 mt-2 text-gray-950 border border-gray-200">
+            <h2 className="text-base font-semibold mb-1">
+              {t("other_deliveries_for_this_request")} (
+              {deliveries?.results?.length - 1})
+            </h2>
+            <SupplyDeliveryTableForRequest
+              deliveries={(deliveries?.results || []).filter(
+                (d) => d.id !== deliveryId,
+              )}
+              isLoading={isLoadingDeliveries}
+              mode="internal"
+            />
+          </div>
+        )}
+
+        <Dialog
+          open={quantityMismatchDialog.open}
+          onOpenChange={(open) =>
+            setQuantityMismatchDialog({ ...quantityMismatchDialog, open })
+          }
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {t("receive_item_quantity_mismatch_title")}
+              </DialogTitle>
+              <DialogDescription>
+                {t("receive_item_quantity_mismatch_message")}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (quantityMismatchDialog.data) {
+                    handleSubmit({
+                      ...quantityMismatchDialog.data,
+                      markAsFullyReceived: false,
+                    });
+                  }
+                  setQuantityMismatchDialog({ open: false });
+                }}
+              >
+                {t("SRD__proceed_without_marking")}
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  if (quantityMismatchDialog.data) {
+                    handleSubmit({
+                      ...quantityMismatchDialog.data,
+                      markAsFullyReceived: true,
+                    });
+                  }
+                  setQuantityMismatchDialog({ open: false });
+                }}
+              >
+                {t("proceed")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <ConfirmActionDialog
           open={dialog.open}

@@ -28,7 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import mutate from "@/Utils/request/mutate";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   ChargeItemRead,
@@ -36,12 +36,15 @@ import {
   ChargeItemUpdate,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
 
 interface EditInvoiceTableProps {
   facilityId: string;
   chargeItems: ChargeItemRead[];
   onClose: () => void;
   onSuccess: () => void;
+  enableShortcut?: boolean;
 }
 
 const chargeItemSchema = z.object({
@@ -70,7 +73,11 @@ const formSchema = z.object({
       id: z.string(),
       title: z.string(),
       status: z.nativeEnum(ChargeItemStatus),
-      description: z.string().optional(),
+      description: z
+        .string()
+        .optional()
+        .nullable()
+        .transform((val) => (val === "" ? null : val)),
       ...chargeItemSchema.shape,
     }),
   ),
@@ -83,9 +90,10 @@ export function EditInvoiceTable({
   chargeItems,
   onClose,
   onSuccess,
+  enableShortcut,
 }: EditInvoiceTableProps) {
   const { t } = useTranslation();
-
+  useFacilityShortcuts("edit-invoiceTable");
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -107,7 +115,7 @@ export function EditInvoiceTable({
           id: item.id,
           title: item.title,
           status: item.status as ChargeItemStatus,
-          description: item.description,
+          description: item.description || "",
           baseAmount: String(baseComponent?.amount || "0"),
           quantity: String(item.quantity),
           discountType: isPercentage ? "percentage" : "amount",
@@ -133,7 +141,6 @@ export function EditInvoiceTable({
   });
 
   const onSubmit = (data: FormValues) => {
-    console.log("Form errors:", form.formState.errors);
     const updates: ChargeItemUpdate[] = data.items.map((item) => ({
       id: item.id,
       title: item.title,
@@ -143,6 +150,7 @@ export function EditInvoiceTable({
         {
           monetary_component_type: MonetaryComponentType.base,
           amount: item.baseAmount,
+          conditions: [],
         },
         // Only include discount component if there's a non-zero value
         ...(parseFloat(item.discountValue) > 0
@@ -157,11 +165,13 @@ export function EditInvoiceTable({
                   item.discountType === "percentage"
                     ? parseFloat(item.discountValue)
                     : undefined,
+                // TODO: This is definitely not correct, we need to pass on the conditions, also verify #146
+                conditions: [],
               },
             ]
           : []),
       ],
-      description: item.description,
+      description: item.description || undefined,
     }));
 
     updateChargeItems({ datapoints: updates });
@@ -302,11 +312,24 @@ export function EditInvoiceTable({
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            data-shortcut-id={enableShortcut ? "cancel-action" : undefined}
+          >
             {t("cancel")}
+            {enableShortcut && <ShortcutBadge actionId="cancel-action" />}
           </Button>
-          <Button type="submit" disabled={isPending}>
+          <Button
+            type="submit"
+            disabled={isPending}
+            data-shortcut-id={enableShortcut ? "submit-action" : undefined}
+          >
             {isPending ? t("saving") : t("save")}
+            {enableShortcut && (
+              <ShortcutBadge actionId="submit-action" className="bg-white" />
+            )}
           </Button>
         </div>
       </form>

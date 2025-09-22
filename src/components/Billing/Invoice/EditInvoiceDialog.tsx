@@ -35,6 +35,7 @@ export function EditInvoiceDialog({
           chargeItems={chargeItems}
           onClose={() => onOpenChange(false)}
           onSuccess={onSuccess}
+          enableShortcut={open}
         />
       </DialogContent>
     </Dialog>
