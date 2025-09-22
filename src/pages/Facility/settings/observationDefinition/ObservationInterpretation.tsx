@@ -1,3 +1,5 @@
+import { GENDER_TYPES } from "@/common/constants";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,10 +29,12 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
+  AgeOperationEqualityValue,
+  AgeOperationInRangeValue,
   Condition,
   ConditionOperation,
   ConditionOperationInRangeValue,
-  getConditionOperationSummary,
+  ConditionOperationSummary,
   Metrics,
 } from "@/types/base/condition/condition";
 import {
@@ -44,18 +48,29 @@ import {
   QualifiedRange,
 } from "@/types/base/qualifiedRange/qualifiedRange";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import valuesetApi from "@/types/valueset/valuesetApi";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, Edit, Trash2 } from "lucide-react";
+import { AlertTriangle, Edit, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+const AGE_TYPES = ["years", "months", "days"];
+
 export function ObservationInterpretation({
   qualifiedRanges,
   setQualifiedRanges,
+  disabled = false,
+  onClearRequest,
+  conflictMessage,
 }: {
   qualifiedRanges: QualifiedRange[];
   setQualifiedRanges: (value: QualifiedRange[]) => void;
+  disabled?: boolean;
+  onClearRequest?: () => void;
+  conflictMessage?: string;
 }) {
   const { t } = useTranslation();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -264,9 +279,10 @@ export function ObservationInterpretation({
       .slice(0, 2)
       .map((condition, index) => {
         return (
-          <span key={`condition-${index}`}>
-            {getConditionOperationSummary(condition, t(condition.metric))}
-          </span>
+          <ConditionOperationSummary
+            key={`condition-${index}`}
+            condition={condition}
+          />
         );
       });
     if (range.conditions.length > 2) {
@@ -328,15 +344,42 @@ export function ObservationInterpretation({
         <h3 className="text-base font-medium text-gray-700">
           {t("observation_interpretation")} ({qualifiedRanges?.length})
         </h3>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleAddInterpretation}
-        >
-          {t("add_interpretation")}
-        </Button>
+        {!disabled && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddInterpretation}
+          >
+            {t("add_interpretation")}
+          </Button>
+        )}
       </div>
+
+      {disabled && conflictMessage && (
+        <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-md">
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="size-4 text-amber-600" />
+              <p className="text-sm text-amber-800">{conflictMessage}</p>
+            </div>
+            <div className="flex items-center gap-2 justify-center">
+              {onClearRequest && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClearRequest}
+                  className="mt-2 text-amber-700 hover:text-amber-800 hover:bg-amber-200 bg-amber-100"
+                >
+                  {t("clear_conflicting_interpretations")}
+                  <X className="size-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {qualifiedRanges?.length === 0 ? (
         <p className="text-sm text-gray-500 py-4 text-center">
@@ -383,10 +426,7 @@ export function ObservationInterpretation({
       )}
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent
-          className="sm:max-w-3xl"
-          //onInteractOutside={removeNewUnsavedInterpretation}
-        >
+        <SheetContent className="sm:max-w-xl">
           <SheetHeader>
             <SheetTitle>{t("add_edit_interpretation")}</SheetTitle>
             <SheetDescription>{t("configure_interpretation")}</SheetDescription>
@@ -489,7 +529,7 @@ function QualifiedRangeEditor({
           setConditions={handleSetConditions}
         />
         <div>
-          <div className="flex flex-row justify-between gap-2 bg-gray-50 rounded-md px-2 pt-1 pb-2 border border-gray-200">
+          <div className="flex flex-col sm:flex-row justify-between gap-2 bg-gray-50 rounded-md px-2 pt-1 pb-2 border border-gray-200">
             <span className="text-sm font-medium mt-2">
               {t("interpretation_type")}
             </span>
@@ -547,6 +587,226 @@ function QualifiedRangeEditor({
   );
 }
 
+export function RenderConditionInput({
+  condition,
+  index,
+  handleSetValue,
+  handleSetValueType,
+}: {
+  condition: Condition;
+  index: number;
+  handleSetValue: (
+    value:
+      | string
+      | ConditionOperationInRangeValue
+      | AgeOperationEqualityValue
+      | { values: string[] },
+    index: number,
+  ) => void;
+  handleSetValueType: (value: string, index: number) => void;
+}) {
+  const { t } = useTranslation();
+  const operation = condition.operation;
+  const value =
+    "value" in condition ? condition.value : { min: undefined, max: undefined };
+  const tagIds = typeof value === "string" ? value : "";
+  const tagQueries = useTagConfigs({
+    ids: [tagIds],
+    disabled: operation !== ConditionOperation.has_tag,
+  });
+  switch (condition.metric) {
+    case "patient_gender": {
+      const currentValue = typeof value === "string" ? value : "";
+      if (operation === ConditionOperation.equality) {
+        return (
+          <Select
+            value={currentValue}
+            onValueChange={(value) => handleSetValue(value, index)}
+          >
+            <SelectTrigger className="sm:w-48!">
+              <SelectValue placeholder={t("select_a_value")} />
+            </SelectTrigger>
+            <SelectContent>
+              {GENDER_TYPES.map((gender) => (
+                <SelectItem key={gender.id} value={gender.id}>
+                  {t(`GENDER__${gender.id}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      }
+      break;
+    }
+    case "patient_age": {
+      const renderAgeType = () => {
+        const valueType =
+          typeof value === "object" && value !== null && "value_type" in value
+            ? (value.value_type as string)
+            : "years";
+        return (
+          <Select
+            value={valueType}
+            onValueChange={(value) => handleSetValueType(value, index)}
+          >
+            <SelectTrigger className="sm:w-28!">
+              <SelectValue placeholder={t("select_a_value")} />
+            </SelectTrigger>
+            <SelectContent>
+              {AGE_TYPES.map((age) => (
+                <SelectItem key={age} value={age}>
+                  {t(age)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      };
+      if (operation === ConditionOperation.equality) {
+        const currentValue =
+          typeof value === "object" && value !== null && "value" in value
+            ? value.value
+            : undefined;
+        const currentValueType =
+          typeof value === "object" && value !== null && "value_type" in value
+            ? value.value_type
+            : "years";
+        return (
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
+              type="number"
+              placeholder={t("value")}
+              value={currentValue || ""}
+              onChange={(e) => {
+                handleSetValue(
+                  {
+                    value: Number(e.target.value),
+                    value_type: currentValueType,
+                  } as AgeOperationEqualityValue,
+                  index,
+                );
+              }}
+              className="sm:w-fit h-9"
+            />
+            {renderAgeType()}
+          </div>
+        );
+      } else if (operation === ConditionOperation.in_range) {
+        const currentRange =
+          typeof value === "object" && value !== null && "min" in value
+            ? (value as any)
+            : { min: undefined, max: undefined, value_type: "years" };
+        return (
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
+              type="number"
+              placeholder={t("min")}
+              className="w-full h-9"
+              value={currentRange.min || ""}
+              onChange={(e) =>
+                handleSetValue(
+                  {
+                    min: Number(e.target.value),
+                    max: currentRange.max || 0,
+                    value_type: currentRange.value_type || "years",
+                  } as any,
+                  index,
+                )
+              }
+            />
+            <Input
+              type="number"
+              placeholder={t("max")}
+              className="w-full h-9"
+              value={currentRange.max || ""}
+              onChange={(e) =>
+                handleSetValue(
+                  {
+                    min: currentRange.min || 0,
+                    max: Number(e.target.value),
+                    value_type: currentRange.value_type || "years",
+                  } as any,
+                  index,
+                )
+              }
+            />
+            {renderAgeType()}
+          </div>
+        );
+      }
+      break;
+    }
+    default: {
+      if (operation === ConditionOperation.equality) {
+        const currentValue = typeof value === "string" ? value : "";
+        return (
+          <Input
+            type="text"
+            placeholder={t("value")}
+            value={currentValue}
+            onChange={(e) => handleSetValue(e.target.value, index)}
+            className="w-fit h-9"
+          />
+        );
+      } else if (operation === ConditionOperation.in_range) {
+        const currentRange =
+          typeof value === "object" && value !== null && "min" in value
+            ? (value as ConditionOperationInRangeValue)
+            : { min: undefined, max: undefined };
+        return (
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Input
+              type="number"
+              placeholder={t("min")}
+              className="w-full h-9"
+              value={currentRange.min || ""}
+              onChange={(e) =>
+                handleSetValue(
+                  {
+                    min: Number(e.target.value),
+                    max: currentRange.max || 0,
+                  },
+                  index,
+                )
+              }
+            />
+            <Input
+              type="number"
+              placeholder={t("max")}
+              className="w-full h-9"
+              value={currentRange.max || ""}
+              onChange={(e) =>
+                handleSetValue(
+                  {
+                    min: currentRange.min || 0,
+                    max: Number(e.target.value),
+                  },
+                  index,
+                )
+              }
+            />
+          </div>
+        );
+      } else if (operation === ConditionOperation.has_tag) {
+        const selectedTags = tagQueries
+          .map((query) => query.data)
+          .filter(Boolean) as TagConfig[];
+        return (
+          <TagSelectorPopover
+            selected={selectedTags}
+            resource={TagResource.ENCOUNTER}
+            onChange={(tags) => {
+              handleSetValue(tags.map((tag) => tag.id).join(","), index);
+            }}
+            singleSelect={true}
+          />
+        );
+      }
+      break;
+    }
+  }
+}
+
 export function ConditionComponent({
   conditions,
   setConditions,
@@ -568,29 +828,60 @@ export function ConditionComponent({
   }, [metrics, conditions]);
 
   const handleSetMetric = (metric: string, index: number) => {
+    const newMetric = metrics?.find((m) => m.name === metric);
+    const firstOperation = newMetric
+      ?.allowed_operations?.[0] as ConditionOperation;
+
+    const updatedCondition: Condition = {
+      ...conditions[index],
+      metric: newMetric?.name || "",
+      operation: firstOperation,
+      ...(firstOperation === ConditionOperation.equality &&
+        newMetric?.name !== "patient_age" && {
+          value: "",
+        }),
+      ...(firstOperation === ConditionOperation.equality &&
+        newMetric?.name === "patient_age" && {
+          value: { value: 0, value_type: "years" },
+        }),
+      ...(firstOperation === ConditionOperation.in_range && {
+        value: {
+          min: undefined,
+          max: undefined,
+          ...(newMetric?.name === "patient_age" && { value_type: "years" }),
+        },
+      }),
+      ...(firstOperation === ConditionOperation.intersects_any && {
+        values: [],
+      }),
+    } as Condition;
+
     setConditions(
-      conditions.map((c, i) =>
-        i === index
-          ? {
-              ...c,
-              metric: metrics?.find((m) => m.name === metric)?.name || "",
-            }
-          : c,
-      ),
+      conditions.map((c, i) => (i === index ? updatedCondition : c)),
     );
   };
 
   const getDefaultCondition = () => {
     const firstOperation = metrics?.[0]
       ?.allowed_operations?.[0] as ConditionOperation;
+    const metricName = metrics?.[0].name || "";
     const newCondition: Condition = {
-      metric: metrics?.[0].name || "",
+      metric: metricName,
       operation: firstOperation,
-      ...(firstOperation === ConditionOperation.equality && {
-        value: "",
-      }),
+      ...(firstOperation === ConditionOperation.equality &&
+        metricName !== "patient_age" && {
+          value: "",
+        }),
+      ...(firstOperation === ConditionOperation.equality &&
+        metricName === "patient_age" && {
+          value: { value: 0, value_type: "years" },
+        }),
       ...(firstOperation === ConditionOperation.in_range && {
-        value: { min: undefined, max: undefined },
+        value: {
+          min: undefined,
+          max: undefined,
+          ...(metricName === "patient_age" && { value_type: "years" }),
+        },
       }),
       ...(firstOperation === ConditionOperation.intersects_any && {
         values: [],
@@ -613,98 +904,40 @@ export function ConditionComponent({
   };
 
   const handleSetValue = (
-    value: string | ConditionOperationInRangeValue | { values: string[] },
+    value:
+      | string
+      | ConditionOperationInRangeValue
+      | AgeOperationEqualityValue
+      | { values: string[] },
     index: number,
   ) => {
+    let updatedCondition = conditions[index];
+    updatedCondition = { ...updatedCondition, value: value } as Condition;
     setConditions(
-      conditions.map((c, i) =>
-        i === index ? ({ ...c, value } as Condition) : c,
-      ),
+      conditions.map((c, i) => (i === index ? updatedCondition : c)),
     );
+  };
+
+  const handleSetValueType = (value: string, index: number) => {
+    const metric = conditions[index].metric;
+    if (metric === "patient_age") {
+      const currentValue = conditions[index].value;
+      const updatedValue = {
+        ...(currentValue as
+          | AgeOperationInRangeValue
+          | AgeOperationEqualityValue),
+        value_type: value,
+      };
+      setConditions(
+        conditions.map((c, i) =>
+          i === index ? ({ ...c, value: updatedValue } as Condition) : c,
+        ),
+      );
+    }
   };
 
   const handleRemoveCondition = (index: number) => {
     setConditions(conditions.filter((_, i) => i !== index));
-  };
-
-  const renderOperation = (condition: Condition, index: number) => {
-    const operation = condition.operation;
-    const value =
-      "value" in condition
-        ? condition.value
-        : { min: undefined, max: undefined };
-    const values = "values" in condition ? condition.values : [];
-    switch (operation) {
-      case ConditionOperation.equality: {
-        const currentValue = typeof value === "string" ? value : "";
-        return (
-          <Input
-            type="number"
-            placeholder="Value"
-            value={currentValue}
-            onChange={(e) => handleSetValue(e.target.value, index)}
-            className="w-fit"
-          />
-        );
-      }
-      case ConditionOperation.in_range: {
-        const currentRange =
-          typeof value === "object" && value !== null && "min" in value
-            ? (value as ConditionOperationInRangeValue)
-            : { min: undefined, max: undefined };
-        return (
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Input
-              type="number"
-              placeholder="Min"
-              className="w-full sm:w-32"
-              value={currentRange.min || ""}
-              onChange={(e) =>
-                handleSetValue(
-                  {
-                    min: Number(e.target.value),
-                    max: currentRange.max || 0,
-                  },
-                  index,
-                )
-              }
-            />
-            <Input
-              type="number"
-              placeholder="Max"
-              className="w-full sm:w-32"
-              value={currentRange.max || ""}
-              onChange={(e) =>
-                handleSetValue(
-                  {
-                    min: currentRange.min || 0,
-                    max: Number(e.target.value),
-                  },
-                  index,
-                )
-              }
-            />
-          </div>
-        );
-      }
-      case ConditionOperation.intersects_any: {
-        const currentValues = values as string[];
-        return (
-          <Input
-            type="text"
-            placeholder="Enter comma-separated values"
-            value={currentValues.join(", ")}
-            onChange={(e) => {
-              const valuesArray = e.target.value
-                .split(",")
-                .map((v) => v.trim())
-                .filter((v) => v);
-              handleSetValue({ values: valuesArray }, index);
-            }}
-          />
-        );
-      }
-    }
   };
 
   return (
@@ -742,7 +975,7 @@ export function ConditionComponent({
                   <Trash2 className="size-4" />
                 </Button>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col gap-2">
                 <div className="flex flex-col sm:flex-row gap-2 flex-1">
                   <div className="flex flex-col gap-2 flex-1">
                     <FormLabel className="text-sm">{t("type")}</FormLabel>
@@ -756,7 +989,7 @@ export function ConditionComponent({
                       <SelectContent>
                         {metrics?.map((metric: Metrics) => (
                           <SelectItem key={metric.name} value={metric.name}>
-                            {t(metric.name)}
+                            {t(`observation_metric__${metric.name}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -790,7 +1023,12 @@ export function ConditionComponent({
                 {condition.operation && (
                   <div className="flex flex-col gap-2">
                     <FormLabel className="text-sm">{t("value")}</FormLabel>
-                    {renderOperation(condition, index)}
+                    <RenderConditionInput
+                      condition={condition}
+                      index={index}
+                      handleSetValue={handleSetValue}
+                      handleSetValueType={handleSetValueType}
+                    />
                   </div>
                 )}
               </div>
@@ -830,12 +1068,13 @@ function InterpretationComponent({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2 w-full justify-between">
+    <div className="flex flex-col gap-2 w-full justify-between">
       <div className="flex flex-col gap-2 flex-1">
         <FormLabel className="text-sm">{t("display")}</FormLabel>
         <Input
           value={interpretation.display}
           onChange={(e) => handleDisplayChange(e.target.value)}
+          className="h-9"
         />
       </div>
       <div className="flex flex-col gap-2 flex-1">
@@ -843,6 +1082,7 @@ function InterpretationComponent({
         <Input
           value={interpretation.icon}
           onChange={(e) => handleIconChange(e.target.value)}
+          className="h-9"
         />
       </div>
       <div className="flex flex-col gap-2 flex-1">
@@ -851,8 +1091,8 @@ function InterpretationComponent({
           value={interpretation.color}
           onValueChange={(value) => handleColorChange(value)}
         >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a color" />
+          <SelectTrigger className="h-9">
+            <SelectValue placeholder={t("select_a_value")} />
           </SelectTrigger>
           <SelectContent>
             {Object.entries(COLOR_OPTIONS).map(([key, value]) => (
@@ -949,7 +1189,7 @@ function NumericRangeComponent({
             </Button>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col gap-2">
             {range?.interpretation && (
               <InterpretationComponent
                 interpretation={range.interpretation}
@@ -965,6 +1205,7 @@ function NumericRangeComponent({
                   type="number"
                   value={range?.min}
                   onChange={(e) => handleSetMin(Number(e.target.value), index)}
+                  className="h-9"
                 />
               </div>
               <div className="flex flex-col gap-2 flex-1">
@@ -973,6 +1214,7 @@ function NumericRangeComponent({
                   type="number"
                   value={range?.max}
                   onChange={(e) => handleSetMax(Number(e.target.value), index)}
+                  className="h-9"
                 />
               </div>
             </div>
