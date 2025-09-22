@@ -118,6 +118,12 @@ export function ItemSelector<T = any>({
   const [searchValue, setSearchValue] = React.useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
 
+  // Detect iOS devices to handle autofocus appropriately
+  const isIOS = React.useMemo(() => {
+    if (typeof navigator === "undefined") return false;
+    return /iPhone|iPad|iPod/.test(navigator.userAgent);
+  }, []);
+
   // Convert value to array for consistent handling
   const selectedValues = React.useMemo(() => {
     if (Array.isArray(value)) return value;
@@ -242,7 +248,7 @@ export function ItemSelector<T = any>({
           onSearch?.(value); // Call external onSearch if provided
         }}
         className="outline-hidden border-none ring-0 shadow-none text-base"
-        autoFocus
+        autoFocus={!isIOS}
       />
       <CommandList className="max-h-[300px] overflow-y-auto">
         {loading ? (
@@ -271,14 +277,6 @@ export function ItemSelector<T = any>({
                 key={option.value}
                 value={option.label}
                 onSelect={() => handleSelect(option.value)}
-                onTouchStart={(e) => {
-                  // fix for ios touch event
-                  if (document.activeElement instanceof HTMLElement) {
-                    document.activeElement.blur();
-                    e.stopPropagation(); //
-                    setTimeout(() => handleSelect(option.value), 10); //
-                  }
-                }}
                 className={cn(
                   "cursor-pointer",
                   option.disabled && "opacity-50 pointer-events-none",
