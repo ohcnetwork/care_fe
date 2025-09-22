@@ -1802,10 +1802,10 @@ export default function MedicationBillForm({ patientId }: Props) {
                                           <PopoverTrigger asChild>
                                             <Button
                                               variant="outline"
-                                              className="w-auto min-w-40 justify-between h-auto min-h-[40px] p-2 border-gray-300 border"
+                                              className="w-auto min-w-40 justify-between h-auto min-h-[40px] p-1 border-gray-300 border"
                                               type="button"
                                             >
-                                              <div className="flex flex-col items-start gap-1 w-full">
+                                              <div className="flex flex-col items-start gap-1 w-full p-1">
                                                 {(() => {
                                                   const selectedLots = form
                                                     .watch(
@@ -1843,7 +1843,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                           key={
                                                             lot.selectedInventoryId
                                                           }
-                                                          className="flex items-center gap-2 w-full bg-gray-50 px-2 border-gray-200 border-1 text-gray-950"
+                                                          className="flex items-center gap-2 w-full bg-gray-50 px-2 py-1 border-gray-200 border-1 text-gray-950"
                                                         >
                                                           <span className="font-medium text-sm">
                                                             {"Lot #" +
@@ -1872,6 +1872,33 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                                 .display
                                                             }
                                                           </Badge>
+                                                          {selectedInventory
+                                                            ?.product
+                                                            .expiration_date && (
+                                                            <Badge
+                                                              variant={
+                                                                selectedInventory.status ===
+                                                                  "active" &&
+                                                                new Date(
+                                                                  selectedInventory.product.expiration_date,
+                                                                ) >= new Date()
+                                                                  ? "primary"
+                                                                  : "destructive"
+                                                              }
+                                                            >
+                                                              {t("expiry")}:{" "}
+                                                              {selectedInventory
+                                                                .product
+                                                                .expiration_date
+                                                                ? formatDate(
+                                                                    selectedInventory
+                                                                      .product
+                                                                      .expiration_date,
+                                                                    "dd/MM/yyyy",
+                                                                  )
+                                                                : "-"}
+                                                            </Badge>
+                                                          )}
                                                           {selectedInventory
                                                             ?.location.id !==
                                                             locationId && (
@@ -1984,6 +2011,30 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                               .base_unit.display
                                                           }
                                                         </Badge>
+                                                        {inv.product
+                                                          ?.expiration_date && (
+                                                          <Badge
+                                                            variant={
+                                                              inv.status ===
+                                                                "active" &&
+                                                              new Date(
+                                                                inv.product.expiration_date,
+                                                              ) >= new Date()
+                                                                ? "primary"
+                                                                : "destructive"
+                                                            }
+                                                          >
+                                                            {t("expiry")}:{" "}
+                                                            {inv.product
+                                                              .expiration_date
+                                                              ? formatDate(
+                                                                  inv.product
+                                                                    .expiration_date,
+                                                                  "dd/MM/yyyy",
+                                                                )
+                                                              : "-"}
+                                                          </Badge>
+                                                        )}
                                                         {inv?.location.id !==
                                                           locationId && (
                                                           <Badge variant="secondary">

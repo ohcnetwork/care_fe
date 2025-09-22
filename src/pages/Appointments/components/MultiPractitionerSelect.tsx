@@ -86,6 +86,7 @@ export const MultiPractitionerSelector = ({
         parent: "",
         ordering: "name",
         active: true,
+        limit: 100,
       },
     }),
     enabled: open,

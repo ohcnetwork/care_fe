@@ -127,14 +127,6 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
             <div>
               <p className="text-gray-600 text-sm">{t("manage_products")}</p>
             </div>
-            <Button
-              onClick={() =>
-                navigate(`/facility/${facilityId}/settings/product/new`)
-              }
-            >
-              <CareIcon icon="l-plus" className="mr-2" />
-              {t("add_product")}
-            </Button>
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
@@ -159,7 +151,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(ProductStatusOptions)}
-                  label="status"
+                  label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>
