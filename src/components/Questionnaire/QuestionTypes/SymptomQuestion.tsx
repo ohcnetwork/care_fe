@@ -46,12 +46,12 @@ import {
 
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
-import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
+import ValueSetSelectV2 from "@/components/Questionnaire/ValueSetSelectV2";
 import { Code } from "@/types/base/code/code";
 import {
   Onset,
@@ -936,7 +936,7 @@ export function SymptomQuestion({
           </div>
         </EntitySelectionSheet>
       ) : (
-        <ValueSetSelect
+        <ValueSetSelectV2
           system="system-condition-code"
           placeholder={addSymptomPlaceholder}
           onSelect={handleCodeSelect}

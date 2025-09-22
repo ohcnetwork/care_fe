@@ -29,7 +29,7 @@ import { Code } from "@/types/base/code/code";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 
 import MedicationValueSetSelect from "./MedicationValueSetSelect";
-import ValueSetSelect from "./ValueSetSelect";
+import ValueSetSelectV2 from "./ValueSetSelectV2";
 
 interface EntitySelectionSheetProps {
   /**
@@ -149,7 +149,7 @@ export function EntitySelectionSheet({
           value={selectedEntity || undefined}
         />
       ) : (
-        <ValueSetSelect
+        <ValueSetSelectV2
           system={system}
           placeholder={placeholder}
           onSelect={handleSelect}
@@ -197,7 +197,7 @@ export function EntitySelectionSheet({
               title={t(`select_${entityType}`)}
             />
           ) : (
-            <ValueSetSelect
+            <ValueSetSelectV2
               system={system}
               placeholder={placeholder}
               onSelect={handleSelect}
