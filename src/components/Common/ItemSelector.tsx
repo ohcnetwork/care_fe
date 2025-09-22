@@ -149,6 +149,11 @@ export function ItemSelector<T = any>({
   const [activeTab, setActiveTab] = React.useState("search");
   const isMobile = useBreakpoints({ default: true, sm: false });
 
+  const isIOS = React.useMemo(() => {
+    if (typeof navigator === "undefined") return false;
+    return /iPhone|iPad|iPod/.test(navigator.userAgent);
+  }, []);
+
   // Handle controlled/uncontrolled open state
   const isOpen = open !== undefined ? open : internalOpen;
   const handleOpenChange = (newOpen: boolean) => {
@@ -299,7 +304,7 @@ export function ItemSelector<T = any>({
           onSearch?.(value); // Call external onSearch if provided
         }}
         className="outline-hidden border-none ring-0 shadow-none text-base md:text-sm"
-        autoFocus
+        autoFocus={!isIOS}
       />
       <CommandList className="overflow-hidden h-[300px]">
         {loading ? (
@@ -336,14 +341,6 @@ export function ItemSelector<T = any>({
                       key={option.value}
                       value={option.label}
                       onSelect={() => handleSelect(option.value)}
-                      // onTouchStart={(e) => {
-                      //   // fix for ios touch event
-                      //   if (document.activeElement instanceof HTMLElement) {
-                      //     document.activeElement.blur();
-                      //     e.stopPropagation();
-                      //     setTimeout(() => handleSelect(option.value), 10);
-                      //   }
-                      // }}
                       className={cn(
                         "cursor-pointer",
                         option.disabled && "opacity-50 pointer-events-none",
@@ -493,14 +490,6 @@ export function ItemSelector<T = any>({
                       key={option.value}
                       value={option.label}
                       onSelect={() => handleSelect(option.value)}
-                      // onTouchStart={(e) => {
-                      //   // fix for ios touch event
-                      //   if (document.activeElement instanceof HTMLElement) {
-                      //     document.activeElement.blur();
-                      //     e.stopPropagation();
-                      //     setTimeout(() => handleSelect(option.value), 10);
-                      //   }
-                      // }}
                       className={cn(
                         "cursor-pointer",
                         option.disabled && "opacity-50 pointer-events-none",
@@ -658,7 +647,7 @@ export function ItemSelector<T = any>({
       )}
       <PopoverContent
         className={cn(
-          "p-0 w-[var(--radix-popover-trigger-width)] min-w-[300px] transition-all",
+          "p-0 w-[var(--radix-popover-trigger-width)] min-w-[300px]",
           popoverClassName,
         )}
         align={popoverAlign}
