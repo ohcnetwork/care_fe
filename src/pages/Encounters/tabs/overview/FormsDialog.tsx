@@ -29,7 +29,7 @@ export const FormDialog = ({
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
 
-  const { data: response, isLoading } = useQuery({
+  const { data: questionnaires, isLoading } = useQuery({
     queryKey: ["questionnaires", search, subjectType],
     queryFn: query.debounced(questionnaireApi.list, {
       queryParams: {
@@ -41,16 +41,16 @@ export const FormDialog = ({
     }),
   });
 
-  const questionnaireOptions = useQuestionnaireOptions(questionnaireTag);
-  const quesionnaires = [
-    ...questionnaireOptions.results,
-    ...(response?.results ?? []),
+  const taggedQuestionnaires = useQuestionnaireOptions(questionnaireTag);
+  const allQuestionnaires = [
+    ...taggedQuestionnaires.results,
+    ...(questionnaires?.results ?? []),
   ];
 
-  const questionnaireIds = new Set([...quesionnaires.map((q) => q.id)]);
+  const questionnaireIds = new Set([...allQuestionnaires.map((q) => q.id)]);
 
   const questionnaireList = [...questionnaireIds].map(
-    (id) => quesionnaires.find((q) => q.id === id)!,
+    (id) => allQuestionnaires.find((q) => q.id === id)!,
   );
 
   const {
@@ -81,7 +81,7 @@ export const FormDialog = ({
             onValueChange={setSearch}
           />
         </div>
-        <CommandList className="h-[80vh] max-h-[80vh] w-full">
+        <CommandList className="max-h-[80vh] w-full">
           {isLoading ? (
             <CardListSkeleton count={10} />
           ) : questionnaireList.length === 0 ? (
