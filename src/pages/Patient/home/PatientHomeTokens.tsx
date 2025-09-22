@@ -16,6 +16,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+
 import useFilters from "@/hooks/useFilters";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { TokenRead, renderTokenNumber } from "@/types/tokens/token/token";
@@ -86,122 +88,120 @@ export default function PatientHomeTokens({
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("token_number")}</TableHead>
-              <TableHead>{t("category")}</TableHead>
-              <TableHead>{t("queue")}</TableHead>
-              <TableHead>{t("status")}</TableHead>
-              <TableHead>{t("created_date")}</TableHead>
-              {facilityId && (
-                <TableHead className="text-right">{t("actions")}</TableHead>
-              )}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
+        {isLoading ? (
+          <TableSkeleton count={5} />
+        ) : (
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">
-                  {t("loading")}
-                </TableCell>
+                <TableHead>{t("token_number")}</TableHead>
+                <TableHead>{t("category")}</TableHead>
+                <TableHead>{t("queue")}</TableHead>
+                <TableHead>{t("status")}</TableHead>
+                <TableHead>{t("created_date")}</TableHead>
+                {facilityId && (
+                  <TableHead className="text-right">{t("actions")}</TableHead>
+                )}
               </TableRow>
-            ) : tokens && tokens.length ? (
-              tokens.map((token: TokenRead) => (
-                <TableRow key={token.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
+            </TableHeader>
+            <TableBody>
+              {tokens && tokens.length ? (
+                tokens.map((token: TokenRead) => (
+                  <TableRow key={token.id}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
+                          <CareIcon
+                            icon="l-ticket"
+                            className="size-4 text-primary"
+                          />
+                        </div>
+                        <span className="font-mono text-sm">
+                          {renderTokenNumber(token)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">
+                          {token.category.name}
+                        </span>
+                        {token.category.shorthand && (
+                          <Badge variant="outline" className="text-xs">
+                            {token.category.shorthand}
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">
+                          {token.queue.name}
+                        </span>
+                        {token.sub_queue && (
+                          <span className="text-xs text-gray-500">
+                            {token.sub_queue.name}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>{t(token.status.toLowerCase())}</TableCell>
+                    <TableCell>
+                      <span className="text-sm text-gray-600">
+                        TODO
+                        {/* TODO: Add created date */}
+                      </span>
+                    </TableCell>
+                    {facilityId && (
+                      <TableCell className="text-right">
+                        <Button variant="outline" size="sm" asChild>
+                          <Link
+                            href={
+                              token.patient
+                                ? `/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                                    {
+                                      phone_number: token.patient.phone_number,
+                                      year_of_birth:
+                                        token.patient.year_of_birth.toString(),
+                                      partial_id: token.patient.id.slice(0, 5),
+                                      queue_id: token.queue.id,
+                                      token_id: token.id,
+                                    },
+                                  ).toString()}`
+                                : "#"
+                            }
+                          >
+                            <CareIcon icon="l-eye" className="mr-1" />
+                            {t("view")}
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-4">
+                    <div className="flex flex-col items-center justify-center p-6 text-center">
+                      <div className="rounded-full bg-primary/10 p-3 mb-3">
                         <CareIcon
                           icon="l-ticket"
-                          className="size-4 text-primary"
+                          className="size-6 text-primary"
                         />
                       </div>
-                      <span className="font-mono text-sm">
-                        {renderTokenNumber(token)}
-                      </span>
+                      <h3 className="text-lg font-semibold mb-1">
+                        {t("no_tokens_found")}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {t("no_tokens_found_description")}
+                      </p>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">
-                        {token.category.name}
-                      </span>
-                      {token.category.shorthand && (
-                        <Badge variant="outline" className="text-xs">
-                          {token.category.shorthand}
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">
-                        {token.queue.name}
-                      </span>
-                      {token.sub_queue && (
-                        <span className="text-xs text-gray-500">
-                          {token.sub_queue.name}
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>{t(token.status.toLowerCase())}</TableCell>
-                  <TableCell>
-                    <span className="text-sm text-gray-600">
-                      TODO
-                      {/* TODO: Add created date */}
-                    </span>
-                  </TableCell>
-                  {facilityId && (
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link
-                          href={
-                            token.patient
-                              ? `/facility/${facilityId}/patients/verify?${new URLSearchParams(
-                                  {
-                                    phone_number: token.patient.phone_number,
-                                    year_of_birth:
-                                      token.patient.year_of_birth.toString(),
-                                    partial_id: token.patient.id.slice(0, 5),
-                                    queue_id: token.queue.id,
-                                    token_id: token.id,
-                                  },
-                                ).toString()}`
-                              : "#"
-                          }
-                        >
-                          <CareIcon icon="l-eye" className="mr-1" />
-                          {t("view")}
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  )}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">
-                  <div className="flex flex-col items-center justify-center p-6 text-center">
-                    <div className="rounded-full bg-primary/10 p-3 mb-3">
-                      <CareIcon
-                        icon="l-ticket"
-                        className="size-6 text-primary"
-                      />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-1">
-                      {t("no_tokens_found")}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {t("no_tokens_found_description")}
-                    </p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        )}
 
         <Pagination totalCount={data?.count ?? 0} />
       </div>
