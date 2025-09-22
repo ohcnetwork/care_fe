@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -14,7 +14,9 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Support both string and { value, label } option
-type FilterTabOption = string | { value: string; label: string };
+type FilterTabOption =
+  | string
+  | { value: string; label: string; icon?: React.ReactNode };
 
 interface FilterTabsProps {
   value: string;
@@ -76,7 +78,9 @@ export function FilterTabs({
         .filter((option) => optionValues.includes(option))
         .slice(0, maxVisibleTabs);
 
-      return optionValues.filter((option) => !validDefaultOptions.includes(option));
+      return optionValues.filter(
+        (option) => !validDefaultOptions.includes(option),
+      );
     }
 
     return optionValues.slice(maxVisibleTabs);
@@ -161,6 +165,7 @@ export function FilterTabs({
                 value={val}
                 className={getTriggerClassName()}
               >
+                {option && typeof option === "object" && option.icon}
                 {option ? getOptionLabel(option) : t(val)}
               </TabsTrigger>
             );
@@ -182,7 +187,10 @@ export function FilterTabs({
                       onClick={() => handleDropdownSelect(val)}
                       className="text-gray-950 font-medium text-sm"
                     >
-                      {option ? getOptionLabel(option) : t(val)}
+                      <span className="flex items-center gap-1">
+                        {option && typeof option === "object" && option.icon}
+                        {option ? getOptionLabel(option) : t(val)}
+                      </span>
                     </DropdownMenuItem>
                   );
                 })}
