@@ -1,4 +1,3 @@
-import { AlarmClockIcon, Eye } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -8,13 +7,13 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 import { getPermissions } from "@/common/Permissions";
 
-import { formatDateTime } from "@/Utils/utils";
+import { newFormatDateTime } from "@/common/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { cn } from "@/lib/utils";
 import {
-  ENCOUNTER_CLASS_ICONS,
-  ENCOUNTER_CLASSES_COLORS,
+  ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
+  ENCOUNTER_STATUS_FILTER_COLORS,
   ENCOUNTER_STATUS_ICONS,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
@@ -44,30 +43,24 @@ export function TimelineEncounterCard({
 
   const canAccess = canViewEncounter || canViewPatients;
 
-  const ClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
   const StatusIcon = ENCOUNTER_STATUS_ICONS[encounter.status];
 
-  const getComponentColor = (color = "gray") => {
-    return `bg-${color}-200 text-${color}-700 border-${color}-500`;
-  };
-
   return (
-    <div className="flex items-stretch gap-3 py-4 group">
-      <div className="w-[36px] flex flex-col items-center self-stretch">
+    <div className="flex items-stretch gap-2 py-4 group">
+      <div className="flex flex-col items-center self-stretch">
         <div className="hidden" />
 
         <div
           className={cn(
-            "relative p-2 rounded-full border-2 transition-all duration-200 mt-6 group-hover:scale-105 group-hover:shadow-md",
-            getComponentColor(ENCOUNTER_STATUS_COLORS[encounter.status]),
+            "relative p-1.5 rounded-full border transition-all duration-200 mt-4 group-hover:scale-105 group-hover:shadow-md",
+            ENCOUNTER_STATUS_FILTER_COLORS[encounter.status],
           )}
-          role="img"
           aria-label={t(`encounter_status__${encounter.status}`)}
         >
           <StatusIcon
             className={cn(
               "size-4",
-              getComponentColor(ENCOUNTER_STATUS_COLORS[encounter.status]),
+              ENCOUNTER_STATUS_FILTER_COLORS[encounter.status],
             )}
           />
         </div>
@@ -83,76 +76,60 @@ export function TimelineEncounterCard({
         onMouseLeave={() => setIsHovered(false)}
       >
         <CardContent className="p-5">
-          <div className="mb-4 flex items-center gap-3">
+          <div className="font-semibold text-base mb-2">
+            {t(`encounter_class__${encounter.encounter_class}`)}
+          </div>
+          <div className="mb-3 flex items-center gap-2">
             <Badge
-              variant={ENCOUNTER_CLASSES_COLORS[encounter.encounter_class]}
-              size="sm"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium"
+              variant={ENCOUNTER_PRIORITY_COLORS[encounter.priority]}
+              className="rounded-sm px-1.5 py-0.5"
             >
-              <ClassIcon className="size-4" />
-              {t(`encounter_class__${encounter.encounter_class}`)}
+              {t(`encounter_priority__${encounter.priority.toLowerCase()}`)}
             </Badge>
             <Badge
               variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
               size="sm"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium"
+              className="rounded-sm px-1.5 py-0.5"
             >
-              <StatusIcon className="size-4" />
               {t(`encounter_status__${encounter.status}`)}
             </Badge>
           </div>
 
-          <div className="grid sm:flex sm:flex-wrap sm:justify-between gap-4">
-            <div>
-              <div className="text-gray-600">{t("facility")}</div>
-              <div className="mt-1 text-lg font-semibold text-gray-900">
-                {encounter.facility.name}
-              </div>
-            </div>
-
+          <div className="grid gap-3 sm:gap-6 sm:flex sm:flex-wrap ">
             <div>
               <div className="text-gray-600">{t("start_date")}</div>
-              <div className="mt-1 text-lg font-semibold text-gray-900">
+              <div className="font-semibold text-gray-900">
                 {encounter.period.start
-                  ? formatDateTime(encounter.period.start)
+                  ? newFormatDateTime(encounter.period.start)
                   : t("not_started")}
               </div>
             </div>
 
-            {encounter.period.end && (
-              <div>
-                <div className="text-gray-600">{t("end_date")}</div>
-                <div className="mt-1 text-lg font-semibold text-gray-900">
-                  {formatDateTime(encounter.period.end)}
-                </div>
+            <div>
+              <div className="text-gray-600">{t("end_date")}</div>
+              <div className="font-semibold text-gray-900">
+                {encounter.period.end
+                  ? newFormatDateTime(encounter.period.end)
+                  : t("ongoing") + "..."}
               </div>
-            )}
-
-            {encounter.external_identifier && (
-              <div>
-                <div className="text-gray-600">{t("external_id")}</div>
-                <div className="mt-1 text-lg font-semibold text-gray-900">
-                  {encounter.external_identifier}
-                </div>
-              </div>
-            )}
+            </div>
 
             <div>
-              <div className="text-gray-600 flex items-center gap-1.5">
-                {t("priority")}{" "}
-                <AlarmClockIcon className="size-5 text-orange-500" />
-              </div>
-              <div className="mt-1 text-lg font-semibold text-gray-900">
-                {t(`encounter_priority__${encounter.priority.toLowerCase()}`)}
+              <div className="text-gray-600">{t("facility")}</div>
+              <div className="font-semibold text-gray-900">
+                {encounter.facility.name}
               </div>
             </div>
           </div>
 
           {encounter.tags.length > 0 && (
-            <div className="w-full mx-3 sm:w-auto">
-              <div className="flex flex-wrap gap-2">
+            <div className="w-full mt-2 sm:w-auto">
+              <div className="text-gray-600 mt-1">
+                {t("encounter_tag_label", { count: encounter.tags.length })}
+              </div>
+              <div className="flex flex-wrap gap-1">
                 {encounter.tags.map((tag) => (
-                  <Badge variant="outline" key={tag.id}>
+                  <Badge variant="secondary" key={tag.id}>
                     {getTagHierarchyDisplay(tag)}
                   </Badge>
                 ))}
@@ -162,23 +139,17 @@ export function TimelineEncounterCard({
         </CardContent>
         <CardFooter className="p-1">
           <div className="bg-gray-100 p-4 rounded-b-lg w-full">
-            {canAccess ? (
-              <Button asChild variant="outline" className="px-4">
-                <Link
-                  href={
-                    facilityId
-                      ? `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
-                      : `/organization/organizationId/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
-                  }
-                >
-                  <Eye className="mr-2 size-4" /> {t("view_encounter")}
-                </Link>
-              </Button>
-            ) : (
-              <Button variant="outline" className="px-4" disabled>
-                <Eye className="mr-2 size-4" /> {t("view_encounter")}
-              </Button>
-            )}
+            <Button asChild variant="outline" disabled={!canAccess}>
+              <Link
+                href={
+                  facilityId
+                    ? `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
+                    : `/organization/organizationId/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`
+                }
+              >
+                {t("view_encounter")}
+              </Link>
+            </Button>
           </div>
         </CardFooter>
       </Card>

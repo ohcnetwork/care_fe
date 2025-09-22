@@ -6,6 +6,7 @@ import {
   SettingsIcon,
   SquareActivity,
   Stethoscope,
+  Ticket,
 } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -34,7 +35,6 @@ import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
-import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
@@ -51,7 +51,6 @@ import { saveElementAsImage } from "@/Utils/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function VerifyPatient() {
-  const getShortcutDisplay = useEncounterShortcutDisplays();
   const queryClient = useQueryClient();
   useFacilityShortcuts("patient-home");
   const { t } = useTranslation();
@@ -112,29 +111,33 @@ export default function VerifyPatient() {
           </AlertDescription>
         </Alert>
       ) : patientData ? (
-        <div className="space-y-6">
+        <div className="space-y-6 md:max-w-5xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
               <div className="">
-                <Card className="bg-white shadow-sm">
-                  <CardHeader className="pb-4">
-                    <div className="space-y-4">
-                      <PatientHoverCard
-                        patient={patientData}
-                        facilityId={facilityId || ""}
-                      />
-                    </div>
-                  </CardHeader>
+                <Card className="bg-white shadow-xs rounded-md -mb-0.25">
+                  <div className="p-4">
+                    <PatientHoverCard
+                      patient={patientData}
+                      facilityId={facilityId || ""}
+                    />
+                  </div>
                 </Card>
-                <Card className="bg-white shadow-sm mx-2 md:mx-10 rounded-t-none">
+                <Card className="bg-white shadow-sm mx-3 rounded-t-none rounded-b-md">
                   <CardHeader className="p-2">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        {patientData.instance_tags.map((t) => (
-                          <Badge key={t.id} variant="outline">
-                            {getTagHierarchyDisplay(t)}
-                          </Badge>
-                        ))}
+                        {patientData.instance_tags.length > 0 ? (
+                          patientData.instance_tags.map((t) => (
+                            <Badge key={t.id} variant="outline">
+                              {getTagHierarchyDisplay(t)}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-sm text-gray-500 px-2">
+                            {t("no_tags_assigned")}
+                          </span>
+                        )}
                       </div>
                       <TagAssignmentSheet
                         entityType={TagResource.PATIENT}
@@ -158,7 +161,9 @@ export default function VerifyPatient() {
                               strokeWidth={1.5}
                             />
                             <span className="font-semibold underline">
-                              {t("manage_tags")}
+                              {patientData.instance_tags.length === 0
+                                ? t("add_tags")
+                                : t("manage_tags")}
                             </span>
                           </Button>
                         }
@@ -178,7 +183,8 @@ export default function VerifyPatient() {
                       <QuickAction
                         icon={<SquareActivity className="text-orange-500" />}
                         title={t("create_encounter")}
-                        shortcut={getShortcutDisplay("create-encounter")}
+                        actionId="create-encounter"
+                        data-shortcut-id="create-encounter"
                       />
                     }
                   />
@@ -192,7 +198,8 @@ export default function VerifyPatient() {
                       <QuickAction
                         icon={<Stethoscope className="text-purple-500" />}
                         title={t("schedule_appointment")}
-                        shortcut={getShortcutDisplay("schedule-appointment")}
+                        actionId="schedule-appointment"
+                        data-shortcut-id="schedule-appointment"
                       />
                     }
                   />
@@ -204,9 +211,10 @@ export default function VerifyPatient() {
                     facilityId={facilityId}
                     trigger={
                       <QuickAction
-                        icon={<Printer className="text-gray-500" />}
+                        icon={<Ticket className="text-gray-500" />}
                         title={t("generate_token")}
-                        shortcut={getShortcutDisplay("generate-token")}
+                        actionId="generate-token"
+                        data-shortcut-id="generate-token"
                       />
                     }
                   />
@@ -272,7 +280,6 @@ export default function VerifyPatient() {
 
                   <div className="mt-4 flex justify-end gap-2">
                     <Button
-                      data-shortcut-id="print-token"
                       variant="ghost"
                       onClick={() =>
                         saveElementAsImage("section-to-print", "token-card.png")

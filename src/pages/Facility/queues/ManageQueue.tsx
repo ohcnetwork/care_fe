@@ -67,7 +67,7 @@ export function ManageQueuePage({
   });
 
   const { data: queue, isLoading: isQueueLoading } = useQuery({
-    queryKey: ["queue", facilityId, queueId],
+    queryKey: ["tokenQueue", facilityId, queueId],
     queryFn: query(tokenQueueApi.get, {
       pathParams: { facility_id: facilityId, id: queueId },
     }),
