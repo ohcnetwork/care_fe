@@ -7,6 +7,7 @@ interface KeyboardShortcutBadgeProps {
   className?: string;
   position?: "top-right" | "bottom-right" | "top-left" | "bottom-left";
   alwaysShow?: boolean;
+  actionId?: string;
 }
 
 /**
@@ -18,6 +19,7 @@ export function KeyboardShortcutBadge({
   className,
   position,
   alwaysShow = true,
+  actionId,
 }: KeyboardShortcutBadgeProps) {
   const { isOptionPressed } = useKeyboardShortcuts([], {}, {});
 
@@ -32,6 +34,7 @@ export function KeyboardShortcutBadge({
 
   return (
     <div
+      data-shortcut-id={actionId}
       className={cn(
         "h-5 min-w-5 flex items-center justify-center px-1 bg-gradient-to-b from-white to gray-500/20 rounded-md border border-gray-200",
         position ? positionClasses[position] : "",
@@ -70,6 +73,7 @@ export function ShortcutBadge({
       className={className}
       position={position}
       alwaysShow={alwaysShow}
+      actionId={actionId}
     />
   );
 }

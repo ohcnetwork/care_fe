@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
 
 import { Button } from "@/components/ui/button";
@@ -88,7 +88,7 @@ export function EditChargeItemSheet({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // Register shortcuts for this sheet
-  useFacilityShortcuts("edit-charge-item-sheet");
+  useShortcutSubContext("facility:chargeItem:sheet");
   const getShortcutDisplay = useShortcutDisplays(["facility"]);
 
   const form = useForm<FormValues>({

@@ -1,313 +1,80 @@
 {
-  "global": [],
-  "facility": [
-    {
-      "key": "shift+p",
-      "action": "register-patient",
-      "description": "Register New Patient",
-      "when": "canCreate"
-    },
-    {
-      "key": "h",
-      "action": "patient-home",
-      "description": "Go to Patient Home",
-      "when": "always"
-    },
-    {
-      "key": "p",
-      "action": "print-token",
-      "description": "Print Token",
-      "when": "always",
-      "subContext": "patient-home"
-    },
-    {
-      "key": "p",
-      "action": "print-token",
-      "description": "Print Token",
-      "when": "always",
-      "subContext": "appointment-detail"
-    },
-    {
-      "key": "e",
-      "action": "create-encounter",
-      "description": "Create Encounter",
-      "when": "always",
-      "subContext": "appointment-detail"
-    },
-    {
-      "key": "s",
-      "action": "start-consultation",
-      "description": "Create Encounter",
-      "when": "always",
-      "subContext": "appointment-detail"
-    },
-    {
-      "key": "t",
-      "action": "generate-token",
-      "description": "Generate Token",
-      "when": "always",
-      "subContext": "patient-home"
-    },
-    {
-      "key": "e",
-      "action": "create-encounter",
-      "description": "Create Encounter",
-      "when": "always",
-      "subContext": "patient-home"
-    },
-    {
-      "key": "a",
-      "action": "schedule-appointment",
-      "description": "Schedule Appointment",
-      "when": "always",
-      "subContext": "patient-home"
-    },
-    {
-      "key": "shift+?",
-      "action": "show-shortcuts",
-      "description": "Show Keyboard Shortcuts",
-      "when": "always"
-    },
-    {
-      "key": "e",
-      "action": "edit-invoice-items",
-      "description": "Edit Invoice Items",
-      "when": "always",
-      "subContext": "invoice-show"
-    },
-    {
-      "key": "a",
-      "action": "add-charge-item",
-      "description": "Add Charge Item",
-      "when": "always",
-      "subContext": "billing"
-    },
-    {
-      "key": "i",
-      "action": "issue-invoice",
-      "description": "Issue Invoice",
-      "when": "always",
-      "subContext": "invoice-show"
-    },
-    {
-      "key": "b",
-      "action": "mark-as-balanced",
-      "description": "Mark as Balanced",
-      "when": "always",
-      "subContext": "invoice-show"
-    },
-    {
-      "key": "r",
-      "action": "record-payment",
-      "description": "Record Payment",
-      "when": "always",
-      "subContext": "invoice-show"
-    },
-    {
-      "key": "esc",
-      "action": "cancel-action",
-      "description": "Cancel Current Action",
-      "when": "always"
-    },
-    {
-      "key": "shift+enter",
-      "action": "submit-action",
-      "description": "Submit Current Action",
-      "when": "always"
-    },
-    {
-      "key": "o",
-      "action": "other-charge-items",
-      "description": "Other Charge Items",
-      "when": "always",
-      "subContext": "chargeItem-sheet"
-    },
-        {
-      "key": "a",
-      "action": "add-charge-items",
-      "description": "add Charge Items in invoice",
-      "when": "always",
-      "subContext": "invoice-show"
-    },
-    {
-      "key": "arrowDown",
-      "action": "select-chargeItem-billing-sheet",
-      "description": "Select Charge Item Billing Sheet",
-      "when": "always",
-      "subContext": "chargeItem-billing-sheet"
-    },
-    {
-      "key": "s",
-      "action": "settle-close-account",
-      "description": "Settle and Close Account",
-      "when": "always",
-      "subContext": "account-show"
-    },
-    {
-      "key": "i",
-      "action": "create-invoice",
-      "description": "Create Invoice",
-      "when": "always",
-      "subContext": "account-show"
-    },
-    {
-      "key": "r",
-      "action": "record-payment-account",
-      "description": "Record Payment",
-      "when": "always",
-      "subContext": "account-show"
-    },
-    {
-      "key": "e",
-      "action": "edit-account",
-      "description": "Edit Account",
-      "when": "always",
-      "subContext": "account-show"
-    },
-    {
-      "key": "shift+1",
-      "action": "switch-to-invoices-tab",
-      "description": "Switch to Invoices Tab",
-      "when": "always",
-      "subContext": "account-show"
-    },
-    {
-      "key": "shift+2",
-      "action": "switch-to-charge-items-tab",
-      "description": "Switch to Charge Items Tab",
-      "when": "always",
-      "subContext": "account-show"
-    },
-    {
-      "key": "shift+3",
-      "action": "switch-to-payments-tab",
-      "description": "Switch to Payments Tab",
-      "when": "always",
-      "subContext": "account-show"
-    },
-    {
-      "key": "shift+4",
-      "action": "switch-to-bed-associations-tab",
-      "description": "Switch to Bed Associations Tab",
-      "when": "always",
-      "subContext": "account-show"
-    },
-    {
-      "key": "enter",
-      "action": "submit-charge-items-billing-sheet",
-      "description": "Submit Charge Items",
-      "when": "always",
-      "subContext": "chargeItem-billing-sheet"
-    },
-    {
-      "key": "arrowLeft",
-      "action": "go-back",
-      "description": "Go Back",
-      "when": "always"
-    },
-    {
-      "key": "v",
-      "action": "view-invoice-payment",
-      "description": "View Invoice",
-      "when": "always"
-    },
-    {
-      "key": "c",
-      "action": "mark-payment-cancelled",
-      "description": "Mark as Cancelled",
-      "when": "always"
-    },
-    {
-      "key": "e",
-      "action": "mark-payment-error",
-      "description": "Mark as Entered in Error",
-      "when": "always",
-      "subContext": "payment"
-    },
-    {
-      "key": "p",
-      "action": "print-payment-receipt",
-      "description": "Print Receipt",
-      "when": "always",
-      "subContext": "payment"
-    },
-    {
-      "key": "e",
-      "action": "edit-invoice-item",
-      "description": "Edit Invoice Item",
-      "when": "always",
-      "subContext": "edit-charge-item-sheet"
-    },
-    {
-      "key": "p",
-      "action": "print-button",
-      "description": "Print anything",
-      "when": "always",
-      "subContext": "general"
-    },
-    {
-      "key": "p",
-      "action": "print-button",
-      "description": "Print Charge Items",
-      "when": "always",
-      "subContext": "charge-items-table"
-    },
-    {
-      "key": "a",
-      "action": "add-charge-items-invoice",
-      "description": "Add Charge Items",
-      "when": "always",
-      "subContext": "invoice-show"
-    },
-    {
-      "key": "p",
-      "action": "print-invoice",
-      "description": "Print Invoice",
-      "when": "always",
-      "subContext": "invoice-show"
-    },
-    {
-      "key": "s",
-      "action": "navigate-to-source",
-      "description": "Navigate to Source",
-      "when": "always",
-      "subContext": "invoice-show"
-    },
-    {
-      "key": "d",
-      "action": "dispense-button",
-      "description": "Dispense Medication",
-      "when": "always"
-    },
-    {
-      "key": "b",
-      "action": "billing-action",
-      "description": "Any Billing related action",
-      "when": "always",
-      "subContext": "general"
-    },
-    {
-      "key": "shift+enter",
-      "action": "mark-as-received",
-      "description": "Mark as Received",
-      "when": "always",
-      "subContext": "supply-delivery"
-    },
-    {
-      "key": "w",
-      "action": "proceed-without-marking",
-      "description": "Proceed without Marking",
-      "when": "always",
-      "subContext": "supply-delivery"
-    },
-    {
-      "key": "enter",
-      "action": "proceed-with-marking",
-      "description": "Proceed with Marking",
-      "when": "always",
-      "subContext": "supply-delivery"
-    }
+  "global": [
+    { "key": "p", "action": "print-button", "description": "Print", "when": "always" },
+    { "key": "shift+?", "action": "show-shortcuts", "description": "Show Keyboard Shortcuts", "when": "always" },
+    { "key": "esc", "action": "cancel-action", "description": "Cancel Current Action", "when": "always" },
+    { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action", "when": "always" },
+    { "key": "arrowLeft", "action": "go-back", "description": "Go Back", "when": "always" }
   ],
+
+  "facility": [
+    { "key": "t", "action": "generate-token", "description": "Generate Token", "when": "always" }
+  ],
+
+  "facility:general": [
+    { "key": "b", "action": "billing-action", "description": "Any Billing related action", "when": "always" },
+    { "key": "p", "action": "print-button", "description": "Print anything", "when": "always" }
+  ],
+
+  "facility:patient": [
+    { "key": "h", "action": "patient-home", "description": "Go to Patient Home", "when": "always" }
+  ],
+  "facility:patient:home": [
+    { "key": "p", "action": "print-token", "description": "Print Token", "when": "always" },
+    { "key": "e", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
+    { "key": "a", "action": "schedule-appointment", "description": "Schedule Appointment", "when": "always" }
+  ],
+
+  "facility:appointment": [
+    { "key": "e", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
+    { "key": "s", "action": "start-consultation", "description": "Start Consultation", "when": "always" }
+  ],
+
+  "facility:billing": [
+    { "key": "a", "action": "add-charge-item", "description": "Add Charge Item", "when": "always" }
+  ],
+
+  "facility:chargeItem:sheet": [
+    { "key": "o", "action": "other-charge-items", "description": "Other Charge Items", "when": "always" },
+    { "key": "e", "action": "edit-invoice-item", "description": "Edit Invoice Item", "when": "always" }
+  ],
+  "facility:pharmacy": [
+    { "key": "d", "action": "dispense-button", "description": "Dispense Medication", "when": "always" }
+  ],
+
+  "facility:chargeItemBilling:sheet": [
+    { "key": "arrowDown", "action": "select-chargeItem-billing-sheet", "description": "Select Charge Item Billing Sheet", "when": "always" },
+    { "key": "enter", "action": "submit-charge-items-billing-sheet", "description": "Submit Charge Items", "when": "always" }
+  ],
+
+  "facility:invoice:show": [
+    { "key": "e", "action": "edit-invoice-items", "description": "Edit Invoice Items", "when": "always" },
+    { "key": "i", "action": "issue-invoice", "description": "Issue Invoice", "when": "always" },
+    { "key": "b", "action": "mark-as-balanced", "description": "Mark as Balanced", "when": "always" },
+    { "key": "r", "action": "record-payment", "description": "Record Payment", "when": "always" },
+    { "key": "a", "action": "add-charge-items", "description": "Add Charge Items", "when": "always" },
+    { "key": "p", "action": "print-invoice", "description": "Print Invoice", "when": "always" },
+    { "key": "s", "action": "navigate-to-source", "description": "Navigate to Source", "when": "always" },
+    { "key": "v", "action": "view-invoice-payment", "description": "View Invoice", "when": "always" }
+  ],
+
+  "facility:account:show": [
+    { "key": "s", "action": "settle-close-account", "description": "Settle and Close Account", "when": "always" },
+    { "key": "i", "action": "create-invoice", "description": "Create Invoice", "when": "always" },
+    { "key": "r", "action": "record-payment-account", "description": "Record Payment", "when": "always" },
+    { "key": "e", "action": "edit-account", "description": "Edit Account", "when": "always" },
+    { "key": "shift+1", "action": "switch-to-invoices-tab", "description": "Switch to Invoices Tab", "when": "always" },
+    { "key": "shift+2", "action": "switch-to-charge-items-tab", "description": "Switch to Charge Items Tab", "when": "always" },
+    { "key": "shift+3", "action": "switch-to-payments-tab", "description": "Switch to Payments Tab", "when": "always" },
+    { "key": "shift+4", "action": "switch-to-bed-associations-tab", "description": "Switch to Bed Associations Tab", "when": "always" }
+  ],
+
+  "facility:payment": [
+    { "key": "c", "action": "mark-payment-cancelled", "description": "Mark as Cancelled", "when": "always" },
+    { "key": "e", "action": "mark-payment-error", "description": "Mark as Entered in Error", "when": "always" },
+    { "key": "p", "action": "print-payment-receipt", "description": "Print Receipt", "when": "always" }
+  ],
+
   "encounter": [
     {
       "key": "a",
