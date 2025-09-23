@@ -35,6 +35,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import useAppHistory from "@/hooks/useAppHistory";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { tzAwareDateTime } from "@/lib/validators";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
@@ -69,6 +70,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
+  useFacilityShortcuts();
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
@@ -307,7 +309,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     <Page title={pageTitle} hideTitleOnPage>
       <div className="flex flex-col gap-4 max-w-2xl mx-auto">
         <div>
-          <BackButton>
+          <BackButton data-shortcut-id="go-back">
             <ArrowLeft />
             {t("back")}
           </BackButton>
