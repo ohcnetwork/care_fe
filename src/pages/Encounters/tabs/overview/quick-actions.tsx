@@ -12,7 +12,10 @@ import {
   StethoscopeIcon,
 } from "@/CAREUI/icons/CustomIcons";
 
-import { KeyboardShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import {
+  KeyboardShortcutBadge,
+  ShortcutBadge,
+} from "@/Utils/keyboardShortcutComponents";
 
 import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
 
@@ -57,6 +60,7 @@ export function QuickAction({
   title,
   shortcut,
   href,
+  actionId,
   ...props
 }: {
   icon: React.ReactNode;
@@ -64,11 +68,13 @@ export function QuickAction({
   shortcut?: string;
   href?: string;
   props?: React.ComponentProps<"div">;
+  actionId?: string;
 }) {
   const content = (
     <>
-      <div className="relative flex md:py-3 py-0 rounded-t-lg rounded-b-xl md:bg-gray-100 bg-white">
+      <div className="relative flex md:py-3 py-0 rounded-t-md rounded-b-lg md:bg-gray-100 bg-white">
         <KeyboardShortcutBadge shortcut={shortcut} position="top-right" />
+        {actionId && <ShortcutBadge actionId={actionId} position="top-right" />}
         <div className="rounded-xl bg-white md:shadow shadow-none mx-auto items-center flex p-2">
           {icon}
         </div>
