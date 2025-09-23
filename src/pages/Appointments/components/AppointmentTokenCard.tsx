@@ -142,14 +142,13 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
                 </Link>
               </Button>
               <Button
-                data-shortcut-id="print-token"
                 variant="outline"
                 onClick={() => print()}
                 className="text-base text-gray-950 font-semibold"
               >
                 <PrinterIcon className="size-4 mr-2" />
                 {t("print_token")}
-                <ShortcutBadge actionId="print-token" />
+                <ShortcutBadge actionId="print-button" />
               </Button>
             </div>
           </div>

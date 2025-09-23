@@ -28,7 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   ChargeItemRead,
@@ -93,7 +93,7 @@ export function EditInvoiceTable({
   enableShortcut,
 }: EditInvoiceTableProps) {
   const { t } = useTranslation();
-  useFacilityShortcuts("edit-invoiceTable");
+  useShortcutSubContext("facility:invoice:show");
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
