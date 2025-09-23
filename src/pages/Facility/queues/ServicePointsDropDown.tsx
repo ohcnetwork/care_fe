@@ -92,7 +92,10 @@ export const ServicePointsDropDown = () => {
                   return (
                     <div
                       key={subQueue.id}
-                      className="flex items-center justify-between rounded-sm w-full p-1 hover:bg-gray-100"
+                      className="flex items-center justify-between rounded-sm w-full p-1 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => {
+                        toggleServicePoint(subQueue.id, !isSelected);
+                      }}
                     >
                       <div className="flex items-center space-x-3 p-1">
                         <Checkbox

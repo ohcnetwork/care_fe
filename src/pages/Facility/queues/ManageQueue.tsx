@@ -242,13 +242,16 @@ function ManageServicePointsDialog({
         <DialogHeader>
           <DialogTitle>{t("assigned_service_points")}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <div>
           {allServicePoints.map((subQueue) => {
             const isSelected = assignedServicePointIds.includes(subQueue.id);
             return (
               <div
                 key={subQueue.id}
-                className="flex items-center justify-between"
+                className="flex items-center justify-between rounded-sm w-full p-3 hover:bg-gray-100 cursor-pointer"
+                onClick={() => {
+                  toggleServicePoint(subQueue.id, !isSelected);
+                }}
               >
                 <div className="flex items-center space-x-3">
                   <Checkbox
