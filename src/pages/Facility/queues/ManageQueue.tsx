@@ -96,7 +96,7 @@ export function ManageQueuePage({
       hideTitleOnPage
     >
       <div className="flex flex-col gap-6">
-        <div className="flex justify-between">
+        <div className="flex justify-between gap-3">
           <div className="flex gap-2 items-center">
             <BackButton size="icon" variant="ghost">
               <ChevronLeft />
@@ -114,7 +114,7 @@ export function ManageQueuePage({
                     {queue.is_primary && (
                       <Badge
                         variant={queue.is_primary ? "primary" : "secondary"}
-                        className="text-xs"
+                        className="hidden sm:block text-xs"
                       >
                         {t("primary")}
                       </Badge>
@@ -129,7 +129,7 @@ export function ManageQueuePage({
             )}
           </div>
           <div className="flex gap-5 items-center justify-center">
-            <div className="flex gap-2 items-center text-black font-medium text-md">
+            <div className="flex flex-col-reverse sm:flex-row gap-2 items-center text-black font-medium text-md">
               <Switch
                 onClick={() =>
                   setQueryParams({
@@ -138,10 +138,10 @@ export function ManageQueuePage({
                 }
               />
               <div className="flex items-center gap-1">
-                <Label>{t("auto_refresh")}</Label>
+                <Label className="whitespace-nowrap">{t("auto_refresh")}</Label>
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger asChild>
+                    <TooltipTrigger asChild className="hidden sm:block">
                       <span className="cursor-help">
                         <InfoIcon className="size-4 text-gray-500" />
                       </span>
