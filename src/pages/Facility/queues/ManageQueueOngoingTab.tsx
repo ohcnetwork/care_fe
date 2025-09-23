@@ -353,20 +353,7 @@ function CallNextPatientButton({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          "infinite-tokens",
-          facilityId,
-          queueId,
-          { status: TokenStatus.IN_PROGRESS },
-        ],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [
-          "infinite-tokens",
-          facilityId,
-          queueId,
-          { status: TokenStatus.CREATED },
-        ],
+        queryKey: ["infinite-tokens", facilityId, queueId],
       });
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, queueId],
