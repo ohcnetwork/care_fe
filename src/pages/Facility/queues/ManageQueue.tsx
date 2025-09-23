@@ -20,7 +20,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
 import { NavTabs } from "@/components/ui/nav-tabs";
+import { Switch } from "@/components/ui/switch";
 import { ManageQueueFinishedTab } from "@/pages/Facility/queues/ManageQueueFinishedTab";
 import { ManageQueueOngoingTab } from "@/pages/Facility/queues/ManageQueueOngoingTab";
 import QueueFormSheet from "@/pages/Facility/queues/QueueFormSheet";
@@ -35,6 +37,7 @@ import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { ChevronLeft, Edit3, PowerOffIcon, SettingsIcon } from "lucide-react";
 import { useNavigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface ManageQueuePageProps {
@@ -54,7 +57,7 @@ export function ManageQueuePage({
 }: ManageQueuePageProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
+  const [refetch, setRefetch] = useState(false);
   const resource = useScheduleResource();
 
   const { data: queue, isLoading: isQueueLoading } = useQuery({
@@ -113,7 +116,11 @@ export function ManageQueuePage({
               </div>
             )}
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-5 items-center justify-center">
+            <div className="flex flex-col gap-2 items-center text-black font-medium">
+              <Label>{t("refetch")}</Label>
+              <Switch onClick={() => setRefetch((prev) => !prev)} />
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -159,6 +166,7 @@ export function ManageQueuePage({
                 <ManageQueueOngoingTab
                   facilityId={facilityId}
                   queueId={queueId}
+                  refetch={refetch}
                 />
               ),
             },
@@ -168,6 +176,7 @@ export function ManageQueuePage({
                 <ManageQueueFinishedTab
                   facilityId={facilityId}
                   queueId={queueId}
+                  refetch={refetch}
                 />
               ),
             },
