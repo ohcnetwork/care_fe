@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import {
-  SelectActionButton,
-  SelectActionOption,
-} from "@/components/ui/selectActionButton";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   BatchRequestBody,
   BatchRequestResponse,
@@ -22,13 +24,17 @@ import {
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
-import { NonEmptyArray } from "@/Utils/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TFunction } from "i18next";
-import { ExternalLinkIcon, PlayIcon } from "lucide-react";
+import { ChevronDown, ExternalLinkIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+
+interface SelectActionOption<T = string> {
+  value: T;
+  child: React.ReactNode;
+}
 
 export const AppointmentEncounterHeader = ({
   appointment,
@@ -51,7 +57,7 @@ export const AppointmentEncounterHeader = ({
     },
   });
 
-  const { mutate: updateToken, isPending: isUpdateTokenPending } = useMutation({
+  const { mutate: updateToken } = useMutation({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
         facility_id: encounter.facility.id || "",
@@ -73,36 +79,35 @@ export const AppointmentEncounterHeader = ({
     },
   });
 
-  const { mutate: batchRequest, isPending: isBatchRequestPending } =
-    useMutation({
-      mutationFn: mutate(batchApi.batchRequest),
-      onSuccess: (results: BatchRequestResponse) => {
-        queryClient.invalidateQueries({
-          queryKey: ["encounter", encounter.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["appointment", encounter?.appointment?.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["tokens", encounter?.appointment?.token?.id],
-        });
-        if (
-          results.results.some(
-            (result) => result.reference_id === "encounter-closed",
-          )
-        ) {
-          toast.success(t("encounter_marked_as_complete"));
-          return;
-        }
-        if (
-          results.results.some(
-            (result) => result.reference_id === "appointment-closed",
-          )
-        ) {
-          toast.success(t("appointment_closed_successfully"));
-        }
-      },
-    });
+  const { mutate: batchRequest } = useMutation({
+    mutationFn: mutate(batchApi.batchRequest),
+    onSuccess: (results: BatchRequestResponse) => {
+      queryClient.invalidateQueries({
+        queryKey: ["encounter", encounter.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["appointment", encounter?.appointment?.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["tokens", encounter?.appointment?.token?.id],
+      });
+      if (
+        results.results.some(
+          (result) => result.reference_id === "encounter-closed",
+        )
+      ) {
+        toast.success(t("encounter_marked_as_complete"));
+        return;
+      }
+      if (
+        results.results.some(
+          (result) => result.reference_id === "appointment-closed",
+        )
+      ) {
+        toast.success(t("appointment_closed_successfully"));
+      }
+    },
+  });
 
   const handleStartEncounter = () => {
     startEncounter({
@@ -210,20 +215,38 @@ export const AppointmentEncounterHeader = ({
   };
 
   return (
-    <div className="flex justify-center gap-4 border border-gray-200 rounded-md p-2 bg-white w-full items-center mb-2">
+    <div className="flex gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white w-fit items-center justify-center shadow-sm">
       {encounter.appointment?.token && (
-        <Button asChild variant="outline">
+        <Button
+          variant="ghost"
+          className="border-r border-gray-300 rounded-r-none pl-2"
+        >
           <Link
             href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/appointments/${encounter.appointment.id}`}
           >
-            <span className="flex items-center gap-3">
-              <span className="font-mono font-semibold">
+            <div className="flex items-center gap-2 justify-center">
+              <span className="text-sm text-gray-600">{t("token")}:</span>
+              <span className="text-sm text-black font-semibold underline">
                 {renderTokenNumber(encounter.appointment.token)}
               </span>
-              <ExternalLinkIcon className="size-4" />
-            </span>
+              <ExternalLinkIcon className="size-4 text-black" />
+            </div>
           </Link>
         </Button>
+      )}
+      {encounter.status !== "in_progress" &&
+      encounter.status !== "completed" ? (
+        <span className="text-sm text-black">
+          {t("do_you_want_to_start_this_encounter")}
+        </span>
+      ) : getOptions(encounter, t).length > 1 ? (
+        <span className="text-sm text-black">
+          {t("how_do_you_to_finish_this_visit")}
+        </span>
+      ) : (
+        <span className="text-sm text-black">
+          {t("do_you_want_to_complete_this_encounter")}
+        </span>
       )}
 
       {encounter.status !== "in_progress" &&
@@ -232,49 +255,55 @@ export const AppointmentEncounterHeader = ({
           variant="outline"
           onClick={() => handleStartEncounter()}
           disabled={isPending}
+          className="space-y-2 space-x-1"
         >
-          <PlayIcon size={12} />
           {t("start_encounter")}
         </Button>
+      ) : getOptions(encounter, t).length > 1 ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              <span className="text-sm font-semibold text-black">
+                {t("end_actions")}
+              </span>
+              <ChevronDown className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="min-w-59x`" align="start">
+            {getOptions(encounter, t).map((option) => (
+              <DropdownMenuItem
+                key={option.value}
+                className="p-2.5"
+                onClick={() => {
+                  if (option.value === "mark_as_complete") {
+                    handleCompleteEncounter();
+                  } else if (option.value === "close_appointment") {
+                    handleCloseAppointment();
+                  } else if (option.value === "close_token") {
+                    handleCloseToken();
+                  }
+                }}
+              >
+                {option.child}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       ) : (
-        <SelectActionButton
-          options={getOptions(encounter, t)}
-          onAction={(value) => {
-            if (value === "mark_as_complete") {
-              handleCompleteEncounter();
-            } else if (value === "close_appointment") {
-              handleCloseAppointment();
-            } else if (value === "close_token") {
-              handleCloseToken();
-            }
-          }}
-          disabled={
-            encounter.status === "completed" ||
-            isBatchRequestPending ||
-            isUpdateTokenPending
-          }
-          persistKey="encounter-complete-action"
+        <Button
           variant="outline"
-        />
+          className="text-sm font-semibold text-black"
+          onClick={handleCompleteEncounter}
+        >
+          {t("complete_encounter")}
+        </Button>
       )}
     </div>
   );
 };
 
 const getOptions = (encounter: EncounterRead, t: TFunction) => {
-  const options: NonEmptyArray<SelectActionOption<string>> = [
-    {
-      value: "mark_as_complete",
-      child: (
-        <div className="flex flex-col items-start">
-          <span className="text-sm">{t("mark_as_complete")}</span>
-          <p className="text-xs text-gray-500">
-            {t("mark_as_complete_description")}
-          </p>
-        </div>
-      ),
-    },
-  ];
+  const options: SelectActionOption<string>[] = [];
 
   if (
     encounter.appointment?.token &&
@@ -283,31 +312,49 @@ const getOptions = (encounter: EncounterRead, t: TFunction) => {
     )
   ) {
     options.push({
-      ...options,
       value: "close_token",
       child: (
         <div className="flex flex-col items-start">
-          <span className="text-sm">{t("close_token")}</span>
-          <p className="text-xs text-gray-500">
+          <span className="text-sm font-medium text-black">
+            {t("mark_token_fulfilled")}
+          </span>
+          <p className="text-xs text-gray-700">
             {t("close_token_description")}
           </p>
         </div>
       ),
     });
   }
+
   if (encounter.appointment?.status !== "fulfilled") {
     options.push({
-      ...options,
       value: "close_appointment",
       child: (
         <div className="flex flex-col items-start">
-          <span className="text-sm">{t("close_appointment")}</span>
-          <p className="text-xs text-gray-500">
+          <span className="text-sm font-medium text-black">
+            {t("close_appointment")}
+          </span>
+          <p className="text-xs text-gray-700">
             {t("close_appointment_description")}
           </p>
         </div>
       ),
     });
   }
+
+  options.push({
+    value: "mark_as_complete",
+    child: (
+      <div className="flex flex-col items-start">
+        <span className="text-sm font-medium text-black">
+          {t("mark_as_complete")}
+        </span>
+        <p className="text-xs text-gray-700">
+          {t("mark_as_complete_description")}
+        </p>
+      </div>
+    ),
+  });
+
   return options;
 };
