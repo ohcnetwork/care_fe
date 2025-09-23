@@ -41,11 +41,9 @@ const INACTIVE_TOKEN_STATUSES = [TokenStatus.FULFILLED, TokenStatus.CANCELLED];
 export function ManageQueueFinishedTab({
   facilityId,
   queueId,
-  refetch,
 }: {
   facilityId: string;
   queueId: string;
-  refetch: boolean;
 }) {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
@@ -54,8 +52,9 @@ export function ManageQueueFinishedTab({
     useTokenListInfiniteQuery({
       facilityId,
       queueId,
-      status: INACTIVE_TOKEN_STATUSES,
-      refetch,
+      qParams: {
+        status: INACTIVE_TOKEN_STATUSES.join(","),
+      },
     });
 
   useEffect(() => {

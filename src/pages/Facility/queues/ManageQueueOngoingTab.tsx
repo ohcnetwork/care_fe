@@ -30,6 +30,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DoorOpenIcon, EyeIcon, Megaphone, SettingsIcon } from "lucide-react";
+import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ServicePointsDropDown } from "./ServicePointsDropDown";
@@ -38,21 +39,21 @@ import { useQueueServicePoints } from "./useQueueServicePoints";
 interface Props {
   facilityId: string;
   queueId: string;
-  refetch: boolean;
 }
 
-export function ManageQueueOngoingTab({ facilityId, queueId, refetch }: Props) {
+export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   const { t } = useTranslation();
   const { assignedServicePoints } = useQueueServicePoints();
   const { preferredServicePointCategories } = usePreferredServicePointCategory({
     facilityId,
   });
+  const [{ autoRefresh }] = useQueryParams();
   const { data: summary } = useQuery({
     queryKey: ["token-queue-summary", facilityId, queueId],
     queryFn: query(tokenQueueApi.summary, {
       pathParams: { facility_id: facilityId, id: queueId },
     }),
-    refetchInterval: refetch ? 10000 : false,
+    refetchInterval: autoRefresh === "true" ? 10000 : false,
   });
 
   return (
@@ -69,7 +70,6 @@ export function ManageQueueOngoingTab({ facilityId, queueId, refetch }: Props) {
           <OngoingQueueTokenCardsList
             facilityId={facilityId}
             queueId={queueId}
-            refetch={refetch}
             qParams={{
               sub_queue_is_null: true,
             }}
@@ -96,7 +96,6 @@ export function ManageQueueOngoingTab({ facilityId, queueId, refetch }: Props) {
                   summary,
                   TokenStatus.UNFULFILLED,
                 )}
-                refetch={refetch}
               />
             )
           }
@@ -134,7 +133,6 @@ export function ManageQueueOngoingTab({ facilityId, queueId, refetch }: Props) {
                       <OngoingQueueTokenCardsList
                         facilityId={facilityId}
                         queueId={queueId}
-                        refetch={refetch}
                         qParams={{
                           status: TokenStatus.IN_PROGRESS,
                           sub_queue: subQueue.id,
@@ -162,7 +160,6 @@ export function ManageQueueOngoingTab({ facilityId, queueId, refetch }: Props) {
                     <OngoingQueueTokenCardsList
                       facilityId={facilityId}
                       queueId={queueId}
-                      refetch={refetch}
                       qParams={{
                         status: TokenStatus.CREATED,
                         sub_queue: subQueue.id,
@@ -356,12 +353,10 @@ function AwaitingRecallTrigger({
   count,
   queueId,
   facilityId,
-  refetch,
 }: {
   count: number;
   queueId: string;
   facilityId: string;
-  refetch: boolean;
 }) {
   const { t } = useTranslation();
   const [showAwaitingRecallDialog, setShowAwaitingRecallDialog] =
@@ -389,7 +384,6 @@ function AwaitingRecallTrigger({
         onOpenChange={setShowAwaitingRecallDialog}
         facilityId={facilityId}
         queueId={queueId}
-        refetch={refetch}
       />
     </>
   );
@@ -459,14 +453,12 @@ function AwaitingRecallDialog({
   open,
   onOpenChange,
   facilityId,
-  refetch,
   queueId,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   facilityId: string;
   queueId: string;
-  refetch: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -480,7 +472,6 @@ function AwaitingRecallDialog({
           <OngoingQueueTokenCardsList
             facilityId={facilityId}
             queueId={queueId}
-            refetch={refetch}
             qParams={{
               status: TokenStatus.UNFULFILLED,
             }}

@@ -23,6 +23,12 @@ import {
 import { Label } from "@/components/ui/label";
 import { NavTabs } from "@/components/ui/nav-tabs";
 import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ManageQueueFinishedTab } from "@/pages/Facility/queues/ManageQueueFinishedTab";
 import { ManageQueueOngoingTab } from "@/pages/Facility/queues/ManageQueueOngoingTab";
 import QueueFormSheet from "@/pages/Facility/queues/QueueFormSheet";
@@ -35,9 +41,14 @@ import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { ChevronLeft, Edit3, PowerOffIcon, SettingsIcon } from "lucide-react";
-import { useNavigate } from "raviger";
-import { useState } from "react";
+import {
+  ChevronLeft,
+  Edit3,
+  InfoIcon,
+  PowerOffIcon,
+  SettingsIcon,
+} from "lucide-react";
+import { useNavigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 interface ManageQueuePageProps {
@@ -57,9 +68,10 @@ export function ManageQueuePage({
 }: ManageQueuePageProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [refetch, setRefetch] = useState(false);
   const resource = useScheduleResource();
-
+  const [{ autoRefresh }, setQueryParams] = useQueryParams<{
+    autoRefresh: string;
+  }>();
   const { data: queue, isLoading: isQueueLoading } = useQuery({
     queryKey: ["tokenQueue", facilityId, queueId],
     queryFn: query(tokenQueueApi.get, {
@@ -117,9 +129,27 @@ export function ManageQueuePage({
             )}
           </div>
           <div className="flex gap-5 items-center justify-center">
-            <div className="flex flex-col gap-2 items-center text-black font-medium">
-              <Label>{t("refetch")}</Label>
-              <Switch onClick={() => setRefetch((prev) => !prev)} />
+            <div className="flex gap-2 items-center text-black font-medium text-md">
+              <Switch
+                onClick={() =>
+                  setQueryParams({
+                    autoRefresh: autoRefresh === "true" ? "false" : "true",
+                  })
+                }
+              />
+              <div className="flex items-center gap-1">
+                <Label>{t("auto_refresh")}</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help">
+                        <InfoIcon className="size-4 text-gray-500" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("auto_refresh_tooltip")}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -166,7 +196,6 @@ export function ManageQueuePage({
                 <ManageQueueOngoingTab
                   facilityId={facilityId}
                   queueId={queueId}
-                  refetch={refetch}
                 />
               ),
             },
@@ -176,7 +205,6 @@ export function ManageQueuePage({
                 <ManageQueueFinishedTab
                   facilityId={facilityId}
                   queueId={queueId}
-                  refetch={refetch}
                 />
               ),
             },

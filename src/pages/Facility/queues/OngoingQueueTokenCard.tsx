@@ -287,17 +287,15 @@ export function OngoingQueueTokenCard({
 export function OngoingQueueTokenCardsList({
   facilityId,
   queueId,
-  qParams,
   emptyState,
   header,
-  refetch,
+  qParams,
 }: {
   facilityId: string;
   queueId: string;
   qParams: Record<string, unknown>;
   emptyState?: React.ReactNode;
   header?: React.ReactNode;
-  refetch: boolean;
 }) {
   const { ref, inView } = useInView();
 
@@ -306,7 +304,6 @@ export function OngoingQueueTokenCardsList({
       facilityId,
       queueId,
       qParams,
-      refetch,
     });
 
   useEffect(() => {
