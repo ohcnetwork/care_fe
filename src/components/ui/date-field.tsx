@@ -5,12 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import dayjs from "@/Utils/dayjs";
+import { cn } from "@/lib/utils";
 
 interface DateFieldProps {
   date?: Date;
   onChange?: (date?: Date) => void;
   disabled?: boolean;
-  id?: string;
+  hideLabels?: boolean;
 }
 
 const isValidDate = (year: string, month: string, day: string): boolean => {
@@ -22,7 +23,7 @@ export default function DateField({
   date,
   onChange,
   disabled,
-  id = "date-field",
+  hideLabels,
 }: DateFieldProps) {
   const { t } = useTranslation();
   const [day, setDay] = useState("");
@@ -146,7 +147,7 @@ export default function DateField({
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1">
-        <Label className="mb-1">{t("day")}</Label>
+        <Label className={cn("mb-1", hideLabels && "hidden")}>{t("day")}</Label>
         <Input
           type="number"
           inputMode="numeric"
@@ -157,14 +158,14 @@ export default function DateField({
           onBlur={handleDayBlur}
           min={1}
           max={31}
-          id={`${id}-day-input`}
-          data-cy={`${id}-day-input`}
           disabled={disabled}
         />
       </div>
 
       <div className="flex-1">
-        <Label className="mb-1">{t("month")}</Label>
+        <Label className={cn("mb-1", hideLabels && "hidden")}>
+          {t("month")}
+        </Label>
         <Input
           type="number"
           inputMode="numeric"
@@ -175,14 +176,14 @@ export default function DateField({
           onBlur={handleMonthBlur}
           min={1}
           max={12}
-          id={`${id}-month-input`}
-          data-cy={`${id}-month-input`}
           disabled={disabled}
         />
       </div>
 
-      <div className="flex-1">
-        <Label className="mb-1">{t("year")}</Label>
+      <div className="flex-2">
+        <Label className={cn("mb-1", hideLabels && "hidden")}>
+          {t("year")}
+        </Label>
         <Input
           type="number"
           inputMode="numeric"
@@ -192,8 +193,6 @@ export default function DateField({
           onChange={handleYearChange}
           min={1900}
           max={new Date().getFullYear()}
-          id={`${id}-year-input`}
-          data-cy={`${id}-year-input`}
           disabled={disabled}
         />
       </div>
