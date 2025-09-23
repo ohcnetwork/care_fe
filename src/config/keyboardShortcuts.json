@@ -4,7 +4,9 @@
     { "key": "shift+?", "action": "show-shortcuts", "description": "Show Keyboard Shortcuts", "when": "always" },
     { "key": "esc", "action": "cancel-action", "description": "Cancel Current Action", "when": "always" },
     { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action", "when": "always" },
-    { "key": "arrowLeft", "action": "go-back", "description": "Go Back", "when": "always" }
+    { "key": "arrowLeft", "action": "go-back", "description": "Go Back", "when": "always" },
+    { "key": "enter", "action": "enter-action", "description": "Enter Current Action", "when": "always" }
+    
   ],
 
   "facility": [
@@ -26,33 +28,24 @@
   ],
 
   "facility:appointment": [
-    { "key": "e", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
-    { "key": "s", "action": "start-consultation", "description": "Start Consultation", "when": "always" }
+    { "key": "2", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
+    { "key": "1", "action": "start-consultation", "description": "Start Consultation", "when": "always" }
   ],
 
   "facility:billing": [
     { "key": "a", "action": "add-charge-item", "description": "Add Charge Item", "when": "always" }
   ],
 
-  "facility:chargeItem:sheet": [
-    { "key": "o", "action": "other-charge-items", "description": "Other Charge Items", "when": "always" },
-    { "key": "e", "action": "edit-invoice-item", "description": "Edit Invoice Item", "when": "always" }
-  ],
   "facility:pharmacy": [
     { "key": "d", "action": "dispense-button", "description": "Dispense Medication", "when": "always" }
   ],
 
-  "facility:chargeItemBilling:sheet": [
-    { "key": "arrowDown", "action": "select-chargeItem-billing-sheet", "description": "Select Charge Item Billing Sheet", "when": "always" },
-    { "key": "enter", "action": "submit-charge-items-billing-sheet", "description": "Submit Charge Items", "when": "always" }
-  ],
-
-  "facility:invoice:show": [
-    { "key": "e", "action": "edit-invoice-items", "description": "Edit Invoice Items", "when": "always" },
+  "facility:billing:invoice": [
+    { "key": "c", "action": "create-invoice", "description": "Create Invoice", "when": "always" },
+    { "key": "o", "action": "other-charge-items", "description": "Other Charge Items", "when": "always" },
     { "key": "i", "action": "issue-invoice", "description": "Issue Invoice", "when": "always" },
     { "key": "b", "action": "mark-as-balanced", "description": "Mark as Balanced", "when": "always" },
     { "key": "r", "action": "record-payment", "description": "Record Payment", "when": "always" },
-    { "key": "a", "action": "add-charge-items", "description": "Add Charge Items", "when": "always" },
     { "key": "p", "action": "print-invoice", "description": "Print Invoice", "when": "always" },
     { "key": "s", "action": "navigate-to-source", "description": "Navigate to Source", "when": "always" },
     { "key": "v", "action": "view-invoice-payment", "description": "View Invoice", "when": "always" }

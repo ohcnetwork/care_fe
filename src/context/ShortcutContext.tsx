@@ -1,9 +1,14 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import actionsJson from "@/config/keyboardShortcuts.json";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { FacilityAction, FacilityActionId } from "@/types/shortcuts";
-import { shortcutActionHandler } from "@/Utils/keyboardShortcutUtils";
+import {
+  formatKeyboardShortcut,
+  shortcutActionHandler,
+} from "@/Utils/keyboardShortcutUtils";
+import { expandShortcutContext } from "@/Utils/shortcutUtils";
 
 interface ShortcutContextType {
   /**
@@ -30,6 +35,10 @@ interface ShortcutContextType {
    * Set whether shortcuts should run even when input fields are focused
    */
   setIgnoreInputFields: (ignore: boolean) => void;
+  /**
+   * Get the display string for a shortcut action ID based on current context
+   */
+  getShortcutDisplay: (actionId: string) => string | undefined;
 }
 
 const ShortcutContext = createContext<ShortcutContextType | null>(null);
@@ -43,21 +52,6 @@ interface ShortcutProviderProps {
   ignoreInputFields?: boolean;
 }
 
-function expandContext(key: string, sep = ":") {
-  if (typeof key !== "string") return [];
-  const clean = key
-    .trim()
-    .replace(new RegExp(`${sep}+`, "g"), sep)
-    .replace(new RegExp(`^${sep}|${sep}$`, "g"), "");
-  if (!clean) return [];
-  const parts = clean.split(sep);
-  const out = [];
-  for (let i = 0; i < parts.length; i++) {
-    out.push(parts.slice(0, i + 1).join(sep));
-  }
-  return out;
-}
-
 export function ShortcutProvider({
   children,
   ignoreInputFields: defaultIgnoreInputFields = false,
@@ -67,10 +61,11 @@ export function ShortcutProvider({
   const [ignoreInputFields, setIgnoreInputFields] = useState(
     defaultIgnoreInputFields,
   );
+  const isMobile = useIsMobile();
 
   // Facility shortcuts logic (moved from useShortcutSubContext)
   const actions = useMemo((): FacilityAction[] => {
-    const allContexts = expandContext(subContext || "");
+    const allContexts = expandShortcutContext(subContext || "");
 
     return ["global", ...allContexts]
       .map((context) => {
@@ -97,9 +92,34 @@ export function ShortcutProvider({
     return handlersMap;
   }, [actions]);
 
+  // Function to get shortcut display string for an action ID
+  const getShortcutDisplay = useMemo(() => {
+    return (actionId: string): string | undefined => {
+      if (isMobile) {
+        return undefined;
+      }
+
+      // Search through current context hierarchy + global
+      const allContexts = expandShortcutContext(subContext || "");
+      const contextsToSearch = ["global", ...allContexts];
+
+      for (const context of contextsToSearch) {
+        const contextActions = actionsJson[context as keyof typeof actionsJson];
+        if (!contextActions) continue;
+
+        const shortcut = contextActions.find((s) => s.action === actionId);
+        if (shortcut) {
+          return formatKeyboardShortcut(shortcut.key);
+        }
+      }
+
+      return undefined;
+    };
+  }, [subContext, isMobile]);
+
   // Set up facility shortcuts
   useKeyboardShortcuts(
-    ["global", ...expandContext(subContext || "")],
+    ["global", ...expandShortcutContext(subContext || "")],
     { canCreate: true },
     handlers,
     subContext,
@@ -114,8 +134,9 @@ export function ShortcutProvider({
       setSubContext,
       ignoreInputFields,
       setIgnoreInputFields,
+      getShortcutDisplay,
     }),
-    [commandDialogOpen, subContext, ignoreInputFields],
+    [commandDialogOpen, subContext, ignoreInputFields, getShortcutDisplay],
   );
 
   return (
@@ -131,6 +152,40 @@ export function useShortcuts() {
     throw new Error("useShortcuts must be used within a ShortcutProvider");
   }
   return context;
+}
+
+/**
+ * Hook to get shortcut display strings based on current context.
+ * Returns a function that can be called with an action ID to get the display string.
+ *
+ * This hook automatically uses the current shortcut context hierarchy, so shortcuts
+ * from parent contexts (e.g., "facility" when in "facility:patient:home") are available.
+ * It also supports multiple context hierarchies with the & separator.
+ *
+ * @returns Function to get display string for an action ID
+ *
+ * @example
+ * // In a component with context "facility:patient:home"
+ * const getShortcutDisplay = useShortcutDisplay();
+ * const printShortcut = getShortcutDisplay("print-button"); // "P" (from global or facility context)
+ * const tokenShortcut = getShortcutDisplay("print-token"); // "P" (from facility:patient:home context)
+ *
+ * @example
+ * // Usage in a button component
+ * function PrintButton() {
+ *   const getShortcutDisplay = useShortcutDisplay();
+ *   const shortcut = getShortcutDisplay("print-button");
+ *
+ *   return (
+ *     <button data-shortcut-id="print-button">
+ *       Print {shortcut && <span className="ml-2 text-xs">({shortcut})</span>}
+ *     </button>
+ *   );
+ * }
+ */
+export function useShortcutDisplay() {
+  const { getShortcutDisplay } = useShortcuts();
+  return getShortcutDisplay;
 }
 
 /**

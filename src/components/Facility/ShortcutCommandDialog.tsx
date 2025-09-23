@@ -17,6 +17,7 @@ import {
   formatKeyboardShortcut,
   shortcutActionHandler,
 } from "@/Utils/keyboardShortcutUtils";
+import { expandShortcutContext } from "@/Utils/shortcutUtils";
 
 interface ActionItem {
   id: string;
@@ -47,23 +48,7 @@ export function ShortcutCommandDialog({
   const { subContext } = useShortcuts();
 
   const facilityActions: ActionGroup[] = useMemo(() => {
-    // Use the same expandContext logic from ShortcutContext
-    const expandContext = (key: string, sep = ":") => {
-      if (typeof key !== "string") return [];
-      const clean = key
-        .trim()
-        .replace(new RegExp(`${sep}+`, "g"), sep)
-        .replace(new RegExp(`^${sep}|${sep}$`, "g"), "");
-      if (!clean) return [];
-      const parts = clean.split(sep);
-      const out = [];
-      for (let i = 0; i < parts.length; i++) {
-        out.push(parts.slice(0, i + 1).join(sep));
-      }
-      return out;
-    };
-
-    const allContexts = expandContext(subContext || "");
+    const allContexts = expandShortcutContext(subContext || "");
     const contextsToSearch = [...allContexts, "global"];
 
     const actionGroups: ActionGroup[] = [];

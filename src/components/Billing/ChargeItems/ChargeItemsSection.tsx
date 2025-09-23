@@ -10,7 +10,6 @@ import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
 import { ChargeItemCard } from "@/pages/Facility/services/serviceRequests/components/ChargeItemCard";
 
-import query from "@/Utils/request/query";
 import {
   AccountBillingStatus,
   AccountStatus,
@@ -22,6 +21,8 @@ import {
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import query from "@/Utils/request/query";
 
 interface ChargeItemsSectionProps {
   facilityId: string;
@@ -117,6 +118,7 @@ export function ChargeItemsSection({
                 >
                   <PlusIcon className="size-4 mr-2" />
                   {t("create_invoice")}
+                  <ShortcutBadge actionId="create-invoice" />
                 </Button>
               )}
               {!disableCreateChargeItems && !viewOnly && (

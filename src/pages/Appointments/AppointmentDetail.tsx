@@ -136,7 +136,7 @@ export default function AppointmentDetail(props: Props) {
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
 
-  useShortcutSubContext("facility:appointment:detail");
+  useShortcutSubContext("facility:appointment:detail&facility:billing:invoice");
 
   const { canViewAppointments, canWriteAppointment } = getPermissions(
     hasPermission,
