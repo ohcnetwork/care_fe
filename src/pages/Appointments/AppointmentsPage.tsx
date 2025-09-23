@@ -94,11 +94,6 @@ import {
   FilterDateRange,
   shortDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import useAuthUser from "@/hooks/useAuthUser";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -661,6 +656,7 @@ function AppointmentColumn(props: {
                   <AppointmentCard
                     appointment={appointment}
                     showStatus={props.statusGroup.statuses.length > 1}
+                    showPractitioner={props.resourceIds.length > 1}
                   />
                 </Link>
               </li>
@@ -676,9 +672,11 @@ function AppointmentColumn(props: {
 function AppointmentCard({
   appointment,
   showStatus,
+  showPractitioner,
 }: {
   appointment: AppointmentRead;
   showStatus: boolean;
+  showPractitioner: boolean;
 }) {
   const { patient } = appointment;
   const { t } = useTranslation();
@@ -702,32 +700,7 @@ function AppointmentCard({
         </div>
 
         <div className="flex">
-          {appointment.resource_type ===
-            SchedulableResourceType.Practitioner && (
-            <div className="flex items-center justify-center">
-              <Tooltip>
-                <TooltipTrigger className="size-14">
-                  <ScheduleResourceIcon
-                    resource={appointment}
-                    className="size-14 rounded-r-none"
-                  />
-                </TooltipTrigger>
-                <TooltipContent className="flex flex-col gap-0">
-                  <span className="text-sm font-medium">
-                    {formatScheduleResourceName(appointment)}
-                  </span>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          )}
-          <div
-            className={cn(
-              "bg-gray-100 px-2 py-1 ml-px text-center",
-              appointment.resource_type === SchedulableResourceType.Practitioner
-                ? "rounded-l-none rounded-r-md"
-                : "rounded-md",
-            )}
-          >
+          <div className="bg-gray-100 px-2 py-1 ml-px text-center rounded-md">
             <p className="text-[10px] uppercase">{t("token")}</p>
             <p className="font-bold text-2xl uppercase">
               {appointment.token?.number ?? "--"}
@@ -750,6 +723,18 @@ function AppointmentCard({
           </Badge>
         )}
       </div>
+      {showPractitioner &&
+        appointment.resource_type === SchedulableResourceType.Practitioner && (
+          <div className="flex items-center justify-start gap-1 pr-2 bg-gray-100 w-fit rounded-full mt-1">
+            <ScheduleResourceIcon
+              resource={appointment}
+              className="size-5 rounded-full"
+            />
+            <span className="text-xs font-semibold text-gray-500">
+              {formatScheduleResourceName(appointment)}
+            </span>
+          </div>
+        )}
     </div>
   );
 }
