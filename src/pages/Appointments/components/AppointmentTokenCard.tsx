@@ -4,7 +4,11 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { formatPatientAge } from "@/Utils/utils";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import {
@@ -12,6 +16,8 @@ import {
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import { TokenRead, renderTokenNumber } from "@/types/tokens/token/token";
+import { PrinterIcon } from "lucide-react";
+import { Link } from "raviger";
 
 interface Props {
   id?: string;
@@ -22,6 +28,7 @@ interface Props {
 
 const TokenCard = ({ id, token, facility, appointment }: Props) => {
   const { t } = useTranslation();
+  const isLargeScreen = useBreakpoints({ lg: true, default: false });
 
   // Get patient from token or appointment
   const patient = token.patient || appointment?.patient;
@@ -29,77 +36,123 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
   return (
     <Card
       id={id}
-      className="p-6 border border-gray-300 relative transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none"
+      className="p-2 border border-gray-200 relative transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none bg-gray-100"
     >
-      <div className="absolute inset-0 opacity-[0.1] pointer-events-none bg-[url('/images/care_logo_gray.svg')] bg-center bg-no-repeat bg-[length:40%_auto] lg:bg-[length:60%_auto]" />
-
-      <div className="relative">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold tracking-tight break-words">
-              {facility.name}
-            </h3>
-            <div className="text-sm text-gray-600">
-              <span>{facility.pincode}</span>
-              <div className="whitespace-normal">{`Ph.: ${facility.phone_number}`}</div>
-            </div>
-          </div>
-
-          <div className="flex-shrink-0">
-            <div className="text-sm whitespace-nowrap text-center bg-gray-100 px-3 pb-2 pt-6 -mt-6 font-medium text-gray-500">
-              <p>{t("general")}</p>
-              <p>{t("op_token")}</p>
-            </div>
-          </div>
-        </div>
-        <div className="mt-4 flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <Label>{t("name")}</Label>
-            <p className="font-semibold break-words">{patient?.name || "--"}</p>
-            {patient && (
-              <p className="text-sm text-gray-600 font-medium">
-                {formatPatientAge(patient, true)},{" "}
-                {t(`GENDER__${patient.gender}`)}
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
+      <div className="flex flex-col px-1">
+        <p className="font-semibold">{renderTokenNumber(token)}</p>
+        {appointment && (
+          <p className="text-gray-700">
+            {formatScheduleResourceName(appointment)}
+          </p>
+        )}
+      </div>
+      <div className="flex flex-col gap-2 bg-white rounded-md p-4 shadow-md mt-2 ">
+        <div className="flex flex-row justify-between">
+          <div className=" flex flex-col items-start justify-between">
             <div>
-              <Label className="text-black font-semibold text-sm/none whitespace-nowrap">
+              <Label className="text-gray-600 text-sm">
+                {t("patient_name")}:
+              </Label>
+              <p className="font-semibold break-words text-sm">
+                {patient?.name || "--"}
+              </p>
+              {patient && (
+                <p className="text-sm text-gray-600 font-medium">
+                  {formatPatientAge(patient, true)},{" "}
+                  {t(`GENDER__${patient.gender}`)}
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="space-y-2 flex-1 min-w-0">
+                  {appointment && (
+                    <>
+                      <div>
+                        <Label className="text-gray-600 text-sm">
+                          {t(
+                            `schedulable_resource__${appointment.resource_type}`,
+                          )}
+                          :
+                        </Label>
+                        <p className="font-semibold break-words text-sm">
+                          {formatScheduleResourceName(appointment)}
+                        </p>
+                      </div>
+                      <Separator />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-600">
+                          {formatAppointmentSlotTime(appointment)}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold tracking-tight break-words">
+                    {facility.name}
+                  </h3>
+                  <div className="text-sm text-gray-600">
+                    <span>{facility.pincode}</span>
+                    <div className="whitespace-normal">{`Ph.: ${facility.phone_number}`}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 items-end">
+            <div className="flex items-end justify-between gap-4">
+              <div className="flex-shrink-0">
+                <div className="text-sm whitespace-nowrap text-center bg-gray-100 px-3 pb-2 pt-2 -mt-4 font-medium text-gray-700 rounded-md rounded-t-none border border-gray-200">
+                  <p>{t("general_op")}</p>
+                </div>
+              </div>
+            </div>
+            <div className="items-end">
+              <Label className="text-gray-600 text-sm whitespace-nowrap justify-end mt-4">
                 {t("token_no")}
               </Label>
-              <p className="text-2xl font-bold leading-none">
+              <p className="text-2xl font-bold justify-end flex">
                 {renderTokenNumber(token)}
               </p>
             </div>
+            <div className="mt-4">
+              <QRCodeSVG
+                size={isLargeScreen ? 96 : 60}
+                value={patient?.id || ""}
+              />
+            </div>
           </div>
         </div>
-        <div className="mt-4 flex justify-between items-start gap-4">
-          <div className="space-y-2 flex-1 min-w-0">
-            {appointment && (
-              <>
-                <div>
-                  <Label>
-                    {t(`schedulable_resource__${appointment.resource_type}`)}:
-                  </Label>
-                  <p className="text-sm font-semibold break-words">
-                    {formatScheduleResourceName(appointment)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-600">
-                    {formatAppointmentSlotTime(appointment)}
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
-
+        {appointment && (
           <div>
-            <QRCodeSVG size={64} value={patient?.id || ""} />
+            <Separator />
+            <div className="pt-3 mx-4 flex gap-2 justify-between">
+              <Button
+                variant="link"
+                className="underline font-semibold text-base capitalize text-gray-950"
+              >
+                <Link
+                  href={`/facility/${facility.id}/queues/${appointment.token?.queue.id}/practitioner/${appointment.resource.id}`}
+                >
+                  {t("queue_board")}
+                </Link>
+              </Button>
+              <Button
+                data-shortcut-id="print-token"
+                variant="outline"
+                onClick={() => print()}
+                className="text-base text-gray-950 font-semibold"
+              >
+                <PrinterIcon className="size-4 mr-2" />
+                {t("print_token")}
+                <ShortcutBadge actionId="print-token" />
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </Card>
   );
