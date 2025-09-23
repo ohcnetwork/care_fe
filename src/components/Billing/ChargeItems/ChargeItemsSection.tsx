@@ -87,7 +87,11 @@ export function ChargeItemsSection({
     enabled: Boolean(patientId),
   });
 
-  if (chargeItems?.results.length && chargeItems?.results.length <= 0) {
+  if (
+    viewOnly &&
+    chargeItems?.results.length &&
+    chargeItems?.results.length <= 0
+  ) {
     return null;
   }
 
