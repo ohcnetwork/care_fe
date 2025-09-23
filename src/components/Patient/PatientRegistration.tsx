@@ -536,7 +536,7 @@ const PatientBasicsContent = ({
         )}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-6 items-start">
         <FormField
           control={form.control}
           name="age_or_dob"
@@ -601,6 +601,7 @@ const PatientBasicsContent = ({
                   />
                 )}
               </div>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -1009,14 +1010,14 @@ const getFormSchema = (t: TFunction) => {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("field_required"),
-          path: ["date_of_birth"],
+          path: ["age_or_dob"],
         });
       }
       if (data.age_or_dob === "age" && !data.age) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("field_required"),
-          path: ["age"],
+          path: ["age_or_dob"],
         });
       }
 
