@@ -198,18 +198,6 @@ export function OngoingQueueTokenCard({
                 <ContextMenuItem
                   onClick={() =>
                     updateToken({
-                      status: TokenStatus.CREATED,
-                      note: token.note,
-                      sub_queue: null,
-                    })
-                  }
-                >
-                  <RotateCcw className="size-4 mr-2" />
-                  {t("move_to_waiting")}
-                </ContextMenuItem>
-                <ContextMenuItem
-                  onClick={() =>
-                    updateToken({
                       status: TokenStatus.UNFULFILLED,
                       note: token.note,
                       sub_queue: null,
@@ -220,6 +208,20 @@ export function OngoingQueueTokenCard({
                   {t("move_to_awaiting_recall")}
                 </ContextMenuItem>
               </>
+            )}
+            {token.sub_queue && (
+              <ContextMenuItem
+                onClick={() =>
+                  updateToken({
+                    status: TokenStatus.CREATED,
+                    note: token.note,
+                    sub_queue: null,
+                  })
+                }
+              >
+                <RotateCcw className="size-4 mr-2" />
+                {t("move_to_waiting")}
+              </ContextMenuItem>
             )}
 
             <ContextMenuItem
