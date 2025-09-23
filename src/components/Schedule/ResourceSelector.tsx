@@ -20,16 +20,17 @@ export type ScheduleResourceFormState =
       resource_type: SchedulableResourceType.HealthcareService;
     };
 
-interface ResourceSelectorProps {
+interface Props {
   facilityId: string;
   selectedResource: ScheduleResourceFormState;
   setSelectedResource: (resource: ScheduleResourceFormState) => void;
 }
-export const ResourceSelector = ({
+
+export const ScheduleResourceSelector = ({
   facilityId,
   selectedResource,
   setSelectedResource,
-}: ResourceSelectorProps) => {
+}: Props) => {
   switch (selectedResource.resource_type) {
     case SchedulableResourceType.Practitioner:
       return (
