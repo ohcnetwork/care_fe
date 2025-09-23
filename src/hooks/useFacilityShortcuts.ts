@@ -14,7 +14,10 @@ import {
 } from "@/Utils/keyboardShortcutUtils";
 import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 
-export function useFacilityShortcuts(subContext?: string) {
+export function useFacilityShortcuts(
+  subContext?: string,
+  ignoreInputFields?: boolean,
+) {
   const navigate = useNavigate();
   const { facility } = useCurrentFacilitySilently();
   const { hasPermission } = usePermissions();
@@ -156,6 +159,8 @@ export function useFacilityShortcuts(subContext?: string) {
         "dispense-button",
         "navigate-to-source",
         "billing-action",
+        "mark-as-received",
+        "proceed-without-marking",
       ]),
 
       // Generic action handlers
@@ -220,6 +225,7 @@ export function useFacilityShortcuts(subContext?: string) {
     { canCreate: true },
     handlers,
     subContext,
+    ignoreInputFields,
   );
 
   return {

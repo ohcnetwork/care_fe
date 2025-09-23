@@ -34,6 +34,7 @@ import { ProductRead } from "@/types/inventory/product/product";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
   SupplyDeliveryCreate,
+  SupplyDeliveryRead,
   SupplyDeliveryStatus,
   SupplyDeliveryType,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
@@ -41,6 +42,10 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import { Organization } from "@/types/organization/organization";
 
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
 import { ProductKnowledgeSelect } from "./ProductKnowledgeSelect";
 import { ReceiveStockTable } from "./ReceiveStockTable";
@@ -97,12 +102,19 @@ export function ReceiveStock({
     },
   });
 
-  const batchRequest = useMutation({
+  const batchRequest = useMutation<
+    BatchRequestResponse,
+    Error,
+    BatchRequestBody
+  >({
     mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      // Get the last delivery from response
+      const lastDelivery = response.results[response.results.length - 1]
+        ?.data as SupplyDeliveryRead;
       toast.success(t("stock_received"));
       form.reset();
-      navigate("/external_supply/inward_entry");
+      navigate(`/external_supply/deliveries/${lastDelivery?.id}`);
     },
     onError: () => {
       toast.error(t("error_receiving_stock"));

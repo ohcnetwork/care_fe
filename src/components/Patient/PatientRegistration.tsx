@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import DateField from "@/components/ui/date-field";
 import {
   Form,
   FormControl,
@@ -54,6 +55,7 @@ import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -534,12 +536,12 @@ const PatientBasicsContent = ({
         )}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-6 items-start">
         <FormField
           control={form.control}
           name="age_or_dob"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="md:col-span-4">
               <FormLabel aria-required>{t("date_of_birth_or_age")}</FormLabel>
               <div className="flex gap-1 items-start">
                 <Tabs value={field.value} onValueChange={field.onChange}>
@@ -555,14 +557,14 @@ const PatientBasicsContent = ({
                     render={({ field }) => (
                       <FormItem className="w-full">
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="date"
-                            max={format(new Date(), "yyyy-MM-dd")}
-                            value={field.value ?? ""}
-                            onChange={(e) => {
-                              field.onChange(e.target.value || null);
-                            }}
+                          <DateField
+                            date={
+                              field.value ? new Date(field.value) : undefined
+                            }
+                            onChange={(date) =>
+                              field.onChange(dateQueryString(date))
+                            }
+                            hideLabels
                           />
                         </FormControl>
                         <FormMessage />
@@ -575,7 +577,7 @@ const PatientBasicsContent = ({
                     control={form.control}
                     name="age"
                     render={({ field }) => (
-                      <FormItem className="w-full">
+                      <FormItem className="w-full md:col-span-2">
                         <FormControl>
                           <Input
                             {...field}
@@ -599,6 +601,7 @@ const PatientBasicsContent = ({
                   />
                 )}
               </div>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -1007,14 +1010,14 @@ const getFormSchema = (t: TFunction) => {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("field_required"),
-          path: ["date_of_birth"],
+          path: ["age_or_dob"],
         });
       }
       if (data.age_or_dob === "age" && !data.age) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("field_required"),
-          path: ["age"],
+          path: ["age_or_dob"],
         });
       }
 
