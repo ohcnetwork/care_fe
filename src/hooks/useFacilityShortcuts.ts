@@ -159,6 +159,8 @@ export function useFacilityShortcuts(
         "dispense-button",
         "navigate-to-source",
         "billing-action",
+        "mark-as-received",
+        "proceed-without-marking",
       ]),
 
       // Generic action handlers

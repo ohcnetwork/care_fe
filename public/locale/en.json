@@ -3895,7 +3895,7 @@
   "rebalance": "Rebalance",
   "rebalancing": "Rebalancing",
   "receive_item": "Receive Item",
-  "receive_item_quantity_mismatch_message": "You are marking the request as fully received. You will not be receiving any more new deliveries for this request.",
+  "receive_item_quantity_mismatch_message": "You are marking the request as fully received. You will not be able to receive any more new deliveries for this request.",
   "receive_item_quantity_mismatch_title": "Quantity Mismatch",
   "receive_items": "Receive Items",
   "receive_stock": "Receive Stock",
