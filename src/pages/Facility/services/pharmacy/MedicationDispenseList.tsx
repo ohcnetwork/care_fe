@@ -231,6 +231,7 @@ export default function MedicationDispenseList({
     queryKey: ["prescription", patientId, prescriptionId],
     queryFn: query(prescriptionApi.get, {
       pathParams: { patientId, id: prescriptionId },
+      queryParams: { facility: facilityId },
     }),
   });
 
@@ -261,6 +262,7 @@ export default function MedicationDispenseList({
     }) => {
       return mutate(prescriptionApi.update, {
         pathParams: { patientId, id: prescription.id },
+        queryParams: { facility: facilityId },
       })({ ...prescription, status: newStatus });
     },
     onSuccess: () => {

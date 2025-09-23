@@ -289,7 +289,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                             onChange={(date) =>
                               field.onChange(dateQueryString(date))
                             }
-                            id="dob"
                           />
                         </FormControl>
                         <FormMessage />

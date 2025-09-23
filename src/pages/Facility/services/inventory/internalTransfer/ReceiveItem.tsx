@@ -1033,6 +1033,7 @@ export default function ReceiveItem({
           onConfirm={dialog.onConfirm}
           variant={dialog.variant}
           confirmText={dialog.confirmText || t("confirm")}
+          cancelText={t("cancel")}
           disabled={isPending}
           hideCancel={dialog.hideCancel}
         />
