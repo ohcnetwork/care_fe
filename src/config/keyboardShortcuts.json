@@ -29,7 +29,8 @@
 
   "facility:appointment": [
     { "key": "2", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
-    { "key": "1", "action": "start-consultation", "description": "Start Consultation", "when": "always" }
+    { "key": "1", "action": "start-consultation", "description": "Start Consultation", "when": "always" },
+    { "key": "3", "action": "print-appointment", "description": "Print Appointment", "when": "always" }
   ],
 
   "facility:billing": [

@@ -20,6 +20,7 @@ import {
   EyeIcon,
   Loader2,
   PlusSquare,
+  PrinterIcon,
   ReceiptText,
   SquareActivity,
   X,
@@ -543,6 +544,14 @@ export default function AppointmentDetail(props: Props) {
                         }}
                       />
                     )}
+                    {/* Print Appointment */}
+                    <QuickAction
+                      icon={<PrinterIcon className="size-4" />}
+                      title={t("print_appointment")}
+                      actionId="print-appointment"
+                      data-shortcut-id="print-appointment"
+                      href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
+                    />
                   </div>
                 </>
                 {/* )} */}
@@ -575,7 +584,7 @@ const AppointmentDetailsContent = ({
         encounterId={appointment.associated_encounter?.id}
         viewOnly={true}
       />
-      <div className=" gap-4 grid grid-cols-1 md:grid-cols-2">
+      <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
         <Card className="bg-white shadow-sm rounded-md p-1">
           <CardHeader className="p-2 bg-gray-50">
             <CardTitle className="flex justify-between">
