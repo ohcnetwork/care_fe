@@ -55,7 +55,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { makeUrl } from "@/Utils/request/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
   SUPPLY_DELIVERY_CONDITION_COLORS,
   SUPPLY_DELIVERY_STATUS_COLORS,
@@ -101,7 +101,7 @@ export default function ReceiveItem({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  useFacilityShortcuts("supply-delivery");
+  useShortcutSubContext("supply-delivery");
   const [isReceivingAbandonedItem, setIsReceivingAbandonedItem] =
     useState(false);
   const [nextDeliveryUrl, setNextDeliveryUrl] = useState<string>("");

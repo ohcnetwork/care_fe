@@ -22,12 +22,25 @@ interface ShortcutContextType {
    * Set the current shortcut sub-context
    */
   setSubContext: (subContext?: string) => void;
+  /**
+   * Whether shortcuts should run even when input fields are focused
+   */
+  ignoreInputFields: boolean;
+  /**
+   * Set whether shortcuts should run even when input fields are focused
+   */
+  setIgnoreInputFields: (ignore: boolean) => void;
 }
 
 const ShortcutContext = createContext<ShortcutContextType | null>(null);
 
 interface ShortcutProviderProps {
   children: React.ReactNode;
+  /**
+   * Whether shortcuts should run even when input fields are focused
+   * @default false
+   */
+  ignoreInputFields?: boolean;
 }
 
 function expandContext(key: string, sep = ":") {
@@ -45,9 +58,15 @@ function expandContext(key: string, sep = ":") {
   return out;
 }
 
-export function ShortcutProvider({ children }: ShortcutProviderProps) {
+export function ShortcutProvider({
+  children,
+  ignoreInputFields: defaultIgnoreInputFields = false,
+}: ShortcutProviderProps) {
   const [commandDialogOpen, setCommandDialogOpen] = useState(false);
   const [subContext, setSubContext] = useState<string | undefined>();
+  const [ignoreInputFields, setIgnoreInputFields] = useState(
+    defaultIgnoreInputFields,
+  );
 
   // Facility shortcuts logic (moved from useShortcutSubContext)
   const actions = useMemo((): FacilityAction[] => {
@@ -84,6 +103,7 @@ export function ShortcutProvider({ children }: ShortcutProviderProps) {
     { canCreate: true },
     handlers,
     subContext,
+    ignoreInputFields,
   );
 
   const value = useMemo(
@@ -92,8 +112,10 @@ export function ShortcutProvider({ children }: ShortcutProviderProps) {
       setCommandDialogOpen,
       subContext,
       setSubContext,
+      ignoreInputFields,
+      setIgnoreInputFields,
     }),
-    [commandDialogOpen, subContext],
+    [commandDialogOpen, subContext, ignoreInputFields],
   );
 
   return (
