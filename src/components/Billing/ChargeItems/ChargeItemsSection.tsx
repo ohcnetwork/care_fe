@@ -87,7 +87,7 @@ export function ChargeItemsSection({
     enabled: Boolean(patientId),
   });
 
-  if (viewOnly && chargeItems?.results.length === 0) {
+  if (chargeItems?.results.length && chargeItems?.results.length <= 0) {
     return null;
   }
 
@@ -98,29 +98,27 @@ export function ChargeItemsSection({
           <div className="flex items-center justify-between">
             <CardTitle>{t("charge_items")}</CardTitle>
             <div className="flex items-center gap-2">
-              {!viewOnly &&
-                (chargeItems?.results ?? []).filter(
-                  (chargeItem) =>
-                    chargeItem.status === ChargeItemStatus.billable,
-                ).length > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setInvoiceSheetState({
-                        open: true,
-                        chargeItems:
-                          chargeItems?.results.filter(
-                            (chargeItem) =>
-                              chargeItem.status === ChargeItemStatus.billable,
-                          ) ?? [],
-                      })
-                    }
-                  >
-                    <PlusIcon className="size-4 mr-2" />
-                    {t("create_invoice")}
-                  </Button>
-                )}
+              {(chargeItems?.results ?? []).filter(
+                (chargeItem) => chargeItem.status === ChargeItemStatus.billable,
+              ).length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setInvoiceSheetState({
+                      open: true,
+                      chargeItems:
+                        chargeItems?.results.filter(
+                          (chargeItem) =>
+                            chargeItem.status === ChargeItemStatus.billable,
+                        ) ?? [],
+                    })
+                  }
+                >
+                  <PlusIcon className="size-4 mr-2" />
+                  {t("create_invoice")}
+                </Button>
+              )}
               {!disableCreateChargeItems && !viewOnly && (
                 <Button
                   variant="outline"

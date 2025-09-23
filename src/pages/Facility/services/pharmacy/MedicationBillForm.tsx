@@ -85,7 +85,7 @@ import useFilters from "@/hooks/useFilters";
 
 import BackButton from "@/components/Common/BackButton";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -690,7 +690,7 @@ const AddMedicationSheet = ({
 };
 
 export default function MedicationBillForm({ patientId }: Props) {
-  useFacilityShortcuts("general");
+  useShortcutSubContext();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { facilityId } = useCurrentFacility();

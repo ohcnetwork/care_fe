@@ -8,13 +8,11 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import { Plus } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { PERMISSION_CREATE_PATIENT } from "@/common/Permissions";
-import { usePermissions } from "@/context/PermissionContext";
-import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
+import actionsJson from "@/config/keyboardShortcuts.json";
+import { useShortcuts } from "@/context/ShortcutContext";
 import { formatKeyboardShortcut } from "@/Utils/keyboardShortcutUtils";
 
 interface ActionItem {
@@ -31,38 +29,63 @@ interface ActionGroup {
   items: ActionItem[];
 }
 
-interface FacilityCommandDialogProps {
+interface ShortcutCommandDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   trigger?: React.ReactNode;
 }
 
-export function FacilityCommandDialog({
+export function ShortcutCommandDialog({
   open,
   onOpenChange,
   trigger,
-}: FacilityCommandDialogProps) {
+}: ShortcutCommandDialogProps) {
   const { t } = useTranslation();
-  const { facility } = useCurrentFacilitySilently();
-  const { hasPermission } = usePermissions();
+  const { subContext } = useShortcuts();
 
-  const facilityActions: ActionGroup[] = useMemo(
-    () => [
-      {
-        group: t("facility_actions"),
-        items: [
-          {
-            id: "register-patient",
-            label: t("register_new_patient"),
-            shortcut: formatKeyboardShortcut("shift+p"),
-            icon: <Plus />,
-            permission: PERMISSION_CREATE_PATIENT,
-          },
-        ],
-      },
-    ],
-    [t],
-  );
+  const facilityActions: ActionGroup[] = useMemo(() => {
+    // Use the same expandContext logic from ShortcutContext
+    const expandContext = (key: string, sep = ":") => {
+      if (typeof key !== "string") return [];
+      const clean = key
+        .trim()
+        .replace(new RegExp(`${sep}+`, "g"), sep)
+        .replace(new RegExp(`^${sep}|${sep}$`, "g"), "");
+      if (!clean) return [];
+      const parts = clean.split(sep);
+      const out = [];
+      for (let i = 0; i < parts.length; i++) {
+        out.push(parts.slice(0, i + 1).join(sep));
+      }
+      return out;
+    };
+
+    const allContexts = expandContext(subContext || "");
+    const contextsToSearch = ["global", ...allContexts];
+
+    const actionGroups: ActionGroup[] = [];
+
+    contextsToSearch.forEach((context) => {
+      const contextActions = actionsJson[context as keyof typeof actionsJson];
+
+      if (!contextActions || contextActions.length === 0) return;
+
+      const items: ActionItem[] = contextActions.map((action) => ({
+        id: action.action,
+        label: action.description,
+        shortcut: formatKeyboardShortcut(action.key),
+      }));
+
+      if (items.length > 0) {
+        actionGroups.push({
+          group: context.replace(/:/g, " ").toUpperCase(),
+          items,
+        });
+      }
+    });
+
+    return actionGroups;
+  }, [subContext]);
 
   const handleSelect = useCallback(
     (actionId: string) => {
@@ -74,17 +97,6 @@ export function FacilityCommandDialog({
       onOpenChange(false);
     },
     [onOpenChange],
-  );
-
-  const isActionDisabled = useCallback(
-    (action: ActionItem): boolean => {
-      if (!facility) return true;
-      if (action.permission) {
-        return !hasPermission(action.permission, facility.permissions);
-      }
-      return false;
-    },
-    [facility, hasPermission],
   );
 
   return (
@@ -113,9 +125,7 @@ export function FacilityCommandDialog({
                     onSelect={() => handleSelect(action.id)}
                     className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
                     autoFocus={false}
-                    disabled={isActionDisabled(action)}
                   >
-                    {action.icon}
                     <span className="flex-1">{action.label}</span>
                     {action.shortcut && (
                       <CommandShortcut className="ml-2 text-xs text-gray-500 bg-white border border-gray-200 shadow-xs px-1.5 py-0.5 rounded">
