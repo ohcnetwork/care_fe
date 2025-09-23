@@ -7,7 +7,6 @@ import {
   isValidPhoneNumber,
 } from "react-phone-number-input";
 import { toast } from "sonner";
-import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { cn } from "@/lib/utils";
 
@@ -38,8 +37,10 @@ import SearchInput from "@/components/Common/SearchInput";
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   PartialPatientModel,
@@ -51,6 +52,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [{ phone_number: phoneNumber = "" }, setPhoneNumberQuery] =
     useQueryParams();
+  useFacilityShortcuts(undefined, true);
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<
     PartialPatientModel | PatientRead | null
@@ -74,10 +76,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     });
   }, [facilityId, phoneNumber]);
 
-  useKeyboardShortcut(["shift", "p"], handleCreatePatient, {
-    ignoreInputFields: false,
-  });
-
   function AddPatientButton({ outline }: { outline?: boolean }) {
     return (
       <Button
@@ -85,19 +83,11 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         className={cn("gap-3 group")}
         onClick={handleCreatePatient}
         data-cy="create-new-patient-button"
+        data-shortcut-id="submit-action"
       >
         <CareIcon icon="l-plus" className="size-4" />
         {t("add_new_patient")}
-        <kbd
-          className={cn(
-            "hidden h-5 select-none items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex",
-            outline
-              ? "border-gray-200 bg-transparent"
-              : "bg-white/20 border-white/20 text-white",
-          )}
-        >
-          ⇧P
-        </kbd>
+        <ShortcutBadge actionId="submit-action" className="bg-white" />
       </Button>
     );
   }

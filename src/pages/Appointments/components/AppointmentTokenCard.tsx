@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { formatPatientAge } from "@/Utils/utils";
+import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -135,7 +136,7 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
                 className="underline font-semibold text-base capitalize text-gray-950"
               >
                 <Link
-                  href={`/facility/${facility.id}/queues/${appointment.token?.queue.id}/practitioner/${appointment.resource.id}`}
+                  href={`/facility/${facility.id}/${resourceTypeToResourcePathSlug[appointment.resource_type]}/${appointment.resource.id}/queues/${appointment.token?.queue.id}`}
                 >
                   {t("queue_board")}
                 </Link>
