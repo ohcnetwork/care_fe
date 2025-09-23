@@ -29,7 +29,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import AddChargeItemsBillingSheet from "@/pages/Facility/billing/account/components/AddChargeItemsBillingSheet";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import accountApi from "@/types/billing/account/accountApi";
@@ -66,7 +66,7 @@ export default function AddChargeItemSheet({
     limit: 10,
     disableCache: true,
   });
-  useFacilityShortcuts("chargeItem-sheet");
+  useShortcutSubContext("facility:chargeItem:sheet");
 
   // Get account information to extract patient ID
   const { data: account } = useQuery({

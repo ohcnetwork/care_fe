@@ -5,6 +5,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import useCurrentService from "@/pages/Facility/services/utils/useCurrentService";
+import { Logs } from "lucide-react";
 
 export function ServiceNav() {
   const { t } = useTranslation();
@@ -29,12 +30,12 @@ export function ServiceNav() {
         {
           name: t("appointments"),
           url: `${baseUrl}/appointments`,
-          icon: <CareIcon icon="l-calender" />,
+          icon: <CareIcon icon="d-calendar" />,
         },
         {
           name: t("queues"),
           url: `${baseUrl}/queues`,
-          icon: <CareIcon icon="l-calender" />,
+          icon: <Logs />,
         },
       ]}
     />

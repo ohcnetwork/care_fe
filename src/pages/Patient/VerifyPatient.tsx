@@ -1,20 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   Download,
   Printer,
-  SettingsIcon,
   SquareActivity,
   Stethoscope,
+  Ticket,
 } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
@@ -33,29 +32,23 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 
-import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
-import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
+import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
+import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
-import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import patientApi from "@/types/emr/patient/patientApi";
-import {
-  getTagHierarchyDisplay,
-  TagResource,
-} from "@/types/emr/tagConfig/tagConfig";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import query from "@/Utils/request/query";
 import { saveElementAsImage } from "@/Utils/utils";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function VerifyPatient() {
-  const getShortcutDisplay = useEncounterShortcutDisplays();
-  const queryClient = useQueryClient();
-  useFacilityShortcuts("patient-home");
+  useShortcutSubContext("facility:patient:home");
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
+  const queryClient = useQueryClient();
+
   const { phone_number, year_of_birth, partial_id, queue_id, token_id } =
     qParams;
   const { goBack } = useAppHistory();
@@ -96,7 +89,7 @@ export default function VerifyPatient() {
 
   if (isVerifyingPatient || !facility) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 md:max-w-5xl mx-auto">
         <CardListSkeleton count={1} />
         <CardGridSkeleton count={4} />
       </div>
@@ -112,60 +105,27 @@ export default function VerifyPatient() {
           </AlertDescription>
         </Alert>
       ) : patientData ? (
-        <div className="space-y-6">
+        <div className="space-y-6 md:max-w-5xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
               <div className="">
-                <Card className="bg-white shadow-sm">
-                  <CardHeader className="pb-4">
-                    <div className="space-y-4">
-                      <PatientHoverCard
-                        patient={patientData}
-                        facilityId={facilityId || ""}
-                      />
-                    </div>
-                  </CardHeader>
-                </Card>
-                <Card className="bg-white shadow-sm mx-10 rounded-t-none">
-                  <CardHeader className="p-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        {patientData.instance_tags.map((t) => (
-                          <Badge key={t.id} variant="outline">
-                            {getTagHierarchyDisplay(t)}
-                          </Badge>
-                        ))}
-                      </div>
-                      <TagAssignmentSheet
-                        entityType={TagResource.PATIENT}
-                        entityId={patientData.id}
-                        currentTags={patientData.instance_tags}
-                        onUpdate={() => {
-                          queryClient.invalidateQueries({
-                            queryKey: [
-                              "patient-verify",
-                              phone_number,
-                              year_of_birth,
-                              partial_id,
-                            ],
-                          });
-                        }}
-                        canWrite={true}
-                        trigger={
-                          <Button variant="ghost">
-                            <SettingsIcon
-                              className=" text-gray-950"
-                              strokeWidth={1.5}
-                            />
-                            <span className="font-semibold underline">
-                              {t("manage_tags")}
-                            </span>
-                          </Button>
-                        }
-                      />
-                    </div>
-                  </CardHeader>
-                </Card>
+                <PatientInfoCard
+                  tags={patientData.instance_tags}
+                  tagEntityType="patient"
+                  tagEntityId={patientData.id}
+                  patient={patientData}
+                  facilityId={facilityId}
+                  onTagsUpdate={() => {
+                    queryClient.invalidateQueries({
+                      queryKey: [
+                        "patient-verify",
+                        phone_number,
+                        year_of_birth,
+                        partial_id,
+                      ],
+                    });
+                  }}
+                />
               </div>
 
               <div className="grid gap-4 grid-cols-2  lg:grid-cols-3">
@@ -178,7 +138,8 @@ export default function VerifyPatient() {
                       <QuickAction
                         icon={<SquareActivity className="text-orange-500" />}
                         title={t("create_encounter")}
-                        shortcut={getShortcutDisplay("create-encounter")}
+                        actionId="create-encounter"
+                        data-shortcut-id="create-encounter"
                       />
                     }
                   />
@@ -192,7 +153,8 @@ export default function VerifyPatient() {
                       <QuickAction
                         icon={<Stethoscope className="text-purple-500" />}
                         title={t("schedule_appointment")}
-                        shortcut={getShortcutDisplay("schedule-appointment")}
+                        actionId="schedule-appointment"
+                        data-shortcut-id="schedule-appointment"
                       />
                     }
                   />
@@ -204,9 +166,10 @@ export default function VerifyPatient() {
                     facilityId={facilityId}
                     trigger={
                       <QuickAction
-                        icon={<Printer className="text-gray-500" />}
+                        icon={<Ticket className="text-gray-500" />}
                         title={t("generate_token")}
-                        shortcut={getShortcutDisplay("generate-token")}
+                        actionId="generate-token"
+                        data-shortcut-id="generate-token"
                       />
                     }
                   />
@@ -247,10 +210,12 @@ export default function VerifyPatient() {
                   <CardContent className="p-2">
                     <div className="flex items-center justify-between gap-2">
                       <Link
-                        href={`/facility/${facilityId}/queues/${tokenData.queue.id}`}
+                        href={`/facility/${facilityId}/${resourceTypeToResourcePathSlug[tokenData.resource_type]}/${tokenData.resource.id}/queues/${tokenData.queue.id}/ongoing`}
                         className="font-semibold text-lg underline"
                       >
-                        {tokenData.queue.name}
+                        {tokenData.queue.name === "System Generated"
+                          ? t("primary_queue")
+                          : tokenData.queue.name}
                       </Link>
 
                       <span className="text-lg text-gray-700 p-2">
@@ -272,7 +237,6 @@ export default function VerifyPatient() {
 
                   <div className="mt-4 flex justify-end gap-2">
                     <Button
-                      data-shortcut-id="print-token"
                       variant="ghost"
                       onClick={() =>
                         saveElementAsImage("section-to-print", "token-card.png")

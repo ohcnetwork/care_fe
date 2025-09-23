@@ -32,7 +32,7 @@ import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPr
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
@@ -74,7 +74,7 @@ export default function AddChargeItemsBillingSheet({
     string | null
   >(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  useFacilityShortcuts("chargeItem-billing-sheet");
+  useShortcutSubContext("facility:chargeItemBilling:sheet");
   const getShortcutDisplay = useShortcutDisplays(["facility"]);
 
   const { data: chargeItemDefinitions, isLoading } = useQuery({

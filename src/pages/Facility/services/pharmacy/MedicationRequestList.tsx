@@ -283,6 +283,7 @@ export default function MedicationRequestList({
         className="flex sm:flex-row flex-wrap sm:items-center mb-4"
         triggerButtonClassName="self-start sm:self-center"
         clearAllButtonClassName="self-center"
+        facilityId={facilityId}
       />
       {/* Table section */}
       <div>

@@ -15,6 +15,7 @@ import Routers from "@/Routers";
 import { displayCareConsoleArt } from "@/Utils/consoleArt";
 import queryClient from "@/Utils/request/queryClient";
 
+import { ShortcutProvider } from "@/context/ShortcutContext";
 import { PubSubProvider } from "./Utils/pubsubContext";
 
 const ScrollToTop = () => {
@@ -36,25 +37,27 @@ const App = () => {
         <ScrollToTop />
         <Suspense fallback={<Loading />}>
           <PubSubProvider>
-            <PluginEngine>
-              <HistoryAPIProvider>
-                <AuthUserProvider
-                  unauthorized={<Routers.PublicRouter />}
-                  otpAuthorized={<Routers.PatientRouter />}
-                >
-                  <Routers.AppRouter />
-                </AuthUserProvider>
-              </HistoryAPIProvider>
-              <Toaster
-                position="top-center"
-                theme="light"
-                richColors
-                expand
-                // For `richColors` to work, pass at-least an empty object.
-                // Refer: https://github.com/shadcn-ui/ui/issues/2234.
-                toastOptions={{}}
-              />
-            </PluginEngine>
+            <ShortcutProvider>
+              <PluginEngine>
+                <HistoryAPIProvider>
+                  <AuthUserProvider
+                    unauthorized={<Routers.PublicRouter />}
+                    otpAuthorized={<Routers.PatientRouter />}
+                  >
+                    <Routers.AppRouter />
+                  </AuthUserProvider>
+                </HistoryAPIProvider>
+                <Toaster
+                  position="top-center"
+                  theme="light"
+                  richColors
+                  expand
+                  // For `richColors` to work, pass at-least an empty object.
+                  // Refer: https://github.com/shadcn-ui/ui/issues/2234.
+                  toastOptions={{}}
+                />
+              </PluginEngine>
+            </ShortcutProvider>
           </PubSubProvider>
         </Suspense>
 
