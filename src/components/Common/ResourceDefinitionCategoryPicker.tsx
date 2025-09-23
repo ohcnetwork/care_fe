@@ -624,7 +624,7 @@ export function ResourceDefinitionCategoryPicker<T>({
     definitions.map((definition) => (
       <CommandItem
         key={definition.id}
-        value={definition.title}
+        value={`${definition.title}-${definition.id}`}
         onSelect={() => handleDefinitionSelect(definition)}
         className={cn(
           "flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200 last:border-b-0",
