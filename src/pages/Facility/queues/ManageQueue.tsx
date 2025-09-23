@@ -97,6 +97,7 @@ export function ManageQueuePage({
         <div className="flex justify-between gap-3">
           <div className="flex gap-2 items-center">
             <BackButton
+              // TODO: move queue index page for practitioner to similar pattern path
               to={
                 resourceType === SchedulableResourceType.Practitioner
                   ? `/facility/${facilityId}/queues?date=${dateQueryString(queue.date)}&resource_id=${resourceId}`
