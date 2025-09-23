@@ -17,12 +17,7 @@ import {
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   BringToFront,
   Check,
@@ -40,6 +35,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
+import { useTokenListInfiniteQuery } from "./utils";
 
 export function OngoingQueueTokenCard({
   facilityId,
@@ -288,14 +284,12 @@ export function OngoingQueueTokenCard({
   );
 }
 
-const PAGE_SIZE = 50;
-
 export function OngoingQueueTokenCardsList({
   facilityId,
   queueId,
-  qParams,
   emptyState,
   header,
+  qParams,
 }: {
   facilityId: string;
   queueId: string;
@@ -306,20 +300,10 @@ export function OngoingQueueTokenCardsList({
   const { ref, inView } = useInView();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["infinite-tokens", facilityId, queueId, qParams],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(tokenApi.list, {
-          pathParams: { facility_id: facilityId, queue_id: queueId },
-          queryParams: { ...qParams, limit: PAGE_SIZE, offset: pageParam },
-        })({ signal });
-        return response;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * PAGE_SIZE;
-        return currentOffset < lastPage.count ? currentOffset : null;
-      },
+    useTokenListInfiniteQuery({
+      facilityId,
+      queueId,
+      qParams,
     });
 
   useEffect(() => {

@@ -30,6 +30,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DoorOpenIcon, EyeIcon, Megaphone, SettingsIcon } from "lucide-react";
+import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ServicePointsDropDown } from "./ServicePointsDropDown";
@@ -46,11 +47,13 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
   const { preferredServicePointCategories } = usePreferredServicePointCategory({
     facilityId,
   });
+  const [{ autoRefresh }] = useQueryParams();
   const { data: summary } = useQuery({
     queryKey: ["token-queue-summary", facilityId, queueId],
     queryFn: query(tokenQueueApi.summary, {
       pathParams: { facility_id: facilityId, id: queueId },
     }),
+    refetchInterval: autoRefresh === "true" ? 10000 : false,
   });
 
   return (
@@ -69,6 +72,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
             queueId={queueId}
             qParams={{
               sub_queue_is_null: true,
+              status: TokenStatus.CREATED,
             }}
             emptyState={
               <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">

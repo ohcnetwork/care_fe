@@ -20,7 +20,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
 import { NavTabs } from "@/components/ui/nav-tabs";
+import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ManageQueueFinishedTab } from "@/pages/Facility/queues/ManageQueueFinishedTab";
 import { ManageQueueOngoingTab } from "@/pages/Facility/queues/ManageQueueOngoingTab";
 import QueueFormSheet from "@/pages/Facility/queues/QueueFormSheet";
@@ -33,8 +41,14 @@ import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { ChevronLeft, Edit3, PowerOffIcon, SettingsIcon } from "lucide-react";
-import { useNavigate } from "raviger";
+import {
+  ChevronLeft,
+  Edit3,
+  InfoIcon,
+  PowerOffIcon,
+  SettingsIcon,
+} from "lucide-react";
+import { useNavigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 interface ManageQueuePageProps {
@@ -54,9 +68,10 @@ export function ManageQueuePage({
 }: ManageQueuePageProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
   const resource = useScheduleResource();
-
+  const [{ autoRefresh }, setQueryParams] = useQueryParams<{
+    autoRefresh: string;
+  }>();
   const { data: queue, isLoading: isQueueLoading } = useQuery({
     queryKey: ["tokenQueue", facilityId, queueId],
     queryFn: query(tokenQueueApi.get, {
@@ -81,7 +96,7 @@ export function ManageQueuePage({
       hideTitleOnPage
     >
       <div className="flex flex-col gap-6">
-        <div className="flex justify-between">
+        <div className="flex justify-between gap-3">
           <div className="flex gap-2 items-center">
             <BackButton size="icon" variant="ghost">
               <ChevronLeft />
@@ -99,7 +114,7 @@ export function ManageQueuePage({
                     {queue.is_primary && (
                       <Badge
                         variant={queue.is_primary ? "primary" : "secondary"}
-                        className="text-xs"
+                        className="hidden sm:block text-xs"
                       >
                         {t("primary")}
                       </Badge>
@@ -113,7 +128,30 @@ export function ManageQueuePage({
               </div>
             )}
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-5 items-center justify-center">
+            <div className="flex flex-col-reverse sm:flex-row gap-2 items-center text-black font-medium text-md">
+              <Switch
+                checked={autoRefresh === "true"}
+                onCheckedChange={(checked) =>
+                  setQueryParams({
+                    autoRefresh: checked ? "true" : "false",
+                  })
+                }
+              />
+              <div className="flex items-center gap-1">
+                <Label className="whitespace-nowrap">{t("auto_refresh")}</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild className="hidden sm:block">
+                      <span className="cursor-help">
+                        <InfoIcon className="size-4 text-gray-500" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("auto_refresh_tooltip")}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -173,7 +211,13 @@ export function ManageQueuePage({
             },
           }}
           currentTab={tab}
-          onTabChange={(tab) => navigate(tab)}
+          onTabChange={(tab) => {
+            navigate(tab, {
+              query: {
+                autoRefresh,
+              },
+            });
+          }}
           setPageTitle={false}
         />
       </div>
