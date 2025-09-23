@@ -10,7 +10,6 @@ import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
 import { ChargeItemCard } from "@/pages/Facility/services/serviceRequests/components/ChargeItemCard";
 
-import query from "@/Utils/request/query";
 import {
   AccountBillingStatus,
   AccountStatus,
@@ -22,6 +21,8 @@ import {
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import query from "@/Utils/request/query";
 
 interface ChargeItemsSectionProps {
   facilityId: string;
@@ -98,29 +99,28 @@ export function ChargeItemsSection({
           <div className="flex items-center justify-between">
             <CardTitle>{t("charge_items")}</CardTitle>
             <div className="flex items-center gap-2">
-              {!viewOnly &&
-                (chargeItems?.results ?? []).filter(
-                  (chargeItem) =>
-                    chargeItem.status === ChargeItemStatus.billable,
-                ).length > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setInvoiceSheetState({
-                        open: true,
-                        chargeItems:
-                          chargeItems?.results.filter(
-                            (chargeItem) =>
-                              chargeItem.status === ChargeItemStatus.billable,
-                          ) ?? [],
-                      })
-                    }
-                  >
-                    <PlusIcon className="size-4 mr-2" />
-                    {t("create_invoice")}
-                  </Button>
-                )}
+              {(chargeItems?.results ?? []).filter(
+                (chargeItem) => chargeItem.status === ChargeItemStatus.billable,
+              ).length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setInvoiceSheetState({
+                      open: true,
+                      chargeItems:
+                        chargeItems?.results.filter(
+                          (chargeItem) =>
+                            chargeItem.status === ChargeItemStatus.billable,
+                        ) ?? [],
+                    })
+                  }
+                >
+                  <PlusIcon className="size-4 mr-2" />
+                  {t("create_invoice")}
+                  <ShortcutBadge actionId="create-invoice" />
+                </Button>
+              )}
               {!disableCreateChargeItems && !viewOnly && (
                 <Button
                   variant="outline"
