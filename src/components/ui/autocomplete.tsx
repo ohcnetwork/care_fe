@@ -234,7 +234,7 @@ export default function Autocomplete({
               {t("autocomplete_options")}
             </DrawerTitle>
 
-            <div className="mt-6 h-full pb-safe flex-1 overflow-y-auto">
+            <div className="mt-6 h-full pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
               <Command>{commandContent}</Command>
             </div>
           </DrawerContent>
