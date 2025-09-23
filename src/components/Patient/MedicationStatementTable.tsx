@@ -31,7 +31,7 @@ export const MedicationStatementTable = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <Table className="border-separate border-gray-200 border-spacing-y-0.5 min-w-4xl">
+    <Table className="border-separate border-gray-200 border-spacing-y-0.5">
       <TableHeader>
         <TableRow className="rounded-md overflow-hidden bg-gray-100">
           <TableHead className="first:rounded-l-md h-auto py-1 px-2 text-gray-600">
@@ -65,12 +65,10 @@ export const MedicationStatementTable = ({
               statement.status === "entered_in_error" ? "opacity-50" : ""
             }`}
           >
-            <TableCell className="font-medium first:rounded-l-md whitespace-normal break-words">
+            <TableCell className="font-medium first:rounded-l-md">
               {statement.medication.display ?? statement.medication.code}
             </TableCell>
-            <TableCell className="break-words whitespace-normal">
-              {statement.dosage_text}
-            </TableCell>
+            <TableCell>{statement.dosage_text}</TableCell>
             <TableCell>
               <Badge
                 variant={MEDICATION_STATEMENT_STATUS_STYLES[statement.status]}
@@ -89,9 +87,7 @@ export const MedicationStatementTable = ({
                 )
                 .join(" - ")}
             </TableCell>
-            <TableCell className="break-words whitespace-normal">
-              {statement.reason}
-            </TableCell>
+            <TableCell>{statement.reason}</TableCell>
             <TableCell className="max-w-[200px]">
               {statement.note ? (
                 <div className="flex items-center gap-2">
