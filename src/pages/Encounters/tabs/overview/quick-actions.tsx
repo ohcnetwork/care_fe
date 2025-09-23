@@ -70,6 +70,8 @@ export function QuickAction({
   props?: React.ComponentProps<"div">;
   actionId?: string;
 }) {
+  console.log("shortcut", shortcut);
+  console.log("actionId", actionId);
   const content = (
     <>
       <div className="relative flex md:py-3 py-0 rounded-t-md rounded-b-lg md:bg-gray-100 bg-white">
