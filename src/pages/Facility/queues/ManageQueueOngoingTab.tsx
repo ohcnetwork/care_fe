@@ -72,6 +72,7 @@ export function ManageQueueOngoingTab({ facilityId, queueId }: Props) {
             queueId={queueId}
             qParams={{
               sub_queue_is_null: true,
+              status: TokenStatus.CREATED,
             }}
             emptyState={
               <div className="flex flex-col gap-2 items-center justify-center bg-gray-100 rounded-lg py-10 border border-gray-100">

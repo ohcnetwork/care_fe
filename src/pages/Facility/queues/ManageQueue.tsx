@@ -131,9 +131,10 @@ export function ManageQueuePage({
           <div className="flex gap-5 items-center justify-center">
             <div className="flex flex-col-reverse sm:flex-row gap-2 items-center text-black font-medium text-md">
               <Switch
-                onClick={() =>
+                checked={autoRefresh === "true"}
+                onCheckedChange={(checked) =>
                   setQueryParams({
-                    autoRefresh: autoRefresh === "true" ? "false" : "true",
+                    autoRefresh: checked ? "true" : "false",
                   })
                 }
               />
@@ -210,7 +211,13 @@ export function ManageQueuePage({
             },
           }}
           currentTab={tab}
-          onTabChange={(tab) => navigate(tab)}
+          onTabChange={(tab) => {
+            navigate(tab, {
+              query: {
+                autoRefresh,
+              },
+            });
+          }}
           setPageTitle={false}
         />
       </div>
