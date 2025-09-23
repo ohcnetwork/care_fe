@@ -24,6 +24,7 @@ export const PrintPrescription = (props: {
     queryKey: ["prescription", patientId, prescriptionId],
     queryFn: query(prescriptionApi.get, {
       pathParams: { patientId, id: prescriptionId! },
+      queryParams: { facility: facilityId },
     }),
     enabled: !!prescriptionId,
   });

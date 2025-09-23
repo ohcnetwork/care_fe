@@ -10,6 +10,12 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -17,6 +23,7 @@ import {
 
 import query from "@/Utils/request/query";
 import { stringifyNestedObject } from "@/Utils/utils";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   LocationForm,
   LocationList,
@@ -45,6 +52,7 @@ export function LocationSearch({
 
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const { data: locations } = useQuery({
     queryKey: ["locations", facilityId, mode, search],
@@ -54,6 +62,60 @@ export function LocationSearch({
     }),
     enabled: facilityId !== "preview",
   });
+  const commandContent = (
+    <Command className="pt-1">
+      <CommandInput
+        placeholder="Search locations..."
+        value={search}
+        className="outline-hidden border-none ring-0 shadow-none"
+        onValueChange={setSearch}
+        autoFocus
+      />
+      <CommandEmpty>{t("no_locations_found")}</CommandEmpty>
+      <CommandGroup>
+        {locations?.results.map((location) => (
+          <CommandItem
+            key={location.id}
+            value={location.name}
+            onSelect={() => {
+              onSelect(location);
+              setOpen(false);
+            }}
+          >
+            {stringifyNestedObject(location)}
+          </CommandItem>
+        ))}
+      </CommandGroup>
+    </Command>
+  );
+
+  if (isMobile) {
+    return (
+      <div className="w-full">
+        <Drawer open={open} onOpenChange={setOpen} direction="bottom">
+          <DrawerTrigger asChild>
+            <div
+              className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer"
+              data-cy="location-search-trigger"
+            >
+              {stringifyNestedObject(value || { name: "" }) ||
+                "Select location..."}
+            </div>
+          </DrawerTrigger>
+          <DrawerContent
+            aria-describedby={undefined}
+            className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
+          >
+            <DrawerTitle className="sr-only">
+              {t("select_location")}
+            </DrawerTitle>
+            <div className="mt-6 h-full">{commandContent}</div>
+          </DrawerContent>
+        </Drawer>
+      </div>
+    );
+  }
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
@@ -61,38 +123,12 @@ export function LocationSearch({
         disabled={disabled}
         data-cy="location-search-trigger"
       >
-        <div
-          className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer"
-          role="combobox"
-          aria-expanded={open}
-        >
+        <div className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer">
           {stringifyNestedObject(value || { name: "" }) || "Select location..."}
         </div>
       </PopoverTrigger>
       <PopoverContent className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]">
-        <Command className="pt-1">
-          <CommandInput
-            placeholder="Search locations..."
-            value={search}
-            className="outline-hidden border-none ring-0 shadow-none"
-            onValueChange={setSearch}
-          />
-          <CommandEmpty>{t("no_locations_found")}</CommandEmpty>
-          <CommandGroup>
-            {locations?.results.map((location) => (
-              <CommandItem
-                key={location.id}
-                value={location.name}
-                onSelect={() => {
-                  onSelect(location);
-                  setOpen(false);
-                }}
-              >
-                {stringifyNestedObject(location)}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
+        {commandContent}
       </PopoverContent>
     </Popover>
   );

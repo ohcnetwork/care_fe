@@ -109,67 +109,65 @@ export const Appointments = (props: PatientProps) => {
                 </TableCell>
               </TableRow>
             ) : appointments && appointments.length ? (
-              [...appointments, ...appointments, ...appointments].map(
-                (appointment, index) => (
-                  <TableRow
-                    key={appointment.id}
-                    className="border-b-10 border-gray-50 bg-white"
-                  >
-                    <TableCell className="rounded-l-md p-4 text-center text-muted-foreground border-r-2 border-gray-50">
-                      {startIndex + index + 1}
-                    </TableCell>
-                    <TableCell className="p-4 text-center font-medium flex items-center justify-between border-r-2 border-gray-50">
-                      <Link
-                        href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
-                        className="underline-offset-2 hover:underline"
-                      >
-                        {appointment.token_slot.availability.name}
-                      </Link>
-                      {facilityId && (
-                        <Button variant="outline" asChild>
-                          <Link
-                            href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
-                          >
-                            {t("view_details")}
-                          </Link>
+              appointments.map((appointment, index) => (
+                <TableRow
+                  key={appointment.id}
+                  className="border-b-10 border-gray-50 bg-white"
+                >
+                  <TableCell className="rounded-l-md p-4 text-center text-muted-foreground border-r-2 border-gray-50">
+                    {startIndex + index + 1}
+                  </TableCell>
+                  <TableCell className="p-4 text-center font-medium flex items-center justify-between border-r-2 border-gray-50">
+                    <Link
+                      href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
+                      className="underline-offset-2 hover:underline"
+                    >
+                      {appointment.token_slot.availability.name}
+                    </Link>
+                    {facilityId && (
+                      <Button variant="outline" asChild>
+                        <Link
+                          href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
+                        >
+                          {t("view_details")}
+                        </Link>
+                      </Button>
+                    )}
+                  </TableCell>
+
+                  <TableCell className="p-4 text-center border-r-2 border-gray-50">
+                    {formatDateTime(appointment.token_slot.start_datetime)}
+                  </TableCell>
+                  <TableCell className="p-4 text-center border-r-2 border-gray-50">
+                    <Badge
+                      variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
+                    >
+                      {t(appointment.status)}
+                    </Badge>
+                  </TableCell>
+
+                  <TableCell className="rounded-r-md p-4 text-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="size-4 text-muted-foreground" />
                         </Button>
-                      )}
-                    </TableCell>
-
-                    <TableCell className="p-4 text-center border-r-2 border-gray-50">
-                      {formatDateTime(appointment.token_slot.start_datetime)}
-                    </TableCell>
-                    <TableCell className="p-4 text-center border-r-2 border-gray-50">
-                      <Badge
-                        variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
-                      >
-                        {t(appointment.status)}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell className="rounded-r-md p-4 text-center">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="size-4 text-muted-foreground" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {facilityId && (
-                            <DropdownMenuItem>
-                              <Link
-                                href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
-                              >
-                                {t("view")}
-                              </Link>
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ),
-              )
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {facilityId && (
+                          <DropdownMenuItem>
+                            <Link
+                              href={`/facility/${facilityId}/patient/${patientData.id}/appointments/${appointment.id}`}
+                            >
+                              {t("view")}
+                            </Link>
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
             ) : (
               <TableRow>
                 <TableCell colSpan={totalColumns} className="text-center py-4">

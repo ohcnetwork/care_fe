@@ -120,7 +120,7 @@ export default function AppointmentDetail(props: Props) {
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
-  useFacilityShortcuts();
+  useFacilityShortcuts("general");
   const { canViewAppointments, canWriteAppointment } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],
@@ -222,13 +222,13 @@ export default function AppointmentDetail(props: Props) {
                     </Link>
                   </Button>
                   <Button
-                    data-shortcut-id="print-token"
+                    data-shortcut-id="print-button"
                     variant="outline"
                     onClick={() => print()}
                   >
                     <PrinterIcon className="size-4 mr-2" />
                     {t("print")}
-                    <ShortcutBadge actionId="print-token" />
+                    <ShortcutBadge actionId="print-button" />
                   </Button>
                 </div>
               </>
@@ -649,7 +649,7 @@ const AppointmentDetails = ({
 
       <ChargeItemsSection
         facilityId={facility.id}
-        resourceId={appointment.resource.id}
+        resourceId={appointment.id}
         patientId={appointment.patient.id}
         serviceResourceType={ChargeItemServiceResource.appointment}
         sourceUrl={`/facility/${facility.id}/patient/${appointment.patient.id}/appointments/${appointment.id}`}

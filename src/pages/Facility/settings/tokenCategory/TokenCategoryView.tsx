@@ -204,12 +204,6 @@ export default function TokenCategoryView({
                 <p className="text-gray-700">{tokenCategory.shorthand}</p>
               </div>
             )}
-            <div>
-              <p className="text-sm text-gray-500">{t("id")}</p>
-              <p className="text-gray-700 font-mono text-sm">
-                {tokenCategory.id}
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>

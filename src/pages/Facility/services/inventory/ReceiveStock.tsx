@@ -27,7 +27,6 @@ import Page from "@/components/Common/Page";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { ProductSearch } from "@/pages/Facility/services/inventory/ProductSearch";
 import { SupplierSelect } from "@/pages/Facility/services/inventory/SupplierSelect";
@@ -42,6 +41,7 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import { Organization } from "@/types/organization/organization";
 
+import batchApi from "@/types/base/batch/batchApi";
 import { ProductKnowledgeSelect } from "./ProductKnowledgeSelect";
 import { ReceiveStockTable } from "./ReceiveStockTable";
 import { SupplyRequestSelect } from "./SupplyRequestSelect";
@@ -98,7 +98,7 @@ export function ReceiveStock({
   });
 
   const batchRequest = useMutation({
-    mutationFn: mutate(routes.batchRequest),
+    mutationFn: mutate(batchApi.batchRequest),
     onSuccess: () => {
       toast.success(t("stock_received"));
       form.reset();
@@ -123,7 +123,7 @@ export function ReceiveStock({
             destination: locationId,
             supplied_item: entry.supplied_item?.id,
             supplied_item_quantity: entry.supplied_item_quantity,
-            status: SupplyDeliveryStatus.completed,
+            status: SupplyDeliveryStatus.in_progress,
             supplied_item_type: SupplyDeliveryType.product,
           } satisfies SupplyDeliveryCreate,
         })),
