@@ -73,11 +73,19 @@ export function ShortcutCommandDialog({
 
       if (!contextActions || contextActions.length === 0) return;
 
-      const items: ActionItem[] = contextActions.map((action) => ({
-        id: action.action,
-        label: action.description,
-        shortcut: formatKeyboardShortcut(action.key),
-      }));
+      const items: ActionItem[] = contextActions
+        .filter((action) => {
+          // Only include actions if the corresponding element exists on the page
+          const element = document.querySelector(
+            `[data-shortcut-id='${action.action}']`,
+          );
+          return element !== null;
+        })
+        .map((action) => ({
+          id: action.action,
+          label: action.description,
+          shortcut: formatKeyboardShortcut(action.key),
+        }));
 
       if (items.length > 0) {
         actionGroups.push({

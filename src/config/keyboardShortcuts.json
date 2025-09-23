@@ -8,7 +8,7 @@
   ],
 
   "facility": [
-    { "key": "g", "action": "generate-token", "description": "Generate Token", "when": "always" }
+    { "key": "t", "action": "generate-token", "description": "Generate Token", "when": "always" }
   ],
 
   "facility:general": [
@@ -21,7 +21,6 @@
   ],
   "facility:patient:home": [
     { "key": "p", "action": "print-token", "description": "Print Token", "when": "always" },
-    { "key": "t", "action": "generate-token", "description": "Generate Token", "when": "always" },
     { "key": "e", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
     { "key": "a", "action": "schedule-appointment", "description": "Schedule Appointment", "when": "always" }
   ],
