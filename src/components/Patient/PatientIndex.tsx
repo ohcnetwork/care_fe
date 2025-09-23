@@ -31,7 +31,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import Loading from "@/components/Common/Loading";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+
 import SearchInput from "@/components/Common/SearchInput";
 
 import { getPermissions } from "@/common/Permissions";
@@ -215,8 +216,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                   (!!identifierSearch.config && !!identifierSearch.value)) && (
                   <>
                     {isFetching || !patientList ? (
-                      <div className="flex items-center justify-center h-[200px]">
-                        <Loading />
+                      <div className="w-full">
+                        <TableSkeleton count={2} />
                       </div>
                     ) : !patientList.results.length ? (
                       <div>
