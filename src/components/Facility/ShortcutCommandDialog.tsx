@@ -13,7 +13,10 @@ import { useTranslation } from "react-i18next";
 
 import actionsJson from "@/config/keyboardShortcuts.json";
 import { useShortcuts } from "@/context/ShortcutContext";
-import { formatKeyboardShortcut } from "@/Utils/keyboardShortcutUtils";
+import {
+  formatKeyboardShortcut,
+  shortcutActionHandler,
+} from "@/Utils/keyboardShortcutUtils";
 
 interface ActionItem {
   id: string;
@@ -61,7 +64,7 @@ export function ShortcutCommandDialog({
     };
 
     const allContexts = expandContext(subContext || "");
-    const contextsToSearch = ["global", ...allContexts];
+    const contextsToSearch = [...allContexts, "global"];
 
     const actionGroups: ActionGroup[] = [];
 
@@ -89,11 +92,7 @@ export function ShortcutCommandDialog({
 
   const handleSelect = useCallback(
     (actionId: string) => {
-      document.dispatchEvent(
-        new CustomEvent("trigger-facility-shortcut", {
-          detail: { actionId },
-        }),
-      );
+      shortcutActionHandler(actionId)();
       onOpenChange(false);
     },
     [onOpenChange],
