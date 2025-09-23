@@ -365,10 +365,10 @@ export default function SupplyRequestDetail({
 
       <Card className="shadow-sm rounded-md mt-4">
         <CardContent className="p-4">
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <div>
               <p className="text-sm text-gray-700 font-medium">{t("item")}</p>
-              <p className="font-semibold text-lg text-gray-950">
+              <p className="font-semibold text-lg text-gray-950 break-words">
                 {supplyRequest.item?.name}
               </p>
             </div>
