@@ -5,6 +5,7 @@ import {
   Printer,
   SquareActivity,
   Stethoscope,
+  Ticket,
 } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -32,7 +33,6 @@ import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
-import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -43,7 +43,6 @@ import query from "@/Utils/request/query";
 import { saveElementAsImage } from "@/Utils/utils";
 
 export default function VerifyPatient() {
-  const getShortcutDisplay = useEncounterShortcutDisplays();
   useFacilityShortcuts("patient-home");
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
@@ -89,7 +88,7 @@ export default function VerifyPatient() {
 
   if (isVerifyingPatient || !facility) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 md:max-w-5xl mx-auto">
         <CardListSkeleton count={1} />
         <CardGridSkeleton count={4} />
       </div>
@@ -105,7 +104,7 @@ export default function VerifyPatient() {
           </AlertDescription>
         </Alert>
       ) : patientData ? (
-        <div className="space-y-6">
+        <div className="space-y-6 md:max-w-5xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
               <div className="">
@@ -138,7 +137,8 @@ export default function VerifyPatient() {
                       <QuickAction
                         icon={<SquareActivity className="text-orange-500" />}
                         title={t("create_encounter")}
-                        shortcut={getShortcutDisplay("create-encounter")}
+                        actionId="create-encounter"
+                        data-shortcut-id="create-encounter"
                       />
                     }
                   />
@@ -152,7 +152,8 @@ export default function VerifyPatient() {
                       <QuickAction
                         icon={<Stethoscope className="text-purple-500" />}
                         title={t("schedule_appointment")}
-                        shortcut={getShortcutDisplay("schedule-appointment")}
+                        actionId="schedule-appointment"
+                        data-shortcut-id="schedule-appointment"
                       />
                     }
                   />
@@ -164,9 +165,10 @@ export default function VerifyPatient() {
                     facilityId={facilityId}
                     trigger={
                       <QuickAction
-                        icon={<Printer className="text-gray-500" />}
+                        icon={<Ticket className="text-gray-500" />}
                         title={t("generate_token")}
-                        shortcut={getShortcutDisplay("generate-token")}
+                        actionId="generate-token"
+                        data-shortcut-id="generate-token"
                       />
                     }
                   />
@@ -232,7 +234,6 @@ export default function VerifyPatient() {
 
                   <div className="mt-4 flex justify-end gap-2">
                     <Button
-                      data-shortcut-id="print-token"
                       variant="ghost"
                       onClick={() =>
                         saveElementAsImage("section-to-print", "token-card.png")
