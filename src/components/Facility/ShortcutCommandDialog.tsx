@@ -75,6 +75,10 @@ export function ShortcutCommandDialog({
 
       const items: ActionItem[] = contextActions
         .filter((action) => {
+          if (action.action === "show-shortcuts") {
+            return false;
+          }
+
           // Only include actions if the corresponding element exists on the page
           const element = document.querySelector(
             `[data-shortcut-id='${action.action}']`,
@@ -96,7 +100,8 @@ export function ShortcutCommandDialog({
     });
 
     return actionGroups;
-  }, [subContext]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subContext, open]);
 
   const handleSelect = useCallback(
     (actionId: string) => {
