@@ -197,7 +197,7 @@ export default function Autocomplete({
   if (isMobile) {
     return (
       <div className="relative w-full">
-        <Drawer open={open} onOpenChange={setOpen} direction="bottom">
+        <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>
             <Button
               aria-invalid={props["aria-invalid"]}
