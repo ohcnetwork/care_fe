@@ -285,6 +285,27 @@
       "description": "Any Billing related action",
       "when": "always",
       "subContext": "general"
+    },
+    {
+      "key": "shift+enter",
+      "action": "mark-as-received",
+      "description": "Mark as Received",
+      "when": "always",
+      "subContext": "supply-delivery"
+    },
+    {
+      "key": "w",
+      "action": "proceed-without-marking",
+      "description": "Proceed without Marking",
+      "when": "always",
+      "subContext": "supply-delivery"
+    },
+    {
+      "key": "enter",
+      "action": "proceed-with-marking",
+      "description": "Proceed with Marking",
+      "when": "always",
+      "subContext": "supply-delivery"
     }
   ],
   "encounter": [
