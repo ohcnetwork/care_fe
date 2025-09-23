@@ -23,7 +23,7 @@ async function getSupplyDeliveryIds(page: number) {
   logger(`Getting supply delivery ids for page ${page}`);
 
   const queryString = new URLSearchParams({
-    offset: `${(page - 1) * PAGE_SIZE}`,
+    offset: "0",
     limit: `${PAGE_SIZE}`,
     status: "in_progress",
     origin_isnull: "true",
