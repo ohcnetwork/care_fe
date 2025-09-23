@@ -44,6 +44,7 @@ export default function SupplyDeliveryList({
         supplier: selectedDelivery?.supplier?.id,
         destination: locationId,
         ordering: "-created_date",
+        limit: 100,
       },
     }),
     enabled: !!facilityId && !!locationId,
@@ -93,7 +94,7 @@ export default function SupplyDeliveryList({
   }
 
   return (
-    <ScrollArea className="h-[calc(100vh-300px)] border-r">
+    <ScrollArea className="h-[calc(100vh-4rem)] border-r">
       <div className="space-y-1 p-2">
         <span className="font-semibold">
           <span className="text-gray-600 font-medium">{t("supplier")}:</span>{" "}

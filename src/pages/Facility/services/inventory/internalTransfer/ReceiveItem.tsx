@@ -445,13 +445,10 @@ export default function ReceiveItem({
   return (
     <Page title={t("to_receive")} hideTitleOnPage>
       <div className="max-w-8xl container mx-auto flex flex-row gap-8">
-        <div
-          className={cn(
-            "grid gap-8 hidden md:grid",
-            mode === "external" ? "grid-cols-[300px_1fr]" : "grid-cols-1",
-          )}
-        >
-          {mode === "external" && (
+        {mode === "external" && (
+          <div
+            className={cn("grid gap-8 hidden md:grid grid-cols-[300px_1fr]")}
+          >
             <SupplyDeliveryList
               facilityId={facilityId}
               locationId={locationId}
@@ -474,8 +471,8 @@ export default function ReceiveItem({
                 }
               }}
             />
-          )}
-        </div>
+          </div>
+        )}
         <div className="mb-6">
           <div className="flex justify-between">
             <div className="mb-6">
