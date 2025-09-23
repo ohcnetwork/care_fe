@@ -20,34 +20,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
 import { NavTabs } from "@/components/ui/nav-tabs";
+import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ManageQueueFinishedTab } from "@/pages/Facility/queues/ManageQueueFinishedTab";
 import { ManageQueueOngoingTab } from "@/pages/Facility/queues/ManageQueueOngoingTab";
 import QueueFormSheet from "@/pages/Facility/queues/QueueFormSheet";
+import { useQueueServicePoints } from "@/pages/Facility/queues/useQueueServicePoints";
 import {
   formatScheduleResourceName,
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
-import { TokenSubQueueRead } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
-import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { ChevronLeft, Edit3, PowerOffIcon, SettingsIcon } from "lucide-react";
+import { ChevronLeft, Edit3, InfoIcon, SettingsIcon } from "lucide-react";
 import { useNavigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 interface ManageQueuePageProps {
   facilityId: string;
-  resourceType: SchedulableResourceType;
   resourceId: string;
+  resourceType: SchedulableResourceType;
   queueId: string;
   tab: "ongoing" | "completed";
-}
-
-interface QueryParams {
-  servicePoints?: string | null;
 }
 
 export function ManageQueuePage({
@@ -59,13 +63,10 @@ export function ManageQueuePage({
 }: ManageQueuePageProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
-  const resource = useScheduleResource({
-    resourceType,
-    resourceId,
-    facilityId,
-  });
-
+  const resource = useScheduleResource();
+  const [{ autoRefresh }, setQueryParams] = useQueryParams<{
+    autoRefresh: string;
+  }>();
   const { data: queue, isLoading: isQueueLoading } = useQuery({
     queryKey: ["tokenQueue", facilityId, queueId],
     queryFn: query(tokenQueueApi.get, {
@@ -73,29 +74,7 @@ export function ManageQueuePage({
     }),
   });
 
-  const { data: subQueues } = useQuery({
-    queryKey: ["servicePoints", facilityId],
-    queryFn: query(tokenSubQueueApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: {
-        resource_type: resourceType,
-        resource_id: resourceId,
-        limit: 100, // We are assuming that a resource will not have more than 100 sub-queues
-      },
-    }),
-  });
-
-  const [qParams] = useQueryParams<QueryParams>();
-  const servicePointIds = qParams.servicePoints?.split(",");
-
-  const activeSubQueues =
-    servicePointIds && subQueues?.results
-      ? subQueues?.results.filter((subQueue) =>
-          servicePointIds.includes(subQueue.id),
-        )
-      : subQueues?.results;
-
-  if (isQueueLoading || !queue || !activeSubQueues || !subQueues) {
+  if (isQueueLoading || !queue) {
     // TODO: build appropriate loading skeleton...
     return <Loading />;
   }
@@ -112,9 +91,13 @@ export function ManageQueuePage({
       hideTitleOnPage
     >
       <div className="flex flex-col gap-6">
-        <div className="flex justify-between">
+        <div className="flex justify-between gap-3">
           <div className="flex gap-2 items-center">
-            <BackButton size="icon" variant="ghost">
+            <BackButton
+              to={`/facility/${facilityId}/queues?date=${dateQueryString(queue.date)}&resource_id=${resourceId}`}
+              size="icon"
+              variant="ghost"
+            >
               <ChevronLeft />
             </BackButton>
             {resource && (
@@ -130,7 +113,7 @@ export function ManageQueuePage({
                     {queue.is_primary && (
                       <Badge
                         variant={queue.is_primary ? "primary" : "secondary"}
-                        className="text-xs"
+                        className="hidden sm:block text-xs"
                       >
                         {t("primary")}
                       </Badge>
@@ -144,7 +127,30 @@ export function ManageQueuePage({
               </div>
             )}
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-5 items-center justify-center">
+            <div className="flex flex-col-reverse sm:flex-row gap-2 items-center text-black font-medium text-md">
+              <Switch
+                checked={autoRefresh === "true"}
+                onCheckedChange={(checked) =>
+                  setQueryParams({
+                    autoRefresh: checked ? "true" : "false",
+                  })
+                }
+              />
+              <div className="flex items-center gap-1">
+                <Label className="whitespace-nowrap">{t("auto_refresh")}</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild className="hidden sm:block">
+                      <span className="cursor-help">
+                        <InfoIcon className="size-4 text-gray-500" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("auto_refresh_tooltip")}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -153,7 +159,6 @@ export function ManageQueuePage({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <ManageServicePointsDialog
-                  subQueues={subQueues.results}
                   trigger={
                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                       <SettingsIcon className="mr-2 size-4" />
@@ -174,14 +179,11 @@ export function ManageQueuePage({
                   }
                 />
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600">
-                  <PowerOffIcon className="mr-2 size-4 text-red-600" />
-                  {t("end_queue")}
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
+
         <NavTabs
           tabs={{
             ongoing: {
@@ -190,9 +192,6 @@ export function ManageQueuePage({
                 <ManageQueueOngoingTab
                   facilityId={facilityId}
                   queueId={queueId}
-                  resourceType={resourceType}
-                  resourceId={resourceId}
-                  subQueues={activeSubQueues}
                 />
               ),
             },
@@ -207,7 +206,13 @@ export function ManageQueuePage({
             },
           }}
           currentTab={tab}
-          onTabChange={(tab) => navigate(tab)}
+          onTabChange={(tab) => {
+            navigate(tab, {
+              query: {
+                autoRefresh,
+              },
+            });
+          }}
           setPageTitle={false}
         />
       </div>
@@ -217,35 +222,18 @@ export function ManageQueuePage({
 
 function ManageServicePointsDialog({
   trigger,
-  subQueues,
   ...props
 }: {
   trigger: React.ReactNode;
-  subQueues: TokenSubQueueRead[];
 } & React.ComponentProps<typeof Dialog>) {
   const { t } = useTranslation();
-  const [qParams, setQParams] = useQueryParams<QueryParams>();
-  const servicePointsIds =
-    qParams.servicePoints?.split(",") ??
-    subQueues.map((subQueue) => subQueue.id);
 
-  const handleServicePointToggle = (subQueueId: string, checked: boolean) => {
-    let updated = checked
-      ? [...servicePointsIds, subQueueId]
-      : servicePointsIds.filter((id) => id !== subQueueId);
+  const { allServicePoints, assignedServicePointIds, toggleServicePoint } =
+    useQueueServicePoints();
 
-    if (checked) {
-      updated = [...new Set([...servicePointsIds, subQueueId])];
-    } else {
-      updated = servicePointsIds.filter((id) => id !== subQueueId);
-    }
-
-    if (updated.length > 0 && updated.length !== servicePointsIds.length) {
-      setQParams({ servicePoints: updated.join(",") });
-    } else {
-      setQParams({ servicePoints: null });
-    }
-  };
+  if (!allServicePoints) {
+    return <Loading />;
+  }
 
   return (
     <Dialog {...props}>
@@ -254,26 +242,26 @@ function ManageServicePointsDialog({
         <DialogHeader>
           <DialogTitle>{t("assigned_service_points")}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          {subQueues.map((subQueue) => {
-            const isSelected = servicePointsIds.includes(subQueue.id);
+        <div>
+          {allServicePoints.map((subQueue) => {
+            const isSelected = assignedServicePointIds.includes(subQueue.id);
             return (
               <div
                 key={subQueue.id}
-                className="flex items-center justify-between"
+                className="flex items-center justify-between rounded-sm w-full p-3 hover:bg-gray-100 cursor-pointer"
+                onClick={() => {
+                  toggleServicePoint(subQueue.id, !isSelected);
+                }}
               >
                 <div className="flex items-center space-x-3">
                   <Checkbox
                     checked={isSelected}
                     onCheckedChange={(checked) =>
-                      handleServicePointToggle(subQueue.id, checked as boolean)
+                      toggleServicePoint(subQueue.id, checked as boolean)
                     }
                   />
                   <span className="text-sm font-medium">{subQueue.name}</span>
                 </div>
-                <Badge variant={isSelected ? "primary" : "secondary"}>
-                  {isSelected ? "Active" : "Inactive"}
-                </Badge>
               </div>
             );
           })}
