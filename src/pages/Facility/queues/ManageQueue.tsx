@@ -42,13 +42,7 @@ import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import {
-  ChevronLeft,
-  Edit3,
-  InfoIcon,
-  PowerOffIcon,
-  SettingsIcon,
-} from "lucide-react";
+import { ChevronLeft, Edit3, InfoIcon, SettingsIcon } from "lucide-react";
 import { useNavigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -185,10 +179,6 @@ export function ManageQueuePage({
                   }
                 />
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600">
-                  <PowerOffIcon className="mr-2 size-4 text-red-600" />
-                  {t("end_queue")}
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

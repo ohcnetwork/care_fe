@@ -1901,7 +1901,6 @@
   "end_date_after_start": "End date cannot be before start date",
   "end_datetime": "End Date/Time",
   "end_dose": "End Dose",
-  "end_queue": "End queue",
   "end_time": "End Time",
   "end_time_before_start_error": "End time cannot be before start time",
   "end_time_future_error": "End time cannot be in the future",
