@@ -55,7 +55,7 @@ export function CancelTokenDialog({
         updateToken({
           status: TokenStatus.CANCELLED,
           note: token.note,
-          // TODO: set sub_queue to null?
+          sub_queue: null,
         })
       }
       cancelText={t("cancel")}
