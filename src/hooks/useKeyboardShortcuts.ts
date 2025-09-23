@@ -27,6 +27,7 @@ export function useKeyboardShortcuts(
   conditions: ShortcutConditions,
   handlers: ShortcutHandlers,
   activeSubContext?: string,
+  ignoreInputFields?: boolean,
 ) {
   const shortcuts = useMemo(() => {
     const allShortcuts: KeyboardShortcut[] = [];
@@ -210,7 +211,12 @@ export function useKeyboardShortcuts(
         target.tagName === "TEXTAREA" ||
         target.contentEditable === "true";
 
-      if (isInputField && !event.ctrlKey && !event.metaKey) {
+      if (
+        isInputField &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !ignoreInputFields
+      ) {
         return;
       }
 

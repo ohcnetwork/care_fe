@@ -114,8 +114,8 @@ import BackButton from "@/components/Common/BackButton";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import {
-  ResourceSelector,
   ScheduleResourceFormState,
+  ScheduleResourceSelector,
 } from "@/components/Schedule/ResourceSelector";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
@@ -997,7 +997,7 @@ const AppointmentActions = ({
                                   `schedulable_resource__${selectedResource.resource_type}`,
                                 )}
                               </Label>
-                              <ResourceSelector
+                              <ScheduleResourceSelector
                                 selectedResource={selectedResource}
                                 facilityId={facilityId}
                                 setSelectedResource={setSelectedResource}
