@@ -3,13 +3,23 @@ import {
   SelectActionButton,
   SelectActionOption,
 } from "@/components/ui/selectActionButton";
-import { BatchRequestResponse } from "@/types/base/batch/batch";
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { EncounterEdit, EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
-import { AppointmentRead } from "@/types/scheduling/schedule";
+import {
+  AppointmentRead,
+  AppointmentUpdateRequest,
+} from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
-import { renderTokenNumber, TokenStatus } from "@/types/tokens/token/token";
+import {
+  renderTokenNumber,
+  TokenStatus,
+  TokenUpdate,
+} from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import { NonEmptyArray } from "@/Utils/types";
@@ -107,7 +117,7 @@ export const AppointmentEncounterHeader = ({
     if (!appointment?.token) return;
     updateToken({
       note: appointment.token.note,
-      sub_queue: appointment.token.sub_queue?.id || undefined,
+      sub_queue: appointment.token.sub_queue?.id || null,
       status: TokenStatus.FULFILLED,
     });
   };
@@ -115,7 +125,9 @@ export const AppointmentEncounterHeader = ({
   const handleCloseAppointment = () => {
     if (!encounter || !appointment) return;
 
-    const requests = [
+    const requests: BatchRequestBody<
+      AppointmentUpdateRequest | TokenUpdate
+    >["requests"] = [
       {
         url: scheduleApi.appointments.update.path
           .replace("{facilityId}", encounter.facility.id)
@@ -139,7 +151,9 @@ export const AppointmentEncounterHeader = ({
         reference_id: "token-closed",
         body: {
           ...appointment.token,
-          status: "FULFILLED",
+          note: appointment.token.note,
+          status: TokenStatus.FULFILLED,
+          sub_queue: appointment.token.sub_queue?.id || null,
         },
       });
     }
@@ -148,7 +162,9 @@ export const AppointmentEncounterHeader = ({
   };
   const handleCompleteEncounter = () => {
     if (!encounter || !appointment) return;
-    const requests = [
+    const requests: BatchRequestBody<
+      AppointmentUpdateRequest | TokenUpdate | EncounterEdit
+    >["requests"] = [
       {
         url: encounterApi.update.path.replace("{id}", encounter.id),
         method: encounterApi.update.method,
@@ -183,7 +199,9 @@ export const AppointmentEncounterHeader = ({
         reference_id: "token-closed",
         body: {
           ...appointment.token,
-          status: "FULFILLED",
+          note: appointment.token.note,
+          sub_queue: appointment.token.sub_queue?.id || null,
+          status: TokenStatus.FULFILLED,
         },
       });
     }

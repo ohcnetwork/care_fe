@@ -22,13 +22,9 @@ import {
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
-import {
+  BringToFront,
   DoorOpenIcon,
   ExternalLink,
   MoreHorizontal,
@@ -38,8 +34,7 @@ import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
-
-const PAGE_SIZE = 50;
+import { useTokenListInfiniteQuery } from "./utils";
 
 const INACTIVE_TOKEN_STATUSES = [TokenStatus.FULFILLED, TokenStatus.CANCELLED];
 
@@ -54,28 +49,11 @@ export function ManageQueueFinishedTab({
   const { ref, inView } = useInView();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: [
-        "infinite-tokens",
-        facilityId,
-        queueId,
-        { status: INACTIVE_TOKEN_STATUSES },
-      ],
-      queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(tokenApi.list, {
-          pathParams: { facility_id: facilityId, queue_id: queueId },
-          queryParams: {
-            status: INACTIVE_TOKEN_STATUSES.join(","),
-            limit: PAGE_SIZE,
-            offset: pageParam,
-          },
-        })({ signal });
-        return response;
-      },
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, allPages) => {
-        const currentOffset = allPages.length * PAGE_SIZE;
-        return currentOffset < lastPage.count ? currentOffset : null;
+    useTokenListInfiniteQuery({
+      facilityId,
+      queueId,
+      qParams: {
+        status: INACTIVE_TOKEN_STATUSES.join(","),
       },
     });
 
@@ -250,7 +228,7 @@ function FinishedTokenOptions({
     updateToken({
       status: TokenStatus.IN_PROGRESS,
       note: token.note,
-      sub_queue: token.sub_queue?.id,
+      sub_queue: token.sub_queue?.id || null,
     });
   };
 
@@ -270,6 +248,19 @@ function FinishedTokenOptions({
           >
             <RotateCcw className="size-4" />
             {t("move_back_to_in_service")}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() =>
+              updateToken({
+                status: TokenStatus.UNFULFILLED,
+                note: token.note,
+                sub_queue: null,
+              })
+            }
+            disabled={isUpdating}
+          >
+            <BringToFront className="size-4" />
+            {t("move_to_awaiting_recall")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
