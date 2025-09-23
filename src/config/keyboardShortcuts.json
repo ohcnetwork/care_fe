@@ -21,6 +21,27 @@
       "subContext": "patient-home"
     },
     {
+      "key": "p",
+      "action": "print-token",
+      "description": "Print Token",
+      "when": "always",
+      "subContext": "appointment-detail"
+    },
+    {
+      "key": "e",
+      "action": "create-encounter",
+      "description": "Create Encounter",
+      "when": "always",
+      "subContext": "appointment-detail"
+    },
+    {
+      "key": "s",
+      "action": "start-consultation",
+      "description": "Create Encounter",
+      "when": "always",
+      "subContext": "appointment-detail"
+    },
+    {
       "key": "t",
       "action": "generate-token",
       "description": "Generate Token",
