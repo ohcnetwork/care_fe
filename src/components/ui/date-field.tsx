@@ -92,6 +92,8 @@ export default function DateField({
           parseInt(day),
         );
         onChange(updatedDate);
+      } else {
+        onChange?.(undefined);
       }
     }
   };
@@ -108,6 +110,8 @@ export default function DateField({
           parseInt(day),
         );
         onChange(updatedDate);
+      } else {
+        onChange?.(undefined);
       }
     }
   };
@@ -124,6 +128,8 @@ export default function DateField({
           parseInt(paddedDay),
         );
         onChange(updatedDate);
+      } else {
+        onChange?.(undefined);
       }
     }
   };
