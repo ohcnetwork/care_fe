@@ -405,7 +405,9 @@ export const request = async <TResponse = unknown>(
     body: JSON.stringify(body),
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
+      Authorization:
+        process.env.AUTHORIZATION ??
+        `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
     },
   });
 
