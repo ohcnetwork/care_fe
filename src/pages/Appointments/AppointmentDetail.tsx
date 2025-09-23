@@ -184,6 +184,7 @@ export default function AppointmentDetail(props: Props) {
       pathParams: { facilityId, id: props.appointmentId },
     }),
     onSuccess: (_) => {
+      console.log("invalidating appointment", props.appointmentId);
       queryClient.invalidateQueries({
         queryKey: ["appointment", props.appointmentId],
       });
@@ -330,7 +331,13 @@ export default function AppointmentDetail(props: Props) {
                       resourceType={appointment.resource_type}
                       appointmentId={appointment.id}
                       trigger={
-                        <Button variant="outline" className="px-6">
+                        <Button
+                          variant="outline"
+                          className="px-6"
+                          disabled={AppointmentFinalStatuses.includes(
+                            appointment.status,
+                          )}
+                        >
                           <PlusCircledIcon className="size-4 mr-2" />
                           {t("generate_token")}
                         </Button>
@@ -451,70 +458,97 @@ export default function AppointmentDetail(props: Props) {
                     </CardContent>
                   </Card>
                 )}
-                <h3 className="text-base font-semibold mt-4">
-                  {t("quick_actions")}
-                </h3>
-                <div className="grid gap-1 grid-cols-1 md:grid-cols-2 mt-1">
-                  {/* Start Consultation - For booked and checked in appointments */}
-                  {canCheckIn &&
-                    ["booked", "checked_in"].includes(currentStatus) &&
-                    (appointment.associated_encounter?.id ? (
-                      // When encounter exists: set status to in_consultation and redirect
-                      <div
-                        onClick={() => {
-                          updateAppointment({
-                            status: "in_consultation",
-                            note: appointment.note,
-                          });
-                          navigate(
-                            `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
-                          );
-                        }}
-                      >
-                        <QuickAction
-                          icon={<PlusSquare className="text-primary-500" />}
-                          title={t("start_consultation")}
-                        />
-                      </div>
-                    ) : (
-                      // When no encounter exists: create encounter and set status to in_consultation
-                      <CreateEncounterForm
-                        patientId={appointment.patient.id}
-                        facilityId={facilityId}
-                        patientName={appointment.patient.name}
-                        appointment={appointment.id}
-                        disableRedirectOnSuccess={true}
-                        trigger={
-                          <QuickAction
-                            icon={<PlusSquare className="text-primary-500" />}
-                            title={t("start_consultation")}
+                {((canCheckIn &&
+                  ["booked", "checked_in"].includes(currentStatus)) ||
+                  !appointment.associated_encounter?.id) && (
+                  <>
+                    {" "}
+                    <h3 className="text-base font-semibold mt-4">
+                      {t("quick_actions")}
+                    </h3>
+                    <div className="grid gap-1 grid-cols-1 md:grid-cols-2 mt-1">
+                      {/* Start Consultation - For booked and checked in appointments */}
+                      {canCheckIn &&
+                        ["booked", "checked_in"].includes(currentStatus) &&
+                        (appointment.associated_encounter?.id ? (
+                          // When encounter exists: set status to in_consultation and redirect
+                          <div
+                            onClick={() => {
+                              updateAppointment({
+                                status: "in_consultation",
+                                note: appointment.note,
+                              });
+                              navigate(
+                                `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
+                              );
+                            }}
+                          >
+                            <QuickAction
+                              icon={<PlusSquare className="text-primary-500" />}
+                              title={t("start_consultation")}
+                            />
+                          </div>
+                        ) : (
+                          // When no encounter exists: create encounter and set status to in_consultation
+                          <CreateEncounterForm
+                            patientId={appointment.patient.id}
+                            facilityId={facilityId}
+                            patientName={appointment.patient.name}
+                            appointment={appointment.id}
+                            disableRedirectOnSuccess={true}
+                            trigger={
+                              <QuickAction
+                                icon={
+                                  <PlusSquare className="text-primary-500" />
+                                }
+                                title={t("start_consultation")}
+                              />
+                            }
+                            onSuccess={() => {
+                              console.log(
+                                "invalidating appointment",
+                                appointment.id,
+                              );
+                              queryClient.invalidateQueries({
+                                queryKey: ["appointment", appointment.id],
+                              });
+                              updateAppointment({
+                                status: "in_consultation",
+                                note: appointment.note,
+                              });
+                            }}
                           />
-                        }
-                        onSuccess={() => {
-                          updateAppointment({
-                            status: "in_consultation",
-                            note: appointment.note,
-                          });
-                        }}
-                      />
-                    ))}
-                  {!appointment.associated_encounter?.id && (
-                    <CreateEncounterForm
-                      patientId={appointment.patient.id}
-                      facilityId={facilityId}
-                      patientName={appointment.patient.name}
-                      appointment={appointment.id}
-                      disableRedirectOnSuccess={true}
-                      trigger={
-                        <QuickAction
-                          icon={<SquareActivity className="text-orange-500" />}
-                          title={t("create_encounter")}
-                          shortcut={getShortcutDisplay("create-encounter")}
+                        ))}
+                      {!appointment.associated_encounter?.id && (
+                        <CreateEncounterForm
+                          patientId={appointment.patient.id}
+                          facilityId={facilityId}
+                          patientName={appointment.patient.name}
+                          appointment={appointment.id}
+                          disableRedirectOnSuccess={true}
+                          trigger={
+                            <QuickAction
+                              icon={
+                                <SquareActivity className="text-orange-500" />
+                              }
+                              title={t("create_encounter")}
+                              shortcut={getShortcutDisplay("create-encounter")}
+                            />
+                          }
+                          onSuccess={() => {
+                            console.log(
+                              "invalidating appointment",
+                              appointment.id,
+                            );
+                            queryClient.invalidateQueries({
+                              queryKey: ["appointment", appointment.id],
+                            });
+                          }}
                         />
-                      }
-                    />
-                  )}
-                </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
