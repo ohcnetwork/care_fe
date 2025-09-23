@@ -28,6 +28,7 @@ import {
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { isIOSDevice } from "@/Utils/utils";
 
 interface AutoCompleteOption {
   label: string;
@@ -150,7 +151,7 @@ export default function Autocomplete({
         disabled={disabled}
         onValueChange={handleInputChange}
         className="outline-hidden border-none ring-0 shadow-none text-base"
-        autoFocus
+        autoFocus={!isIOSDevice}
       />
       <CommandList className="overflow-y-auto">
         {isLoading ? (
@@ -234,7 +235,7 @@ export default function Autocomplete({
               {t("autocomplete_options")}
             </DrawerTitle>
 
-            <div className="mt-6 h-full pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
+            <div className="mt-6 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
               <Command>{commandContent}</Command>
             </div>
           </DrawerContent>
