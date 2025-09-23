@@ -21,6 +21,7 @@ import { UserCheck } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { usePreferredServicePointCategory } from "./usePreferredServicePointCategory";
 import { useQueueServicePoints } from "./useQueueServicePoints";
 
 export function AssignToServicePointDialog({
@@ -37,6 +38,9 @@ export function AssignToServicePointDialog({
   const queryClient = useQueryClient();
   const [selectedSubQueueId, setSelectedSubQueueId] = useState<string>("");
   const { assignedServicePoints } = useQueueServicePoints();
+  const { preferredServicePointCategories } = usePreferredServicePointCategory({
+    facilityId,
+  });
 
   const { mutate: updateToken, isPending } = useMutation({
     mutationFn: mutate(tokenApi.update, {
@@ -100,6 +104,10 @@ export function AssignToServicePointDialog({
               >
                 {subQueue.name}
               </label>
+              <span className="text-sm">
+                {preferredServicePointCategories?.[subQueue.id]?.name ??
+                  t("all")}
+              </span>
             </div>
           ))}
           {assignedServicePoints.length === 0 && (
