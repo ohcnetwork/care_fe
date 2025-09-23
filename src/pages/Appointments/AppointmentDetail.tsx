@@ -115,7 +115,6 @@ import {
   ResourceSelector,
   ScheduleResourceFormState,
 } from "@/components/Schedule/ResourceSelector";
-import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
 import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
@@ -130,7 +129,6 @@ export default function AppointmentDetail(props: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
-  const getShortcutDisplay = useEncounterShortcutDisplays();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
   const [params, setQueryParams] = useQueryParams();
@@ -486,6 +484,8 @@ export default function AppointmentDetail(props: Props) {
                             <QuickAction
                               icon={<PlusSquare className="text-primary-500" />}
                               title={t("start_consultation")}
+                              actionId="start-consultation"
+                              data-shortcut-id="start-consultation"
                             />
                           </div>
                         ) : (
@@ -502,6 +502,8 @@ export default function AppointmentDetail(props: Props) {
                                   <PlusSquare className="text-primary-500" />
                                 }
                                 title={t("start_consultation")}
+                                actionId="start-consultation"
+                                data-shortcut-id="start-consultation"
                               />
                             }
                             onSuccess={() => {
@@ -532,7 +534,8 @@ export default function AppointmentDetail(props: Props) {
                                 <SquareActivity className="text-orange-500" />
                               }
                               title={t("create_encounter")}
-                              shortcut={getShortcutDisplay("create-encounter")}
+                              actionId="create-encounter"
+                              data-shortcut-id="create-encounter"
                             />
                           }
                           onSuccess={() => {
