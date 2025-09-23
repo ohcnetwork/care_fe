@@ -156,6 +156,8 @@ export function useFacilityShortcuts(subContext?: string) {
         "dispense-button",
         "navigate-to-source",
         "billing-action",
+        "mark-as-received",
+        "proceed-without-marking",
       ]),
 
       // Generic action handlers
