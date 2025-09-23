@@ -1,4 +1,3 @@
-import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { useScheduleResourceFromPath } from "@/components/Schedule/useScheduleResource";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,6 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -23,7 +21,6 @@ import { OngoingQueueTokenCardsList } from "@/pages/Facility/queues/OngoingQueue
 import { usePreferredServicePointCategory } from "@/pages/Facility/queues/usePreferredServicePointCategory";
 import { getTokenQueueStatusCount } from "@/pages/Facility/queues/utils";
 import { TokenRead, TokenStatus } from "@/types/tokens/token/token";
-import tokenApi from "@/types/tokens/token/tokenApi";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import mutate from "@/Utils/request/mutate";
@@ -208,7 +205,6 @@ function InServiceColumnOptions({
   facilityId,
   queueId,
   subQueueId,
-  tokens,
 }: {
   facilityId: string;
   queueId: string;
@@ -216,9 +212,6 @@ function InServiceColumnOptions({
   tokens: TokenRead[];
 }) {
   const { t } = useTranslation();
-  const [showCompleteAllDialog, setShowCompleteAllDialog] = useState(false);
-
-  const queryClient = useQueryClient();
 
   const { preferredServicePointCategories, setPreferredServicePointCategory } =
     usePreferredServicePointCategory({ facilityId });
@@ -233,46 +226,6 @@ function InServiceColumnOptions({
       },
     }),
   });
-
-  const { mutate: completeAllTokens, isPending: isCompletingAllTokens } =
-    useMutation({
-      mutationFn: mutate(tokenApi.upsert, {
-        pathParams: { facility_id: facilityId, queue_id: queueId },
-      }),
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: [
-            "infinite-tokens",
-            facilityId,
-            queueId,
-            { sub_queue: subQueueId, status: TokenStatus.IN_PROGRESS },
-          ],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [
-            "infinite-tokens",
-            facilityId,
-            queueId,
-            { status: TokenStatus.FULFILLED },
-          ],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["token-queue-summary", facilityId, queueId],
-        });
-        setShowCompleteAllDialog(false);
-      },
-    });
-
-  const handleCompleteAllTokens = () => {
-    completeAllTokens({
-      datapoints: tokens.map((token) => ({
-        id: token.id,
-        status: TokenStatus.FULFILLED,
-        note: token.note,
-        sub_queue: null,
-      })),
-    });
-  };
 
   return (
     <div className="flex gap-1">
@@ -328,24 +281,9 @@ function InServiceColumnOptions({
               </RadioGroup>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
-          <DropdownMenuItem onClick={() => setShowCompleteAllDialog(true)}>
-            {t("complete_all")}
-          </DropdownMenuItem>
           {/* <DropdownMenuItem>Transfer all</DropdownMenuItem> */}
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <ConfirmActionDialog
-        open={showCompleteAllDialog}
-        onOpenChange={setShowCompleteAllDialog}
-        title={t("complete_all_tokens")}
-        description={t("complete_all_tokens_confirmation")}
-        onConfirm={handleCompleteAllTokens}
-        cancelText={t("cancel")}
-        confirmText={t("complete_all")}
-        variant="primary"
-        disabled={isCompletingAllTokens}
-      />
     </div>
   );
 }
