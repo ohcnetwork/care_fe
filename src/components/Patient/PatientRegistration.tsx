@@ -35,6 +35,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import useAppHistory from "@/hooks/useAppHistory";
+import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { tzAwareDateTime } from "@/lib/validators";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
@@ -69,6 +70,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
+  useFacilityShortcuts();
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
@@ -172,7 +174,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
         !data.date_of_birth && data.year_of_birth
           ? new Date().getFullYear() - data.year_of_birth
           : undefined,
-      blood_group: data.blood_group,
+      blood_group: data.blood_group || undefined,
       tags: [], // This is only used for create patient
 
       address: data.address || "",
@@ -261,9 +263,11 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     const basePayload = {
       ...values,
 
-      age: values.age_or_dob === "dob" ? undefined : values.age,
+      age: values.age_or_dob === "dob" ? undefined : values.age || undefined,
       date_of_birth:
-        values.age_or_dob === "dob" ? values.date_of_birth : undefined,
+        values.age_or_dob === "dob"
+          ? values.date_of_birth || undefined
+          : undefined,
 
       emergency_phone_number: values.emergency_phone_number_same_as_phone_number
         ? values.phone_number
@@ -305,7 +309,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     <Page title={pageTitle} hideTitleOnPage>
       <div className="flex flex-col gap-4 max-w-2xl mx-auto">
         <div>
-          <BackButton>
+          <BackButton data-shortcut-id="go-back">
             <ArrowLeft />
             {t("back")}
           </BackButton>
@@ -522,6 +526,7 @@ const PatientBasicsContent = ({
                   value: g.id,
                   label: t(`GENDER__${g.id}`),
                 }))}
+                required={true}
               />
             </FormControl>
             <FormMessage />
@@ -550,7 +555,15 @@ const PatientBasicsContent = ({
                     render={({ field }) => (
                       <FormItem className="w-full">
                         <FormControl>
-                          <Input {...field} type="date" />
+                          <Input
+                            {...field}
+                            type="date"
+                            max={format(new Date(), "yyyy-MM-dd")}
+                            value={field.value ?? ""}
+                            onChange={(e) => {
+                              field.onChange(e.target.value || null);
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -565,22 +578,19 @@ const PatientBasicsContent = ({
                       <FormItem className="w-full">
                         <FormControl>
                           <Input
+                            {...field}
                             type="number"
                             inputMode="numeric"
                             pattern="[0-9]*"
                             placeholder={t("age")}
                             min={1}
                             max={120}
-                            {...field}
-                            onChange={(e) =>
-                              form.setValue(
-                                "age",
-                                e.target.value
-                                  ? Number(e.target.value)
-                                  : (null as unknown as number),
-                                { shouldDirty: true },
-                              )
-                            }
+                            value={field.value ?? ""}
+                            onChange={(e) => {
+                              field.onChange(
+                                e.target.value ? Number(e.target.value) : null,
+                              );
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -725,7 +735,9 @@ const AdditionalDetailsContent = ({
                   onCheckedChange={(value) => field.onChange(!value)}
                 />
               </FormControl>
-              <FormLabel>{t("permanent_address_is_different")}</FormLabel>
+              <FormLabel>
+                {t("permanent_address_is_different_from_current_address")}
+              </FormLabel>
             </FormItem>
           )}
         />
@@ -949,8 +961,9 @@ const getFormSchema = (t: TFunction) => {
         .string()
         .date()
         .refine((date) => !isFuture(date), t("date_cannot_be_future"))
-        .optional(),
-      age: validators().age.optional(),
+        .optional()
+        .nullable(),
+      age: validators().age.optional().nullable(),
       blood_group: z.nativeEnum(BloodGroupChoices).optional(),
       tags: z.array(z.string()),
 
