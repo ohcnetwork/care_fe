@@ -137,6 +137,8 @@ export const isUserOnline = (user: { last_login: DateLike }) => {
 
 export const isAndroidDevice = /android/i.test(navigator.userAgent);
 
+export const isIOSDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 export const getMapUrl = (latitude: string, longitude: string) => {
   return isAndroidDevice
     ? `geo:${latitude},${longitude}`
