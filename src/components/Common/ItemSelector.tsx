@@ -52,11 +52,7 @@ export interface ItemSelectorProps<T = any> {
   triggerButton?: React.ReactNode;
   mobileTrigger?: React.ReactNode;
   className?: string;
-  popoverClassName?: string;
-  popoverAlign?: "start" | "center" | "end";
-  popoverSide?: "top" | "bottom" | "left" | "right";
-  popoverSideOffset?: number;
-  popoverAvoidCollisions?: boolean;
+  popoverProps?: React.ComponentProps<typeof PopoverContent>;
 
   // Behavior options
   disabled?: boolean;
@@ -95,11 +91,7 @@ export function ItemSelector<T = any>({
   triggerButton,
   mobileTrigger,
   className,
-  popoverClassName,
-  popoverAlign = "start",
-  popoverSide = "bottom",
-  popoverSideOffset = 4,
-  popoverAvoidCollisions = true,
+  popoverProps,
   disabled = false,
   loading = false,
   multiSelect = false,
@@ -328,12 +320,9 @@ export function ItemSelector<T = any>({
       <PopoverContent
         className={cn(
           "p-0 w-[var(--radix-popover-trigger-width)] min-w-[300px]",
-          popoverClassName,
+          popoverProps?.className,
         )}
-        align={popoverAlign}
-        side={popoverSide}
-        sideOffset={popoverSideOffset}
-        avoidCollisions={popoverAvoidCollisions}
+        {...(popoverProps && { ...popoverProps, className: undefined })}
       >
         {commandContent}
       </PopoverContent>
