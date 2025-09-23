@@ -39,6 +39,7 @@ import {
 } from "@/types/scheduling/schedule";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import {
@@ -98,7 +99,11 @@ export function ManageQueuePage({
       <div className="flex flex-col gap-6">
         <div className="flex justify-between gap-3">
           <div className="flex gap-2 items-center">
-            <BackButton size="icon" variant="ghost">
+            <BackButton
+              to={`/facility/${facilityId}/queues?date=${dateQueryString(queue.date)}&resource_id=${resourceId}`}
+              size="icon"
+              variant="ghost"
+            >
               <ChevronLeft />
             </BackButton>
             {resource && (
