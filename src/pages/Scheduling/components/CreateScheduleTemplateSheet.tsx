@@ -105,12 +105,12 @@ export default function CreateScheduleTemplateSheet({
                 slot_type: z.literal("appointment"),
                 name: z.string().trim().min(1, t("field_required")),
                 reason: z.string().trim(),
-                start_time: z.string().min(1, t("field_required")) as z.ZodType<
-                  Time | undefined
-                >,
-                end_time: z.string().min(1, t("field_required")) as z.ZodType<
-                  Time | undefined
-                >,
+                start_time: z
+                  .string({ required_error: t("field_required") })
+                  .min(1, t("field_required")) as z.ZodType<Time | undefined>,
+                end_time: z
+                  .string({ required_error: t("field_required") })
+                  .min(1, t("field_required")) as z.ZodType<Time | undefined>,
                 slot_size_in_minutes: z
                   .union([
                     z.number().min(1, t("number_min_error", { min: 1 })),
@@ -143,10 +143,10 @@ export default function CreateScheduleTemplateSheet({
                 name: z.string().trim().min(1, t("field_required")),
                 reason: z.string().trim(),
                 start_time: z
-                  .string()
+                  .string({ required_error: t("field_required") })
                   .min(1, t("field_required")) as unknown as z.ZodType<Time>,
                 end_time: z
-                  .string()
+                  .string({ required_error: t("field_required") })
                   .min(1, t("field_required")) as unknown as z.ZodType<Time>,
                 slot_size_in_minutes: z.literal(null),
                 tokens_per_slot: z.literal(null),
