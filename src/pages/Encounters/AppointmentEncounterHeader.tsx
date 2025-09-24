@@ -245,100 +245,106 @@ export const AppointmentEncounterHeader = ({
   };
 
   return (
-    <div className="flex gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white w-fit items-center justify-center shadow-sm">
+    <div className="flex gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white sm:w-fit w-fullitems-center justify-center shadow-sm">
       {encounter.appointment?.token && (
-        <Button
-          variant="ghost"
-          className="border-r border-gray-300 rounded-r-none pl-2"
-        >
-          <Link
-            href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/appointments/${encounter.appointment.id}`}
-          >
-            <div className="flex items-center gap-2 justify-center">
-              <span className="text-sm text-gray-600">{t("token")}:</span>
-              <span className="text-sm text-black font-semibold underline">
-                {renderTokenNumber(encounter.appointment.token)}
-              </span>
-              <ExternalLinkIcon className="size-4 text-black" />
-            </div>
-          </Link>
-        </Button>
+        <div className="flex items-center justify-center border-r border-gray-300 ">
+          <Button variant="ghost" className="rounded-r-none pl-2 ">
+            <Link
+              href={`/facility/${encounter.facility.id}/patient/${encounter.patient.id}/appointments/${encounter.appointment.id}`}
+            >
+              <div className="flex sm:flex-row flex-col items-center justify-center sm:gap-1">
+                <span className="text-sm text-gray-600">{t("token")}:</span>
+                <div className="flex whitespace-nowrap gap-1 items-center">
+                  <span className="text-sm text-black font-semibold underline ">
+                    {renderTokenNumber(encounter.appointment.token)}
+                  </span>
+                  <ExternalLinkIcon className="size-4 text-black" />
+                </div>
+              </div>
+            </Link>
+          </Button>
+        </div>
       )}
-      {encounter.status !== "in_progress" &&
-      encounter.status !== "completed" ? (
-        <span className="text-sm text-black">
-          {t("do_you_want_to_start_this_encounter")}
-        </span>
-      ) : getOptions(encounter).length > 1 ? (
-        <span className="text-sm text-black">
-          {t("how_do_you_to_finish_this_visit")}
-        </span>
-      ) : (
-        <span className="text-sm text-black">
-          {t("do_you_want_to_complete_this_encounter")}
-        </span>
-      )}
-
-      {encounter.status !== "in_progress" &&
-      encounter.status !== "completed" ? (
-        <Button
-          variant="outline"
-          onClick={() => handleStartEncounter()}
-          disabled={isPending}
-          className="space-y-2 space-x-1"
-        >
-          {t("start_encounter")}
-        </Button>
-      ) : getOptions(encounter).length > 1 ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+      <div className="flex sm:flex-row flex-col gap-2 sm:items-center items-start">
+        <div>
+          {encounter.status !== "in_progress" &&
+          encounter.status !== "completed" ? (
+            <span className="text-sm text-black">
+              {t("do_you_want_to_start_this_encounter")}
+            </span>
+          ) : getOptions(encounter).length > 1 ? (
+            <span className="text-sm text-black">
+              {t("how_do_you_to_finish_this_visit")}
+            </span>
+          ) : (
+            <span className="text-sm text-black">
+              {t("do_you_want_to_complete_this_encounter")}
+            </span>
+          )}
+        </div>
+        <div className="w-full sm:w-auto">
+          {encounter.status !== "in_progress" &&
+          encounter.status !== "completed" ? (
             <Button
               variant="outline"
-              disabled={isBatchRequestPending || isUpdateTokenPending}
+              onClick={() => handleStartEncounter()}
+              disabled={isPending}
+              className="space-y-2 space-x-1 w-full sm:w-auto"
             >
-              <span className="text-sm font-semibold text-black">
-                {t("end_actions")}
-              </span>
-              <ChevronDown className="size-4" />
+              {t("start_encounter")}
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="min-w-59x`" align="start">
-            {getOptions(encounter).map((option) => (
-              <DropdownMenuItem
-                key={option.value}
-                className="p-2.5"
-                onClick={() => {
-                  if (option.value === "mark_as_complete") {
-                    handleCompleteEncounter();
-                  } else if (option.value === "close_appointment") {
-                    handleCloseAppointment();
-                  } else if (option.value === "mark_token_fulfilled") {
-                    handleCloseToken();
-                  }
-                }}
-              >
-                <div className="flex flex-col items-start">
-                  <span className="text-sm font-medium text-black">
-                    {t(option.value)}
+          ) : getOptions(encounter).length > 1 ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  disabled={isBatchRequestPending || isUpdateTokenPending}
+                  className="w-full sm:w-auto"
+                >
+                  <span className="text-sm font-semibold text-black">
+                    {t("end_actions")}
                   </span>
-                  <p className="text-xs text-gray-700">
-                    {t(option.discription)}
-                  </p>
-                </div>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        <Button
-          variant="outline"
-          className="text-sm font-semibold text-black"
-          onClick={handleCompleteEncounter}
-          disabled={isBatchRequestPending}
-        >
-          {t("complete_encounter")}
-        </Button>
-      )}
+                  <ChevronDown className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="min-w-59x`" align="start">
+                {getOptions(encounter).map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    className="p-2.5"
+                    onClick={() => {
+                      if (option.value === "mark_as_complete") {
+                        handleCompleteEncounter();
+                      } else if (option.value === "close_appointment") {
+                        handleCloseAppointment();
+                      } else if (option.value === "mark_token_fulfilled") {
+                        handleCloseToken();
+                      }
+                    }}
+                  >
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium text-black">
+                        {t(option.value)}
+                      </span>
+                      <p className="text-xs text-gray-700">
+                        {t(option.discription)}
+                      </p>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto text-sm font-semibold text-black"
+              onClick={handleCompleteEncounter}
+            >
+              {t("complete_encounter")}
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
