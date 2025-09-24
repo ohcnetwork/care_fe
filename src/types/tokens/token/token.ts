@@ -38,7 +38,7 @@ export interface TokenGenerateWithQueue extends TokenGenerate {
 export interface TokenUpdate extends Omit<Token, "id"> {
   note: string;
   status: TokenStatus;
-  sub_queue?: string;
+  sub_queue: string | null;
 }
 
 export interface TokenRead extends Token {
