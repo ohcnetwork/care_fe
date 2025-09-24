@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
 
-import Loading from "@/components/Common/Loading";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -65,8 +65,8 @@ export default function PrescriptionListSelector({
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <Loading />
+      <div className="space-y-3">
+        <CardListSkeleton count={7} />
       </div>
     );
   }
@@ -126,7 +126,7 @@ export default function PrescriptionListSelector({
             <DrawerHeader>
               <DrawerTitle>{t("prescription")}</DrawerTitle>
             </DrawerHeader>
-            <div className="overflow-y-auto">
+            <div className="overflow-y-auto pr-2">
               <PrescriptionList
                 prescriptions={prescriptions.results as PrescriptionRead[]}
                 selectedPrescriptionId={selectedPrescriptionId}
@@ -150,7 +150,7 @@ function PrescriptionList({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="space-y-2 p-2 overflow-hidden">
+    <div className="space-y-2 p-2">
       {prescriptions.map((prescription) => {
         const isSelected = selectedPrescriptionId === prescription.id;
         return (
