@@ -236,15 +236,18 @@ export function AccountList({
                 <TableRow key={account.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <Avatar name={account.name} className="size-8" />
-                      <div>
-                        <div className="text-base font-semibold leading-6">
+                      <Avatar
+                        name={account.name}
+                        className="size-8 flex-shrink-0"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="text-base font-semibold leading-6 break-words">
                           {account.name}
                         </div>
                         {!hidePatientName && (
                           <div className="flex items-center gap-1 text-sm text-gray-600">
                             <span
-                              className="inline-flex text-sm text-gray-600 cursor-pointer underline"
+                              className="inline-flex text-sm text-gray-600 cursor-pointer underline break-words"
                               onClick={() =>
                                 navigate(
                                   `/facility/${facilityId}/patient/${account.patient.id}`,
@@ -252,7 +255,7 @@ export function AccountList({
                               }
                             >
                               {account.patient.name}
-                              <ArrowUpRightSquare className="size-4 ml-1 mt-0.5" />
+                              <ArrowUpRightSquare className="size-4 ml-1 mt-0.5 flex-shrink-0" />
                             </span>
                           </div>
                         )}
