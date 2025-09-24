@@ -101,7 +101,7 @@ export default function ReceiveItem({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  useShortcutSubContext("supply-delivery");
+  useShortcutSubContext("facility:pharmacy:supply-delivery");
   const [isReceivingAbandonedItem, setIsReceivingAbandonedItem] =
     useState(false);
   const [nextDeliveryUrl, setNextDeliveryUrl] = useState<string>("");
@@ -429,34 +429,33 @@ export default function ReceiveItem({
   return (
     <Page title={t("to_receive")} hideTitleOnPage>
       <div className="max-w-8xl container mx-auto flex flex-row gap-8">
-        {mode === "external" && (
-          <div
-            className={cn("grid gap-8 hidden md:grid grid-cols-[300px_1fr]")}
-          >
-            <SupplyDeliveryList
-              facilityId={facilityId}
-              locationId={locationId}
-              selectedDelivery={delivery}
-              onSelectDelivery={(deliveryId) => {
+        <div className={cn("grid gap-8 hidden md:grid grid-cols-[300px_1fr]")}>
+          <SupplyDeliveryList
+            facilityId={facilityId}
+            locationId={locationId}
+            selectedDelivery={delivery}
+            mode={mode}
+            onSelectDelivery={(deliveryId) => {
+              const { deliveryId: _, ...cleanParams } = qParams;
+              navigate(
+                makeUrl(
+                  mode === "external"
+                    ? `/facility/${facilityId}/locations/${locationId}/external_supply/deliveries/${deliveryId}`
+                    : `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_receive/${deliveryId}`,
+                  { ...cleanParams, deliveryId },
+                ),
+              );
+            }}
+            onSetNextDeliveryUrl={(url) => {
+              if (url) {
                 const { deliveryId: _, ...cleanParams } = qParams;
-                navigate(
-                  makeUrl(
-                    `/facility/${facilityId}/locations/${locationId}/external_supply/deliveries/${deliveryId}`,
-                    { ...cleanParams, deliveryId },
-                  ),
-                );
-              }}
-              onSetNextDeliveryUrl={(url) => {
-                if (url) {
-                  const { deliveryId: _, ...cleanParams } = qParams;
-                  setNextDeliveryUrl(makeUrl(url, { ...cleanParams }));
-                } else {
-                  setNextDeliveryUrl("");
-                }
-              }}
-            />
-          </div>
-        )}
+                setNextDeliveryUrl(makeUrl(url, { ...cleanParams }));
+              } else {
+                setNextDeliveryUrl("");
+              }
+            }}
+          />
+        </div>
         {isLoading || !delivery ? (
           <Skeleton className="h-[calc(100vh-4rem)] w-full" />
         ) : (
@@ -818,9 +817,7 @@ export default function ReceiveItem({
                                           checked={field.value}
                                           onCheckedChange={field.onChange}
                                           id="markAsFullyReceived"
-                                          data-shortcut-id="mark_as_fully_received"
                                         />
-                                        <ShortcutBadge actionId="mark_as_fully_received" />
                                       </div>
                                     </FormControl>
                                   </div>
@@ -863,7 +860,6 @@ export default function ReceiveItem({
                           type="button"
                           disabled={isPending}
                           onClick={() => openDialog("receive")}
-                          data-shortcut-id="mark-as-received"
                         >
                           <ButtonIcon className="size-4" />
                           {buttonText}
@@ -1066,7 +1062,6 @@ export default function ReceiveItem({
                       }
                       setQuantityMismatchDialog({ open: false });
                     }}
-                    data-shortcut-id="proceed-without-marking"
                   >
                     {t("SRD__proceed_without_marking")}
                     <ShortcutBadge actionId="proceed-without-marking" />
@@ -1082,7 +1077,6 @@ export default function ReceiveItem({
                       }
                       setQuantityMismatchDialog({ open: false });
                     }}
-                    data-shortcut-id="proceed-with-marking"
                   >
                     {t("proceed")}
                     <ShortcutBadge actionId="proceed-with-marking" />

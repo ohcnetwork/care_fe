@@ -41,6 +41,13 @@
     { "key": "d", "action": "dispense-button", "description": "Dispense Medication", "when": "always" }
   ],
 
+"facility:pharmacy:supply-delivery": [
+    { "key": "shift+enter", "action": "mark-as-received", "description": "Mark as Received", "when": "always" },
+    { "key": "w", "action": "proceed-without-marking", "description": "Proceed without Marking", "when": "always" },
+    { "key": "enter", "action": "proceed-with-marking", "description": "Proceed with Marking", "when": "always" }
+
+  ],
+
   "facility:billing:invoice": [
     { "key": "c", "action": "create-invoice", "description": "Create Invoice", "when": "always" },
     { "key": "o", "action": "other-charge-items", "description": "Other Charge Items", "when": "always" },
