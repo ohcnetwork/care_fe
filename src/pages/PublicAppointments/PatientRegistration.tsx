@@ -154,7 +154,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         data.ageInputType === "date_of_birth"
           ? dateQueryString(data.date_of_birth)
           : undefined,
-      age: data.ageInputType === "age" ? data.age : undefined,
+      age: data.ageInputType === "age" ? Number(data.age) : undefined,
       pincode: data.pincode,
       geo_organization: data.geo_organization,
     };
@@ -298,12 +298,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                             inputMode="numeric"
                             pattern="[0-9]*"
                             {...field}
-                            onChange={(e) => {
-                              const value = e.target.value.trim();
-                              field.onChange(
-                                value === "" ? undefined : Number(value),
-                              );
-                            }}
                             placeholder={t("type_patient_age")}
                           />
                         </FormControl>
