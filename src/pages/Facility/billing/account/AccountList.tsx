@@ -245,18 +245,8 @@ export function AccountList({
                           {account.name}
                         </div>
                         {!hidePatientName && (
-                          <div className="flex items-center gap-1 text-sm text-gray-600">
-                            <span
-                              className="inline-flex text-sm text-gray-600 cursor-pointer underline break-words"
-                              onClick={() =>
-                                navigate(
-                                  `/facility/${facilityId}/patient/${account.patient.id}`,
-                                )
-                              }
-                            >
-                              {account.patient.name}
-                              <ArrowUpRightSquare className="size-4 ml-1 mt-0.5 flex-shrink-0" />
-                            </span>
+                          <div className="flex items-center gap-1 text-sm text-gray-600 break-words">
+                            {account.patient.name}
                           </div>
                         )}
                       </div>
