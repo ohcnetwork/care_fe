@@ -166,7 +166,7 @@ export default function useFileManager(
       setArchiving(false);
       return;
     }
-
+    setArchiving(true);
     await archiveUpload({
       id: archiveFile?.id || "",
       archive_reason: archiveReason,
@@ -325,7 +325,12 @@ export default function useFileManager(
                 rows={6}
                 placeholder="Type the reason..."
                 value={archiveReason}
-                onChange={(e) => setArchiveReason(e.target.value)}
+                onChange={(e) => {
+                  setArchiveReason(e.target.value);
+                  if (e.target.value.trim() !== "") {
+                    setArchiveReasonError("");
+                  }
+                }}
                 className={cn(
                   archiveReasonError &&
                     "border-red-500 focus-visible:ring-red-500",
