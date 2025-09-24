@@ -30,11 +30,6 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-interface SelectActionOption {
-  value: string;
-  discription: string;
-}
-
 export const AppointmentEncounterHeader = ({
   appointment,
   encounter,
@@ -215,7 +210,11 @@ export const AppointmentEncounterHeader = ({
   };
 
   const getOptions = (encounter: EncounterRead) => {
-    const options: SelectActionOption[] = [];
+    const options: (
+      | "mark_token_fulfilled"
+      | "close_appointment"
+      | "mark_as_complete"
+    )[] = [];
 
     if (
       encounter.appointment?.token &&
@@ -223,23 +222,14 @@ export const AppointmentEncounterHeader = ({
         encounter.appointment.token.status,
       )
     ) {
-      options.push({
-        value: "mark_token_fulfilled",
-        discription: "close_token_description",
-      });
+      options.push("mark_token_fulfilled");
     }
 
     if (encounter.appointment?.status !== "fulfilled") {
-      options.push({
-        value: "close_appointment",
-        discription: "close_appointment_description",
-      });
+      options.push("close_appointment");
     }
 
-    options.push({
-      value: "mark_as_complete",
-      discription: "mark_as_complete_description",
-    });
+    options.push("mark_as_complete");
 
     return options;
   };
@@ -310,24 +300,24 @@ export const AppointmentEncounterHeader = ({
               <DropdownMenuContent className="min-w-59x`" align="start">
                 {getOptions(encounter).map((option) => (
                   <DropdownMenuItem
-                    key={option.value}
+                    key={option}
                     className="p-2.5"
                     onClick={() => {
-                      if (option.value === "mark_as_complete") {
+                      if (option === "mark_as_complete") {
                         handleCompleteEncounter();
-                      } else if (option.value === "close_appointment") {
+                      } else if (option === "close_appointment") {
                         handleCloseAppointment();
-                      } else if (option.value === "mark_token_fulfilled") {
+                      } else if (option === "mark_token_fulfilled") {
                         handleCloseToken();
                       }
                     }}
                   >
                     <div className="flex flex-col items-start">
                       <span className="text-sm font-medium text-black">
-                        {t(option.value)}
+                        {t(option)}
                       </span>
                       <p className="text-xs text-gray-700">
-                        {t(option.discription)}
+                        {t(`${option}_description`)}
                       </p>
                     </div>
                   </DropdownMenuItem>
