@@ -271,7 +271,6 @@ export default function useFileManager(
           archiveDialogueOpen !== null &&
           archiveDialogueOpen.archived_datetime === null
         }
-        //onOpenChange={() => setArchiveDialogueOpen(null)}
         onOpenChange={(open) => {
           if (!open) {
             setArchiveDialogueOpen(null);
@@ -324,7 +323,6 @@ export default function useFileManager(
                 name="editFileName"
                 id="archive-file-reason"
                 rows={6}
-                //required
                 placeholder="Type the reason..."
                 value={archiveReason}
                 onChange={(e) => setArchiveReason(e.target.value)}
