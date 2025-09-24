@@ -175,6 +175,7 @@ export default function useFileManager(
     setArchiveDialogueOpen(null);
     setArchiving(false);
     setArchiveReason("");
+    setArchiveReasonError("");
     onArchive?.();
   };
 
@@ -270,7 +271,14 @@ export default function useFileManager(
           archiveDialogueOpen !== null &&
           archiveDialogueOpen.archived_datetime === null
         }
-        onOpenChange={() => setArchiveDialogueOpen(null)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setArchiveDialogueOpen(null);
+            setArchiveReason("");
+            setArchiveReasonError("");
+            setArchiving(false);
+          }
+        }}
       >
         <DialogContent>
           <DialogHeader>
@@ -295,6 +303,10 @@ export default function useFileManager(
           <form
             onSubmit={(event: any) => {
               event.preventDefault();
+              if (!validateArchiveReason(archiveReason)) {
+                setArchiving(false);
+                return;
+              }
               handleFileArchive(archiveDialogueOpen);
             }}
             className="mx-2 my-4 flex w-full flex-col"
@@ -311,7 +323,6 @@ export default function useFileManager(
                 name="editFileName"
                 id="archive-file-reason"
                 rows={6}
-                required
                 placeholder="Type the reason..."
                 value={archiveReason}
                 onChange={(e) => setArchiveReason(e.target.value)}
@@ -331,6 +342,7 @@ export default function useFileManager(
                 variant="outline"
                 onClick={() => {
                   setArchiveReason("");
+                  setArchiveReasonError("");
                   setArchiveDialogueOpen(null);
                 }}
               >
