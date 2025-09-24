@@ -506,6 +506,7 @@ export default function QuestionnaireResponsesList({
       patientId,
       qParams.page,
       questionnaireId,
+      encounter?.id,
     ],
     queryFn: query.paginated(patientApi.getQuestionnaireResponses, {
       pathParams: { patientId },
