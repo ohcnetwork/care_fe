@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
 import { DispenseHistory } from "@/components/Medicine/MedicationRequestTable/DispenseHistory";
-import PrescriptionList from "@/components/Medicine/PrescriptionList";
+import PrescriptionListSelector from "@/components/Medicine/PrescriptionListSelector";
 import PrescriptionView from "@/components/Medicine/PrescriptionView";
 import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
 
@@ -119,9 +119,9 @@ export default function MedicationRequestTable() {
 
           <TabsContent value="prescriptions">
             <div className="flex flex-col gap-2">
-              <div className="grid grid-cols-[300px_1fr] gap-4">
-                <div>
-                  <PrescriptionList
+              <div className="flex lg:flex-row flex-col w-full">
+                <div className="overflow-hidden">
+                  <PrescriptionListSelector
                     patientId={patientId}
                     encounterId={encounterId}
                     facilityId={facilityId}
@@ -132,7 +132,7 @@ export default function MedicationRequestTable() {
                   />
                 </div>
                 {selectedPrescriptionId && (
-                  <div>
+                  <div className="flex-1 w-full overflow-hidden">
                     <PrescriptionView
                       patientId={patientId}
                       prescriptionId={selectedPrescriptionId}

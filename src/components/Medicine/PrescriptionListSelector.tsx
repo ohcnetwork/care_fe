@@ -3,16 +3,23 @@ import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
 
 import Loading from "@/components/Common/Loading";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { PrescriptionRead } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { ReceiptTextIcon } from "lucide-react";
+import { ChevronDown, ReceiptTextIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-interface PrescriptionListProps {
+interface PrescriptionListSelectorProps {
   patientId: string;
   encounterId: string;
   facilityId?: string;
@@ -20,24 +27,30 @@ interface PrescriptionListProps {
   onSelectPrescription: (prescription: PrescriptionRead | undefined) => void;
 }
 
-export default function PrescriptionList({
+export default function PrescriptionListSelector({
   patientId,
   encounterId,
   facilityId,
   selectedPrescriptionId,
   onSelectPrescription,
-}: PrescriptionListProps) {
+}: PrescriptionListSelectorProps) {
+  const { t } = useTranslation();
+  const [openDrawer, setOpenDrawer] = React.useState(false);
   const { data: prescriptions, isLoading } = useQuery({
     queryKey: ["prescriptions", patientId, encounterId],
     queryFn: query(prescriptionApi.list, {
       pathParams: { patientId },
-      queryParams: {
-        encounter: encounterId,
-        facility: facilityId,
-      },
+      queryParams: { encounter: encounterId, facility: facilityId },
     }),
     enabled: !!patientId && !!encounterId,
   });
+
+  function handleSelectPrescription(
+    prescription: PrescriptionRead | undefined,
+  ) {
+    onSelectPrescription(prescription);
+    setOpenDrawer(false);
+  }
 
   // Select first prescription by default
   React.useEffect(() => {
@@ -62,54 +75,127 @@ export default function PrescriptionList({
     return null;
   }
 
+  const selectedPrescription = selectedPrescriptionId
+    ? prescriptions?.results.find((pres) => pres.id === selectedPrescriptionId)
+    : undefined;
+
   return (
-    <ScrollArea className="h-[calc(100vh-300px)] border-r">
-      <div className="space-y-1 p-2">
-        {prescriptions.results.map((prescription) => {
-          const isSelected = selectedPrescriptionId === prescription.id;
-          return (
-            <Card
-              key={prescription.id}
-              className={cn(
-                "rounded-md relative cursor-pointer transition-colors w-full",
-                isSelected
-                  ? "bg-white border-primary-600 shadow-md"
-                  : "bg-gray-100 hover:bg-gray-100 shadow-none",
-              )}
-              onClick={() =>
-                onSelectPrescription(prescription as PrescriptionRead)
-              }
-            >
-              {isSelected && (
-                <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
-              )}
-              <CardContent className="flex flex-col px-4 py-3 gap-2">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-start gap-3">
-                    <ReceiptTextIcon
-                      className={cn(
-                        "size-5",
-                        isSelected ? "text-primary-600" : "text-gray-500",
+    <>
+      <div className="hidden lg:block overflow-y-auto">
+        <PrescriptionList
+          prescriptions={prescriptions.results as PrescriptionRead[]}
+          selectedPrescriptionId={selectedPrescriptionId}
+          onSelectPrescription={onSelectPrescription}
+        />
+      </div>
+      <div className="lg:hidden">
+        <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
+          <DrawerTrigger asChild>
+            {selectedPrescription ? (
+              <div
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "w-full flex justify-between items-center py-6",
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <ReceiptTextIcon className="size-5 text-primary-600 shrink-0 mt-1" />
+                  <div className="flex flex-col">
+                    <span className="text-base font-medium">
+                      {formatDateTime(
+                        selectedPrescription.created_date,
+                        "DD/MM/YYYY hh:mm A",
                       )}
-                    />
-                    <div className="flex flex-col items-start">
-                      <span className="text-base font-medium">
-                        {formatDateTime(
-                          prescription.created_date,
-                          "DD/MM/YYYY hh:mm A",
-                        )}
-                      </span>
-                      <span className="text-sm font-medium text-gray-700">
-                        {formatName(prescription.prescribed_by)}
-                      </span>
-                    </div>
+                    </span>
+                    <span className="text-sm font-medium text-gray-700">
+                      {t("prescribed_by")}:{" "}
+                      {formatName(selectedPrescription.prescribed_by)}
+                    </span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                <ChevronDown className="size-5 text-gray-500 shrink-0 ml-2" />
+              </div>
+            ) : (
+              <Button variant="outline" className="w-full">
+                {t("select_prescription")}
+              </Button>
+            )}
+          </DrawerTrigger>
+
+          <DrawerContent className="max-h-[85vh]">
+            <DrawerHeader>
+              <DrawerTitle>{t("prescription")}</DrawerTitle>
+            </DrawerHeader>
+            <div className="overflow-y-auto">
+              <PrescriptionList
+                prescriptions={prescriptions.results as PrescriptionRead[]}
+                selectedPrescriptionId={selectedPrescriptionId}
+                onSelectPrescription={handleSelectPrescription}
+              />
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
-    </ScrollArea>
+    </>
+  );
+}
+function PrescriptionList({
+  prescriptions,
+  selectedPrescriptionId,
+  onSelectPrescription,
+}: {
+  prescriptions: PrescriptionRead[];
+  selectedPrescriptionId: string | undefined;
+  onSelectPrescription: (prescription: PrescriptionRead | undefined) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="space-y-2 p-2 overflow-hidden">
+      {prescriptions.map((prescription) => {
+        const isSelected = selectedPrescriptionId === prescription.id;
+        return (
+          <Card
+            key={prescription.id}
+            className={cn(
+              "rounded-md relative cursor-pointer transition-colors w-full",
+              isSelected
+                ? "bg-white border-primary-600 shadow-md"
+                : "bg-gray-100 hover:bg-gray-100 shadow-none",
+            )}
+            onClick={() =>
+              onSelectPrescription(prescription as PrescriptionRead)
+            }
+          >
+            {isSelected && (
+              <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
+            )}
+            <CardContent className="flex flex-col px-4 py-3 gap-2">
+              <div className="flex justify-between items-center">
+                <div className="flex items-start gap-3">
+                  <ReceiptTextIcon
+                    className={cn(
+                      "size-5",
+                      isSelected ? "text-primary-600" : "text-gray-500",
+                    )}
+                  />
+                  <div className="flex flex-col items-start">
+                    <span className="text-base font-medium whitespace-nowrap">
+                      {formatDateTime(prescription.created_date, "DD/MM/YYYY")}
+                    </span>
+                    <span className="text-base font-medium whitespace-nowrap">
+                      {formatDateTime(prescription.created_date, "hh:mm A")}
+                    </span>
+                    <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                      {t("prescribed_by")}:{" "}
+                      {formatName(prescription.prescribed_by)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
   );
 }
