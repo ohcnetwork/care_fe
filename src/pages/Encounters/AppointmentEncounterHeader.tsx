@@ -25,15 +25,14 @@ import {
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { TFunction } from "i18next";
 import { ChevronDown, ExternalLinkIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-interface SelectActionOption<T = string> {
-  value: T;
-  child: React.ReactNode;
+interface SelectActionOption {
+  value: string;
+  discription: string;
 }
 
 export const AppointmentEncounterHeader = ({
@@ -57,7 +56,7 @@ export const AppointmentEncounterHeader = ({
     },
   });
 
-  const { mutate: updateToken } = useMutation({
+  const { mutate: updateToken, isPending: isUpdateTokenPending } = useMutation({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
         facility_id: encounter.facility.id || "",
@@ -79,35 +78,36 @@ export const AppointmentEncounterHeader = ({
     },
   });
 
-  const { mutate: batchRequest } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: (results: BatchRequestResponse) => {
-      queryClient.invalidateQueries({
-        queryKey: ["encounter", encounter.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["appointment", encounter?.appointment?.id],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["tokens", encounter?.appointment?.token?.id],
-      });
-      if (
-        results.results.some(
-          (result) => result.reference_id === "encounter-closed",
-        )
-      ) {
-        toast.success(t("encounter_marked_as_complete"));
-        return;
-      }
-      if (
-        results.results.some(
-          (result) => result.reference_id === "appointment-closed",
-        )
-      ) {
-        toast.success(t("appointment_closed_successfully"));
-      }
-    },
-  });
+  const { mutate: batchRequest, isPending: isBatchRequestPending } =
+    useMutation({
+      mutationFn: mutate(batchApi.batchRequest),
+      onSuccess: (results: BatchRequestResponse) => {
+        queryClient.invalidateQueries({
+          queryKey: ["encounter", encounter.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["appointment", encounter?.appointment?.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["tokens", encounter?.appointment?.token?.id],
+        });
+        if (
+          results.results.some(
+            (result) => result.reference_id === "encounter-closed",
+          )
+        ) {
+          toast.success(t("encounter_marked_as_complete"));
+          return;
+        }
+        if (
+          results.results.some(
+            (result) => result.reference_id === "appointment-closed",
+          )
+        ) {
+          toast.success(t("appointment_closed_successfully"));
+        }
+      },
+    });
 
   const handleStartEncounter = () => {
     startEncounter({
@@ -214,6 +214,36 @@ export const AppointmentEncounterHeader = ({
     batchRequest({ requests });
   };
 
+  const getOptions = (encounter: EncounterRead) => {
+    const options: SelectActionOption[] = [];
+
+    if (
+      encounter.appointment?.token &&
+      [TokenStatus.CREATED, TokenStatus.IN_PROGRESS].includes(
+        encounter.appointment.token.status,
+      )
+    ) {
+      options.push({
+        value: "mark_token_fulfilled",
+        discription: "close_token_description",
+      });
+    }
+
+    if (encounter.appointment?.status !== "fulfilled") {
+      options.push({
+        value: "close_appointment",
+        discription: "close_appointment_description",
+      });
+    }
+
+    options.push({
+      value: "mark_as_complete",
+      discription: "mark_as_complete_description",
+    });
+
+    return options;
+  };
+
   return (
     <div className="flex gap-3 border border-gray-300 rounded-lg py-1.5 px-2 bg-white w-fit items-center justify-center shadow-sm">
       {encounter.appointment?.token && (
@@ -239,7 +269,7 @@ export const AppointmentEncounterHeader = ({
         <span className="text-sm text-black">
           {t("do_you_want_to_start_this_encounter")}
         </span>
-      ) : getOptions(encounter, t).length > 1 ? (
+      ) : getOptions(encounter).length > 1 ? (
         <span className="text-sm text-black">
           {t("how_do_you_to_finish_this_visit")}
         </span>
@@ -259,10 +289,13 @@ export const AppointmentEncounterHeader = ({
         >
           {t("start_encounter")}
         </Button>
-      ) : getOptions(encounter, t).length > 1 ? (
+      ) : getOptions(encounter).length > 1 ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              disabled={isBatchRequestPending || isUpdateTokenPending}
+            >
               <span className="text-sm font-semibold text-black">
                 {t("end_actions")}
               </span>
@@ -270,7 +303,7 @@ export const AppointmentEncounterHeader = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="min-w-59x`" align="start">
-            {getOptions(encounter, t).map((option) => (
+            {getOptions(encounter).map((option) => (
               <DropdownMenuItem
                 key={option.value}
                 className="p-2.5"
@@ -279,12 +312,19 @@ export const AppointmentEncounterHeader = ({
                     handleCompleteEncounter();
                   } else if (option.value === "close_appointment") {
                     handleCloseAppointment();
-                  } else if (option.value === "close_token") {
+                  } else if (option.value === "mark_token_fulfilled") {
                     handleCloseToken();
                   }
                 }}
               >
-                {option.child}
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium text-black">
+                    {t(option.value)}
+                  </span>
+                  <p className="text-xs text-gray-700">
+                    {t(option.discription)}
+                  </p>
+                </div>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -294,67 +334,11 @@ export const AppointmentEncounterHeader = ({
           variant="outline"
           className="text-sm font-semibold text-black"
           onClick={handleCompleteEncounter}
+          disabled={isBatchRequestPending}
         >
           {t("complete_encounter")}
         </Button>
       )}
     </div>
   );
-};
-
-const getOptions = (encounter: EncounterRead, t: TFunction) => {
-  const options: SelectActionOption<string>[] = [];
-
-  if (
-    encounter.appointment?.token &&
-    [TokenStatus.CREATED, TokenStatus.IN_PROGRESS].includes(
-      encounter.appointment.token.status,
-    )
-  ) {
-    options.push({
-      value: "close_token",
-      child: (
-        <div className="flex flex-col items-start">
-          <span className="text-sm font-medium text-black">
-            {t("mark_token_fulfilled")}
-          </span>
-          <p className="text-xs text-gray-700">
-            {t("close_token_description")}
-          </p>
-        </div>
-      ),
-    });
-  }
-
-  if (encounter.appointment?.status !== "fulfilled") {
-    options.push({
-      value: "close_appointment",
-      child: (
-        <div className="flex flex-col items-start">
-          <span className="text-sm font-medium text-black">
-            {t("close_appointment")}
-          </span>
-          <p className="text-xs text-gray-700">
-            {t("close_appointment_description")}
-          </p>
-        </div>
-      ),
-    });
-  }
-
-  options.push({
-    value: "mark_as_complete",
-    child: (
-      <div className="flex flex-col items-start">
-        <span className="text-sm font-medium text-black">
-          {t("mark_as_complete")}
-        </span>
-        <p className="text-xs text-gray-700">
-          {t("mark_as_complete_description")}
-        </p>
-      </div>
-    ),
-  });
-
-  return options;
 };
