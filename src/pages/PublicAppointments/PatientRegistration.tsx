@@ -60,7 +60,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         .refine(validateName, t("min_char_length_error", { min_length: 3 })),
       gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
       address: z.string().min(1, t("field_required")),
-      age: z.number().optional(),
+      age: z.string().optional(),
       date_of_birth: z.date().or(z.string()).optional(),
       pincode: validators().pincode,
       geo_organization: z.string().min(1, t("organization_required")),
