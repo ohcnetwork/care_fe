@@ -7,7 +7,6 @@ import { useShortcutSubContext } from "@/context/ShortcutContext";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
 
 import {
   CardGridSkeleton,
@@ -30,7 +29,6 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import patientApi from "@/types/emr/patient/patientApi";
-import tokenApi from "@/types/tokens/token/tokenApi";
 import query from "@/Utils/request/query";
 
 export default function VerifyPatient() {
@@ -39,8 +37,7 @@ export default function VerifyPatient() {
   const [qParams] = useQueryParams();
   const queryClient = useQueryClient();
 
-  const { phone_number, year_of_birth, partial_id, queue_id, token_id } =
-    qParams;
+  const { phone_number, year_of_birth, partial_id } = qParams;
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
@@ -63,19 +60,6 @@ export default function VerifyPatient() {
       body: { phone_number, year_of_birth, partial_id },
     }),
     enabled: !!(phone_number && year_of_birth && partial_id),
-  });
-
-  // Fetch token details if queue_id and token_id are provided
-  const { isLoading: isTokenLoading } = useQuery({
-    queryKey: ["token", facilityId, queue_id, token_id],
-    queryFn: query(tokenApi.get, {
-      pathParams: {
-        facility_id: facilityId,
-        queue_id: queue_id!,
-        id: token_id!,
-      },
-    }),
-    enabled: !!(queue_id && token_id && facilityId),
   });
 
   if (isVerifyingPatient || !facility) {
@@ -179,20 +163,6 @@ export default function VerifyPatient() {
             </div>
 
             <div className="space-y-4">
-              {isTokenLoading && (
-                <Card className="bg-white shadow-sm h-full">
-                  <CardHeader className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 bg-gray-200 rounded animate-pulse" />
-                      <div className="space-y-2">
-                        <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
-                        <div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
-                      </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-              )}
-
               {canCreateToken && !isTab && (
                 <PatientTokensList
                   patientId={patientData.id}
