@@ -55,7 +55,6 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
             icon={<HealthWorkerIcon className="text-teal-700" />}
             title={t("forms")}
             shortcut={getShortcutDisplay("add-questionnaire")}
-            actionId="add-questionnaire"
           />
         }
       />
