@@ -4,8 +4,10 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
+import { CompactConditionEditor } from "@/components/Billing/CompactConditionEditor";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -23,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Condition, conditionSchema } from "@/types/base/condition/condition";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { CodeSchema } from "@/types/base/code/code";
@@ -30,6 +33,9 @@ import {
   MonetaryComponentRead,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
+import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import query from "@/Utils/request/query";
+import { useQuery } from "@tanstack/react-query";
 
 interface DiscountMonetaryComponentFormProps {
   defaultValues?: MonetaryComponentRead;
@@ -59,6 +65,7 @@ export function DiscountMonetaryComponentForm({
             })
             .optional(),
           title: z.string().min(1, { message: t("field_required") }),
+          conditions: z.array(conditionSchema).default([]),
         })
         .refine((data) => data.factor != null || data.amount != null, {
           message: t("either_amount_or_factor_required"),
@@ -83,6 +90,12 @@ export function DiscountMonetaryComponentForm({
     ...(facility?.discount_codes || []),
   ];
 
+  // Fetch available metrics for conditions
+  const { data: availableMetrics = [] } = useQuery({
+    queryKey: ["metrics"],
+    queryFn: query(chargeItemDefinitionApi.listMetrics, {}),
+  });
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -91,6 +104,7 @@ export function DiscountMonetaryComponentForm({
       factor: defaultValues?.factor,
       amount: defaultValues?.amount,
       title: defaultValues?.title || "",
+      conditions: defaultValues?.conditions || [],
     },
   });
 
@@ -101,6 +115,15 @@ export function DiscountMonetaryComponentForm({
     } else {
       form.setValue("factor", undefined);
     }
+  };
+
+  // Handle condition changes
+  const handleConditionsChange = (conditions: Condition[]) => {
+    form.setValue("conditions", conditions, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    form.trigger("conditions");
   };
 
   return (
@@ -257,6 +280,20 @@ export function DiscountMonetaryComponentForm({
             )}
           />
         </div>
+
+        {/* Conditions */}
+        <Card>
+          <CardHeader className="p-4">
+            <CardTitle>{t("conditions")}</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <CompactConditionEditor
+              conditions={form.watch("conditions") || []}
+              availableMetrics={availableMetrics}
+              onChange={handleConditionsChange}
+            />
+          </CardContent>
+        </Card>
 
         <div className="pt-2">
           <Button

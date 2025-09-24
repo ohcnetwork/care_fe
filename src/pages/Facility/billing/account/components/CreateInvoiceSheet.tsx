@@ -20,9 +20,12 @@ interface CreateInvoiceSheetProps {
   onOpenChange: (open: boolean) => void;
   preSelectedChargeItems?: ChargeItemRead[];
   trigger?: React.ReactNode;
-  redirectInNewTab?: boolean;
   onSuccess?: () => void;
   sourceUrl?: string;
+  locationId?: string;
+  patientId?: string;
+  disableCreateChargeItems?: boolean;
+  showDispenseNowButton?: boolean;
 }
 
 export function CreateInvoiceSheet({
@@ -32,9 +35,12 @@ export function CreateInvoiceSheet({
   onOpenChange,
   preSelectedChargeItems,
   trigger,
-  redirectInNewTab = true,
   onSuccess,
   sourceUrl,
+  locationId,
+  patientId,
+  disableCreateChargeItems = false,
+  showDispenseNowButton = false,
 }: CreateInvoiceSheetProps) {
   const { t } = useTranslation();
 
@@ -51,10 +57,13 @@ export function CreateInvoiceSheet({
             facilityId={facilityId}
             accountId={accountId}
             preSelectedChargeItems={preSelectedChargeItems}
-            redirectInNewTab={redirectInNewTab}
             onSuccess={onSuccess}
             showHeader={false}
             sourceUrl={sourceUrl}
+            locationId={locationId}
+            patientId={patientId}
+            disableCreateChargeItems={disableCreateChargeItems}
+            showDispenseNowButton={showDispenseNowButton}
           />
         </ScrollArea>
       </SheetContent>
