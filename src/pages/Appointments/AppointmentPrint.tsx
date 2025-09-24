@@ -151,34 +151,35 @@ export default function AppointmentPrint(props: Props) {
 
                 <div className="bg-white rounded-md p-3 shadow-md mt-2 h-full">
                   <div className="space-y-2 flex flex-col justify-between h-full">
-                    {chargeItems?.results?.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex justify-between items-center"
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <Label className="text-xs font-medium text-gray-700">
-                              {item.title}
-                            </Label>
-                          </div>
-                          <p className="text-xs text-gray-600">
-                            {t("qty")}: {item.quantity}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold">
-                            ₹{item.total_price}
-                          </p>
-                          {item.paid_invoice && (
+                    <div className="space-y-4">
+                      {chargeItems?.results?.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex justify-between items-center"
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <Label className="text-xs font-medium text-gray-700">
+                                {item.title}
+                              </Label>
+                            </div>
                             <p className="text-xs text-gray-600">
-                              {item.paid_invoice.number}
+                              {t("qty")}: {item.quantity}
                             </p>
-                          )}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-semibold">
+                              ₹{item.total_price}
+                            </p>
+                            {item.paid_invoice && (
+                              <p className="text-xs text-gray-600">
+                                {item.paid_invoice.number}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-
+                      ))}
+                    </div>
                     <div>
                       <Separator className="my-2" />
 

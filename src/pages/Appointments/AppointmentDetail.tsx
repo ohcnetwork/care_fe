@@ -292,7 +292,7 @@ export default function AppointmentDetail(props: Props) {
         </div>
         <div
           className={cn(
-            "flex flex-col md:flex-col lg:flex-row mt-2 md:mt-0",
+            "flex flex-col-reverse lg:flex-row mt-2 md:mt-0",
             isUpdating && "opacity-50 pointer-events-none animate-pulse",
           )}
         >
@@ -300,7 +300,7 @@ export default function AppointmentDetail(props: Props) {
             appointment={appointment}
             facility={facility}
           />
-          <div className="mt-6 ml-0 md:ml-4 flex-1">
+          <div className="mt-6 pl-0 md:pl-4 flex-1">
             <h3 className="text-base font-semibold">{t("token")}</h3>
             {appointment.token?.number ? (
               <>
