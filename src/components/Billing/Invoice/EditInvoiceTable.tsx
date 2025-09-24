@@ -93,7 +93,7 @@ export function EditInvoiceTable({
   enableShortcut,
 }: EditInvoiceTableProps) {
   const { t } = useTranslation();
-  useShortcutSubContext("facility:invoice:show");
+  useShortcutSubContext("facility:billing:invoice:show");
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {

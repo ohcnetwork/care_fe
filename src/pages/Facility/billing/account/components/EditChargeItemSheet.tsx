@@ -7,8 +7,10 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import { useShortcutSubContext } from "@/context/ShortcutContext";
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
+import {
+  useShortcutDisplay,
+  useShortcutSubContext,
+} from "@/context/ShortcutContext";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -88,8 +90,8 @@ export function EditChargeItemSheet({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // Register shortcuts for this sheet
-  useShortcutSubContext("facility:chargeItem:sheet");
-  const getShortcutDisplay = useShortcutDisplays(["facility"]);
+  useShortcutSubContext("facility:billing:invoice");
+  const getShortcutDisplay = useShortcutDisplay();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

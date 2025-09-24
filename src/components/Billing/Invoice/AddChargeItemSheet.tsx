@@ -63,10 +63,10 @@ export default function AddChargeItemSheet({
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = React.useState(false);
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
-    limit: 10,
+    limit: 15,
     disableCache: true,
   });
-  useShortcutSubContext("facility:chargeItem:sheet");
+  useShortcutSubContext("facility:billing:invoice");
 
   // Get account information to extract patient ID
   const { data: account } = useQuery({

@@ -1,6 +1,6 @@
+import { useShortcutDisplay } from "@/context/ShortcutContext";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { cn } from "@/lib/utils";
-import { useShortcutDisplays } from "./keyboardShortcutUtils";
 
 interface KeyboardShortcutBadgeProps {
   shortcut: string | undefined;
@@ -50,6 +50,8 @@ export function KeyboardShortcutBadge({
  * Simple component that takes an actionId and displays the keyboard shortcut badge
  * This is the simplest API - just pass the actionId and it handles everything
  * By default, no positioning is applied - use className or position prop for styling.
+ *
+ * This component automatically uses the current shortcut context hierarchy.
  */
 export function ShortcutBadge({
   actionId,
@@ -62,7 +64,7 @@ export function ShortcutBadge({
   position?: "top-right" | "bottom-right" | "top-left" | "bottom-left";
   alwaysShow?: boolean;
 }) {
-  const getShortcutDisplay = useShortcutDisplays();
+  const getShortcutDisplay = useShortcutDisplay();
   const { isOptionPressed } = useKeyboardShortcuts([], {}, {});
 
   return (

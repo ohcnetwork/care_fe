@@ -32,13 +32,11 @@ import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPr
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
-import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { useShortcutDisplays } from "@/Utils/keyboardShortcutUtils";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -74,8 +72,6 @@ export default function AddChargeItemsBillingSheet({
     string | null
   >(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  useShortcutSubContext("facility:chargeItemBilling:sheet");
-  const getShortcutDisplay = useShortcutDisplays(["facility"]);
 
   const { data: chargeItemDefinitions, isLoading } = useQuery({
     queryKey: ["chargeItemDefinitions", search],
@@ -328,10 +324,7 @@ export default function AddChargeItemsBillingSheet({
                 isLoading={isLoading}
                 noOptionsMessage={t("no_charge_item_definitions_found")}
                 disabled={disabled}
-                shortcutId="select-chargeItem-billing-sheet"
-                shortcutDisplay={getShortcutDisplay(
-                  "select-chargeItem-billing-sheet",
-                )}
+                shortcutId="open-dropdown"
               />
             </div>
 
@@ -352,13 +345,10 @@ export default function AddChargeItemsBillingSheet({
                   handleSubmit();
                 }}
                 disabled={isPending || selectedItems.length === 0 || disabled}
-                data-shortcut-id={
-                  open ? "submit-charge-items-billing-sheet" : undefined
-                }
                 className="flex flex-row items-center gap-2 justify-between"
               >
                 {t("add_items")}
-                <ShortcutBadge actionId="submit-charge-items-billing-sheet" />
+                {open && <ShortcutBadge actionId="enter-action" />}
               </Button>
             </div>
           </div>

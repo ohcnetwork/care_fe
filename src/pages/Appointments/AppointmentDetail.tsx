@@ -20,6 +20,7 @@ import {
   EyeIcon,
   Loader2,
   PlusSquare,
+  PrinterIcon,
   ReceiptText,
   SquareActivity,
   X,
@@ -136,7 +137,7 @@ export default function AppointmentDetail(props: Props) {
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
 
-  useShortcutSubContext("facility:appointment:detail");
+  useShortcutSubContext("facility:appointment:detail&facility:billing:invoice");
 
   const { canViewAppointments, canWriteAppointment } = getPermissions(
     hasPermission,
@@ -291,7 +292,7 @@ export default function AppointmentDetail(props: Props) {
         </div>
         <div
           className={cn(
-            "flex flex-col md:flex-col lg:flex-row mt-2 md:mt-0",
+            "flex flex-col-reverse lg:flex-row mt-2 md:mt-0",
             isUpdating && "opacity-50 pointer-events-none animate-pulse",
           )}
         >
@@ -299,7 +300,7 @@ export default function AppointmentDetail(props: Props) {
             appointment={appointment}
             facility={facility}
           />
-          <div className="mt-6 ml-0 md:ml-4 flex-1">
+          <div className="mt-6 pl-0 md:pl-4 flex-1">
             <h3 className="text-base font-semibold">{t("token")}</h3>
             {appointment.token?.number ? (
               <>
@@ -543,6 +544,14 @@ export default function AppointmentDetail(props: Props) {
                         }}
                       />
                     )}
+                    {/* Print Appointment */}
+                    <QuickAction
+                      icon={<PrinterIcon className="size-4" />}
+                      title={t("print_appointment")}
+                      actionId="print-appointment"
+                      data-shortcut-id="print-appointment"
+                      href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
+                    />
                   </div>
                 </>
                 {/* )} */}
@@ -575,7 +584,7 @@ const AppointmentDetailsContent = ({
         encounterId={appointment.associated_encounter?.id}
         viewOnly={true}
       />
-      <div className=" gap-4 grid grid-cols-1 md:grid-cols-2">
+      <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
         <Card className="bg-white shadow-sm rounded-md p-1">
           <CardHeader className="p-2 bg-gray-50">
             <CardTitle className="flex justify-between">

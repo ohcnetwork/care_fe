@@ -126,7 +126,7 @@ export function InvoiceShow({
     "payment_history" | "invoice_activity"
   >("payment_history");
   const queryClient = useQueryClient();
-  useShortcutSubContext("facility:invoice:show");
+  useShortcutSubContext("facility:billing:invoice:show");
 
   const activeTabStyle =
     "border-b-2 border-primary font-medium text-primary-900";
@@ -768,14 +768,14 @@ export function InvoiceShow({
                     setOpen={setIsAddChargeItemSheetOpen}
                     trigger={
                       <Button
-                        data-shortcut-id="add-charge-items-invoice"
+                        data-shortcut-id="add-charge-item"
                         variant="ghost"
                         className="w-full border border-gray-400 text-gray-950 font-semibold text-sm shadow-sm"
                         disabled={isAddChargeItemSheetOpen}
                       >
                         <CareIcon icon="l-plus" className="mr-2 size-4" />
                         {t("add_charge_item")}
-                        <ShortcutBadge actionId="add-charge-items-invoice" />
+                        <ShortcutBadge actionId="add-charge-item" />
                       </Button>
                     }
                   />
