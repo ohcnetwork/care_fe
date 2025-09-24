@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, User } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -127,13 +126,6 @@ export default function PatientHomeEncounters({
           <p className="text-gray-600 mb-4 text-sm max-w-md">
             {t("create_a_new_encounter_to_get_started")}
           </p>
-          <Button
-            size="sm"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
-          >
-            <User className="size-3 mr-1.5" />
-            {t("create_encounter")}
-          </Button>
         </div>
       )}
     </>
