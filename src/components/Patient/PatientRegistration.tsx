@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import DateField from "@/components/ui/date-field";
 import {
   Form,
   FormControl,
@@ -34,10 +35,12 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAppHistory from "@/hooks/useAppHistory";
 import { tzAwareDateTime } from "@/lib/validators";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
+import { PLUGIN_Component } from "@/PluginEngine";
 import {
   BloodGroupChoices,
   PatientIdentifierCreate,
@@ -53,6 +56,7 @@ import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -69,6 +73,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
+  useShortcutSubContext();
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
@@ -307,7 +312,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     <Page title={pageTitle} hideTitleOnPage>
       <div className="flex flex-col gap-4 max-w-2xl mx-auto">
         <div>
-          <BackButton>
+          <BackButton data-shortcut-id="go-back">
             <ArrowLeft />
             {t("back")}
           </BackButton>
@@ -334,6 +339,12 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
                   : ["patient-basics", "additional-details"]
               }
             >
+              <PLUGIN_Component
+                __name="PatientRegistrationForm"
+                form={form}
+                facilityId={facilityId}
+                patientId={patientId}
+              />
               <AccordionItem
                 value="patient-basics"
                 className="bg-white flex flex-col gap-4 p-6 shadow rounded-md"
@@ -532,12 +543,12 @@ const PatientBasicsContent = ({
         )}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-6 items-start">
         <FormField
           control={form.control}
           name="age_or_dob"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="md:col-span-4">
               <FormLabel aria-required>{t("date_of_birth_or_age")}</FormLabel>
               <div className="flex gap-1 items-start">
                 <Tabs value={field.value} onValueChange={field.onChange}>
@@ -553,14 +564,14 @@ const PatientBasicsContent = ({
                     render={({ field }) => (
                       <FormItem className="w-full">
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="date"
-                            max={format(new Date(), "yyyy-MM-dd")}
-                            value={field.value ?? ""}
-                            onChange={(e) => {
-                              field.onChange(e.target.value || null);
-                            }}
+                          <DateField
+                            date={
+                              field.value ? new Date(field.value) : undefined
+                            }
+                            onChange={(date) =>
+                              field.onChange(dateQueryString(date))
+                            }
+                            hideLabels
                           />
                         </FormControl>
                         <FormMessage />
@@ -573,7 +584,7 @@ const PatientBasicsContent = ({
                     control={form.control}
                     name="age"
                     render={({ field }) => (
-                      <FormItem className="w-full">
+                      <FormItem className="w-full md:col-span-2">
                         <FormControl>
                           <Input
                             {...field}
@@ -597,6 +608,7 @@ const PatientBasicsContent = ({
                   />
                 )}
               </div>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -1005,14 +1017,14 @@ const getFormSchema = (t: TFunction) => {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("field_required"),
-          path: ["date_of_birth"],
+          path: ["age_or_dob"],
         });
       }
       if (data.age_or_dob === "age" && !data.age) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("field_required"),
-          path: ["age"],
+          path: ["age_or_dob"],
         });
       }
 

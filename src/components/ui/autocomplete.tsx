@@ -28,6 +28,7 @@ import {
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface AutoCompleteOption {
   label: string;
@@ -310,7 +311,7 @@ export default function Autocomplete({
             <div className="absolute right-3 top-1/2 -translate-y-1/2 ">
               <div className="flex items-center justify-center gap-1">
                 <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                  {shortcutDisplay}
+                  <ShortcutBadge actionId={shortcutId ?? ""} />
                 </div>
                 <CaretSortIcon className="size-3 shrink-0 opacity-50" />
               </div>
