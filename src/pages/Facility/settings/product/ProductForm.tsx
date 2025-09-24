@@ -348,33 +348,49 @@ export function ProductFormContent({
               )}
             />
 
-            {!isEditMode && !existingProductKnowledge && (
-              <FormField
-                control={form.control}
-                name="product_knowledge"
-                render={({ field }) => (
+            <FormField
+              control={form.control}
+              name="product_knowledge"
+              render={({ field }) => {
+                const selectedProductKnowledge = productKnowledgeData?.find(
+                  (pk) => pk.slug === field.value,
+                );
+
+                const isEditable = !isEditMode && !existingProductKnowledge;
+
+                return (
                   <FormItem className="flex flex-col">
-                    <FormLabel aria-required>
+                    <FormLabel aria-required={isEditable ? true : undefined}>
                       {t("product_knowledge")}
                     </FormLabel>
+
                     <FormControl>
-                      <ProductKnowledgeSelect
-                        value={productKnowledgeData?.find(
-                          (pk) => pk.slug === field.value,
-                        )}
-                        onChange={(selected) => field.onChange(selected.slug)}
-                        className="border-gray-300 font-normal text-gray-700"
-                        enableFavorites
-                      />
+                      {isEditable ? (
+                        <ProductKnowledgeSelect
+                          value={selectedProductKnowledge}
+                          onChange={(selected) => field.onChange(selected.slug)}
+                          className="border-gray-300 font-normal text-gray-700"
+                          enableFavorites
+                        />
+                      ) : (
+                        <div className="px-3 py-2 border border-gray-300 rounded bg-gray-100 text-gray-700">
+                          {selectedProductKnowledge?.slug}
+                        </div>
+                      )}
                     </FormControl>
-                    <FormDescription>
-                      {t("product_knowledge_selection_description")}
-                    </FormDescription>
-                    <FormMessage />
+
+                    {isEditable && (
+                      <>
+                        <FormDescription>
+                          {t("product_knowledge_selection_description")}
+                        </FormDescription>
+                        <FormMessage />
+                      </>
+                    )}
                   </FormItem>
-                )}
-              />
-            )}
+                );
+              }}
+            />
 
             <FormField
               control={form.control}
