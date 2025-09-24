@@ -7,17 +7,23 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import ValueSetSearchContent from "@/components/Questionnaire/ValueSetSearchContent";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { Code } from "@/types/base/code/code";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   system: string;
@@ -50,6 +56,7 @@ export default function ValueSetSelect({
   title,
   asSheet = false,
 }: Props) {
+  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -72,8 +79,8 @@ export default function ValueSetSelect({
 
   if (isMobile && !hideTrigger && asSheet) {
     return (
-      <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
-        <SheetTrigger asChild>
+      <Drawer open={internalOpen} onOpenChange={setInternalOpen}>
+        <DrawerTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
@@ -88,10 +95,12 @@ export default function ValueSetSelect({
             <span>{value?.display || placeholder}</span>
             <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
           </Button>
-        </SheetTrigger>
-        <SheetContent side="bottom" className="px-0 pt-2 pb-0 rounded-t-3xl">
-          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
-          <div className="mt-6 h-full">
+        </DrawerTrigger>
+        <DrawerContent className="min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
+          <DrawerTitle className="sr-only">
+            {title || t("select_value")}
+          </DrawerTitle>
+          <div className="mt-6 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
             <ValueSetSearchContent
               system={system}
               onSelect={(selected) => {
@@ -110,15 +119,15 @@ export default function ValueSetSelect({
               title={title}
             />
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     );
   }
 
   if (isMobile && !hideTrigger) {
     return (
-      <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
-        <SheetTrigger asChild>
+      <Drawer open={internalOpen} onOpenChange={setInternalOpen}>
+        <DrawerTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
@@ -141,10 +150,12 @@ export default function ValueSetSelect({
               </span>
             </div>
           </Button>
-        </SheetTrigger>
-        <SheetContent side="bottom" className="px-0 pt-2 pb-0 rounded-t-3xl">
-          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
-          <div className="mt-6 h-full">
+        </DrawerTrigger>
+        <DrawerContent className="min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
+          <DrawerTitle className="sr-only">
+            {title || t("select_value")}
+          </DrawerTitle>
+          <div className="mt-6 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
             <ValueSetSearchContent
               system={system}
               onSelect={(selected) => {
@@ -164,8 +175,8 @@ export default function ValueSetSelect({
               title={title}
             />
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     );
   }
 
