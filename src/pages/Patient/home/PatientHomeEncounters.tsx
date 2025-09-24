@@ -38,6 +38,7 @@ export default function PatientHomeEncounters({
     queryFn: query(encounterApi.list, {
       queryParams: {
         patient: patientId,
+        status: "planned,in_progress,on_hold",
       },
       silent: true,
     }),
