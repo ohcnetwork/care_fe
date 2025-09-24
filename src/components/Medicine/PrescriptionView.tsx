@@ -63,7 +63,7 @@ export default function PrescriptionView({
   }
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between p-2 w-full">
+      <div className="flex items-center gap-2 flex-wrap justify-between px-2 my-2 w-full">
         <div className="hidden lg:block">
           <h3 className="font-semibold text-lg">
             {formatDateTime(prescription.created_date, "DD/MM/YYYY hh:mm A")}
