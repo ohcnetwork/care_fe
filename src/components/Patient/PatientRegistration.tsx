@@ -40,6 +40,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 import { tzAwareDateTime } from "@/lib/validators";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
+import { PLUGIN_Component } from "@/PluginEngine";
 import {
   BloodGroupChoices,
   PatientIdentifierCreate,
@@ -338,6 +339,12 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
                   : ["patient-basics", "additional-details"]
               }
             >
+              <PLUGIN_Component
+                __name="PatientRegistrationForm"
+                form={form}
+                facilityId={facilityId}
+                patientId={patientId}
+              />
               <AccordionItem
                 value="patient-basics"
                 className="bg-white flex flex-col gap-4 p-6 shadow rounded-md"
