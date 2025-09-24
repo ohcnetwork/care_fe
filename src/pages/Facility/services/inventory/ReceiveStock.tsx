@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { CheckIcon, Plus, X } from "lucide-react";
 import { useNavigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -27,7 +27,6 @@ import Page from "@/components/Common/Page";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { ProductSearch } from "@/pages/Facility/services/inventory/ProductSearch";
 import { SupplierSelect } from "@/pages/Facility/services/inventory/SupplierSelect";
@@ -35,6 +34,7 @@ import { ProductRead } from "@/types/inventory/product/product";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
   SupplyDeliveryCreate,
+  SupplyDeliveryRead,
   SupplyDeliveryStatus,
   SupplyDeliveryType,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
@@ -42,6 +42,11 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import { Organization } from "@/types/organization/organization";
 
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
+import batchApi from "@/types/base/batch/batchApi";
 import { ProductKnowledgeSelect } from "./ProductKnowledgeSelect";
 import { ReceiveStockTable } from "./ReceiveStockTable";
 import { SupplyRequestSelect } from "./SupplyRequestSelect";
@@ -97,12 +102,19 @@ export function ReceiveStock({
     },
   });
 
-  const batchRequest = useMutation({
-    mutationFn: mutate(routes.batchRequest),
-    onSuccess: () => {
+  const batchRequest = useMutation<
+    BatchRequestResponse,
+    Error,
+    BatchRequestBody
+  >({
+    mutationFn: mutate(batchApi.batchRequest),
+    onSuccess: (response) => {
+      // Get the last delivery from response
+      const lastDelivery = response.results[response.results.length - 1]
+        ?.data as SupplyDeliveryRead;
       toast.success(t("stock_received"));
       form.reset();
-      navigate("/external_supply/inward_entry");
+      navigate(`/external_supply/deliveries/${lastDelivery?.id}`);
     },
     onError: () => {
       toast.error(t("error_receiving_stock"));
@@ -123,7 +135,7 @@ export function ReceiveStock({
             destination: locationId,
             supplied_item: entry.supplied_item?.id,
             supplied_item_quantity: entry.supplied_item_quantity,
-            status: SupplyDeliveryStatus.completed,
+            status: SupplyDeliveryStatus.in_progress,
             supplied_item_type: SupplyDeliveryType.product,
           } satisfies SupplyDeliveryCreate,
         })),
@@ -292,9 +304,9 @@ function AddItemForm({
 }) {
   const { t } = useTranslation();
   const [currentEntry, setCurrentEntry] = useState(entry);
-  const [productFormSubmit, setProductFormSubmit] = useState<
-    (() => void) | null
-  >(null);
+  const productSearchRef = useRef<{
+    createNewProduct: () => void;
+  }>({ createNewProduct: () => {} });
   const [isProductCreationInProgress, setIsProductCreationInProgress] =
     useState(false);
   const [activeTab, setActiveTab] = useState(
@@ -307,7 +319,6 @@ function AddItemForm({
 
   useEffect(() => {
     if (currentEntry.supplied_item && currentEntry.supplied_item.id) {
-      setProductFormSubmit(null);
       setIsProductCreationInProgress(false);
     }
   }, [currentEntry.supplied_item]);
@@ -315,9 +326,8 @@ function AddItemForm({
   if (!currentEntry) return null;
 
   const handleSave = () => {
-    if (productFormSubmit && isProductCreationInProgress) {
-      // If product creation is in progress, trigger the submit
-      productFormSubmit();
+    if (isProductCreationInProgress) {
+      productSearchRef.current?.createNewProduct?.();
     } else {
       onSuccess(currentEntry, index);
       setOpen(false);
@@ -443,31 +453,28 @@ function AddItemForm({
                     ...prev,
                     supplied_item: product,
                   }));
+                  setIsProductCreationInProgress(false);
                 } else {
                   setCurrentEntry((prev) => ({
                     ...prev,
                     supplied_item: null,
                   }));
+                  setIsProductCreationInProgress(true);
                 }
-                // Clear the submit function and creation state since product is now selected
-                setProductFormSubmit(null);
-                setIsProductCreationInProgress(false);
-              }}
-              onProductSubmit={(submitFn) => {
-                setProductFormSubmit(() => submitFn);
-                setIsProductCreationInProgress(true);
               }}
               onProductCreate={(product) => {
                 const updatedEntry = {
                   ...currentEntry,
                   supplied_item: product,
                 };
+                setIsProductCreationInProgress(false);
                 setCurrentEntry(updatedEntry);
                 onSuccess(updatedEntry, index);
                 setOpen(false);
               }}
               enabled={open}
-              productKnowledgeId={currentEntry._product_knowledge?.id || ""}
+              productKnowledgeSlug={currentEntry._product_knowledge?.slug || ""}
+              ref={productSearchRef}
             />
           </div>
         </ScrollArea>
@@ -483,8 +490,7 @@ function AddItemForm({
                 ? !currentEntry._product_knowledge
                 : !currentEntry.supply_request) ||
               (!isProductCreationInProgress && !currentEntry.supplied_item) ||
-              !currentEntry.supplied_item_quantity ||
-              (isProductCreationInProgress && !productFormSubmit)
+              !currentEntry.supplied_item_quantity
             }
           >
             <CheckIcon className="size-6" />

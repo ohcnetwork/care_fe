@@ -34,4 +34,16 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<ServiceRequestApplyActivityDefinitionSpec>(),
   },
+  setTags: {
+    path: "/api/v1/facility/{facilityId}/service_request/{external_id}/set_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<unknown>(),
+    TBody: Type<{ tags: string[] }>(),
+  },
+  removeTags: {
+    path: "/api/v1/facility/{facilityId}/service_request/{external_id}/remove_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<unknown>(),
+    TBody: Type<{ tags: string[] }>(),
+  },
 } as const;

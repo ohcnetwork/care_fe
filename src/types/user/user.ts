@@ -37,7 +37,7 @@ export interface UserRead extends UserReadMinimal {
   flags: string[];
 }
 
-export interface CurrentUserRead extends UserBase, Permissions {
+export interface CurrentUserRead extends UserRead, Permissions {
   alt_phone_number?: string;
   date_of_birth?: string;
   is_superuser: boolean;
