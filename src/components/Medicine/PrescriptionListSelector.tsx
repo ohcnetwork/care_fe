@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Drawer,
@@ -92,11 +92,9 @@ export default function PrescriptionListSelector({
         <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
           <DrawerTrigger asChild>
             {selectedPrescription ? (
-              <div
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "w-full flex justify-between items-center py-6",
-                )}
+              <Button
+                variant="outline"
+                className="w-full flex justify-between items-center py-6"
               >
                 <div className="flex items-start gap-3">
                   <ReceiptTextIcon className="size-5 text-primary-600 shrink-0 mt-1" />
@@ -114,7 +112,7 @@ export default function PrescriptionListSelector({
                   </div>
                 </div>
                 <ChevronDown className="size-5 text-gray-500 shrink-0 ml-2" />
-              </div>
+              </Button>
             ) : (
               <Button variant="outline" className="w-full">
                 {t("select_prescription")}
