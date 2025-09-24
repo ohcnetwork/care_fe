@@ -188,6 +188,7 @@ export default function PatientTokensList({
                     className="print:block print:w-[400px] print:border print:rounded-md"
                   >
                     <TokenCard
+                      showlogo={false}
                       token={token as TokenRetrieve}
                       facility={facility}
                       id={`token-card-${token.id}`}

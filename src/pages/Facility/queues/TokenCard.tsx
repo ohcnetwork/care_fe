@@ -26,6 +26,7 @@ interface Props {
   facility: FacilityRead;
   className?: string;
   tokenActions?: boolean;
+  showlogo?: boolean;
 }
 
 const TokenCard = ({
@@ -34,6 +35,7 @@ const TokenCard = ({
   facility,
   className,
   tokenActions = true,
+  showlogo = true,
 }: Props) => {
   const { t } = useTranslation();
   const isLargeScreen = useBreakpoints({ lg: true, default: false });
@@ -69,7 +71,9 @@ const TokenCard = ({
         className,
       )}
     >
-      {/* <div className="absolute inset-0 opacity-[0.1] pointer-events-none bg-[url('/images/care_logo_gray.svg')] bg-center bg-no-repeat bg-[length:40%_auto] lg:bg-[length:60%_auto]" /> */}
+      {showlogo && (
+        <div className="absolute inset-0 opacity-[0.1] pointer-events-none bg-[url('/images/care_logo_gray.svg')] bg-center bg-no-repeat bg-[length:40%_auto] lg:bg-[length:60%_auto]" />
+      )}
 
       <div className="relative z-10">
         <div className="flex flex-row items-start justify-between gap-4">
