@@ -5,7 +5,7 @@ const TIME_FORMAT = "hh:mm A";
 const DATE_TIME_FORMAT = `${DATE_FORMAT}, ${TIME_FORMAT}`;
 
 type DateLike = Parameters<typeof dayjs>[0];
-export const newFormatDateTime = (date: DateLike, format?: string) => {
+export const formatDateTime = (date: DateLike, format?: string) => {
   const obj = dayjs(date);
 
   if (format) {
