@@ -17,13 +17,13 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 export const FormDialog = ({
-  trigger,
   subjectType,
   questionnaireTag,
+  trigger,
 }: {
-  trigger: React.ReactNode;
   subjectType: string;
   questionnaireTag: string;
+  trigger?: React.ReactNode;
 }) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
@@ -59,6 +59,19 @@ export const FormDialog = ({
     facilityId,
   } = useEncounter();
 
+  // Handle keyboard shortcut to open forms dialog
+  useEffect(() => {
+    const handleOpenFormsDialog = () => {
+      setOpen(true);
+    };
+
+    document.addEventListener("open-forms-dialog", handleOpenFormsDialog);
+
+    return () => {
+      document.removeEventListener("open-forms-dialog", handleOpenFormsDialog);
+    };
+  }, []);
+
   useEffect(() => {
     if (open) {
       setSearch("");
@@ -67,7 +80,9 @@ export const FormDialog = ({
 
   return (
     <>
-      <div onClick={() => setOpen(true)}>{trigger}</div>
+      <div className="flex" onClick={() => setOpen(true)}>
+        {trigger}
+      </div>
       <CommandDialog
         className="md:max-w-2xl"
         open={open}

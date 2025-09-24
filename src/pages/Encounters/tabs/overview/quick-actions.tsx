@@ -12,7 +12,10 @@ import {
   StethoscopeIcon,
 } from "@/CAREUI/icons/CustomIcons";
 
-import { KeyboardShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import {
+  KeyboardShortcutBadge,
+  ShortcutBadge,
+} from "@/Utils/keyboardShortcutComponents";
 
 import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
 import { FormDialog } from "./FormsDialog";
@@ -20,6 +23,7 @@ import { FormDialog } from "./FormsDialog";
 export const QuickActions = (props: React.ComponentProps<"div">) => {
   const { t } = useTranslation();
   const getShortcutDisplay = useEncounterShortcutDisplays();
+
   return (
     <div
       {...props}
@@ -47,23 +51,25 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
         subjectType="encounter"
         questionnaireTag="encounter_actions"
         trigger={
-          <div className="flex-1 flex flex-row md:flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-white cursor-pointer">
-            <QuickActionContent
-              icon={<HealthWorkerIcon className="text-teal-700" />}
-              title={t("forms")}
-            />
-          </div>
+          <QuickAction
+            icon={<HealthWorkerIcon className="text-teal-700" />}
+            title={t("forms")}
+            shortcut={getShortcutDisplay("add-questionnaire")}
+            actionId="add-questionnaire"
+          />
         }
       />
     </div>
   );
 };
-// function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+
 export function QuickAction({
   icon,
   title,
   shortcut,
   href,
+  actionId,
+  onClick,
   ...props
 }: {
   icon: React.ReactNode;
@@ -71,6 +77,8 @@ export function QuickAction({
   shortcut?: string;
   href?: string;
   props?: React.ComponentProps<"div">;
+  onClick?: () => void;
+  actionId?: string;
 }) {
   const className =
     "flex-1 flex flex-row md:flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-white";
@@ -78,37 +86,52 @@ export function QuickAction({
   if (href) {
     return (
       <Link href={href} className={className}>
-        <QuickActionContent icon={icon} title={title} shortcut={shortcut} />
+        <QuickActionContent
+          icon={icon}
+          title={title}
+          shortcut={shortcut}
+          actionId={actionId}
+        />
       </Link>
     );
   }
 
   return (
-    <button className={className} {...props}>
-      <QuickActionContent icon={icon} title={title} shortcut={shortcut} />
+    <button className={className} {...props} onClick={onClick}>
+      <QuickActionContent
+        icon={icon}
+        title={title}
+        shortcut={shortcut}
+        actionId={actionId}
+      />
     </button>
   );
 }
 
-export const QuickActionContent = ({
+const QuickActionContent = ({
   icon,
   title,
   shortcut,
+  actionId,
 }: {
   icon: React.ReactNode;
   title: string;
   shortcut?: string;
-}) => (
-  <>
-    <div className="relative flex md:py-3 py-0 rounded-t-lg rounded-b-xl md:bg-gray-100 bg-white">
-      <KeyboardShortcutBadge shortcut={shortcut} position="top-right" />
-      <div className="rounded-xl bg-white md:shadow shadow-none mx-auto items-center flex p-2">
-        {icon}
+  actionId?: string;
+}) => {
+  return (
+    <>
+      <div className="relative flex md:py-3 py-0 rounded-t-md rounded-b-lg md:bg-gray-100 bg-white">
+        <KeyboardShortcutBadge shortcut={shortcut} position="top-right" />
+        {actionId && <ShortcutBadge actionId={actionId} position="top-right" />}
+        <div className="rounded-xl bg-white md:shadow shadow-none mx-auto items-center flex p-2">
+          {icon}
+        </div>
       </div>
-    </div>
-    <div className="flex items-center gap-1 justify-center">
-      <PlusIcon className="size-4 md:block hidden" />
-      <span className="text-sm font-semibold">{title}</span>
-    </div>
-  </>
-);
+      <div className="flex items-center gap-1 justify-center">
+        <PlusIcon className="size-4 md:block hidden" />
+        <span className="text-sm font-semibold">{title}</span>
+      </div>
+    </>
+  );
+};
