@@ -10,7 +10,7 @@ import {
 import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -44,7 +44,7 @@ import query from "@/Utils/request/query";
 import { saveElementAsImage } from "@/Utils/utils";
 
 export default function VerifyPatient() {
-  useFacilityShortcuts("patient-home");
+  useShortcutSubContext("facility:patient:home");
   const { t } = useTranslation();
   const [qParams] = useQueryParams();
   const queryClient = useQueryClient();

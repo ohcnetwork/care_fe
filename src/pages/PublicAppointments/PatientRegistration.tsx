@@ -218,7 +218,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormItem className="flex flex-col">
                     <FormLabel aria-required>{t("patient_name")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder={t("type_patient_name")} />
+                      <Input {...field} placeholder={t("type_name")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

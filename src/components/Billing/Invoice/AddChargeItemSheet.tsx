@@ -29,7 +29,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import AddChargeItemsBillingSheet from "@/pages/Facility/billing/account/components/AddChargeItemsBillingSheet";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import accountApi from "@/types/billing/account/accountApi";
@@ -63,10 +63,10 @@ export default function AddChargeItemSheet({
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = React.useState(false);
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
-    limit: 10,
+    limit: 15,
     disableCache: true,
   });
-  useFacilityShortcuts("chargeItem-sheet");
+  useShortcutSubContext("facility:billing:invoice");
 
   // Get account information to extract patient ID
   const { data: account } = useQuery({

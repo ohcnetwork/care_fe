@@ -2,7 +2,10 @@ import BackButton from "@/components/Common/BackButton";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
-import { useScheduleResource } from "@/components/Schedule/useScheduleResource";
+import {
+  resourceTypeToResourcePathSlug,
+  useScheduleResource,
+} from "@/components/Schedule/useScheduleResource";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -94,7 +97,12 @@ export function ManageQueuePage({
         <div className="flex justify-between gap-3">
           <div className="flex gap-2 items-center">
             <BackButton
-              to={`/facility/${facilityId}/queues?date=${dateQueryString(queue.date)}&resource_id=${resourceId}`}
+              // TODO: move queue index page for practitioner to similar pattern path
+              to={
+                resourceType === SchedulableResourceType.Practitioner
+                  ? `/facility/${facilityId}/queues?date=${dateQueryString(queue.date)}&resource_id=${resourceId}`
+                  : `/facility/${facilityId}/${resourceTypeToResourcePathSlug[resourceType]}/${resourceId}/queues?date=${dateQueryString(queue.date)}&resource_id=${resourceId}`
+              }
               size="icon"
               variant="ghost"
             >
