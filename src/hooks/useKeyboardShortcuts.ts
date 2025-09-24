@@ -2,8 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import shortcutsConfig from "@/config/keyboardShortcuts.json";
 
-export type ShortcutContext = "global" | "encounter" | "patient" | "facility";
-
 export interface ShortcutConditions {
   readOnly?: boolean;
   canEdit?: boolean;
@@ -25,7 +23,7 @@ export interface KeyboardShortcut {
 }
 
 export function useKeyboardShortcuts(
-  contexts: ShortcutContext[],
+  contexts: string[],
   conditions: ShortcutConditions,
   handlers: ShortcutHandlers,
   activeSubContext?: string,

@@ -94,8 +94,8 @@ import {
   FilterDateRange,
   shortDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
 
@@ -156,7 +156,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     limit: 15,
   });
 
-  useFacilityShortcuts("charge-items-table");
+  useShortcutSubContext();
   const practitionerFilterEnabled =
     resourceType === SchedulableResourceType.Practitioner && !resourceId;
 

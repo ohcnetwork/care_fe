@@ -61,6 +61,7 @@ export function QuickAction({
   shortcut,
   href,
   actionId,
+  onClick,
   ...props
 }: {
   icon: React.ReactNode;
@@ -68,10 +69,9 @@ export function QuickAction({
   shortcut?: string;
   href?: string;
   props?: React.ComponentProps<"div">;
+  onClick?: () => void;
   actionId?: string;
 }) {
-  console.log("shortcut", shortcut);
-  console.log("actionId", actionId);
   const content = (
     <>
       <div className="relative flex md:py-3 py-0 rounded-t-md rounded-b-lg md:bg-gray-100 bg-white">
@@ -100,7 +100,7 @@ export function QuickAction({
   }
 
   return (
-    <button className={className} {...props}>
+    <button className={className} {...props} onClick={onClick}>
       {content}
     </button>
   );
