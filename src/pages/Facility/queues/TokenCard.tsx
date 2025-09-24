@@ -73,7 +73,7 @@ const TokenCard = ({
 
       <div className="relative z-10">
         <div className="flex flex-row items-start justify-between gap-4">
-          <div className="pt-2 items-start justify-start gap-4">
+          <div className="pt-2 items-start gap-4">
             <div>
               {token.patient && (
                 <div className="flex-1 min-w-0">
@@ -167,6 +167,7 @@ const TokenCard = ({
             <div className="flex items-center justify-between">
               <Button
                 variant="link"
+                asChild
                 className="underline font-semibold text-base capitalize text-gray-950"
               >
                 <Link

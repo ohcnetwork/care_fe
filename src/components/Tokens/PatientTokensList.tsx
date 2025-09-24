@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -16,15 +15,16 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { cn } from "@/lib/utils";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
 import { FacilityRead } from "@/types/facility/facility";
+import { formatScheduleResourceName } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import {
   renderTokenNumber,
   TOKEN_STATUS_COLORS,
-  TokenRead,
   TokenRetrieve,
 } from "@/types/tokens/token/token";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 
 interface PatientTokensListProps {
   patientId: string;
@@ -129,7 +129,7 @@ export default function PatientTokensList({
         </Card>
       )}
 
-      {tokens.map((token: TokenRead) => {
+      {tokens.map((token) => {
         const isExpanded = expandedTokens.has(token.id);
 
         return (
@@ -147,46 +147,36 @@ export default function PatientTokensList({
               <CollapsibleTrigger asChild>
                 <CardHeader
                   className={cn(
-                    "p-2 px-4 cursor-pointer rounded-md hover:bg-gray-50 transition-colors ",
+                    "p-2 px-4 cursor-pointer rounded-md hover:bg-gray-50 transition-colors",
                     isExpanded && "rounded-none",
                   )}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="space-y-1 w-full">
+                      <div className="flex items-center justify-between">
+                        <div className="flex justify-between gap-2">
+                          <div className="text-sm font-semibold flex justify-between gap-2">
                             {renderTokenNumber(token)}
-                          </span>
-                          <Badge
-                            variant={TOKEN_STATUS_COLORS[token.status]}
-                            className="px-1.5 rounded-sm"
-                          >
-                            {t(token.status.toLowerCase())}
-                          </Badge>
+                          </div>
                         </div>
+                      </div>
+                      <div className="flex justify-between items-center">
                         <p className="text-sm text-gray-600">
-                          {token.queue.name}
-                          {token.sub_queue && ` • ${token.sub_queue.name}`}
+                          {formatScheduleResourceName(token)}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">
-                        {new Date(token.queue.date).toLocaleDateString(
-                          "en-GB",
-                          {
-                            day: "2-digit",
-                            month: "short",
-                          },
-                        )}
-                      </span>
-                      {isExpanded ? (
-                        <ChevronsDownUp className="size-4" />
-                      ) : (
-                        <ChevronsUpDown className="size-4" />
-                      )}
-                    </div>
+                    <Badge
+                      variant={TOKEN_STATUS_COLORS[token.status]}
+                      className="px-1.5 rounded-sm ml-2"
+                    >
+                      {t(token.status.toLowerCase())}
+                    </Badge>
+                    {isExpanded ? (
+                      <ChevronsDownUp className="size-4 shrink-0" />
+                    ) : (
+                      <ChevronsUpDown className="size-4 shrink-0" />
+                    )}
                   </div>
                 </CardHeader>
               </CollapsibleTrigger>
