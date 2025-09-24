@@ -18,6 +18,7 @@ interface SupplyDeliveryListProps {
   selectedDelivery?: SupplyDeliveryRead;
   onSelectDelivery: (DeliveryId: string) => void;
   onSetNextDeliveryUrl?: (url: string) => void;
+  mode: "internal" | "external";
 }
 
 export default function SupplyDeliveryList({
@@ -26,6 +27,7 @@ export default function SupplyDeliveryList({
   selectedDelivery,
   onSelectDelivery,
   onSetNextDeliveryUrl,
+  mode,
 }: SupplyDeliveryListProps) {
   const { t } = useTranslation();
 
@@ -36,14 +38,20 @@ export default function SupplyDeliveryList({
         deliver_to: locationId,
         facility: facilityId,
         status: "in_progress",
-        supplier: selectedDelivery?.supplier?.id,
         destination: locationId,
         ordering: "-created_date",
-        origin_isnull: true,
-        limit: 100,
+        ...(mode === "external"
+          ? {
+              origin_isnull: true,
+              supplier: selectedDelivery?.supplier?.id,
+            }
+          : {
+              origin: selectedDelivery?.origin?.id,
+            }),
+        limit: 200,
       },
     }),
-    enabled: !!facilityId && !!locationId,
+    enabled: !!facilityId && !!locationId && !!selectedDelivery,
   });
 
   // Set next/previous delivery URL when list changes
@@ -63,7 +71,9 @@ export default function SupplyDeliveryList({
 
       onSetNextDeliveryUrl(
         nextDelivery
-          ? `/facility/${facilityId}/locations/${locationId}/external_supply/deliveries/${nextDelivery.id}`
+          ? mode === "external"
+            ? `/facility/${facilityId}/locations/${locationId}/external_supply/deliveries/${nextDelivery.id}`
+            : `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_receive/${nextDelivery.id}`
           : "",
       );
     }
@@ -85,8 +95,12 @@ export default function SupplyDeliveryList({
     <ScrollArea className="h-[calc(100vh-4rem)] border-r">
       <div className="space-y-1 p-2">
         <span className="font-semibold">
-          <span className="text-gray-600 font-medium">{t("supplier")}:</span>{" "}
-          {selectedDelivery?.supplier?.name}
+          <span className="text-gray-600 font-medium">
+            {t(mode === "external" ? "supplier" : "dispatched_from")}:
+          </span>{" "}
+          {mode === "external"
+            ? selectedDelivery?.supplier?.name
+            : selectedDelivery?.origin?.name}
         </span>
         {deliveries.results.map((delivery) => {
           const isSelected = selectedDelivery?.id === delivery.id;
@@ -109,7 +123,10 @@ export default function SupplyDeliveryList({
                   <div className="flex items-start gap-2">
                     <div className="flex flex-col items-start">
                       <span className="text-base font-medium">
-                        {delivery.supplied_item?.product_knowledge.name}
+                        {mode === "external"
+                          ? delivery.supplied_item?.product_knowledge.name
+                          : delivery.supplied_inventory_item?.product
+                              .product_knowledge.name}
                       </span>
                       <span className="text-sm text-gray-700">
                         {formatDateTime(
