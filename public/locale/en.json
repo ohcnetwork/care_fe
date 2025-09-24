@@ -5074,6 +5074,7 @@
   "unassign": "Unassign",
   "unavailable": "Unavailable",
   "unconfirmed": "Unconfirmed",
+  "unfulfilled": "Unfulfilled",
   "uniform": "Uniform",
   "unique": "Unique",
   "unique_help": "If enabled, this identifier must be unique across all patients.",
