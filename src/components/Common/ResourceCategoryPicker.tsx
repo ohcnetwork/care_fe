@@ -36,6 +36,7 @@ import {
   ResourceCategoryParent,
   ResourceCategoryRead,
   ResourceCategoryResourceType,
+  ResourceCategorySubType,
 } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 
@@ -65,6 +66,7 @@ import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryA
 interface ResourceCategoryPickerProps {
   facilityId: string;
   resourceType: ResourceCategoryResourceType;
+  resourceSubType?: ResourceCategorySubType;
   value?: string; // category slug
   onValueChange: (categorySlug: string | undefined) => void;
   placeholder?: string;
@@ -80,6 +82,7 @@ interface CategoryBreadcrumb {
 export function ResourceCategoryPicker({
   facilityId,
   resourceType,
+  resourceSubType,
   value,
   onValueChange,
   placeholder,
@@ -105,6 +108,7 @@ export function ResourceCategoryPicker({
       pathParams: { facilityId },
       queryParams: {
         resource_type: resourceType,
+        resource_sub_type: resourceSubType,
         parent: currentParent || "",
         ordering: "title",
       },
