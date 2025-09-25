@@ -1,4 +1,5 @@
 import { Code } from "@/types/base/code/code";
+import { SlugConfig } from "@/types/base/slug/slugConfig";
 import { UserReadMinimal } from "@/types/user/user";
 
 export enum SpecimenDefinitionStatus {
@@ -93,10 +94,12 @@ export interface SpecimenDefinition {
   type_collected: Code;
   patient_preparation?: Code[];
   collection?: Code;
+  slug_config: SlugConfig;
 }
 
 export interface SpecimenDefinitionCreate
-  extends Omit<SpecimenDefinition, "id" | "facility"> {
+  extends Omit<SpecimenDefinition, "id" | "facility" | "slug_config" | "slug"> {
+  slug_value: string;
   type_tested?: TypeTestedSpec;
 }
 

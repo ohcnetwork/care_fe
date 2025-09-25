@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -534,19 +535,19 @@ export default function ReportBuilder({
                       </TabsTrigger>
                     </TabsList>
                     {hasLayoutErrors && (
-                      <span className="text-red-500 bg-red-100 p-2 rounded-md text-sm">
+                      <Badge variant="destructive" size="sm">
                         {t("layout_error")}
-                      </span>
+                      </Badge>
                     )}
                     {hasHeaderErrors && (
-                      <span className="text-red-500 bg-red-100 p-2 rounded-md text-sm">
+                      <Badge variant="destructive" size="sm">
                         {t("header_error")}
-                      </span>
+                      </Badge>
                     )}
                     {hasSectionsErrors && (
-                      <span className="text-red-500 bg-red-100 p-2 rounded-md text-sm">
+                      <Badge variant="destructive" size="sm">
                         {t("sections_error")}
-                      </span>
+                      </Badge>
                     )}
                     <TabsContent value="layout">
                       <LayoutBuilder form={form} />

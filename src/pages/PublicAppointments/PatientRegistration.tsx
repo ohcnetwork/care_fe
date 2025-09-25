@@ -60,7 +60,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         .refine(validateName, t("min_char_length_error", { min_length: 3 })),
       gender: z.enum(GENDERS, { required_error: t("gender_is_required") }),
       address: z.string().min(1, t("field_required")),
-      age: z.number().optional(),
+      age: z.string().optional(),
       date_of_birth: z.date().or(z.string()).optional(),
       pincode: validators().pincode,
       geo_organization: z.string().min(1, t("organization_required")),
@@ -154,7 +154,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         data.ageInputType === "date_of_birth"
           ? dateQueryString(data.date_of_birth)
           : undefined,
-      age: data.ageInputType === "age" ? data.age : undefined,
+      age: data.ageInputType === "age" ? Number(data.age) : undefined,
       pincode: data.pincode,
       geo_organization: data.geo_organization,
     };
@@ -206,7 +206,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormItem className="flex flex-col">
                     <FormLabel aria-required>{t("patient_name")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder={t("type_patient_name")} />
+                      <Input {...field} placeholder={t("type_name")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -277,7 +277,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                             onChange={(date) =>
                               field.onChange(dateQueryString(date))
                             }
-                            id="dob"
                           />
                         </FormControl>
                         <FormMessage />
@@ -299,12 +298,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                             inputMode="numeric"
                             pattern="[0-9]*"
                             {...field}
-                            onChange={(e) => {
-                              const value = e.target.value.trim();
-                              field.onChange(
-                                value === "" ? undefined : Number(value),
-                              );
-                            }}
                             placeholder={t("type_patient_age")}
                           />
                         </FormControl>

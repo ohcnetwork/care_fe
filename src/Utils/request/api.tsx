@@ -1,8 +1,10 @@
 import { PaginatedResponse } from "@/Utils/request/types";
-import { BatchRequestBody } from "@/types/base/batch/batch";
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
 import { PlugConfig } from "@/types/plugConfig";
-import { BatchSubmissionResult } from "@/types/questionnaire/batch";
 import { UserReadMinimal } from "@/types/user/user";
 
 /**
@@ -60,7 +62,7 @@ const routes = {
     path: "/api/v1/batch_requests/",
     method: "POST",
     TRes: Type<{
-      results: BatchSubmissionResult[];
+      results: BatchRequestResponse[];
     }>(),
     TBody: Type<BatchRequestBody>(),
   },
