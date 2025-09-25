@@ -1,7 +1,7 @@
 import { Suspense, lazy } from "react";
 
 import Loading from "@/components/Common/Loading";
-import { PrintAllQuestionnaireResponses } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireQuestionnaireResponses";
+import { PrintAllQuestionnaireResponses } from "@/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses";
 import { PrintQuestionnaireResponse } from "@/components/Facility/ConsultationDetails/PrintQuestionnaireResponse";
 import QuestionnaireResponseView from "@/components/Facility/ConsultationDetails/QuestionnaireResponseView";
 import { PrintMedicationAdministration } from "@/components/Medicine/MedicationAdministration/PrintMedicationAdministration";

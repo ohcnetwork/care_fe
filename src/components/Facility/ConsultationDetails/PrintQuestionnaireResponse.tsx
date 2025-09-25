@@ -7,7 +7,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import {
   EncounterDetails,
   ResponseCard,
-} from "@/components/Facility/ConsultationDetails/PrintQuestionnaireQuestionnaireResponses";
+} from "@/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses";
 
 import query from "@/Utils/request/query";
 import encounterApi from "@/types/emr/encounter/encounterApi";
