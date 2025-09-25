@@ -37,4 +37,11 @@ export default () => ({
     .positive()
     .min(100000, t("pincode_must_be_6_digits"))
     .max(999999, t("pincode_must_be_6_digits")),
+
+  age: z
+    .number()
+    .int()
+    .positive()
+    .min(1, t("age_must_be_positive"))
+    .max(120, t("age_must_be_below_120")),
 });

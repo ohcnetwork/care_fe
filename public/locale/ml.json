@@ -1056,8 +1056,6 @@
   "invalid_password": "പാസ്‌വേഡ് ആവശ്യകതകൾ പാലിക്കുന്നില്ല",
   "invalid_password_reset_link": "അസാധുവായ പാസ്‌വേഡ് പുനഃസജ്ജീകരണ ലിങ്ക്",
   "invalid_patient_data": "രോഗിയുടെ ഡാറ്റ അസാധുവാണ്",
-  "invalid_pincode": "പിൻകോഡ് അസാധുവാണ്",
-  "invalid_pincode_msg": "ദയവായി സാധുവായ പിൻകോഡ് നൽകുക",
   "invalid_reset": "അസാധുവായ റീസെറ്റ്",
   "invalid_url": "ദയവായി ഒരു സാധുവായ url നൽകുക",
   "invalid_url_http_https": "URL http:// അല്ലെങ്കിൽ https:// എന്നതിൽ തുടങ്ങണം",

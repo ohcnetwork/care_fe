@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
+import { format, isSameDay, parseISO } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,39 +28,29 @@ import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
 import { formatTimeShort } from "@/Utils/utils";
-import { useIsUserSchedulableResource } from "@/pages/Scheduling/useIsUserSchedulableResource";
-import { ScheduleException } from "@/types/scheduling/schedule";
+import {
+  SchedulableResourceType,
+  ScheduleException,
+} from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface Props {
   items?: ScheduleException[];
   facilityId: string;
-  userId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
 }
 
 export default function ScheduleExceptions({
   items,
   facilityId,
-  userId,
+  resourceType,
+  resourceId,
 }: Props) {
   const { t } = useTranslation();
 
-  const { data: isSchedulableResource } = useIsUserSchedulableResource(
-    facilityId,
-    userId,
-  );
-
   if (items == null) {
     return <Loading />;
-  }
-
-  if (!isSchedulableResource) {
-    return (
-      <div className="flex flex-col items-center text-center text-gray-500 py-16">
-        <CareIcon icon="l-calendar-slash" className="size-10 mb-3" />
-        <p>{t("exception_for_non_schedulable_resource_warning")}</p>
-      </div>
-    );
   }
 
   if (items.length === 0) {
@@ -79,7 +69,8 @@ export default function ScheduleExceptions({
           <ScheduleExceptionItem
             {...exception}
             facilityId={facilityId}
-            userId={userId}
+            resourceType={resourceType}
+            resourceId={resourceId}
           />
         </li>
       ))}
@@ -88,7 +79,11 @@ export default function ScheduleExceptions({
 }
 
 const ScheduleExceptionItem = (
-  props: ScheduleException & { facilityId: string; userId: string },
+  props: ScheduleException & {
+    facilityId: string;
+    resourceId: string;
+    resourceType: SchedulableResourceType;
+  },
 ) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -105,13 +100,15 @@ const ScheduleExceptionItem = (
       toast.success(t("exception_deleted"));
       queryClient.invalidateQueries({
         queryKey: [
-          "user-schedule-exceptions",
-          { facilityId: props.facilityId, userId: props.userId },
+          "scheduleExceptions",
+          props.facilityId,
+          { resourceType: props.resourceType, resourceId: props.resourceId },
         ],
       });
     },
   });
-
+  const fromDate = parseISO(props.valid_from);
+  const toDate = parseISO(props.valid_to);
   return (
     <div
       className={cn(
@@ -131,14 +128,25 @@ const ScheduleExceptionItem = (
                 {formatTimeShort(props.start_time)} -{" "}
                 {formatTimeShort(props.end_time)}
               </span>
-              <span> {t("from")} </span>
-              <span className="font-medium">
-                {format(parseISO(props.valid_from), "EEE, dd MMM yyyy")}
-              </span>
-              <span> {t("to")} </span>
-              <span className="font-medium">
-                {format(parseISO(props.valid_to), "EEE, dd MMM yyyy")}
-              </span>
+              {isSameDay(fromDate, toDate) ? (
+                <>
+                  <span> {t("on")} </span>
+                  <span className="font-medium">
+                    {format(fromDate, "EEE, dd MMM yyyy")}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span> {t("from")} </span>
+                  <span className="font-medium">
+                    {format(fromDate, "EEE, dd MMM yyyy")}
+                  </span>
+                  <span> {t("to")} </span>
+                  <span className="font-medium">
+                    {format(toDate, "EEE, dd MMM yyyy")}
+                  </span>
+                </>
+              )}
             </span>
           </div>
         </div>

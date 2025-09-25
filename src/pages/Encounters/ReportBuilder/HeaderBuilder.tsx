@@ -21,13 +21,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Dialog } from "@/components/ui/dialog";
 import {
   FormControl,
   FormField,
@@ -76,9 +76,11 @@ const AlignmentInput = ({
         <FormItem>
           <FormLabel>{t("alignment")}</FormLabel>
           <Select value={field.value} onValueChange={field.onChange}>
-            <SelectTrigger>
-              <SelectValue placeholder={t("alignment")} />
-            </SelectTrigger>
+            <FormControl>
+              <SelectTrigger ref={field.ref}>
+                <SelectValue placeholder={t("alignment")} />
+              </SelectTrigger>
+            </FormControl>
             <SelectContent>
               {HEADER_ALIGNMENT_OPTIONS.map((option) => (
                 <SelectItem key={option.id} value={option.id}>

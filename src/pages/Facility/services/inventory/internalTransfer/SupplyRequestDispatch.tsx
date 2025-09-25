@@ -86,7 +86,8 @@ const dispatchFormSchema = z.object({
 interface Props {
   facilityId: string;
   locationId: string;
-  supplyRequestId: string;
+  supplyRequestId?: string;
+  supplyDeliveryId?: string;
 }
 
 type FormValues = z.infer<typeof dispatchFormSchema>;
@@ -95,6 +96,7 @@ export default function SupplyRequestDispatch({
   facilityId,
   locationId,
   supplyRequestId,
+  supplyDeliveryId,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -146,8 +148,9 @@ export default function SupplyRequestDispatch({
   const { data: supplyRequest } = useQuery({
     queryKey: ["supplyRequest", supplyRequestId],
     queryFn: query(supplyRequestApi.retrieveSupplyRequest, {
-      pathParams: { supplyRequestId },
+      pathParams: { supplyRequestId: supplyRequestId! },
     }),
+    enabled: Boolean(supplyRequestId),
   });
 
   // Fetch inventory items for the requested product
@@ -170,18 +173,35 @@ export default function SupplyRequestDispatch({
         origin: locationId,
       },
     }),
+    enabled: Boolean(supplyRequestId),
   });
 
-  const deliveries = deliveriesResponse?.results || [];
+  // Fetch delivery for this request
+  const { data: deliveryResponse } = useQuery({
+    queryKey: ["supplyDelivery", supplyDeliveryId],
+    queryFn: query(supplyDeliveryApi.retrieveSupplyDelivery, {
+      pathParams: { supplyDeliveryId: supplyDeliveryId! },
+    }),
+    enabled: Boolean(supplyDeliveryId && !supplyRequestId),
+  });
 
-  const alreadyDispatchedQuantity = deliveries.reduce(
-    (sum, delivery) =>
-      delivery.status !== SupplyDeliveryStatus.entered_in_error &&
-      delivery.status !== SupplyDeliveryStatus.abandoned
-        ? sum + delivery.supplied_item_quantity
-        : sum,
-    0,
-  );
+  const deliveries = deliveriesResponse?.results
+    ? deliveriesResponse?.results
+    : deliveryResponse
+      ? Array.of(deliveryResponse)
+      : [];
+
+  const alreadyDispatchedQuantity =
+    deliveries.length > 0
+      ? deliveries.reduce(
+          (sum, delivery) =>
+            delivery.status !== SupplyDeliveryStatus.entered_in_error &&
+            delivery.status !== SupplyDeliveryStatus.abandoned
+              ? sum + delivery.supplied_item_quantity
+              : sum,
+          0,
+        )
+      : 0;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(dispatchFormSchema),
@@ -355,8 +375,6 @@ export default function SupplyRequestDispatch({
     }
   }
 
-  if (!supplyRequest) return null;
-
   return (
     <div className="space-y-2 container mx-auto max-w-5xl">
       {/* Header */}
@@ -386,128 +404,137 @@ export default function SupplyRequestDispatch({
                 [SupplyRequestStatus.cancelled]: "SRD__action_cancelled",
                 [SupplyRequestStatus.draft]: "SRD__action_draft",
                 [SupplyRequestStatus.suspended]: "SRD__action_suspended",
-              }[supplyRequest.status],
+              }[supplyRequest?.status || SupplyRequestStatus.active],
             ),
-            from: supplyRequest.deliver_from?.name,
-            to: supplyRequest.deliver_to.name,
+            from:
+              supplyRequest?.deliver_from?.name ||
+              deliveryResponse?.origin?.name,
+            to:
+              supplyRequest?.deliver_to.name ||
+              deliveryResponse?.destination?.name,
           }}
         />
-        {supplyRequest.status === SupplyRequestStatus.active &&
+        {supplyRequest?.status === SupplyRequestStatus.active &&
           ` ${t("SRD__page_description_end")}`}
       </div>
 
       {/* Summary */}
-      <div className="flex items-center rounded-lg shadow-sm bg-white p-4 mb-0">
-        <div className="grid grid-cols-5 gap-4 grow">
-          <div>
-            <div className="text-xs font-medium">
-              {t("SRD__item_to_dispatch")}
+      {supplyRequest && (
+        <div className="flex items-center rounded-lg shadow-sm bg-white p-4 mb-0">
+          <div className="grid grid-cols-5 gap-4 grow">
+            <div>
+              <div className="text-xs font-medium">
+                {t("SRD__item_to_dispatch")}
+              </div>
+              <div className="text-sm font-semibold text-gray-950">
+                {supplyRequest.item.name}
+              </div>
             </div>
+            <div>
+              <div className="text-xs font-medium">
+                {t("SRD__qty_to_dispatch")}
+              </div>
+              <div className="text-sm font-semibold text-gray-950">
+                {supplyRequest.quantity}{" "}
+                {supplyRequest.item.base_unit.display || t("units")}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs font-medium">{t("deliver_to")}</div>
+              <div className="text-sm font-semibold text-gray-950">
+                {supplyRequest.deliver_to.name}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs font-medium">{t("priority")}</div>
+              <Badge
+                variant={SUPPLY_REQUEST_PRIORITY_COLORS[supplyRequest.priority]}
+              >
+                {t(supplyRequest.priority)}
+              </Badge>
+            </div>
+            <div>
+              <div className="text-xs font-medium">{t("status")}</div>
+              <Badge
+                variant={SUPPLY_REQUEST_STATUS_COLORS[supplyRequest.status]}
+              >
+                {t(supplyRequest.status)}
+              </Badge>
+            </div>
+          </div>
+          {deliveries.length > 0 &&
+            supplyRequest.status === SupplyRequestStatus.active && (
+              <div className="ml-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setConfirmDialog({
+                          open: true,
+                          title: t("mark_as_fully_dispatched"),
+                          description: (
+                            <>
+                              <Trans
+                                i18nKey="confirm_action_description"
+                                values={{
+                                  action: t(
+                                    "mark_as_fully_dispatched",
+                                  ).toLowerCase(),
+                                }}
+                                components={{
+                                  1: <strong className="text-gray-900" />,
+                                }}
+                              />
+                              <p className="mt-2">
+                                {t("this_action_cannot_be_undone")}
+                              </p>
+                            </>
+                          ),
+                          onConfirm: markRequestAsFulfilled,
+                          variant: "primary",
+                          confirmText: isUpdatingRequest
+                            ? t("updating")
+                            : t("confirm"),
+                          cancelText: t("cancel"),
+                          disabled: isUpdatingRequest,
+                        })
+                      }
+                    >
+                      {t("mark_as_fully_dispatched")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+        </div>
+      )}
+      {supplyRequest && (
+        <div className="grid grid-cols-5 gap-4 rounded-b-lg mx-4 p-3 bg-gray-100 border border-t-0 border-gray-200 mt-0.5">
+          <div>
+            <div className="text-xs font-medium">{t("category")}</div>
             <div className="text-sm font-semibold text-gray-950">
-              {supplyRequest.item.name}
+              {t(supplyRequest.category)}
             </div>
           </div>
           <div>
-            <div className="text-xs font-medium">
-              {t("SRD__qty_to_dispatch")}
-            </div>
+            <div className="text-xs font-medium">{t("intent")}</div>
             <div className="text-sm font-semibold text-gray-950">
-              {supplyRequest.quantity}{" "}
-              {supplyRequest.item.definitional?.dosage_form?.display ||
-                t("units")}
+              {t(supplyRequest.intent)}
             </div>
           </div>
           <div>
-            <div className="text-xs font-medium">{t("deliver_to")}</div>
+            <div className="text-xs font-medium">{t("reason")}</div>
             <div className="text-sm font-semibold text-gray-950">
-              {supplyRequest.deliver_to.name}
+              {t(supplyRequest.reason)}
             </div>
           </div>
-          <div>
-            <div className="text-xs font-medium">{t("priority")}</div>
-            <Badge
-              variant={SUPPLY_REQUEST_PRIORITY_COLORS[supplyRequest.priority]}
-            >
-              {t(supplyRequest.priority)}
-            </Badge>
-          </div>
-          <div>
-            <div className="text-xs font-medium">{t("status")}</div>
-            <Badge variant={SUPPLY_REQUEST_STATUS_COLORS[supplyRequest.status]}>
-              {t(supplyRequest.status)}
-            </Badge>
-          </div>
         </div>
-        {deliveries.length > 0 &&
-          supplyRequest.status === SupplyRequestStatus.active && (
-            <div className="ml-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <MoreVertical className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() =>
-                      setConfirmDialog({
-                        open: true,
-                        title: t("mark_as_fully_dispatched"),
-                        description: (
-                          <>
-                            <Trans
-                              i18nKey="confirm_action_description"
-                              values={{
-                                action: t(
-                                  "mark_as_fully_dispatched",
-                                ).toLowerCase(),
-                              }}
-                              components={{
-                                1: <strong className="text-gray-900" />,
-                              }}
-                            />
-                            <p className="mt-2">
-                              {t("this_action_cannot_be_undone")}
-                            </p>
-                          </>
-                        ),
-                        onConfirm: markRequestAsFulfilled,
-                        variant: "primary",
-                        confirmText: isUpdatingRequest
-                          ? t("updating")
-                          : t("confirm"),
-                        cancelText: t("cancel"),
-                        disabled: isUpdatingRequest,
-                      })
-                    }
-                  >
-                    {t("mark_as_fully_dispatched")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-      </div>
-      <div className="grid grid-cols-5 gap-4 rounded-b-lg mx-4 p-3 bg-gray-100 border border-t-0 border-gray-200 mt-0.5">
-        <div>
-          <div className="text-xs font-medium">{t("category")}</div>
-          <div className="text-sm font-semibold text-gray-950">
-            {t(supplyRequest.category)}
-          </div>
-        </div>
-        <div>
-          <div className="text-xs font-medium">{t("intent")}</div>
-          <div className="text-sm font-semibold text-gray-950">
-            {t(supplyRequest.intent)}
-          </div>
-        </div>
-        <div>
-          <div className="text-xs font-medium">{t("reason")}</div>
-          <div className="text-sm font-semibold text-gray-950">
-            {t(supplyRequest.reason)}
-          </div>
-        </div>
-      </div>
+      )}
       {/* Existing Deliveries */}
       {deliveries.length > 0 && (
         <div className="rounded-lg border bg-white mx-4 mb-4">
@@ -719,7 +746,7 @@ export default function SupplyRequestDispatch({
       </Dialog>
 
       {/* Main Form */}
-      {supplyRequest.status === SupplyRequestStatus.active && (
+      {supplyRequest && supplyRequest.status === SupplyRequestStatus.active && (
         <div className="rounded-lg border bg-gray-100 mx-4 mt-6">
           <Form {...form}>
             <form

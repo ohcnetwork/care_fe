@@ -77,8 +77,17 @@ describe("All combination of questionnaire submissions", () => {
     cy.visit("/");
     facilityCreation.selectFirstRandomFacility();
     cy.getFacilityIdAndNavigate("encounters/patients");
+    cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounters");
+    cy.get("button").contains("Filter").click();
+    cy.get('[role="menuitem"]').contains("Status").click();
+    cy.get("div").contains("In Progress").click();
+    cy.get("body").type("{esc}");
+    cy.wait("@getEncounters").its("response.statusCode").should("eq", 200);
     cy.get("button").contains("View Encounter").first().click();
-    cy.get("button").contains("Add Questionnaire").click();
+    cy.get("button").contains("Update Details").click();
+    cy.get("div[role='dialog']").within(() => {
+      cy.get('[data-cy="add-questionnaire-button"]').click();
+    });
     cy.typeAndSelectOption(
       "input[placeholder='Search Questionnaires']",
       questionnaireName,
@@ -87,11 +96,12 @@ describe("All combination of questionnaire submissions", () => {
 
     // Add allergy information to the questionnaire
     cy.get("button").contains("Allergy").click();
-    cy.typeAndSelectOption(
-      "input[placeholder='Add Allergy']",
-      allergyName,
-      false,
-    );
+    cy.get(
+      "input[placeholder='Add Allergy'], input[placeholder='Add another Allergy']",
+    ).then(($input) => {
+      cy.wrap($input).type(allergyName);
+      cy.get("[cmdk-item]").contains(allergyName).click();
+    });
     cy.get("button").contains("Done").click();
 
     // Submit the questionnaire and verify success
@@ -156,7 +166,10 @@ describe("All combination of questionnaire submissions", () => {
     facilityCreation.selectFirstRandomFacility();
     cy.getFacilityIdAndNavigate("encounters/patients");
     cy.get("button").contains("View Encounter").first().click();
-    cy.get("svg.lucide-external-link").filter(":visible").first().click();
+    cy.get("[data-slot='patient-info-hover-card-trigger']")
+      .filter(":visible")
+      .click();
+    cy.get("a").contains("View Profile").click();
     cy.get("[role='tablist']").contains("Updates").click();
     cy.get("a").contains("Add Patient Updates").click();
     cy.get("button").contains("Add Questionnaire").click();

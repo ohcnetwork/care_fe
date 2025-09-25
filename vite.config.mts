@@ -7,7 +7,6 @@ import DOMPurify from "dompurify";
 import fs from "fs";
 import { JSDOM } from "jsdom";
 import { marked } from "marked";
-import { createRequire } from "node:module";
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import checker from "vite-plugin-checker";
@@ -17,14 +16,6 @@ import { z } from "zod";
 
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
-
-const pdfWorkerPath = path.join(
-  path.dirname(
-    createRequire(import.meta.url).resolve("pdfjs-dist/package.json"),
-  ),
-  "build",
-  "pdf.worker.min.mjs",
-);
 
 // Convert goal description markdown to HTML
 function getDescriptionHtml(description: string) {
@@ -197,6 +188,8 @@ export default defineConfig(({ mode }) => {
           REACT_SENTRY_DSN: z.string().url().optional(),
           REACT_SENTRY_ENVIRONMENT: z.string().optional(),
 
+          REACT_DEFAULT_PAYMENT_TERMS: z.string().optional(),
+
           REACT_CDN_URLS: z
             .string()
             .optional()
@@ -208,7 +201,7 @@ export default defineConfig(({ mode }) => {
       viteStaticCopy({
         targets: [
           {
-            src: pdfWorkerPath,
+            src: "node_modules/pdfjs-dist/build/pdf.worker.min.mjs",
             dest: "",
           },
         ],
@@ -241,7 +234,7 @@ export default defineConfig(({ mode }) => {
           type: "module",
         },
         injectManifest: {
-          maximumFileSizeToCacheInBytes: 7000000,
+          maximumFileSizeToCacheInBytes: 8000000,
         },
         manifest: {
           name: "Care",

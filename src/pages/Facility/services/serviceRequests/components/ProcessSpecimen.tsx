@@ -29,6 +29,7 @@ interface ProcessSpecimenProps {
   onUpdateProcessing: (index: number, processing: ProcessingSpec) => void;
   existingProcessing?: ProcessingReadSpec[];
   diagnosticReports?: DiagnosticReportRead[];
+  disableEdit: boolean;
 }
 
 export function ProcessSpecimen({
@@ -36,6 +37,7 @@ export function ProcessSpecimen({
   onUpdateProcessing,
   existingProcessing = [],
   diagnosticReports = [],
+  disableEdit,
 }: ProcessSpecimenProps) {
   const [noteDialog, setNoteDialog] = useState<{
     open: boolean;
@@ -156,6 +158,7 @@ export function ProcessSpecimen({
                 onClick={(e) =>
                   handleOpenNote(e, index, process.description, process.method)
                 }
+                disabled={disableEdit}
               >
                 <Edit className="h-4 w-4" />
               </Button>
@@ -172,6 +175,7 @@ export function ProcessSpecimen({
                 placeholder={t("process_specimen__valusetselect_placeholder")}
                 onSelect={handleSelectStep}
                 value={null}
+                disabled={disableEdit}
               />
             </div>
           )}
