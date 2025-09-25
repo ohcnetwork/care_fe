@@ -8,14 +8,16 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import { Plus } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { PERMISSION_CREATE_PATIENT } from "@/common/Permissions";
-import { usePermissions } from "@/context/PermissionContext";
-import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
-import { formatKeyboardShortcut } from "@/Utils/keyboardShortcutUtils";
+import actionsJson from "@/config/keyboardShortcuts.json";
+import { useShortcuts } from "@/context/ShortcutContext";
+import {
+  formatKeyboardShortcut,
+  shortcutActionHandler,
+} from "@/Utils/keyboardShortcutUtils";
+import { expandShortcutContext } from "@/Utils/shortcutUtils";
 
 interface ActionItem {
   id: string;
@@ -31,60 +33,67 @@ interface ActionGroup {
   items: ActionItem[];
 }
 
-interface FacilityCommandDialogProps {
+interface ShortcutCommandDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   trigger?: React.ReactNode;
 }
 
-export function FacilityCommandDialog({
+export function ShortcutCommandDialog({
   open,
   onOpenChange,
   trigger,
-}: FacilityCommandDialogProps) {
+}: ShortcutCommandDialogProps) {
   const { t } = useTranslation();
-  const { facility } = useCurrentFacilitySilently();
-  const { hasPermission } = usePermissions();
+  const { subContext } = useShortcuts();
 
-  const facilityActions: ActionGroup[] = useMemo(
-    () => [
-      {
-        group: t("facility_actions"),
-        items: [
-          {
-            id: "register-patient",
-            label: t("register_new_patient"),
-            shortcut: formatKeyboardShortcut("shift+p"),
-            icon: <Plus />,
-            permission: PERMISSION_CREATE_PATIENT,
-          },
-        ],
-      },
-    ],
-    [t],
-  );
+  const facilityActions: ActionGroup[] = useMemo(() => {
+    const allContexts = expandShortcutContext(subContext || "");
+    const contextsToSearch = [...allContexts, "global"];
+
+    const actionGroups: ActionGroup[] = [];
+
+    contextsToSearch.forEach((context) => {
+      const contextActions = actionsJson[context as keyof typeof actionsJson];
+
+      if (!contextActions || contextActions.length === 0) return;
+
+      const items: ActionItem[] = contextActions
+        .filter((action) => {
+          if (action.action === "show-shortcuts") {
+            return false;
+          }
+
+          // Only include actions if the corresponding element exists on the page
+          const element = document.querySelector(
+            `[data-shortcut-id='${action.action}']`,
+          );
+          return element !== null;
+        })
+        .map((action) => ({
+          id: action.action,
+          label: action.description,
+          shortcut: formatKeyboardShortcut(action.key),
+        }));
+
+      if (items.length > 0) {
+        actionGroups.push({
+          group: context.replace(/:/g, " ").toUpperCase(),
+          items,
+        });
+      }
+    });
+
+    return actionGroups;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subContext, open]);
 
   const handleSelect = useCallback(
     (actionId: string) => {
-      document.dispatchEvent(
-        new CustomEvent("trigger-facility-shortcut", {
-          detail: { actionId },
-        }),
-      );
+      shortcutActionHandler(actionId)();
       onOpenChange(false);
     },
     [onOpenChange],
-  );
-
-  const isActionDisabled = useCallback(
-    (action: ActionItem): boolean => {
-      if (!facility) return true;
-      if (action.permission) {
-        return !hasPermission(action.permission, facility.permissions);
-      }
-      return false;
-    },
-    [facility, hasPermission],
   );
 
   return (
@@ -113,9 +122,7 @@ export function FacilityCommandDialog({
                     onSelect={() => handleSelect(action.id)}
                     className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
                     autoFocus={false}
-                    disabled={isActionDisabled(action)}
                   >
-                    {action.icon}
                     <span className="flex-1">{action.label}</span>
                     {action.shortcut && (
                       <CommandShortcut className="ml-2 text-xs text-gray-500 bg-white border border-gray-200 shadow-xs px-1.5 py-0.5 rounded">

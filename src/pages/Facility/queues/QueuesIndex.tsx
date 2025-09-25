@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { MoreVertical, Pencil, Plus, Settings, Square, X } from "lucide-react";
+import { MoreVertical, Pencil, Plus, Settings, Square } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -74,7 +74,7 @@ function QueueRow({
   const { t } = useTranslation();
   const queueLink =
     resourceType === SchedulableResourceType.Practitioner
-      ? `/facility/${facilityId}/queues/${queue.id}/${resourceType}/${resourceId}/ongoing`
+      ? `/facility/${facilityId}/practitioner/${resourceId}/queues/${queue.id}/ongoing`
       : `/queues/${queue.id}/ongoing`;
 
   return (
@@ -146,10 +146,6 @@ function QueueRow({
                 </DropdownMenuItem>
               }
             />
-            <DropdownMenuItem className="text-red-600 focus:text-red-600">
-              <X className="h-4 w-4 mr-2" />
-              {t("end_queue")}
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>

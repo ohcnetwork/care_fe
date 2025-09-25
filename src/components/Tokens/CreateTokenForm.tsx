@@ -38,8 +38,8 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 import {
-  ResourceSelector,
   ScheduleResourceFormState,
+  ScheduleResourceSelector,
 } from "@/components/Schedule/ResourceSelector";
 import { PatientRead } from "@/types/emr/patient/patient";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
@@ -134,7 +134,7 @@ export default function CreateTokenForm({
       setIsOpen(false);
       form.reset();
       queryClient.invalidateQueries({
-        queryKey: ["tokens", facilityId],
+        queryKey: ["tokens", patient?.id, facilityId],
       });
       onSuccess?.();
       if (!disableRedirectOnSuccess) {
@@ -267,7 +267,7 @@ export default function CreateTokenForm({
                         )}
                       </FormLabel>
                       <FormControl>
-                        <ResourceSelector
+                        <ScheduleResourceSelector
                           selectedResource={selectedResource}
                           facilityId={facilityId}
                           setSelectedResource={(resource) => {
