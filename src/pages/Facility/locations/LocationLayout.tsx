@@ -280,6 +280,11 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       resourceId={locationId}
     />
   ),
+  "/queues/:queueId": ({ queueId }: { queueId: string }) => (
+    <Redirect
+      to={`/facility/${facilityId}/locations/${locationId}/queues/${queueId}/ongoing`}
+    />
+  ),
   "/queues/:queueId/ongoing": ({ queueId }: { queueId: string }) => (
     <ManageQueuePage
       facilityId={facilityId}
