@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/popover";
 
 import query from "@/Utils/request/query";
-import { RoleBase, RoleRead } from "@/types/emr/role/role";
+import { RoleBase } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
 
 interface RoleSelectProps {
@@ -106,7 +106,7 @@ export function RoleSelect({
             </CommandEmpty>
             <CommandGroup>
               {rolesList
-                ?.filter((role: RoleRead) => !role.is_archived)
+                ?.filter((role) => !role.is_archived)
                 .map((role, i) => (
                   <CommandItem
                     key={role.id}

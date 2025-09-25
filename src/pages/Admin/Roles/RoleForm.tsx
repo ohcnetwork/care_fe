@@ -24,6 +24,7 @@ import mutate from "@/Utils/request/mutate";
 import { Permission } from "@/types/emr/permission/permission";
 import { RoleRead } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
+import { useEffect } from "react";
 
 interface RoleFormProps {
   role: RoleRead | null;
@@ -81,6 +82,17 @@ export default function RoleForm({
       onSuccess();
     },
   });
+
+  useEffect(() => {
+    if (isEditMode) {
+      form.reset({
+        name: role?.name || "",
+        description: role?.description || "",
+        permissions: role?.permissions.map((p) => p.slug) || [],
+        is_archived: role?.is_archived ?? false,
+      });
+    }
+  }, [form, role]);
 
   const onSubmit = (data: z.infer<typeof roleSchema>) => {
     const payload = {

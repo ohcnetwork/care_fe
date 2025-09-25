@@ -61,16 +61,18 @@ export function PermissionsIndex() {
                 <TableHead className="sticky top-0 left-0 z-20 whitespace-nowrap bg-white font-semibold">
                   {t("permission")}
                 </TableHead>
-                {roles.map((role) => (
-                  <TableHead
-                    key={role.id}
-                    className="whitespace-nowrap h-32 max-w-8 min-w-8 sticky top-0 z-10 bg-white font-semibold"
-                  >
-                    <div className="text-sm transform -rotate-90 w-24 px-2 -translate-x-1/3">
-                      {role.name}
-                    </div>
-                  </TableHead>
-                ))}
+                {roles
+                  .filter((role) => !role.is_archived)
+                  .map((role) => (
+                    <TableHead
+                      key={role.id}
+                      className="whitespace-nowrap h-32 max-w-8 min-w-8 sticky top-0 z-10 bg-white font-semibold"
+                    >
+                      <div className="text-sm transform -rotate-90 w-24 px-2 -translate-x-1/3">
+                        {role.name}
+                      </div>
+                    </TableHead>
+                  ))}
               </TableRow>
             </TableHeader>
             <TableBody>
