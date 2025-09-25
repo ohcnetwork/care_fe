@@ -173,108 +173,96 @@ export const PrintChargeItems = (props: {
                   </TableHeader>
                   <TableBody>
                     {(() => {
-                      type GroupKey =
-                        | Exclude<
-                            ChargeItemStatus,
-                            "entered_in_error" | "billed" | "paid"
-                          >
-                        | "billed_paid";
-                      const groups = chargeItems.results.reduce(
+                      // Group charge items by category, excluding entered_in_error items
+                      const validItems = chargeItems.results.filter(
+                        (item) =>
+                          item.status !== ChargeItemStatus.entered_in_error,
+                      );
+
+                      const groups = validItems.reduce(
                         (
-                          acc: Partial<Record<GroupKey, ChargeItemRead[]>>,
+                          acc: Record<string, ChargeItemRead[]>,
                           item: ChargeItemRead,
                         ) => {
-                          // Skip entered_in_error
-                          if (
-                            item.status === ChargeItemStatus.entered_in_error
-                          ) {
-                            return acc;
-                          }
-                          // Club billed and paid together
-                          const key: GroupKey =
-                            item.status === ChargeItemStatus.billed ||
-                            item.status === ChargeItemStatus.paid
-                              ? "billed_paid"
-                              : (item.status as GroupKey);
-                          const list = acc[key] ?? [];
+                          const categoryTitle =
+                            item.charge_item_definition?.category?.title ||
+                            t("uncategorized");
+                          const list = acc[categoryTitle] ?? [];
                           list.push(item);
-                          acc[key] = list;
+                          acc[categoryTitle] = list;
                           return acc;
                         },
-                        {} as Partial<Record<GroupKey, ChargeItemRead[]>>,
+                        {} as Record<string, ChargeItemRead[]>,
                       );
-                      const desiredOrder: GroupKey[] = [
-                        ChargeItemStatus.planned,
-                        ChargeItemStatus.billable,
-                        ChargeItemStatus.not_billable,
-                        ChargeItemStatus.aborted,
-                        "billed_paid",
-                      ];
-                      const order: GroupKey[] = desiredOrder.filter(
-                        (s) => (groups[s] ?? []).length > 0,
-                      );
+
+                      // Sort categories alphabetically
+                      const sortedCategories = Object.keys(groups).sort();
+
                       const rows: React.ReactNode[] = [];
-                      order.forEach((status) => {
+                      let globalIndex = 1;
+
+                      sortedCategories.forEach((categoryTitle) => {
+                        // Add category header
                         rows.push(
                           <TableRow
-                            key={`status-${status}`}
+                            key={`category-${categoryTitle}`}
                             className="bg-transparent"
                           >
                             <TableCell
                               colSpan={5}
-                              className="text-left font-semibold capitalize"
+                              className="text-left font-semibold capitalize bg-gray-50"
                             >
-                              {status === "billed_paid"
-                                ? `${t("billed")} / ${t("paid")}`
-                                : t(status as string)}
+                              {categoryTitle}
                             </TableCell>
                           </TableRow>,
                         );
-                        const items: ChargeItemRead[] = groups[status] ?? [];
-                        items.forEach(
-                          (chargeItem: ChargeItemRead, index: number) => {
-                            const unitPrice =
-                              chargeItem.unit_price_components.find(
-                                (c) =>
-                                  c.monetary_component_type ===
-                                  MonetaryComponentType.base,
-                              )?.amount;
-                            rows.push(
-                              <TableRow
-                                key={chargeItem.id}
-                                className="bg-transparent hover:bg-transparent"
-                              >
-                                <TableCell className="text-left">
-                                  {index + 1}
-                                </TableCell>
-                                <TableCell className="text-left">
-                                  <div className="flex flex-col">
-                                    <span className="font-medium">
-                                      {chargeItem.title}
+
+                        const items: ChargeItemRead[] =
+                          groups[categoryTitle] ?? [];
+                        items.forEach((chargeItem: ChargeItemRead) => {
+                          const unitPrice =
+                            chargeItem.unit_price_components.find(
+                              (c) =>
+                                c.monetary_component_type ===
+                                MonetaryComponentType.base,
+                            )?.amount;
+                          rows.push(
+                            <TableRow
+                              key={chargeItem.id}
+                              className="bg-transparent hover:bg-transparent"
+                            >
+                              <TableCell className="text-left">
+                                {globalIndex++}
+                              </TableCell>
+                              <TableCell className="text-left">
+                                <div className="flex flex-col">
+                                  <span className="font-medium">
+                                    {chargeItem.title}
+                                  </span>
+                                  {chargeItem.description && (
+                                    <span className="text-xs text-gray-600 whitespace-pre-wrap">
+                                      {chargeItem.description}
                                     </span>
-                                    {chargeItem.description && (
-                                      <span className="text-xs text-gray-600 whitespace-pre-wrap">
-                                        {chargeItem.description}
-                                      </span>
-                                    )}
-                                  </div>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <MonetaryDisplay amount={unitPrice} />
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  {chargeItem.quantity}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <MonetaryDisplay
-                                    amount={chargeItem.total_price}
-                                  />
-                                </TableCell>
-                              </TableRow>,
-                            );
-                          },
-                        );
-                        const groupTotal = items
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <MonetaryDisplay amount={unitPrice} />
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {Math.floor(Number(chargeItem.quantity))}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <MonetaryDisplay
+                                  amount={chargeItem.total_price}
+                                />
+                              </TableCell>
+                            </TableRow>,
+                          );
+                        });
+
+                        // Add category subtotal
+                        const categoryTotal = items
                           .reduce(
                             (sum: number, item: ChargeItemRead) =>
                               sum + Number(item.total_price ?? 0),
@@ -283,18 +271,20 @@ export const PrintChargeItems = (props: {
                           .toFixed(2);
                         rows.push(
                           <TableRow
-                            key={`subtotal-${status}`}
-                            className="font-semibold"
+                            key={`subtotal-${categoryTitle}`}
+                            className="font-semibold bg-gray-50"
                           >
                             <TableCell colSpan={4} className="text-right pr-2">
                               {t("total")}
                             </TableCell>
                             <TableCell className="text-right">
-                              <MonetaryDisplay amount={groupTotal} />
+                              <MonetaryDisplay amount={categoryTotal} />
                             </TableCell>
                           </TableRow>,
                         );
                       });
+
+                      // Add grand total
                       rows.push(
                         <TableRow
                           key="grand-total"
@@ -305,7 +295,7 @@ export const PrintChargeItems = (props: {
                           </TableCell>
                           <TableCell className="text-right">
                             <MonetaryDisplay
-                              amount={chargeItems.results
+                              amount={validItems
                                 .reduce(
                                   (sum, item) =>
                                     sum + Number(item.total_price ?? 0),
