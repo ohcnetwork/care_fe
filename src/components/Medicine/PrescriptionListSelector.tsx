@@ -65,7 +65,7 @@ export default function PrescriptionListSelector({
 
   if (isLoading) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-3 w-60">
         <CardListSkeleton count={7} />
       </div>
     );
