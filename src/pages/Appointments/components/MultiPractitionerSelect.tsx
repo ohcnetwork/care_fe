@@ -1,4 +1,4 @@
-import { CheckIcon } from "@radix-ui/react-icons";
+import { CaretDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -36,10 +36,15 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 
+import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { COLOR_PALETTE } from "@/components/ui/multi-filter/utils/Utils";
 import { cn } from "@/lib/utils";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
+import {
+  formatScheduleResourceName,
+  SchedulableResourceType,
+} from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
@@ -58,6 +63,7 @@ interface MultiPractitionerSelectorProps {
   selected: UserReadMinimal[];
   onSelect: (users: UserReadMinimal[]) => void;
   facilityId: string;
+  multiple?: boolean;
 }
 
 const MULTI_SELECT_SHOW_LIMIT = 5;
@@ -66,6 +72,7 @@ export const MultiPractitionerSelector = ({
   facilityId,
   selected,
   onSelect,
+  multiple = true,
 }: MultiPractitionerSelectorProps) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -203,33 +210,35 @@ export const MultiPractitionerSelector = ({
 
   return (
     <div className="flex items-center gap-2">
-      <div className="order-last sm:order-first">
-        {selected && selected.length > 0 && (
-          <div className="flex items-center gap-1">
-            {selected.slice(0, MULTI_SELECT_SHOW_LIMIT).map((user) => (
-              <Fragment key={user.id}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Avatar
-                      imageUrl={user.profile_picture_url}
-                      name={formatName(user, true)}
-                      className="size-8 rounded-full cursor-pointer"
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent className="flex flex-col gap-0">
-                    <span className="text-sm font-medium">
-                      {formatName(user)}
-                    </span>
-                    <span className="text-xs text-gray-300 truncate">
-                      {user.username}
-                    </span>
-                  </TooltipContent>
-                </Tooltip>
-              </Fragment>
-            ))}
-          </div>
-        )}
-      </div>
+      {multiple && (
+        <div className="order-last sm:order-first">
+          {selected && selected.length > 0 && (
+            <div className="flex items-center gap-1">
+              {selected.slice(0, MULTI_SELECT_SHOW_LIMIT).map((user) => (
+                <Fragment key={user.id}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Avatar
+                        imageUrl={user.profile_picture_url}
+                        name={formatName(user, true)}
+                        className="size-8 rounded-full cursor-pointer"
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent className="flex flex-col gap-0">
+                      <span className="text-sm font-medium">
+                        {formatName(user)}
+                      </span>
+                      <span className="text-xs text-gray-300 truncate">
+                        {user.username}
+                      </span>
+                    </TooltipContent>
+                  </Tooltip>
+                </Fragment>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       <Popover
         open={open}
         onOpenChange={(newOpen) => {
@@ -241,21 +250,58 @@ export const MultiPractitionerSelector = ({
         modal={true}
       >
         <PopoverTrigger asChild>
-          <Button
-            variant="secondary"
-            role="combobox"
-            className="size-8! rounded-full"
-          >
-            {selected && selected.length > MULTI_SELECT_SHOW_LIMIT ? (
-              <span className="text-xs text-gray-500">
-                +{selected.length - MULTI_SELECT_SHOW_LIMIT}
-              </span>
-            ) : (
-              <CareIcon icon="l-plus" className="size-4" />
-            )}
-          </Button>
+          {multiple ? (
+            <Button
+              variant="secondary"
+              role="combobox"
+              className="size-8! rounded-full"
+            >
+              {selected && selected.length > MULTI_SELECT_SHOW_LIMIT ? (
+                <span className="text-xs text-gray-500">
+                  +{selected.length - MULTI_SELECT_SHOW_LIMIT}
+                </span>
+              ) : (
+                <CareIcon icon="l-plus" className="size-4" />
+              )}
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              role="combobox"
+              className="min-w-60 w-full justify-start"
+            >
+              {selected[0] ? (
+                <div className="flex items-center gap-2">
+                  <ScheduleResourceIcon
+                    resource={{
+                      resource_type: SchedulableResourceType.Practitioner,
+                      resource: selected[0],
+                    }}
+                    className="size-6 rounded-full"
+                  />
+                  <span>
+                    {formatScheduleResourceName({
+                      resource_type: SchedulableResourceType.Practitioner,
+                      resource: selected[0],
+                    })}
+                  </span>
+                </div>
+              ) : (
+                <span className="text-gray-400">
+                  {t("select_practitioner")}
+                </span>
+              )}
+              <CaretDownIcon className="ml-auto" />
+            </Button>
+          )}
         </PopoverTrigger>
-        <PopoverContent align="start" className="p-0">
+        <PopoverContent
+          align="start"
+          className={cn(
+            "p-0",
+            !multiple && "w-[var(--radix-popover-trigger-width)]",
+          )}
+        >
           <div>
             {/* Main Content */}
             {!currentOrganizationId && (
@@ -309,15 +355,17 @@ export const MultiPractitionerSelector = ({
                             <h3 className="px-2 py-1 text-sm font-medium text-gray-500 uppercase tracking-wide">
                               {t("selected")}
                             </h3>
-                            <div>
-                              <Button
-                                variant="outline"
-                                size="xs"
-                                onClick={() => onSelect([])}
-                              >
-                                {t("clear_all")}
-                              </Button>
-                            </div>
+                            {multiple && (
+                              <div>
+                                <Button
+                                  variant="outline"
+                                  size="xs"
+                                  onClick={() => onSelect([])}
+                                >
+                                  {t("clear_all")}
+                                </Button>
+                              </div>
+                            )}
                           </div>
                           {selected.map((user) => (
                             <CommandItem
@@ -508,19 +556,21 @@ export const MultiPractitionerSelector = ({
                             <h3 className="px-2 py-1 text-sm font-medium text-gray-500 uppercase tracking-wide">
                               {t("practitioners")}
                             </h3>
-                            <div className="max-h-[400px] overflow-y-auto">
-                              <Button
-                                variant="outline"
-                                size="xs"
-                                onClick={() => {
-                                  handleSelectAll(
-                                    organizationUsers.users as NonEmptyArray<UserReadMinimal>,
-                                  );
-                                }}
-                              >
-                                {t("select_all")}
-                              </Button>
-                            </div>
+                            {multiple && (
+                              <div className="max-h-[400px] overflow-y-auto">
+                                <Button
+                                  variant="outline"
+                                  size="xs"
+                                  onClick={() => {
+                                    handleSelectAll(
+                                      organizationUsers.users as NonEmptyArray<UserReadMinimal>,
+                                    );
+                                  }}
+                                >
+                                  {t("select_all")}
+                                </Button>
+                              </div>
+                            )}
                           </div>
                           {organizationUsers.users.map((user) => {
                             const isSelected = selected?.some(

@@ -1,5 +1,5 @@
 import { LocationSearch } from "@/components/Location/LocationSearch";
-import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
+import { MultiPractitionerSelector } from "@/pages/Appointments/components/MultiPractitionerSelect";
 import { HealthcareServiceSelector } from "@/pages/Facility/services/HealthcareServiceSelector";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import { LocationList } from "@/types/location/location";
@@ -34,15 +34,18 @@ export const ScheduleResourceSelector = ({
   switch (selectedResource.resource_type) {
     case SchedulableResourceType.Practitioner:
       return (
-        <PractitionerSelector
+        <MultiPractitionerSelector
           facilityId={facilityId}
-          selected={selectedResource.resource}
-          onSelect={(user) => {
+          selected={
+            selectedResource.resource ? [selectedResource.resource] : []
+          }
+          onSelect={(users) => {
             setSelectedResource({
-              resource: user,
+              resource: users[0] || null,
               resource_type: selectedResource.resource_type,
             });
           }}
+          multiple={false}
         />
       );
 
