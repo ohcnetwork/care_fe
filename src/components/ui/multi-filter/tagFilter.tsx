@@ -74,7 +74,7 @@ function TreeViewItem({
   });
 
   const isSelected = selectedTags.some((t) => t.id === tag.id);
-  const isRootLevel = tag.has_children && (children?.results?.length ?? 0) > 0;
+  const isRootLevel = tag.has_children;
   const allChildrenSelected =
     children?.results?.every((childTag: TagConfig) =>
       selectedTags.some((t) => t.id === childTag.id),

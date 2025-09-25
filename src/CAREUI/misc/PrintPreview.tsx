@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button";
 
 import Page from "@/components/Common/Page";
 
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 type Props = {
@@ -27,7 +27,7 @@ export default function PrintPreview(props: Props) {
   const initialScale = useBreakpoints({ default: 0.44, md: 1 });
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
-  useFacilityShortcuts("general");
+  useShortcutSubContext();
   return (
     <div className="flex items-center justify-center">
       <Page

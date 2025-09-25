@@ -50,7 +50,7 @@ import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { cn } from "@/lib/utils";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import {
@@ -74,7 +74,7 @@ function MedicationTable({
   setMedicationToMarkComplete,
 }: MedicationTableProps) {
   const { t } = useTranslation();
-  useFacilityShortcuts("general");
+
   return (
     <div className="overflow-hidden rounded-md border-2 border-white shadow-md">
       <Table className="rounded-md">
@@ -210,7 +210,7 @@ export default function MedicationDispenseList({
 }: Props) {
   const { t } = useTranslation();
   const { locationId } = useCurrentLocation();
-
+  useShortcutSubContext("facility:pharmacy");
   const queryClient = useQueryClient();
   const [dispensedMedicationId, setDispensedMedicationId] = useState<
     string | null

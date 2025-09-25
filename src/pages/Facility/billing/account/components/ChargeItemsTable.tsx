@@ -12,7 +12,7 @@ import { Link, navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -113,7 +113,7 @@ export function ChargeItemsTable({
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
 
   // Register shortcuts for this table
-  useFacilityShortcuts("charge-items-table");
+  useShortcutSubContext("facility:billing");
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
