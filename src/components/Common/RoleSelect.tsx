@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/popover";
 
 import query from "@/Utils/request/query";
-import { RoleBase } from "@/types/emr/role/role";
+import { RoleBase, RoleRead } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
 
 interface RoleSelectProps {
@@ -105,33 +105,35 @@ export function RoleSelect({
               {isFetching ? t("searching") : t("no_roles_found")}
             </CommandEmpty>
             <CommandGroup>
-              {rolesList?.map((role, i) => (
-                <CommandItem
-                  key={role.id}
-                  value={role.name}
-                  onSelect={() => {
-                    onChange(role);
-                    setOpen(false);
-                  }}
-                  className="cursor-pointer"
-                  ref={i === rolesList.length - 1 ? ref : undefined}
-                >
-                  <CheckIcon
-                    className={cn(
-                      "mr-2 size-4",
-                      value?.id === role.id ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                  <div className="flex flex-col items-start">
-                    <span>{role.name}</span>
-                    {role.description && (
-                      <span className="text-xs text-gray-500">
-                        {role.description}
-                      </span>
-                    )}
-                  </div>
-                </CommandItem>
-              ))}
+              {rolesList
+                ?.filter((role: RoleRead) => !role.is_archived)
+                .map((role, i) => (
+                  <CommandItem
+                    key={role.id}
+                    value={role.name}
+                    onSelect={() => {
+                      onChange(role);
+                      setOpen(false);
+                    }}
+                    className="cursor-pointer"
+                    ref={i === rolesList.length - 1 ? ref : undefined}
+                  >
+                    <CheckIcon
+                      className={cn(
+                        "mr-2 size-4",
+                        value?.id === role.id ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                    <div className="flex flex-col items-start">
+                      <span>{role.name}</span>
+                      {role.description && (
+                        <span className="text-xs text-gray-500">
+                          {role.description}
+                        </span>
+                      )}
+                    </div>
+                  </CommandItem>
+                ))}
               {isFetchingNextPage && (
                 <div className="text-center text-sm py-2">{t("loading")}</div>
               )}

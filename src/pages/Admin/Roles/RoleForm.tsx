@@ -1,12 +1,23 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
@@ -27,11 +38,31 @@ export default function RoleForm({
 }: RoleFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [formData, setFormData] = React.useState({
-    name: role?.name || "",
-    description: role?.description || "",
-    permissions: role?.permissions.map((p: Permission) => p.slug) || [],
+  const isEditMode = !!role?.id;
+
+  const roleSchema = z.object({
+    name: z.string().trim().min(1, t("name_is_required")),
+    description: z.string().trim().optional(),
+    permissions: z
+      .array(z.string())
+      .min(1, t("at_least_one_permission_required")),
+    is_archived: z.boolean().default(false),
   });
+
+  const form = useForm({
+    resolver: zodResolver(roleSchema),
+    defaultValues: {
+      name: role?.name || "",
+      description: role?.description || "",
+      permissions: role?.permissions.map((p) => p.slug) || [],
+      is_archived: role?.is_archived ?? false,
+    },
+  });
+
+  const { isDirty } = form.formState;
+  const watchedPermissions = form.watch("permissions");
+  const hasPermissionSelected =
+    watchedPermissions && watchedPermissions.length > 0;
 
   const createRoleMutation = useMutation({
     mutationFn: mutate(roleApi.createRole),
@@ -51,147 +82,228 @@ export default function RoleForm({
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = (data: z.infer<typeof roleSchema>) => {
     const payload = {
-      name: formData.name,
-      description: formData.description,
-      permissions: formData.permissions,
+      name: data.name,
+      description: data.description,
+      permissions: data.permissions,
+      is_archived: data.is_archived,
     };
 
-    if (role?.id) {
+    if (isEditMode) {
       updateRoleMutation.mutate(payload);
     } else {
       createRoleMutation.mutate(payload);
     }
   };
 
-  const handlePermissionToggle = (permissionSlug: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      permissions: prev.permissions.includes(permissionSlug)
-        ? prev.permissions.filter((p: string) => p !== permissionSlug)
-        : [...prev.permissions, permissionSlug],
-    }));
-  };
-
   const isLoading =
     createRoleMutation.isPending || updateRoleMutation.isPending;
 
+  const handlePermissionToggle = (slug: string) => {
+    const current = form.watch("permissions") || [];
+    if (current.includes(slug)) {
+      form.setValue(
+        "permissions",
+        current.filter((s) => s !== slug),
+        { shouldValidate: true, shouldDirty: true },
+      );
+    } else {
+      form.setValue("permissions", [...current, slug], {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  };
+
+  const handleSelectAll = () => {
+    form.setValue(
+      "permissions",
+      permissions.map((p) => p.slug),
+      { shouldValidate: true, shouldDirty: true },
+    );
+  };
+
+  const handleClearAll = () => {
+    form.setValue("permissions", [], {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
+
+  const handleCancel = () => {
+    form.reset();
+    onSuccess();
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">{t("name")}</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
-            placeholder={t("enter_role_name")}
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="description">{t("description")}</Label>
-          <Textarea
-            id="description"
-            value={formData.description}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, description: e.target.value }))
-            }
-            placeholder={t("enter_role_description")}
-            rows={3}
-          />
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>{t("permissions")}</CardTitle>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    permissions: permissions.map((p) => p.slug),
-                  }))
-                }
-              >
-                {t("select_all")}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    permissions: [],
-                  }))
-                }
-              >
-                {t("clear")}
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3 max-h-60 overflow-y-auto">
-            {permissions.map((permission) => (
-              <div
-                key={permission.slug}
-                className="flex items-center space-x-2"
-              >
-                <Checkbox
-                  id={permission.slug}
-                  checked={formData.permissions.includes(permission.slug)}
-                  onCheckedChange={() =>
-                    handlePermissionToggle(permission.slug)
-                  }
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="name" aria-required="true">
+                {t("name")}
+              </FormLabel>
+              <FormControl>
+                <Input
+                  id="name"
+                  placeholder={t("enter_role_name")}
+                  {...field}
                 />
-                <Label
-                  htmlFor={permission.slug}
-                  className="flex-1 cursor-pointer"
-                >
-                  <div>
-                    <div className="font-medium">{permission.name}</div>
-                    {permission.description && (
-                      <div className="text-sm text-gray-500">
-                        {permission.description}
-                      </div>
-                    )}
-                  </div>
-                </Label>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <div className="flex justify-end space-x-2">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onSuccess}
-          disabled={isLoading}
-        >
-          {t("cancel")}
-        </Button>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading
-            ? t("saving")
-            : role?.id
-              ? t("update_role")
-              : t("create_role")}
-        </Button>
-      </div>
-    </form>
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="description">{t("description")}</FormLabel>
+              <FormControl>
+                <Textarea
+                  id="description"
+                  rows={3}
+                  placeholder={t("enter_role_description")}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {isEditMode && (
+          <FormField
+            control={form.control}
+            name="is_archived"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="mb-2">{t("status")}</FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={(val) => field.onChange(val === "true")}
+                    value={String(field.value)}
+                    className="flex space-x-4"
+                  >
+                    <FormItem className="flex items-center space-x-2">
+                      <FormControl>
+                        <RadioGroupItem value="false" id="unarchive" />
+                      </FormControl>
+                      <FormLabel htmlFor="unarchive" className="cursor-pointer">
+                        {t("unarchive")}
+                      </FormLabel>
+                    </FormItem>
+
+                    <FormItem className="flex items-center space-x-2">
+                      <FormControl>
+                        <RadioGroupItem value="true" id="archive" />
+                      </FormControl>
+                      <FormLabel htmlFor="archive" className="cursor-pointer">
+                        {t("archive")}
+                      </FormLabel>
+                    </FormItem>
+                  </RadioGroup>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        )}
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>{t("permissions")}</CardTitle>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSelectAll}
+                >
+                  {t("select_all")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearAll}
+                >
+                  {t("clear")}
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <FormField
+              control={form.control}
+              name="permissions"
+              render={() => (
+                <FormItem>
+                  <div className="space-y-3 max-h-60 overflow-y-auto">
+                    {permissions.map((permission) => (
+                      <div
+                        key={permission.slug}
+                        className="flex items-center space-x-2"
+                      >
+                        <Checkbox
+                          id={permission.slug}
+                          checked={watchedPermissions?.includes(
+                            permission.slug,
+                          )}
+                          onCheckedChange={() =>
+                            handlePermissionToggle(permission.slug)
+                          }
+                        />
+                        <Label
+                          htmlFor={permission.slug}
+                          className="flex-1 cursor-pointer"
+                        >
+                          <div>
+                            <div className="font-medium">{permission.name}</div>
+                            {permission.description && (
+                              <div className="text-sm text-gray-500">
+                                {permission.description}
+                              </div>
+                            )}
+                          </div>
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end space-x-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isLoading}
+          >
+            {t("cancel")}
+          </Button>
+          <Button
+            type="submit"
+            disabled={!isDirty || isLoading || !hasPermissionSelected}
+          >
+            {isLoading
+              ? t("saving")
+              : isEditMode
+                ? t("update_role")
+                : t("create_role")}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

@@ -68,7 +68,7 @@ function RoleCard({
               ))}
               {role.permissions.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{role.permissions.length - 3} more
+                  +{role.permissions.length - 3} {t("more")}
                 </Badge>
               )}
             </div>
@@ -152,6 +152,7 @@ export default function RolesIndex() {
                     description: "",
                     permissions: [],
                     is_system: false,
+                    is_archived: false,
                   });
                 }
               }}
@@ -219,9 +220,11 @@ export default function RolesIndex() {
           <>
             {/* Mobile Card View */}
             <div className="grid gap-4 md:hidden">
-              {roles.map((role: RoleRead) => (
-                <RoleCard key={role.id} role={role} onEdit={handleEdit} />
-              ))}
+              {roles
+                .filter((role) => !role.is_archived)
+                .map((role: RoleRead) => (
+                  <RoleCard key={role.id} role={role} onEdit={handleEdit} />
+                ))}
             </div>
             {/* Desktop Table View */}
             <div className="hidden md:block">
@@ -236,44 +239,48 @@ export default function RolesIndex() {
                     </TableRow>
                   </TableHeader>
                   <TableBody className="bg-white">
-                    {roles.map((role: RoleRead) => (
-                      <TableRow key={role.id} className="divide-x">
-                        <TableCell className="font-medium">
-                          {role.name}
-                        </TableCell>
-                        <TableCell className="text-gray-600">
-                          {role.description || "-"}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {role.permissions.slice(0, 3).map((permission) => (
-                              <Badge
-                                key={permission.slug}
-                                variant="secondary"
-                                className="text-xs"
-                              >
-                                {permission.name}
-                              </Badge>
-                            ))}
-                            {role.permissions.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{role.permissions.length - 3} more
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(role)}
-                          >
-                            <CareIcon icon="l-edit" className="size-4" />
-                            {t("edit")}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {roles
+                      .filter((role: RoleRead) => !role.is_archived)
+                      .map((role: RoleRead) => (
+                        <TableRow key={role.id} className="divide-x">
+                          <TableCell className="font-medium">
+                            {role.name}
+                          </TableCell>
+                          <TableCell className="text-gray-600">
+                            {role.description || "-"}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1">
+                              {role.permissions
+                                .slice(0, 3)
+                                .map((permission) => (
+                                  <Badge
+                                    key={permission.slug}
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    {permission.name}
+                                  </Badge>
+                                ))}
+                              {role.permissions.length > 3 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{role.permissions.length - 3} more
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEdit(role)}
+                            >
+                              <CareIcon icon="l-edit" className="size-4" />
+                              {t("edit")}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </div>
