@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 import { getPermissions } from "@/common/Permissions";
 
-import { newFormatDateTime } from "@/common/utils";
+import { formatDateTime } from "@/common/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { cn } from "@/lib/utils";
 import {
@@ -100,7 +100,7 @@ export function TimelineEncounterCard({
               <div className="text-gray-600">{t("start_date")}</div>
               <div className="font-semibold text-gray-900">
                 {encounter.period.start
-                  ? newFormatDateTime(encounter.period.start)
+                  ? formatDateTime(encounter.period.start)
                   : t("not_started")}
               </div>
             </div>
@@ -109,7 +109,7 @@ export function TimelineEncounterCard({
               <div className="text-gray-600">{t("end_date")}</div>
               <div className="font-semibold text-gray-900">
                 {encounter.period.end
-                  ? newFormatDateTime(encounter.period.end)
+                  ? formatDateTime(encounter.period.end)
                   : t("ongoing") + "..."}
               </div>
             </div>

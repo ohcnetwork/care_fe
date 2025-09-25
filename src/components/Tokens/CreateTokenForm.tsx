@@ -134,7 +134,7 @@ export default function CreateTokenForm({
       setIsOpen(false);
       form.reset();
       queryClient.invalidateQueries({
-        queryKey: ["tokens", facilityId],
+        queryKey: ["tokens", patient?.id, facilityId],
       });
       onSuccess?.();
       if (!disableRedirectOnSuccess) {

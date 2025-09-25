@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -6,12 +7,17 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
+  dateFilter,
   encounterPriorityFilter,
   encounterStatusFilter,
   tagFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import {
+  FilterDateRange,
+  longDateRangeOptions,
+} from "@/components/ui/multi-filter/utils/Utils";
 import { Separator } from "@/components/ui/separator";
 
 import Page from "@/components/Common/Page";
@@ -26,6 +32,7 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 
 interface EncounterListProps {
   encounters?: EncounterRead[];
@@ -37,6 +44,8 @@ const buildQueryParams = (
   facilityId: string,
   status?: string,
   priority?: string,
+  created_date_after?: string,
+  created_date_before?: string,
 ) => {
   const params: Record<string, string | undefined> = {};
   if (facilityId) {
@@ -49,6 +58,12 @@ const buildQueryParams = (
   }
   if (priority) {
     params.priority = priority;
+  }
+  if (created_date_after) {
+    params.created_date_after = created_date_after;
+  }
+  if (created_date_before) {
+    params.created_date_before = created_date_before;
   }
   return params;
 };
@@ -91,13 +106,21 @@ export function EncounterList({
     encounter_id,
     external_identifier,
     patient_filter,
+    created_date_after,
+    created_date_before,
   } = qParams;
 
   const { data: queryEncounters, isFetching } = useQuery({
     queryKey: ["encounters", facilityId, qParams, encounterClass],
     queryFn: query.debounced(encounterApi.list, {
       queryParams: {
-        ...buildQueryParams(facilityId, status, priority),
+        ...buildQueryParams(
+          facilityId,
+          status,
+          priority,
+          created_date_after,
+          created_date_before,
+        ),
         name,
         encounter_class: encounterClass,
         external_identifier,
@@ -133,15 +156,49 @@ export function EncounterList({
     .map((query) => query.data)
     .filter(Boolean) as TagConfig[];
 
+  useEffect(() => {
+    // Set default date range if no dates are present
+    if (!created_date_after && !created_date_before) {
+      const today = new Date();
+      updateQuery({
+        created_date_after: dateQueryString(today),
+        created_date_before: dateQueryString(today),
+      });
+    }
+  }, [created_date_after, created_date_before, updateQuery]);
+
   const filters = [
     encounterStatusFilter("status"),
     encounterPriorityFilter("priority"),
     tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
+    dateFilter("created_date", t("date"), longDateRangeOptions),
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
-    if (query.tags) {
-      query.tags = (query.tags as TagConfig[]).map((tag) => tag.id);
+    for (const [key, value] of Object.entries(query)) {
+      switch (key) {
+        case "tags":
+          query.tags = (value as TagConfig[])?.map((tag) => tag.id).join(",");
+          break;
+        case "tags_behavior":
+          // tags_behavior is already handled by the filter system
+          break;
+        case "created_date":
+          {
+            const dateRange = value as FilterDateRange;
+            query = {
+              ...query,
+              created_date: undefined,
+              created_date_after: dateRange?.from
+                ? dateQueryString(dateRange?.from as Date)
+                : undefined,
+              created_date_before: dateRange?.to
+                ? dateQueryString(dateRange?.to as Date)
+                : undefined,
+            };
+          }
+          break;
+      }
     }
     updateQuery(query);
   };
@@ -155,6 +212,13 @@ export function EncounterList({
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
     tags: selectedTags,
+    created_date:
+      created_date_after || created_date_before
+        ? {
+            from: created_date_after ? new Date(created_date_after) : undefined,
+            to: created_date_before ? new Date(created_date_before) : undefined,
+          }
+        : undefined,
   });
 
   return (
