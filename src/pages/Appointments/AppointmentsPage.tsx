@@ -47,7 +47,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs"
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -332,21 +332,15 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     <Page
       title={t("appointments")}
       options={
-        <Tabs
+        <FilterTabs
           value={activeTab}
-          onValueChange={(value) => setActiveTab(value as "board" | "list")}
-        >
-          <TabsList>
-            <TabsTrigger value="board">
-              <CareIcon icon="l-kanban" />
-              <span>{t("board")}</span>
-            </TabsTrigger>
-            <TabsTrigger value="list">
-              <CareIcon icon="l-list-ul" />
-              <span>{t("list")}</span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+          onValueChange={(v) => setActiveTab(v as "board" | "list")}
+          options={[
+            {value: "board", label: t("board"), icon: <CareIcon icon="l-kanban" />},
+            {value: "list", label: t("list"), icon: <CareIcon icon="l-list-ul" />}
+          ]}
+          showAllOption={false}
+        />
       }
     >
       <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
@@ -820,21 +814,15 @@ function AppointmentRow(props: {
   return (
     <div className="overflow-x-auto">
       <div className="hidden md:flex">
-        <Tabs
+        <FilterTabs
           value={props.status ?? "booked"}
-          className="overflow-x-auto"
-          onValueChange={(value) => props.updateQuery({ status: value })}
-        >
-          <TabsList>
-            {getStatusGroups(t).map((group) => {
-              return (
-                <TabsTrigger key={group.label} value={group.statuses.join(",")}>
-                  {group.label}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-        </Tabs>
+          onValueChange={(v) => props.updateQuery({ status: v })}
+          options={getStatusGroups(t).map((group) => ({
+            value: group.statuses.join(","),
+            label: group.label,
+          }))}
+          showAllOption={false}
+        />
       </div>
 
       {/* Status Filter - Mobile */}
@@ -849,7 +837,7 @@ function AppointmentRow(props: {
           <SelectContent>
             {getStatusGroups(t).map((group) => (
               <SelectItem key={group.label} value={group.statuses.join(",")}>
-                <div className="flex items-center">{group.label}</div>
+                <div className="flex items-center">{group.label} hello world</div>
               </SelectItem>
             ))}
           </SelectContent>

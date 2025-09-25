@@ -37,11 +37,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs"
 
 import { dateQueryString } from "@/Utils/utils";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { AppointmentNonCancelledStatuses } from "@/types/scheduling/schedule";
+import { useState } from "react";
 
 interface BookingsListProps {
   patientId: string;
@@ -50,32 +51,24 @@ interface BookingsListProps {
 
 export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState("search")
 
   return (
     <div className="mt-2">
-      <Tabs defaultValue="upcoming">
-        <div className="flex sm:flex-row flex-col gap-2">
-          <TabsList className="sm:flex sm:flex-col sm:w-52 h-fit sm:bg-gray-50 items-center justify-center w-full bg-gray-100">
-            <TabsTrigger
-              value="upcoming"
-              className="w-full sm:justify-start data-[state=active]:bg-white data-[state=active]:shadow-sm sm:data-[state=active]:text-primary-800 py-2 px-3"
-            >
-              {t("upcoming")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="past"
-              className="w-full sm:justify-start data-[state=active]:bg-white data-[state=active]:shadow-sm sm:data-[state=active]:text-primary-800 py-2 px-3"
-            >
-              {t("past")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="cancelled"
-              className="w-full sm:justify-start data-[state=active]:bg-white data-[state=active]:shadow-sm sm:data-[state=active]:text-primary-800 py-2 px-3"
-            >
-              {t("cancelled")}
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="upcoming" className="space-y-4 overflow-x-scroll">
+      <div className="flex sm:flex-row flex-col gap-2">
+        <FilterTabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          options={[
+            {value: "upcoming", label: t("upcoming")},
+            {value: "past", label: t("past")},
+            {value: "cancelled", label: t("cancelled")}
+          ]}
+          showAllOption={false}
+          className="sm:flex sm:flex-col sm:w-52 h-fit sm:bg-gray-50 items-center justify-center w-full bg-gray-100"
+        />
+        {activeTab === "upcoming" && (
+          <div>
             <span className="text-lg font-semibold text-gray-950 mb-4">
               {t("today")}
             </span>
@@ -88,32 +81,37 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             <span className="text-lg font-semibold text-gray-950 mb-4">
               {t("next")}
             </span>
+          </div>
+        )}
+        {activeTab === "upcoming" && (
+          <div className="space-y-4 overflow-x-scroll">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
               dateFrom={dateQueryString(addDays(new Date(), 1))}
             />
-          </TabsContent>
-          <TabsContent value="past" className="space-y-4 overflow-x-scroll">
+          </div>
+        )}
+        {activeTab === "past" && (
+          <div className="space-y-4 overflow-x-scroll">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
               dateTo={dateQueryString(subDays(new Date(), 1))}
               status={AppointmentNonCancelledStatuses}
             />
-          </TabsContent>
-          <TabsContent
-            value="cancelled"
-            className="space-y-4 overflow-x-scroll"
-          >
+          </div>
+        )}
+        {activeTab === "cancelled" && (
+          <div className="space-y-4 overflow-x-scroll">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
               status={AppointmentCancelledStatuses}
             />
-          </TabsContent>
+          </div>
+        )}
         </div>
-      </Tabs>
     </div>
   );
 };

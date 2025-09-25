@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Loading from "@/components/Common/Loading";
 
@@ -522,18 +522,18 @@ export default function ReportBuilder({
                   <CardTitle>{t("report_builder_title")}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Tabs
+                  <FilterTabs
                     value={activeTab}
                     onValueChange={setActiveTab}
+                    options={[
+                      { value: "layout", label: t("layout") },
+                      { value: "header", label: t("header") },
+                      { value: "sections", label: t("sections") },
+                    ]}
+                    variant="background"
                     className="w-full"
-                  >
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="layout">{t("layout")}</TabsTrigger>
-                      <TabsTrigger value="header">{t("header")}</TabsTrigger>
-                      <TabsTrigger value="sections">
-                        {t("sections")}
-                      </TabsTrigger>
-                    </TabsList>
+                    showAllOption={false}
+                  />
                     {hasLayoutErrors && (
                       <Badge variant="destructive" size="sm">
                         {t("layout_error")}
@@ -549,16 +549,15 @@ export default function ReportBuilder({
                         {t("sections_error")}
                       </Badge>
                     )}
-                    <TabsContent value="layout">
+                    {activeTab === "layout" && (
                       <LayoutBuilder form={form} />
-                    </TabsContent>
-                    <TabsContent value="header">
+                    )}
+                    {activeTab === "header" && (
                       <HeaderBuilder form={form} />
-                    </TabsContent>
-                    <TabsContent value="sections">
+                    )}
+                    {activeTab === "sections" && (
                       <SectionBuilder form={form} facilityId={facilityId} />
-                    </TabsContent>
-                  </Tabs>
+                    )}
                 </CardContent>
               </Card>
               <ReportBuilderPreview form={form} />

@@ -15,7 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { RelativeDatePicker } from "@/components/ui/relative-date-picker";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs"
 
 interface CombinedDatePickerProps {
   value?: Date;
@@ -78,30 +78,36 @@ export function CombinedDatePicker({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align={popoverAlign}>
-          <Tabs
+          <FilterTabs
             value={activeTab}
             onValueChange={(v) => setActiveTab(v as "absolute" | "relative")}
-          >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="absolute">{t("absolute_date")}</TabsTrigger>
-              <TabsTrigger value="relative">{t("quick_finder")}</TabsTrigger>
-            </TabsList>
-            <TabsContent value="absolute" className="p-0">
-              <Calendar
+            options={[
+              {value: "absolute", label: t("absolute_date")},
+              {value: "relative", label: t("quick_finder")}
+            ]}
+            variant="underline"
+            showAllOption={false}
+            className="grid w-full grid-cols-2"
+          />
+            {activeTab === "absolute" && (
+              <div className="p-0">
+                <Calendar
                 mode="single"
                 selected={value}
                 onSelect={handleSelect}
                 disabled={blockDate}
               />
-            </TabsContent>
-            <TabsContent value="relative" className="p-0">
-              <RelativeDatePicker
+              </div>
+            )}
+            {activeTab === "relative" && (
+              <div className="p-0">
+                <RelativeDatePicker
                 value={value}
                 onDateChange={handleRelativeDateChange}
                 disabled={blockDate}
               />
-            </TabsContent>
-          </Tabs>
+              </div>
+            )}
         </PopoverContent>
       </Popover>
     </div>

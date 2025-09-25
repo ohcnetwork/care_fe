@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
 import SearchInput from "@/components/Common/SearchInput";
@@ -92,6 +92,39 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
 
   const resources = queryResources?.results || [];
 
+  // --- FilterTabs options ---
+  const directionTabs = [
+    {
+      value: "outgoing",
+      label: "outgoing",
+      icon: <CareIcon icon="l-arrow-up-right" className="size-4" />,
+    },
+    {
+      value: "incoming",
+      label: "incoming",
+      icon: <CareIcon icon="l-arrow-down-left" className="size-4" />,
+    },
+  ];
+
+  const statusTabs = [
+    { value: "active", label: "active" },
+    { value: "completed", label: "completed" },
+  ];
+
+  const statusTabsWithIcons = currentStatuses.map((statusOption) => ({
+    value: statusOption,
+    label: `resource_status__${statusOption}`,
+    icon: (
+      <CareIcon
+        icon={
+          RESOURCE_STATUS_CHOICES.find((o) => o.text === statusOption)?.icon ||
+          "l-folder-open"
+        }
+        className="size-4"
+      />
+    ),
+  }));
+
   return (
     <Page
       title={t("resource")}
@@ -129,67 +162,44 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   }
                 />
                 <div>
-                  <Tabs value={incoming ? "incoming" : "outgoing"}>
-                    <TabsList className="inline-flex bg-transparent p-0 h-8 w-full">
-                      <TabsTrigger
-                        value="outgoing"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
-                        onClick={() => updateQuery({ incoming: false })}
-                        data-cy="tab-outgoing"
-                      >
-                        {t("outgoing")}
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="incoming"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
-                        onClick={() => updateQuery({ incoming: true })}
-                        data-cy="tab-incoming"
-                      >
-                        {t("incoming")}
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
+                  <FilterTabs
+                    value={incoming ? "incoming" : "outgoing"}
+                    onValueChange={(val) =>
+                      updateQuery({ incoming: val === "incoming" })
+                    }
+                    options={directionTabs}
+                    variant="background"
+                    className="w-full"
+                    showAllOption={false}
+                    maxVisibleTabs={2}
+                  />
                 </div>
                 <div className="sm:hidden block">
-                  <Tabs value={isActive ? "active" : "completed"}>
-                    <TabsList className="bg-transparent p-0 h-8 w-full">
-                      <TabsTrigger
-                        value="active"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
-                        onClick={() => updateQuery({ status: "pending" })}
-                      >
-                        {t("active")}
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="completed"
-                        className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
-                        onClick={() => updateQuery({ status: "completed" })}
-                      >
-                        {t("completed")}
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
+                  <FilterTabs
+                    value={isActive ? "active" : "completed"}
+                    onValueChange={(val) =>
+                      updateQuery({
+                        status: val === "active" ? "pending" : "completed",
+                      })
+                    }
+                    options={statusTabs}
+                    variant="background"
+                    className="w-full"
+                    showAllOption={false}
+                    maxVisibleTabs={2}
+                  />
                 </div>
               </div>
               <div className="hidden sm:block">
-                <Tabs value={isActive ? "active" : "completed"}>
-                  <TabsList className="bg-transparent p-0 h-8">
-                    <TabsTrigger
-                      value="active"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() => updateQuery({ status: "pending" })}
-                    >
-                      {t("active")}
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="completed"
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() => updateQuery({ status: "completed" })}
-                    >
-                      {t("completed")}
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
+                <FilterTabs
+                  value={currentStatus}
+                  onValueChange={(val) => updateQuery({ status: val })}
+                  options={statusTabsWithIcons}
+                  variant="background"
+                  className="w-full"
+                  showAllOption={false}
+                  maxVisibleTabs={8}
+                />
               </div>
             </div>
 
@@ -213,31 +223,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   </SelectContent>
                 </Select>
               </div>
-
-              {/* Desktop Tabs */}
-              <Tabs value={currentStatus} className="hidden sm:block w-full">
-                <TabsList className="bg-transparent p-0 h-auto flex-wrap justify-start gap-y-2 overflow-auto">
-                  {currentStatuses.map((statusOption) => (
-                    <TabsTrigger
-                      key={statusOption}
-                      value={statusOption}
-                      className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      data-cy={`tab-${statusOption}`}
-                      onClick={() => updateQuery({ status: statusOption })}
-                    >
-                      <CareIcon
-                        icon={
-                          RESOURCE_STATUS_CHOICES.find(
-                            (o) => o.text === statusOption,
-                          )?.icon || "l-folder-open"
-                        }
-                        className="size-4"
-                      />
-                      {t(`resource_status__${statusOption}`)}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
             </div>
           </div>
         </div>

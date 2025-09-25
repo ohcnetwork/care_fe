@@ -31,7 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -331,32 +331,20 @@ export function ValueSetList() {
 
         <div className="mt-8 mb-4">
           <div className="w-full overflow-x-auto pb-1">
-            <Tabs
-              defaultValue="active"
-              value={qParams.status || "active"}
-              onValueChange={(value) => updateQuery({ status: value })}
-            >
-              <div className="min-w-[480px]">
-                <TabsList className="flex w-full">
-                  <TabsTrigger value="active" className="flex-1">
-                    <FileCheckIcon className="size-4" />
-                    {t("active")}
-                  </TabsTrigger>
-                  <TabsTrigger value="draft" className="flex-1">
-                    <NotepadTextDashedIcon className="size-4" />
-                    {t("draft")}
-                  </TabsTrigger>
-                  <TabsTrigger value="retired" className="flex-1">
-                    <ArchiveIcon className="size-4" />
-                    {t("retired")}
-                  </TabsTrigger>
-                  <TabsTrigger value="unknown" className="flex-1">
-                    <HelpCircle className="size-4" />
-                    {t("unknown")}
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-            </Tabs>
+            <div className="min-w-[480px]">
+              <FilterTabs
+                value={qParams.status || "active"}
+                onValueChange={(v) => updateQuery({status: v})}
+                options={[
+                  {value: "active", label: t("active"), icon:<FileCheckIcon className="size-4" />},
+                  {value: "draft", label: t("draft"), icon: <NotepadTextDashedIcon className="size-4" />},
+                  {value: "retired", label: t("retired"), icon: <ArchiveIcon className="size-4" />},
+                  {value: "unknown", label: t("unknown"), icon: <HelpCircle className="size-4" />}
+                ]}
+                className="flex w-full"
+                showAllOption={false}
+              />
+            </div>
           </div>
         </div>
 

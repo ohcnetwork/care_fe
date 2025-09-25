@@ -37,7 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import query from "@/Utils/request/query";
 import { ReportTemplateFormData } from "@/pages/Encounters/ReportBuilder/schema";
@@ -759,22 +759,20 @@ function SectionItem({
             </div>
           </div>
 
-          <Tabs
+          <FilterTabs
             value={activeTab}
             onValueChange={(value) => onTabChange(index, value)}
-          >
-            <TabsList className="overflow-x-auto w-full">
-              <TabsTrigger value="basic" className="w-full">
-                {t("basic_settings")}
-              </TabsTrigger>
-              {dataSource && (
-                <TabsTrigger value="fields" className="w-full">
-                  {t("fields_columns")}
-                </TabsTrigger>
-              )}
-            </TabsList>
+            options={[
+              { value: "basic", label: t("basic_settings") },
+              { value: "fields", label: t("fields_columns") },
+            ]}
+            showAllOption={false}
+            variant="underline"
+            className="overflow-x-auto w-full"
+          />
 
-            <TabsContent value="basic" className="space-y-4 mt-4">
+          {activeTab === "basic" && (
+            <div className="space-y-4 mt-4">
               <SectionBasicSettings
                 form={form}
                 index={index}
@@ -783,20 +781,22 @@ function SectionItem({
                 isEnabled={isEnabled}
                 isTable={isTable}
               />
-            </TabsContent>
+            </div>
+          )}
 
             {dataSource && (
-              <TabsContent value="fields" className="space-y-4 mt-4">
-                <SectionFieldsAndColumns
+              activeTab === "fields" && (
+                <div className="space-y-4 mt-4">
+                  <SectionFieldsAndColumns
                   form={form}
                   index={index}
                   availableSections={availableSections}
                   isEnabled={isEnabled}
                   isTable={isTable}
                 />
-              </TabsContent>
+                </div>
+              )
             )}
-          </Tabs>
         </div>
       </CardContent>
     </Card>

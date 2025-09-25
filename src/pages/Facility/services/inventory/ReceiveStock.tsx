@@ -22,6 +22,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
 
@@ -326,12 +327,17 @@ function AddItemForm({
     setOpen(false);
   };
 
+  const tabOptions = [
+    { value: "requested", label: "requested_items" },
+    { value: "additional", label: "additional_item" },
+  ];
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent className="w-full sm:max-w-2xl p-3">
         <ScrollArea className="h-[calc(100vh-8rem)] mt-6 p-3">
           <div className="flex flex-col gap-2">
-            <Tabs
+            <FilterTabs
               value={activeTab}
               onValueChange={(value) => {
                 setActiveTab(value);
@@ -343,94 +349,90 @@ function AddItemForm({
                   _is_additional: value === "additional",
                 }));
               }}
-            >
-              <TabsList className="w-full flex flex-row">
-                <TabsTrigger value="requested" className="w-full">
-                  {t("requested_items")}
-                </TabsTrigger>
-                <TabsTrigger value="additional" className="w-full">
-                  {t("additional_item", { count: 2 })}
-                </TabsTrigger>
-              </TabsList>
+              options={tabOptions}
+              variant="background"
+              className="mb-2"
+              showAllOption={false}
+              maxVisibleTabs={2}
+            />
 
-              <div className="bg-gray-100 p-3 rounded flex flex-col gap-2">
-                <TabsContent value="requested">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">
-                      {t("received_item")}
-                    </label>
-                    <SupplyRequestSelect
-                      value={
-                        currentEntry.supply_request
-                          ? (currentEntry.supply_request as SupplyRequestRead)
-                          : undefined
-                      }
-                      onChange={(value) => {
-                        if (value && value.quantity) {
-                          setCurrentEntry((prev) => ({
-                            ...prev,
-                            supply_request: value,
-                            supplied_item_quantity: value.quantity,
-                            _product_knowledge: value.item,
-                            supplied_item: null,
-                          }));
-                        } else {
-                          setCurrentEntry((prev) => ({
-                            ...prev,
-                            supply_request: null,
-                            _product_knowledge: null,
-                            supplied_item: null,
-                          }));
-                        }
-                      }}
-                      locationId={locationId}
-                      placeholder={t("select_item")}
-                      inputPlaceholder={t("search_items")}
-                      noOptionsMessage={t("no_items_found")}
-                      supplier={supplier}
-                      enabled={open}
-                    />
-                  </div>
-                </TabsContent>
-                <TabsContent value="additional">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium">
-                      {t("received_item")}
-                    </label>
-                    <ProductKnowledgeSelect
-                      value={
-                        currentEntry._product_knowledge
-                          ? (currentEntry._product_knowledge as ProductKnowledgeBase)
-                          : undefined
-                      }
-                      onChange={(productKnowledge) => {
-                        setCurrentEntry((prev) => ({
-                          ...prev,
-                          _product_knowledge: productKnowledge,
-                          supplied_item: null,
-                        }));
-                      }}
-                    />
-                  </div>
-                </TabsContent>
+            <div className="bg-gray-100 p-3 rounded flex flex-col gap-2">
+              {activeTab === "requested" && (
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium">
-                    {t("received_quantity")}
+                    {t("received_item")}
                   </label>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={currentEntry.supplied_item_quantity || 0}
-                    onChange={(e) =>
-                      setCurrentEntry((prev) => ({
-                        ...prev,
-                        supplied_item_quantity: Number(e.target.value),
-                      }))
+                  <SupplyRequestSelect
+                    value={
+                      currentEntry.supply_request
+                        ? (currentEntry.supply_request as SupplyRequestRead)
+                        : undefined
                     }
+                    onChange={(value) => {
+                      if (value && value.quantity) {
+                        setCurrentEntry((prev) => ({
+                          ...prev,
+                          supply_request: value,
+                          supplied_item_quantity: value.quantity,
+                          _product_knowledge: value.item,
+                          supplied_item: null,
+                        }));
+                      } else {
+                        setCurrentEntry((prev) => ({
+                          ...prev,
+                          supply_request: null,
+                          _product_knowledge: null,
+                          supplied_item: null,
+                        }));
+                      }
+                    }}
+                    locationId={locationId}
+                    placeholder={t("select_item")}
+                    inputPlaceholder={t("search_items")}
+                    noOptionsMessage={t("no_items_found")}
+                    supplier={supplier}
+                    enabled={open}
                   />
                 </div>
+              )}
+              {activeTab === "additional" && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">
+                    {t("received_item")}
+                  </label>
+                  <ProductKnowledgeSelect
+                    value={
+                      currentEntry._product_knowledge
+                        ? (currentEntry._product_knowledge as ProductKnowledgeBase)
+                        : undefined
+                    }
+                    onChange={(productKnowledge) => {
+                      setCurrentEntry((prev) => ({
+                        ...prev,
+                        _product_knowledge: productKnowledge,
+                        supplied_item: null,
+                      }));
+                    }}
+                  />
+                </div>
+              )}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">
+                  {t("received_quantity")}
+                </label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={currentEntry.supplied_item_quantity || 0}
+                  onChange={(e) =>
+                    setCurrentEntry((prev) => ({
+                      ...prev,
+                      supplied_item_quantity: Number(e.target.value),
+                    }))
+                  }
+                />
               </div>
-            </Tabs>
+            </div>
             <ProductSearch
               key={`${activeTab}-product-search`}
               facilityId={facilityId}

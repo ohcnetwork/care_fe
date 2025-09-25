@@ -1,7 +1,5 @@
 import { navigate } from "raviger";
-
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { EncounterList } from "@/pages/Encounters/EncounterList";
 import LocationList from "@/pages/Facility/locations/LocationList";
 import { EncounterClass } from "@/types/emr/encounter/encounter";
@@ -21,24 +19,31 @@ export default function EncountersOverview({
 }: EncountersOverviewProps) {
   return (
     <div className="h-full">
-      <Tabs
+      <FilterTabs
         value={tab}
-        className="h-full"
-        onValueChange={(value) => {
-          navigate(`/facility/${facilityId}/encounters/${value}`);
-        }}
-      >
-        <TabsContent value="patients">
-          <EncounterList
-            facilityId={facilityId}
-            encounterClass={encounterClass}
-          />
-        </TabsContent>
+        onValueChange={(value) =>
+          navigate(`/facility/${facilityId}/encounters/${value}`)
+        }
+        options={[
+          { value: "patients", label: "patients" },
+          { value: "locations", label: "locations" },
+        ]}
+        variant="background"
+        className="mb-4"
+        showAllOption={false}
+        maxVisibleTabs={2}
+      />
 
-        <TabsContent value="locations">
-          <LocationList facilityId={facilityId} locationId={locationId} />
-        </TabsContent>
-      </Tabs>
+      {tab === "patients" && (
+        <EncounterList
+          facilityId={facilityId}
+          encounterClass={encounterClass}
+        />
+      )}
+
+      {tab === "locations" && (
+        <LocationList facilityId={facilityId} locationId={locationId} />
+      )}
     </div>
   );
 }
