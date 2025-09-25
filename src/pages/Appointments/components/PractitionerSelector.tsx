@@ -59,7 +59,7 @@ const getColorForTag = (uuid: string) => {
   return COLOR_PALETTE[hash % COLOR_PALETTE.length];
 };
 
-interface MultiPractitionerSelectorProps {
+interface Props {
   selected: UserReadMinimal[];
   onSelect: (users: UserReadMinimal[]) => void;
   facilityId: string;
@@ -73,7 +73,7 @@ export const PractitionerSelector = ({
   selected,
   onSelect,
   multiple = true,
-}: MultiPractitionerSelectorProps) => {
+}: Props) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -171,7 +171,7 @@ export const PractitionerSelector = ({
   };
 
   const handleUserSelect = (user: UserReadMinimal) => {
-    if (selected) {
+    if (selected && multiple) {
       onSelect([...selected, user]);
     } else {
       onSelect([user]);
@@ -179,6 +179,9 @@ export const PractitionerSelector = ({
     // Close the sidebar after selection
     setCurrentOrganizationId(null);
     setNavigationStack([]);
+    if (!multiple) {
+      setOpen(false);
+    }
   };
 
   const handleBackNavigation = () => {
