@@ -153,7 +153,7 @@ export default function DiagnosticReportPrint({
       <PrintPreview
         title={`${t("diagnostic_report")} - ${report.code?.display || "diagnostic_report"}`}
       >
-        <div className="min-h-screen py-8 max-w-4xl mx-auto">
+        <div className="py-8 max-w-4xl mx-auto">
           {/* Header with Facility Name and Logo */}
           <div className="flex justify-between items-start pb-6 border-b border-gray-200">
             <div className="space-y-4 flex-1">

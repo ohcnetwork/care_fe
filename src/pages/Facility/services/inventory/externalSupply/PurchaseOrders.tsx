@@ -116,7 +116,7 @@ export function PurchaseOrders({ facilityId, locationId }: Props) {
   const selectedProduct = productKnowledges.find((p) => p.id === qParams.item);
 
   const renderFilters = () => (
-    <div className="flex items-center gap-4">
+    <div className="flex flex-col md:flex-row gap-4">
       <ProductKnowledgeSelect
         value={selectedProduct}
         onChange={(product) => updateQuery({ item: product?.id })}
