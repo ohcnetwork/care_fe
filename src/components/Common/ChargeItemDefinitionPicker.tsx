@@ -599,7 +599,7 @@ export function ChargeItemDefinitionPicker({
                               </div>
                             )}
                             {definition.price_components?.[0] && (
-                              <div className="text-xs text-green-600 mt-0.5">
+                              <div className="text-xs mt-0.5">
                                 {definition.price_components[0].amount}{" "}
                                 {definition.price_components[0].code?.code ||
                                   "INR"}
