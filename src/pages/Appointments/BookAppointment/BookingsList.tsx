@@ -8,10 +8,10 @@ import {
   Appointment,
   APPOINTMENT_STATUS_COLORS,
   AppointmentStatus,
-  CancelledAppointmentStatus,
+  CancelledAppointmentStatuses,
   formatScheduleResourceName,
-  PastAppointmentStatus,
-  UpcomingAppointmentStatus,
+  PastAppointmentStatuses,
+  UpcomingAppointmentStatuses,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
@@ -70,14 +70,14 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              status={UpcomingAppointmentStatus}
+              statuses={UpcomingAppointmentStatuses}
             />
           </TabsContent>
           <TabsContent value="past" className="space-y-4 overflow-x-scroll">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              status={PastAppointmentStatus}
+              statuses={PastAppointmentStatuses}
             />
           </TabsContent>
           <TabsContent
@@ -87,7 +87,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              status={CancelledAppointmentStatus}
+              statuses={CancelledAppointmentStatuses}
             />
           </TabsContent>
         </div>
@@ -290,11 +290,11 @@ const AppointmentTable = ({
 export const BookingListContent = ({
   patientId,
   facilityId,
-  status,
+  statuses,
 }: {
   patientId: string;
   facilityId?: string;
-  status?: readonly AppointmentStatus[];
+  statuses?: readonly AppointmentStatus[];
 }) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
@@ -306,7 +306,7 @@ export const BookingListContent = ({
     fetchNextPage,
     isLoading,
   } = useInfiniteQuery({
-    queryKey: ["infinite-appointments", patientId, facilityId, status],
+    queryKey: ["infinite-appointments", patientId, facilityId, statuses],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(scheduleApi.appointments.getAppointments, {
         pathParams: { patientId },
@@ -314,7 +314,7 @@ export const BookingListContent = ({
           offset: pageParam,
           limit: 15,
           facility: facilityId,
-          status: status?.join(","),
+          status: statuses?.join(","),
         },
       })({ signal });
       return response;

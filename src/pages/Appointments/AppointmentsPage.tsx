@@ -71,7 +71,7 @@ import {
   APPOINTMENT_STATUS_COLORS,
   AppointmentRead,
   AppointmentStatus,
-  CancelledAppointmentStatus,
+  CancelledAppointmentStatuses,
   formatScheduleResourceName,
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
@@ -130,7 +130,7 @@ const getStatusGroups = (t: TFunction): AppointmentStatusGroup[] => {
     },
     {
       label: t("non_fulfilled"),
-      statuses: CancelledAppointmentStatus,
+      statuses: CancelledAppointmentStatuses,
     },
   ];
 };

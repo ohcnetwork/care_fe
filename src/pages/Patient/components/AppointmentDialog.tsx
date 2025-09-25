@@ -36,7 +36,7 @@ import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   Appointment,
-  AppointmentFinalStatus,
+  AppointmentFinalStatuses,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 
@@ -115,7 +115,7 @@ function AppointmentDialog({
             <span className="text-sm font-semibold text-blue-700">
               {t(appointment.status)}
             </span>
-            {!AppointmentFinalStatus.includes(appointment.status) && (
+            {!AppointmentFinalStatuses.includes(appointment.status) && (
               <span className="flex flex-row gap-2">
                 <AlertDialog
                   open={isCancelDialogOpen}
