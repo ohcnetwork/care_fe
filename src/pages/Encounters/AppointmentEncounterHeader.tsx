@@ -14,6 +14,7 @@ import { EncounterEdit, EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
   AppointmentRead,
+  AppointmentStatus,
   AppointmentUpdateRequest,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
@@ -135,7 +136,7 @@ export const AppointmentEncounterHeader = ({
         method: scheduleApi.appointments.update.method,
         reference_id: "appointment-closed",
         body: {
-          status: "fulfilled",
+          status: AppointmentStatus.FULFILLED,
           note: appointment.note,
         },
       },
@@ -183,7 +184,7 @@ export const AppointmentEncounterHeader = ({
         method: scheduleApi.appointments.update.method,
         reference_id: "appointment-closed",
         body: {
-          status: "fulfilled",
+          status: AppointmentStatus.FULFILLED,
           note: appointment.note,
         },
       },
@@ -225,7 +226,7 @@ export const AppointmentEncounterHeader = ({
       options.push("mark_token_fulfilled");
     }
 
-    if (encounter.appointment?.status !== "fulfilled") {
+    if (encounter.appointment?.status !== AppointmentStatus.FULFILLED) {
       options.push("close_appointment");
     }
 
