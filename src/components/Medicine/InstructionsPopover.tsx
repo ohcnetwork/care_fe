@@ -4,20 +4,21 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { isAppleDevice } from "@/Utils/utils";
 
 import { Code } from "@/types/base/code/code";
 
@@ -139,23 +140,25 @@ export default function InstructionsPopover({
 
   if (isMobile) {
     return (
-      <Sheet>
-        <SheetTrigger asChild>
+      <Drawer repositionInputs={!isAppleDevice}>
+        <DrawerTrigger asChild>
           {TriggerButton(currentInstructions, disabledButton)}
-        </SheetTrigger>
-        <SheetContent side="bottom" className="p-4">
-          <SheetHeader className="mb-2">
-            {t("additional_instructions")}
-          </SheetHeader>
-          <InstructionContentSection
-            currentInstructions={currentInstructions}
-            isReadOnly={isReadOnly}
-            disabled={disabled}
-            removeInstruction={removeInstruction}
-            addInstruction={addInstruction}
-          />
-        </SheetContent>
-      </Sheet>
+        </DrawerTrigger>
+        <DrawerContent className="min-h-[60vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
+          <div className="p-3 pb-[env(safe-area-inset-bottom)]">
+            <DrawerHeader className="sticky top-0 z-10 bg-white">
+              {t("additional_instructions")}
+            </DrawerHeader>
+            <InstructionContentSection
+              currentInstructions={currentInstructions}
+              isReadOnly={isReadOnly}
+              disabled={disabled}
+              removeInstruction={removeInstruction}
+              addInstruction={addInstruction}
+            />
+          </div>
+        </DrawerContent>
+      </Drawer>
     );
   }
 
