@@ -147,8 +147,8 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
         </div>
       </div>
 
-      <Card className="flex flex-col flex-1 min-h-80">
-        <CardHeader className="flex-shrink-0">
+      <Card className="flex flex-col min-h-80">
+        <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>{t("permissions")}</CardTitle>
             <div className="flex gap-2">
@@ -181,7 +181,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex-1 overflow-auto">
+        <CardContent className="overflow-auto">
           <div className="space-y-3 h-full pr-2">
             {permissions.map((permission, index) => (
               <div
@@ -218,7 +218,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end space-x-2 flex-shrink-0">
+      <div className="flex justify-end space-x-2">
         <Button
           type="button"
           variant="outline"
