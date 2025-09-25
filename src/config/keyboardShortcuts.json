@@ -4,7 +4,7 @@
     { "key": "shift+?", "action": "show-shortcuts", "description": "Show Keyboard Shortcuts", "when": "always" },
     { "key": "esc", "action": "cancel-action", "description": "Cancel Current Action", "when": "always" },
     { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action", "when": "always" },
-    { "key": "arrowLeft", "action": "go-back", "description": "Go Back", "when": "always" },
+    { "key": "shift+arrowLeft", "action": "go-back", "description": "Go Back", "when": "always" },
     { "key": "enter", "action": "enter-action", "description": "Enter Current Action", "when": "always" }
     
   ],
@@ -29,7 +29,8 @@
 
   "facility:appointment": [
     { "key": "2", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
-    { "key": "1", "action": "start-consultation", "description": "Start Consultation", "when": "always" }
+    { "key": "1", "action": "start-consultation", "description": "Start Consultation", "when": "always" },
+    { "key": "3", "action": "print-appointment", "description": "Print Appointment", "when": "always" }
   ],
 
   "facility:billing": [
@@ -38,6 +39,13 @@
 
   "facility:pharmacy": [
     { "key": "d", "action": "dispense-button", "description": "Dispense Medication", "when": "always" }
+  ],
+
+"facility:pharmacy:supply-delivery": [
+    { "key": "shift+enter", "action": "mark-as-received", "description": "Mark as Received", "when": "always" },
+    { "key": "w", "action": "proceed-without-marking", "description": "Proceed without Marking", "when": "always" },
+    { "key": "enter", "action": "proceed-with-marking", "description": "Proceed with Marking", "when": "always" }
+
   ],
 
   "facility:billing:invoice": [

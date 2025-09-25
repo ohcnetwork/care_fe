@@ -21,19 +21,19 @@ import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
-type PrintQuestionnaireQuestionnaireResponsesProps = {
+type PrintAllQuestionnaireResponsesProps = {
   questionnaireId: string;
   patientId: string;
   encounterId?: string;
   facilityId?: string;
 };
 
-export function PrintQuestionnaireQuestionnaireResponses({
+export function PrintAllQuestionnaireResponses({
   questionnaireId,
   encounterId,
   patientId,
   facilityId,
-}: PrintQuestionnaireQuestionnaireResponsesProps) {
+}: PrintAllQuestionnaireResponsesProps) {
   const { t } = useTranslation();
 
   const { data: encounter } = useQuery({
@@ -81,7 +81,7 @@ export function PrintQuestionnaireQuestionnaireResponses({
       title={t("questionnaire_response_logs")}
       disabled={!questionnaireResponses?.results?.length}
     >
-      <div className="min-h-screen md:p-2 max-w-4xl mx-auto">
+      <div className="md:p-2 max-w-4xl mx-auto">
         <div>
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
             <img
