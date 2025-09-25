@@ -6,7 +6,7 @@ import PrintAppointments from "@/pages/Appointments/components/PrintAppointments
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
-import { useRoutes } from "raviger";
+import { Redirect, useRoutes } from "raviger";
 import HealthcareServiceShow from "./HealthcareServiceShow";
 
 interface ServiceLayoutProps {
@@ -54,6 +54,11 @@ const getRoutes = (facilityId: string, serviceId: string) => ({
       facilityId={facilityId}
       resourceType={SchedulableResourceType.HealthcareService}
       resourceId={serviceId}
+    />
+  ),
+  "/queues/:queueId": ({ queueId }: { queueId: string }) => (
+    <Redirect
+      to={`/facility/${facilityId}/services/${serviceId}/queues/${queueId}/ongoing`}
     />
   ),
   "/queues/:queueId/ongoing": ({ queueId }: { queueId: string }) => (

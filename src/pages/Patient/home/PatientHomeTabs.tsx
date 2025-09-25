@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Appointments } from "@/components/Patient/PatientDetailsTab/Appointments";
+import PatientTokensList from "@/components/Tokens/PatientTokensList";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { FacilityRead } from "@/types/facility/facility";
 import PatientHomeEncounters from "./PatientHomeEncounters";
-import PatientHomeTokens from "./PatientHomeTokens";
 
 interface PatientHomeTabsProps {
   patientId: string;
-  facilityId: string;
+  facility: FacilityRead;
   facilityPermissions: string[];
   canListEncounters: boolean;
   canWriteAppointment: boolean;
@@ -18,7 +20,7 @@ interface PatientHomeTabsProps {
 
 export default function PatientHomeTabs({
   patientId,
-  facilityId,
+  facility,
   facilityPermissions,
   canListEncounters,
   canWriteAppointment,
@@ -27,6 +29,7 @@ export default function PatientHomeTabs({
 }: PatientHomeTabsProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("encounters");
+  const isTab = useBreakpoints({ default: true, lg: false });
 
   const tabs = [
     { id: "encounters", label: t("encounters"), alwaysVisible: true },
@@ -35,8 +38,19 @@ export default function PatientHomeTabs({
       label: t("appointments"),
       visible: canWriteAppointment,
     },
-    { id: "tokens", label: t("tokens"), visible: canCreateToken },
+    { id: "tokens", label: t("tokens"), visible: canCreateToken && isTab },
   ].filter((tab) => tab.alwaysVisible || tab.visible);
+
+  useEffect(() => {
+    if (!isTab && activeTab === "tokens") {
+      const fallbackTab = tabs.find(
+        (tab) => tab.id !== "tokens" && (tab.alwaysVisible || tab.visible),
+      );
+      if (fallbackTab) {
+        setActiveTab(fallbackTab.id);
+      }
+    }
+  }, [isTab, activeTab, tabs]);
 
   return (
     <div className="w-full">
@@ -64,7 +78,7 @@ export default function PatientHomeTabs({
         {activeTab === "encounters" && (
           <PatientHomeEncounters
             patientId={patientId}
-            facilityId={facilityId}
+            facilityId={facility.id}
             facilityPermissions={facilityPermissions}
             canListEncounters={canListEncounters}
           />
@@ -73,13 +87,13 @@ export default function PatientHomeTabs({
         {activeTab === "appointments" && canWriteAppointment && (
           <Appointments
             patientData={patientData}
-            facilityId={facilityId}
+            facilityId={facility.id}
             patientId={patientId}
           />
         )}
 
-        {activeTab === "tokens" && canCreateToken && (
-          <PatientHomeTokens patientId={patientId} facilityId={facilityId} />
+        {activeTab === "tokens" && canCreateToken && isTab && (
+          <PatientTokensList patientId={patientId} facility={facility} />
         )}
       </div>
     </div>

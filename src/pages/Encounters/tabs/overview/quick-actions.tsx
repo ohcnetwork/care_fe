@@ -61,6 +61,7 @@ export function QuickAction({
   shortcut,
   href,
   actionId,
+  onClick,
   ...props
 }: {
   icon: React.ReactNode;
@@ -68,6 +69,7 @@ export function QuickAction({
   shortcut?: string;
   href?: string;
   props?: React.ComponentProps<"div">;
+  onClick?: () => void;
   actionId?: string;
 }) {
   const content = (
@@ -98,7 +100,7 @@ export function QuickAction({
   }
 
   return (
-    <button className={className} {...props}>
+    <button className={className} {...props} onClick={onClick}>
       {content}
     </button>
   );
