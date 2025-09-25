@@ -234,7 +234,7 @@ export default defineConfig(({ mode }) => {
           type: "module",
         },
         injectManifest: {
-          maximumFileSizeToCacheInBytes: 7000000,
+          maximumFileSizeToCacheInBytes: 8000000,
         },
         manifest: {
           name: "Care",

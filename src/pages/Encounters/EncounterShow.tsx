@@ -29,6 +29,7 @@ import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/medicines";
 import { EncounterObservationsTab } from "@/pages/Encounters/tabs/observations";
 import { EncounterOverviewTab } from "@/pages/Encounters/tabs/overview";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/plots";
+import { EncounterResponsesTab } from "@/pages/Encounters/tabs/responses";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
@@ -135,6 +136,10 @@ export const EncounterShow = (props: Props) => {
       label: t(`ENCOUNTER_TAB__medicines`),
       component: <EncounterMedicinesTab />,
     },
+    responses: {
+      label: t(`ENCOUNTER_TAB__qnr_responses`),
+      component: <EncounterResponsesTab />,
+    },
     files: {
       label: t(`ENCOUNTER_TAB__files`),
       component: <EncounterFilesTab />,
@@ -186,10 +191,12 @@ export const EncounterShow = (props: Props) => {
       {primaryEncounter &&
         primaryEncounter.appointment?.id &&
         canWritePrimaryEncounter && (
-          <AppointmentEncounterHeader
-            appointment={primaryEncounter.appointment}
-            encounter={primaryEncounter}
-          />
+          <div className="flex items-center justify-center -mt-2 mb-2">
+            <AppointmentEncounterHeader
+              appointment={primaryEncounter.appointment}
+              encounter={primaryEncounter}
+            />
+          </div>
         )}
 
       <div className="flex flex-col gap-2">

@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   formatPhoneNumberIntl,
   isValidPhoneNumber,
 } from "react-phone-number-input";
 import { toast } from "sonner";
-import useKeyboardShortcut from "use-keyboard-shortcut";
 
 import { cn } from "@/lib/utils";
 
@@ -38,19 +37,23 @@ import SearchInput from "@/components/Common/SearchInput";
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import { useShortcuts, useShortcutSubContext } from "@/context/ShortcutContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
+  getPartialId,
   PartialPatientModel,
   PatientRead,
-  getPartialId,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [{ phone_number: phoneNumber = "" }, setPhoneNumberQuery] =
     useQueryParams();
+  const shortcuts = useShortcuts();
+  useShortcutSubContext();
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<
     PartialPatientModel | PatientRead | null
@@ -60,6 +63,12 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const { hasPermission } = usePermissions();
 
   const { facility } = useCurrentFacility();
+
+  // Enable shortcuts to work when this search component is active
+  useEffect(() => {
+    shortcuts.setIgnoreInputFields(true);
+    return () => shortcuts.setIgnoreInputFields(false);
+  }, [shortcuts]);
 
   const { canCreatePatient } = getPermissions(
     hasPermission,
@@ -74,10 +83,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     });
   }, [facilityId, phoneNumber]);
 
-  useKeyboardShortcut(["shift", "p"], handleCreatePatient, {
-    ignoreInputFields: false,
-  });
-
   function AddPatientButton({ outline }: { outline?: boolean }) {
     return (
       <Button
@@ -85,19 +90,11 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         className={cn("gap-3 group")}
         onClick={handleCreatePatient}
         data-cy="create-new-patient-button"
+        data-shortcut-id="submit-action"
       >
         <CareIcon icon="l-plus" className="size-4" />
         {t("add_new_patient")}
-        <kbd
-          className={cn(
-            "hidden h-5 select-none items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex",
-            outline
-              ? "border-gray-200 bg-transparent"
-              : "bg-white/20 border-white/20 text-white",
-          )}
-        >
-          ⇧P
-        </kbd>
+        <ShortcutBadge actionId="submit-action" className="bg-white" />
       </Button>
     );
   }
