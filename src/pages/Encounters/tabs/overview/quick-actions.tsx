@@ -18,10 +18,12 @@ import {
 } from "@/Utils/keyboardShortcutComponents";
 
 import { useEncounterShortcutDisplays } from "@/hooks/useEncounterShortcuts";
+import { FormDialog } from "./FormsDialog";
 
 export const QuickActions = (props: React.ComponentProps<"div">) => {
   const { t } = useTranslation();
   const getShortcutDisplay = useEncounterShortcutDisplays();
+
   return (
     <div
       {...props}
@@ -45,22 +47,28 @@ export const QuickActions = (props: React.ComponentProps<"div">) => {
         shortcut={getShortcutDisplay("add-diagnosis")}
         href={`questionnaire/diagnosis`}
       />
-      <QuickAction
-        icon={<HealthWorkerIcon className="text-teal-700" />}
-        title={t("forms")}
-        shortcut={getShortcutDisplay("add-questionnaire")}
-        href={`questionnaire`}
+      <FormDialog
+        subjectType="encounter"
+        questionnaireTag="encounter_actions"
+        trigger={
+          <QuickAction
+            icon={<HealthWorkerIcon className="text-teal-700" />}
+            title={t("forms")}
+            shortcut={getShortcutDisplay("add-questionnaire")}
+          />
+        }
       />
     </div>
   );
 };
-// function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+
 export function QuickAction({
   icon,
   title,
   shortcut,
   href,
   actionId,
+  onClick,
   ...props
 }: {
   icon: React.ReactNode;
@@ -68,9 +76,49 @@ export function QuickAction({
   shortcut?: string;
   href?: string;
   props?: React.ComponentProps<"div">;
+  onClick?: () => void;
   actionId?: string;
 }) {
-  const content = (
+  const className =
+    "flex-1 flex flex-row md:flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-white";
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        <QuickActionContent
+          icon={icon}
+          title={title}
+          shortcut={shortcut}
+          actionId={actionId}
+        />
+      </Link>
+    );
+  }
+
+  return (
+    <button className={className} {...props} onClick={onClick}>
+      <QuickActionContent
+        icon={icon}
+        title={title}
+        shortcut={shortcut}
+        actionId={actionId}
+      />
+    </button>
+  );
+}
+
+const QuickActionContent = ({
+  icon,
+  title,
+  shortcut,
+  actionId,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  shortcut?: string;
+  actionId?: string;
+}) => {
+  return (
     <>
       <div className="relative flex md:py-3 py-0 rounded-t-md rounded-b-lg md:bg-gray-100 bg-white">
         <KeyboardShortcutBadge shortcut={shortcut} position="top-right" />
@@ -85,21 +133,4 @@ export function QuickAction({
       </div>
     </>
   );
-
-  const className =
-    "flex-1 flex flex-row md:flex-col gap-1.25 p-1 pb-2 rounded-lg shadow bg-white";
-
-  if (href) {
-    return (
-      <Link href={href} className={className}>
-        {content}
-      </Link>
-    );
-  }
-
-  return (
-    <button className={className} {...props}>
-      {content}
-    </button>
-  );
-}
+};

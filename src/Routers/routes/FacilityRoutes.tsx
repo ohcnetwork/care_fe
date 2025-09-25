@@ -4,9 +4,8 @@ import FacilityUsers from "@/components/Facility/FacilityUsers";
 import ResourceCreate from "@/components/Resource/ResourceForm";
 
 import BedAvailabilityDashboard from "@/pages/Facility/BedAvailabilityDashboard";
-import { FacilityLayout } from "@/pages/Facility/FacilityLayout";
 
-import { AppRoutes, RouteParams } from "@/Routers/AppRouter";
+import { AppRoutes } from "@/Routers/AppRouter";
 import AccountList from "@/pages/Facility/billing/account/AccountList";
 import AccountShow from "@/pages/Facility/billing/account/AccountShow";
 import CreateInvoicePage from "@/pages/Facility/billing/account/CreateInvoice";
@@ -171,15 +170,4 @@ const FacilityRoutes: AppRoutes = {
   ),
 };
 
-const injectFacilityLayout = (routes: AppRoutes) => {
-  return Object.fromEntries(
-    Object.entries(routes).map(([key, value]) => [
-      key,
-      (args: RouteParams<string>) => (
-        <FacilityLayout>{value(args)}</FacilityLayout>
-      ),
-    ]),
-  );
-};
-
-export default injectFacilityLayout(FacilityRoutes);
+export default FacilityRoutes;

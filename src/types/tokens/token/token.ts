@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { PatientRead } from "@/types/emr/patient/patient";
 import {
   Appointment,
@@ -17,6 +18,18 @@ export enum TokenStatus {
   CANCELLED = "CANCELLED",
   ENTERED_IN_ERROR = "ENTERED_IN_ERROR",
 }
+
+export const TOKEN_STATUS_COLORS = {
+  UNFULFILLED: "secondary",
+  CREATED: "blue",
+  IN_PROGRESS: "yellow",
+  FULFILLED: "green",
+  CANCELLED: "destructive",
+  ENTERED_IN_ERROR: "destructive",
+} as const satisfies Record<
+  TokenStatus,
+  React.ComponentProps<typeof Badge>["variant"]
+>;
 
 export interface Token {
   id: string;

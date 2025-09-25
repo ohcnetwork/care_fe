@@ -22,13 +22,17 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { TokenGenerate } from "@/types/tokens/token/token";
 import { TokenCategoryRead } from "@/types/tokens/tokenCategory/tokenCategory";
 import tokenCategoryApis from "@/types/tokens/tokenCategory/tokenCategoryApi";
+import {
+  KeyboardShortcutBadge,
+  ShortcutBadge,
+} from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 interface TokenGenerationSheetProps {
   facilityId: string;
@@ -63,17 +67,26 @@ export function TokenGenerationSheet({
     enabled: isOpen && !!facilityId,
   });
 
-  // Set default category when categories are loaded
+  // Set default category when sheet opens and categories are available
   useEffect(() => {
-    if (tokenCategories?.results && tokenCategories.results.length > 0) {
+    if (
+      isOpen &&
+      tokenCategories?.results &&
+      tokenCategories.results.length > 0
+    ) {
       const defaultCategory = tokenCategories.results.find(
         (category) => category.default,
       );
       if (defaultCategory) {
         setSelectedCategory(defaultCategory.id);
+      } else {
+        // If no default category, reset to empty
+        setSelectedCategory("");
       }
+      // Always reset note when opening
+      setNote("");
     }
-  }, [tokenCategories]);
+  }, [isOpen, tokenCategories]);
 
   // Generate token mutation
   const { mutate: generateToken, isPending: isGenerating } = useMutation({
@@ -83,8 +96,6 @@ export function TokenGenerationSheet({
     onSuccess: () => {
       toast.success(t("token_generated_successfully"));
       setIsOpen(false);
-      setSelectedCategory("");
-      setNote("");
       onSuccess?.();
       // Invalidate appointment data to refresh
       queryClient.invalidateQueries({
@@ -172,13 +183,16 @@ export function TokenGenerationSheet({
                   variant="outline"
                   onClick={() => handleOpenChange(false)}
                   className="flex-1"
+                  data-shortcut-id="cancel-action"
                 >
+                  <KeyboardShortcutBadge shortcut="esc" />
                   {t("cancel")}
                 </Button>
                 <Button
                   onClick={handleGenerateToken}
                   disabled={!selectedCategory || isGenerating}
                   className="flex-1"
+                  data-shortcut-id="submit-action"
                 >
                   {isGenerating ? (
                     <>
@@ -186,7 +200,13 @@ export function TokenGenerationSheet({
                       {t("generating")}
                     </>
                   ) : (
-                    t("generate_token")
+                    <>
+                      {t("generate_token")}
+                      <ShortcutBadge
+                        actionId="submit-action"
+                        className="bg-gray-200"
+                      />
+                    </>
                   )}
                 </Button>
               </div>

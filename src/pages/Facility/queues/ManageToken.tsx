@@ -25,7 +25,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import Page from "@/components/Common/Page";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { renderTokenNumber, TokenStatus } from "@/types/tokens/token/token";
@@ -119,7 +119,7 @@ export default function ManageToken({
   const { t } = useTranslation();
   const { facility, isFacilityLoading } = useCurrentFacility();
 
-  useFacilityShortcuts();
+  useShortcutSubContext();
 
   const {
     data: token,
