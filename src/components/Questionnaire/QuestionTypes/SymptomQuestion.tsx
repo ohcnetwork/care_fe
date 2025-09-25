@@ -923,17 +923,15 @@ export function SymptomQuestion({
           onConfirm={handleConfirmSymptom}
           placeholder={addSymptomPlaceholder}
         >
-          <div className="space-y-4 p-3">
-            <SymptomRow
-              symptom={newSymptom as SymptomRequest}
-              index={-1}
-              disabled={disabled}
-              onUpdate={(_, updates) => {
-                setNewSymptom((prev) => ({ ...prev, ...updates }));
-              }}
-              onRemove={() => {}}
-            />
-          </div>
+          <SymptomRow
+            symptom={newSymptom as SymptomRequest}
+            index={-1}
+            disabled={disabled}
+            onUpdate={(_, updates) => {
+              setNewSymptom((prev) => ({ ...prev, ...updates }));
+            }}
+            onRemove={() => {}}
+          />
         </EntitySelectionSheet>
       ) : (
         <ValueSetSelect

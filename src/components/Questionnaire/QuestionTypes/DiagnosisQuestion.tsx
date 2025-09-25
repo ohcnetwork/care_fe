@@ -622,15 +622,13 @@ export function DiagnosisQuestion({
           onConfirm={handleConfirmDiagnosis}
           placeholder={addDiagnosisPlaceholder}
         >
-          <div className="space-y-4 p-3">
-            <DiagnosisDetailsForm
-              diagnosis={newDiagnosis}
-              onUpdate={(updates) =>
-                setNewDiagnosis((prev) => ({ ...prev, ...updates }))
-              }
-              disabled={disabled}
-            />
-          </div>
+          <DiagnosisDetailsForm
+            diagnosis={newDiagnosis}
+            onUpdate={(updates) =>
+              setNewDiagnosis((prev) => ({ ...prev, ...updates }))
+            }
+            disabled={disabled}
+          />
         </EntitySelectionSheet>
       ) : (
         <ValueSetSelect
