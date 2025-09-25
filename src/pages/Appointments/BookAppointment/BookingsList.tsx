@@ -1,6 +1,6 @@
 import { differenceInMinutes, format } from "date-fns";
 import { CalendarDays } from "lucide-react";
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import query from "@/Utils/request/query";
@@ -46,7 +46,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
     <div className="mt-2">
       <Tabs defaultValue="upcoming">
         <div className="flex flex-col gap-2">
-          <TabsList className="grid grid-cols-3 bg-gray-100 h-10">
+          <TabsList className="grid grid-cols-3 bg-gray-100 h-10 w-full sm:w-fit">
             <TabsTrigger
               value="upcoming"
               className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
@@ -194,16 +194,18 @@ const AppointmentTable = ({
           <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
             {t("status")}
           </TableHead>
-          <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
-            {t("actions")}
-          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody className="bg-white">
         {appointments.map((appointment) => (
           <TableRow
             key={appointment.id} // added key for React
-            className="shadow bg-white space-y-3 rounded-lg"
+            className="shadow bg-white space-y-3 rounded-lg cursor-pointer"
+            onClick={() =>
+              navigate(
+                `/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`,
+              )
+            }
           >
             <TableCell className="p-4">
               <div className="flex gap-2 items-start justify-start">
@@ -279,16 +281,6 @@ const AppointmentTable = ({
                   {t(appointment.status)}
                 </Badge>
               </div>
-            </TableCell>
-
-            <TableCell>
-              <Button variant="outline" className="text-gray-950">
-                <Link
-                  href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`}
-                >
-                  {t("see_details")}
-                </Link>
-              </Button>
             </TableCell>
           </TableRow>
         ))}
