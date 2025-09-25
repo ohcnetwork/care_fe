@@ -135,7 +135,7 @@ export function ServiceRequestDetails({
                 {t("requested by")}
               </div>
               <div className="font-semibold text-gray-700">
-                {request.created_by && formatName(request.created_by)}
+                {request.requester && formatName(request.requester)}
               </div>
             </div>
           </div>

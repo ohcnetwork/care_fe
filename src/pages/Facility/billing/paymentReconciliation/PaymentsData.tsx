@@ -277,7 +277,13 @@ export default function PaymentsData({
                     </TableCell>
                     <TableCell>{methodMap[payment.method]}</TableCell>
                     <TableCell>
-                      <MonetaryDisplay amount={payment.amount} />
+                      <MonetaryDisplay
+                        amount={String(
+                          payment.is_credit_note
+                            ? -payment.amount
+                            : payment.amount,
+                        )}
+                      />
                     </TableCell>
                     <TableCell>
                       <Badge

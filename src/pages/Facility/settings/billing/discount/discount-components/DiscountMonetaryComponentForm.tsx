@@ -1,11 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
+import { CompactConditionEditor } from "@/components/Billing/CompactConditionEditor";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -23,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Condition, conditionSchema } from "@/types/base/condition/condition";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { CodeSchema } from "@/types/base/code/code";
@@ -30,34 +33,9 @@ import {
   MonetaryComponentRead,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
-
-const formSchema = z
-  .object({
-    monetary_component_type: z.literal(MonetaryComponentType.discount),
-    code: CodeSchema.optional(),
-    factor: z.number().min(0).max(100).optional(),
-    amount: z
-      .string()
-      .refine((val) => !val || Number(val) >= 0, {
-        message: "Amount must be greater than or equal to 0",
-      })
-      .optional(),
-    title: z.string().min(1, { message: "field_required" }),
-  })
-  .refine((data) => data.factor != null || data.amount != null, {
-    message: "Either factor or amount must be provided",
-    path: ["factor", "amount"],
-  })
-  .refine(
-    (data) => {
-      // If there's a code, it must have a display value
-      return data.code == null || data.code.display.length > 0;
-    },
-    {
-      message: "Display text is required for custom codes",
-      path: ["code"],
-    },
-  );
+import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import query from "@/Utils/request/query";
+import { useQuery } from "@tanstack/react-query";
 
 interface DiscountMonetaryComponentFormProps {
   defaultValues?: MonetaryComponentRead;
@@ -73,11 +51,50 @@ export function DiscountMonetaryComponentForm({
     defaultValues?.factor != null ? "factor" : "amount",
   );
 
+  const formSchema = useMemo(
+    () =>
+      z
+        .object({
+          monetary_component_type: z.literal(MonetaryComponentType.discount),
+          code: CodeSchema.optional(),
+          factor: z.number().min(0).max(100).optional(),
+          amount: z
+            .string()
+            .refine((val) => !val || Number(val) >= 0, {
+              message: t("amount_must_be_greater_than_or_equal_to_0"),
+            })
+            .optional(),
+          title: z.string().min(1, { message: t("field_required") }),
+          conditions: z.array(conditionSchema).default([]),
+        })
+        .refine((data) => data.factor != null || data.amount != null, {
+          message: t("either_amount_or_factor_required"),
+          path: ["factor", "amount"],
+        })
+        .refine(
+          (data) => {
+            // If there's a code, it must have a display value
+            return data.code == null || data.code.display.length > 0;
+          },
+          {
+            message: t("display_text_is_required_for_custom_codes"),
+            path: ["code"],
+          },
+        ),
+    [t],
+  );
+
   const { facility } = useCurrentFacility();
   const discountCodes = [
     ...(facility?.instance_discount_codes || []),
     ...(facility?.discount_codes || []),
   ];
+
+  // Fetch available metrics for conditions
+  const { data: availableMetrics = [] } = useQuery({
+    queryKey: ["metrics"],
+    queryFn: query(chargeItemDefinitionApi.listMetrics, {}),
+  });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -87,6 +104,7 @@ export function DiscountMonetaryComponentForm({
       factor: defaultValues?.factor,
       amount: defaultValues?.amount,
       title: defaultValues?.title || "",
+      conditions: defaultValues?.conditions || [],
     },
   });
 
@@ -97,6 +115,15 @@ export function DiscountMonetaryComponentForm({
     } else {
       form.setValue("factor", undefined);
     }
+  };
+
+  // Handle condition changes
+  const handleConditionsChange = (conditions: Condition[]) => {
+    form.setValue("conditions", conditions, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    form.trigger("conditions");
   };
 
   return (
@@ -184,15 +211,28 @@ export function DiscountMonetaryComponentForm({
                 />
               )}
             </div>
-            <Select value={valueType} onValueChange={handleValueTypeChange}>
-              <SelectTrigger className="flex-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="factor">{t("factor")}</SelectItem>
-                <SelectItem value="amount">{t("amount")}</SelectItem>
-              </SelectContent>
-            </Select>
+            <FormField
+              control={form.control}
+              name="factor"
+              render={({ field: _field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Select
+                      value={valueType}
+                      onValueChange={handleValueTypeChange}
+                    >
+                      <SelectTrigger className="flex-1" ref={_field.ref}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="factor">{t("factor")}</SelectItem>
+                        <SelectItem value="amount">{t("amount")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
           <FormDescription>
             {valueType === "factor"
@@ -241,8 +281,26 @@ export function DiscountMonetaryComponentForm({
           />
         </div>
 
+        {/* Conditions */}
+        <Card>
+          <CardHeader className="p-4">
+            <CardTitle>{t("conditions")}</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <CompactConditionEditor
+              conditions={form.watch("conditions") || []}
+              availableMetrics={availableMetrics}
+              onChange={handleConditionsChange}
+            />
+          </CardContent>
+        </Card>
+
         <div className="pt-2">
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={!form.formState.isDirty}
+          >
             {t("save")}
           </Button>
         </div>
