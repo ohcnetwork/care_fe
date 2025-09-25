@@ -352,9 +352,9 @@ export function ProductFormContent({
               control={form.control}
               name="product_knowledge"
               render={({ field }) => {
-                const selectedProductKnowledge = productKnowledgeData?.find(
-                  (pk) => pk.slug === field.value,
-                );
+                const selectedProductKnowledge =
+                  productKnowledgeData?.find((pk) => pk.slug === field.value) ??
+                  existingData?.product_knowledge;
 
                 const isEditable = !isEditMode && !existingProductKnowledge;
 
@@ -374,7 +374,9 @@ export function ProductFormContent({
                         />
                       ) : (
                         <div className="px-3 py-2 border border-gray-300 rounded bg-gray-100 text-gray-700">
-                          {selectedProductKnowledge?.slug}
+                          {selectedProductKnowledge?.name ??
+                            selectedProductKnowledge?.slug ??
+                            t("product_knowledge_not_found")}
                         </div>
                       )}
                     </FormControl>
