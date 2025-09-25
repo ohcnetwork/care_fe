@@ -27,13 +27,17 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   patientList: Array<PartialPatientModel | PatientRead>;
-  handleOk: (action: string) => void;
+  onTransfer: () => void;
 }
 
-const DuplicatePatientDialog = (props: Props) => {
+const DuplicatePatientDialog = ({
+  open,
+  onOpenChange,
+  patientList,
+  onTransfer,
+}: Props) => {
   const { t } = useTranslation();
-  const { open, onOpenChange, patientList, handleOk } = props;
-  const [action, setAction] = useState("");
+  const [action, setAction] = useState<"transfer" | "close">();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -103,7 +107,9 @@ const DuplicatePatientDialog = (props: Props) => {
                   id="transfer"
                   name="confirm_action"
                   value="transfer"
-                  onChange={(e) => setAction(e.target.value)}
+                  onChange={(e) =>
+                    setAction(e.target.value as "transfer" | "close")
+                  }
                 />
                 <p>{t("duplicate_patient_record_confirmation")}</p>
               </label>
@@ -120,7 +126,9 @@ const DuplicatePatientDialog = (props: Props) => {
                   className="m-3 text-red-600 focus:ring-2 focus:ring-red-500"
                   name="confirm_action"
                   value="close"
-                  onChange={(e) => setAction(e.target.value)}
+                  onChange={(e) =>
+                    setAction(e.target.value as "transfer" | "close")
+                  }
                 />
                 <p>{t("duplicate_patient_record_rejection")}</p>
               </label>
@@ -132,7 +140,9 @@ const DuplicatePatientDialog = (props: Props) => {
         <DialogFooter>
           <div className="mt-4 flex flex-col justify-between sm:flex-row gap-2">
             <Button
-              onClick={() => handleOk(action)}
+              onClick={() =>
+                action === "transfer" ? onTransfer() : onOpenChange(false)
+              }
               disabled={!action}
               variant={"primary"}
             >

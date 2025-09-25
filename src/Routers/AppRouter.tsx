@@ -23,7 +23,11 @@ import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
 import AdminRoutes from "@/Routers/routes/adminRoutes";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDialog";
+import { Button } from "@/components/ui/button";
 import { PermissionProvider } from "@/context/PermissionContext";
+import { useShortcuts } from "@/context/ShortcutContext";
 import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
 import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
@@ -37,11 +41,13 @@ const PATHS_WITHOUT_SIDEBAR = [
   /^\/facility\/[^/]+\/services_requests\/[^/]+$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/to_receive\/[^/]+$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/to_dispatch\/[^/]+$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/create_delivery$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/requests\/[^/]+$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/requests\/[^/]+\/edit$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/purchase_orders\/new$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/purchase_orders\/[^/]+\/edit$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/external_supply\/deliveries\/[^/]+$/,
+  /^\/facility\/[^/]+\/queues\/[^/]+\/tokens\/[^/]+$/,
 ];
 
 export type RouteParams<T extends string> =
@@ -115,7 +121,7 @@ export default function AppRouter() {
     !PATHS_WITHOUT_SIDEBAR.some((path) =>
       typeof path === "string" ? path === currentPath : path.test(currentPath),
     );
-
+  const { commandDialogOpen, setCommandDialogOpen } = useShortcuts();
   const sidebarOpen = useSidebarState();
 
   return (
@@ -131,6 +137,14 @@ export default function AppRouter() {
           id="pages"
           className="flex flex-col flex-1 max-w-full min-h-[calc(100svh-(--spacing(4)))] md:m-2 md:peer-data-[state=collapsed]:ml-0 border border-gray-200 rounded-lg shadow-sm bg-gray-50 focus:outline-hidden"
         >
+          <Button onClick={() => setCommandDialogOpen(true)} className="hidden">
+            <ShortcutBadge actionId="show-shortcuts" />
+          </Button>
+
+          <ShortcutCommandDialog
+            open={commandDialogOpen}
+            onOpenChange={setCommandDialogOpen}
+          />
           <BrowserWarning />
           <div className="relative z-10 flex h-16 bg-white shadow-sm shrink-0 md:hidden">
             <div className="flex items-center">

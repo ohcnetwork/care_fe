@@ -9,13 +9,12 @@ import { Separator } from "@/components/ui/separator";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
-import { StatusBadge } from "@/pages/Encounters/EncounterProperties";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
-  ENCOUNTER_CLASSES_COLORS,
-  ENCOUNTER_CLASS_ICONS,
-  ENCOUNTER_PRIORITY_COLORS,
-} from "@/types/emr/encounter/encounter";
+  EncounterClassBadge,
+  StatusBadge,
+} from "@/pages/Encounters/EncounterProperties";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { ENCOUNTER_PRIORITY_COLORS } from "@/types/emr/encounter/encounter";
 
 export const EncounterDetails = () => {
   const { t } = useTranslation();
@@ -27,8 +26,6 @@ export const EncounterDetails = () => {
     canWriteSelectedEncounter,
   } = useEncounter();
   if (!encounter) return <CardListSkeleton count={1} />;
-
-  const EncounterClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
 
   return (
     <div className="flex flex-wrap gap-2 border bg-gray-100 border-gray-200 rounded-md pt-2 px-1 pb-1">
@@ -54,15 +51,7 @@ export const EncounterDetails = () => {
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium">{t("encounter_class")}: </span>
           <div>
-            <Badge
-              variant={ENCOUNTER_CLASSES_COLORS[encounter.encounter_class]}
-              size="sm"
-            >
-              <EncounterClassIcon className="size-3" />
-              <span className="whitespace-nowrap">
-                {t(`encounter_class__${encounter.encounter_class}`)}
-              </span>
-            </Badge>
+            <EncounterClassBadge encounter={encounter} />
           </div>
         </div>
         <div className="flex flex-col gap-1">

@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -51,18 +52,18 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
-import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
-
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
 import { dateQueryString } from "@/Utils/utils";
 import {
   calculateSlotDuration,
+  formatAvailabilityTime,
   getSlotsPerSession,
   getTokenDuration,
 } from "@/pages/Scheduling/utils";
 import {
   AvailabilityDateTime,
+  SchedulableResourceType,
   ScheduleAvailability,
   ScheduleAvailabilityCreateRequest,
   ScheduleTemplate,
@@ -72,14 +73,16 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 export default function EditScheduleTemplateSheet({
   template,
   facilityId,
-  userId,
+  resourceType,
+  resourceId,
   trigger,
   open,
   onOpenChange,
 }: {
   template: ScheduleTemplate;
   facilityId: string;
-  userId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -102,7 +105,8 @@ export default function EditScheduleTemplateSheet({
           <ScheduleTemplateEditor
             template={template}
             facilityId={facilityId}
-            userId={userId}
+            resourceType={resourceType}
+            resourceId={resourceId}
           />
 
           <div className="mt-4">
@@ -123,14 +127,16 @@ export default function EditScheduleTemplateSheet({
               availability={availability}
               scheduleId={template.id}
               facilityId={facilityId}
-              userId={userId}
+              resourceType={resourceType}
+              resourceId={resourceId}
             />
           ))}
 
           <NewAvailabilityCard
             scheduleId={template.id}
             facilityId={facilityId}
-            userId={userId}
+            resourceType={resourceType}
+            resourceId={resourceId}
           />
         </div>
       </SheetContent>
@@ -141,11 +147,13 @@ export default function EditScheduleTemplateSheet({
 const ScheduleTemplateEditor = ({
   template,
   facilityId,
-  userId,
+  resourceId,
+  resourceType,
 }: {
   template: ScheduleTemplate;
   facilityId: string;
-  userId: string;
+  resourceId: string;
+  resourceType: SchedulableResourceType;
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -185,7 +193,7 @@ const ScheduleTemplateEditor = ({
     onSuccess: () => {
       toast.success("Schedule template updated successfully");
       queryClient.invalidateQueries({
-        queryKey: ["user-schedule-templates", { facilityId, userId }],
+        queryKey: ["schedule", facilityId, { resourceType, resourceId }],
       });
     },
   });
@@ -197,7 +205,7 @@ const ScheduleTemplateEditor = ({
     onSuccess: () => {
       toast.success(t("template_deleted"));
       queryClient.invalidateQueries({
-        queryKey: ["user-schedule-templates", { facilityId, userId }],
+        queryKey: ["schedule", facilityId, { resourceType, resourceId }],
       });
     },
   });
@@ -339,12 +347,14 @@ const AvailabilityEditor = ({
   availability,
   scheduleId,
   facilityId,
-  userId,
+  resourceType,
+  resourceId,
 }: {
   availability: ScheduleAvailability;
   scheduleId: string;
   facilityId: string;
-  userId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -357,7 +367,7 @@ const AvailabilityEditor = ({
     onSuccess: () => {
       toast.success(t("schedule_availability_deleted_successfully"));
       queryClient.invalidateQueries({
-        queryKey: ["user-schedule-templates", { facilityId, userId }],
+        queryKey: ["schedule", facilityId, { resourceType, resourceId }],
       });
     },
   });
@@ -402,9 +412,9 @@ const AvailabilityEditor = ({
         <div className="flex items-center gap-3">
           <CareIcon icon="l-clock" className="text-lg text-blue-600" />
           <span className="font-semibold">{availability.name}</span>
-          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+          <Badge variant="blue" className="rounded-full text-xs">
             {t(`SCHEDULE_AVAILABILITY_TYPE__${availability.slot_type}`)}
-          </span>
+          </Badge>
         </div>
 
         <AlertDialog
@@ -544,11 +554,13 @@ const AvailabilityEditor = ({
 const NewAvailabilityCard = ({
   scheduleId,
   facilityId,
-  userId,
+  resourceType,
+  resourceId,
 }: {
   scheduleId: string;
   facilityId: string;
-  userId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -610,7 +622,7 @@ const NewAvailabilityCard = ({
     onSuccess: () => {
       toast.success(t("schedule_availability_created_successfully"));
       queryClient.invalidateQueries({
-        queryKey: ["user-schedule-templates", { facilityId, userId }],
+        queryKey: ["schedule", facilityId, { resourceType, resourceId }],
       });
       form.reset();
       setIsExpanded(false);

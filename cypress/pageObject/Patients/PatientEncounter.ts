@@ -1,8 +1,8 @@
 export class PatientEncounter {
   // Navigation
   navigateToEncounters() {
-    cy.verifyAndClickElement('[data-cy="nav-patients"]', "Patients");
-    cy.verifyAndClickElement('[data-cy="nav-encounters"]', "Encounters");
+    cy.get('[data-sidebar="menu"]').contains("Patients").click();
+    cy.get('[data-sidebar="menu"]').contains("All Encounters").click();
     return this;
   }
 
@@ -62,7 +62,10 @@ export class PatientEncounter {
   }
 
   clickPatientDetailsButton() {
-    cy.get("svg.lucide-external-link").filter(":visible").first().click();
+    cy.get("[data-slot='patient-info-hover-card-trigger']")
+      .filter(":visible")
+      .click();
+    cy.get("a").contains("View Profile").click();
     return this;
   }
 
@@ -102,7 +105,10 @@ export class PatientEncounter {
 
   clickInProgressEncounterFilter() {
     cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounters");
-    cy.get('button:contains("In Progress")').click();
+    cy.get("button").contains("Filter").click();
+    cy.get('[role="menuitem"]').contains("Status").click();
+    cy.get("div").contains("In Progress").click();
+    cy.get("body").type("{esc}");
     cy.wait("@getEncounters").its("response.statusCode").should("eq", 200);
     return this;
   }

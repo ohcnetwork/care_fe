@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
+import { Badge } from "@/components/ui/badge";
+
 import Loading from "@/components/Common/Loading";
 
 import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
@@ -26,7 +28,7 @@ export default function PrintResourceLetter({ id }: { id: string }) {
   }
   return (
     <PrintPreview title={t("request_letter")}>
-      <div className="min-h-screen bg-white">
+      <div className="bg-white">
         <div className="mx-4">
           {/* Header */}
           <div className="mb-8 text-center">
@@ -89,9 +91,9 @@ export default function PrintResourceLetter({ id }: { id: string }) {
             {/* Status Section */}
             <div className="mb-4">
               <span className="font-semibold">{t("current_status")}: </span>
-              <span className="rounded bg-gray-100 px-2 py-1">
+              <Badge variant="secondary">
                 {t(`resource_status__${data.status}`)}
-              </span>
+              </Badge>
             </div>
           </div>
 
