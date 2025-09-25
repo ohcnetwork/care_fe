@@ -40,7 +40,7 @@ import {
 
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS_ICONS,
@@ -76,7 +76,7 @@ export default function CreateEncounterForm({
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
-  useFacilityShortcuts();
+  useShortcutSubContext();
 
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),

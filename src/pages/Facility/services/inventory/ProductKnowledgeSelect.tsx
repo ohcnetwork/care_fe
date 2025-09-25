@@ -34,7 +34,7 @@ export function ProductKnowledgeSelect({
   disabled,
   className,
   placeholder,
-  enableFavorites = false,
+  enableFavorites = true,
 }: ProductKnowledgeSelectProps) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();

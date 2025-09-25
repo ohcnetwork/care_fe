@@ -154,10 +154,6 @@ function ActivityDefinitionTableRow({
       <TableCell className="text-sm text-gray-500">
         {t(definition.kind)}
       </TableCell>
-      <TableCell className="text-sm text-gray-500">
-        {/* TODO: Add resource category title when it's available & Fix the same for product knowledge */}
-        {/* {definition.category.title} */}
-      </TableCell>
       <TableCell>
         <div className="flex items-center space-x-2">
           <TooltipProvider>
@@ -346,12 +342,7 @@ export function ActivityDefinitionList({
                         </TableHead>
                         <TableHead className="w-[15%]">{t("status")}</TableHead>
                         <TableHead className="w-[15%]">{t("kind")}</TableHead>
-                        <TableHead className="w-[15%]">
-                          {t("category")}
-                        </TableHead>
-                        <TableHead className="w-[10%] text-right">
-                          {t("actions")}
-                        </TableHead>
+                        <TableHead className="w-[5%]">{t("actions")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

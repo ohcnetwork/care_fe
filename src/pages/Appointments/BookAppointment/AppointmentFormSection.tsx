@@ -5,8 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import {
-  ResourceSelector,
   ScheduleResourceFormState,
+  ScheduleResourceSelector,
 } from "@/components/Schedule/ResourceSelector";
 import RadioInput from "@/components/ui/RadioInput";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -60,7 +60,7 @@ export const AppointmentFormSection = ({
         <Label className="mb-2 text-sm font-medium text-gray-950">
           {t(`schedulable_resource__${selectedResource.resource_type}`)}
         </Label>
-        <ResourceSelector
+        <ScheduleResourceSelector
           facilityId={facilityId}
           setSelectedResource={setSelectedResource}
           selectedResource={selectedResource}

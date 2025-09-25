@@ -53,7 +53,7 @@ export const BookAppointmentDetails = ({
       toast.success(t("appointment_created_successfully"));
       onSuccess?.();
       navigate(
-        `/facility/${facilityId}/patient/${patientId}/appointments/${data.id}`,
+        `/facility/${facilityId}/patient/${patientId}/appointments/${data.id}?showSuccess=true`,
       );
     },
     onError: (error) => {
