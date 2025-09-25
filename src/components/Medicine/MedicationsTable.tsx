@@ -77,10 +77,10 @@ export const MedicationsTable = ({
 
   return (
     <div
-      className="border border-gray-200 rounded-lg"
+      className=" @container border border-gray-200 rounded-lg"
       data-cy="medications-table"
     >
-      <Table className="min-w-6xl">
+      <Table className="@lg:min-w-auto min-w-6xl">
         <TableHeader>
           <TableRow className="divide-x bg-gray-100">
             <TableHead>{t("medicine")}</TableHead>
