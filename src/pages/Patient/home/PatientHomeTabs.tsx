@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { BookingListContent } from "@/pages/Appointments/BookAppointment/BookingsList";
+import { BookingsList } from "@/pages/Appointments/BookAppointment/BookingsList";
 import PatientHomeEncounters from "./PatientHomeEncounters";
 import PatientHomeTokens from "./PatientHomeTokens";
 
@@ -68,7 +68,7 @@ export default function PatientHomeTabs({
         )}
 
         {activeTab === "appointments" && canWriteAppointment && (
-          <BookingListContent patientId={patientId} facilityId={facilityId} />
+          <BookingsList patientId={patientId} facilityId={facilityId} />
         )}
 
         {activeTab === "tokens" && canCreateToken && (

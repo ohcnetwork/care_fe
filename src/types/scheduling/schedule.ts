@@ -139,17 +139,17 @@ export interface AvailabilityHeatmapResponse {
   [date: string]: { total_slots: number; booked_slots: number };
 }
 
-export const AppointmentNonCancelledStatuses = [
+export const UpcomingAppointmentStatuses = [
   "proposed",
   "pending",
   "booked",
   "arrived",
-  "fulfilled",
-  "noshow",
   "checked_in",
   "waitlist",
   "in_consultation",
 ] as const;
+
+export const PastAppointmentStatuses = ["fulfilled", "noshow"] as const;
 
 export const AppointmentCancelledStatuses = [
   "cancelled",
@@ -158,7 +158,8 @@ export const AppointmentCancelledStatuses = [
 ] as const;
 
 export const AppointmentStatuses = [
-  ...AppointmentNonCancelledStatuses,
+  ...UpcomingAppointmentStatuses,
+  ...PastAppointmentStatuses,
   ...AppointmentCancelledStatuses,
 ] as const;
 
@@ -167,6 +168,7 @@ export const AppointmentFinalStatuses: AppointmentStatus[] = [
   "cancelled",
   "entered_in_error",
   "rescheduled",
+  "noshow",
 ];
 
 export const APPOINTMENT_STATUS_COLORS = {
@@ -186,9 +188,6 @@ export const APPOINTMENT_STATUS_COLORS = {
   AppointmentStatus,
   React.ComponentProps<typeof Badge>["variant"]
 >;
-
-export type AppointmentNonCancelledStatus =
-  (typeof AppointmentNonCancelledStatuses)[number];
 
 export type AppointmentCancelledStatus =
   (typeof AppointmentCancelledStatuses)[number];
@@ -220,7 +219,7 @@ export type Appointment = {
   token_slot: TokenSlot;
   patient: PatientRead;
   booked_on: string;
-  status: AppointmentNonCancelledStatus;
+  status: AppointmentStatus;
   note: string;
   booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;

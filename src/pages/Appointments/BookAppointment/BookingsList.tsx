@@ -1,13 +1,4 @@
-import {
-  addDays,
-  differenceInMinutes,
-  endOfDay,
-  format,
-  isAfter,
-  isBefore,
-  startOfDay,
-  subDays,
-} from "date-fns";
+import { differenceInMinutes, format } from "date-fns";
 import { CalendarDays } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -15,9 +6,12 @@ import { useTranslation } from "react-i18next";
 import query from "@/Utils/request/query";
 import {
   Appointment,
+  APPOINTMENT_STATUS_COLORS,
   AppointmentCancelledStatuses,
   AppointmentStatus,
   formatScheduleResourceName,
+  PastAppointmentStatuses,
+  UpcomingAppointmentStatuses,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
@@ -33,17 +27,16 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { dateQueryString } from "@/Utils/utils";
+import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
-import { AppointmentNonCancelledStatuses } from "@/types/scheduling/schedule";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 
 interface BookingsListProps {
   patientId: string;
-  facilityId: string;
+  facilityId?: string;
 }
 
 export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
@@ -52,52 +45,39 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
   return (
     <div className="mt-2">
       <Tabs defaultValue="upcoming">
-        <div className="flex sm:flex-row flex-col gap-2">
-          <TabsList className="sm:flex sm:flex-col sm:w-52 h-fit sm:bg-gray-50 items-center justify-center w-full bg-gray-100">
+        <div className="flex flex-col gap-2">
+          <TabsList className="grid grid-cols-3 bg-gray-100 h-10">
             <TabsTrigger
               value="upcoming"
-              className="w-full sm:justify-start data-[state=active]:bg-white data-[state=active]:shadow-sm sm:data-[state=active]:text-primary-800 py-2 px-3"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
             >
               {t("upcoming")}
             </TabsTrigger>
             <TabsTrigger
               value="past"
-              className="w-full sm:justify-start data-[state=active]:bg-white data-[state=active]:shadow-sm sm:data-[state=active]:text-primary-800 py-2 px-3"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
             >
               {t("past")}
             </TabsTrigger>
             <TabsTrigger
               value="cancelled"
-              className="w-full sm:justify-start data-[state=active]:bg-white data-[state=active]:shadow-sm sm:data-[state=active]:text-primary-800 py-2 px-3"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
             >
               {t("cancelled")}
             </TabsTrigger>
           </TabsList>
           <TabsContent value="upcoming" className="space-y-4 overflow-x-scroll">
-            <span className="text-lg font-semibold text-gray-950 mb-4">
-              {t("today")}
-            </span>
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              dateFrom={dateQueryString(new Date())}
-              dateTo={dateQueryString(new Date())}
-            />
-            <span className="text-lg font-semibold text-gray-950 mb-4">
-              {t("next")}
-            </span>
-            <BookingListContent
-              patientId={patientId}
-              facilityId={facilityId}
-              dateFrom={dateQueryString(addDays(new Date(), 1))}
+              status={UpcomingAppointmentStatuses}
             />
           </TabsContent>
           <TabsContent value="past" className="space-y-4 overflow-x-scroll">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              dateTo={dateQueryString(subDays(new Date(), 1))}
-              status={AppointmentNonCancelledStatuses}
+              status={PastAppointmentStatuses}
             />
           </TabsContent>
           <TabsContent
@@ -185,9 +165,11 @@ const AppointmentCard = ({
 const AppointmentTable = ({
   appointments,
   patientId,
+  showFacilityInfo,
 }: {
   appointments: Appointment[];
   patientId: string;
+  showFacilityInfo: boolean;
 }) => {
   const { t } = useTranslation();
 
@@ -204,7 +186,12 @@ const AppointmentTable = ({
           <TableHead className="w-30 border-y bg-gray-100 text-gray-700 text-sm">
             {t("resource")}
           </TableHead>
-          <TableHead className="w-14 border-y bg-gray-100 hidden xl:table-cell text-gray-700 text-sm">
+          {showFacilityInfo && (
+            <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
+              {t("facility")}
+            </TableHead>
+          )}
+          <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
             {t("status")}
           </TableHead>
           <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
@@ -256,7 +243,10 @@ const AppointmentTable = ({
               <div className="px-2 py-1">
                 <div className="flex flex-col gap-2">
                   <div className="flex flex-row gap-2">
-                    <ScheduleResourceIcon resource={appointment} />
+                    <ScheduleResourceIcon
+                      resource={appointment}
+                      className="border border-white shadow-sm rounded-full"
+                    />
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-sm font-medium text-gray-950">
                         {formatScheduleResourceName(appointment)}
@@ -267,9 +257,25 @@ const AppointmentTable = ({
               </div>
             </TableCell>
 
+            {showFacilityInfo && (
+              <TableCell>
+                <div className="flex gap-2 items-center">
+                  <Avatar
+                    name={appointment.facility.name}
+                    className="size-8 border border-white shadow-sm"
+                  />
+                  <span className="text-sm font-medium text-gray-950">
+                    {appointment.facility.name}
+                  </span>
+                </div>
+              </TableCell>
+            )}
+
             <TableCell className="hidden xl:table-cell">
               <div className="flex flex-row items-start justify-start">
-                <Badge variant="green" className="text-gray-700">
+                <Badge
+                  variant={`${APPOINTMENT_STATUS_COLORS[appointment.status]}`}
+                >
                   {t(appointment.status)}
                 </Badge>
               </div>
@@ -294,14 +300,10 @@ const AppointmentTable = ({
 export const BookingListContent = ({
   patientId,
   facilityId,
-  dateFrom,
-  dateTo,
   status,
 }: {
   patientId: string;
   facilityId?: string;
-  dateFrom?: string;
-  dateTo?: string;
   status?: readonly AppointmentStatus[];
 }) => {
   const { t } = useTranslation();
@@ -312,23 +314,16 @@ export const BookingListContent = ({
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
+    isLoading,
   } = useInfiniteQuery({
-    queryKey: [
-      "infinite-appointments",
-      patientId,
-      dateFrom,
-      dateTo,
-      facilityId,
-    ],
+    queryKey: ["infinite-appointments", patientId, facilityId, status],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query(scheduleApi.appointments.getAppointments, {
         pathParams: { patientId },
         queryParams: {
           offset: pageParam,
           limit: 15,
-          date_after: dateFrom,
           facility: facilityId,
-          date_before: dateTo,
           status: status?.join(","),
         },
       })({ signal });
@@ -345,30 +340,16 @@ export const BookingListContent = ({
     appointmentsData?.pages.flatMap((page) => page.results) ?? [];
 
   useEffect(() => {
-    console.log(inView);
-  }, [inView]);
-
-  useEffect(() => {
     if (inView && hasNextPage) {
       fetchNextPage();
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
-  const filteredAppointments =
-    appointments
-      .filter((appointment) => status?.includes(appointment.status) ?? true)
-      .filter((appointment) =>
-        dateFrom
-          ? isAfter(appointment.token_slot.start_datetime, startOfDay(dateFrom))
-          : true,
-      )
-      .filter((appointment) =>
-        dateTo
-          ? isBefore(appointment.token_slot.start_datetime, endOfDay(dateTo))
-          : true,
-      ) ?? [];
+  if (isLoading) {
+    return <CardListSkeleton count={15} />;
+  }
 
-  if (filteredAppointments.length === 0) {
+  if (appointments.length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-gray-500">{t("no_appointments")}</p>
@@ -380,12 +361,13 @@ export const BookingListContent = ({
     <div className="w-full">
       <div className="hidden sm:block">
         <AppointmentTable
-          appointments={filteredAppointments}
+          appointments={appointments}
           patientId={patientId}
+          showFacilityInfo={!facilityId}
         />
       </div>
       <div className="sm:hidden space-y-4">
-        {filteredAppointments.map((appointment) => (
+        {appointments.map((appointment) => (
           <AppointmentCard
             key={`card-${appointment.id}`}
             appointment={appointment}

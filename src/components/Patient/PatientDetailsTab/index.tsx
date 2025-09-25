@@ -6,7 +6,7 @@ import { HasPermissionFn, getPermissions } from "@/common/Permissions";
 
 import { PatientRead } from "@/types/emr/patient/patient";
 
-import { BookingListContent } from "@/pages/Appointments/BookAppointment/BookingsList";
+import { BookingsList } from "@/pages/Appointments/BookAppointment/BookingsList";
 import { Accounts } from "./Accounts";
 import { PatientFilesTab } from "./PatientFiles";
 import { PatientNotesTab } from "./PatientNotes";
@@ -37,7 +37,7 @@ export const BASE_PATIENT_TABS: Tab[] = [
   },
   {
     route: "appointments",
-    component: BookingListContent,
+    component: BookingsList,
   },
   {
     route: "encounters",
