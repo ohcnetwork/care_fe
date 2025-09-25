@@ -158,7 +158,6 @@ export default function VerifyPatient() {
                 canListEncounters={canListEncounters}
                 canWriteAppointment={canWriteAppointment}
                 canCreateToken={canCreateToken}
-                patientData={patientData}
               />
             </div>
 
