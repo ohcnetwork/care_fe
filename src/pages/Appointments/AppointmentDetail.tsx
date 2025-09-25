@@ -94,7 +94,7 @@ import { FacilityRead } from "@/types/facility/facility";
 import {
   Appointment,
   APPOINTMENT_STATUS_COLORS,
-  AppointmentFinalStatuses,
+  AppointmentFinalStatus,
   AppointmentRead,
   AppointmentStatus,
   AppointmentUpdateRequest,
@@ -335,7 +335,7 @@ export default function AppointmentDetail(props: Props) {
                         <Button
                           variant="outline"
                           className="px-6"
-                          disabled={AppointmentFinalStatuses.includes(
+                          disabled={AppointmentFinalStatus.includes(
                             appointment.status,
                           )}
                         >
@@ -457,7 +457,7 @@ export default function AppointmentDetail(props: Props) {
               </Card>
             )}
             {/* Lets only show encounter details if the appointment is not in a final status or if there is an encounter linked to the appointment */}
-            {![...AppointmentFinalStatuses, "noshow"].includes(
+            {![...AppointmentFinalStatus, "noshow"].includes(
               appointment.status,
             ) && (
               <div>
@@ -820,7 +820,7 @@ const AppointmentActions = ({
       },
     });
 
-  if (AppointmentFinalStatuses.includes(currentStatus)) {
+  if (AppointmentFinalStatus.includes(currentStatus)) {
     return null;
   }
 

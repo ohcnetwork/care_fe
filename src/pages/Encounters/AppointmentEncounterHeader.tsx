@@ -226,7 +226,7 @@ export const AppointmentEncounterHeader = ({
       options.push("mark_token_fulfilled");
     }
 
-    if (encounter.appointment?.status !== "fulfilled") {
+    if (encounter.appointment?.status !== AppointmentStatus.FULFILLED) {
       options.push("close_appointment");
     }
 

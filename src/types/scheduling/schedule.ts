@@ -140,7 +140,7 @@ export interface AvailabilityHeatmapResponse {
 }
 
 export enum AppointmentStatus {
-  PRPOSED = "proposed",
+  PROPOSED = "proposed",
   PENDING = "pending",
   BOOKED = "booked",
   ARRIVED = "arrived",
@@ -154,13 +154,13 @@ export enum AppointmentStatus {
   RESCHEDULED = "rescheduled",
 }
 
-export const PastAppointmentStatuses = [
+export const PastAppointmentStatus = [
   AppointmentStatus.FULFILLED,
   AppointmentStatus.NO_SHOW,
 ];
 
-export const UpcomingAppointmentStatuses = [
-  AppointmentStatus.PRPOSED,
+export const UpcomingAppointmentStatus = [
+  AppointmentStatus.PROPOSED,
   AppointmentStatus.PENDING,
   AppointmentStatus.BOOKED,
   AppointmentStatus.ARRIVED,
@@ -169,16 +169,16 @@ export const UpcomingAppointmentStatuses = [
   AppointmentStatus.IN_CONSULTATION,
 ];
 
-export const CancelledAppointmentStatuses = [
+export const CancelledAppointmentStatus = [
   AppointmentStatus.CANCELLED,
   AppointmentStatus.ENTERED_IN_ERROR,
   AppointmentStatus.RESCHEDULED,
   AppointmentStatus.NO_SHOW,
 ];
 
-export const AppointmentFinalStatuses = [
-  ...CancelledAppointmentStatuses,
-  ...PastAppointmentStatuses,
+export const AppointmentFinalStatus = [
+  ...CancelledAppointmentStatus,
+  ...PastAppointmentStatus,
 ];
 
 export const APPOINTMENT_STATUS_COLORS = {

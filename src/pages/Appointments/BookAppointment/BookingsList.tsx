@@ -8,10 +8,10 @@ import {
   Appointment,
   APPOINTMENT_STATUS_COLORS,
   AppointmentStatus,
-  CancelledAppointmentStatuses,
+  CancelledAppointmentStatus,
   formatScheduleResourceName,
-  PastAppointmentStatuses,
-  UpcomingAppointmentStatuses,
+  PastAppointmentStatus,
+  UpcomingAppointmentStatus,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
@@ -70,14 +70,14 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              status={UpcomingAppointmentStatuses}
+              status={UpcomingAppointmentStatus}
             />
           </TabsContent>
           <TabsContent value="past" className="space-y-4 overflow-x-scroll">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              status={PastAppointmentStatuses}
+              status={PastAppointmentStatus}
             />
           </TabsContent>
           <TabsContent
@@ -87,7 +87,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              status={CancelledAppointmentStatuses}
+              status={CancelledAppointmentStatus}
             />
           </TabsContent>
         </div>
