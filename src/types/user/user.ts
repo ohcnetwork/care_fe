@@ -38,13 +38,13 @@ export interface UserRead extends UserReadMinimal {
 }
 
 export interface CurrentUserRead extends UserRead, Permissions {
+  alt_phone_number?: string;
+  date_of_birth?: string;
   is_superuser: boolean;
   qualification?: string | null;
   doctor_experience_commenced_on?: string | null;
   doctor_medical_council_registration?: string | null;
   weekly_working_hours?: string | null;
-  alt_phone_number?: string | null;
-  date_of_birth?: string | null;
   verified: boolean;
   facilities: FacilityBareMinimum[];
   organizations: Organization[];

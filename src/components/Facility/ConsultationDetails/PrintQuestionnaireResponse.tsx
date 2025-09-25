@@ -7,7 +7,7 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import {
   EncounterDetails,
   ResponseCard,
-} from "@/components/Facility/ConsultationDetails/PrintQuestionnaireQuestionnaireResponses";
+} from "@/components/Facility/ConsultationDetails/PrintAllQuestionnaireResponses";
 
 import query from "@/Utils/request/query";
 import encounterApi from "@/types/emr/encounter/encounterApi";
@@ -66,7 +66,7 @@ export function PrintQuestionnaireResponse({
       title={t("questionnaire_response_logs")}
       disabled={!questionnaireResponse}
     >
-      <div className="min-h-screen md:p-2 max-w-4xl mx-auto">
+      <div className="md:p-2 max-w-4xl mx-auto">
         <div>
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
             <img

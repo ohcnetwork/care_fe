@@ -61,7 +61,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
         category: qParams.category,
         resource: qParams.resource,
         parent_is_null: true,
-        facility: facilityId,
+        ...(facilityId ? { facility: facilityId, facility_only: true } : {}),
       },
     }),
   });
