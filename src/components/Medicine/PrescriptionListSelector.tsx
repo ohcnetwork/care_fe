@@ -161,9 +161,7 @@ function PrescriptionList({
                 ? "bg-white border-primary-600 shadow-md"
                 : "bg-gray-100 hover:bg-gray-100 shadow-none",
             )}
-            onClick={() =>
-              onSelectPrescription(prescription as PrescriptionRead)
-            }
+            onClick={() => onSelectPrescription(prescription)}
           >
             {isSelected && (
               <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
