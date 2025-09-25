@@ -81,7 +81,7 @@ export default function PrescriptionListSelector({
 
   return (
     <>
-      <div className="hidden lg:block overflow-y-auto">
+      <div className="hidden lg:block h-full overflow-y-auto">
         <PrescriptionList
           prescriptions={prescriptions.results as PrescriptionRead[]}
           selectedPrescriptionId={selectedPrescriptionId}

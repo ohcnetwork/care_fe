@@ -84,9 +84,9 @@ export default function MedicationRequestTable() {
   });
 
   return (
-    <div className="space-y-2">
-      <div className="rounded-lg">
-        <Tabs defaultValue="prescriptions">
+    <div className="space-y-2 h-full">
+      <div className="rounded-lg h-full">
+        <Tabs defaultValue="prescriptions" className="h-full">
           <ScrollArea className="w-full">
             <TabsList className="w-fit">
               <TabsTrigger
@@ -117,21 +117,19 @@ export default function MedicationRequestTable() {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
 
-          <TabsContent value="prescriptions">
-            <div className="flex flex-col gap-2">
-              <div className="flex lg:flex-row flex-col w-full">
-                <div className="overflow-hidden">
-                  <PrescriptionListSelector
-                    patientId={patientId}
-                    encounterId={encounterId}
-                    facilityId={facilityId}
-                    selectedPrescriptionId={selectedPrescriptionId}
-                    onSelectPrescription={(prescription) => {
-                      setSelectedPrescriptionId(prescription?.id);
-                    }}
-                  />
-                </div>
-                {selectedPrescriptionId && (
+          <TabsContent value="prescriptions" className="h-full flex-1">
+            <div className="flex flex-col gap-2 h-full">
+              <div className="flex lg:flex-row flex-col w-full h-full gap-2">
+                <PrescriptionListSelector
+                  patientId={patientId}
+                  encounterId={encounterId}
+                  facilityId={facilityId}
+                  selectedPrescriptionId={selectedPrescriptionId}
+                  onSelectPrescription={(prescription) => {
+                    setSelectedPrescriptionId(prescription?.id);
+                  }}
+                />
+                {selectedPrescriptionId ? (
                   <div className="flex-1 w-full overflow-hidden">
                     <PrescriptionView
                       patientId={patientId}
@@ -141,12 +139,9 @@ export default function MedicationRequestTable() {
                       encounterId={encounterId}
                     />
                   </div>
-                )}
-              </div>
-              {!selectedPrescriptionId && (
-                <div className="flex w-full items-center justify-center">
-                  <div className="flexitems-center justify-center gap-2 pt-16 text-center">
-                    <div className="rounded-full bg-secondary/10 flex flex-col items-center justify-center gap-2">
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="flex flex-col items-center">
                       <ReceiptTextIcon className="text-gray-500" />
                       <h3 className="font-medium">
                         {t("no_prescriptions_found")}
@@ -166,8 +161,8 @@ export default function MedicationRequestTable() {
                       )}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </TabsContent>
 
