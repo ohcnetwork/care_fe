@@ -139,36 +139,46 @@ export interface AvailabilityHeatmapResponse {
   [date: string]: { total_slots: number; booked_slots: number };
 }
 
+export enum AppointmentStatus {
+  PRPOSED = "proposed",
+  PENDING = "pending",
+  BOOKED = "booked",
+  ARRIVED = "arrived",
+  CHECKED_IN = "checked_in",
+  WAITLIST = "waitlist",
+  IN_CONSULTATION = "in_consultation",
+  FULFILLED = "fulfilled",
+  NO_SHOW = "noshow",
+  CANCELLED = "cancelled",
+  ENTERED_IN_ERROR = "entered_in_error",
+  RESCHEDULED = "rescheduled",
+}
+
+export const PastAppointmentStatuses = [
+  AppointmentStatus.FULFILLED,
+  AppointmentStatus.NO_SHOW,
+];
+
 export const UpcomingAppointmentStatuses = [
-  "proposed",
-  "pending",
-  "booked",
-  "arrived",
-  "checked_in",
-  "waitlist",
-  "in_consultation",
-] as const;
+  AppointmentStatus.PRPOSED,
+  AppointmentStatus.PENDING,
+  AppointmentStatus.BOOKED,
+  AppointmentStatus.ARRIVED,
+  AppointmentStatus.CHECKED_IN,
+  AppointmentStatus.WAITLIST,
+  AppointmentStatus.IN_CONSULTATION,
+];
 
-export const PastAppointmentStatuses = ["fulfilled", "noshow"] as const;
+export const CancelledAppointmentStatuses = [
+  AppointmentStatus.CANCELLED,
+  AppointmentStatus.ENTERED_IN_ERROR,
+  AppointmentStatus.RESCHEDULED,
+  AppointmentStatus.NO_SHOW,
+];
 
-export const AppointmentCancelledStatuses = [
-  "cancelled",
-  "entered_in_error",
-  "rescheduled",
-] as const;
-
-export const AppointmentStatuses = [
-  ...UpcomingAppointmentStatuses,
+export const AppointmentFinalStatuses = [
+  ...CancelledAppointmentStatuses,
   ...PastAppointmentStatuses,
-  ...AppointmentCancelledStatuses,
-] as const;
-
-export const AppointmentFinalStatuses: AppointmentStatus[] = [
-  "fulfilled",
-  "cancelled",
-  "entered_in_error",
-  "rescheduled",
-  "noshow",
 ];
 
 export const APPOINTMENT_STATUS_COLORS = {
@@ -188,11 +198,6 @@ export const APPOINTMENT_STATUS_COLORS = {
   AppointmentStatus,
   React.ComponentProps<typeof Badge>["variant"]
 >;
-
-export type AppointmentCancelledStatus =
-  (typeof AppointmentCancelledStatuses)[number];
-
-export type AppointmentStatus = (typeof AppointmentStatuses)[number];
 
 type LocationResource = {
   resource: LocationList;

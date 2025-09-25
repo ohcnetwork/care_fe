@@ -477,7 +477,7 @@ export default function AppointmentDetail(props: Props) {
                         data-shortcut-id="start-consultation"
                         onClick={() => {
                           updateAppointment({
-                            status: "in_consultation",
+                            status: AppointmentStatus.IN_CONSULTATION,
                             note: appointment.note,
                           });
                           navigate(
@@ -502,7 +502,7 @@ export default function AppointmentDetail(props: Props) {
                         }
                         onSuccess={() => {
                           updateAppointment({
-                            status: "in_consultation",
+                            status: AppointmentStatus.IN_CONSULTATION,
                             note: appointment.note,
                           });
                         }}
@@ -830,13 +830,13 @@ const AppointmentActions = ({
       {/* Primary Actions */}
       <div className="flex items-center justify-between gap-2">
         {/* Check In - Only for booked appointments */}
-        {currentStatus && currentStatus === "booked" && (
+        {currentStatus && currentStatus === AppointmentStatus.BOOKED && (
           <Button
             disabled={!canCheckIn}
             variant="primary"
             onClick={() =>
               updateAppointment({
-                status: "checked_in",
+                status: AppointmentStatus.CHECKED_IN,
                 note: appointment.note,
               })
             }
@@ -860,11 +860,11 @@ const AppointmentActions = ({
             <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
 
             {/* Mark as Fulfilled - For in consultation */}
-            {currentStatus === "in_consultation" && (
+            {currentStatus === AppointmentStatus.IN_CONSULTATION && (
               <DropdownMenuItem
                 onClick={() =>
                   updateAppointment({
-                    status: "fulfilled",
+                    status: AppointmentStatus.FULFILLED,
                     note: appointment.note,
                   })
                 }
@@ -880,7 +880,7 @@ const AppointmentActions = ({
                 <DropdownMenuSeparator />
 
                 {/* Reschedule */}
-                {appointment.status !== "in_consultation" && (
+                {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
                   <>
                     <AlertDialog
                       open={isRescheduleReasonOpen}
@@ -1055,7 +1055,10 @@ const AppointmentActions = ({
                 )}
 
                 {/* Mark as No Show */}
-                {["booked", "checked_in"].includes(currentStatus) && (
+                {[
+                  AppointmentStatus.BOOKED,
+                  AppointmentStatus.CHECKED_IN,
+                ].includes(currentStatus) && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -1087,7 +1090,7 @@ const AppointmentActions = ({
                         <AlertDialogAction
                           onClick={() =>
                             updateAppointment({
-                              status: "noshow",
+                              status: AppointmentStatus.NO_SHOW,
                               note: note,
                             })
                           }
@@ -1108,7 +1111,7 @@ const AppointmentActions = ({
                 )}
 
                 {/* Cancel Appointment */}
-                {appointment.status !== "in_consultation" && (
+                {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>

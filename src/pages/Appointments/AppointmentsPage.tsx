@@ -71,6 +71,7 @@ import {
   APPOINTMENT_STATUS_COLORS,
   AppointmentRead,
   AppointmentStatus,
+  CancelledAppointmentStatuses,
   formatScheduleResourceName,
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
@@ -113,23 +114,23 @@ const getStatusGroups = (t: TFunction): AppointmentStatusGroup[] => {
   return [
     {
       label: t("booked"),
-      statuses: ["booked"],
+      statuses: [AppointmentStatus.BOOKED],
     },
     {
       label: t("checked_in"),
-      statuses: ["checked_in"],
+      statuses: [AppointmentStatus.CHECKED_IN],
     },
     {
       label: t("in_consultation"),
-      statuses: ["in_consultation"],
+      statuses: [AppointmentStatus.IN_CONSULTATION],
     },
     {
       label: t("fulfilled"),
-      statuses: ["fulfilled"],
+      statuses: [AppointmentStatus.FULFILLED],
     },
     {
       label: t("non_fulfilled"),
-      statuses: ["noshow", "cancelled", "entered_in_error", "rescheduled"],
+      statuses: CancelledAppointmentStatuses,
     },
   ];
 };

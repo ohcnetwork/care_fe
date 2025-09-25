@@ -7,8 +7,8 @@ import query from "@/Utils/request/query";
 import {
   Appointment,
   APPOINTMENT_STATUS_COLORS,
-  AppointmentCancelledStatuses,
   AppointmentStatus,
+  CancelledAppointmentStatuses,
   formatScheduleResourceName,
   PastAppointmentStatuses,
   UpcomingAppointmentStatuses,
@@ -87,7 +87,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              status={AppointmentCancelledStatuses}
+              status={CancelledAppointmentStatuses}
             />
           </TabsContent>
         </div>
@@ -199,7 +199,7 @@ const AppointmentTable = ({
       <TableBody className="bg-white">
         {appointments.map((appointment) => (
           <TableRow
-            key={appointment.id} // added key for React
+            key={appointment.id}
             className="shadow bg-white space-y-3 rounded-lg cursor-pointer"
             onClick={() =>
               navigate(
@@ -275,9 +275,7 @@ const AppointmentTable = ({
 
             <TableCell className="hidden xl:table-cell">
               <div className="flex flex-row items-start justify-start">
-                <Badge
-                  variant={`${APPOINTMENT_STATUS_COLORS[appointment.status]}`}
-                >
+                <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
                   {t(appointment.status)}
                 </Badge>
               </div>
