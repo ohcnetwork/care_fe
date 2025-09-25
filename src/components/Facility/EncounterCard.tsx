@@ -9,6 +9,7 @@ import { getPermissions } from "@/common/Permissions";
 
 import { formatDateTime } from "@/common/utils";
 import { usePermissions } from "@/context/PermissionContext";
+import { cn } from "@/lib/utils";
 import {
   ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
