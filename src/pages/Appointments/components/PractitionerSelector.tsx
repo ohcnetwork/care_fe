@@ -68,7 +68,7 @@ interface MultiPractitionerSelectorProps {
 
 const MULTI_SELECT_SHOW_LIMIT = 5;
 
-export const MultiPractitionerSelector = ({
+export const PractitionerSelector = ({
   facilityId,
   selected,
   onSelect,
