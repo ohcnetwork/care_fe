@@ -137,9 +137,9 @@ export function ConditionOperationSummary({
     .filter(Boolean) as TagConfig[];
   switch (condition.operation) {
     case ConditionOperation.equality:
-      return `${conditionName} is equal to ${condition.value} ${typeof condition.value === "object" && "value_type" in condition.value ? `(${condition?.value.value_type})` : ""}`;
+      return `${conditionName} is equal to ${typeof condition.value === "object" && "value" in condition.value ? condition.value.value : condition.value} ${typeof condition.value === "object" && "value_type" in condition.value ? `${condition?.value.value_type}` : ""}`;
     case ConditionOperation.in_range:
-      return `${conditionName} is in range ${condition.value.min} ${"value_type" in condition.value ? `${condition?.value.value_type}` : ""} to ${condition.value.max} ${"value_type" in condition.value ? `${condition?.value.value_type}` : ""}`;
+      return `${conditionName} is in range ${condition.value.min} to ${condition.value.max} ${"value_type" in condition.value ? `${condition?.value.value_type}` : ""}`;
     case ConditionOperation.has_tag:
       return `${conditionName} has following tag: ${tags.map((tag) => tag.display).join(", ")}`;
   }

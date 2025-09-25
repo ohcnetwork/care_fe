@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, X } from "lucide-react";
 import { navigate } from "raviger";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -213,6 +213,7 @@ function ObservationDefinitionFormContent({
     setshowClearObsInterpretationWarning,
   ] = useState(false);
   const [clearRootLevel, setClearRootLevel] = useState(false);
+  const qualifiedRangesRef = useRef<QualifiedRange[]>([]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -265,10 +266,11 @@ function ObservationDefinitionFormContent({
 
   const rootQualifiedRanges = form.watch("qualified_ranges");
   const componentQualifiedRanges =
-    form.watch("component")?.flatMap((c) => c.qualified_ranges) || [];
+    form.watch("component")?.flatMap((c) => c.qualified_ranges || []) || [];
 
   // Mutual exclusivity logic: only one level can have qualified ranges at a time
-  const hasRootQualifiedRanges = rootQualifiedRanges.length > 0;
+  const hasRootQualifiedRanges =
+    rootQualifiedRanges && rootQualifiedRanges.length > 0;
   const hasComponentQualifiedRanges = componentQualifiedRanges.length > 0;
 
   const disableRootObsInterpretation = hasComponentQualifiedRanges;
@@ -596,30 +598,28 @@ function ObservationDefinitionFormContent({
               </div>
             </div>
 
-            <FormField
-              control={form.control}
-              name="qualified_ranges"
-              render={({ field }) => {
-                return (
-                  <FormItem>
-                    <ObservationInterpretation
-                      qualifiedRanges={field.value}
-                      setQualifiedRanges={(value: QualifiedRange[]) =>
-                        field.onChange(value)
-                      }
-                      disabled={disableRootObsInterpretation}
-                      onClearRequest={() => {
-                        setClearRootLevel(false);
-                        setshowClearObsInterpretationWarning(true);
-                      }}
-                      conflictMessage={
-                        hasComponentQualifiedRanges
-                          ? t("component_qualified_ranges_exist_message")
-                          : undefined
-                      }
-                    />
-                  </FormItem>
-                );
+            <ObservationInterpretation
+              form={form}
+              qualifiedRanges={form.watch("qualified_ranges") || []}
+              setQualifiedRanges={(value: QualifiedRange[]) =>
+                form.setValue("qualified_ranges", value)
+              }
+              disabled={disableRootObsInterpretation}
+              onClearRequest={() => {
+                setClearRootLevel(false);
+                setshowClearObsInterpretationWarning(true);
+              }}
+              conflictMessage={
+                hasComponentQualifiedRanges
+                  ? t("component_qualified_ranges_exist_message")
+                  : undefined
+              }
+              onCancel={() => {
+                form.setValue("qualified_ranges", qualifiedRangesRef.current);
+              }}
+              onSheetOpen={() => {
+                const ranges = form.getValues("qualified_ranges") || [];
+                qualifiedRangesRef.current = JSON.parse(JSON.stringify(ranges));
               }}
             />
 
@@ -890,35 +890,45 @@ function ObservationDefinitionFormContent({
                             />
                           </div>
 
-                          <FormField
-                            control={form.control}
+                          <ObservationInterpretation
+                            form={form}
+                            qualifiedRanges={
+                              form.watch(
+                                `component.${index}.qualified_ranges`,
+                              ) || []
+                            }
+                            setQualifiedRanges={(value: QualifiedRange[]) =>
+                              form.setValue(
+                                `component.${index}.qualified_ranges`,
+                                value,
+                              )
+                            }
+                            disabled={disableComponentObsInterpretation}
+                            onClearRequest={() => {
+                              setClearRootLevel(true);
+                              setshowClearObsInterpretationWarning(true);
+                            }}
+                            conflictMessage={
+                              hasRootQualifiedRanges
+                                ? t("root_qualified_ranges_exist_message")
+                                : undefined
+                            }
                             name={`component.${index}.qualified_ranges`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <ObservationInterpretation
-                                    qualifiedRanges={field.value}
-                                    setQualifiedRanges={(
-                                      value: QualifiedRange[],
-                                    ) => field.onChange(value)}
-                                    disabled={disableComponentObsInterpretation}
-                                    onClearRequest={() => {
-                                      setClearRootLevel(true);
-                                      setshowClearObsInterpretationWarning(
-                                        true,
-                                      );
-                                    }}
-                                    conflictMessage={
-                                      hasRootQualifiedRanges
-                                        ? t(
-                                            "root_qualified_ranges_exist_message",
-                                          )
-                                        : undefined
-                                    }
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
+                            onCancel={() => {
+                              form.setValue(
+                                `component.${index}.qualified_ranges`,
+                                qualifiedRangesRef.current,
+                              );
+                            }}
+                            onSheetOpen={() => {
+                              const ranges =
+                                form.getValues(
+                                  `component.${index}.qualified_ranges`,
+                                ) || [];
+                              qualifiedRangesRef.current = JSON.parse(
+                                JSON.stringify(ranges),
+                              );
+                            }}
                           />
                         </div>
                       </div>

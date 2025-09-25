@@ -11,7 +11,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { FormLabel } from "@/components/ui/form";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -55,22 +61,33 @@ import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Edit, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FieldValues, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 const AGE_TYPES = ["years", "months", "days"];
 
-export function ObservationInterpretation({
+export function ObservationInterpretation<
+  TFieldValues extends FieldValues = FieldValues,
+>({
+  form,
   qualifiedRanges,
   setQualifiedRanges,
   disabled = false,
   onClearRequest,
   conflictMessage,
+  name = "qualified_ranges",
+  onCancel,
+  onSheetOpen,
 }: {
+  form: UseFormReturn<TFieldValues>;
   qualifiedRanges: QualifiedRange[];
   setQualifiedRanges: (value: QualifiedRange[]) => void;
   disabled?: boolean;
   onClearRequest?: () => void;
   conflictMessage?: string;
+  name?: string;
+  onSheetOpen?: () => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -99,6 +116,13 @@ export function ObservationInterpretation({
       }
     }
   }, [qualifiedRanges]);
+
+  const handleSheetState = (open: boolean) => {
+    setIsSheetOpen(open);
+    if (open) {
+      onSheetOpen?.();
+    }
+  };
 
   const hasExistingData = () => {
     return qualifiedRanges.some(
@@ -146,6 +170,11 @@ export function ObservationInterpretation({
         };
       });
       setQualifiedRanges(updatedRanges);
+
+      form.setValue(name as any, updatedRanges as any, {
+        shouldValidate: true,
+      });
+
       setRecentlyChangedRanges(changedIndices);
 
       // Update editedRange if we're currently editing a range that was affected
@@ -197,13 +226,18 @@ export function ObservationInterpretation({
           : [],
       _interpretation_type: selectedInterpretationType,
     };
-    setQualifiedRanges([...(qualifiedRanges || []), newRange]);
+
+    const updatedRanges = [...(qualifiedRanges || []), newRange];
+    setQualifiedRanges(updatedRanges);
+
+    form.setValue(name as any, updatedRanges as any);
+
     setEditedRange(newRange);
-    setIsSheetOpen(true);
+    handleSheetState(true);
   };
 
   const handleEditInterpretation = (index: number) => {
-    setIsSheetOpen(true);
+    handleSheetState(true);
     const rangeToEdit = { ...qualifiedRanges[index], id: index };
     setEditedRange(rangeToEdit);
 
@@ -216,7 +250,11 @@ export function ObservationInterpretation({
   };
 
   const handleRemoveInterpretation = (index: number) => {
-    setQualifiedRanges(qualifiedRanges.filter((_, i) => i !== index));
+    const updatedRanges = qualifiedRanges.filter((_, i) => i !== index);
+    setQualifiedRanges(updatedRanges);
+
+    form.setValue(name as any, updatedRanges as any);
+
     const newRecentlyChanged = new Set<number>();
     recentlyChangedRanges.forEach((changedIndex) => {
       if (changedIndex < index) {
@@ -228,12 +266,20 @@ export function ObservationInterpretation({
     setRecentlyChangedRanges(newRecentlyChanged);
   };
 
-  const handleSaveInterpretation = (updatedRange: QualifiedRange) => {
-    if (editedRange && updatedRange.id !== undefined) {
-      const editingIndex = updatedRange.id;
+  const handleSaveInterpretation = async () => {
+    if (editedRange && editedRange.id !== undefined) {
+      const editingIndex = editedRange.id;
       const newRanges = [...qualifiedRanges];
-      newRanges[editingIndex] = updatedRange;
+      newRanges[editingIndex] = editedRange;
       setQualifiedRanges(newRanges);
+
+      form.setValue(name as any, newRanges as any);
+      const isValid = await form.trigger();
+      console.log(JSON.stringify(form.formState.errors));
+
+      if (!isValid) {
+        return;
+      }
 
       // Clear highlighting for this range when user saves
       if (recentlyChangedRanges.has(editingIndex)) {
@@ -242,33 +288,13 @@ export function ObservationInterpretation({
         setRecentlyChangedRanges(newRecentlyChanged);
       }
     }
-    setIsSheetOpen(false);
+    handleSheetState(false);
     setEditedRange(null);
   };
 
-  const removeNewUnsavedInterpretation = () => {
-    // If we were adding a new interpretation, remove it
-    if (editedRange && editedRange.id !== undefined) {
-      const editingIndex = editedRange.id;
-      if (
-        editingIndex === qualifiedRanges.length - 1 &&
-        qualifiedRanges[editingIndex]
-      ) {
-        const lastRange = qualifiedRanges[editingIndex];
-        const isEmpty =
-          lastRange.conditions.length === 0 &&
-          lastRange.ranges.length <= 1 &&
-          (lastRange.valueset_interpretation?.length || 0) <= 1;
-        if (isEmpty) {
-          setQualifiedRanges(qualifiedRanges.slice(0, -1));
-        }
-      }
-    }
-  };
-
   const handleCancelEdit = () => {
-    removeNewUnsavedInterpretation();
-    setIsSheetOpen(false);
+    onCancel?.();
+    handleSheetState(false);
     setEditedRange(null);
   };
 
@@ -312,14 +338,14 @@ export function ObservationInterpretation({
     return (
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-start flex-1 text-sm">
         <span>#{index + 1}</span>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 sm:w-1/2">
           <span className="text-xs font-medium">{t("conditions")}</span>
           <div className="flex flex-col gap-1 text-gray-500">
             {operationSummary}
           </div>
         </div>
         {rangeCount > 0 && (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 sm:w-1/2">
             <span className="text-xs font-medium">{t("effect")}</span>
             <div className="flex flex-col gap-1 text-gray-500">
               {rangeSummary}
@@ -327,7 +353,7 @@ export function ObservationInterpretation({
           </div>
         )}
         {valuesetCount > 0 && (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 sm:w-1/2">
             <span className="text-xs font-medium">{t("effect")}</span>
             <div className="flex flex-col gap-1 text-gray-500">
               {valuesetSummary}
@@ -336,6 +362,29 @@ export function ObservationInterpretation({
         )}
       </div>
     );
+  };
+
+  const handleEditRange = (
+    range: QualifiedRange,
+    field: keyof QualifiedRange | undefined,
+    value: any,
+  ) => {
+    if (field && value !== undefined) {
+      const updatedRange = {
+        ...range,
+        [field]: value,
+      };
+      setEditedRange(updatedRange);
+
+      // Update form state if we have a field name
+      if (editedRange && editedRange.id !== undefined) {
+        const fieldPath = `${name}.${editedRange.id}.${field}`;
+        form.setValue(fieldPath as any, value as any);
+      }
+    } else {
+      // Full range update
+      setEditedRange(range);
+    }
   };
 
   return (
@@ -425,7 +474,7 @@ export function ObservationInterpretation({
         </div>
       )}
 
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+      <Sheet open={isSheetOpen} onOpenChange={handleSheetState}>
         <SheetContent className="sm:max-w-xl">
           <SheetHeader>
             <SheetTitle>{t("add_edit_interpretation")}</SheetTitle>
@@ -434,12 +483,14 @@ export function ObservationInterpretation({
 
           {editedRange && (
             <QualifiedRangeEditor
+              form={form}
               editedRange={editedRange}
-              setEditedRange={setEditedRange}
+              setEditedRange={handleEditRange}
               onSave={handleSaveInterpretation}
               onCancel={handleCancelEdit}
               interpretationType={selectedInterpretationType}
               handleTypeChange={handleTypeChange}
+              fieldName={`${name}.${editedRange.id || 0}`}
             />
           )}
         </SheetContent>
@@ -476,49 +527,48 @@ export function ObservationInterpretation({
   );
 }
 
-function QualifiedRangeEditor({
+function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
+  form,
   editedRange,
   setEditedRange,
   onSave,
   onCancel,
   interpretationType,
   handleTypeChange,
+  fieldName,
 }: {
+  form: UseFormReturn<TFieldValues>;
   editedRange: QualifiedRange;
-  setEditedRange: (range: QualifiedRange) => void;
-  onSave: (updatedRange: QualifiedRange) => void;
+  setEditedRange: (
+    range: QualifiedRange,
+    field?: keyof QualifiedRange,
+    value?: any,
+  ) => void;
+  onSave: () => void;
   onCancel: () => void;
   interpretationType: InterpretationType;
   handleTypeChange: (newType: InterpretationType) => void;
+  fieldName: string;
 }) {
   const { t } = useTranslation();
 
   const handleSetConditions = (value: Condition[]) => {
-    setEditedRange({
-      ...editedRange,
-      conditions: value,
-    });
+    setEditedRange(editedRange, "conditions", value);
   };
 
   const handleSetRanges = (value: NumericRange[]) => {
-    setEditedRange({
-      ...editedRange,
-      ranges: value,
-    });
+    setEditedRange(editedRange, "ranges", value);
   };
 
   const customValueSetInterpretations =
     editedRange.valueset_interpretation || [];
 
   const handleSetCustomValuesetInterpretations = (value: CustomValueSet[]) => {
-    setEditedRange({
-      ...editedRange,
-      valueset_interpretation: value,
-    });
+    setEditedRange(editedRange, "valueset_interpretation", value);
   };
 
   const handleSave = () => {
-    onSave(editedRange);
+    onSave();
   };
 
   return (
@@ -527,6 +577,8 @@ function QualifiedRangeEditor({
         <ConditionComponent
           conditions={editedRange.conditions}
           setConditions={handleSetConditions}
+          form={form}
+          fieldName={`${fieldName}.conditions`}
         />
         <div>
           <div className="flex flex-col sm:flex-row justify-between gap-2 bg-gray-50 rounded-md px-2 pt-1 pb-2 border border-gray-200">
@@ -565,13 +617,17 @@ function QualifiedRangeEditor({
         </div>
         {interpretationType === InterpretationType.ranges ? (
           <NumericRangeComponent
+            form={form}
             ranges={editedRange.ranges}
             setRanges={handleSetRanges}
+            fieldName={fieldName}
           />
         ) : (
           <CustomValueSetInterpretationComponent
+            form={form}
             valuesetInterpretations={customValueSetInterpretations}
             setValuesetInterpretations={handleSetCustomValuesetInterpretations}
+            fieldName={fieldName}
           />
         )}
       </div>
@@ -592,6 +648,8 @@ export function RenderConditionInput({
   index,
   handleSetValue,
   handleSetValueType,
+  form,
+  fieldName,
 }: {
   condition: Condition;
   index: number;
@@ -604,6 +662,8 @@ export function RenderConditionInput({
     index: number,
   ) => void;
   handleSetValueType: (value: string, index: number) => void;
+  form: UseFormReturn<any>;
+  fieldName: string;
 }) {
   const { t } = useTranslation();
   const operation = condition.operation;
@@ -616,24 +676,36 @@ export function RenderConditionInput({
   });
   switch (condition.metric) {
     case "patient_gender": {
-      const currentValue = typeof value === "string" ? value : "";
       if (operation === ConditionOperation.equality) {
         return (
-          <Select
-            value={currentValue}
-            onValueChange={(value) => handleSetValue(value, index)}
-          >
-            <SelectTrigger className="sm:w-48!">
-              <SelectValue placeholder={t("select_a_value")} />
-            </SelectTrigger>
-            <SelectContent>
-              {GENDER_TYPES.map((gender) => (
-                <SelectItem key={gender.id} value={gender.id}>
-                  {t(`GENDER__${gender.id}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <FormField
+            control={form.control}
+            name={`${fieldName}.value` as any}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Select
+                    value={field.value || ""}
+                    onValueChange={(value) => {
+                      handleSetValue(value, index);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("select_a_value")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {GENDER_TYPES.map((gender) => (
+                        <SelectItem key={gender.id} value={gender.id}>
+                          {t(`GENDER__${gender.id}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         );
       }
       break;
@@ -645,48 +717,68 @@ export function RenderConditionInput({
             ? (value.value_type as string)
             : "years";
         return (
-          <Select
-            value={valueType}
-            onValueChange={(value) => handleSetValueType(value, index)}
-          >
-            <SelectTrigger className="sm:w-28!">
-              <SelectValue placeholder={t("select_a_value")} />
-            </SelectTrigger>
-            <SelectContent>
-              {AGE_TYPES.map((age) => (
-                <SelectItem key={age} value={age}>
-                  {t(age)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <FormField
+            control={form.control}
+            name={`${fieldName}.value.value_type` as any}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Select
+                    value={field.value || valueType}
+                    onValueChange={(value) => {
+                      handleSetValueType(value, index);
+                    }}
+                  >
+                    <SelectTrigger className="sm:w-28!">
+                      <SelectValue placeholder={t("select_a_value")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {AGE_TYPES.map((age) => (
+                        <SelectItem key={age} value={age}>
+                          {t(age)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         );
       };
       if (operation === ConditionOperation.equality) {
-        const currentValue =
-          typeof value === "object" && value !== null && "value" in value
-            ? value.value
-            : undefined;
         const currentValueType =
           typeof value === "object" && value !== null && "value_type" in value
             ? value.value_type
             : "years";
         return (
           <div className="flex flex-col sm:flex-row gap-2">
-            <Input
-              type="number"
-              placeholder={t("value")}
-              value={currentValue || ""}
-              onChange={(e) => {
-                handleSetValue(
-                  {
-                    value: Number(e.target.value),
-                    value_type: currentValueType,
-                  } as AgeOperationEqualityValue,
-                  index,
-                );
-              }}
-              className="sm:w-fit h-9"
+            <FormField
+              control={form.control}
+              name={`${fieldName}.value.value` as any}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder={t("value")}
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        handleSetValue(
+                          {
+                            value: Number(e.target.value),
+                            value_type: currentValueType,
+                          } as AgeOperationEqualityValue,
+                          index,
+                        );
+                      }}
+                      className="sm:w-fit h-9"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
             {renderAgeType()}
           </div>
@@ -698,37 +790,59 @@ export function RenderConditionInput({
             : { min: undefined, max: undefined, value_type: "years" };
         return (
           <div className="flex flex-col sm:flex-row gap-2">
-            <Input
-              type="number"
-              placeholder={t("min")}
-              className="w-full h-9"
-              value={currentRange.min || ""}
-              onChange={(e) =>
-                handleSetValue(
-                  {
-                    min: Number(e.target.value),
-                    max: currentRange.max || 0,
-                    value_type: currentRange.value_type || "years",
-                  } as any,
-                  index,
-                )
-              }
+            <FormField
+              control={form.control}
+              name={`${fieldName}.value.min` as any}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder={t("min")}
+                      className="w-full h-9"
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        handleSetValue(
+                          {
+                            min: Number(e.target.value),
+                            max: currentRange.max || 0,
+                            value_type: currentRange.value_type || "years",
+                          } as any,
+                          index,
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <Input
-              type="number"
-              placeholder={t("max")}
-              className="w-full h-9"
-              value={currentRange.max || ""}
-              onChange={(e) =>
-                handleSetValue(
-                  {
-                    min: currentRange.min || 0,
-                    max: Number(e.target.value),
-                    value_type: currentRange.value_type || "years",
-                  } as any,
-                  index,
-                )
-              }
+            <FormField
+              control={form.control}
+              name={`${fieldName}.value.max` as any}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder={t("max")}
+                      className="w-full h-9"
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        handleSetValue(
+                          {
+                            min: currentRange.min || 0,
+                            max: Number(e.target.value),
+                            value_type: currentRange.value_type || "years",
+                          } as any,
+                          index,
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
             {renderAgeType()}
           </div>
@@ -738,14 +852,26 @@ export function RenderConditionInput({
     }
     default: {
       if (operation === ConditionOperation.equality) {
-        const currentValue = typeof value === "string" ? value : "";
         return (
-          <Input
-            type="text"
-            placeholder={t("value")}
-            value={currentValue}
-            onChange={(e) => handleSetValue(e.target.value, index)}
-            className="w-fit h-9"
+          <FormField
+            control={form.control}
+            name={`${fieldName}.value` as any}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder={t("value")}
+                    value={field.value || ""}
+                    onChange={(e) => {
+                      handleSetValue(e.target.value, index);
+                    }}
+                    className="w-fit h-9"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         );
       } else if (operation === ConditionOperation.in_range) {
@@ -755,35 +881,57 @@ export function RenderConditionInput({
             : { min: undefined, max: undefined };
         return (
           <div className="flex flex-col sm:flex-row gap-2">
-            <Input
-              type="number"
-              placeholder={t("min")}
-              className="w-full h-9"
-              value={currentRange.min || ""}
-              onChange={(e) =>
-                handleSetValue(
-                  {
-                    min: Number(e.target.value),
-                    max: currentRange.max || 0,
-                  },
-                  index,
-                )
-              }
+            <FormField
+              control={form.control}
+              name={`${fieldName}.value.min` as any}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder={t("min")}
+                      className="w-full h-9"
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        handleSetValue(
+                          {
+                            min: Number(e.target.value),
+                            max: currentRange.max || 0,
+                          },
+                          index,
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <Input
-              type="number"
-              placeholder={t("max")}
-              className="w-full h-9"
-              value={currentRange.max || ""}
-              onChange={(e) =>
-                handleSetValue(
-                  {
-                    min: currentRange.min || 0,
-                    max: Number(e.target.value),
-                  },
-                  index,
-                )
-              }
+            <FormField
+              control={form.control}
+              name={`${fieldName}.value.max` as any}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder={t("max")}
+                      className="w-full h-9"
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        handleSetValue(
+                          {
+                            min: currentRange.min || 0,
+                            max: Number(e.target.value),
+                          },
+                          index,
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
         );
@@ -807,12 +955,18 @@ export function RenderConditionInput({
   }
 }
 
-export function ConditionComponent({
+export function ConditionComponent<
+  TFieldValues extends FieldValues = FieldValues,
+>({
   conditions,
   setConditions,
+  form,
+  fieldName,
 }: {
   conditions: Condition[];
   setConditions: (value: Condition[]) => void;
+  form: UseFormReturn<TFieldValues>;
+  fieldName: string;
 }) {
   const { t } = useTranslation();
   const { data: metrics } = useQuery({
@@ -836,6 +990,7 @@ export function ConditionComponent({
       ...conditions[index],
       metric: newMetric?.name || "",
       operation: firstOperation,
+      value: undefined,
       ...(firstOperation === ConditionOperation.equality &&
         newMetric?.name !== "patient_age" && {
           value: "",
@@ -979,44 +1134,77 @@ export function ConditionComponent({
                 <div className="flex flex-col sm:flex-row gap-2 flex-1">
                   <div className="flex flex-col gap-2 flex-1">
                     <FormLabel className="text-sm">{t("type")}</FormLabel>
-                    <Select
-                      value={condition.metric}
-                      onValueChange={(value) => handleSetMetric(value, index)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a metric" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {metrics?.map((metric: Metrics) => (
-                          <SelectItem key={metric.name} value={metric.name}>
-                            {t(`observation_metric__${metric.name}`)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormField
+                      control={form.control}
+                      name={`${fieldName}.${index}.metric` as any}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Select
+                              value={field.value}
+                              onValueChange={(value) => {
+                                handleSetMetric(value, index);
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a metric" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {metrics?.map((metric: Metrics) => (
+                                  <SelectItem
+                                    key={metric.name}
+                                    value={metric.name}
+                                  >
+                                    {t(`observation_metric__${metric.name}`)}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   <div className="flex flex-col gap-2 flex-1">
                     <FormLabel className="text-sm">{t("comperator")}</FormLabel>
-                    <Select
-                      value={condition.operation}
-                      onValueChange={(value) =>
-                        handleSetOperation(value as ConditionOperation, index)
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an operation" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {metric.allowed_operations.map(
-                          (operation: ConditionOperation) => (
-                            <SelectItem key={operation} value={operation}>
-                              {t(operation)}
-                            </SelectItem>
-                          ),
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <FormField
+                      control={form.control}
+                      name={`${fieldName}.${index}.operation` as any}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Select
+                              value={field.value}
+                              onValueChange={(value) => {
+                                handleSetOperation(
+                                  value as ConditionOperation,
+                                  index,
+                                );
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select an operation" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {metric.allowed_operations.map(
+                                  (operation: ConditionOperation) => (
+                                    <SelectItem
+                                      key={operation}
+                                      value={operation}
+                                    >
+                                      {t(operation)}
+                                    </SelectItem>
+                                  ),
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </div>
 
@@ -1028,6 +1216,8 @@ export function ConditionComponent({
                       index={index}
                       handleSetValue={handleSetValue}
                       handleSetValueType={handleSetValueType}
+                      form={form}
+                      fieldName={`${fieldName}.${index}`}
                     />
                   </div>
                 )}
@@ -1038,12 +1228,18 @@ export function ConditionComponent({
     </div>
   );
 }
-function InterpretationComponent({
+function InterpretationComponent<
+  TFieldValues extends FieldValues = FieldValues,
+>({
+  form,
   interpretation,
   setInterpretation,
+  fieldName,
 }: {
+  form: UseFormReturn<TFieldValues>;
   interpretation: Interpretation;
   setInterpretation: (interpretation: Interpretation) => void;
+  fieldName: string;
 }) {
   const { t } = useTranslation();
   const handleDisplayChange = (value: string) => {
@@ -1071,50 +1267,79 @@ function InterpretationComponent({
     <div className="flex flex-col gap-2 w-full justify-between">
       <div className="flex flex-col gap-2 flex-1">
         <FormLabel className="text-sm">{t("display")}</FormLabel>
-        <Input
-          value={interpretation.display}
-          onChange={(e) => handleDisplayChange(e.target.value)}
-          className="h-9"
+        <FormField
+          control={form.control}
+          name={`${fieldName}.display` as any}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  {...field}
+                  value={field.value || ""}
+                  className="h-9"
+                  onChange={(e) => handleDisplayChange(e.target.value)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
       </div>
       <div className="flex flex-col gap-2 flex-1">
         <FormLabel className="text-sm">{t("icon")}</FormLabel>
         <Input
-          value={interpretation.icon}
+          value={interpretation.icon || ""}
           onChange={(e) => handleIconChange(e.target.value)}
           className="h-9"
         />
       </div>
       <div className="flex flex-col gap-2 flex-1">
         <FormLabel className="text-sm">{t("color")}</FormLabel>
-        <Select
-          value={interpretation.color}
-          onValueChange={(value) => handleColorChange(value)}
-        >
-          <SelectTrigger className="h-9">
-            <SelectValue placeholder={t("select_a_value")} />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(COLOR_OPTIONS).map(([key, value]) => (
-              <SelectItem key={key} value={value.hex}>
-                <div className="flex items-center gap-2">
-                  <div className={`w-4 h-4 rounded-full ${value.class}`} />
-                  {value.label}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <FormField
+          control={form.control}
+          name={`${fieldName}.color` as any}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Select
+                  value={field.value || ""}
+                  onValueChange={handleColorChange}
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder={t("select_a_value")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(COLOR_OPTIONS).map(([key, value]) => (
+                      <SelectItem key={key} value={value.hex}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-4 h-4 rounded-full ${value.class}`}
+                          />
+                          {value.label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
     </div>
   );
 }
-function NumericRangeComponent({
+function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
+  form,
   ranges,
   setRanges,
+  fieldName,
 }: {
+  form: UseFormReturn<TFieldValues>;
   ranges: NumericRange[];
   setRanges: (value: NumericRange[]) => void;
+  fieldName: string;
 }) {
   const { t } = useTranslation();
   const handleSetRange = (value: NumericRange, index: number) => {
@@ -1192,29 +1417,59 @@ function NumericRangeComponent({
           <div className="flex flex-col gap-2">
             {range?.interpretation && (
               <InterpretationComponent
+                form={form}
                 interpretation={range.interpretation}
                 setInterpretation={(value) =>
                   handleSetInterpretation(value, index)
                 }
+                fieldName={`${fieldName}.ranges.${index}.interpretation`}
               />
             )}
             <div className="flex flex-row gap-2">
               <div className="flex flex-col gap-2 flex-1">
                 <FormLabel className="text-sm">{t("min")}</FormLabel>
-                <Input
-                  type="number"
-                  value={range?.min}
-                  onChange={(e) => handleSetMin(Number(e.target.value), index)}
-                  className="h-9"
+                <FormField
+                  control={form.control}
+                  name={`${fieldName}.ranges.${index}.min` as any}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="number"
+                          value={field.value || ""}
+                          className="h-9"
+                          onChange={(e) =>
+                            handleSetMin(Number(e.target.value), index)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
               <div className="flex flex-col gap-2 flex-1">
                 <FormLabel className="text-sm">{t("max")}</FormLabel>
-                <Input
-                  type="number"
-                  value={range?.max}
-                  onChange={(e) => handleSetMax(Number(e.target.value), index)}
-                  className="h-9"
+                <FormField
+                  control={form.control}
+                  name={`${fieldName}.ranges.${index}.max` as any}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="number"
+                          value={field.value || ""}
+                          className="h-9"
+                          onChange={(e) =>
+                            handleSetMax(Number(e.target.value), index)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
             </div>
@@ -1225,12 +1480,18 @@ function NumericRangeComponent({
   );
 }
 
-function CustomValueSetInterpretationComponent({
+function CustomValueSetInterpretationComponent<
+  TFieldValues extends FieldValues = FieldValues,
+>({
+  form,
   valuesetInterpretations,
   setValuesetInterpretations,
+  fieldName,
 }: {
+  form: UseFormReturn<TFieldValues>;
   valuesetInterpretations: CustomValueSet[];
   setValuesetInterpretations: (value: CustomValueSet[]) => void;
+  fieldName: string;
 }) {
   const { t } = useTranslation();
 
@@ -1327,10 +1588,12 @@ function CustomValueSetInterpretationComponent({
           </Select>
           {valuesetInterpretation.valueset && (
             <InterpretationComponent
+              form={form}
               interpretation={valuesetInterpretation.interpretation}
               setInterpretation={(value) =>
                 handleSetInterpretation(value, index)
               }
+              fieldName={`${fieldName}.valueset_interpretation.${index}.interpretation`}
             />
           )}
         </div>

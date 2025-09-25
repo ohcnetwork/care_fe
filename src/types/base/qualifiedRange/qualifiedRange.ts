@@ -45,11 +45,23 @@ export const qualifiedRangeSchema = z.array(
     .object({
       conditions: z.array(conditionSchema),
       ranges: z.array(
-        z.object({
-          interpretation: interpretationSchema,
-          min: z.number().optional(),
-          max: z.number().optional(),
-        }),
+        z
+          .object({
+            interpretation: interpretationSchema,
+            min: z.coerce.number().optional(),
+            max: z.coerce.number().optional(),
+          })
+          .refine(
+            (data) => {
+              // Only validate if both min and max exist
+              if (data.min === undefined || data.max === undefined) return true;
+              return data.min <= data.max;
+            },
+            {
+              message: "Min value must be <= max value",
+              path: ["max"],
+            },
+          ),
       ),
       normal_coded_value_set: z.string().optional(),
       critical_coded_value_set: z.string().optional(),
