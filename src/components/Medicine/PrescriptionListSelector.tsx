@@ -96,16 +96,17 @@ export default function PrescriptionListSelector({
                 variant="outline"
                 className="w-full flex justify-between items-center py-6"
               >
-                <div className="flex items-start gap-3">
-                  <ReceiptTextIcon className="size-5 text-primary-600 shrink-0 mt-1" />
-                  <div className="flex flex-col">
-                    <span className="text-base font-medium">
+                <div className="flex gap-3">
+                  <ReceiptTextIcon className="size-5 text-primary-600" />
+                  <div className="flex flex-col -mt-1 text-left">
+                    <span className="text-sm font-medium whitespace-nowrap">
                       {formatDateTime(
                         selectedPrescription.created_date,
                         "DD/MM/YYYY hh:mm A",
                       )}
                     </span>
-                    <span className="text-sm font-medium text-gray-700">
+
+                    <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
                       {t("prescribed_by")}:{" "}
                       {formatName(selectedPrescription.prescribed_by)}
                     </span>
@@ -168,26 +169,25 @@ function PrescriptionList({
               <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
             )}
             <CardContent className="flex flex-col px-4 py-3 gap-2">
-              <div className="flex justify-between items-center">
-                <div className="flex items-start gap-3">
-                  <ReceiptTextIcon
-                    className={cn(
-                      "size-5",
-                      isSelected ? "text-primary-600" : "text-gray-500",
+              <div className="flex gap-3">
+                <ReceiptTextIcon
+                  className={cn(
+                    "size-5",
+                    isSelected ? "text-primary-600" : "text-gray-500",
+                  )}
+                />
+                <div className="flex flex-col -mt-1">
+                  <span className="text-sm font-medium whitespace-nowrap">
+                    {formatDateTime(
+                      prescription.created_date,
+                      "DD/MM/YYYY hh:mm A",
                     )}
-                  />
-                  <div className="flex flex-col items-start">
-                    <span className="text-base font-medium whitespace-nowrap">
-                      {formatDateTime(prescription.created_date, "DD/MM/YYYY")}
-                    </span>
-                    <span className="text-base font-medium whitespace-nowrap">
-                      {formatDateTime(prescription.created_date, "hh:mm A")}
-                    </span>
-                    <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                      {t("prescribed_by")}:{" "}
-                      {formatName(prescription.prescribed_by)}
-                    </span>
-                  </div>
+                  </span>
+
+                  <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                    {t("prescribed_by")}:{" "}
+                    {formatName(prescription.prescribed_by)}
+                  </span>
                 </div>
               </div>
             </CardContent>
