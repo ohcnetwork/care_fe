@@ -276,11 +276,13 @@ export function ActivityDefinitionList({
             {/* classification Filter */}
             <div className="w-full sm:w-auto">
               <FilterSelect
-                value={qParams.category || ""}
-                onValueChange={(value) => updateQuery({ category: value })}
+                value={qParams.classification || ""}
+                onValueChange={(value) =>
+                  updateQuery({ classification: value })
+                }
                 options={Object.values(Classification)}
                 label={t("category")}
-                onClear={() => updateQuery({ category: undefined })}
+                onClear={() => updateQuery({ classification: undefined })}
               />
             </div>
           </div>
