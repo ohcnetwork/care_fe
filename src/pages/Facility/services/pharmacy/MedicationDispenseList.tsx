@@ -618,8 +618,6 @@ export default function MedicationDispenseList({
           setMedicationToMarkComplete(null);
         }}
         confirmText={t("mark_as_already_given")}
-        cancelText={t("cancel")}
-        variant="primary"
       />
       <ConfirmActionDialog
         open={prescriptionToUpdate !== null}
