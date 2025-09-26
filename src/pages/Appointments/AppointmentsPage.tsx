@@ -103,7 +103,7 @@ import {
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import { MultiPractitionerSelector } from "./components/MultiPractitionerSelect";
+import { PractitionerSelector } from "./components/PractitionerSelector";
 
 type AppointmentStatusGroup = {
   label: string;
@@ -357,7 +357,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
               <Label className="mb-2 text-black">
                 {t("practitioner", { count: 2 })}
               </Label>
-              <MultiPractitionerSelector
+              <PractitionerSelector
                 facilityId={facilityId}
                 selected={practitioners || []}
                 onSelect={(users) => {
