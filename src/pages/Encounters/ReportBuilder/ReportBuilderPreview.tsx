@@ -375,9 +375,7 @@ function SectionPreview({ section }: { section: SectionConfig }) {
       ) : isTextStyle ? (
         isCustomSection ? (
           <ul className="list-disc list-inside">
-            {text?.map((item, index) => (
-              <li key={index}>{t(item)}</li>
-            ))}
+            {text?.map((item, index) => <li key={index}>{t(item)}</li>)}
           </ul>
         ) : (
           <ul className="list-disc list-inside">
