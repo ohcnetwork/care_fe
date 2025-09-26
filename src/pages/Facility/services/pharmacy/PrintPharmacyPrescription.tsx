@@ -47,7 +47,5 @@ export function PrintPharmacyPrescription({ facilityId, patientId }: Props) {
     return null;
   }
 
-  return (
-    <PrescriptionPreview medications={filteredMedications} patient={patient} />
-  );
+  return <PrescriptionPreview prescriptions={[]} patient={patient} />;
 }

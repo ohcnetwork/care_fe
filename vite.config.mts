@@ -188,6 +188,8 @@ export default defineConfig(({ mode }) => {
           REACT_SENTRY_DSN: z.string().url().optional(),
           REACT_SENTRY_ENVIRONMENT: z.string().optional(),
 
+          REACT_DEFAULT_PAYMENT_TERMS: z.string().optional(),
+
           REACT_CDN_URLS: z
             .string()
             .optional()
@@ -232,7 +234,7 @@ export default defineConfig(({ mode }) => {
           type: "module",
         },
         injectManifest: {
-          maximumFileSizeToCacheInBytes: 7000000,
+          maximumFileSizeToCacheInBytes: 8000000,
         },
         manifest: {
           name: "Care",
