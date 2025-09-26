@@ -27,7 +27,13 @@ import ValueSetSearchContent from "@/components/Questionnaire/ValueSetSearchCont
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
@@ -171,71 +177,54 @@ export default function MedicationValueSetSelect({
     );
   };
 
-  const renderTabContent = () => (
+  const renderTabs = () => (
     <Tabs
       value={activeTab}
       onValueChange={(value: string) =>
         setActiveTab(value as "product" | "valueset")
       }
-      className="w-full"
     >
-      <div className="flex items-center border-b">
-        <TabsList className="h-10 w-full px-2">
-          <TabsTrigger value="product" className="flex-1">
-            {t("in_stock")}
-          </TabsTrigger>
-          <TabsTrigger value="valueset" className="flex-1">
-            {t("medication_list")}
-          </TabsTrigger>
-        </TabsList>
-      </div>
-      <TabsContent value="product" className="p-0">
-        <Command className="rounded-lg" filter={() => 1}>
-          <CommandInput
-            placeholder={t("search_products")}
-            onValueChange={(value) => {
-              if (value && currentCategory) {
-                setCurrentCategory(undefined);
-                setBreadcrumbs([]);
-              }
-              setSearch(value);
-            }}
-            value={search}
-            className="border-none ring-0 text-base md:text-sm"
-            autoFocus
-          />
+      <TabsList className="flex w-full">
+        <TabsTrigger value="product" className="flex-1">
+          {t("in_stock")}
+        </TabsTrigger>
+        <TabsTrigger value="valueset" className="flex-1">
+          {t("medication_list")}
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
+  );
 
-          {/* Breadcrumbs navigation */}
-          {breadcrumbs.length > 0 && (
-            <div className="px-4 py-2 border-b bg-gray-100">
-              <div className="flex items-center gap-1 truncate text-xs">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleBackToRoot}
-                  className="h-6 px-2 text-xs hover:bg-white"
-                >
-                  <Home className="size-3 mr-1" />
-                  {t("root")}
-                </Button>
-                {breadcrumbs.map((breadcrumb, index) => (
-                  <div key={breadcrumb.slug} className="flex items-center">
-                    <ChevronRight className="size-3 mx-1 text-gray-500" />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleBreadcrumbClick(index)}
-                      className="h-6 px-2 text-xs hover:bg-white truncate max-w-[150px]"
-                    >
-                      {breadcrumb.title}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+  const renderCommand = (children: React.ReactNode) => (
+    <Command className="rounded-lg" filter={() => 1}>
+      <CommandInput
+        placeholder={t("search_products")}
+        onValueChange={(value) => {
+          if (value && currentCategory) {
+            setCurrentCategory(undefined);
+            setBreadcrumbs([]);
+          }
+          setSearch(value);
+        }}
+        value={search}
+        className="border-none ring-0 text-base md:text-sm"
+        autoFocus
+      />
+      {children}
+    </Command>
+  );
 
-          <CommandList className="max-h-[300px] overflow-auto">
+  const renderTabContent = () => (
+    <div className="flex-1 overflow-y-auto">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value: string) =>
+          setActiveTab(value as "product" | "valueset")
+        }
+        className="w-full p-0"
+      >
+        <TabsContent value="product" className="p-0">
+          <CommandList className="overflow-y-auto">
             <CommandEmpty>
               {search.length < 3 ? (
                 <p className="p-4 text-sm text-gray-500">
@@ -289,29 +278,59 @@ export default function MedicationValueSetSelect({
             {/* Search Results */}
             {search && renderProductItems()}
           </CommandList>
-        </Command>
-      </TabsContent>
+        </TabsContent>
 
-      <TabsContent value="valueset" className="p-0">
-        <ValueSetSearchContent
-          system="system-medication"
-          onSelect={(selected) => {
-            onSelect(selected);
-            setOpen(false);
-          }}
-          searchPostFix=" clinical drug"
-          title={title}
-          search={search}
-          onSearchChange={setSearch}
-        />
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="valueset" className="p-0">
+          <ValueSetSearchContent
+            system="system-medication"
+            onSelect={(selected) => {
+              onSelect(selected);
+              setOpen(false);
+            }}
+            searchPostFix=" clinical drug"
+            title={title}
+            search={search}
+            onSearchChange={setSearch}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
+
+  const renderBreadcrumbs = () =>
+    breadcrumbs.length > 0 && (
+      <div className="px-4 py-2 border-b bg-gray-100">
+        <div className="flex items-center gap-1 truncate text-xs">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBackToRoot}
+            className="h-6 px-2 text-xs hover:bg-white"
+          >
+            <Home className="size-3 mr-1" />
+            {t("root")}
+          </Button>
+          {breadcrumbs.map((breadcrumb, index) => (
+            <div key={breadcrumb.slug} className="flex items-center">
+              <ChevronRight className="size-3 mx-1 text-gray-500" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleBreadcrumbClick(index)}
+                className="h-6 px-2 text-xs hover:bg-white truncate max-w-[150px]"
+              >
+                {breadcrumb.title}
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
 
   if (isMobile && !hideTrigger) {
     return (
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
@@ -327,19 +346,29 @@ export default function MedicationValueSetSelect({
             <span>{value?.display || placeholder}</span>
             <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
           </Button>
-        </SheetTrigger>
-        <SheetContent side="bottom" className="px-0 pt-2 pb-0 rounded-t-2xl">
-          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
-          <div className="mt-8 h-full overflow-y-auto">
-            {renderTabContent()}
-          </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerTrigger>
+        <DrawerContent className="min-h-[50vh] max-h-[85vh] px-0 pb-0 rounded-t-lg flex flex-col">
+          <DrawerHeader className="p-0 flex-shrink-0 space-y-2 mt-1">
+            {renderTabs()}
+            <DrawerTitle className="sr-only">
+              {title || t("select_medication")}
+            </DrawerTitle>
+            {renderBreadcrumbs()}
+          </DrawerHeader>
+          {renderCommand(renderTabContent())}
+        </DrawerContent>
+      </Drawer>
     );
   }
 
   if (hideTrigger) {
-    return renderTabContent();
+    return (
+      <div className="w-full">
+        {renderTabs()}
+        {renderBreadcrumbs()}
+        {renderCommand(renderTabContent())}
+      </div>
+    );
   }
 
   return (
@@ -357,7 +386,9 @@ export default function MedicationValueSetSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[600px] p-0" align="start">
-        {renderTabContent()}
+        {renderTabs()}
+        {renderBreadcrumbs()}
+        {renderCommand(renderTabContent())}
       </PopoverContent>
     </Popover>
   );
