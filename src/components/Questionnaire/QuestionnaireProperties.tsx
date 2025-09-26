@@ -383,7 +383,7 @@ export function QuestionnaireProperties({
           />
         </div>
         <div className="space-y-2">
-          <Label>{t("tags")}</Label>
+          <Label>{t("tags", { count: 2 })}</Label>
           <TagSelector id={id} selection={tagSelection} form={form} />
         </div>
         {id && (

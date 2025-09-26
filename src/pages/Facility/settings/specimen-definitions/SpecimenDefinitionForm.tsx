@@ -43,6 +43,7 @@ import {
   RETENTION_TIME_UNITS,
   SPECIMEN_DEFINITION_UNITS_CODES,
   SpecimenDefinitionCreate,
+  SpecimenDefinitionRead,
   SpecimenDefinitionStatus,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 
@@ -89,7 +90,7 @@ const typeTestedSchema = z.object({
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
+  slug_value: z.string().min(1, "Slug is required"),
   status: z.nativeEnum(SpecimenDefinitionStatus),
   description: z.string().min(1, t("field_required")),
   derived_from_uri: z
@@ -106,7 +107,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface SpecimenDefinitionFormProps {
-  initialData?: SpecimenDefinitionCreate;
+  initialData?: SpecimenDefinitionRead;
   onSubmit: (data: SpecimenDefinitionCreate) => void;
   isLoading?: boolean;
 }
@@ -123,10 +124,10 @@ export function SpecimenDefinitionForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: initialData?.title,
-      slug: initialData?.slug,
+      slug_value: initialData?.slug_config.slug_value,
       status: initialData?.status ?? SpecimenDefinitionStatus.active,
       description: initialData?.description,
-      derived_from_uri: initialData?.derived_from_uri || undefined,
+      derived_from_uri: initialData?.derived_from_uri ?? undefined,
       type_collected: initialData?.type_collected,
       patient_preparation: initialData?.patient_preparation ?? [],
       collection: initialData?.collection ?? undefined,
@@ -180,7 +181,7 @@ export function SpecimenDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || ""), {
           shouldValidate: true,
         });
       }
@@ -277,7 +278,7 @@ export function SpecimenDefinitionForm({
 
                 <FormField
                   control={form.control}
-                  name="slug"
+                  name="slug_value"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel>
@@ -318,7 +319,7 @@ export function SpecimenDefinitionForm({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder={t("select_status")} />
                           </SelectTrigger>
                         </FormControl>
@@ -538,7 +539,7 @@ export function SpecimenDefinitionForm({
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder={t("select_preference")} />
                           </SelectTrigger>
                         </FormControl>

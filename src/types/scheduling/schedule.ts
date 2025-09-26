@@ -3,13 +3,35 @@ import { DayOfWeek } from "@/CAREUI/interactive/WeekdayCheckbox";
 import { Badge } from "@/components/ui/badge";
 
 import { Time } from "@/Utils/types";
+import { formatName } from "@/Utils/utils";
+import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
+import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
+import { LocationList } from "@/types/location/location";
+import { buildLocationHierarchy } from "@/types/location/utils";
+import { TokenRead } from "@/types/tokens/token/token";
 import { UserReadMinimal } from "@/types/user/user";
 
-export type ScheduleSlotType = "appointment" | "open" | "closed";
+export enum AvailabilitySlotType {
+  Appointment = "appointment",
+  Open = "open",
+  Closed = "closed",
+}
+
+export enum SchedulableResourceType {
+  Practitioner = "practitioner",
+  Location = "location",
+  HealthcareService = "healthcare_service",
+}
+
+export const SCHEDULABLE_RESOURCE_TYPE_COLORS = {
+  practitioner: "blue",
+  location: "green",
+  healthcare_service: "yellow",
+} as const satisfies Record<SchedulableResourceType, string>;
 
 export interface AvailabilityDateTime {
   day_of_week: DayOfWeek;
@@ -25,6 +47,9 @@ export interface ScheduleTemplate {
   availabilities: ScheduleAvailability[];
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
+  charge_item_definition: ChargeItemDefinitionRead;
+  revisit_charge_item_definition: ChargeItemDefinitionRead;
+  revisit_allowed_days: number;
 }
 
 type ScheduleAvailabilityBase = {
@@ -33,25 +58,30 @@ type ScheduleAvailabilityBase = {
   availability: AvailabilityDateTime[];
 } & (
   | {
-      slot_type: "appointment";
+      slot_type: AvailabilitySlotType.Appointment;
       slot_size_in_minutes: number;
       tokens_per_slot: number;
     }
   | {
-      slot_type: "open" | "closed";
+      slot_type: AvailabilitySlotType.Open | AvailabilitySlotType.Closed;
       slot_size_in_minutes: null;
       tokens_per_slot: null;
     }
 );
 
 export interface ScheduleTemplateCreateRequest {
-  user: string;
   name: string;
   valid_from: string; // datetime
   valid_to: string; // datetime
   availabilities: ScheduleAvailabilityBase[];
+  resource_type: SchedulableResourceType;
+  resource_id: string;
 }
-
+export interface ScheduleTemplateSetChargeItemDefinitionRequest {
+  charge_item_definition: string;
+  re_visit_allowed_days: number;
+  re_visit_charge_item_definition: string | null;
+}
 export interface ScheduleTemplateUpdateRequest {
   name: string;
   valid_from: string;
@@ -74,7 +104,8 @@ export interface ScheduleException {
 }
 
 export interface ScheduleExceptionCreateRequest {
-  user: string; // user's id
+  resource_type: SchedulableResourceType;
+  resource_id: string;
   reason: string;
   valid_from: string;
   valid_to: string;
@@ -100,41 +131,54 @@ export interface GetSlotsForDayResponse {
 export interface AvailabilityHeatmapRequest {
   from_date: string;
   to_date: string;
-  user: string;
+  resource_type: SchedulableResourceType;
+  resource_id: string;
 }
 
 export interface AvailabilityHeatmapResponse {
   [date: string]: { total_slots: number; booked_slots: number };
 }
 
-export const AppointmentNonCancelledStatuses = [
-  "proposed",
-  "pending",
-  "booked",
-  "arrived",
-  "fulfilled",
-  "noshow",
-  "checked_in",
-  "waitlist",
-  "in_consultation",
-] as const;
+export enum AppointmentStatus {
+  PROPOSED = "proposed",
+  PENDING = "pending",
+  BOOKED = "booked",
+  ARRIVED = "arrived",
+  CHECKED_IN = "checked_in",
+  WAITLIST = "waitlist",
+  IN_CONSULTATION = "in_consultation",
+  FULFILLED = "fulfilled",
+  NO_SHOW = "noshow",
+  CANCELLED = "cancelled",
+  ENTERED_IN_ERROR = "entered_in_error",
+  RESCHEDULED = "rescheduled",
+}
 
-export const AppointmentCancelledStatuses = [
-  "cancelled",
-  "entered_in_error",
-  "rescheduled",
-] as const;
+export const PastAppointmentStatuses = [
+  AppointmentStatus.FULFILLED,
+  AppointmentStatus.NO_SHOW,
+];
 
-export const AppointmentStatuses = [
-  ...AppointmentNonCancelledStatuses,
-  ...AppointmentCancelledStatuses,
-] as const;
+export const UpcomingAppointmentStatuses = [
+  AppointmentStatus.PROPOSED,
+  AppointmentStatus.PENDING,
+  AppointmentStatus.BOOKED,
+  AppointmentStatus.ARRIVED,
+  AppointmentStatus.CHECKED_IN,
+  AppointmentStatus.WAITLIST,
+  AppointmentStatus.IN_CONSULTATION,
+];
 
-export const AppointmentFinalStatuses: AppointmentStatus[] = [
-  "fulfilled",
-  "cancelled",
-  "entered_in_error",
-  "rescheduled",
+export const CancelledAppointmentStatuses = [
+  AppointmentStatus.CANCELLED,
+  AppointmentStatus.ENTERED_IN_ERROR,
+  AppointmentStatus.RESCHEDULED,
+  AppointmentStatus.NO_SHOW,
+];
+
+export const AppointmentFinalStatuses = [
+  ...CancelledAppointmentStatuses,
+  ...PastAppointmentStatuses,
 ];
 
 export const APPOINTMENT_STATUS_COLORS = {
@@ -155,33 +199,45 @@ export const APPOINTMENT_STATUS_COLORS = {
   React.ComponentProps<typeof Badge>["variant"]
 >;
 
-export type AppointmentNonCancelledStatus =
-  (typeof AppointmentNonCancelledStatuses)[number];
+type LocationResource = {
+  resource: LocationList;
+  resource_type: SchedulableResourceType.Location;
+};
 
-export type AppointmentCancelledStatus =
-  (typeof AppointmentCancelledStatuses)[number];
+type UserResource = {
+  resource: UserReadMinimal;
+  resource_type: SchedulableResourceType.Practitioner;
+};
 
-export type AppointmentStatus = (typeof AppointmentStatuses)[number];
+type HealthcareServiceResource = {
+  resource: HealthcareServiceReadSpec;
+  resource_type: SchedulableResourceType.HealthcareService;
+};
 
-export interface Appointment {
+export type ScheduleResource =
+  | UserResource
+  | LocationResource
+  | HealthcareServiceResource;
+
+export type Appointment = {
   id: string;
   token_slot: TokenSlot;
   patient: PatientRead;
   booked_on: string;
-  status: AppointmentNonCancelledStatus;
+  status: AppointmentStatus;
   note: string;
-  user: UserReadMinimal;
   booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
-}
+  token: TokenRead | null;
+} & ScheduleResource;
 
-export interface AppointmentRead extends Appointment {
+export type AppointmentRead = Appointment & {
   tags: TagConfig[];
   updated_by: UserReadMinimal | null;
   created_by: UserReadMinimal;
   modified_date: string;
   associated_encounter?: EncounterRead;
-}
+};
 
 export interface AppointmentCreateRequest {
   patient: string;
@@ -223,4 +279,17 @@ export const getUserFromLocalStorage = (): UserReadMinimal => {
 
 export const storeUserInLocalStorage = (user: UserReadMinimal) => {
   localStorage.setItem("user", JSON.stringify(user));
+};
+
+export const formatScheduleResourceName = (appointment: ScheduleResource) => {
+  switch (appointment.resource_type) {
+    case SchedulableResourceType.Practitioner:
+      return formatName(appointment.resource);
+    case SchedulableResourceType.Location:
+      return buildLocationHierarchy(appointment.resource).join(" > ");
+    case SchedulableResourceType.HealthcareService:
+      return appointment.resource.name;
+    default:
+      return "-";
+  }
 };
