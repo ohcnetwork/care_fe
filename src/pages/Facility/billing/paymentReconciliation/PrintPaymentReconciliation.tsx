@@ -77,7 +77,7 @@ export function PrintPaymentReconciliation({
     <PrintPreview
       title={`${t(payment.is_credit_note ? "refund_receipt" : "payment_receipt")}`}
     >
-      <div className="min-h-screen md:p-2 max-w-4xl mx-auto md:min-w-2xl">
+      <div className="md:p-2 max-w-4xl mx-auto md:min-w-2xl">
         <div>
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">

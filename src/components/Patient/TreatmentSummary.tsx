@@ -191,7 +191,7 @@ export default function TreatmentSummary({
       <PrintPreview
         title={`${t("treatment_summary")} - ${encounter.patient.name}`}
       >
-        <div className="min-h-screen py-2 max-w-4xl mx-auto">
+        <div className="py-2 max-w-4xl mx-auto">
           <div className="space-y-6">
             {/* Header */}
             <div className="flex justify-between items-start pb-2 border-b border-gray-200">

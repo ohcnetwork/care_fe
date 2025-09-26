@@ -312,7 +312,6 @@ export const getDateOperations = (selected: FilterDateRange) => {
   }
   return [];
 };
-
 export const SelectedDateBadge = ({
   selected,
   filter,
@@ -322,16 +321,34 @@ export const SelectedDateBadge = ({
   filter: FilterConfig;
   onFilterChange: (filterKey: string, values: FilterValues) => void;
 }) => {
+  const { t } = useTranslation();
   const hasValidFrom = !!selected.from && isValid(selected.from);
   const hasValidTo = !!selected.to && isValid(selected.to);
   if (!hasValidFrom && !hasValidTo) return <></>;
   const isSameDate =
     selected.from && selected.to && isSameDay(selected.from, selected.to);
   const presentDate = isSameDate ? selected.from : selected.from || selected.to;
+
+  const isSameRange = (option: DateRangeOption) => {
+    const { from, to } = option.getDateRange();
+    return (
+      selected.from &&
+      isSameDay(selected.from, from) &&
+      selected.to &&
+      isSameDay(selected.to, to)
+    );
+  };
+
+  const isRangeSelected = (filter.meta as DateFilterMeta)?.presetOptions?.find(
+    (option) => isSameRange(option),
+  );
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="text-xs">
-        {selected.from && selected.to && !isSameDate ? (
+        {isRangeSelected ? (
+          <span>{t(isRangeSelected.label)}</span>
+        ) : selected.from && selected.to && !isSameDate ? (
           <span>
             {[selected.from, selected.to].map((date, index) => (
               <span key={date.toISOString() + index}>
