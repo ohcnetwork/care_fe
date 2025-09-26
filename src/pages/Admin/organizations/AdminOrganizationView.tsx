@@ -1,24 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreVertical } from "lucide-react";
 import { Link } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -28,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -55,6 +46,7 @@ function OrganizationCard({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { mutate: deleteOrganization } = useMutation({
     mutationFn: mutate(organizationApi.delete, {
@@ -116,48 +108,28 @@ function OrganizationCard({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem
-                        onSelect={(e) => e.preventDefault()}
-                        className="text-destructive"
-                      >
-                        {t("delete")}
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t("delete_organization")}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {canDelete
-                            ? t("are_you_sure_want_to_delete", {
-                                name: org.name,
-                              })
-                            : t("cannot_delete_organization_with_children")}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => deleteOrganization({})}
-                          disabled={!canDelete}
-                          className={buttonVariants({
-                            variant: "destructive",
-                          })}
-                        >
-                          {t("delete")}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <DropdownMenuItem
+                    onSelect={() => setShowDeleteDialog(true)}
+                    className="text-destructive"
+                    disabled={!canDelete}
+                  >
+                    {t("delete")}
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </div>
         </div>
       </CardContent>
+      <ConfirmActionDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={t("delete_organization")}
+        description={t("are_you_sure_want_to_delete", { name: org.name })}
+        onConfirm={() => deleteOrganization()}
+        confirmText={t("delete")}
+        variant="destructive"
+      />
     </Card>
   );
 }
