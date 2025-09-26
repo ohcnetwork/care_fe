@@ -356,32 +356,25 @@ export function ProductFormContent({
                   productKnowledgeData?.find((pk) => pk.slug === field.value) ??
                   existingData?.product_knowledge;
 
-                const isEditable = !isEditMode && !existingProductKnowledge;
+                const isDisabled = isEditMode || !!existingProductKnowledge;
 
                 return (
                   <FormItem className="flex flex-col">
-                    <FormLabel aria-required={isEditable ? true : undefined}>
+                    <FormLabel aria-required={!isDisabled ? true : undefined}>
                       {t("product_knowledge")}
                     </FormLabel>
 
                     <FormControl>
-                      {isEditable ? (
-                        <ProductKnowledgeSelect
-                          value={selectedProductKnowledge}
-                          onChange={(selected) => field.onChange(selected.slug)}
-                          className="border-gray-300 font-normal text-gray-700"
-                          enableFavorites
-                        />
-                      ) : (
-                        <div className="px-3 py-2 border border-gray-300 rounded bg-gray-100 text-gray-700">
-                          {selectedProductKnowledge?.name ??
-                            selectedProductKnowledge?.slug ??
-                            t("product_knowledge_not_found")}
-                        </div>
-                      )}
+                      <ProductKnowledgeSelect
+                        value={selectedProductKnowledge}
+                        onChange={(selected) => field.onChange(selected.slug)}
+                        className="border-gray-300 font-normal text-gray-700"
+                        enableFavorites
+                        disabled={isDisabled}
+                      />
                     </FormControl>
 
-                    {isEditable && (
+                    {!isDisabled && (
                       <>
                         <FormDescription>
                           {t("product_knowledge_selection_description")}
