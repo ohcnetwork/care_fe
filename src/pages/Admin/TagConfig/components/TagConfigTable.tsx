@@ -170,7 +170,9 @@ export default function TagConfigTable({
   if (configs.length === 0) {
     return (
       <EmptyState
-        icon={emptyStateIcon}
+        icon={
+          <CareIcon icon={emptyStateIcon} className="text-primary size-6" />
+        }
         title={t(emptyStateTitle)}
         description={t(emptyStateDescription)}
       />

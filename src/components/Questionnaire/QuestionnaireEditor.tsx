@@ -1259,7 +1259,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       </div>
                     ) : (
                       <EmptyState
-                        icon="l-plus"
+                        icon={
+                          <CareIcon
+                            icon="l-plus"
+                            className="text-primary size-6"
+                          />
+                        }
                         title={t("no_questions_yet")}
                         description={t("click_to_add_first_question")}
                         action={
