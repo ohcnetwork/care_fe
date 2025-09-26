@@ -200,7 +200,9 @@ export default function ObservationDefinitionList({
           </>
         ) : observationDefinitions.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
             title={t("no_observation_definitions_found")}
             description={t("adjust_observation_definition_filters")}
           />

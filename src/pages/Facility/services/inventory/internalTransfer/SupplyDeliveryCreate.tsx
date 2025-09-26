@@ -37,8 +37,6 @@ import Page from "@/components/Common/Page";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import Autocomplete from "@/components/ui/autocomplete";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
@@ -51,6 +49,9 @@ import {
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
 import locationApi from "@/types/location/locationApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { formatDate } from "date-fns";
 
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().min(1, "Inventory item is required"),
@@ -115,7 +116,7 @@ export default function SupplyDeliveryCreate({
 
   const inventoryItemOptions =
     inventoryItems?.results.map((item: InventoryRead) => ({
-      label: `${item.product.product_knowledge.name} (${t("lot")} #${item.product.batch?.lot_number})`,
+      label: `${t("lot")} #${item.product.batch?.lot_number} ${item.product.expiration_date ? `(${t("expiry")} ${formatDate(item.product.expiration_date, "dd/MM/yyyy")})` : ""}`,
       value: item.id,
     })) || [];
 

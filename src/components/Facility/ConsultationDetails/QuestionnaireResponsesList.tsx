@@ -504,6 +504,7 @@ export default function QuestionnaireResponsesList({
     queryKey: [
       "questionnaireResponses",
       patientId,
+      encounter?.id,
       qParams.page,
       questionnaireId,
     ],
@@ -520,7 +521,7 @@ export default function QuestionnaireResponsesList({
         ...(questionnaireId ? { questionnaire: questionnaireId } : {}),
       },
       maxPages: isPrintPreview ? undefined : 1,
-      pageSize: isPrintPreview ? 100 : RESULTS_PER_PAGE_LIMIT,
+      pageSize: isPrintPreview ? 200 : RESULTS_PER_PAGE_LIMIT,
     }),
     enabled: canAccess,
   });

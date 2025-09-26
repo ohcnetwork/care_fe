@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,11 +28,13 @@ import {
 } from "@/components/ui/table";
 
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
+import { ChargeItemDefinitionPicker } from "@/components/Common/ChargeItemDefinitionPicker";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { ResourceCategorySubType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   ApplyChargeItemDefinitionRequest,
   ChargeItemServiceResource,
@@ -75,18 +76,17 @@ export default function AddMultipleChargeItemsSheet({
   const [selectedItems, setSelectedItems] = useState<
     ApplyChargeItemDefinitionRequestWithObject[]
   >([]);
-  const [search, setSearch] = useState("");
-  const [selectedDefinitionId, setSelectedDefinitionId] = useState<
-    string | null
-  >(null);
+  const [selectedDefinitionSlug, setSelectedDefinitionSlug] = useState<
+    string | undefined
+  >(undefined);
 
-  const { data: chargeItemDefinitions, isLoading } = useQuery({
-    queryKey: ["chargeItemDefinitions", search],
-    queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
-      pathParams: { facilityId },
-      queryParams: { limit: 100, status: "active", title: search },
+  // Fetch selected definition details when a definition is selected
+  const { data: selectedDefinition } = useQuery({
+    queryKey: ["chargeItemDefinition", facilityId, selectedDefinitionSlug],
+    queryFn: query(chargeItemDefinitionApi.retrieveChargeItemDefinition, {
+      pathParams: { facilityId, slug: selectedDefinitionSlug! },
     }),
-    enabled: open,
+    enabled: !!selectedDefinitionSlug,
   });
 
   // Unified request data
@@ -102,37 +102,39 @@ export default function AddMultipleChargeItemsSheet({
     },
   });
 
-  const handleSelectChargeItem = (value: string) => {
-    if (!value) return;
-    setSelectedDefinitionId(value);
-  };
-
   useEffect(() => {
-    if (selectedDefinitionId) {
-      const selectedCID = chargeItemDefinitions?.results.find(
-        (cid) => cid.id === selectedDefinitionId,
+    if (selectedDefinitionSlug && selectedDefinition) {
+      // Check if this definition is already in the selected items
+      const isAlreadySelected = selectedItems.some(
+        (item) => item.charge_item_definition === selectedDefinitionSlug,
       );
-      if (!selectedCID) return;
 
-      setSelectedItems([
-        ...selectedItems,
-        {
-          quantity: "1",
-          encounter: encounterId,
-          patient: patientId,
-          charge_item_definition: selectedCID.slug,
-          charge_item_definition_object: selectedCID,
-          service_resource: serviceResourceType as ChargeItemServiceResource,
-          service_resource_id: serviceResourceId,
-        },
-      ]);
-      setSelectedDefinitionId(null);
+      if (!isAlreadySelected) {
+        setSelectedItems((prevItems) => [
+          ...prevItems,
+          {
+            quantity: "1",
+            encounter: encounterId,
+            patient: patientId,
+            charge_item_definition: selectedDefinition.slug,
+            charge_item_definition_object: selectedDefinition,
+            service_resource: serviceResourceType as ChargeItemServiceResource,
+            service_resource_id: serviceResourceId,
+          },
+        ]);
+      }
+
+      // Clear the selection to allow selecting the same item again if needed
+      setSelectedDefinitionSlug(undefined);
     }
   }, [
-    selectedDefinitionId,
-    chargeItemDefinitions,
+    selectedDefinitionSlug,
+    selectedDefinition,
+    selectedItems,
     serviceResourceType,
+    serviceResourceId,
     encounterId,
+    patientId,
   ]);
 
   const handleRemoveItem = (index: number) => {
@@ -170,20 +172,17 @@ export default function AddMultipleChargeItemsSheet({
           </SheetHeader>
           <div className="mt-6 space-y-6">
             <div className="space-y-2">
-              <Autocomplete
-                options={
-                  chargeItemDefinitions?.results?.map((cid) => ({
-                    label: cid.title,
-                    value: cid.id,
-                  })) || []
-                }
-                value=""
-                onChange={handleSelectChargeItem}
-                onSearch={setSearch}
+              <label className="text-sm font-medium">
+                {t("select_charge_item_definition")}
+              </label>
+              <ChargeItemDefinitionPicker
+                facilityId={facilityId}
+                resourceSubType={ResourceCategorySubType.location}
+                value={selectedDefinitionSlug}
+                onValueChange={setSelectedDefinitionSlug}
                 placeholder={t("select_charge_item_definition")}
-                isLoading={isLoading}
-                noOptionsMessage={t("no_charge_item_definitions_found")}
                 disabled={disabled}
+                className="w-full"
               />
             </div>
 

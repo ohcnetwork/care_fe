@@ -1,24 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building, FolderOpen, PenLine, Trash } from "lucide-react";
 import { Link, navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,6 +26,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -65,6 +56,7 @@ function DeleteOrgDialog({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { mutate: deleteOrganization } = useMutation({
     mutationFn: mutate(facilityOrganizationApi.delete, {
@@ -78,41 +70,32 @@ function DeleteOrgDialog({
     },
   });
   return (
-    <AlertDialog>
+    <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Trash className="size-4" />
-            </Button>
-          </AlertDialogTrigger>
+          <Button
+            data-cy="delete-organization-button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash className="size-4" />
+          </Button>
         </TooltipTrigger>
         <TooltipContent>{t("delete")}</TooltipContent>
       </Tooltip>
-      <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
-        <AlertDialogHeader>
-          <AlertDialogTitle>
-            {t("remove_name", { name: org.name })}
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            {t("are_you_sure_want_to_delete", {
-              name: org.name,
-            })}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => deleteOrganization()}
-            className={buttonVariants({
-              variant: "destructive",
-            })}
-          >
-            {t("remove")}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      <ConfirmActionDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={t("remove_name", { name: org.name })}
+        description={t("are_you_sure_want_to_delete", {
+          name: org.name,
+        })}
+        variant="destructive"
+        confirmText={t("remove")}
+        onConfirm={() => deleteOrganization()}
+      />
+    </>
   );
 }
 
