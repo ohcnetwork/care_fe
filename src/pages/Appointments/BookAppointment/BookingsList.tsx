@@ -99,11 +99,11 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
 const AppointmentCard = ({
   appointment,
   patientId,
-  appointmentId,
+  showFacilityInfo,
 }: {
   appointment: Appointment;
   patientId: string;
-  appointmentId: string;
+  showFacilityInfo: boolean;
 }) => {
   const { t } = useTranslation();
 
@@ -135,15 +135,23 @@ const AppointmentCard = ({
           </div>
         </div>
         <div className="px-2 py-1 rounded-sm bg-gray-50">
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-row gap-2">
-              <ScheduleResourceIcon resource={appointment} />
+          <div className="flex flex-col gap-1">
+            <div className="flex flex-row gap-1">
+              <ScheduleResourceIcon resource={appointment} className="size-5" />
               <div className="flex items-center justify-center gap-2">
                 <span className="text-sm font-medium text-gray-950">
                   {formatScheduleResourceName(appointment)}
                 </span>
               </div>
             </div>
+            {showFacilityInfo && (
+              <div className="flex gap-1 items-center">
+                <Avatar name={appointment.facility.name} className="size-5" />
+                <span className="text-sm font-medium text-gray-950">
+                  {appointment.facility.name}
+                </span>
+              </div>
+            )}
           </div>
         </div>
         <Button
@@ -152,7 +160,7 @@ const AppointmentCard = ({
           asChild
         >
           <Link
-            href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointmentId}`}
+            href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`}
           >
             {t("see_details")}
           </Link>
@@ -186,11 +194,6 @@ const AppointmentTable = ({
           <TableHead className="w-30 border-y bg-gray-100 text-gray-700 text-sm">
             {t("resource")}
           </TableHead>
-          {showFacilityInfo && (
-            <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
-              {t("facility")}
-            </TableHead>
-          )}
           <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
             {t("status")}
           </TableHead>
@@ -243,11 +246,11 @@ const AppointmentTable = ({
 
             <TableCell>
               <div className="px-2 py-1">
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-row gap-2">
+                <div className="flex flex-col gap-1">
+                  <div className="flex flex-row gap-1">
                     <ScheduleResourceIcon
                       resource={appointment}
-                      className="border border-white shadow-sm rounded-full"
+                      className="size-5"
                     />
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-sm font-medium text-gray-950">
@@ -255,23 +258,21 @@ const AppointmentTable = ({
                       </span>
                     </div>
                   </div>
+
+                  {showFacilityInfo && (
+                    <div className="flex gap-1 items-center">
+                      <Avatar
+                        name={appointment.facility.name}
+                        className="size-5"
+                      />
+                      <span className="text-sm font-medium text-gray-950">
+                        {appointment.facility.name}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </TableCell>
-
-            {showFacilityInfo && (
-              <TableCell>
-                <div className="flex gap-2 items-center">
-                  <Avatar
-                    name={appointment.facility.name}
-                    className="size-8 border border-white shadow-sm"
-                  />
-                  <span className="text-sm font-medium text-gray-950">
-                    {appointment.facility.name}
-                  </span>
-                </div>
-              </TableCell>
-            )}
 
             <TableCell className="hidden xl:table-cell">
               <div className="flex flex-row items-start justify-start">
@@ -346,7 +347,7 @@ export const BookingListContent = ({
       </div>
     );
   }
-
+  console.log(facilityId);
   return (
     <div className="w-full">
       <div className="hidden sm:block">
@@ -362,7 +363,7 @@ export const BookingListContent = ({
             key={`card-${appointment.id}`}
             appointment={appointment}
             patientId={patientId}
-            appointmentId={appointment.id}
+            showFacilityInfo={!facilityId}
           />
         ))}
       </div>
