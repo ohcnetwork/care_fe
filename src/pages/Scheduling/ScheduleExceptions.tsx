@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, isSameDay, parseISO } from "date-fns";
-import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -11,19 +10,9 @@ import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Loading from "@/components/Common/Loading";
 
 import mutate from "@/Utils/request/mutate";
@@ -87,7 +76,7 @@ const ScheduleExceptionItem = (
 ) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { mutate: deleteException, isPending } = useMutation({
     mutationFn: mutate(scheduleApis.exceptions.delete, {
@@ -150,50 +139,33 @@ const ScheduleExceptionItem = (
             </span>
           </div>
         </div>
-        <AlertDialog
-          open={isDeleteDialogOpen}
-          onOpenChange={setIsDeleteDialogOpen}
+        <Button
+          variant="secondary"
+          size="sm"
+          disabled={isPending}
+          onClick={() => setShowDeleteDialog(true)}
         >
-          <AlertDialogTrigger asChild>
-            <Button variant="secondary" size="sm" disabled={isPending}>
-              <CareIcon icon="l-minus-circle" className="text-base" />
-              <span className="ml-2">{t("remove")}</span>
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
-              <AlertDialogDescription>
-                <Alert variant="destructive" className="mt-4">
-                  <AlertTitle>{t("warning")}</AlertTitle>
-                  <AlertDescription>
-                    {t(
-                      "this_will_permanently_remove_the_exception_and_cannot_be_undone",
-                    )}
-                  </AlertDescription>
-                </Alert>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
-                {t("cancel")}
-              </AlertDialogCancel>
-              <AlertDialogAction
-                className={cn(buttonVariants({ variant: "destructive" }))}
-                onClick={() => {
-                  deleteException();
-                  setIsDeleteDialogOpen(false);
-                }}
-              >
-                {isPending ? (
-                  <Loader2 className="size-4 animate-spin mr-2" />
-                ) : (
-                  t("confirm")
+          <CareIcon icon="l-minus-circle" className="text-base" />
+          <span className="ml-2">{t("remove")}</span>
+        </Button>
+        <ConfirmActionDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          title={t("are_you_sure")}
+          description={
+            <Alert variant="destructive" className="mt-4">
+              <AlertTitle>{t("warning")}</AlertTitle>
+              <AlertDescription>
+                {t(
+                  "this_will_permanently_remove_the_exception_and_cannot_be_undone",
                 )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+              </AlertDescription>
+            </Alert>
+          }
+          variant="destructive"
+          confirmText={t("delete")}
+          onConfirm={() => deleteException()}
+        />
       </div>
       {/* TODO: Add this information */}
       {/* <div className="px-4 py-2">

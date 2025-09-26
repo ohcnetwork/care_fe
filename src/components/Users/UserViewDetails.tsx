@@ -88,7 +88,11 @@ export const BasicInfoDetails = ({ user }: UserViewDetailsProps) => {
           label={t("suffix")}
           value={user.suffix || "-"}
         />
-        <LabelValue id="gender" label={t("gender")} value={user.gender} />
+        <LabelValue
+          id="gender"
+          label={t("gender")}
+          value={user.gender ? t(`GENDER__${user.gender}`) : "-"}
+        />
       </div>
     </div>
   );

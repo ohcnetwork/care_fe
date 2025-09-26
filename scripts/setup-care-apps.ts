@@ -70,11 +70,7 @@ function readAppsConfig(): Plugin[] {
     return {
       repo,
       // Convert repo name to camelCase for import
-      camelCaseName: repo
-        .replace(/[-_]/g, "")
-        .replace(/\b\w/g, (char, index) =>
-          index === 0 ? char.toLowerCase() : char.toUpperCase(),
-        ),
+      camelCaseName: repo.replace(/[-_](\w)/g, (_, c) => c.toUpperCase()),
     };
   });
 
