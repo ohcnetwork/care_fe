@@ -49,4 +49,10 @@ export default {
     TRes: Type<ChargeItemRead>(),
     TBody: Type<{ charge_item: string }>(),
   },
+  upsertChargeItem: {
+    path: "/api/v1/facility/{facilityId}/charge_item/upsert/",
+    method: HttpMethod.POST,
+    TRes: Type<ChargeItemRead>(),
+    TBody: Type<{ datapoints: ChargeItemUpdate[] }>(),
+  },
 } as const;
