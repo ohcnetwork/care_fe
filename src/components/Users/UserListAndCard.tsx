@@ -230,7 +230,9 @@ export const UserList = ({ users }: { users?: UserReadMinimal[] }) => {
       <table className="relative min-w-full divide-y divide-gray-200">
         <UserListHeader />
         <tbody className="divide-y divide-gray-200 bg-white">
-          {users?.map((user) => <UserListRow key={user.id} user={user} />)}
+          {users?.map((user) => (
+            <UserListRow key={user.id} user={user} />
+          ))}
         </tbody>
       </table>
     </div>

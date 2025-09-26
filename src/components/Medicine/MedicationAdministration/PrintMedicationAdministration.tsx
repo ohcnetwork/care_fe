@@ -182,7 +182,7 @@ export const PrintMedicationAdministration = (props: {
       title={`${t("medicine_administration")} - ${encounter?.patient.name}`}
       disabled={!medicationAdministrations?.results?.length}
     >
-      <div className="min-h-screen md:p-2 max-w-4xl mx-auto">
+      <div className="md:p-2 max-w-4xl mx-auto">
         <div>
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
             <img

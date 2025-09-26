@@ -3,19 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -24,6 +12,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -892,79 +882,49 @@ export function LocationSheet({
         </SheetContent>
       </Sheet>
 
-      <AlertDialog
+      {/* Discharge Dialog */}
+      <ConfirmActionDialog
         open={showDischargeDialog}
-        onOpenChange={setShowDischargeDialog}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("confirm_selection")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("bed_available_soon_discharged_message")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                setShowDischargeDialog(false);
-                setSelectedDischargedBed(null);
-              }}
-            >
-              {t("cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleDischargeConfirm}>
-              {t("proceed")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("confirm")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {locationStatus === "active"
-                ? t("are_you_sure_mark_as_error_active_bed")
-                : t("are_you_sure_cancel_planned_bed")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                setShowDeleteDialog(false);
-                setLocationToDelete(null);
-              }}
-            >
-              {t("cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className={cn(buttonVariants({ variant: "destructive" }))}
-              onClick={confirmDeletePlan}
-            >
-              {t("confirm")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onOpenChange={(open) => {
+          setShowDischargeDialog(open);
+          if (!open) setSelectedDischargedBed(null);
+        }}
+        title={t("confirm_selection")}
+        description={t("bed_available_soon_discharged_message")}
+        onConfirm={handleDischargeConfirm}
+        confirmText={t("proceed")}
+      />
 
-      <AlertDialog
+      {/* Delete Dialog */}
+      <ConfirmActionDialog
+        open={showDeleteDialog}
+        onOpenChange={(open) => {
+          setShowDeleteDialog(open);
+          if (!open) {
+            setLocationToDelete(null);
+          }
+        }}
+        title={t("confirm")}
+        description={
+          locationStatus === "active"
+            ? t("are_you_sure_mark_as_error_active_bed")
+            : t("are_you_sure_cancel_planned_bed")
+        }
+        onConfirm={confirmDeletePlan}
+        confirmText={t("confirm")}
+        variant="destructive"
+      />
+
+      {/* Occupied Dialog */}
+      <ConfirmActionDialog
         open={showOccupiedDialog}
         onOpenChange={setShowOccupiedDialog}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("bed_occupied")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("bed_unavailable_message")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowOccupiedDialog(false)}>
-              {t("close")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={t("bed_occupied")}
+        description={t("bed_unavailable_message")}
+        onConfirm={() => setShowOccupiedDialog(false)}
+        confirmText={t("close")}
+        hideCancel
+      />
     </>
   );
 }
