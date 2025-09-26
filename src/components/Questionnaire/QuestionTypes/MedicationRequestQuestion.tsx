@@ -413,7 +413,7 @@ export function MedicationRequestQuestion({
   };
 
   const newMedicationSheetContent = (
-    <div className="space-y-4 p-3">
+    <div className="space-y-3">
       {newMedicationInSheet && (
         <MedicationRequestGridRow
           medication={newMedicationInSheet}
@@ -1281,7 +1281,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {t("instructions")}
         </Label>
         {dosageInstruction?.as_needed_boolean ? (
-          <div className="space-y-2">
+          <div className="space-y-2 p-1">
             <ValueSetSelect
               system="system-as-needed-reason"
               value={dosageInstruction?.as_needed_for || null}
@@ -1292,9 +1292,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 });
               }}
               disabled={disabled || isReadOnly}
-              asSheet
             />
-
             <InstructionsPopover
               currentInstructions={currentInstructions}
               removeInstruction={removeInstruction}
@@ -1304,13 +1302,15 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             />
           </div>
         ) : (
-          <InstructionsPopover
-            currentInstructions={currentInstructions}
-            removeInstruction={removeInstruction}
-            addInstruction={addInstruction}
-            isReadOnly={isReadOnly}
-            disabled={disabled}
-          />
+          <div className="p-1">
+            <InstructionsPopover
+              currentInstructions={currentInstructions}
+              removeInstruction={removeInstruction}
+              addInstruction={addInstruction}
+              isReadOnly={isReadOnly}
+              disabled={disabled}
+            />
+          </div>
         )}
       </div>
       {/* Route */}
@@ -1325,7 +1325,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onSelect={(route) => handleUpdateDosageInstruction({ route })}
           placeholder={t("select_route")}
           disabled={disabled || isReadOnly}
-          asSheet
         />
       </div>
       {/* Site */}
@@ -1340,7 +1339,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onSelect={(site) => handleUpdateDosageInstruction({ site })}
           placeholder={t("select_site")}
           disabled={disabled || isReadOnly}
-          asSheet
         />
       </div>
       {/* Method */}
@@ -1356,7 +1354,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           placeholder={t("select_method")}
           disabled={disabled || isReadOnly}
           count={20}
-          asSheet
         />
       </div>
       {/* Intent */}

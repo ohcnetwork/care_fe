@@ -37,7 +37,6 @@ interface Props {
   controlledOpen?: boolean;
   showCode?: boolean;
   title?: string;
-  asSheet?: boolean;
   closeOnSelect?: boolean;
 }
 
@@ -54,7 +53,6 @@ export default function ValueSetSelect({
   closeOnSelect = true,
   showCode = false,
   title,
-  asSheet = false,
 }: Props) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -77,7 +75,7 @@ export default function ValueSetSelect({
     }
   }, [internalOpen, isMobile]);
 
-  if (isMobile && !hideTrigger && asSheet) {
+  if (isMobile && !hideTrigger) {
     return (
       <Drawer open={internalOpen} onOpenChange={setInternalOpen}>
         <DrawerTrigger asChild>
@@ -100,7 +98,7 @@ export default function ValueSetSelect({
           <DrawerTitle className="sr-only">
             {title || t("select_value")}
           </DrawerTitle>
-          <div className="mt-6 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
+          <div className="pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
             <ValueSetSearchContent
               system={system}
               onSelect={(selected) => {
@@ -155,7 +153,7 @@ export default function ValueSetSelect({
           <DrawerTitle className="sr-only">
             {title || t("select_value")}
           </DrawerTitle>
-          <div className="mt-6 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
+          <div className="pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
             <ValueSetSearchContent
               system={system}
               onSelect={(selected) => {

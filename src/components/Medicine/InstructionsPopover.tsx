@@ -145,8 +145,8 @@ export default function InstructionsPopover({
           {TriggerButton(currentInstructions, disabledButton)}
         </DrawerTrigger>
         <DrawerContent className="min-h-[60vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
-          <div className="p-3 pb-[env(safe-area-inset-bottom)]">
-            <DrawerHeader className="sticky top-0 z-10 bg-white">
+          <div className="pb-[env(safe-area-inset-bottom)]">
+            <DrawerHeader className="sticky top-0 z-10 bg-white p-0 mt-1.5">
               {t("additional_instructions")}
             </DrawerHeader>
             <InstructionContentSection

@@ -299,8 +299,8 @@ export default function MedicationValueSetSelect({
 
   const renderBreadcrumbs = () =>
     breadcrumbs.length > 0 && (
-      <div className="px-4 py-2 border-b bg-gray-100">
-        <div className="flex items-center gap-1 truncate text-xs">
+      <div className="px-4 py-2 border-b bg-gray-100 mt-1">
+        <div className="flex items-center gap-1 truncate text-xs overflow-x-auto">
           <Button
             variant="ghost"
             size="sm"
@@ -348,7 +348,7 @@ export default function MedicationValueSetSelect({
           </Button>
         </DrawerTrigger>
         <DrawerContent className="min-h-[50vh] max-h-[85vh] px-0 pb-0 rounded-t-lg flex flex-col">
-          <DrawerHeader className="p-0 flex-shrink-0 space-y-2 mt-1">
+          <DrawerHeader className="p-0 flex-shrink-0 mt-1.5">
             {renderTabs()}
             <DrawerTitle className="sr-only">
               {title || t("select_medication")}
@@ -363,7 +363,7 @@ export default function MedicationValueSetSelect({
 
   if (hideTrigger) {
     return (
-      <div className="w-full">
+      <div className="w-full mt-1.5">
         {renderTabs()}
         {renderBreadcrumbs()}
         {renderCommand(renderTabContent())}
