@@ -16,6 +16,7 @@ import CommentSection from "@/components/Resource/ResourceCommentSection";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
+import { formatPatientAddress } from "@/components/Patient/utils";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 import { getResourceRequestCategoryEnum } from "@/types/resourceRequest/resourceRequest";
@@ -65,7 +66,11 @@ function PatientCard({ patient }: { patient: PatientRead }) {
           <div className="space-y-1 md:col-span-2">
             <p className="text-sm font-medium">{t("address")}</p>
             <p className="text-sm text-gray-500 whitespace-pre-wrap">
-              {[patient.address].filter(Boolean).join(", ") || "--"}
+              {formatPatientAddress(patient.address) || (
+                <span className="text-gray-500">
+                  {t("no_address_provided")}
+                </span>
+              )}
             </p>
           </div>
         </div>
