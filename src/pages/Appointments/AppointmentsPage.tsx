@@ -264,7 +264,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
       "multi",
       t("tags", { count: 2 }),
     ),
-    dateFilter("date", t("date"), shortDateRangeOptions),
+    dateFilter("date", t("date"), shortDateRangeOptions, true),
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
