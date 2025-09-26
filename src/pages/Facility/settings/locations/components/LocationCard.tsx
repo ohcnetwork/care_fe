@@ -132,7 +132,7 @@ export function LocationCard({
                 {location.has_children && (
                   <Badge
                     variant="outline"
-                    className="flex items-center gap-1 whitespace-nowrap overflow-hidden"
+                    className="flex items-center gap-1 whitespace-nowrap"
                   >
                     <FolderOpen className="size-3" />
                     {t("has_child_locations")}
