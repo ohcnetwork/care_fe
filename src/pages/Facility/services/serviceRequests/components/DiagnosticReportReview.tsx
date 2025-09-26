@@ -13,17 +13,6 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { Avatar } from "@/components/Common/Avatar";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { FileListTable } from "@/components/Files/FileListTable";
 
 import mutate from "@/Utils/request/mutate";
@@ -57,16 +47,19 @@ interface DiagnosticReportReviewProps {
   patientId: string;
   serviceRequestId: string;
   diagnosticReports: DiagnosticReportRead[];
+  disableEdit: boolean;
 }
 
 export function DiagnosticReportReview({
   facilityId,
   patientId,
   diagnosticReports,
+  disableEdit,
 }: DiagnosticReportReviewProps) {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(true);
   const [conclusion, setConclusion] = useState<string>("");
+  const [showApproveDialog, setShowApproveDialog] = useState(false);
   const queryClient = useQueryClient();
   const latestReport = diagnosticReports[0];
 
@@ -270,10 +263,11 @@ export function DiagnosticReportReview({
                     ) : (
                       <textarea
                         id="conclusion"
-                        className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg"
+                        className="w-full field-sizing-content focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 rounded-lg disabled:cursor-not-allowed"
                         placeholder={t("enter_conclusion")}
                         value={conclusion || fullReport?.conclusion || ""}
                         onChange={(e) => setConclusion(e.target.value)}
+                        disabled={disableEdit}
                       />
                     )}
                   </CardContent>
@@ -318,33 +312,26 @@ export function DiagnosticReportReview({
 
                 {fullReport?.status === DiagnosticReportStatus.preliminary && (
                   <div className="flex justify-end">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="primary"
-                          disabled={isUpdatingReport}
-                          className="gap-2"
-                        >
-                          <CheckCircle2 className="h-4 w-4" />
-                          Approve Results
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Confirm Approval</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to approve these diagnostic
-                            results? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={handleApprove}>
-                            Approve
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <Button
+                      variant="primary"
+                      disabled={isUpdatingReport}
+                      className="gap-2"
+                      onClick={() => setShowApproveDialog(true)}
+                    >
+                      <CheckCircle2 className="size-4" />
+                      {t("approve_results")}
+                    </Button>
+                    <ConfirmActionDialog
+                      open={showApproveDialog}
+                      onOpenChange={setShowApproveDialog}
+                      title={t("confirm")}
+                      description={t(
+                        "are_you_sure_want_to_approve_diagnostic_report",
+                      )}
+                      confirmText={t("approve")}
+                      onConfirm={handleApprove}
+                      disabled={isUpdatingReport || disableEdit}
+                    />
                   </div>
                 )}
               </div>

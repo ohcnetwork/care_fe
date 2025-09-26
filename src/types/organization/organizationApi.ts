@@ -35,6 +35,7 @@ export default {
   delete: {
     path: "/api/v1/organization/{id}/",
     method: HttpMethod.DELETE,
+    TBody: Type<void>(),
     TRes: Type<void>(),
   },
   get: {
