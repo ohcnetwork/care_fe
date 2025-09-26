@@ -18,7 +18,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { getConditionValue } from "@/types/base/condition/condition";
+import { ConditionOperationSummary } from "@/types/base/condition/condition";
 import {
   MonetaryComponent,
   MonetaryComponentOrder,
@@ -276,22 +276,20 @@ export function ChargeItemDefinitionDetail({
                             <p className="text-sm text-gray-500">
                               {t("conditions")}
                             </p>
-                            {component.conditions.map((condition, index) => {
-                              return (
-                                <div
-                                  key={index}
-                                  className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
-                                >
-                                  <span>
-                                    {condition.metric}{" "}
-                                    <span className="font-mono pr-2 ">
-                                      {condition.operation}
-                                    </span>
-                                    {getConditionValue(condition)}
-                                  </span>
-                                </div>
-                              );
-                            })}
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {component.conditions.map((condition, index) => {
+                                return (
+                                  <div
+                                    key={index}
+                                    className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
+                                  >
+                                    <ConditionOperationSummary
+                                      condition={condition}
+                                    />
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         )}
                       </div>

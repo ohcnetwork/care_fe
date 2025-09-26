@@ -275,7 +275,6 @@ export function ObservationInterpretation<
 
       form.setValue(name as any, newRanges as any);
       const isValid = await form.trigger();
-      console.log(JSON.stringify(form.formState.errors));
 
       if (!isValid) {
         return;
