@@ -1,23 +1,27 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ChevronDown, CircleDashed, Tags } from "lucide-react";
+import { ChevronDown, Tags } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FilterSelect } from "@/components/ui/filter-select";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import {
+  dateFilter,
+  encounterStatusFilter,
+  tagFilter,
+} from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -28,16 +32,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-import { DateRangeFilter } from "@/components/Common/DateRangeFilter";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { dateTimeQueryString } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
-  ENCOUNTER_STATUS,
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
   completedEncounterStatus,
@@ -48,7 +46,9 @@ import {
   TagResource,
   getTagHierarchyDisplay,
 } from "@/types/emr/tagConfig/tagConfig";
-import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { dateTimeQueryString } from "@/Utils/utils";
 
 interface EncounterCardProps {
   encounter: EncounterRead;
@@ -160,10 +160,10 @@ interface Props {
 const EncounterHistoryList = ({ onSelect }: Props) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
-  const [showFilters, setShowFilters] = useState(false);
 
   const [status, setStatus] = useState<string>();
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [tagsBehavior, setTagsBehavior] = useState<string>("any");
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
 
@@ -175,27 +175,6 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     patientId,
     facilityId,
   } = useEncounter();
-
-  const tagConfigsQuery = useTagConfigs({ ids: selectedTagIds, facilityId });
-  const selectedTags = tagConfigsQuery
-    .map((q) => q.data)
-    .filter(Boolean) as TagConfig[];
-
-  const handleStatusChange = (value: string | undefined) => {
-    setStatus(value);
-  };
-
-  const handleTagsChange = (tags: TagConfig[]) => {
-    setSelectedTagIds(tags.map((tag) => tag.id));
-  };
-
-  const handleDateFromChange = (date: Date | undefined) => {
-    setDateFrom(date);
-  };
-
-  const handleDateToChange = (date: Date | undefined) => {
-    setDateTo(date);
-  };
 
   const handleSelect = (encounterId: string | null) => {
     setSelectedEncounter(encounterId);
@@ -215,6 +194,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       patientId,
       status,
       selectedTagIds,
+      tagsBehavior,
       dateFrom,
       dateTo,
     ],
@@ -227,7 +207,10 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             ? { patient_filter: patientId, facility: facilityId }
             : { patient: patientId }),
           ...(status && { status }),
-          ...(selectedTagIds.length > 0 && { tags: selectedTagIds.join(",") }),
+          ...(selectedTagIds.length > 0 && {
+            tags: selectedTagIds.join(","),
+            tags_behavior: tagsBehavior,
+          }),
           ...(dateFrom && {
             created_date_after: dateTimeQueryString(dateFrom),
           }),
@@ -258,6 +241,51 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
+  const onFilterUpdate = (query: Record<string, unknown>) => {
+    for (const [key, value] of Object.entries(query)) {
+      const filterValue = value as
+        | string
+        | TagConfig[]
+        | { from: Date; to: Date };
+      switch (key) {
+        case "status":
+          setStatus(filterValue as string);
+          break;
+        case "tags":
+          setSelectedTagIds(
+            (filterValue as TagConfig[])?.map((tag) => tag.id) ?? [],
+          );
+          break;
+        case "tags_behavior":
+          setTagsBehavior(filterValue as string);
+          break;
+        case "created_date":
+          if (
+            typeof filterValue === "object" &&
+            "from" in filterValue &&
+            "to" in filterValue
+          ) {
+            setDateFrom(filterValue.from as Date);
+            setDateTo(filterValue.to as Date);
+          }
+          break;
+      }
+    }
+  };
+
+  const filters = [
+    encounterStatusFilter("status"),
+    tagFilter("tags", TagResource.ENCOUNTER),
+    dateFilter("created_date"),
+  ];
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useMultiFilterState(filters, onFilterUpdate);
+
   return (
     <div className="space-y-4 pt-2">
       {!primaryEncounter ? (
@@ -285,56 +313,20 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             <h2 className="text-xs font-medium text-gray-600 uppercase">
               {t("other_encounters")}
             </h2>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowFilters(!showFilters)}
-              className={cn(showFilters && "bg-gray-100")}
-              title={t("toggle_filters")}
-            >
-              <CareIcon icon="l-filter" className="size-4" />
-            </Button>
           </div>
 
           {/* Filters */}
-          {showFilters && (
-            <div className="flex flex-col gap-2 mb-4">
-              <FilterSelect
-                value={status || ""}
-                onValueChange={handleStatusChange}
-                options={[...ENCOUNTER_STATUS]}
-                label={t("status")}
-                onClear={() => setStatus(undefined)}
-                icon={<CircleDashed className="size-4 text-gray-600" />}
-                className="bg-white font-medium rounded-md hover:bg-gray-100 h-9"
-              />
 
-              <TagSelectorPopover
-                selected={selectedTags}
-                onChange={handleTagsChange}
-                resource={TagResource.ENCOUNTER}
-                asFilter
-                className="mt-0 bg-white font-medium rounded-md"
-              />
-
-              <DateRangeFilter
-                dateFrom={dateFrom}
-                dateTo={dateTo}
-                onDateFromChange={handleDateFromChange}
-                onDateToChange={handleDateToChange}
-                onDateRangeChange={(from, to) => {
-                  setDateFrom(from);
-                  setDateTo(to);
-                }}
-                onClear={() => {
-                  setDateFrom(undefined);
-                  setDateTo(undefined);
-                }}
-                popoverPlaceholder={t("select_created_date_range")}
-                className="bg-white font-medium rounded-md"
-              />
-            </div>
-          )}
+          <MultiFilter
+            selectedFilters={selectedFilters}
+            onFilterChange={handleFilterChange}
+            onOperationChange={handleOperationChange}
+            onClearAll={handleClearAll}
+            onClearFilter={handleClearFilter}
+            placeholder={t("filter")}
+            triggerButtonClassName="self-start"
+            facilityId={facilityId}
+          />
         </div>
 
         <div className="flex flex-col gap-2">

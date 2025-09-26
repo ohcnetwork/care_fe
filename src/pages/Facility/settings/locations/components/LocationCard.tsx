@@ -7,6 +7,7 @@ import {
   PenLine,
   Trash,
 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -14,19 +15,8 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -34,6 +24,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import mutate from "@/Utils/request/mutate";
 import { LocationList, LocationTypeIcons } from "@/types/location/location";
@@ -72,6 +64,7 @@ export function LocationCard({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const Icon =
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons] ||
     Folder;
@@ -208,42 +201,15 @@ export function LocationCard({
                     </DropdownMenuItem>
                   )}
                   {!location.has_children && !location.current_encounter && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()}
-                          className="text-destructive"
-                          data-cy="delete-location-button"
-                        >
-                          <Trash className="size-4 mr-2" />
-                          {t("delete")}
-                        </DropdownMenuItem>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            {t("remove_name", { name: location.name })}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {t("are_you_sure_want_to_delete", {
-                              name: location.name,
-                            })}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                          <AlertDialogAction
-                            data-cy="remove-location-button"
-                            onClick={() => removeLocation({})}
-                            className={buttonVariants({
-                              variant: "destructive",
-                            })}
-                          >
-                            {t("remove")}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      onClick={() => setShowDeleteDialog(true)}
+                      className="text-destructive"
+                      data-cy="delete-location-button"
+                    >
+                      <Trash className="size-4 mr-2" />
+                      {t("delete")}
+                    </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -269,6 +235,17 @@ export function LocationCard({
           </div>
         </div>
       </div>
+      <ConfirmActionDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={t("remove_name", { name: location.name })}
+        description={t("are_you_sure_want_to_delete", {
+          name: location.name,
+        })}
+        confirmText={t("remove")}
+        onConfirm={() => removeLocation({})}
+        variant="destructive"
+      />
     </Card>
   );
 }
