@@ -1613,6 +1613,14 @@ function QuestionEditor({
     onChange({ ...question, [field]: value, ...additionalFields });
   };
 
+  // Clear structured type if not structured, voluntarily doing this way, so that
+  // form is made dirty and user's can simply open and save the form to clear the error.
+  useEffect(() => {
+    if (question.structured_type && question.type !== "structured") {
+      updateField("structured_type", undefined);
+    }
+  }, [question.structured_type, question.type]);
+
   const toggleSubQuestionExpanded = (
     questionLinkId: string,
     allowCollapse: boolean = true,
