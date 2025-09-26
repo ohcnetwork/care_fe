@@ -1,6 +1,6 @@
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import Calendar from "@/CAREUI/interactive/Calendar";
-import Loading from "@/components/Common/Loading";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -96,7 +96,7 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
   });
 
   if (!templatesQuery.data || !exceptionsQuery.data) {
-    return <Loading />;
+    return <TableSkeleton count={3} />;
   }
 
   return (

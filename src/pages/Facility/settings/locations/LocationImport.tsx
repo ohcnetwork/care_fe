@@ -117,7 +117,6 @@ const processRowLocations = (data: string[][]) => {
   return locations;
 };
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 export default function LocationImport({ facilityId }: LocationImportProps) {
   const [processedLocations, setProcessedLocations] = useState<
     LocationImportT[]
