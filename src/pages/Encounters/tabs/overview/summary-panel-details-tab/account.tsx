@@ -17,6 +17,7 @@ import {
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 
+import { Link } from "raviger";
 import { EmptyState } from "./empty-state";
 
 export const Account = () => {
@@ -76,11 +77,15 @@ export const Account = () => {
             <span className="text-sm text-black font-semibold">
               {account.name}
             </span>
-            <Badge
-              variant={ACCOUNT_BILLING_STATUS_COLORS[account.billing_status]}
+            <Link
+              href={`/facility/${facilityId}/billing/account/${account.id}?encounterId=${encounter.id}`}
             >
-              {t(account.billing_status)}
-            </Badge>
+              <Badge
+                variant={ACCOUNT_BILLING_STATUS_COLORS[account.billing_status]}
+              >
+                {t(account.billing_status)}
+              </Badge>
+            </Link>
           </div>
         )}
       </div>

@@ -191,10 +191,12 @@ export const EncounterShow = (props: Props) => {
       {primaryEncounter &&
         primaryEncounter.appointment?.id &&
         canWritePrimaryEncounter && (
-          <AppointmentEncounterHeader
-            appointment={primaryEncounter.appointment}
-            encounter={primaryEncounter}
-          />
+          <div className="flex items-center justify-center -mt-2 mb-2">
+            <AppointmentEncounterHeader
+              appointment={primaryEncounter.appointment}
+              encounter={primaryEncounter}
+            />
+          </div>
         )}
 
       <div className="flex flex-col gap-2">

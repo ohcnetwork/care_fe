@@ -59,6 +59,7 @@ import queryClient from "@/Utils/request/queryClient";
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
 import { LocationHistory } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import { differenceInDays, differenceInHours, format } from "date-fns";
 import EditChargeItemSheet from "./EditChargeItemSheet";
 
 interface PriceComponentRowProps {
@@ -107,22 +108,60 @@ function LocationGroupRow({
 }: LocationGroupRowProps) {
   const { t } = useTranslation();
   return (
-    <TableRow className="bg-blue-50 border-b-2 border-blue-200">
+    <TableRow className="bg-gray-50 border-b-2 border-gray-200 shadow-md">
       <TableCell
-        className="border-x p-4 font-semibold text-blue-900"
+        className="border-x p-4 font-semibold text-gray-900"
         colSpan={8}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {location.location.name}
+          <div className="gap-2">
+            <div className="flex items-center gap-2">
+              {location.location.name}
+              <Badge
+                variant={location.status === "active" ? "primary" : "secondary"}
+                className="text-xs"
+              >
+                {t(location.status)}
+              </Badge>
+            </div>
+            <div className="text-xs font-normal text-gray-700 flex items-center gap-2">
+              {[
+                location.start_datetime &&
+                  format(
+                    new Date(location.start_datetime),
+                    "MMM d, yyyy h:mm a",
+                  ),
+                location.end_datetime &&
+                  format(new Date(location.end_datetime), "MMM d, yyyy h:mm a"),
+              ]
+                .filter(Boolean)
+                .join(" - ")}{" "}
+              {location.end_datetime && (
+                <div className="text-sm text-gray-500">
+                  {(() => {
+                    const start = new Date(location.start_datetime);
+                    const end = new Date(location.end_datetime);
+                    const days = differenceInDays(end, start);
+                    const hours = differenceInHours(end, start) % 24;
+
+                    const parts = [];
+                    if (days > 0) parts.push(`${days} ${t("days")}`);
+                    if (hours > 0) parts.push(`${hours} ${t("hours")}`);
+
+                    return `(${parts.join(", ") || `0 ${t("hours")}`})`;
+                  })()}
+                </div>
+              )}
+            </div>
           </div>
+
           <Button
             variant="outline"
             size="sm"
             onClick={() =>
               setAddChargeItemState({
                 serviceRequestId: location.id,
-                locationId: location.location.id,
+                locationId: location.id,
                 status: true,
               })
             }
@@ -365,7 +404,7 @@ export function BedChargeItemsTable({
                           <TableRow key={`${location.id}-no-items`}>
                             <TableCell
                               colSpan={8}
-                              className="text-center text-gray-500 py-4 italic"
+                              className="text-center text-gray-500 py-4"
                             >
                               {t("no_charge_items_for_location")}
                             </TableCell>
