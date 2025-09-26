@@ -1,5 +1,5 @@
 import { differenceInMinutes, format } from "date-fns";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, CalendarOff } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -30,6 +30,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
@@ -66,24 +67,21 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
               {t("cancelled")}
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="upcoming" className="space-y-4 overflow-x-scroll">
+          <TabsContent value="upcoming" className="space-y-4 overflow-x-auto">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
               statuses={UpcomingAppointmentStatuses}
             />
           </TabsContent>
-          <TabsContent value="past" className="space-y-4 overflow-x-scroll">
+          <TabsContent value="past" className="space-y-4 overflow-x-auto">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
               statuses={PastAppointmentStatuses}
             />
           </TabsContent>
-          <TabsContent
-            value="cancelled"
-            className="space-y-4 overflow-x-scroll"
-          >
+          <TabsContent value="cancelled" className="space-y-4 overflow-x-auto">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
@@ -342,9 +340,11 @@ export const BookingListContent = ({
 
   if (appointments.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">{t("no_appointments")}</p>
-      </div>
+      <EmptyState
+        title={t("no_appointments")}
+        icon={<CalendarOff className="size-5 text-primary m-1" />}
+        className="m-1"
+      />
     );
   }
   console.log(facilityId);
