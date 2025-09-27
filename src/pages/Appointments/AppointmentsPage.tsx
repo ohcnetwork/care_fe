@@ -700,14 +700,16 @@ function AppointmentCard({
           </p>
         </div>
 
-        <div className="flex">
-          <div className="bg-gray-100 px-2 py-1 ml-px text-center rounded-md">
-            <p className="text-[10px] uppercase">{t("token")}</p>
-            <p className="font-bold text-2xl uppercase">
-              {appointment.token?.number ?? "--"}
-            </p>
+        {appointment.token && (
+          <div className="flex">
+            <div className="bg-gray-100 px-2 py-1 ml-px text-center rounded-md">
+              <p className="text-[10px] uppercase">{t("token")}</p>
+              <p className="font-bold text-2xl uppercase">
+                {appointment.token?.number ?? "--"}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <div className="flex flex-wrap gap-1">
         {appointment.tags.map((tag) => (
