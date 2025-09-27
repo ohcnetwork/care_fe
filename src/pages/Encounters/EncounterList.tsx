@@ -26,7 +26,7 @@ import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
 import useFilters from "@/hooks/useFilters";
 
-import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { EncounterClass, EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -251,7 +251,7 @@ export function EncounterList({
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <PatientEncounterOrIdentifierFilter
+                <PatientIdentifierFilter
                   onSelect={(patientId) =>
                     updateQuery({ patient_filter: patientId })
                   }

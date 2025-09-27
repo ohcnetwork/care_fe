@@ -46,7 +46,7 @@ interface Props {
   patientId?: string;
 }
 
-export default function PatientEncounterOrIdentifierFilter({
+export default function PatientIdentifierFilter({
   onSelect,
   placeholder,
   className,

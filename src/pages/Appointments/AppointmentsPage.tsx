@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -55,7 +56,6 @@ import {
   CardListSkeleton,
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
-import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useFilters, { FilterState } from "@/hooks/useFilters";
@@ -404,7 +404,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
               <ShortcutBadge actionId="print-button" className="bg-white" />
             </Button>
           )}
-          <PatientEncounterOrIdentifierFilter
+          <PatientIdentifierFilter
             onSelect={(patientId) => updateQuery({ patient: patientId })}
             placeholder={t("search_patients")}
             className="w-full sm:w-auto"
