@@ -7,6 +7,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
@@ -17,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import {
@@ -101,7 +101,7 @@ export default function InvoicesData({
 
   const tabOptions = Object.values(InvoiceStatus).map((status) => ({
     value: status,
-    label: t(statusMap[status].label),
+    label: statusMap[status].label,
   }));
 
   return (

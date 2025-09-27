@@ -9,13 +9,13 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { RelativeDatePicker } from "@/components/ui/relative-date-picker";
-import { FilterTabs } from "@/components/ui/filter-tabs"
 
 interface CombinedDatePickerProps {
   value?: Date;
@@ -82,32 +82,32 @@ export function CombinedDatePicker({
             value={activeTab}
             onValueChange={(v) => setActiveTab(v as "absolute" | "relative")}
             options={[
-              {value: "absolute", label: "absolute_date"},
-              {value: "relative", label: "quick_finder"}
+              { value: "absolute", label: "absolute_date" },
+              { value: "relative", label: "quick_finder" },
             ]}
             variant="underline"
             showAllOption={false}
             className="grid w-full grid-cols-2"
           />
-            {activeTab === "absolute" && (
-              <div className="p-0">
-                <Calendar
+          {activeTab === "absolute" && (
+            <div className="p-0">
+              <Calendar
                 mode="single"
                 selected={value}
                 onSelect={handleSelect}
                 disabled={blockDate}
               />
-              </div>
-            )}
-            {activeTab === "relative" && (
-              <div className="p-0">
-                <RelativeDatePicker
+            </div>
+          )}
+          {activeTab === "relative" && (
+            <div className="p-0">
+              <RelativeDatePicker
                 value={value}
                 onDateChange={handleRelativeDateChange}
                 disabled={blockDate}
               />
-              </div>
-            )}
+            </div>
+          )}
         </PopoverContent>
       </Popover>
     </div>

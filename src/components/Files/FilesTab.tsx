@@ -1,5 +1,3 @@
-import { t } from "i18next";
-
 import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { DischargeTab } from "@/components/Files/DischargeSummarySubTab";
@@ -77,7 +75,7 @@ export const FilesTab = ({
     <div className="space-y-4">
       <FilterTabs
         value={allowedTabs.includes(activeTab as TabType) ? activeTab : "all"}
-        onValueChange={(value) => setActiveTab(value as TabType)}
+        onValueChange={(value) => setActiveTab((value || "all") as TabType)}
         options={tabOptions}
         variant="background"
         showAllOption={false}

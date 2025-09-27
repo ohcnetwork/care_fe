@@ -78,7 +78,7 @@ export default function DispensesView({
 
   const tabOptions = visibleTabs.map((statusValue) => ({
     value: statusValue,
-    label: t(statusValue)
+    label: t(statusValue),
   }));
 
   return (
@@ -112,47 +112,48 @@ export default function DispensesView({
           )
         }
         options={tabOptions}
-        className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto"
+        variant="underline"
+        showAllOption={false}
       />
-          {dropdownItems.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="text-gray-500 font-semibold hover:text-gray-900 hover:bg-transparent pb-2.5 px-2.5"
-                >
-                  {t("more")}
-                  <ChevronDown />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {dropdownItems.map((statusValue) => (
-                  <DropdownMenuItem
-                    key={statusValue}
-                    onClick={() => handleDropdownSelect(statusValue)}
-                    className="text-gray-950 font-medium text-sm"
-                  >
-                    {t(statusValue)}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+      {dropdownItems.length > 0 && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="text-gray-500 font-semibold hover:text-gray-900 hover:bg-transparent pb-2.5 px-2.5"
+            >
+              {t("more")}
+              <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {dropdownItems.map((statusValue) => (
+              <DropdownMenuItem
+                key={statusValue}
+                onClick={() => handleDropdownSelect(statusValue)}
+                className="text-gray-950 font-medium text-sm"
+              >
+                {t(statusValue)}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
-        <div>
-          {Object.values(MedicationDispenseStatus).map((statusValue) =>
-            status === statusValue ? (
-              <div key={statusValue} className="p-2">
-                <DispensedMedicationList
-                  facilityId={facilityId}
-                  patientId={patientId}
-                  locationId={locationId}
-                  status={statusValue}
-                />
-              </div>
-            ) : null
-          )}
-        </div>
+      <div>
+        {Object.values(MedicationDispenseStatus).map((statusValue) =>
+          status === statusValue ? (
+            <div key={statusValue} className="p-2">
+              <DispensedMedicationList
+                facilityId={facilityId}
+                patientId={patientId}
+                locationId={locationId}
+                status={statusValue}
+              />
+            </div>
+          ) : null,
+        )}
+      </div>
     </Page>
   );
 }

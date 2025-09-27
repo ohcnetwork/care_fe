@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { FilterTabs } from "@/components/ui/filter-tabs";
+import { Input } from "@/components/ui/input";
 
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -73,10 +73,12 @@ export default function MedicationDispenseHistory({
     },
   } as const;
 
-  const tabOptions = Object.entries(DISPENSE_STATUS_OPTIONS).map(([key, { label }]) => ({
-    value: key,
-    label: t(label)
-  }));
+  const tabOptions = Object.entries(DISPENSE_STATUS_OPTIONS).map(
+    ([key, { label }]) => ({
+      value: key,
+      label: label,
+    }),
+  );
 
   return (
     <Page title={t("medication_dispense")}>
@@ -85,10 +87,9 @@ export default function MedicationDispenseHistory({
           value={qParams.exclude_status || "pending"}
           onValueChange={(value) => updateQuery({ exclude_status: value })}
           className="w-full"
-          options = {tabOptions}
+          options={tabOptions}
           showAllOption={false}
         />
-
       </div>
       <div className="flex items-center gap-4 mb-6">
         <div className="flex-1">

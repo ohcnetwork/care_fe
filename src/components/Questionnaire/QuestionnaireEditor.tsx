@@ -951,18 +951,25 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       <div className="mb-4">
         <FilterTabs
           value={activeTab}
-          onValueChange={(v) => setActiveTab(v as "edit" | "preview")}
+          onValueChange={(v) => {
+            if (v === "preview" && !id) return;
+            setActiveTab(v as "edit" | "preview");
+          }}
           options={[
             {
               value: "edit",
               label: "edit_form",
               icon: <ViewIcon className="size-4" />,
             },
-            {
-              value: "preview",
-              label: "form_preview",
-              icon: <SquarePenIcon className="size-4" />,
-            },
+            ...(id
+              ? [
+                  {
+                    value: "preview",
+                    label: "form_preview",
+                    icon: <SquarePenIcon className="size-4" />,
+                  },
+                ]
+              : []),
           ]}
           showAllOption={false}
         />
@@ -1328,7 +1335,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         </div>
       )}
 
-      {activeTab === "preview" && (
+      {activeTab === "preview" && id && (
         <Card>
           <CardHeader>
             <CardTitle>{t("preview")}</CardTitle>

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { EyeIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -102,29 +102,38 @@ export default function PaymentsData({
 
   const payments = (response?.results as PaymentReconciliationRead[]) || [];
 
-  const tabOptions1 = [{value: "all", label: t("all_status")}];
-  tabOptions1.concat(Object.values(PaymentReconciliationStatus).map((status) => ({
-    value: status,
-    label: t(status),
-  })));
+  const statusTabOptions = useMemo(
+    () =>
+      Object.values(PaymentReconciliationStatus).map((status) => ({
+        value: status,
+        // pass translation keys; FilterTabs will call t()
+        label: status,
+      })),
+    [],
+  );
 
-  const tabOptions2 = [{value: "all", label: t("all_type")}];
-  tabOptions2.concat(Object.values(PaymentReconciliationType).map((type) => ({
-    value: type,
-    label: t(typeMap[type]),
-  })));
+  const typeTabOptions = useMemo(
+    () =>
+      Object.values(PaymentReconciliationType).map((type) => ({
+        value: type,
+        // pass translation keys from typeMap; FilterTabs will call t()
+        label: typeMap[type],
+      })),
+    [],
+  );
 
   return (
     <>
       <div className="flex w-full flex-col items-center my-4 gap-2 md:flex-row md:flex-wrap md:gap-y-4 md:justify-start lg:flex-nowrap lg:justify-between">
         <div className="flex w-full flex-col items-center gap-3 md:flex-row md:flex-wrap md:gap-y-4">
           <FilterTabs
-            value={qParams.status ?? "all"}
+            value={qParams.status ?? ""}
             onValueChange={(value) =>
               updateQuery({ status: value === "all" ? undefined : value })
             }
             className="hidden sm:flex"
-            options={tabOptions1}
+            options={statusTabOptions}
+            allOptionLabel="all_status"
           />
           <Select
             defaultValue={qParams.status ?? "all"}
@@ -146,21 +155,24 @@ export default function PaymentsData({
               </SelectGroup>
             </SelectContent>
           </Select>
-          
+
           <FilterTabs
-            value={qParams.reconciliation_type ?? "all"}
+            value={qParams.reconciliation_type ?? ""}
             onValueChange={(value) =>
               updateQuery({
                 reconciliation_type: value === "all" ? undefined : value,
               })
             }
             className="hidden sm:flex"
-            options={tabOptions2}
+            options={typeTabOptions}
+            allOptionLabel="all_type"
           />
           <Select
             defaultValue={qParams.status ?? "all"}
             onValueChange={(value) =>
-              updateQuery({ status: value === "all" ? undefined : value })
+              updateQuery({
+                reconciliation_type: value === "all" ? undefined : value,
+              })
             }
           >
             <SelectTrigger className="sm:hidden border-gray-400 text-gray-950 rounded-sm">

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Form,
   FormControl,
@@ -21,7 +22,6 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
 
@@ -348,24 +348,25 @@ function AddItemForm({
       <SheetContent className="w-full sm:max-w-2xl p-3">
         <ScrollArea className="h-[calc(100vh-8rem)] mt-6 p-3">
           <div className="flex flex-col gap-2">
-            <FilterTabs
-              value={activeTab}
-              onValueChange={(value) => {
-                setActiveTab(value);
-                setCurrentEntry((prev) => ({
-                  ...prev,
-                  supplied_item: null,
-                  supply_request: null,
-                  _product_knowledge: null,
-                  _is_additional: value === "additional",
-                }));
-              }}
-              options={tabOptions}
-              variant="background"
-              className="mb-2"
-              showAllOption={false}
-              maxVisibleTabs={2}
-            />
+            <div data-cy="receive-stock-add-item-tabs">
+              <FilterTabs
+                value={activeTab}
+                onValueChange={(value) => {
+                  setActiveTab(value);
+                  setCurrentEntry((prev) => ({
+                    ...prev,
+                    supplied_item: null,
+                    supply_request: null,
+                    _product_knowledge: null,
+                    _is_additional: value === "additional",
+                  }));
+                }}
+                options={tabOptions}
+                variant="background"
+                className="mb-2"
+                showAllOption={false}
+              />
+            </div>
 
             <div className="bg-gray-100 p-3 rounded flex flex-col gap-2">
               {activeTab === "requested" && (

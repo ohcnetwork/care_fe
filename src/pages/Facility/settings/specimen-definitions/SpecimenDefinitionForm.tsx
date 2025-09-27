@@ -10,6 +10,7 @@ import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Form,
   FormControl,
@@ -28,7 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Textarea } from "@/components/ui/textarea";
 
 import ComboboxQuantityInput from "@/components/Common/ComboboxQuantityInput";
@@ -119,12 +119,14 @@ export function SpecimenDefinitionForm({
   const { t } = useTranslation();
 
   const { facilityId } = useCurrentFacility();
-  
+
   // State for minimum volume tab selection
   const [minimumVolumeTab, setMinimumVolumeTab] = useState<"quantity" | "text">(
     initialData?.type_tested?.container?.minimum_volume?.quantity
       ? "quantity"
-      : "text"
+      : initialData?.type_tested?.container?.minimum_volume?.string
+        ? "text"
+        : "quantity",
   );
 
   const form = useForm<FormValues>({
@@ -670,9 +672,15 @@ export function SpecimenDefinitionForm({
                           const v = value as "quantity" | "text";
                           setMinimumVolumeTab(v);
                           if (v === "quantity") {
-                            form.setValue("type_tested.container.minimum_volume.string", undefined);
+                            form.setValue(
+                              "type_tested.container.minimum_volume.string",
+                              undefined,
+                            );
                           } else {
-                            form.setValue("type_tested.container.minimum_volume.quantity", undefined);
+                            form.setValue(
+                              "type_tested.container.minimum_volume.quantity",
+                              undefined,
+                            );
                           }
                         }}
                         options={minimumVolumeTabOptions}

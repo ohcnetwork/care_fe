@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import {
-  ArchiveIcon,
+  Archive as ArchiveIcon,
   Eye,
-  FileCheckIcon,
+  FileCheck as FileCheckIcon,
   HelpCircle,
-  NotepadTextDashedIcon,
+  NotepadTextDashed as NotepadTextDashedIcon,
   Pencil,
-  PlusIcon,
+  Plus as PlusIcon,
   Search,
 } from "lucide-react";
 import { Link, useNavigate } from "raviger";

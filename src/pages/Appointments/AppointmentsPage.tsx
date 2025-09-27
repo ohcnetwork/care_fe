@@ -25,6 +25,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -48,7 +49,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -100,35 +100,39 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { PractitionerSelector } from "./components/PractitionerSelector";
 
-type AppointmentStatusGroup = {
+interface AppointmentStatusGroup {
   label: string;
+  labelKey: string;
   statuses: AppointmentStatus[];
-};
+}
 
-const getStatusGroups = (t: TFunction): AppointmentStatusGroup[] => {
-  return [
-    {
-      label: t("booked"),
-      statuses: [AppointmentStatus.BOOKED],
-    },
-    {
-      label: t("checked_in"),
-      statuses: [AppointmentStatus.CHECKED_IN],
-    },
-    {
-      label: t("in_consultation"),
-      statuses: [AppointmentStatus.IN_CONSULTATION],
-    },
-    {
-      label: t("fulfilled"),
-      statuses: [AppointmentStatus.FULFILLED],
-    },
-    {
-      label: t("non_fulfilled"),
-      statuses: CancelledAppointmentStatuses,
-    },
-  ];
-};
+const getStatusGroups = (t: TFunction): AppointmentStatusGroup[] => [
+  {
+    label: t("booked"),
+    labelKey: "booked",
+    statuses: [AppointmentStatus.BOOKED],
+  },
+  {
+    label: t("checked_in"),
+    labelKey: "checked_in",
+    statuses: [AppointmentStatus.CHECKED_IN],
+  },
+  {
+    label: t("in_consultation"),
+    labelKey: "in_consultation",
+    statuses: [AppointmentStatus.IN_CONSULTATION],
+  },
+  {
+    label: t("fulfilled"),
+    labelKey: "fulfilled",
+    statuses: [AppointmentStatus.FULFILLED],
+  },
+  {
+    label: t("non_fulfilled"),
+    labelKey: "non_fulfilled",
+    statuses: CancelledAppointmentStatuses,
+  },
+];
 
 function AppointmentsEmptyState() {
   const { t } = useTranslation();
@@ -332,8 +336,16 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           value={activeTab}
           onValueChange={(v) => setActiveTab(v as "board" | "list")}
           options={[
-            {value: "board", label: t("board"), icon: <CareIcon icon="l-kanban" />},
-            {value: "list", label: t("list"), icon: <CareIcon icon="l-list-ul" />}
+            {
+              value: "board",
+              label: "board",
+              icon: <CareIcon icon="l-kanban" />,
+            },
+            {
+              value: "list",
+              label: "list",
+              icon: <CareIcon icon="l-list-ul" />,
+            },
           ]}
           showAllOption={false}
         />
@@ -800,9 +812,13 @@ function AppointmentRow(props: {
   const appointments = data?.results ?? [];
 
   const statusTabValue =
-  getStatusGroups(t).find((g) =>
-    g.statuses.includes((props.status ?? "booked") as AppointmentStatus),
-  )?.statuses.join(",") ?? (props.status ?? "booked");
+    getStatusGroups(t)
+      .find((g) =>
+        g.statuses.includes((props.status ?? "booked") as AppointmentStatus),
+      )
+      ?.statuses.join(",") ??
+    props.status ??
+    "booked";
 
   return (
     <div className="overflow-x-auto">
@@ -812,7 +828,7 @@ function AppointmentRow(props: {
           onValueChange={(v) => props.updateQuery({ status: v })}
           options={getStatusGroups(t).map((group) => ({
             value: group.statuses.join(","),
-            label: group.label,
+            label: group.labelKey,
           }))}
           showAllOption={false}
         />
@@ -830,7 +846,7 @@ function AppointmentRow(props: {
           <SelectContent>
             {getStatusGroups(t).map((group) => (
               <SelectItem key={group.label} value={group.statuses.join(",")}>
-                <div className="flex items-center">{t(group.label)}</div>
+                <div className="flex items-center">{group.label}</div>
               </SelectItem>
             ))}
           </SelectContent>

@@ -92,7 +92,7 @@ export default function FacilityOrganizationList({
       ? [
           {
             path: `/facility/${facilityId}/settings/departments/${organizationId}/users`,
-            title: t("users"),
+            title: "users",
             value: "users",
           },
         ]
@@ -101,7 +101,7 @@ export default function FacilityOrganizationList({
       path: organizationId
         ? `/facility/${facilityId}/settings/departments/${organizationId}/departments`
         : `/facility/${facilityId}/settings/departments`,
-      title: t("departments_or_teams"),
+      title: "departments_or_teams",
       value: "departments",
     },
   ];
@@ -223,7 +223,7 @@ export default function FacilityOrganizationList({
                         className="w-full mt-2"
                         value={currentTab}
                         onValueChange={handleTabChange}
-                        options = {navItems.map((item) => ({
+                        options={navItems.map((item) => ({
                           value: item.value,
                           label: item.title,
                         }))}
