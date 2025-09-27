@@ -1,4 +1,3 @@
-import { PlusIcon } from "lucide-react";
 import { Link } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -128,7 +127,6 @@ const QuickActionContent = ({
         </div>
       </div>
       <div className="flex items-center gap-1 justify-center">
-        <PlusIcon className="size-4 md:block hidden" />
         <span className="text-sm font-semibold">{title}</span>
       </div>
     </>
