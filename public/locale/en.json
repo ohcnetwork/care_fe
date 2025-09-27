@@ -756,6 +756,7 @@
   "authorize_shift_delete": "Authorize shift delete",
   "auto_fill_slot_duration": "Auto-fill slot duration",
   "auto_generated_for_care": "Auto Generated for Care",
+  "auto_maintained": "Auto maintained",
   "auto_refresh": "Auto Refresh",
   "auto_refresh_tooltip": "Automatically refreshes the queue every 10 seconds. Disable to pause live updates.",
   "autocomplete_options": "Autocomplete Options",

@@ -42,8 +42,6 @@ import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcuts, useShortcutSubContext } from "@/context/ShortcutContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
   getPartialId,
   PartialPatientModel,
@@ -119,13 +117,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       value: phoneNumber,
       display: t("phone_number"),
     },
-    {
-      key: "encounter",
-      type: "text" as const,
-      placeholder: t("search_encounters"),
-      value: "",
-      display: t("encounter"),
-    },
     ...identifierOptions,
   ];
 
@@ -135,9 +126,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     value?: string;
   }>({});
 
-  // Track encounter search state
-  const [encounterSearch, setEncounterSearch] = useState<string>("");
-
   const handleSearch = useCallback(
     (key: string, value: string) => {
       if (key === "phone_number") {
@@ -146,48 +134,31 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             isValidPhoneNumber(value) || value === "" ? value : null,
         });
         setIdentifierSearch({});
-        setEncounterSearch("");
-      } else if (key === "encounter") {
-        setPhoneNumberQuery({ phone_number: "" });
-        setIdentifierSearch({});
-        setEncounterSearch(value);
       } else {
         setPhoneNumberQuery({ phone_number: "" });
-        setEncounterSearch("");
         setIdentifierSearch({ config: key, value });
       }
     },
     [setPhoneNumberQuery],
   );
 
-  const { data: patientList, isFetching: isPatientFetching } = useQuery({
+  const { data: patientList, isFetching } = useQuery({
     queryKey: ["patient-search", facilityId, phoneNumber, identifierSearch],
     queryFn: query.debounced(patientApi.searchPatient, {
       body: phoneNumber
         ? { phone_number: phoneNumber }
         : identifierSearch.config && identifierSearch.value
-          ? { config: identifierSearch.config, value: identifierSearch.value }
+          ? {
+              config: identifierSearch.config,
+              value: identifierSearch.value,
+              page_size: 20,
+            }
           : {},
     }),
     enabled:
       (!!isValidPhoneNumber(phoneNumber) && !!phoneNumber) ||
       (!!identifierSearch.config && !!identifierSearch.value),
   });
-
-  // Encounter search query
-  const { data: encounterList, isFetching: isEncounterFetching } = useQuery({
-    queryKey: ["encounter-search", facilityId, encounterSearch],
-    queryFn: query.debounced(encounterApi.list, {
-      queryParams: {
-        facility: facilityId,
-        name: encounterSearch || undefined,
-        limit: 10,
-      },
-    }),
-    enabled: !!encounterSearch,
-  });
-
-  const isFetching = isPatientFetching || isEncounterFetching;
 
   const handlePatientSelect = (index: number) => {
     const patient = patientList?.results[index];
@@ -207,16 +178,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         },
       });
     }
-  };
-
-  const handleEncounterSelect = (encounter: EncounterRead) => {
-    navigate(`/facility/${facilityId}/patients/verify`, {
-      query: {
-        phone_number: encounter.patient.phone_number,
-        year_of_birth: encounter.patient.year_of_birth.toString(),
-        partial_id: encounter.patient.id.slice(0, 5),
-      },
-    });
   };
 
   const handleVerify = () => {
@@ -266,79 +227,13 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
               <div className="min-h-[200px]" id="patient-search-results">
                 {(!!phoneNumber ||
-                  (!!identifierSearch.config && !!identifierSearch.value) ||
-                  !!encounterSearch) && (
+                  (!!identifierSearch.config && !!identifierSearch.value)) && (
                   <>
-                    {isFetching ? (
+                    {isFetching || !patientList ? (
                       <div className="flex items-center justify-center h-[200px]">
                         <Loading />
                       </div>
-                    ) : encounterSearch ? (
-                      // Encounter search results
-                      !encounterList?.results.length ? (
-                        <div>
-                          <div className="flex flex-col items-center justify-center py-10 text-center">
-                            <h3 className="text-lg font-semibold">
-                              {t("no_encounters_found")}
-                            </h3>
-                            <p className="text-sm text-gray-500 mb-6">
-                              {t("no_encounters_found")}
-                            </p>
-                            <AddPatientButton outline />
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="rounded-lg border border-gray-200">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead className="w-[300px]">
-                                  {t("patient_name")}
-                                </TableHead>
-                                <TableHead>{t("phone_number")}</TableHead>
-                                <TableHead>{t("gender")}</TableHead>
-                                <TableHead>{t("encounter_date")}</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {encounterList.results.map((encounter) => (
-                                <TableRow
-                                  key={encounter.id}
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleEncounterSelect(encounter)
-                                  }
-                                >
-                                  <TableCell className="font-medium">
-                                    {encounter.patient.name}
-                                  </TableCell>
-                                  <TableCell>
-                                    {formatPhoneNumberIntl(
-                                      encounter.patient.phone_number,
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    {
-                                      GENDER_TYPES.find(
-                                        (g) =>
-                                          g.id === encounter.patient.gender,
-                                      )?.text
-                                    }
-                                  </TableCell>
-                                  <TableCell>
-                                    {encounter.period.start
-                                      ? new Date(
-                                          encounter.period.start,
-                                        ).toLocaleDateString()
-                                      : "-"}
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      )
-                    ) : !patientList?.results.length ? (
+                    ) : !patientList.results.length ? (
                       <div>
                         <div className="flex flex-col items-center justify-center py-10 text-center">
                           <h3 className="text-lg font-semibold">
