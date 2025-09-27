@@ -38,7 +38,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import InvoicesData from "@/pages/Facility/billing/invoice/InvoicesData";
 import PaymentsData from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
@@ -99,7 +99,7 @@ export function AccountShow({
   }>({ sheetOpen: false, reason: AccountBillingStatus.closed_baddebt });
   const [{ encounterId }] = useQueryParams();
 
-  useFacilityShortcuts("account-show");
+  useShortcutSubContext("facility:account:show");
 
   const { data: account, isLoading } = useQuery({
     queryKey: ["account", accountId],

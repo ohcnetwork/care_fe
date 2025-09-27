@@ -87,9 +87,10 @@ export default function HealthcareServiceList({
           </div>
         ) : healthcareServices.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
             title={t("no_healthcare_services_found")}
-            description={""}
           />
         ) : (
           <div className="space-y-2">

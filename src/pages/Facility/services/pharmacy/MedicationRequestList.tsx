@@ -21,7 +21,7 @@ import {
 
 import useFilters from "@/hooks/useFilters";
 
-import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
@@ -217,7 +217,7 @@ export default function MedicationRequestList({
           />
         </div>
         <div className="flex items-center gap-2">
-          <PatientEncounterOrIdentifierFilter
+          <PatientIdentifierFilter
             onSelect={(patientId) =>
               updateQuery({ patient_external_id: patientId })
             }

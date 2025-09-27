@@ -1,32 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
-import {
-  addDays,
-  compareAsc,
-  differenceInMinutes,
-  endOfDay,
-  format,
-  isAfter,
-  isBefore,
-  startOfDay,
-  subDays,
-} from "date-fns";
-import { CalendarDays } from "lucide-react";
-import { Link } from "raviger";
+import { differenceInMinutes, format } from "date-fns";
+import { CalendarDays, CalendarOff } from "lucide-react";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import query from "@/Utils/request/query";
 import {
   Appointment,
-  AppointmentCancelledStatuses,
+  APPOINTMENT_STATUS_COLORS,
   AppointmentStatus,
+  CancelledAppointmentStatuses,
   formatScheduleResourceName,
+  PastAppointmentStatuses,
+  UpcomingAppointmentStatuses,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
-import {
-  CardGridSkeleton,
-  TableSkeleton,
-} from "@/components/Common/SkeletonLoading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,14 +27,19 @@ import {
 } from "@/components/ui/table";
 import { FilterTabs } from "@/components/ui/filter-tabs"
 
-import { dateQueryString } from "@/Utils/utils";
+import { Avatar } from "@/components/Common/Avatar";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { AppointmentNonCancelledStatuses } from "@/types/scheduling/schedule";
 import { useState } from "react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 
 interface BookingsListProps {
   patientId: string;
-  facilityId: string;
+  facilityId?: string;
 }
 
 export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
@@ -97,8 +90,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              dateTo={dateQueryString(subDays(new Date(), 1))}
-              status={AppointmentNonCancelledStatuses}
+              statuses={PastAppointmentStatuses}
             />
           </div>
         )}
@@ -107,7 +99,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              status={AppointmentCancelledStatuses}
+              statuses={CancelledAppointmentStatuses}
             />
           </div>
         )}
@@ -119,13 +111,11 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
 const AppointmentCard = ({
   appointment,
   patientId,
-  facilityId,
-  appointmentId,
+  showFacilityInfo,
 }: {
   appointment: Appointment;
   patientId: string;
-  facilityId: string;
-  appointmentId: string;
+  showFacilityInfo: boolean;
 }) => {
   const { t } = useTranslation();
 
@@ -157,15 +147,23 @@ const AppointmentCard = ({
           </div>
         </div>
         <div className="px-2 py-1 rounded-sm bg-gray-50">
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-row gap-2">
-              <ScheduleResourceIcon resource={appointment} />
+          <div className="flex flex-col gap-1">
+            <div className="flex flex-row gap-1">
+              <ScheduleResourceIcon resource={appointment} className="size-5" />
               <div className="flex items-center justify-center gap-2">
                 <span className="text-sm font-medium text-gray-950">
                   {formatScheduleResourceName(appointment)}
                 </span>
               </div>
             </div>
+            {showFacilityInfo && (
+              <div className="flex gap-1 items-center">
+                <Avatar name={appointment.facility.name} className="size-5" />
+                <span className="text-sm font-medium text-gray-950">
+                  {appointment.facility.name}
+                </span>
+              </div>
+            )}
           </div>
         </div>
         <Button
@@ -174,7 +172,7 @@ const AppointmentCard = ({
           asChild
         >
           <Link
-            href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointmentId}`}
+            href={`/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`}
           >
             {t("see_details")}
           </Link>
@@ -186,12 +184,12 @@ const AppointmentCard = ({
 
 const AppointmentTable = ({
   appointments,
-  facilityId,
   patientId,
+  showFacilityInfo,
 }: {
   appointments: Appointment[];
-  facilityId: string;
   patientId: string;
+  showFacilityInfo: boolean;
 }) => {
   const { t } = useTranslation();
 
@@ -208,19 +206,21 @@ const AppointmentTable = ({
           <TableHead className="w-30 border-y bg-gray-100 text-gray-700 text-sm">
             {t("resource")}
           </TableHead>
-          <TableHead className="w-14 border-y bg-gray-100 hidden xl:table-cell text-gray-700 text-sm">
-            {t("status")}
-          </TableHead>
           <TableHead className="w-14 border-y bg-gray-100 text-gray-700 text-sm">
-            {t("actions")}
+            {t("status")}
           </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody className="bg-white">
         {appointments.map((appointment) => (
           <TableRow
-            key={appointment.id} // added key for React
-            className="shadow bg-white space-y-3 rounded-lg"
+            key={appointment.id}
+            className="shadow bg-white space-y-3 rounded-lg cursor-pointer"
+            onClick={() =>
+              navigate(
+                `/facility/${appointment.facility.id}/patient/${patientId}/appointments/${appointment.id}`,
+              )
+            }
           >
             <TableCell className="p-4">
               <div className="flex gap-2 items-start justify-start">
@@ -258,35 +258,40 @@ const AppointmentTable = ({
 
             <TableCell>
               <div className="px-2 py-1">
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-row gap-2">
-                    <ScheduleResourceIcon resource={appointment} />
+                <div className="flex flex-col gap-1">
+                  <div className="flex flex-row gap-1">
+                    <ScheduleResourceIcon
+                      resource={appointment}
+                      className="size-5"
+                    />
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-sm font-medium text-gray-950">
                         {formatScheduleResourceName(appointment)}
                       </span>
                     </div>
                   </div>
+
+                  {showFacilityInfo && (
+                    <div className="flex gap-1 items-center">
+                      <Avatar
+                        name={appointment.facility.name}
+                        className="size-5"
+                      />
+                      <span className="text-sm font-medium text-gray-950">
+                        {appointment.facility.name}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </TableCell>
 
             <TableCell className="hidden xl:table-cell">
               <div className="flex flex-row items-start justify-start">
-                <Badge variant="green" className="text-gray-700">
+                <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
                   {t(appointment.status)}
                 </Badge>
               </div>
-            </TableCell>
-
-            <TableCell>
-              <Button variant="outline" className="text-gray-950">
-                <Link
-                  href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
-                >
-                  {t("see_details")}
-                </Link>
-              </Button>
             </TableCell>
           </TableRow>
         ))}
@@ -295,92 +300,92 @@ const AppointmentTable = ({
   );
 };
 
-const BookingListContent = ({
+export const BookingListContent = ({
   patientId,
   facilityId,
-  dateFrom,
-  dateTo,
-  status,
+  statuses,
 }: {
   patientId: string;
-  facilityId: string;
-  dateFrom?: string;
-  dateTo?: string;
-  status?: readonly AppointmentStatus[];
+  facilityId?: string;
+  statuses?: readonly AppointmentStatus[];
 }) => {
   const { t } = useTranslation();
-  const { data: appointments, isLoading } = useQuery({
-    queryKey: ["patient-appointments", patientId, dateFrom, dateTo, facilityId],
-    queryFn: query(scheduleApi.appointments.getAppointments, {
-      pathParams: { patientId },
-      queryParams: {
-        limit: 100,
-        date_after: dateFrom,
-        facility: facilityId,
-        date_before: dateTo,
-        status: status?.join(","),
-      },
-    }),
+  const { ref, inView } = useInView();
+
+  const {
+    data: appointmentsData,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    isLoading,
+  } = useInfiniteQuery({
+    queryKey: ["infinite-appointments", patientId, facilityId, statuses],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(scheduleApi.appointments.getAppointments, {
+        pathParams: { patientId },
+        queryParams: {
+          offset: pageParam,
+          limit: 15,
+          facility: facilityId,
+          status: statuses?.join(","),
+        },
+      })({ signal });
+      return response;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * 15;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
   });
 
-  const filteredAppointments =
-    appointments?.results
-      .filter((appointment) => status?.includes(appointment.status) ?? true)
-      .filter((appointment) =>
-        dateFrom
-          ? isAfter(appointment.token_slot.start_datetime, startOfDay(dateFrom))
-          : true,
-      )
-      .filter((appointment) =>
-        dateTo
-          ? isBefore(appointment.token_slot.start_datetime, endOfDay(dateTo))
-          : true,
-      )
-      .sort((a, b) =>
-        compareAsc(a.token_slot.start_datetime, b.token_slot.start_datetime),
-      ) ?? [];
+  const appointments =
+    appointmentsData?.pages.flatMap((page) => page.results) ?? [];
+
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
 
   if (isLoading) {
-    return (
-      <div className="w-full">
-        <div className="hidden sm:block">
-          <TableSkeleton count={10} />
-        </div>
-        <div className="sm:hidden">
-          <CardGridSkeleton count={10} />
-        </div>
-      </div>
-    );
+    return <CardListSkeleton count={15} />;
   }
 
-  if (filteredAppointments.length === 0) {
+  if (appointments.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">{t("no_appointments")}</p>
-      </div>
+      <EmptyState
+        title={t("no_appointments")}
+        icon={<CalendarOff className="size-5 text-primary m-1" />}
+        className="m-1"
+      />
     );
   }
-
+  console.log(facilityId);
   return (
     <div className="w-full">
       <div className="hidden sm:block">
         <AppointmentTable
-          appointments={filteredAppointments}
-          facilityId={facilityId}
+          appointments={appointments}
           patientId={patientId}
+          showFacilityInfo={!facilityId}
         />
       </div>
-      <div className="sm:hidden">
-        {filteredAppointments.map((appointment) => (
+      <div className="sm:hidden space-y-4">
+        {appointments.map((appointment) => (
           <AppointmentCard
-            key={appointment.id}
+            key={`card-${appointment.id}`}
             appointment={appointment}
             patientId={patientId}
-            facilityId={facilityId}
-            appointmentId={appointment.id}
+            showFacilityInfo={!facilityId}
           />
         ))}
       </div>
+      <div ref={ref} />
+      {isFetchingNextPage && <CardListSkeleton count={2} />}
+      {!hasNextPage && !isFetchingNextPage && (
+        <div className="border-b border-gray-300 pb-2" />
+      )}
     </div>
   );
 };

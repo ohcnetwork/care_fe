@@ -35,7 +35,7 @@ export const structuredHandlers: {
 } = {
   allergy_intolerance: {
     getRequests: async (allergies, { patientId, encounterId }) => {
-      if (!encounterId) {
+      if (!encounterId || allergies.length === 0) {
         return [];
       }
 
@@ -57,6 +57,10 @@ export const structuredHandlers: {
   },
   medication_request: {
     getRequests: async (medications, { patientId, encounterId }) => {
+      if (medications.length === 0) {
+        return [];
+      }
+
       return [
         {
           url: `/api/v1/patient/${patientId}/medication/request/upsert/`,
@@ -77,6 +81,10 @@ export const structuredHandlers: {
   },
   medication_statement: {
     getRequests: async (medications, { patientId, encounterId }) => {
+      if (medications.length === 0) {
+        return [];
+      }
+
       return [
         {
           url: `/api/v1/patient/${patientId}/medication/statement/upsert/`,
@@ -95,7 +103,7 @@ export const structuredHandlers: {
   },
   symptom: {
     getRequests: async (symptoms, { patientId, encounterId }) => {
-      if (!encounterId) {
+      if (!encounterId || symptoms.length === 0) {
         return [];
       }
 
@@ -117,7 +125,9 @@ export const structuredHandlers: {
   },
   diagnosis: {
     getRequests: async (diagnoses, { patientId, encounterId }) => {
-      if (!encounterId) {
+      const results = diagnoses.filter((diagnosis) => diagnosis.dirty);
+
+      if (!encounterId || results.length === 0) {
         return [];
       }
 
@@ -126,13 +136,11 @@ export const structuredHandlers: {
           url: `/api/v1/patient/${patientId}/diagnosis/upsert/`,
           method: "POST",
           body: {
-            datapoints: diagnoses
-              .filter((diagnosis) => diagnosis.dirty)
-              .map((diagnosis) => ({
-                ...diagnosis,
-                note: sanitizeNote(diagnosis.note),
-                encounter: encounterId,
-              })),
+            datapoints: results.map((diagnosis) => ({
+              ...diagnosis,
+              note: sanitizeNote(diagnosis.note),
+              encounter: encounterId,
+            })),
           },
           reference_id: "diagnosis",
         },

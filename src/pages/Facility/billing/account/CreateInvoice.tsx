@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -149,7 +149,7 @@ export function CreateInvoicePage({
   const queryClient = useQueryClient();
   const hasInitializedSelections = useRef(false);
 
-  useFacilityShortcuts("billing");
+  useShortcutSubContext("facility:billing");
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>(
     () => {
       if (!preSelectedChargeItems) return {};

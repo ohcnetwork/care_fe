@@ -1,35 +1,21 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { Loader2, SaveIcon, Trash2Icon } from "lucide-react";
+import { SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import { cn } from "@/lib/utils";
-
 import Callout from "@/CAREUI/display/Callout";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import WeekdayCheckbox, {
   DayOfWeek,
 } from "@/CAREUI/interactive/WeekdayCheckbox";
-
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
@@ -51,6 +37,8 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import mutate from "@/Utils/request/mutate";
 import { Time } from "@/Utils/types";
@@ -157,7 +145,7 @@ const ScheduleTemplateEditor = ({
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const templateFormSchema = z
     .object({
@@ -276,57 +264,17 @@ const ScheduleTemplateEditor = ({
           </div>
 
           <div className="flex justify-end gap-2">
-            <AlertDialog
-              open={isDeleteDialogOpen}
-              onOpenChange={(open) => setIsDeleteDialogOpen(open)}
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isProcessing}
+              onClick={() => setShowDeleteDialog(true)}
+              size="sm"
             >
-              <AlertDialogTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isProcessing}
-                  size="sm"
-                >
-                  <Trash2Icon />
-                  {isDeleting ? t("deleting") : t("delete")}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    <Alert variant="destructive" className="mt-4">
-                      <AlertTitle>{t("warning")}</AlertTitle>
-                      <AlertDescription>
-                        {t(
-                          "this_will_permanently_remove_the_scheduled_template_and_cannot_be_undone",
-                        )}
-                      </AlertDescription>
-                    </Alert>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel
-                    onClick={() => setIsDeleteDialogOpen(false)}
-                  >
-                    {t("cancel")}
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    className={cn(buttonVariants({ variant: "destructive" }))}
-                    onClick={() => {
-                      deleteTemplate();
-                      setIsDeleteDialogOpen(false);
-                    }}
-                  >
-                    {isDeleting ? (
-                      <Loader2 className="size-4 animate-spin mr-2" />
-                    ) : (
-                      t("confirm")
-                    )}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+              <Trash2Icon />
+              {isDeleting ? t("deleting") : t("delete")}
+            </Button>
+
             <Button
               variant="primary"
               type="submit"
@@ -339,6 +287,26 @@ const ScheduleTemplateEditor = ({
           </div>
         </form>
       </Form>
+      <ConfirmActionDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={t("are_you_sure")}
+        description={
+          <Alert variant="destructive" className="mt-4">
+            <AlertTitle>{t("warning")}</AlertTitle>
+            <AlertDescription>
+              {t(
+                "this_will_permanently_remove_the_scheduled_template_and_cannot_be_undone",
+              )}
+            </AlertDescription>
+          </Alert>
+        }
+        onConfirm={() => {
+          deleteTemplate();
+        }}
+        confirmText={isDeleting ? t("deleting") : t("delete")}
+        variant="destructive"
+      />
     </div>
   );
 };
@@ -358,7 +326,7 @@ const AvailabilityEditor = ({
 }) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { mutate: deleteAvailability, isPending: isDeleting } = useMutation({
     mutationFn: mutate(scheduleApis.templates.availabilities.delete, {
@@ -416,55 +384,14 @@ const AvailabilityEditor = ({
             {t(`SCHEDULE_AVAILABILITY_TYPE__${availability.slot_type}`)}
           </Badge>
         </div>
-
-        <AlertDialog
-          open={isDeleteDialogOpen}
-          onOpenChange={(open) => setIsDeleteDialogOpen(open)}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowDeleteDialog(true)}
+          disabled={isDeleting}
         >
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsDeleteDialogOpen(true)}
-              disabled={isDeleting}
-            >
-              <CareIcon icon="l-trash" className="text-lg" />
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
-              <AlertDialogDescription>
-                <Alert variant="destructive" className="mt-4">
-                  <AlertTitle>{t("warning")}</AlertTitle>
-                  <AlertDescription>
-                    {t(
-                      "this_will_permanently_remove_the_session_and_cannot_be_undone",
-                    )}
-                  </AlertDescription>
-                </Alert>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
-                {t("cancel")}
-              </AlertDialogCancel>
-              <AlertDialogAction
-                className={cn(buttonVariants({ variant: "destructive" }))}
-                onClick={() => {
-                  deleteAvailability();
-                  setIsDeleteDialogOpen(false);
-                }}
-              >
-                {isDeleting ? (
-                  <Loader2 className="size-4 animate-spin mr-2" />
-                ) : (
-                  t("confirm")
-                )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          <CareIcon icon="l-trash" className="text-lg" />
+        </Button>
       </div>
 
       <div className="space-y-4">
@@ -547,6 +474,27 @@ const AvailabilityEditor = ({
           </div>
         </div>
       </div>
+
+      <ConfirmActionDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={t("are_you_sure")}
+        description={
+          <Alert variant="destructive" className="mt-4">
+            <AlertTitle>{t("warning")}</AlertTitle>
+            <AlertDescription>
+              {t(
+                "this_will_permanently_remove_the_session_and_cannot_be_undone",
+              )}
+            </AlertDescription>
+          </Alert>
+        }
+        onConfirm={() => {
+          deleteAvailability();
+        }}
+        confirmText={isDeleting ? t("deleting") : t("delete")}
+        variant="destructive"
+      />
     </div>
   );
 };
