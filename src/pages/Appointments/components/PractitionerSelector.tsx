@@ -137,6 +137,16 @@ export const PractitionerSelector = ({
       enabled: !!currentOrganizationId,
     });
 
+  // Fetch all practitioners for search functionality
+  const { data: allPractitioners } = useQuery({
+    queryKey: ["allPractitioners", facilityId, searchQuery],
+    queryFn: query(scheduleApi.appointments.availableUsers, {
+      pathParams: { facilityId },
+      queryParams: { limit: 10 },
+    }),
+    enabled: open && !!searchQuery && searchQuery.length > 0,
+  });
+
   // Fetch child organizations for current navigation level
   const { data: childOrganizations } = useQuery({
     queryKey: ["childOrganizations", facilityId, currentOrganizationId],
@@ -323,7 +333,7 @@ export const PractitionerSelector = ({
                   <div className="px-3 py-2 border-b">
                     <div className="relative">
                       <CommandInput
-                        placeholder={t("search_organizations")}
+                        placeholder={t("search_departments_and_practitioners")}
                         value={searchQuery}
                         onValueChange={setSearchQuery}
                         className="pl-1 border-0 focus:ring-0"
@@ -350,113 +360,122 @@ export const PractitionerSelector = ({
                       )}
                     </CommandEmpty>
 
-                    <CommandGroup>
-                      {/* Selected Practitioners - Show at the top */}
-                      {selected && selected.length > 0 && (
-                        <>
-                          <div className="flex items-center justify-between mb-1">
-                            <h3 className="px-2 py-1 text-sm font-medium text-gray-500 uppercase tracking-wide">
-                              {t("selected")}
-                            </h3>
-                            {multiple && (
-                              <div>
-                                <Button
-                                  variant="outline"
-                                  size="xs"
-                                  onClick={() => onSelect([])}
-                                >
-                                  {t("clear_all")}
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                          {selected.map((user) => (
-                            <CommandItem
-                              key={user.id}
-                              value={getItemValue(user)}
-                              onSelect={() => {
-                                onSelect(
-                                  selected.filter((s) => s.id !== user.id),
-                                );
-                              }}
-                              className="flex items-center gap-2 px-3 py-3 cursor-pointer hover:bg-gray-50"
-                            >
-                              <Avatar
-                                imageUrl={user.profile_picture_url}
-                                name={formatName(user, true)}
-                                className="size-6 rounded-full"
-                              />
-                              <div className="flex flex-col min-w-0 flex-1">
-                                <span
-                                  className="truncate text-sm font-medium"
-                                  title={formatName(user)}
-                                >
-                                  {formatName(user)}
-                                </span>
-                              </div>
-                              <XIcon className="ml-auto" />
-                            </CommandItem>
-                          ))}
-                          <div className="bg-gray-200 -mx-1 my-1 h-px"></div>
-                        </>
-                      )}
-
-                      {/* Organizations Section */}
-                      {organizations.length > 0 && (
-                        <>
-                          <h3 className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                            {t("departments")}
-                          </h3>
-                          {organizations
-                            .filter((organization) =>
-                              searchQuery
-                                ? organization.name
-                                    .toLowerCase()
-                                    .includes(searchQuery.toLowerCase()) ||
-                                  organization.description
-                                    ?.toLowerCase()
-                                    .includes(searchQuery.toLowerCase())
-                                : true,
-                            )
-                            .map((organization) => (
-                              <CommandItem
-                                key={organization.id}
-                                value={organization.name}
-                                onSelect={() =>
-                                  handleOrganizationClick(organization)
-                                }
-                                className="flex items-center justify-between px-3 py-3 cursor-pointer hover:bg-gray-50"
+                    {/* Selected Practitioners - Show at the top */}
+                    {selected && selected.length > 0 && (
+                      <CommandGroup heading={t("selected")}>
+                        {selected.map((user) => (
+                          <CommandItem
+                            key={user.id}
+                            value={getItemValue(user)}
+                            onSelect={() => {
+                              onSelect(
+                                selected.filter((s) => s.id !== user.id),
+                              );
+                            }}
+                            className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
+                          >
+                            <Avatar
+                              imageUrl={user.profile_picture_url}
+                              name={formatName(user, true)}
+                              className="size-6 rounded-full"
+                            />
+                            <div className="flex flex-col min-w-0 flex-1">
+                              <span
+                                className="truncate text-sm font-medium"
+                                title={formatName(user)}
                               >
-                                <div className="flex items-center gap-3 min-w-0 flex-1">
-                                  <div className="flex-shrink-0">
-                                    <div
-                                      className={cn(
-                                        "h-3 w-3 rounded-full flex-shrink-0 border",
-                                        getColorForTag(organization.id),
-                                      )}
-                                    />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <div className="font-medium text-sm truncate">
-                                      {organization.name}
-                                    </div>
-                                    {organization.description && (
-                                      <div className="text-xs text-gray-500 truncate mt-0.5">
-                                        {organization.description}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2 flex-shrink-0">
-                                  {organization.has_children && (
-                                    <ChevronRight className="h-4 w-4 text-gray-500" />
+                                {formatName(user)}
+                              </span>
+                            </div>
+                            <XIcon className="ml-auto" />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    )}
+                    {/* Organizations Section */}
+                    {organizations.length > 0 && (
+                      <CommandGroup heading={t("departments")}>
+                        {organizations.map((organization) => (
+                          <CommandItem
+                            key={organization.id}
+                            value={organization.name}
+                            onSelect={() =>
+                              handleOrganizationClick(organization)
+                            }
+                            className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50"
+                          >
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              <div className="flex-shrink-0">
+                                <div
+                                  className={cn(
+                                    "h-3 w-3 rounded-full flex-shrink-0 border",
+                                    getColorForTag(organization.id),
                                   )}
+                                />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium text-sm truncate">
+                                  {organization.name}
                                 </div>
+                                {organization.description && (
+                                  <div className="text-xs text-gray-500 truncate mt-0.5">
+                                    {organization.description}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {organization.has_children && (
+                                <ChevronRight className="h-4 w-4 text-gray-500" />
+                              )}
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    )}
+
+                    {/* Search Results - Practitioners */}
+                    {searchQuery &&
+                      allPractitioners?.users?.length &&
+                      allPractitioners?.users?.length > 0 && (
+                        <CommandGroup heading={t("practitioners")}>
+                          {allPractitioners?.users?.map((user) => {
+                            const isSelected = selected?.some(
+                              (s) => s.id === user.id,
+                            );
+
+                            return (
+                              <CommandItem
+                                key={user.id}
+                                value={getItemValue(user)}
+                                onSelect={() => {
+                                  if (!isSelected) {
+                                    handleUserSelect(user);
+                                  }
+                                }}
+                                className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
+                              >
+                                <Avatar
+                                  imageUrl={user.profile_picture_url}
+                                  name={formatName(user, true)}
+                                  className="size-6 rounded-full"
+                                />
+                                <div className="flex flex-col min-w-0 flex-1">
+                                  <span
+                                    className="truncate text-sm font-medium"
+                                    title={formatName(user)}
+                                  >
+                                    {formatName(user)}
+                                  </span>
+                                </div>
+                                {isSelected && (
+                                  <CheckIcon className="h-4 w-4 text-gray-700" />
+                                )}
                               </CommandItem>
-                            ))}
-                        </>
+                            );
+                          })}
+                        </CommandGroup>
                       )}
-                    </CommandGroup>
                   </CommandList>
                 </Command>
               </div>
