@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { formatDate } from "date-fns";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -32,10 +31,7 @@ import {
 } from "@/components/ui/popover";
 
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
   getPartialId,
   PartialPatientModel,
@@ -65,7 +61,7 @@ export default function PatientEncounterOrIdentifierFilter({
   const [pendingPatient, setPendingPatient] = useState<
     PatientRead | PartialPatientModel | null
   >(null);
-  const [searchType, setSearchType] = useState("encounter");
+  const [searchType, setSearchType] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [verificationOpen, setVerificationOpen] = useState(false);
@@ -77,7 +73,7 @@ export default function PatientEncounterOrIdentifierFilter({
     } else if (!patientId) {
       setSelectedPatient(null);
     }
-  }, [patientId]);
+  }, [patientId, selectedPatient]);
 
   // Fetch patient details when patientId is provided
   const { data: patientDetails } = useQuery({
@@ -100,27 +96,12 @@ export default function PatientEncounterOrIdentifierFilter({
     queryKey: ["patient-search", searchTerm, searchType],
     queryFn: query.debounced(patientApi.searchPatient, {
       body:
-        searchType && searchTerm && searchType !== "encounter"
-          ? { config: searchType, value: searchTerm }
+        searchType && searchTerm
+          ? { config: searchType, value: searchTerm, page_size: 20 }
           : {},
     }),
-    enabled: !!searchType && !!searchTerm && searchType !== "encounter",
+    enabled: !!searchType && !!searchTerm,
   });
-
-  // Encounter search query (for encounter-based search)
-  const { data: encounterList, isFetching: isEncounterFetching } = useQuery({
-    queryKey: ["encounter-search", facilityId, searchTerm, searchType],
-    queryFn: query.debounced(encounterApi.list, {
-      queryParams: {
-        facility: facilityId,
-        name: searchTerm || undefined,
-        limit: 10,
-      },
-    }),
-    enabled: !!searchTerm && searchType === "encounter",
-  });
-
-  const isFetching = isPatientFetching || isEncounterFetching;
 
   // Patient verification query
   const { data: verifiedPatient, refetch: verifyPatient } = useQuery({
@@ -136,16 +117,6 @@ export default function PatientEncounterOrIdentifierFilter({
     enabled: false,
   });
 
-  // Handle successful verification
-  useEffect(() => {
-    if (verifiedPatient) {
-      handleSelectPatient(verifiedPatient);
-      setVerificationOpen(false);
-      setYearOfBirth("");
-      setPendingPatient(null);
-    }
-  }, [verifiedPatient]);
-
   const handleSelectPatient = useCallback(
     (patient: PatientRead | PartialPatientModel) => {
       setSelectedPatient(patient);
@@ -156,6 +127,16 @@ export default function PatientEncounterOrIdentifierFilter({
     [onSelect],
   );
 
+  // Handle successful verification
+  useEffect(() => {
+    if (verifiedPatient) {
+      handleSelectPatient(verifiedPatient);
+      setVerificationOpen(false);
+      setYearOfBirth("");
+      setPendingPatient(null);
+    }
+  }, [verifiedPatient, handleSelectPatient]);
+
   const handlePatientSelect = (patient: PatientRead | PartialPatientModel) => {
     if (patientList?.partial) {
       setPendingPatient(patient);
@@ -164,10 +145,6 @@ export default function PatientEncounterOrIdentifierFilter({
     } else {
       handleSelectPatient(patient);
     }
-  };
-
-  const handleEncounterSelect = (encounter: EncounterRead) => {
-    handleSelectPatient(encounter.patient);
   };
 
   const handleVerify = () => {
@@ -209,13 +186,13 @@ export default function PatientEncounterOrIdentifierFilter({
               <div className="relative flex items-center px-3 py-2">
                 <CommandInput
                   placeholder={
-                    searchType === "encounter"
-                      ? t("search_encounters")
-                      : t("search_by_identifier", {
+                    searchType
+                      ? t("search_by_identifier", {
                           name: facility?.patient_instance_identifier_configs?.find(
                             (c) => c.id === searchType,
                           )?.config.display,
                         })
+                      : t("select_search_type")
                   }
                   value={searchTerm}
                   onValueChange={setSearchTerm}
@@ -235,22 +212,6 @@ export default function PatientEncounterOrIdentifierFilter({
               </div>
 
               <div className="flex flex-wrap gap-1.5 p-2 border-t rounded-b-lg bg-gray-50 border-t-gray-100">
-                <Button
-                  key="encounter"
-                  variant="outline"
-                  onClick={() => {
-                    setSearchType("encounter");
-                    setSearchTerm("");
-                  }}
-                  className={cn(
-                    "h-6 px-2 text-xs rounded-md",
-                    searchType === "encounter"
-                      ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200",
-                  )}
-                >
-                  {t("encounter")}
-                </Button>
                 {facility?.patient_instance_identifier_configs?.map(
                   (config) => (
                     <Button
@@ -274,49 +235,12 @@ export default function PatientEncounterOrIdentifierFilter({
               </div>
 
               <CommandList>
-                {!searchTerm ? (
+                {!searchType ? (
+                  <CommandEmpty>{t("select_search_type")}</CommandEmpty>
+                ) : !searchTerm ? (
                   <CommandEmpty>{t("start_typing_to_search")}</CommandEmpty>
-                ) : isFetching ? (
+                ) : isPatientFetching ? (
                   <CommandEmpty>{t("searching")}</CommandEmpty>
-                ) : searchType === "encounter" ? (
-                  !encounterList?.results.length ? (
-                    <CommandEmpty>{t("no_encounters_found")}</CommandEmpty>
-                  ) : (
-                    <CommandGroup>
-                      {encounterList.results.map((encounter) => (
-                        <CommandItem
-                          key={encounter.id}
-                          value={`${encounter.patient.name} ${encounter.id}`}
-                          onSelect={() => handleEncounterSelect(encounter)}
-                          className="cursor-pointer"
-                        >
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex flex-col flex-1 gap-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">
-                                  {encounter.patient.name}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {formatPatientAge(encounter.patient, true)}
-                                </span>
-                                {encounter.period.start && (
-                                  <span className="text-xs text-gray-500">
-                                    {formatDate(
-                                      encounter.period.start,
-                                      "MMM d",
-                                    )}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            {selectedPatient?.id === encounter.patient.id && (
-                              <Check className="size-4" />
-                            )}
-                          </div>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  )
                 ) : !patientList?.results.length ? (
                   <CommandEmpty>
                     {t("no_results_found_for", { term: searchTerm })}

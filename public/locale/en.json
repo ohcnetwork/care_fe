@@ -4496,6 +4496,7 @@
   "select_resource_type_description": "Choose the type of resource you want to create a token for",
   "select_role": "Select Role",
   "select_route": "Select Route",
+  "select_search_type": "Select search type",
   "select_service_point": "Select Service Point",
   "select_seven_day_period": "Select a seven day period",
   "select_site": "Select site",
