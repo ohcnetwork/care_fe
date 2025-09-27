@@ -116,7 +116,7 @@ export const NavTabs = <TabKey extends string>({
                   {tabs[option].icon && (
                     <span className="mr-2">{tabs[option].icon}</span>
                   )}
-                  {tabs[option].label}
+                  {t(tabs[option].label)}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>

@@ -180,14 +180,8 @@ export default function MedicationValueSetSelect({
             setActiveTab(value as "product" | "valueset")
           }
           options={[
-            {
-              value: "product",
-              label: t("in_stock"),
-            },
-            {
-              value: "valueset",
-              label: t("medication_list"),
-            },
+            { value: "product",   label: "in_stock" },
+            { value: "valueset",  label: "medication_list" },
           ]}
           variant="underline"
           className="flex items-center border-b"

@@ -118,7 +118,9 @@ export function AccountList({
             <div className="flex flex-wrap gap-4">
               <FilterTabs
                 value={qParams.status ?? "all"}
-                onValueChange={(v) => updateQuery({ status: v === "all" ? undefined : v })}
+                onValueChange={(nextValue) =>
+                  updateQuery({ status: nextValue ? nextValue : undefined })
+                }
                 className="overflow-y-auto max-w-[calc(100%)] max-sm:hidden text-gray-950"
                 options={[
                   { value: "all", label: t("all_accounts") },

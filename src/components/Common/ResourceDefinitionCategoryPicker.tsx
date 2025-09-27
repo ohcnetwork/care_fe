@@ -780,8 +780,8 @@ export function ResourceDefinitionCategoryPicker<T>({
   );
 
   const tabOptions = [
-    { value: "search", label: t("search") },
-    { value: "favorites", label: t("favorites") },
+    { value: "search", label: "search" },
+    { value: "favorites", label: "favorites" },
   ];
 
   return (
@@ -883,10 +883,10 @@ export function ResourceDefinitionCategoryPicker<T>({
                   />
                 </div>
                 <div className="flex-1 min-h-0 overflow-hidden">
-                  {activeTab === t("search") && (
+                  {activeTab === "search" && (
                     <div className="h-full mt-0">{renderMainContent()}</div>
                   )}
-                  {activeTab === t("favorites") && (
+                  {activeTab === "favorites" && (
                     <div className="h-full mt-0">
                       {renderFavoritesContent()}
                     </div>

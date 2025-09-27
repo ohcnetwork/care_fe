@@ -186,6 +186,7 @@ export function AccountShow({
     });
   };
 
+  const showBedTab = Boolean(encounterId) || tab === "bed_charge_items";
   const tabOptions = [
     {
       value: "invoices",
@@ -202,7 +203,7 @@ export function AccountShow({
       label: "payments",
       icon: <CareIcon icon="l-money-bill" className="size-4" />,
     },
-    ...(encounterId
+    ...(showBedTab
       ? [
           {
             value: "bed_charge_items" as const,
@@ -651,7 +652,9 @@ export function AccountShow({
         )}
         
         {tab === "payments" && (
-          <PaymentsData facilityId={facilityId} accountId={accountId} />
+          <div className="mt-4">
+            <PaymentsData facilityId={facilityId} accountId={accountId} />
+          </div>
         )}
 
         {tab === "bed_charge_items" && (

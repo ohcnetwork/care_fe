@@ -763,8 +763,8 @@ function SectionItem({
             value={activeTab}
             onValueChange={(value) => onTabChange(index, value)}
             options={[
-              { value: "basic", label: t("basic_settings") },
-              { value: "fields", label: t("fields_columns") },
+              { value: "basic", label: "basic_settings" },
+              { value: "fields", label: "fields_columns" },
             ]}
             showAllOption={false}
             variant="underline"

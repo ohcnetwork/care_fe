@@ -200,14 +200,14 @@ export default function ValueSetSearchContent({
     <Command filter={() => 1} className="rounded-t-3xl">
       <div className="py-3 px-3 border-b border-gray-200 flex justify-between items-center">
         {title && <h3 className="text-base font-semibold">{title}</h3>}
-        <div className="md-hidden">
+        <div className="md:hidden" data-cy="valueset-tabs-mobile">
           <div className="flex w-full">
             <FilterTabs
               value={activeTab.toString()}
               onValueChange={(value) => setActiveTab(Number(value))}
               options={[
-                {value: "0", label: t("search")},
-                {value: "1", label: t("starred")}
+                {value: "0", label: "search"},
+                {value: "1", label: "starred"}
               ]}
               className="flex-1"
               variant="background"

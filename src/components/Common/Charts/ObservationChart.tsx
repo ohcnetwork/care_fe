@@ -115,7 +115,9 @@ export const ObservationVisualizer = ({
   canAccess,
 }: ObservationVisualizerProps) => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("search");
+  const [activeTab, setActiveTab] = useState<"graph" | "data" | "history">(
+    "graph",
+  );
 
   // Flatten all codes for a single API request
   const allCodes = codeGroups.flatMap((group) => group.codes);
@@ -242,9 +244,9 @@ export const ObservationVisualizer = ({
   });
 
   const tabOptions = [
-    { value: "graph", label: t("graph") },
-    { value: "data", label: t("recent_data") },
-    { value: "history", label: t("full_history") },
+    { value: "graph", label: "graph" },
+    { value: "data", label: "recent_data" },
+    { value: "history", label: "full_history" },
   ];
   return (
     <div
@@ -286,7 +288,7 @@ export const ObservationVisualizer = ({
           <div className="mb-4">
             <FilterTabs
               value={activeTab}
-              onValueChange={setActiveTab}
+              onValueChange={(value) => setActiveTab(value as "graph" | "data" | "history")}
               options={tabOptions}
               variant="underline"
               showAllOption={false}
@@ -356,10 +358,10 @@ export const ObservationVisualizer = ({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Time</TableHead>
-                    <TableHead>Values</TableHead>
-                    <TableHead>Entered By</TableHead>
-                    <TableHead>Notes</TableHead>
+                    <TableHead>{t("time")}</TableHead>
+                    <TableHead>{t("values")}</TableHead>
+                    <TableHead>{t("entered_by")}</TableHead>
+                    <TableHead>{t("notes")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

@@ -48,7 +48,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FilterTabs } from "@/components/ui/filter-tabs"
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -799,11 +799,16 @@ function AppointmentRow(props: {
 
   const appointments = data?.results ?? [];
 
+  const statusTabValue =
+  getStatusGroups(t).find((g) =>
+    g.statuses.includes((props.status ?? "booked") as AppointmentStatus),
+  )?.statuses.join(",") ?? (props.status ?? "booked");
+
   return (
     <div className="overflow-x-auto">
       <div className="hidden md:flex">
         <FilterTabs
-          value={props.status ?? "booked"}
+          value={statusTabValue}
           onValueChange={(v) => props.updateQuery({ status: v })}
           options={getStatusGroups(t).map((group) => ({
             value: group.statuses.join(","),
@@ -825,7 +830,7 @@ function AppointmentRow(props: {
           <SelectContent>
             {getStatusGroups(t).map((group) => (
               <SelectItem key={group.label} value={group.statuses.join(",")}>
-                <div className="flex items-center">{group.label} hello world</div>
+                <div className="flex items-center">{t(group.label)}</div>
               </SelectItem>
             ))}
           </SelectContent>

@@ -151,7 +151,7 @@ export default function MedicationRequestTable() {
             </div>
             {!selectedPrescriptionId && (
               <div className="flex w-full items-center justify-center">
-                <div className="flexitems-center justify-center gap-2 pt-16 text-center">
+                <div className="flex items-center justify-center gap-2 pt-16 text-center">
                   <div className="rounded-full bg-secondary/10 flex flex-col items-center justify-center gap-2">
                     <ReceiptTextIcon className="text-gray-500" />
                     <h3 className="font-medium">
@@ -162,7 +162,7 @@ export default function MedicationRequestTable() {
                         asChild
                         variant="outline"
                         className="text-gray-950 hover:text-gray-700 h-9 mt-2"
-                        data-cy="edit-prescription"
+                        data-cy="create-prescription"
                       >
                         <Link href={`questionnaire/medication_request`}>
                           <PlusIcon className="mr-2 size-4" />

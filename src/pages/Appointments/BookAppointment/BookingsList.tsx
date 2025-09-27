@@ -44,7 +44,7 @@ interface BookingsListProps {
 
 export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("search")
+  const [activeTab, setActiveTab] = useState("upcoming")
 
   return (
     <div className="mt-2">

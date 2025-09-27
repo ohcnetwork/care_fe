@@ -1,4 +1,4 @@
-import { act, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -28,7 +28,7 @@ export default function BookAppointmentSheet({
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("search");
+  const [activeTab, setActiveTab] = useState("appointment");
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>

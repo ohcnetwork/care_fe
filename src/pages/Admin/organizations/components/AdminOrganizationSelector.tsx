@@ -23,7 +23,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { FilterTabs } from "@/components/ui/filter-tabs"
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 

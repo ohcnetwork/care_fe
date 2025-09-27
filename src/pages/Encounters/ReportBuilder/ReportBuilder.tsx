@@ -526,9 +526,9 @@ export default function ReportBuilder({
                     value={activeTab}
                     onValueChange={setActiveTab}
                     options={[
-                      { value: "layout", label: t("layout") },
-                      { value: "header", label: t("header") },
-                      { value: "sections", label: t("sections") },
+                      { value: "layout", label: "layout" },
+                      { value: "header", label: "header" },
+                      { value: "sections", label: "sections" },
                     ]}
                     variant="background"
                     className="w-full"

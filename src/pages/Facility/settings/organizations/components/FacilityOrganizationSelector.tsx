@@ -137,7 +137,8 @@ export default function FacilityOrganizationSelector(
   };
 
   const handleOrganizationViewChange = (value: string) => {
-    setShowAllOrgs(value === "all");
+    const normalizedValue = value || "all";
+    setShowAllOrgs(normalizedValue === "all");
     setSelectedOrganizations([]);
     setCurrentSelection(null);
     setNavigationLevels([]);

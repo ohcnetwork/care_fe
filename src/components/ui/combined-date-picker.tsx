@@ -82,8 +82,8 @@ export function CombinedDatePicker({
             value={activeTab}
             onValueChange={(v) => setActiveTab(v as "absolute" | "relative")}
             options={[
-              {value: "absolute", label: t("absolute_date")},
-              {value: "relative", label: t("quick_finder")}
+              {value: "absolute", label: "absolute_date"},
+              {value: "relative", label: "quick_finder"}
             ]}
             variant="underline"
             showAllOption={false}

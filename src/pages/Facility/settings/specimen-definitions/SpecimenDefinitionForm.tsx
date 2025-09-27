@@ -663,15 +663,23 @@ export function SpecimenDefinitionForm({
                 <div className="space-y-4">
                   <div className="flex flex-col gap-2">
                     <FormLabel>{t("minimum_volume")}</FormLabel>
-                    <FilterTabs
-                      value={minimumVolumeTab}
-                      onValueChange={(value) => setMinimumVolumeTab(value as "quantity" | "text")}
-                      options={minimumVolumeTabOptions}
-                      variant="background"
-                      className="w-full"
-                      showAllOption={false}
-                      maxVisibleTabs={2}
-                    />
+                    <div data-cy="minimum-volume-tabs">
+                      <FilterTabs
+                        value={minimumVolumeTab}
+                        onValueChange={(value) => {
+                          const v = value as "quantity" | "text";
+                          setMinimumVolumeTab(v);
+                          if (v === "quantity") {
+                            form.setValue("type_tested.container.minimum_volume.string", undefined);
+                          } else {
+                            form.setValue("type_tested.container.minimum_volume.quantity", undefined);
+                          }
+                        }}
+                        options={minimumVolumeTabOptions}
+                        className="w-full"
+                        showAllOption={false}
+                      />
+                    </div>
 
                     {minimumVolumeTab === "quantity" && (
                       <FormField

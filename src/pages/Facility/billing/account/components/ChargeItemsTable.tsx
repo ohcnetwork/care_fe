@@ -180,7 +180,7 @@ export function ChargeItemsTable({
 
   const tabOptions = Object.values(ChargeItemStatus).map((s) => ({
     value: s,
-    label: t(s),
+    label: s,
   }));
 
   return (
@@ -191,7 +191,7 @@ export function ChargeItemsTable({
           value={qParams.charge_item_status ?? "all"}
           onValueChange={(value) =>
             updateQuery({
-              charge_item_status: value === "all" ? undefined : value,
+              charge_item_status: value || undefined,
             })
           }
           className="max-sm:hidden w-2/3 md:w-full overflow-x-auto"

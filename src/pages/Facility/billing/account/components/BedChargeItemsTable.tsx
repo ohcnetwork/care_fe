@@ -279,7 +279,7 @@ export function BedChargeItemsTable({
 
   const tabOptions = Object.values(ChargeItemStatus).map((s) => ({
     value: s,
-    label: t(s),
+    label: s,
   }));
 
   return (

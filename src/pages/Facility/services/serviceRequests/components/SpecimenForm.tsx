@@ -303,8 +303,9 @@ export function SpecimenForm({
           )}
 
           {identifierMode === "scan" && (
-            <div className="flex gap-2">
+            <div className="flex gap-2" data-cy="specimen-scan-section">
               <Input
+                data-cy="specimen-accession-input"
                 value={specimenData.specimen.accession_identifier}
                 onChange={(e) =>
                   handleSpecimenChange("accession_identifier", e.target.value)
@@ -317,6 +318,8 @@ export function SpecimenForm({
                 variant="outline"
                 onClick={handleScanBarcode}
                 disabled={disableEdit}
+                aria-label={t("scan_barcode")}
+                data-cy="open-scan-dialog"
               >
                 <Scan className="h-4 w-4" />
               </Button>

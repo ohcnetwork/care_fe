@@ -80,9 +80,12 @@ export function LocationSheet({
   encounter,
   open,
   onOpenChange,
+  defaultTab,
 }: LocationSheetProps) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("search");
+  const [activeTab, setActiveTab] = useState<"assign" | "history">(
+    defaultTab ?? "assign",
+  );
   const [showDischargeDialog, setShowDischargeDialog] = useState(false);
   const [showOccupiedDialog, setShowOccupiedDialog] = useState(false);
   const [selectedDischargedBed, setSelectedDischargedBed] =
@@ -845,8 +848,8 @@ export function LocationSheet({
   };
 
   const tabOptions = [
-    { value: "assign", label: t("assign_location") },
-    { value: "history", label: t("location_history") },
+    { value: "assign", label: "assign_location" },
+    { value: "history", label: "location_history" },
   ];
 
   return (
@@ -871,7 +874,7 @@ export function LocationSheet({
           <div className="w-full justify-start border-b border-gray-200 bg-transparent p-0 h-auto rounded-none">
             <FilterTabs
               value={activeTab}
-              onValueChange={setActiveTab}
+              onValueChange={(v) => setActiveTab(v as "assign" | "history")}
               options={tabOptions}
               variant="underline"
               showAllOption={false}

@@ -109,11 +109,12 @@ export default function InvoicesData({
       <div className="flex flex-row justify-between items-center gap-2 max-sm:flex-col pb-4">
         <FilterTabs
           value={qParams.status ?? "all"}
-          onValueChange={(value) =>
-            updateQuery({ status: value === "all" ? undefined : value })
-          }
-          className="max-sm:hidden"
+          onValueChange={(value) => updateQuery({ status: value || undefined })}
+          className="hidden sm:flex"
           options={tabOptions}
+          // Optional UX: label and underline variant for consistency
+          // label="filter_by_status"
+          // variant="underline"
         />
         <div className="relative w-full sm:max-w-xs border border-gray-400 rounded-md">
           <CareIcon

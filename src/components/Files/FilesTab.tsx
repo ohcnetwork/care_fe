@@ -43,7 +43,7 @@ export const FilesTab = ({
     encounter?.permissions ?? [],
   );
 
-  const [activeTab, setActiveTab] = useState("search");
+  const [activeTab, setActiveTab] = useState<TabType>("all");
 
   const canWriteCurrentEncounter =
     canWriteEncounter &&
@@ -61,23 +61,23 @@ export const FilesTab = ({
     }[type] || "";
 
   const tabOptions: { value: TabType; label: string }[] = [
-    { value: "all", label: t("files") },
+    { value: "all", label: "files" },
     ...(type === FileType.ENCOUNTER && encounter
       ? [
           {
             value: "discharge_summary" as TabType,
-            label: t("discharge_summary"),
+            label: "discharge_summary",
           },
         ]
       : []),
-    { value: "drawings", label: t("drawings") },
+    { value: "drawings", label: "drawings" },
   ];
 
   return (
     <div className="space-y-4">
       <FilterTabs
         value={allowedTabs.includes(activeTab as TabType) ? activeTab : "all"}
-        onValueChange={setActiveTab}
+        onValueChange={(value) => setActiveTab(value as TabType)}
         options={tabOptions}
         variant="background"
         showAllOption={false}

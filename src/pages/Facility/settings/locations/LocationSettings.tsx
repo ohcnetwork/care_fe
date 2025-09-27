@@ -147,10 +147,11 @@ export default function LocationSettings({
           <FilterTabs
             value={activeTab}
             onValueChange={(value) => setActiveTab(value as "list" | "map")}
-            className="mt-2 sm:mt-0 flex"
+            className="mt-2 sm:mt-0"
+            showAllOption={false}
             options={[
-              { value: "list", label: t("list"), icon: <CareIcon icon="l-list-ul" className="text-lg" /> },
-              { value: "map", label: t("map"), icon: <CareIcon icon="l-map" className="text-lg" /> },
+              { value: "list", label: "list", icon: <CareIcon icon="l-list-ul" className="text-lg" /> },
+              { value: "map", label: "map", icon: <CareIcon icon="l-map" className="text-lg" /> },
             ]}
           />
         </div>
