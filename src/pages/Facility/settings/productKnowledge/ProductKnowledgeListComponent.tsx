@@ -327,7 +327,9 @@ export function ProductKnowledgeList({
           <TableSkeleton count={5} />
         ) : products.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
             title={t("no_product_knowledge_found")}
             description={t("no_products_in_category")}
           />

@@ -215,7 +215,7 @@ export function AccountList({
           <TableSkeleton count={5} />
         ) : accounts.length === 0 ? (
           <EmptyState
-            icon="l-user"
+            icon={<CareIcon icon="l-user" className="text-primary size-6" />}
             title={t("no_accounts_found")}
             description={t("adjust_account_filters")}
           />

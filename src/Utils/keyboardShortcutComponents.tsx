@@ -1,6 +1,36 @@
 import { useShortcutDisplay } from "@/context/ShortcutContext";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { cn } from "@/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
+
+const keyboardShortcutBadgeVariants = cva(
+  "h-5 min-w-5 flex justify-center px-1 rounded border font-medium text-xs",
+  {
+    variants: {
+      variant: {
+        default:
+          "bg-linear-to-b from-white to-gray-200 border-gray-200 text-gray-700",
+        primary: "border-gray-200/20 font-normal",
+        classic_primary:
+          "border-primary-900 font-normal bg-linear-to-b from-primary-600 to-primary-900",
+        secondary: "bg-gray-50 text-gray-700",
+      },
+      position: {
+        "top-right": "absolute top-1 right-1",
+        "bottom-right": "absolute bottom-1 right-1",
+        "top-left": "absolute top-1 left-1",
+        "bottom-left": "absolute bottom-1 left-1",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  },
+);
+
+type KeyboardShortcutBadgeVariant = VariantProps<
+  typeof keyboardShortcutBadgeVariants
+>["variant"];
 
 interface KeyboardShortcutBadgeProps {
   shortcut: string | undefined;
@@ -8,6 +38,7 @@ interface KeyboardShortcutBadgeProps {
   position?: "top-right" | "bottom-right" | "top-left" | "bottom-left";
   alwaysShow?: boolean;
   actionId?: string;
+  variant?: KeyboardShortcutBadgeVariant;
 }
 
 /**
@@ -20,28 +51,22 @@ export function KeyboardShortcutBadge({
   position,
   alwaysShow = true,
   actionId,
-}: KeyboardShortcutBadgeProps) {
+  variant = "default",
+}: KeyboardShortcutBadgeProps &
+  VariantProps<typeof keyboardShortcutBadgeVariants>) {
   const { isOptionPressed } = useKeyboardShortcuts([], {}, {});
 
   if (!shortcut || (!alwaysShow && !isOptionPressed)) return null;
-
-  const positionClasses = {
-    "top-right": "absolute top-1 right-1",
-    "bottom-right": "absolute bottom-1 right-1",
-    "top-left": "absolute top-1 left-1",
-    "bottom-left": "absolute bottom-1 left-1",
-  };
 
   return (
     <div
       data-shortcut-id={actionId}
       className={cn(
-        "h-5 min-w-5 flex items-center justify-center px-1 bg-gradient-to-b from-white to gray-500/20 rounded-md border border-gray-200",
-        position ? positionClasses[position] : "",
+        keyboardShortcutBadgeVariants({ variant, position }),
         className,
       )}
     >
-      <span className="font-medium text-xs text-gray-700">{shortcut}</span>
+      {shortcut}
     </div>
   );
 }
@@ -58,11 +83,13 @@ export function ShortcutBadge({
   className,
   position,
   alwaysShow = true,
+  variant = "default",
 }: {
   actionId: string;
   className?: string;
   position?: "top-right" | "bottom-right" | "top-left" | "bottom-left";
   alwaysShow?: boolean;
+  variant?: KeyboardShortcutBadgeVariant;
 }) {
   const getShortcutDisplay = useShortcutDisplay();
   const { isOptionPressed } = useKeyboardShortcuts([], {}, {});
@@ -76,6 +103,7 @@ export function ShortcutBadge({
       position={position}
       alwaysShow={alwaysShow}
       actionId={actionId}
+      variant={variant}
     />
   );
 }

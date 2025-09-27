@@ -10,29 +10,37 @@ import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useSchedul
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
+import { formatSlotTimeRange } from "@/pages/Appointments/utils";
 import { FacilityRead } from "@/types/facility/facility";
 import {
   Appointment,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 import { TokenRead, renderTokenNumber } from "@/types/tokens/token/token";
+import { formatDate } from "date-fns";
 import { PrinterIcon } from "lucide-react";
 import { Link } from "raviger";
 
 interface Props {
   id?: string;
-  token: TokenRead;
+  token?: TokenRead;
   facility: FacilityRead;
   appointment?: Appointment;
+  inPrintMode?: boolean;
 }
 
-const TokenCard = ({ id, token, facility, appointment }: Props) => {
+const TokenCard = ({
+  id,
+  token,
+  facility,
+  appointment,
+  inPrintMode = false,
+}: Props) => {
   const { t } = useTranslation();
   const isLargeScreen = useBreakpoints({ lg: true, default: false });
 
   // Get patient from token or appointment
-  const patient = token.patient || appointment?.patient;
+  const patient = token?.patient || appointment?.patient;
 
   return (
     <Card
@@ -40,7 +48,12 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
       className="p-2 border border-gray-200 relative transition-all duration-300 ease-in-out print:scale-100 print:rotate-0 print:shadow-none print:hover:scale-100 print:hover:rotate-0 print:hover:shadow-none bg-gray-100"
     >
       <div className="flex flex-col px-1">
-        <p className="font-semibold">{renderTokenNumber(token)}</p>
+        {token && <p className="font-semibold">{renderTokenNumber(token)}</p>}
+        {appointment && (
+          <p className="font-semibold">
+            {t("appointment")} {t(appointment.status)}
+          </p>
+        )}
         {appointment && (
           <p className="text-gray-700">
             {formatScheduleResourceName(appointment)}
@@ -83,8 +96,16 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
                       </div>
                       <Separator />
                       <div>
-                        <p className="text-sm font-semibold text-gray-600">
-                          {formatAppointmentSlotTime(appointment)}
+                        <p className="text-sm font-semibold text-gray-600 flex gap-2">
+                          <span className="text-sm font-semibold text-gray-600">
+                            {formatDate(
+                              appointment.token_slot.start_datetime,
+                              "EEE, dd MMM",
+                            )}
+                          </span>
+                          <span className="text-sm font-semibold text-gray-600">
+                            {formatSlotTimeRange(appointment.token_slot)}
+                          </span>
                         </p>
                       </div>
                     </>
@@ -111,14 +132,16 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
                 </div>
               </div>
             </div>
-            <div className="items-end">
-              <Label className="text-gray-600 text-sm whitespace-nowrap justify-end mt-4">
-                {t("token_no")}
-              </Label>
-              <p className="text-2xl font-bold justify-end flex">
-                {renderTokenNumber(token)}
-              </p>
-            </div>
+            {token && (
+              <div className="items-end">
+                <Label className="text-gray-600 text-sm whitespace-nowrap justify-end mt-4">
+                  {t("token_no")}
+                </Label>
+                <p className="text-2xl font-bold justify-end flex">
+                  {renderTokenNumber(token)}
+                </p>
+              </div>
+            )}
             <div className="mt-4">
               <QRCodeSVG
                 size={isLargeScreen ? 96 : 60}
@@ -127,10 +150,10 @@ const TokenCard = ({ id, token, facility, appointment }: Props) => {
             </div>
           </div>
         </div>
-        {appointment && (
+        {appointment && !inPrintMode && (
           <div>
             <Separator />
-            <div className="pt-3 mx-4 flex gap-2 justify-between">
+            <div className="pt-3 mx-4 flex gap-2 justify-between print:hidden">
               <Button
                 variant="link"
                 className="underline font-semibold text-base capitalize text-gray-950"
