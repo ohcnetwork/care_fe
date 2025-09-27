@@ -1,9 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
@@ -18,6 +19,23 @@ import medicationRequestApi from "@/types/emr/medicationRequest/medicationReques
 
 export const MedicationHistory = ({ patientId }: { patientId: string }) => {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<"prescriptions" | "statements" | "administration">("prescriptions");
+
+  // Tab options for FilterTabs
+  const tabOptions = [
+    {
+      value: "prescriptions",
+      label: "prescriptions",
+    },
+    {
+      value: "statements",
+      label: "medication_statements",
+    },
+    {
+      value: "administration",
+      label: "medicine_administration",
+    },
+  ];
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -29,39 +47,42 @@ export const MedicationHistory = ({ patientId }: { patientId: string }) => {
         />
         <h4 className="text-xl">{t("past_medications")}</h4>
       </div>
-      <Tabs defaultValue="prescriptions" className="w-full">
+      
+      <div className="w-full">
         <div className="overflow-x-auto">
-          <TabsList className="mb-4">
-            <TabsTrigger value="prescriptions">
-              {t("prescriptions")}
-            </TabsTrigger>
-            <TabsTrigger value="statements">
-              {t("medication_statements")}
-            </TabsTrigger>
-            <TabsTrigger value="administration">
-              {t("medicine_administration")}
-            </TabsTrigger>
-          </TabsList>
+          <FilterTabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as "prescriptions" | "statements" | "administration")}
+            options={tabOptions}
+            variant="background"
+            className="mb-4"
+            showAllOption={false}
+            maxVisibleTabs={3}
+          />
         </div>
-        <TabsContent value="prescriptions">
+
+        {/* Conditional rendering based on activeTab */}
+        {activeTab === "prescriptions" && (
           <Prescriptions patientId={patientId} />
-        </TabsContent>
-        <TabsContent value="statements">
+        )}
+
+        {activeTab === "statements" && (
           <MedicationStatementList
             patientId={patientId}
             canAccess
             showTimeLine={true}
           />
-        </TabsContent>
-        <TabsContent value="administration">
+        )}
+
+        {activeTab === "administration" && (
           <AdministrationTab
             patientId={patientId}
             canWrite={false}
             canAccess
             showTimeLine={true}
           />
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   );
 };

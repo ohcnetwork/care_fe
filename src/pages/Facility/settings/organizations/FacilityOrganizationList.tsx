@@ -11,7 +11,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
 
@@ -219,25 +219,16 @@ export default function FacilityOrganizationList({
                           {org.description}
                         </p>
                       )}
-                      <Tabs
-                        defaultValue={currentTab}
+                      <FilterTabs
                         className="w-full mt-2"
                         value={currentTab}
                         onValueChange={handleTabChange}
-                      >
-                        <TabsList className="w-full justify-start border-b border-gray-300 bg-transparent p-0 h-auto rounded-none">
-                          {navItems.map((item) => (
-                            <TabsTrigger
-                              key={item.value}
-                              value={item.value}
-                              className="border-0 border-b-2 border-transparent px-2 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:text-primary-800  data-[state=active]:border-primary-700 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-                              data-cy={`${item.value}-tab`}
-                            >
-                              {item.title}
-                            </TabsTrigger>
-                          ))}
-                        </TabsList>
-                      </Tabs>
+                        options = {navItems.map((item) => ({
+                          value: item.value,
+                          label: item.title,
+                        }))}
+                        showAllOption={false}
+                      />
                     </div>
                   </>
                 )}

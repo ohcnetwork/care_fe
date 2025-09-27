@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -73,26 +73,22 @@ export default function MedicationDispenseHistory({
     },
   } as const;
 
+  const tabOptions = Object.entries(DISPENSE_STATUS_OPTIONS).map(([key, { label }]) => ({
+    value: key,
+    label: t(label)
+  }));
+
   return (
     <Page title={t("medication_dispense")}>
       <div className="mb-4 pt-6">
-        <Tabs
+        <FilterTabs
           value={qParams.exclude_status || "pending"}
           onValueChange={(value) => updateQuery({ exclude_status: value })}
           className="w-full"
-        >
-          <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-            {Object.entries(DISPENSE_STATUS_OPTIONS).map(([key, { label }]) => (
-              <TabsTrigger
-                key={key}
-                value={key}
-                className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {t(label)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+          options = {tabOptions}
+          showAllOption={false}
+        />
+
       </div>
       <div className="flex items-center gap-4 mb-6">
         <div className="flex-1">

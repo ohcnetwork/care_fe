@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import {
@@ -101,26 +102,30 @@ export default function PaymentsData({
 
   const payments = (response?.results as PaymentReconciliationRead[]) || [];
 
+  const tabOptions1 = [{value: "all", label: t("all_status")}];
+  tabOptions1.concat(Object.values(PaymentReconciliationStatus).map((status) => ({
+    value: status,
+    label: t(status),
+  })));
+
+  const tabOptions2 = [{value: "all", label: t("all_type")}];
+  tabOptions2.concat(Object.values(PaymentReconciliationType).map((type) => ({
+    value: type,
+    label: t(typeMap[type]),
+  })));
+
   return (
     <>
       <div className="flex w-full flex-col items-center my-4 gap-2 md:flex-row md:flex-wrap md:gap-y-4 md:justify-start lg:flex-nowrap lg:justify-between">
         <div className="flex w-full flex-col items-center gap-3 md:flex-row md:flex-wrap md:gap-y-4">
-          <Tabs
-            defaultValue={qParams.status ?? "all"}
+          <FilterTabs
+            value={qParams.status ?? "all"}
             onValueChange={(value) =>
               updateQuery({ status: value === "all" ? undefined : value })
             }
             className="hidden sm:flex"
-          >
-            <TabsList>
-              <TabsTrigger value="all">{t("all_status")}</TabsTrigger>
-              {Object.values(PaymentReconciliationStatus).map((status) => (
-                <TabsTrigger key={status} value={status}>
-                  {t(status)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+            options={tabOptions1}
+          />
           <Select
             defaultValue={qParams.status ?? "all"}
             onValueChange={(value) =>
@@ -141,25 +146,17 @@ export default function PaymentsData({
               </SelectGroup>
             </SelectContent>
           </Select>
-
-          <Tabs
-            defaultValue={qParams.reconciliation_type ?? "all"}
+          
+          <FilterTabs
+            value={qParams.reconciliation_type ?? "all"}
             onValueChange={(value) =>
               updateQuery({
                 reconciliation_type: value === "all" ? undefined : value,
               })
             }
             className="hidden sm:flex"
-          >
-            <TabsList>
-              <TabsTrigger value="all">{t("all_type")}</TabsTrigger>
-              {Object.values(PaymentReconciliationType).map((type) => (
-                <TabsTrigger key={type} value={type}>
-                  {t(typeMap[type])}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+            options={tabOptions2}
+          />
           <Select
             defaultValue={qParams.status ?? "all"}
             onValueChange={(value) =>

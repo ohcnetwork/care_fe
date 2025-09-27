@@ -27,7 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -452,17 +452,16 @@ export default function DispensedMedicationList({
       </div>
 
       <div className="mb-4">
-        <Tabs
+        <FilterTabs
           value={paymentFilter}
           onValueChange={(value) => updateQuery({ payment_status: value })}
           className="w-full"
-        >
-          <TabsList>
-            <TabsTrigger value="all">{t("all")}</TabsTrigger>
-            <TabsTrigger value="paid">{t("paid")}</TabsTrigger>
-            <TabsTrigger value="unpaid">{t("unpaid")}</TabsTrigger>
-          </TabsList>
-        </Tabs>
+          options={[
+            {value: "paid", label: t("paid")},
+            {value: "unpaid", label: t("unpaid")},
+          ]}
+
+        />
       </div>
 
       {isLoading ? (

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Textarea } from "@/components/ui/textarea";
 
 import { PrintableQRCode } from "@/components/PrintableQRCode";
@@ -245,28 +245,30 @@ export function SpecimenForm({
           <div className="font-medium text-lg mb-2">
             {t("specimen_identification")}
           </div>
-          <Tabs
+          <FilterTabs
             value={identifierMode}
             onValueChange={(v) => setIdentifierMode(v as "scan" | "generate")}
-            defaultValue="generate"
-          >
-            <TabsList className="w-full">
-              <TabsTrigger
-                value="generate"
-                className="flex-1 flex items-center justify-center gap-2"
-              >
-                <QrCode className="h-4 w-4" />
-                {t("generate_qr")}
-              </TabsTrigger>
-              <TabsTrigger
-                value="scan"
-                className="flex-1 flex items-center justify-center gap-2"
-              >
-                <Scan className="h-4 w-4" />
-                {t("scan_existing")}
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="generate">
+            className="w-full mb-4"
+            options={[
+              {
+                value: "generate",
+                label: "generate_qr",
+                icon: <QrCode className="h-4 w-4" />,
+              },
+              {
+                value: "scan",
+                label: "scan_existing",
+                icon: <Scan className="h-4 w-4" />,
+              },
+            ]}
+            variant="background"
+            showAllOption={false}
+            maxVisibleTabs={2}
+          />
+
+          {/* Conditional rendering based on identifierMode */}
+          {identifierMode === "generate" && (
+            <>
               {draftSpecimen ? (
                 <>
                   <div className="rounded-lg bg-green-50 p-2 mb-4">
@@ -297,28 +299,29 @@ export function SpecimenForm({
                   </p>
                 </div>
               )}
-            </TabsContent>
-            <TabsContent value="scan">
-              <div className="flex gap-2">
-                <Input
-                  value={specimenData.specimen.accession_identifier}
-                  onChange={(e) =>
-                    handleSpecimenChange("accession_identifier", e.target.value)
-                  }
-                  placeholder={t("specimen_scan_placeholder")}
-                  disabled={disableEdit}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleScanBarcode}
-                  disabled={disableEdit}
-                >
-                  <Scan className="h-4 w-4" />
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
+            </>
+          )}
+
+          {identifierMode === "scan" && (
+            <div className="flex gap-2">
+              <Input
+                value={specimenData.specimen.accession_identifier}
+                onChange={(e) =>
+                  handleSpecimenChange("accession_identifier", e.target.value)
+                }
+                placeholder={t("specimen_scan_placeholder")}
+                disabled={disableEdit}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleScanBarcode}
+                disabled={disableEdit}
+              >
+                <Scan className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
         <div className="space-y-4">
           <div className="font-medium text-lg mb-2">

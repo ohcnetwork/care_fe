@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -185,6 +185,33 @@ export function AccountShow({
       reason: AccountBillingStatus.closed_baddebt,
     });
   };
+
+  const tabOptions = [
+    {
+      value: "invoices",
+      label: "invoices",
+      icon: <CareIcon icon="l-receipt" className="size-4" />,
+    },
+    {
+      value: "charge_items",
+      label: "charge_items",
+      icon: <CareIcon icon="l-list-ul" className="size-4" />,
+    },
+    {
+      value: "payments",
+      label: "payments",
+      icon: <CareIcon icon="l-money-bill" className="size-4" />,
+    },
+    ...(encounterId
+      ? [
+          {
+            value: "bed_charge_items" as const,
+            label: "bed_charge_items",
+            icon: <CareIcon icon="l-bed" className="size-4" />,
+          },
+        ]
+      : []),
+  ];
 
   if (isLoading) {
     return <TableSkeleton count={5} />;
@@ -546,50 +573,20 @@ export function AccountShow({
       </div>
 
       {/* Tabs Section */}
-      <Tabs
-        value={tab}
-        onValueChange={(value) =>
-          navigate(
-            `/facility/${facilityId}/billing/account/${accountId}/${value}` +
-              (encounterId !== undefined ? `?encounterId=${encounterId}` : ""),
-          )
-        }
-        className="mt-8"
-      >
-        <div className="flex flex-row justify-between items-center">
-          <TabsList className="border-b border-gray-300 w-full flex justify-start gap-0 rounded-none bg-transparent p-0 overflow-x-auto">
-            <TabsTrigger
-              value="invoices"
-              className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:font-semibold text-gray-600"
-            >
-              {t("invoices")}
-              <ShortcutBadge actionId="switch-to-invoices-tab" />
-            </TabsTrigger>
-            <TabsTrigger
-              value="charge_items"
-              className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:font-semibold text-gray-600"
-            >
-              {t("charge_items")}
-              <ShortcutBadge actionId="switch-to-charge-items-tab" />
-            </TabsTrigger>
-            <TabsTrigger
-              value="payments"
-              className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent text-gray-600"
-            >
-              {t("payments")}
-              <ShortcutBadge actionId="switch-to-payments-tab" />
-            </TabsTrigger>
-            {encounterId && (
-              <TabsTrigger
-                value="bed_charge_items"
-                className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent text-gray-600"
-              >
-                {t("bed_charge_items")}
-                <ShortcutBadge actionId="switch-to-bed-associations-tab" />
-              </TabsTrigger>
-            )}
-          </TabsList>
-        </div>
+      <div className="flex flex-row justify-between items-center">
+        <FilterTabs
+          value={tab}
+          onValueChange={(value) =>
+            navigate(
+              `/facility/${facilityId}/billing/account/${accountId}/${value}` +
+                (encounterId !== undefined ? `?encounterId=${encounterId}` : ""),
+            )
+          }
+          options={tabOptions}
+          showAllOption={false}
+          className="border-b border-gray-300 w-full flex justify-start gap-0 rounded-none bg-transparent p-0 overflow-x-auto"
+        />
+      </div>
 
         {/* Hidden buttons for tab shortcuts */}
         <div className="hidden">
@@ -637,31 +634,34 @@ export function AccountShow({
             />
           )}
         </div>
-
-        <TabsContent value="charge_items" className="mt-4">
-          <ChargeItemsTable
-            facilityId={facilityId}
-            accountId={accountId}
-            patientId={account.patient.id}
-          />
-        </TabsContent>
-
-        <TabsContent value="invoices" className="mt-4">
-          <InvoicesData facilityId={facilityId} accountId={accountId} />
-        </TabsContent>
-
-        <TabsContent value="payments">
+        {tab === "charge_items" && (
+          <div className="mt-4">
+            <ChargeItemsTable
+              facilityId={facilityId}
+              accountId={accountId}
+              patientId={account.patient.id}
+            />
+          </div>
+        )}
+        
+        {tab === "invoices" && (
+          <div className="mt-4">
+            <InvoicesData facilityId={facilityId} accountId={accountId} />
+          </div>
+        )}
+        
+        {tab === "payments" && (
           <PaymentsData facilityId={facilityId} accountId={accountId} />
-        </TabsContent>
-        {
-          <TabsContent value="bed_charge_items" className="mt-4">
+        )}
+
+        {tab === "bed_charge_items" && (
+          <div className="mt-4">
             <BedChargeItemsTable
               facilityId={facilityId}
               accountId={accountId}
             />
-          </TabsContent>
-        }
-      </Tabs>
+          </div>
+        )}
 
       <AccountSheet
         open={sheetOpen}

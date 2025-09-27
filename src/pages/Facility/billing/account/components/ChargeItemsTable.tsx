@@ -40,7 +40,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -178,11 +178,16 @@ export function ChargeItemsTable({
     }
   };
 
+  const tabOptions = Object.values(ChargeItemStatus).map((s) => ({
+    value: s,
+    label: t(s),
+  }));
+
   return (
     <div>
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-center gap-2">
         {/* Desktop Tabs */}
-        <Tabs
+        <FilterTabs
           value={qParams.charge_item_status ?? "all"}
           onValueChange={(value) =>
             updateQuery({
@@ -190,16 +195,8 @@ export function ChargeItemsTable({
             })
           }
           className="max-sm:hidden w-2/3 md:w-full overflow-x-auto"
-        >
-          <TabsList className="overflow-x-auto">
-            <TabsTrigger value="all">{t("all")}</TabsTrigger>
-            {Object.values(ChargeItemStatus).map((status) => (
-              <TabsTrigger key={status} value={status}>
-                {t(status)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+          options={tabOptions}
+        />
         {/* Mobile Select */}
         <Select
           value={qParams.charge_item_status ?? "all"}

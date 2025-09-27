@@ -12,7 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
 
@@ -76,6 +76,11 @@ export default function DispensesView({
     enabled: !!patientId,
   });
 
+  const tabOptions = visibleTabs.map((statusValue) => ({
+    value: statusValue,
+    label: t(statusValue)
+  }));
+
   return (
     <Page title={t("pharmacy_medications")} hideTitleOnPage>
       <div>
@@ -99,24 +104,16 @@ export default function DispensesView({
           <PatientHeader patient={patientData} facilityId={facilityId} />
         </Card>
       )}
-      <Tabs
+      <FilterTabs
         value={status}
         onValueChange={(value) =>
           navigate(
             `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/${value}`,
           )
         }
-      >
-        <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-          {visibleTabs.map((statusValue) => (
-            <TabsTrigger
-              key={statusValue}
-              value={statusValue}
-              className="border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-            >
-              {t(statusValue)}
-            </TabsTrigger>
-          ))}
+        options={tabOptions}
+        className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto"
+      />
           {dropdownItems.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -141,21 +138,21 @@ export default function DispensesView({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-        </TabsList>
 
         <div>
-          {Object.values(MedicationDispenseStatus).map((statusValue) => (
-            <TabsContent key={statusValue} value={statusValue} className="p-2">
-              <DispensedMedicationList
-                facilityId={facilityId}
-                patientId={patientId}
-                locationId={locationId}
-                status={statusValue}
-              />
-            </TabsContent>
-          ))}
+          {Object.values(MedicationDispenseStatus).map((statusValue) =>
+            status === statusValue ? (
+              <div key={statusValue} className="p-2">
+                <DispensedMedicationList
+                  facilityId={facilityId}
+                  patientId={patientId}
+                  locationId={locationId}
+                  status={statusValue}
+                />
+              </div>
+            ) : null
+          )}
         </div>
-      </Tabs>
     </Page>
   );
 }

@@ -23,7 +23,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -377,20 +377,16 @@ export default function FacilityOrganizationSelector(
         </div>
       </div>
 
-      <Tabs
+      <FilterTabs
         value={showAllOrgs ? "all" : "mine"}
         onValueChange={handleOrganizationViewChange}
         className="w-full sm:w-auto"
-      >
-        <TabsList className="grid w-full grid-cols-2 sm:w-[300px]">
-          <TabsTrigger value="mine" data-cy="my-organizations-tab">
-            {t("my_organizations")}
-          </TabsTrigger>
-          <TabsTrigger value="all" data-cy="all-organizations-tab">
-            {t("all_organizations")}
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+        options={[
+          {value: "mine", label: t("my_organizations")},
+          {value: "all", label: t("all_organizations")}
+        ]}
+        showAllOption={false}
+      />
 
       <div className="space-y-3">
         <div className="space-y-3">

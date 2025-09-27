@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -31,6 +31,7 @@ function PatientIndex() {
     Appointment | undefined
   >();
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"scheduled" | "history">("scheduled");
 
   const patient = usePatientContext();
   const selectedPatient = patient?.selectedPatient;
@@ -80,6 +81,18 @@ function PatientIndex() {
   const scheduledAppointments = appointments?.filter((appointment) =>
     dayjs().isBefore(dayjs(appointment.token_slot.start_datetime)),
   );
+
+  // Tab options for FilterTabs
+  const tabOptions = [
+    {
+      value: "scheduled",
+      label: "scheduled",
+    },
+    {
+      value: "history",
+      label: "history",
+    },
+  ];
 
   const getAppointmentCard = (appointment: Appointment) => {
     const appointmentTime = dayjs(appointment.token_slot.start_datetime);
@@ -188,18 +201,27 @@ function PatientIndex() {
             </Link>
           </Button>
         </div>
-        <Tabs defaultValue="scheduled" className="mt-4">
-          <TabsList>
-            <TabsTrigger value="scheduled">{t("scheduled")}</TabsTrigger>
-            <TabsTrigger value="history">{t("history")}</TabsTrigger>
-          </TabsList>
-          <TabsContent value="scheduled">
-            {getAppointmentCardContent(scheduledAppointments)}
-          </TabsContent>
-          <TabsContent value="history">
-            {getAppointmentCardContent(pastAppointments)}
-          </TabsContent>
-        </Tabs>
+
+        <div className="mt-4">
+          <FilterTabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as "scheduled" | "history")}
+            options={tabOptions}
+            variant="background"
+            className="w-full mb-4"
+            showAllOption={false}
+            maxVisibleTabs={2}
+          />
+
+          {/* Conditional rendering based on activeTab */}
+          {activeTab === "scheduled" && (
+            getAppointmentCardContent(scheduledAppointments)
+          )}
+
+          {activeTab === "history" && (
+            getAppointmentCardContent(pastAppointments)
+          )}
+        </div>
       </div>
     </>
   );

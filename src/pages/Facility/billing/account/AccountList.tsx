@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Page from "@/components/Common/Page";
@@ -116,24 +116,19 @@ export function AccountList({
           />
           <div className="mb-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-between gap-4">
             <div className="flex flex-wrap gap-4">
-              <Tabs
+              <FilterTabs
                 value={qParams.status ?? "all"}
-                onValueChange={(value) =>
-                  updateQuery({ status: value === "all" ? undefined : value })
-                }
+                onValueChange={(v) => updateQuery({ status: v === "all" ? undefined : v })}
                 className="overflow-y-auto max-w-[calc(100%)] max-sm:hidden text-gray-950"
-              >
-                <TabsList>
-                  <TabsTrigger value="all">{t("all_accounts")}</TabsTrigger>
-                  {Object.keys(ACCOUNT_STATUS_COLORS).map((key) => (
-                    <TabsTrigger key={key} value={key}>
-                      <span className="text-gray-950 font-medium text-sm">
-                        {t(key)}
-                      </span>
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
+                options={[
+                  { value: "all", label: t("all_accounts") },
+                  ...Object.keys(ACCOUNT_STATUS_COLORS).map((key) => ({
+                    value: key,
+                    label: t(key),
+                  })),
+                ]}
+                showAllOption={false}
+              />
 
               <Select
                 defaultValue={qParams.status ?? "all"}

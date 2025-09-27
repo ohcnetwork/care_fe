@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
 
@@ -99,7 +99,7 @@ export default function SupplyDeliveryList({
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(SupplyDeliveryStatus)}
-                  label="status"
+                  label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>
@@ -108,20 +108,20 @@ export default function SupplyDeliveryList({
 
           <div className="flex flex-row justify-between items-center gap-2">
             {(type == null || type === "internal") && (
-              <Tabs
-                value={tab}
+              <FilterTabs
+                value={tab || SupplyDeliveryTab.INCOMING}
                 onValueChange={(value) =>
                   navigate(
                     `/facility/${facilityId}/locations/${locationId}/supply_deliveries/${value}`,
                   )
                 }
                 className="max-sm:hidden"
-              >
-                <TabsList>
-                  <TabsTrigger value="incoming">{t("incoming")}</TabsTrigger>
-                  <TabsTrigger value="outgoing">{t("outgoing")}</TabsTrigger>
-                </TabsList>
-              </Tabs>
+                options={[
+                  {value: "incoming", label: t("incoming")},
+                  {value: "outgoing", label: t("outgoing")}
+                ]}
+                showAllOption={false}
+              />
             )}
 
             <Select

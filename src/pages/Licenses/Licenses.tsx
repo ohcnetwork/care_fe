@@ -8,8 +8,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import Loading from "@/components/Common/Loading";
 
 import licenseUrls from "@/pages/Licenses/components/license-urls.json";
@@ -41,15 +40,15 @@ export const LicensesPage = () => {
 
       <div className="p-4">
         <div className="mb-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-          <Tabs
+          <FilterTabs
             value={tab}
             onValueChange={(value) => setTab(value as "frontend" | "backend")}
-          >
-            <TabsList>
-              <TabsTrigger value="frontend">{t("care_frontend")}</TabsTrigger>
-              <TabsTrigger value="backend">{t("care_backend")}</TabsTrigger>
-            </TabsList>
-          </Tabs>
+            options={[
+              { value: "frontend", label: t("care_frontend") },
+              { value: "backend", label: t("care_backend") },
+            ]}
+            showAllOption={false}
+          />
         </div>
 
         {isLoading || !data ? <Loading /> : <SbomViewer data={data} />}
