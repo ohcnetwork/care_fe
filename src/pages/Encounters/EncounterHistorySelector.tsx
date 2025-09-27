@@ -34,6 +34,7 @@ import {
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
+import RailPanel from "@/components/Common/RailPanel";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS_COLORS,
@@ -411,9 +412,11 @@ export default function EncounterHistorySelector() {
         </Sheet>
       </div>
       <div className="hidden lg:block pr-3">
-        <ScrollArea className="h-[calc(100vh-9rem)] pr-3">
-          <EncounterHistoryList />
-        </ScrollArea>
+        <RailPanel defaultOpen>
+          <ScrollArea className="h-[calc(100vh-9rem)] pr-3">
+            <EncounterHistoryList />
+          </ScrollArea>
+        </RailPanel>
       </div>
     </>
   );
