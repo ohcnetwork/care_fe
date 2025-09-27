@@ -168,7 +168,7 @@ export default function PaymentsData({
             allOptionLabel="all_type"
           />
           <Select
-            defaultValue={qParams.status ?? "all"}
+            defaultValue={qParams.reconciliation_type ?? "all"}
             onValueChange={(value) =>
               updateQuery({
                 reconciliation_type: value === "all" ? undefined : value,

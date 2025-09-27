@@ -11,6 +11,7 @@ import {
   CancelledAppointmentStatuses,
   formatScheduleResourceName,
   PastAppointmentStatuses,
+  UpcomingAppointmentStatuses, // Add this
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
@@ -50,35 +51,19 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
           value={activeTab}
           onValueChange={setActiveTab}
           options={[
-            { value: "upcoming", label: "upcoming" },
-            { value: "past", label: "past" },
-            { value: "cancelled", label: "cancelled" },
+            { value: "upcoming", label: t("upcoming") },
+            { value: "past", label: t("past") },
+            { value: "cancelled", label: t("cancelled") },
           ]}
           showAllOption={false}
           className="sm:flex sm:flex-col sm:w-52 h-fit sm:bg-gray-50 items-center justify-center w-full bg-gray-100"
         />
         {activeTab === "upcoming" && (
-          <div>
-            <span className="text-lg font-semibold text-gray-950 mb-4">
-              {t("today")}
-            </span>
-            <BookingListContent
-              patientId={patientId}
-              facilityId={facilityId}
-              dateFrom={dateQueryString(new Date())}
-              dateTo={dateQueryString(new Date())}
-            />
-            <span className="text-lg font-semibold text-gray-950 mb-4">
-              {t("next")}
-            </span>
-          </div>
-        )}
-        {activeTab === "upcoming" && (
           <div className="space-y-4 overflow-x-scroll">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
-              dateFrom={dateQueryString(addDays(new Date(), 1))}
+              statuses={UpcomingAppointmentStatuses}
             />
           </div>
         )}

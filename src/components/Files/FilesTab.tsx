@@ -71,10 +71,13 @@ export const FilesTab = ({
     { value: "drawings", label: "drawings" },
   ];
 
+  const availableTabs = tabOptions.map((option) => option.value);
+  const resolvedTab = availableTabs.includes(activeTab) ? activeTab : "all";
+
   return (
     <div className="space-y-4">
       <FilterTabs
-        value={allowedTabs.includes(activeTab as TabType) ? activeTab : "all"}
+        value={resolvedTab}
         onValueChange={(value) => setActiveTab((value || "all") as TabType)}
         options={tabOptions}
         variant="background"
@@ -83,7 +86,7 @@ export const FilesTab = ({
         className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
       />
 
-      {(activeTab === "all" || !allowedTabs.includes(activeTab as TabType)) && (
+      {resolvedTab === "all" && (
         <FilesPage
           type={type}
           encounter={encounter}
@@ -93,7 +96,7 @@ export const FilesTab = ({
         />
       )}
 
-      {activeTab === "discharge_summary" && encounter && (
+      {resolvedTab === "discharge_summary" && encounter && (
         <DischargeTab
           type={type}
           encounter={encounter}
@@ -102,7 +105,7 @@ export const FilesTab = ({
         />
       )}
 
-      {activeTab === "drawings" && (
+      {resolvedTab === "drawings" && (
         <div>
           <DrawingPage
             type={type}
