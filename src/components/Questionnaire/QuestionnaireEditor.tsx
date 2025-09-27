@@ -955,7 +955,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           options={[
             {
               value: "edit",
-              label: t("edit_form"),
+              label: "edit_form",
               icon: <ViewIcon className="size-4" />,
             },
             {

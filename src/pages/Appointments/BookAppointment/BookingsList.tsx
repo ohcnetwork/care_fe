@@ -11,12 +11,12 @@ import {
   CancelledAppointmentStatuses,
   formatScheduleResourceName,
   PastAppointmentStatuses,
-  UpcomingAppointmentStatuses,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Table,
   TableBody,
@@ -25,16 +25,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FilterTabs } from "@/components/ui/filter-tabs"
 
 import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
-import { AppointmentNonCancelledStatuses } from "@/types/scheduling/schedule";
-import { useState } from "react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 
 interface BookingsListProps {
@@ -44,7 +41,7 @@ interface BookingsListProps {
 
 export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("upcoming")
+  const [activeTab, setActiveTab] = useState("upcoming");
 
   return (
     <div className="mt-2">
@@ -53,9 +50,9 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
           value={activeTab}
           onValueChange={setActiveTab}
           options={[
-            {value: "upcoming", label: t("upcoming")},
-            {value: "past", label: t("past")},
-            {value: "cancelled", label: t("cancelled")}
+            { value: "upcoming", label: "upcoming" },
+            { value: "past", label: "past" },
+            { value: "cancelled", label: "cancelled" },
           ]}
           showAllOption={false}
           className="sm:flex sm:flex-col sm:w-52 h-fit sm:bg-gray-50 items-center justify-center w-full bg-gray-100"
@@ -103,7 +100,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
             />
           </div>
         )}
-        </div>
+      </div>
     </div>
   );
 };

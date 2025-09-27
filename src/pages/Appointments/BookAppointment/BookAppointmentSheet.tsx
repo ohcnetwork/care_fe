@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Sheet,
   SheetContent,
@@ -8,7 +9,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { BookAppointmentDetails } from "./BookAppointmentDetails";
 import { BookingsList } from "./BookingsList";
@@ -42,8 +42,8 @@ export default function BookAppointmentSheet({
             value={activeTab}
             onValueChange={setActiveTab}
             options={[
-              {value: "appointment", label: t("book_appointment")},
-              {value: "encounter", label: t("bookings")}
+              { value: "appointment", label: "book_appointment" },
+              { value: "encounter", label: "bookings" },
             ]}
             showAllOption={false}
             className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto"
@@ -60,10 +60,7 @@ export default function BookAppointmentSheet({
             </div>
           )}
           {activeTab === "encounter" && (
-            <BookingsList
-                patientId={patientId}
-                facilityId={facilityId ?? ""}
-              />
+            <BookingsList patientId={patientId} facilityId={facilityId ?? ""} />
           )}
         </div>
       </SheetContent>

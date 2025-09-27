@@ -16,6 +16,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -23,7 +24,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -120,8 +120,9 @@ export default function FacilityOrganizationSelector(
     );
   };
 
-  const handleOrganizationViewChange = (value: string) => {
-    setShowAllOrgs(value === "all");
+  const handleOrganizationViewChange = (incomingValue: string) => {
+    const nextValue = incomingValue === "" ? "all" : incomingValue;
+    setShowAllOrgs(nextValue === "all");
     setSelectedOrganizations([]);
     setCurrentSelection(null);
     setNavigationLevels([]);
@@ -314,8 +315,8 @@ export default function FacilityOrganizationSelector(
         value={showAllOrgs ? "all" : "mine"}
         onValueChange={handleOrganizationViewChange}
         options={[
-          {value: "mine", label: t("my_organizations")},
-          {value: "all", label: t("all_organizations")}
+          { value: "mine", label: "my_organizations" },
+          { value: "all", label: "all_organizations" },
         ]}
         showAllOption={false}
         className="grid w-full grid-cols-2 sm:w-[300px]"

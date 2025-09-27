@@ -15,6 +15,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -24,7 +25,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -45,7 +45,6 @@ import {
   QuestionnaireDetail,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import { update } from "cypress/types/lodash";
 
 function EmptyState() {
   const { t } = useTranslation();
@@ -258,11 +257,24 @@ export function QuestionnaireList() {
           <div className="w-full overflow-x-auto pb-1">
             <FilterTabs
               value={qParams.status || "active"}
-              onValueChange={(value) => updateQuery({status: value})}
-              options={[{value: "active", label: t("active"), icon: <FileCheckIcon className="size-4" />}, 
-                {value: "draft", label: t("draft"), icon:<NotepadTextDashedIcon className="size-4" />}, 
-                {value: "retired", label: t("retired"), icon: <ArchiveIcon className="size-4" />
-               }]}
+              onValueChange={(value) => updateQuery({ status: value })}
+              options={[
+                {
+                  value: "active",
+                  label: "active",
+                  icon: <FileCheckIcon className="size-4" />,
+                },
+                {
+                  value: "draft",
+                  label: "draft",
+                  icon: <NotepadTextDashedIcon className="size-4" />,
+                },
+                {
+                  value: "retired",
+                  label: "retired",
+                  icon: <ArchiveIcon className="size-4" />,
+                },
+              ]}
               variant="background"
               className="min-w-full sm:min-w-[50%] md:min-w-[40%]"
               showAllOption={false}

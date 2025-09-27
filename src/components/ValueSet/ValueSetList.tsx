@@ -22,6 +22,7 @@ import {
   ExpandableTextContent,
   ExpandableTextExpandButton,
 } from "@/components/ui/expandable-text";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -31,7 +32,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -334,12 +334,28 @@ export function ValueSetList() {
             <div className="min-w-[480px]">
               <FilterTabs
                 value={qParams.status || "active"}
-                onValueChange={(v) => updateQuery({status: v})}
+                onValueChange={(v) => updateQuery({ status: v })}
                 options={[
-                  {value: "active", label: t("active"), icon:<FileCheckIcon className="size-4" />},
-                  {value: "draft", label: t("draft"), icon: <NotepadTextDashedIcon className="size-4" />},
-                  {value: "retired", label: t("retired"), icon: <ArchiveIcon className="size-4" />},
-                  {value: "unknown", label: t("unknown"), icon: <HelpCircle className="size-4" />}
+                  {
+                    value: "active",
+                    label: "active",
+                    icon: <FileCheckIcon className="size-4" />,
+                  },
+                  {
+                    value: "draft",
+                    label: "draft",
+                    icon: <NotepadTextDashedIcon className="size-4" />,
+                  },
+                  {
+                    value: "retired",
+                    label: "retired",
+                    icon: <ArchiveIcon className="size-4" />,
+                  },
+                  {
+                    value: "unknown",
+                    label: "unknown",
+                    icon: <HelpCircle className="size-4" />,
+                  },
                 ]}
                 className="flex w-full"
                 showAllOption={false}
