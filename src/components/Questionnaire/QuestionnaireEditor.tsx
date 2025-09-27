@@ -347,8 +347,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   });
 
   const { data: availableTags, isLoading: isLoadingAvailableTags } = useQuery({
-    queryKey: ["tags", tagSearchQuery],
-    queryFn: query(questionnaireApi.tags.list, {
+    queryKey: ["questionnaireTags", tagSearchQuery],
+    queryFn: query.debounced(questionnaireApi.tags.list, {
       queryParams: {
         name: tagSearchQuery || undefined,
       },
@@ -811,8 +811,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       status: mappedData.status || "draft",
       version: mappedData.version || "1.0",
       subject_type: mappedData.subject_type || "encounter",
-      questions: mappedData.questions || [],
     });
+    updateQuestions(mappedData.questions || []);
 
     form.trigger();
 
@@ -1238,6 +1238,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               }
                               expandPath={expandPath}
                               questionRefs={questionRefs}
+                              totalSiblings={rootQuestions.length}
                             />
                           </div>
                         ))}
@@ -1258,7 +1259,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       </div>
                     ) : (
                       <EmptyState
-                        icon="l-plus"
+                        icon={
+                          <CareIcon
+                            icon="l-plus"
+                            className="text-primary size-6"
+                          />
+                        }
                         title={t("no_questions_yet")}
                         description={t("click_to_add_first_question")}
                         action={
@@ -1539,6 +1545,7 @@ interface QuestionEditorProps {
   handleEnableWhenDependentClick: (path: string[], targetId: string) => void;
   expandPath?: string[];
   questionRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
+  totalSiblings?: number;
 }
 
 function QuestionEditor({
@@ -1564,6 +1571,7 @@ function QuestionEditor({
   handleEnableWhenDependentClick,
   expandPath,
   questionRefs,
+  totalSiblings,
 }: QuestionEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const {
@@ -1609,6 +1617,14 @@ function QuestionEditor({
   ) => {
     onChange({ ...question, [field]: value, ...additionalFields });
   };
+
+  // Clear structured type if not structured, voluntarily doing this way, so that
+  // form is made dirty and user's can simply open and save the form to clear the error.
+  useEffect(() => {
+    if (question.structured_type && question.type !== "structured") {
+      updateField("structured_type", undefined);
+    }
+  }, [question.structured_type, question.type]);
 
   const toggleSubQuestionExpanded = (
     questionLinkId: string,
@@ -1740,11 +1756,11 @@ function QuestionEditor({
             }}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a value" />
+              <SelectValue placeholder={t("select_a_value")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Yes">Yes</SelectItem>
-              <SelectItem value="No">No</SelectItem>
+              <SelectItem value="Yes">{t("yes")}</SelectItem>
+              <SelectItem value="No">{t("no")}</SelectItem>
             </SelectContent>
           </Select>
         );
@@ -1764,7 +1780,7 @@ function QuestionEditor({
             }}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a value" />
+              <SelectValue placeholder={t("select_a_value")} />
             </SelectTrigger>
             <SelectContent>
               {currentEnableWhen.answer_option?.map((option) => (
@@ -1821,7 +1837,7 @@ function QuestionEditor({
               newConditions[index] = newCondition;
               updateField("enable_when", newConditions);
             }}
-            placeholder="Answer value"
+            placeholder={t("answer_value")}
           />
         );
     }
@@ -1866,49 +1882,51 @@ function QuestionEditor({
             <ChevronsUpDown className="size-4 text-gray-500" />
           )}
         </CollapsibleTrigger>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="size-8">
-              <CareIcon icon="l-ellipsis-v" className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {!isFirst && (
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveUp?.();
-                }}
-              >
-                <ChevronUp className="mr-2 size-4" />
-                {t("move_up")}
-              </DropdownMenuItem>
-            )}
-            {!isLast && (
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveDown?.();
-                }}
-              >
-                <ChevronDown className="mr-2 size-4" />
-                {t("move_down")}
-              </DropdownMenuItem>
-            )}
+        {!(depth > 0 && totalSiblings === 1) && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="size-8">
+                <CareIcon icon="l-ellipsis-v" className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {!isFirst && (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveUp?.();
+                  }}
+                >
+                  <ChevronUp className="mr-2 size-4" />
+                  {t("move_up")}
+                </DropdownMenuItem>
+              )}
+              {!isLast && (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveDown?.();
+                  }}
+                >
+                  <ChevronDown className="mr-2 size-4" />
+                  {t("move_down")}
+                </DropdownMenuItem>
+              )}
 
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              className="text-destructive"
-            >
-              <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
-              {t("delete")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                className="text-destructive"
+              >
+                <CareIcon icon="l-trash-alt" className="mr-2 size-4" />
+                {t("delete")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       <CollapsibleContent>
@@ -2770,6 +2788,7 @@ function QuestionEditor({
                       isLast={idx === (questions?.length || 0) - 1}
                       expandPath={expandPath?.slice(1)}
                       questionRefs={questionRefs}
+                      totalSiblings={questions?.length || 0}
                     />
                   </div>
                 ))}
@@ -2875,7 +2894,7 @@ function QuestionEditor({
                           }}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a question" />
+                            <SelectValue placeholder={t("select_a_question")} />
                           </SelectTrigger>
                           <SelectContent>
                             {(rootQuestions || [])
@@ -2934,7 +2953,9 @@ function QuestionEditor({
                               }}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select a sub-question" />
+                                <SelectValue
+                                  placeholder={t("select_a_sub_question")}
+                                />
                               </SelectTrigger>
                               <SelectContent>
                                 {q.questions?.map((subQuestion, index) => {

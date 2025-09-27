@@ -69,4 +69,9 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<UserReadMinimal>>(),
   },
+  getUser: {
+    path: "/api/v1/facility/{facilityId}/users/{userId}/",
+    method: HttpMethod.GET,
+    TRes: Type<UserReadMinimal>(),
+  },
 } as const;

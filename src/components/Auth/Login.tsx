@@ -43,6 +43,7 @@ import ViewCache from "@/Utils/ViewCache";
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
+import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/auth/otp";
 
 import { AuthHero } from "./AuthHero";
@@ -188,7 +189,7 @@ const Login = (props: LoginProps) => {
 
   // Forgot Password Mutation
   const { mutate: submitForgetPassword } = useMutation({
-    mutationFn: mutate(routes.forgotPassword),
+    mutationFn: mutate(authApi.forgotPassword),
     onSuccess: () => {
       toast.success(t("password_sent"));
     },

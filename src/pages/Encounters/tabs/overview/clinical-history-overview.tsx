@@ -50,7 +50,7 @@ export const ClinicalHistoryOverview = (props: React.ComponentProps<"div">) => {
               {t("blood_group")}:
             </span>
             <Badge variant="destructive">
-              <DropletIcon className="size-4" />
+              <DropletIcon className="size-4" strokeWidth={1.5} />
               <span>
                 {t(`BLOOD_GROUP_LONG__${patient?.blood_group || "unknown"}`)}
               </span>

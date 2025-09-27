@@ -57,6 +57,7 @@ export const EncounterDevicesTab = () => {
         limit,
       },
     }),
+    enabled: !!facilityId,
   });
 
   const { mutate: disassociateDevice, isPending: isDisassociating } =

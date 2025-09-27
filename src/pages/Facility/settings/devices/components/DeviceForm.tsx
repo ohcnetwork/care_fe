@@ -247,7 +247,10 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 <FormLabel aria-required>{t("status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger data-cy="device-status-select">
+                    <SelectTrigger
+                      data-cy="device-status-select"
+                      ref={field.ref}
+                    >
                       <SelectValue placeholder={t("select_status")} />
                     </SelectTrigger>
                   </FormControl>
@@ -272,7 +275,10 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 <FormLabel aria-required>{t("availability_status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger data-cy="device-availability-status-select">
+                    <SelectTrigger
+                      data-cy="device-availability-status-select"
+                      ref={field.ref}
+                    >
                       <SelectValue
                         placeholder={t("select_availability_status")}
                       />
@@ -495,7 +501,10 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                       }}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-[42px] md:h-[38px]">
+                        <SelectTrigger
+                          className="h-[42px] md:h-[38px]"
+                          ref={field.ref}
+                        >
                           <SelectValue
                             placeholder={t("select_contact_system")}
                           />

@@ -13,12 +13,12 @@ export default {
     TRes: Type<PaginatedResponse<SpecimenDefinitionRead>>(),
   },
   retrieveSpecimenDefinition: {
-    path: "/api/v1/facility/{facilityId}/specimen_definition/{specimenDefinitionId}/",
+    path: "/api/v1/facility/{facilityId}/specimen_definition/{specimenSlug}/",
     method: HttpMethod.GET,
     TRes: Type<SpecimenDefinitionRead>(),
   },
   updateSpecimenDefinition: {
-    path: "/api/v1/facility/{facilityId}/specimen_definition/{specimenDefinitionId}/",
+    path: "/api/v1/facility/{facilityId}/specimen_definition/{specimenSlug}/",
     method: HttpMethod.PUT,
     TRes: Type<SpecimenDefinitionRead>(),
     TBody: Type<SpecimenDefinitionCreate>(),

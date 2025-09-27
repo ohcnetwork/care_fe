@@ -30,21 +30,25 @@ import { Textarea } from "@/components/ui/textarea";
 
 import Page from "@/components/Common/Page";
 import RequirementsSelector from "@/components/Common/RequirementsSelector";
+import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
+import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
+
+import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
-import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
 import ObservationDefinitionForm from "@/pages/Facility/settings/observationDefinition/ObservationDefinitionForm";
 import { CreateSpecimenDefinition } from "@/pages/Facility/settings/specimen-definitions/CreateSpecimenDefinition";
-import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
+import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
   type ActivityDefinitionCreateSpec,
   type ActivityDefinitionReadSpec,
   type ActivityDefinitionUpdateSpec,
-  Category,
+  Classification,
   Kind,
   Status,
 } from "@/types/emr/activityDefinition/activityDefinition";
@@ -52,17 +56,17 @@ import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefini
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
-import locationApi from "@/types/location/locationApi";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
+  slug_value: z.string().min(1, "Slug is required"),
   description: z.string().min(1, "Description is required"),
   usage: z.string().min(1, "Usage is required"),
   derived_from_uri: z.string().nullable(),
   status: z.nativeEnum(Status),
-  category: z.nativeEnum(Category),
+  classification: z.nativeEnum(Classification),
   kind: z.nativeEnum(Kind),
+  healthcare_service: z.string().nullable(),
   code: z.object({
     code: z.string().min(1, "Code is required"),
     display: z.string().min(1, "Display name is required"),
@@ -129,46 +133,37 @@ const formSchema = z.object({
     )
     .default([]),
   charge_item_definitions: z
+    .array(z.custom<ChargeItemDefinitionBase>())
+    .default([]),
+  locations: z
     .array(
       z.object({
-        value: z.string(),
-        label: z.string(),
-        details: z.array(
-          z
-            .object({
-              label: z.string(),
-              value: z
-                .string()
-                .optional()
-                .transform((v) => v ?? undefined),
-            })
-            .transform((obj) => ({
-              ...obj,
-              value: obj.value ?? undefined,
-            })),
-        ),
+        id: z.string(),
+        name: z.string(),
       }),
     )
     .default([]),
-  locations: z.array(z.string()).default([]),
+  category: z.string(),
 });
 
 export default function ActivityDefinitionForm({
   facilityId,
-  activityDefinitionId,
+  activityDefinitionSlug,
+  categorySlug,
 }: {
   facilityId: string;
-  activityDefinitionId?: string;
+  activityDefinitionSlug?: string;
+  categorySlug?: string;
 }) {
   const { t } = useTranslation();
 
-  const isEditMode = Boolean(activityDefinitionId);
+  const isEditMode = Boolean(activityDefinitionSlug);
 
   const { data: existingData, isFetching } = useQuery({
-    queryKey: ["activityDefinition", activityDefinitionId],
+    queryKey: ["activityDefinition", activityDefinitionSlug],
     queryFn: query(activityDefinitionApi.retrieveActivityDefinition, {
       pathParams: {
-        activityDefinitionId: activityDefinitionId!,
+        activityDefinitionSlug: activityDefinitionSlug!,
         facilityId,
       },
     }),
@@ -197,27 +192,29 @@ export default function ActivityDefinitionForm({
   return (
     <ActivityDefinitionFormContent
       facilityId={facilityId}
-      activityDefinitionId={activityDefinitionId}
+      activityDefinitionSlug={activityDefinitionSlug}
       existingData={existingData}
+      categorySlug={categorySlug}
     />
   );
 }
 
 function ActivityDefinitionFormContent({
   facilityId,
-  activityDefinitionId,
+  activityDefinitionSlug,
   existingData,
+  categorySlug,
 }: {
   facilityId: string;
-  activityDefinitionId?: string;
+  activityDefinitionSlug?: string;
   existingData?: ActivityDefinitionReadSpec;
+  categorySlug?: string;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const isEditMode = Boolean(activityDefinitionId);
+  const isEditMode = Boolean(activityDefinitionSlug);
   const [specimenSearch, setSpecimenSearch] = React.useState("");
   const [observationSearch, setObservationSearch] = React.useState("");
-  const [chargeItemSearch, setChargeItemSearch] = React.useState("");
   const { data: specimenDefinitions, isLoading: isLoadingSpecimens } = useQuery(
     {
       queryKey: ["specimenDefinitions", facilityId, specimenSearch],
@@ -247,49 +244,26 @@ function ActivityDefinitionFormContent({
       ),
     });
 
-  const {
-    data: chargeItemDefinitions,
-    isLoading: isLoadingChargeItemDefinitions,
-  } = useQuery({
-    queryKey: ["chargeItemDefinitions", facilityId, chargeItemSearch],
-    queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
-      pathParams: { facilityId },
-      queryParams: {
-        limit: 100,
-        title: chargeItemSearch,
-      },
-    }),
-  });
-
-  const { data: locations, isLoading: isLoadingLocations } = useQuery({
-    queryKey: ["locations", facilityId],
-    queryFn: query.debounced(locationApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: {
-        limit: 100,
-      },
-    }),
-  });
-
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues:
       isEditMode && existingData
         ? {
             title: existingData.title,
-            slug: existingData.slug,
+            slug_value: existingData.slug_config.slug_value,
             description: existingData.description,
             usage: existingData.usage,
             derived_from_uri: existingData.derived_from_uri,
             status: existingData.status,
-            category: existingData.category,
+            classification: existingData.classification,
             kind: existingData.kind,
             code: existingData.code,
             body_site: existingData.body_site,
             diagnostic_report_codes: existingData.diagnostic_report_codes || [],
+            healthcare_service: existingData.healthcare_service?.id || null,
             specimen_requirements:
               existingData.specimen_requirements?.map((s) => ({
-                value: s.id,
+                value: s.slug,
                 label: s.title,
                 details: [
                   {
@@ -316,7 +290,7 @@ function ActivityDefinitionFormContent({
               })) || [],
             observation_result_requirements:
               existingData.observation_result_requirements?.map((obs) => ({
-                value: obs.id,
+                value: obs.slug,
                 label: obs.title,
                 details: [
                   {
@@ -343,26 +317,13 @@ function ActivityDefinitionFormContent({
                   },
                 ],
               })) || [],
-            charge_item_definitions:
-              existingData.charge_item_definitions?.map((c) => ({
-                value: c.id,
-                label: c.title,
-                details: [
-                  {
-                    label: t("status"),
-                    value: t(c.status) ?? undefined,
-                  },
-                  {
-                    label: t("description"),
-                    value: c.description ?? undefined,
-                  },
-                  {
-                    label: t("purpose"),
-                    value: c.purpose ?? undefined,
-                  },
-                ],
+            locations:
+              existingData.locations?.map((l) => ({
+                id: l.id,
+                name: l.name,
               })) || [],
-            locations: existingData.locations?.map((l) => l.id) || [],
+            charge_item_definitions: existingData.charge_item_definitions || [],
+            category: existingData.category?.slug || "",
           }
         : {
             status: Status.active,
@@ -373,6 +334,8 @@ function ActivityDefinitionFormContent({
             derived_from_uri: null,
             body_site: null,
             diagnostic_report_codes: [],
+            healthcare_service: null,
+            category: categorySlug || "",
           },
   });
 
@@ -382,7 +345,7 @@ function ActivityDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || ""), {
           shouldValidate: true,
         });
       }
@@ -400,7 +363,7 @@ function ActivityDefinitionFormContent({
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["activityDefinitions"] });
         queryClient.invalidateQueries({
-          queryKey: ["activityDefinition", activityDefinitionId],
+          queryKey: ["activityDefinition", activityDefinitionSlug],
         });
         toast.success(t("activity_definition_created_successfully"));
         navigate(`/facility/${facilityId}/settings/activity_definitions`);
@@ -411,20 +374,20 @@ function ActivityDefinitionFormContent({
     useMutation({
       mutationFn: mutate(activityDefinitionApi.updateActivityDefinition, {
         pathParams: {
-          activityDefinitionId: activityDefinitionId || "",
+          activityDefinitionSlug: activityDefinitionSlug || "",
           facilityId,
         },
       }),
-      onSuccess: () => {
+      onSuccess: (activityDefinition: ActivityDefinitionReadSpec) => {
         queryClient.invalidateQueries({
           queryKey: [
-            ["activityDefinition", activityDefinitionId],
+            ["activityDefinition", activityDefinitionSlug],
             ["activityDefinitions"],
           ],
         });
         toast.success(t("activity_definition_updated_successfully"));
         navigate(
-          `/facility/${facilityId}/settings/activity_definitions/${activityDefinitionId}`,
+          `/facility/${facilityId}/settings/activity_definitions/${activityDefinition.slug}`,
         );
       },
     });
@@ -441,11 +404,12 @@ function ActivityDefinitionFormContent({
         (item) => item.value,
       ),
       charge_item_definitions: data.charge_item_definitions.map(
-        (item) => item.value,
+        (item) => item.slug,
       ),
+      locations: data.locations.map((loc) => loc.id),
     };
 
-    if (isEditMode && activityDefinitionId) {
+    if (isEditMode && activityDefinitionSlug) {
       updateActivityDefinition(
         transformedData as unknown as ActivityDefinitionUpdateSpec,
       );
@@ -455,6 +419,12 @@ function ActivityDefinitionFormContent({
       );
     }
   }
+
+  React.useEffect(() => {
+    console.log("form.getValues()", form.getValues());
+    //log errors on submit
+    console.log("form.formState.errors", form.formState.errors);
+  }, [form.getValues(), form.formState.errors]);
 
   return (
     <Page
@@ -507,7 +477,7 @@ function ActivityDefinitionFormContent({
 
                   <FormField
                     control={form.control}
-                    name="slug"
+                    name="slug_value"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>
@@ -597,7 +567,7 @@ function ActivityDefinitionFormContent({
 
                   <FormField
                     control={form.control}
-                    name="category"
+                    name="classification"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>
@@ -614,13 +584,39 @@ function ActivityDefinitionFormContent({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {Object.values(Category).map((category) => (
+                            {Object.values(Classification).map((category) => (
                               <SelectItem key={category} value={category}>
                                 {t(category)}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>
+                          {t("resource_category")}{" "}
+                          <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <ResourceCategoryPicker
+                            facilityId={facilityId}
+                            resourceType={
+                              ResourceCategoryResourceType.activity_definition
+                            }
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder={t("select_resource_category")}
+                            className="w-full"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -765,7 +761,7 @@ function ActivityDefinitionFormContent({
                         options={
                           specimenDefinitions?.results.map((spec) => ({
                             label: spec.title,
-                            value: spec.id,
+                            value: spec.slug,
                             details: [
                               {
                                 label: t("type"),
@@ -831,7 +827,7 @@ function ActivityDefinitionFormContent({
                         options={
                           observationDefinitions?.results.map((obs) => ({
                             label: obs.title,
-                            value: obs.id,
+                            value: obs.slug,
                             details: [
                               {
                                 label: t("category"),
@@ -878,48 +874,37 @@ function ActivityDefinitionFormContent({
                   <div className="rounded-lg border border-gray-200 shadow-sm p-4">
                     <FormLabel>{t("charge_item_definitions")}</FormLabel>
                     <div className="mt-2">
-                      <RequirementsSelector
-                        title={t("select_charge_item_definitions")}
-                        description={t(
-                          "select_or_create_charge_item_definitions",
-                        )}
-                        allowDuplicate={true}
+                      <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
+                        facilityId={facilityId}
                         value={form.watch("charge_item_definitions") || []}
-                        onChange={(values) =>
-                          form.setValue("charge_item_definitions", values)
-                        }
-                        options={
-                          chargeItemDefinitions?.results.map((chargeDef) => ({
-                            label: chargeDef.title,
-                            value: chargeDef.id,
-                            details: [
-                              {
-                                label: t("status"),
-                                value: t(chargeDef.status) ?? undefined,
-                              },
-                              {
-                                label: t("description"),
-                                value: chargeDef.description ?? undefined,
-                              },
-                              {
-                                label: t("purpose"),
-                                value: chargeDef.purpose ?? undefined,
-                              },
-                            ],
-                          })) || []
-                        }
-                        isLoading={isLoadingChargeItemDefinitions}
+                        onValueChange={(selectedDef) => {
+                          if (!selectedDef) {
+                            form.setValue("charge_item_definitions", []);
+                            return;
+                          }
+                          const defs = Array.isArray(selectedDef)
+                            ? selectedDef
+                            : [selectedDef];
+                          form.setValue("charge_item_definitions", defs);
+                        }}
+                        allowMultiple
                         placeholder={t("select_charge_item_definitions")}
-                        onSearch={setChargeItemSearch}
-                        canCreate={true}
-                        createForm={(onSuccess) => (
-                          <div className="py-2">
-                            <ChargeItemDefinitionForm
-                              facilityId={facilityId}
-                              onSuccess={onSuccess}
-                            />
-                          </div>
-                        )}
+                        className="w-full"
+                        resourceType={
+                          ResourceCategoryResourceType.charge_item_definition
+                        }
+                        listDefinitions={{
+                          queryFn:
+                            chargeItemDefinitionApi.listChargeItemDefinition,
+                          pathParams: { facilityId },
+                        }}
+                        translations={{
+                          searchPlaceholder: "search_charge_item_definitions",
+                          selectPlaceholder: "select_charge_item_definition",
+                          noResultsFound:
+                            "no_charge_item_definitions_found_for",
+                          noItemsFound: "no_charge_item_definitions_found",
+                        }}
                       />
                     </div>
                   </div>
@@ -930,54 +915,34 @@ function ActivityDefinitionFormContent({
                       <RequirementsSelector
                         title={t("location_requirements")}
                         description={t("location_requirements_description")}
-                        value={(form.watch("locations") || []).map((id) => ({
-                          value: id,
-                          label:
-                            locations?.results.find((l) => l.id === id)?.name ||
-                            id,
+                        value={(form.watch("locations") || []).map((loc) => ({
+                          value: loc.id,
+                          label: loc.name,
                           details: [],
                         }))}
                         onChange={(values) =>
                           form.setValue(
                             "locations",
-                            values.map((v) => v.value),
+                            values.map((v) => ({
+                              id: v.value,
+                              name: v.label,
+                            })),
                           )
                         }
-                        options={
-                          locations?.results
-                            .filter((location) =>
-                              (form.watch("locations") || []).includes(
-                                location.id,
-                              ),
-                            )
-                            .map((location) => ({
-                              label: location.name,
-                              value: location.id,
-                              details: [
-                                {
-                                  label: t("type"),
-                                  value: t(`location_form__${location.form}`),
-                                },
-                                {
-                                  label: t("status"),
-                                  value: t(location.status),
-                                },
-                                {
-                                  label: t("description"),
-                                  value: location.description || undefined,
-                                },
-                              ],
-                            })) || []
-                        }
-                        isLoading={isLoadingLocations}
+                        options={[]}
+                        isLoading={false}
                         placeholder={t("select_locations")}
                         customSelector={
-                          <LocationMultiSelect
-                            facilityId={facilityId}
-                            value={form.watch("locations") || []}
-                            onChange={(values) =>
-                              form.setValue("locations", values)
-                            }
+                          <FormField
+                            control={form.control}
+                            name="locations"
+                            render={({ field }) => (
+                              <LocationMultiSelect
+                                facilityId={facilityId}
+                                value={field.value || []}
+                                onChange={field.onChange}
+                              />
+                            )}
                           />
                         }
                       />

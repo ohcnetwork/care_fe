@@ -97,10 +97,7 @@ export class PatientPrescription {
       .then(($button) => {
         if (!$button.is(":disabled")) {
           cy.wrap($button).click();
-          cy.verifyAndClickElement(
-            '[data-cy="confirm-remove-medication"]',
-            "Remove",
-          );
+          cy.clickConfirmAction("Remove");
         }
       });
     return this;

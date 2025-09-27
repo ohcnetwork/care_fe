@@ -55,6 +55,7 @@ import {
   CreateConsentRequest,
 } from "@/types/consent/consent";
 import consentApi from "@/types/consent/consentApi";
+import { FileCategory, FileType } from "@/types/files/file";
 
 interface FileEntry {
   file: File;
@@ -77,7 +78,10 @@ const consentFormSchema = (isEdit: boolean) =>
         .array(
           z.object({
             file: z.instanceof(File),
-            name: z.string().min(1, { message: t("enter_file_name") }),
+            name: z
+              .string()
+              .trim()
+              .min(1, { message: t("enter_file_name") }),
           }),
         )
         .default([]),
@@ -130,8 +134,8 @@ export default function ConsentFormSheet({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fileUpload = useFileUpload({
-    type: "consent",
-    category: "consent_attachment",
+    type: FileType.CONSENT,
+    category: FileCategory.CONSENT_ATTACHMENT,
     multiple: true,
     allowedExtensions: ["jpg", "jpeg", "png", "pdf"],
     allowNameFallback: false,
