@@ -12,9 +12,9 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
 import CircularProgress from "@/components/Common/CircularProgress";
 import LanguageSelectorLogin from "@/components/Common/LanguageSelectorLogin";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -22,7 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {FilterTabs} from "@/components/ui/filter-tabs"
+import { FilterTabs } from "@/components/ui/filter-tabs"
 import { Input } from "@/components/ui/input";
 import {
   InputOTP,
@@ -372,8 +372,8 @@ const Login = (props: LoginProps) => {
                       }
                     }}
                     options={[
-                      {value: "staff", label: "staff_login"},
-                      {value: "patient", label: "patient_login"},
+                      { value: "staff", label: "staff_login"},
+                      { value: "patient", label: "patient_login"},
                     ]}
                     variant="background"
                     className="flex-1 mb-2"
@@ -382,8 +382,8 @@ const Login = (props: LoginProps) => {
                 </div>
 
                 {/* Staff Login */}
-                {mode === "staff" &&(
-                  !forgotPassword ?(
+                {mode === "staff" &&
+                  (!forgotPassword ?(
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="username">{t("username")}</Label>
@@ -467,7 +467,7 @@ const Login = (props: LoginProps) => {
                         onClick={() => setForgotPassword(false)}
                         className="px-0 mb-4 flex items-center gap-2"
                       >
-                      <CareIcon icon="l-arrow-left" className="text-lg" />
+                        <CareIcon icon="l-arrow-left" className="text-lg" />
                         <span>{t("back_to_login")}</span>
                       </Button>
 
@@ -482,7 +482,9 @@ const Login = (props: LoginProps) => {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="forgot_username">{t("username")}</Label>
+                          <Label htmlFor="forgot_username">
+                            {t("username")}
+                          </Label>
                           <Input
                             id="forgot_username"
                             name="username"
@@ -516,8 +518,7 @@ const Login = (props: LoginProps) => {
                         </Button>
                       </div>
                     </form>
-                  )
-                )}
+                  ))}
 
                 {/* Patient Login */}
                 {mode === "patient" && (
