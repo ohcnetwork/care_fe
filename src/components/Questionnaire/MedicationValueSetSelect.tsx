@@ -197,19 +197,21 @@ export default function MedicationValueSetSelect({
 
   const renderCommand = (children: React.ReactNode) => (
     <Command className="rounded-lg" filter={() => 1}>
-      <CommandInput
-        placeholder={t("search_products")}
-        onValueChange={(value) => {
-          if (value && currentCategory) {
-            setCurrentCategory(undefined);
-            setBreadcrumbs([]);
-          }
-          setSearch(value);
-        }}
-        value={search}
-        className="border-none ring-0 text-base md:text-sm"
-        autoFocus
-      />
+      {activeTab === "product" && (
+        <CommandInput
+          placeholder={t("search_products")}
+          onValueChange={(value) => {
+            if (value && currentCategory) {
+              setCurrentCategory(undefined);
+              setBreadcrumbs([]);
+            }
+            setSearch(value);
+          }}
+          value={search}
+          className="border-none ring-0 text-base md:text-sm"
+          autoFocus
+        />
+      )}
       {children}
     </Command>
   );
@@ -298,7 +300,8 @@ export default function MedicationValueSetSelect({
   );
 
   const renderBreadcrumbs = () =>
-    breadcrumbs.length > 0 && (
+    breadcrumbs.length > 0 &&
+    activeTab === "product" && (
       <div className="px-4 py-2 border-b bg-gray-100 mt-1">
         <div className="flex items-center gap-1 truncate text-xs overflow-x-auto">
           <Button
