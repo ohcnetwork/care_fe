@@ -48,8 +48,8 @@ export const LicensesPage = () => {
             value={tab}
             onValueChange={(value) => setTab(value as "frontend" | "backend")}
             options={[
-              { value: "frontend", label: t("care_frontend") },
-              { value: "backend", label: t("care_backend") },
+              { value: "frontend", label: "care_frontend" },
+              { value: "backend", label: "care_backend" },
             ]}
             showAllOption={false}
           />

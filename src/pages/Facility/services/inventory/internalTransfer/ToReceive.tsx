@@ -29,7 +29,12 @@ export default function ToReceive({ facilityId, locationId }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [qParams, setQueryParams] = useQueryParams();
-  const currentTab = (qParams.tab as Tab) || "requests_raised";
+  const tabOptions = Object.values(Tab);
+  const isValidTab = (val: unknown): val is Tab =>
+    typeof val === "string" && (tabOptions as string[]).includes(val);
+  const currentTab: Tab = isValidTab(qParams.tab)
+    ? (qParams.tab as Tab)
+    : Tab.REQUESTS_RAISED;
 
   const handleTabChange = (value: string) => {
     const { status: _, ...newParams } = qParams;
@@ -39,8 +44,6 @@ export default function ToReceive({ facilityId, locationId }: Props) {
       page: "1",
     });
   };
-
-  const tabOptions = Object.values(Tab);
 
   const maxVisibleTabs = useBreakpoints({
     default: 2,

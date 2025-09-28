@@ -31,6 +31,7 @@ import {
 } from "@/types/emr/specimen/specimen";
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import type { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { format } from "date-fns";
 
 interface SpecimenFormProps {
   specimenDefinition: SpecimenDefinitionRead;
@@ -51,7 +52,7 @@ export function SpecimenForm({
 }: SpecimenFormProps) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
-  const currentUserId = authUser.id;
+  const currentUserId = authUser.id ?? null;
   const queryClient = useQueryClient();
 
   const [identifierMode, setIdentifierMode] = useState<"scan" | "generate">(
@@ -239,13 +240,8 @@ export function SpecimenForm({
   function toDateTimeLocalValue(iso: string | null): string {
     if (!iso) return "";
     const d = new Date(iso);
-    const pad = (n: number) => String(n).padStart(2, "0");
-    const yyyy = d.getFullYear();
-    const mm = pad(d.getMonth() + 1);
-    const dd = pad(d.getDate());
-    const hh = pad(d.getHours());
-    const mi = pad(d.getMinutes());
-    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+    if (Number.isNaN(d.getTime())) return "";
+    return format(d, "yyyy-MM-dd'T'HH:mm");
   }
 
   return (

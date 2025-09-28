@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -54,7 +54,7 @@ export function FilterTabs({
     typeof option === "string" ? t(option) : t(option.label);
 
   // Prepare arrays of values for visible/dropdown logic
-  const optionValues = options.map(getOptionValue);
+  const optionValues = useMemo(() => options.map(getOptionValue), [options]);
 
   // State for managing visible tabs when using dropdown
   const [visibleOptions, setVisibleOptions] = useState<string[]>(() => {
@@ -85,6 +85,25 @@ export function FilterTabs({
 
     return optionValues.slice(maxVisibleTabs);
   });
+
+  // Keep derived state in sync when inputs change
+  useEffect(() => {
+    if (!showMoreDropdown) {
+      setVisibleOptions(optionValues);
+      setDropdownOptions([]);
+      return;
+    }
+    const baseVisible =
+      (defaultVisibleOptions &&
+        defaultVisibleOptions
+          .filter((opt) => optionValues.includes(opt))
+          .slice(0, maxVisibleTabs)) ||
+      optionValues.slice(0, maxVisibleTabs);
+    setVisibleOptions(baseVisible);
+    setDropdownOptions(
+      optionValues.filter((opt) => !baseVisible.includes(opt)),
+    );
+  }, [optionValues, showMoreDropdown, defaultVisibleOptions, maxVisibleTabs]);
 
   const handleValueChange = (newValue: string) => {
     if (showAllOption && newValue === "all") {
