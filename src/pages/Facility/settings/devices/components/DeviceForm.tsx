@@ -494,17 +494,22 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                         // If the system is changing from a phone type to a non-phone type, clear the value
                         if (isPhone(value) !== isPhone(field.value)) {
                           form.setValue(`contact.${index}.value`, "");
+                          form.clearErrors(`contact.${index}.value`);
+                          field.onChange(value);
+                          return;
                         }
-                        // Always trigger revalidation after onChange
+                        form.clearErrors(`contact.${index}.value`);
                         field.onChange(value);
-                        form.trigger(`contact.${index}.value`);
+                        const newValue = form.getValues(
+                          `contact.${index}.value`,
+                        );
+                        if (newValue) {
+                          form.trigger(`contact.${index}.value`);
+                        }
                       }}
                     >
                       <FormControl>
-                        <SelectTrigger
-                          className="h-[42px] md:h-[38px]"
-                          ref={field.ref}
-                        >
+                        <SelectTrigger className="!h-10" ref={field.ref}>
                           <SelectValue
                             placeholder={t("select_contact_system")}
                           />
