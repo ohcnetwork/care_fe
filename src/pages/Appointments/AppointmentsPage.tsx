@@ -761,7 +761,7 @@ function AppointmentRow(props: {
   updateQuery: (filter: FilterState) => void;
   resultsPerPage: number;
   slot: string | null;
-  status: AppointmentStatus;
+  status?: string;
   date_from: string | null;
   date_to: string | null;
   canViewAppointments: boolean;
