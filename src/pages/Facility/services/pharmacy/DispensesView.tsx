@@ -50,7 +50,7 @@ export default function DispensesView({
 
   const tabOptions = allStatuses.map((statusValue) => ({
     value: statusValue,
-    label: t(statusValue),
+    label: statusValue,
   }));
 
   return (

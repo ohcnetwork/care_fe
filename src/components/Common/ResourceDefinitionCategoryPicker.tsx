@@ -40,7 +40,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   ResourceCategoryParent,
@@ -1024,31 +1023,27 @@ export function ResourceDefinitionCategoryPicker<T>({
                 <div className="max-w-72 w-full border-l border-gray-200">
                   <div className="px-4 py-1 border-b bg-gray-50">
                     <FilterTabs
-                      value={activeTab}
-                      onValueChange={(value) =>
-                        setActiveTab(value as "card" | "list")
-                      }
+                      value={favSubTab}
+                      onValueChange={setFavSubTab}
                       options={[
                         {
-                          value: "card",
-                          label: "card",
-                          icon: (
-                            <CareIcon
-                              icon="l-credit-card"
-                              className="text-lg"
-                            />
-                          ),
+                          value: "recent",
+                          label: "recent",
+                          icon: <Clock className="h-4 w-4" />,
                         },
                         {
-                          value: "list",
-                          label: "list",
-                          icon: (
-                            <CareIcon icon="l-list-ul" className="text-lg" />
-                          ),
+                          value: "favorites",
+                          label: "favorites",
+                          icon:
+                            favorites.length > 0 ? (
+                              <Badge variant="secondary">
+                                {favorites.length}
+                              </Badge>
+                            ) : undefined,
                         },
                       ]}
                       className="flex"
-                      variant="background"
+                      variant="underline"
                       showAllOption={false}
                       maxVisibleTabs={2}
                     />
