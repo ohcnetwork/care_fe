@@ -967,7 +967,7 @@ export function ResourceDefinitionCategoryPicker<T>({
               </div>
               <ChevronDown
                 className={cn(
-                  "p-0 shadow-lg border-0 min-w-[var(--radix-popover-trigger-width)] sm:max-w-[80vw]",
+                  "size-4 shrink-0 opacity-50 transition-transform duration-200",
                   open && "rotate-180",
                 )}
               />
