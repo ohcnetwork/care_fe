@@ -65,7 +65,7 @@ export default function ToReceive({ facilityId, locationId }: Props) {
               <Button
                 onClick={() => {
                   navigate(
-                    "/internal_transfers/to_receive/raise_stock_request",
+                    `/facility/${facilityId}/locations/${locationId}/internal_transfers/to_receive/raise_stock_request`,
                   );
                 }}
                 className="whitespace-nowrap bg-primary-700 hover:bg-primary-800"

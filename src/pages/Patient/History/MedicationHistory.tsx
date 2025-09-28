@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -19,7 +19,9 @@ import medicationRequestApi from "@/types/emr/medicationRequest/medicationReques
 
 export const MedicationHistory = ({ patientId }: { patientId: string }) => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<"prescriptions" | "statements" | "administration">("prescriptions");
+  const [activeTab, setActiveTab] = useState<
+    "prescriptions" | "statements" | "administration"
+  >("prescriptions");
 
   // Tab options for FilterTabs
   const tabOptions = [
@@ -47,12 +49,16 @@ export const MedicationHistory = ({ patientId }: { patientId: string }) => {
         />
         <h4 className="text-xl">{t("past_medications")}</h4>
       </div>
-      
+
       <div className="w-full">
         <div className="overflow-x-auto">
           <FilterTabs
             value={activeTab}
-            onValueChange={(value) => setActiveTab(value as "prescriptions" | "statements" | "administration")}
+            onValueChange={(value) =>
+              setActiveTab(
+                value as "prescriptions" | "statements" | "administration",
+              )
+            }
             options={tabOptions}
             variant="background"
             className="mb-4"
@@ -156,7 +162,7 @@ const Prescriptions = ({ patientId }: { patientId: string }) => {
 
                       <div className="space-y-3 overflow-auto w-full">
                         <h3 className="text-sm font-medium text-indigo-700">
-                          {format(date, "dd MMMM, yyyy")}
+                          {format(parseISO(date), "dd MMMM, yyyy")}
                         </h3>
                         <MedicationsTable medications={items} />
                       </div>

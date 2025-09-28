@@ -3,6 +3,7 @@ import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { FilterSelect } from "@/components/ui/filter-select";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
 
@@ -49,7 +49,7 @@ export default function SupplyDeliveryList({
   });
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["supplyDeliveries", facilityId, locationId, qParams, tab],
+    queryKey: ["supplyDeliveries", facilityId, locationId, qParams, tab, type],
     queryFn: query.debounced(supplyDeliveryApi.listSupplyDelivery, {
       queryParams: {
         facility: facilityId,
@@ -117,8 +117,8 @@ export default function SupplyDeliveryList({
                 }
                 className="max-sm:hidden"
                 options={[
-                  {value: "incoming", label: t("incoming")},
-                  {value: "outgoing", label: t("outgoing")}
+                  { value: "incoming", label: t("incoming") },
+                  { value: "outgoing", label: t("outgoing") },
                 ]}
                 showAllOption={false}
               />

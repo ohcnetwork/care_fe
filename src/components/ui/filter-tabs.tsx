@@ -87,11 +87,11 @@ export function FilterTabs({
   });
 
   const handleValueChange = (newValue: string) => {
-    if (newValue === "all") {
+    if (showAllOption && newValue === "all") {
       onValueChange("");
-    } else {
-      onValueChange(newValue);
+      return;
     }
+    onValueChange(newValue);
   };
 
   const handleDropdownSelect = (selectedOption: string) => {

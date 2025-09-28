@@ -6,10 +6,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import Loading from "@/components/Common/Loading";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FilterTabs } from "@/components/ui/filter-tabs";
-import Loading from "@/components/Common/Loading";
 
 import licenseUrls from "@/pages/Licenses/components/license-urls.json";
 import { getPackageUrl } from "@/pages/Licenses/utils";
@@ -26,7 +26,11 @@ export const LicensesPage = () => {
 
   const { data, isLoading } = useQuery<LicensesSbom>({
     queryKey: ["sbom", tab],
-    queryFn: () => fetch(sbomUrlMap[tab]).then((res) => res.json()),
+    queryFn: async ({ signal }) => {
+      const res = await fetch(sbomUrlMap[tab], { signal });
+      if (!res.ok) throw new Error(`Failed to fetch SBOM (${res.status})`);
+      return res.json();
+    },
   });
 
   return (
@@ -108,7 +112,11 @@ const SbomPackage = ({
         target="_blank"
         rel="noopener noreferrer"
         className="hover:text-primary-dark block text-primary"
-        href={`${getPackageUrl(pkg.name, pkg.versionInfo, pkg.externalRefs[0].referenceLocator)}`}
+        href={`${getPackageUrl(
+          pkg.name,
+          pkg.versionInfo,
+          pkg.externalRefs?.[0]?.referenceLocator,
+        )}`}
       >
         <strong className="text-lg">{`${pkg.name} v${pkg.versionInfo}`}</strong>
       </a>

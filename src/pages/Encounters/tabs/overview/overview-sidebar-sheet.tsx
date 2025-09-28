@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -9,7 +10,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
@@ -42,6 +42,12 @@ export const OverviewSidebarSheet = ({
     { value: "reports", label: "reports" },
   ];
 
+  useEffect(() => {
+    if (!canEdit && activeTab === "actions") {
+      setActiveTab("details");
+    }
+  }, [canEdit, activeTab]);
+
   return (
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
@@ -57,7 +63,7 @@ export const OverviewSidebarSheet = ({
           </SheetTitle>
           <Separator className="my-2" />
         </SheetHeader>
-        
+
         <div className="p-2 rounded-lg">
           <FilterTabs
             value={activeTab}
@@ -84,13 +90,9 @@ export const OverviewSidebarSheet = ({
             </div>
           )}
 
-          {activeTab === "actions" && canEdit && (
-            <SummaryPanelActionsTab />
-          )}
+          {activeTab === "actions" && canEdit && <SummaryPanelActionsTab />}
 
-          {activeTab === "reports" && (
-            <SummaryPanelReportsTab />
-          )}
+          {activeTab === "reports" && <SummaryPanelReportsTab />}
         </div>
       </SheetContent>
     </Sheet>

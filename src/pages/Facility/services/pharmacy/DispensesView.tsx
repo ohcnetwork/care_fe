@@ -1,17 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftIcon, ChevronDown } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import { navigate } from "raviger";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
@@ -46,29 +39,6 @@ export default function DispensesView({
   ];
 
   const allStatuses = Object.values(MedicationDispenseStatus);
-  const initialVisibleTabs = defaultVisibleStatuses.includes(status)
-    ? defaultVisibleStatuses
-    : [...defaultVisibleStatuses.slice(0, -1), status];
-  const [visibleTabs, setVisibleTabs] =
-    useState<MedicationDispenseStatus[]>(initialVisibleTabs);
-  const [dropdownItems, setDropdownItems] = useState<
-    MedicationDispenseStatus[]
-  >(allStatuses.filter((value) => !initialVisibleTabs.includes(value)));
-
-  const handleDropdownSelect = (value: MedicationDispenseStatus) => {
-    const lastVisibleTab = visibleTabs[visibleTabs.length - 1];
-    const newVisibleTabs = [...visibleTabs.slice(0, -1), value];
-    const newDropdownItems = [
-      ...dropdownItems.filter((item) => item !== value),
-      lastVisibleTab,
-    ];
-
-    setVisibleTabs(newVisibleTabs);
-    setDropdownItems(newDropdownItems);
-    navigate(
-      `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/${value}`,
-    );
-  };
 
   const { data: patientData } = useQuery({
     queryKey: ["patient", patientId],
@@ -78,7 +48,7 @@ export default function DispensesView({
     enabled: !!patientId,
   });
 
-  const tabOptions = visibleTabs.map((statusValue) => ({
+  const tabOptions = allStatuses.map((statusValue) => ({
     value: statusValue,
     label: t(statusValue),
   }));
@@ -116,31 +86,10 @@ export default function DispensesView({
         options={tabOptions}
         variant="underline"
         showAllOption={false}
+        showMoreDropdown={true}
+        maxVisibleTabs={4}
+        defaultVisibleOptions={defaultVisibleStatuses}
       />
-      {dropdownItems.length > 0 && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="text-gray-500 font-semibold hover:text-gray-900 hover:bg-transparent pb-2.5 px-2.5"
-            >
-              {t("more")}
-              <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {dropdownItems.map((statusValue) => (
-              <DropdownMenuItem
-                key={statusValue}
-                onClick={() => handleDropdownSelect(statusValue)}
-                className="text-gray-950 font-medium text-sm"
-              >
-                {t(statusValue)}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
 
       <div>
         {Object.values(MedicationDispenseStatus).map((statusValue) =>

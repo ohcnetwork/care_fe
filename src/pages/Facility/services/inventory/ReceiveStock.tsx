@@ -318,6 +318,10 @@ function AddItemForm({
   }, [entry, open]);
 
   useEffect(() => {
+    setActiveTab(entry._is_additional ? "additional" : "requested");
+  }, [entry, open]);
+
+  useEffect(() => {
     if (currentEntry.supplied_item && currentEntry.supplied_item.id) {
       setIsProductCreationInProgress(false);
     }

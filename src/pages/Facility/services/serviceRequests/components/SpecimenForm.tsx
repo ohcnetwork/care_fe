@@ -9,9 +9,9 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Textarea } from "@/components/ui/textarea";
 
 import { PrintableQRCode } from "@/components/PrintableQRCode";
@@ -174,11 +174,9 @@ export function SpecimenForm({
     const quantity = specimenData.specimen.collection?.quantity;
     const newErrors: typeof errors = {};
 
-    if (!quantity?.value || quantity.value <= 0) {
+    if (quantity?.value == null) {
       newErrors.quantityValue = t("field_required");
-    }
-
-    if (quantity?.value && quantity.value <= 0) {
+    } else if (quantity.value <= 0) {
       newErrors.quantityValue = t("invalid_quantity");
     }
 
@@ -199,7 +197,7 @@ export function SpecimenForm({
         ...finalData,
         specimen: {
           ...finalData.specimen,
-          accession_identifier: draftSpecimen.accession_identifier,
+          accession_identifier: draftSpecimen.id,
         },
       };
     }
@@ -237,6 +235,18 @@ export function SpecimenForm({
 
     updateSpecimen(submissionPayload);
   };
+
+  function toDateTimeLocalValue(iso: string | null): string {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    const mm = pad(d.getMonth() + 1);
+    const dd = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const mi = pad(d.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+  }
 
   return (
     <div>
@@ -339,11 +349,10 @@ export function SpecimenForm({
                 <Input
                   className="h-9"
                   type="datetime-local"
-                  value={
-                    specimenData.specimen.collection?.collected_date_time?.split(
-                      ".",
-                    )[0] || ""
-                  }
+                  value={toDateTimeLocalValue(
+                    specimenData.specimen.collection?.collected_date_time ??
+                      null,
+                  )}
                   onChange={(e) =>
                     handleCollectionChange(
                       "collected_date_time",
