@@ -156,8 +156,7 @@ function ProductKnowledgeFormContent({
   slug,
   existingData,
   categorySlug,
-  onSuccess = () =>
-    navigate(`/facility/${facilityId}/settings/product_knowledge`),
+  onSuccess = () => {},
 }: {
   facilityId: string;
   slug?: string;
@@ -246,10 +245,13 @@ function ProductKnowledgeFormContent({
   const { mutate: createProductKnowledge, isPending: isCreating } = useMutation(
     {
       mutationFn: mutate(productKnowledgeApi.createProductKnowledge),
-      onSuccess: () => {
+      onSuccess: (productKnowledge: ProductKnowledgeBase) => {
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         toast.success(t("product_knowledge_created_successfully"));
         onSuccess();
+        navigate(
+          `/facility/${facilityId}/settings/product_knowledge/categories/${productKnowledge.category.slug}`,
+        );
       },
     },
   );
@@ -470,7 +472,7 @@ function ProductKnowledgeFormContent({
                   </div>
 
                   <div>
-                    <FormLabel>{t("base_unit")}</FormLabel>
+                    <FormLabel aria-required>{t("base_unit")}</FormLabel>
                     <div className="mt-2">
                       <Select
                         value={form.watch("base_unit")?.code || ""}
