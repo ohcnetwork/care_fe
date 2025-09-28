@@ -47,7 +47,6 @@ import {
   SupplyDeliveryType,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
-import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
 import locationApi from "@/types/location/locationApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -86,14 +85,6 @@ export default function SupplyDeliveryCreate({
 }: Props) {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
-
-  const { data: supplyRequest } = useQuery({
-    queryKey: ["supplyRequest", supplyRequestId],
-    queryFn: query(supplyRequestApi.retrieveSupplyRequest, {
-      pathParams: { supplyRequestId: supplyRequestId! },
-    }),
-    enabled: Boolean(supplyRequestId),
-  });
 
   const title = t("create_supply_delivery");
   const pageDescription = t("supply_delivery_description");
@@ -145,7 +136,7 @@ export default function SupplyDeliveryCreate({
     resolver: zodResolver(createFormSchema),
     defaultValues: {
       supplied_item_type: SupplyDeliveryType.product,
-      destination: supplyRequest?.deliver_to?.id || "",
+      destination: "",
       items: [
         {
           supplied_inventory_item: "",

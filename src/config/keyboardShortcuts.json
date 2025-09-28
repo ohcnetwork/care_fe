@@ -76,6 +76,9 @@
     { "key": "e", "action": "mark-payment-error", "description": "Mark as Entered in Error", "when": "always" },
     { "key": "p", "action": "print-payment-receipt", "description": "Print Receipt", "when": "always" }
   ],
+  "facility:inventory": [
+    { "key": "c", "action": "create-order", "description": "Create Order", "when": "always" }
+  ],
 
   "encounter": [
     {

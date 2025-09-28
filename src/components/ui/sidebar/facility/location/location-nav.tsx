@@ -71,8 +71,8 @@ export function LocationNav() {
             {
               header: t("external_supply"),
               // headerIcon: <CareIcon icon="l-box" className="text-gray-400" />,
-              name: t("purchase_orders"),
-              url: `${baseUrl}/external_supply/purchase_orders`,
+              name: t("request_orders"),
+              url: `${baseUrl}/external_supply/request_orders`,
             },
             {
               name: t("inward_entry"),

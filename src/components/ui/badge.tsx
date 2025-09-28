@@ -11,6 +11,7 @@ const badgeVariants = cva(
       variant: {
         primary: "border-primary-300 bg-primary-100 text-primary-900",
         secondary: "border-gray-300 bg-gray-100 text-gray-900",
+        gray: "border-gray-300 bg-gray-100 text-gray-900",
         outline: "border-gray-300",
         danger: "border-red-800 bg-red-600 text-white",
         destructive: "border-red-300 bg-red-100 text-red-900",

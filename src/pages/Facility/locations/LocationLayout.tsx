@@ -11,16 +11,15 @@ import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
 import { ReceiveStock } from "@/pages/Facility/services/inventory/ReceiveStock";
-import SupplyRequestForm from "@/pages/Facility/services/inventory/SupplyRequestForm";
 import { IncomingDeliveries } from "@/pages/Facility/services/inventory/externalSupply/IncomingDeliveries";
-import { PurchaseOrders } from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrders";
-import PurchaseOrdersBySupplier from "@/pages/Facility/services/inventory/externalSupply/PurchaseOrdersBySupplier";
+
+import RequestOrderForm from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderForm";
+import { RequestOrderList } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderList";
+import { RequestOrderShow } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderShow";
 import ReceiveItem from "@/pages/Facility/services/inventory/internalTransfer/ReceiveItem";
 import SupplyDeliveryCreate from "@/pages/Facility/services/inventory/internalTransfer/SupplyDeliveryCreate";
-import SupplyRequestDetail from "@/pages/Facility/services/inventory/internalTransfer/SupplyRequestDetail";
-import SupplyRequestDispatch from "@/pages/Facility/services/inventory/internalTransfer/SupplyRequestDispatch";
-import ToDispatch from "@/pages/Facility/services/inventory/internalTransfer/ToDispatch";
-import ToReceive from "@/pages/Facility/services/inventory/internalTransfer/ToReceive";
+// import SupplyRequestDetail from "@/pages/Facility/services/inventory/internalTransfer/SupplyRequestDetail";
+// import ToDispatch from "@/pages/Facility/services/inventory/internalTransfer/ToDispatch";
 import DispensesView from "@/pages/Facility/services/pharmacy/DispensesView";
 import MedicationBillForm from "@/pages/Facility/services/pharmacy/MedicationBillForm";
 import MedicationDispenseHistory from "@/pages/Facility/services/pharmacy/MedicationDispenseHistory";
@@ -76,13 +75,12 @@ const getRoutes = (facilityId: string, locationId: string) => ({
 
   // Inventory - Internal Transfers
   "/internal_transfers/to_receive": () => (
-    <ToReceive facilityId={facilityId} locationId={locationId} />
-  ),
-  "/internal_transfers/to_receive/raise_stock_request": () => (
-    <SupplyRequestForm
+    // <ToReceive facilityId={facilityId} locationId={locationId} />
+    <RequestOrderList
       facilityId={facilityId}
       locationId={locationId}
-      mode="internal"
+      internal={true}
+      isRequester={true}
     />
   ),
   "/internal_transfers/to_receive/:deliveryId": ({
@@ -97,57 +95,104 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       mode="internal"
     />
   ),
-  "/internal_transfers/to_dispatch": () => (
-    <ToDispatch facilityId={facilityId} locationId={locationId} />
+  "/internal_transfers/request_orders/new": () => (
+    <RequestOrderForm
+      facilityId={facilityId}
+      locationId={locationId}
+      internal={true}
+    />
   ),
-
+  "/internal_transfers/request_orders/:id/edit": ({ id }: { id: string }) => (
+    <RequestOrderForm
+      facilityId={facilityId}
+      locationId={locationId}
+      requestOrderId={id}
+      internal={true}
+    />
+  ),
+  "/internal_transfers/request_orders/:id": ({ id }: { id: string }) => (
+    <RequestOrderShow facilityId={facilityId} requestOrderId={id} />
+  ),
+  "/internal_transfers/to_dispatch": () => (
+    <RequestOrderList
+      facilityId={facilityId}
+      locationId={locationId}
+      internal={true}
+      isRequester={false}
+    />
+  ),
   "/internal_transfers/create_delivery": () => (
     <SupplyDeliveryCreate facilityId={facilityId} locationId={locationId} />
   ),
-  "/internal_transfers/to_dispatch/delivery/:id": ({ id }: { id: string }) => (
-    <SupplyRequestDispatch
-      facilityId={facilityId}
-      locationId={locationId}
-      supplyDeliveryId={id}
-    />
-  ),
-  "/internal_transfers/to_dispatch/:id": ({ id }: { id: string }) => (
-    <SupplyRequestDispatch
-      facilityId={facilityId}
-      locationId={locationId}
-      supplyRequestId={id}
-    />
-  ),
+  // "/internal_transfers/to_dispatch/delivery/:id": ({ id }: { id: string }) => (
+  //   <SupplyRequestDispatch
+  //     facilityId={facilityId}
+  //     locationId={locationId}
+  //     supplyDeliveryId={id}
+  //   />
+  // ),
+  // "/internal_transfers/to_dispatch/:id": ({ id }: { id: string }) => (
+  //   <SupplyRequestDispatch
+  //     facilityId={facilityId}
+  //     locationId={locationId}
+  //     supplyRequestId={id}
+  //   />
+  // ),
 
-  "/internal_transfers/requests/:id": ({ id }: { id: string }) => (
-    <SupplyRequestDetail
-      facilityId={facilityId}
-      locationId={locationId}
-      id={id}
-      mode="internal"
-    />
-  ),
-  "/internal_transfers/requests/:id/edit": ({ id }: { id: string }) => (
-    <SupplyRequestForm
-      facilityId={facilityId}
-      locationId={locationId}
-      supplyRequestId={id}
-      mode="internal"
-    />
-  ),
+  // "/internal_transfers/requests/:id": ({ id }: { id: string }) => (
+  //   <SupplyRequestDetail
+  //     facilityId={facilityId}
+  //     locationId={locationId}
+  //     id={id}
+  //     mode="internal"
+  //   />
+  // ),
+  // "/internal_transfers/requests/:id/edit": ({ id }: { id: string }) => (
+  //   <SupplyRequestForm
+  //     facilityId={facilityId}
+  //     locationId={locationId}
+  //     supplyRequestId={id}
+  //     mode="internal"
+  //   />
+  // ),
 
   // Inventory - External Supply
-  "/external_supply/purchase_orders": () => (
-    <PurchaseOrders facilityId={facilityId} locationId={locationId} />
-  ),
-  "/external_supply/purchase_orders/new": () => (
-    <SupplyRequestForm
+  // "/external_supply/purchase_orders": () => (
+  //   <PurchaseOrders facilityId={facilityId} locationId={locationId} />
+  // ),
+  // "/external_supply/purchase_orders/new": () => (
+  //   <SupplyRequestForm
+  //     facilityId={facilityId}
+  //     locationId={locationId}
+  //     mode="external"
+  //   />
+  // ),
+  "/external_supply/request_orders/new": () => (
+    <RequestOrderForm
       facilityId={facilityId}
       locationId={locationId}
-      mode="external"
+      internal={false}
     />
   ),
-
+  "/external_supply/request_orders/:id/edit": ({ id }: { id: string }) => (
+    <RequestOrderForm
+      facilityId={facilityId}
+      locationId={locationId}
+      requestOrderId={id}
+      internal={false}
+    />
+  ),
+  "/external_supply/request_orders": () => (
+    <RequestOrderList
+      facilityId={facilityId}
+      locationId={locationId}
+      internal={false}
+      isRequester={true}
+    />
+  ),
+  "/external_supply/request_orders/:id": ({ id }: { id: string }) => (
+    <RequestOrderShow facilityId={facilityId} requestOrderId={id} />
+  ),
   "/external_supply/deliveries/:id": ({ id }: { id: string }) => (
     <ReceiveItem
       facilityId={facilityId}
@@ -157,33 +202,33 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     />
   ),
 
-  "/external_supply/purchase_orders/supplier/:supplierId": ({
-    supplierId,
-  }: {
-    supplierId: string;
-  }) => (
-    <PurchaseOrdersBySupplier
-      facilityId={facilityId}
-      locationId={locationId}
-      supplierId={supplierId}
-    />
-  ),
-  "/external_supply/purchase_orders/:id": ({ id }: { id: string }) => (
-    <SupplyRequestDetail
-      facilityId={facilityId}
-      locationId={locationId}
-      id={id}
-      mode="external"
-    />
-  ),
-  "/external_supply/purchase_orders/:id/edit": ({ id }: { id: string }) => (
-    <SupplyRequestForm
-      facilityId={facilityId}
-      locationId={locationId}
-      supplyRequestId={id}
-      mode="external"
-    />
-  ),
+  // "/external_supply/purchase_orders/supplier/:supplierId": ({
+  //   supplierId,
+  // }: {
+  //   supplierId: string;
+  // }) => (
+  //   <PurchaseOrdersBySupplier
+  //     facilityId={facilityId}
+  //     locationId={locationId}
+  //     supplierId={supplierId}
+  //   />
+  // ),
+  // "/external_supply/purchase_orders/:id": ({ id }: { id: string }) => (
+  //   <SupplyRequestDetail
+  //     facilityId={facilityId}
+  //     locationId={locationId}
+  //     id={id}
+  //     mode="external"
+  //   />
+  // ),
+  // "/external_supply/purchase_orders/:id/edit": ({ id }: { id: string }) => (
+  //   <SupplyRequestForm
+  //     facilityId={facilityId}
+  //     locationId={locationId}
+  //     supplyRequestId={id}
+  //     mode="external"
+  //   />
+  // ),
   "/external_supply/inward_entry": () => (
     <IncomingDeliveries facilityId={facilityId} locationId={locationId} />
   ),

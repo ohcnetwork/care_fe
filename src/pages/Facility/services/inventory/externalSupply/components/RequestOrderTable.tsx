@@ -18,27 +18,25 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import {
-  SUPPLY_REQUEST_PRIORITY_COLORS,
-  SUPPLY_REQUEST_STATUS_COLORS,
-  SupplyRequestRead,
-} from "@/types/inventory/supplyRequest/supplyRequest";
+  REQUEST_ORDER_PRIORITY_COLORS,
+  REQUEST_ORDER_STATUS_COLORS,
+  RequestOrderRetrieve,
+} from "@/types/inventory/requestOrder/requestOrder";
 
 interface Props {
-  requests: SupplyRequestRead[];
+  requests: RequestOrderRetrieve[];
   isLoading: boolean;
   facilityId: string;
   locationId: string;
-  emptyTitle?: string;
-  emptyDescription?: string;
+  internal: boolean;
 }
 
-export default function PurchaseOrderTable({
+export default function RequestOrderTable({
   requests,
   isLoading,
   facilityId,
   locationId,
-  emptyTitle,
-  emptyDescription,
+  internal,
 }: Props) {
   const { t } = useTranslation();
 
@@ -49,10 +47,8 @@ export default function PurchaseOrderTable({
   if (requests.length === 0) {
     return (
       <EmptyState
-        title={emptyTitle || t("no_supply_requests_found")}
-        description={
-          emptyDescription || t("no_supply_requests_found_description")
-        }
+        title={t("no_orders_found")}
+        description={t("no_orders_found_description")}
         icon={<CareIcon icon="l-box" className="text-primary size-6" />}
       />
     );
@@ -63,8 +59,7 @@ export default function PurchaseOrderTable({
       <Table>
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-x">
-            <TableHead className="text-gray-700">{t("item")}</TableHead>
-            <TableHead className="text-gray-700">{t("quantity")}</TableHead>
+            <TableHead className="text-gray-700">{t("name")}</TableHead>
             <TableHead className="text-gray-700">{t("supplier")}</TableHead>
             <TableHead className="text-gray-700">{t("deliver_to")}</TableHead>
             <TableHead className="text-gray-700">{t("status")}</TableHead>
@@ -75,28 +70,25 @@ export default function PurchaseOrderTable({
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white text-base">
-          {requests.map((request: SupplyRequestRead) => (
+          {requests.map((request: RequestOrderRetrieve) => (
             <TableRow key={request.id} className="divide-x">
               <TableCell className="font-semibold text-gray-950">
-                {request.item.name}
+                {request.name}
               </TableCell>
               <TableCell className="font-medium text-gray-950">
-                {request.quantity}
+                {request.supplier?.name}
               </TableCell>
               <TableCell className="font-medium text-gray-950">
-                {request.supplier?.name || t("not_specified")}
-              </TableCell>
-              <TableCell className="font-medium text-gray-950">
-                {request.deliver_to.name}
+                {request.destination.name}
               </TableCell>
               <TableCell>
-                <Badge variant={SUPPLY_REQUEST_STATUS_COLORS[request.status]}>
+                <Badge variant={REQUEST_ORDER_STATUS_COLORS[request.status]}>
                   {t(request.status)}
                 </Badge>
               </TableCell>
               <TableCell>
                 <Badge
-                  variant={SUPPLY_REQUEST_PRIORITY_COLORS[request.priority]}
+                  variant={REQUEST_ORDER_PRIORITY_COLORS[request.priority]}
                 >
                   {t(request.priority)}
                 </Badge>
@@ -108,7 +100,9 @@ export default function PurchaseOrderTable({
                   className="shadow-sm border-gray-400 font-semibold text-gray-950"
                   onClick={() =>
                     navigate(
-                      `/facility/${facilityId}/locations/${locationId}/external_supply/purchase_orders/${request.id}`,
+                      `/facility/${facilityId}/locations/${locationId}/${
+                        internal ? "internal_transfers" : "external_supply"
+                      }/request_orders/${request.id}`,
                     )
                   }
                 >

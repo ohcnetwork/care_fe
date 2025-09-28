@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import {
   AlertTriangleIcon,
-  ArrowRightIcon,
   CheckIcon,
   MoreVertical,
   XIcon,
@@ -65,8 +64,6 @@ import {
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import {
-  SUPPLY_REQUEST_PRIORITY_COLORS,
-  SUPPLY_REQUEST_STATUS_COLORS,
   SupplyRequestCreate,
   SupplyRequestStatus,
 } from "@/types/inventory/supplyRequest/supplyRequest";
@@ -203,14 +200,9 @@ export default function ReceiveItem({
       if (data.markAsFullyReceived && delivery.supply_request) {
         await updateSupplyRequest({
           status: SupplyRequestStatus.completed,
-          intent: delivery.supply_request.intent,
-          category: delivery.supply_request.category,
-          priority: delivery.supply_request.priority,
-          reason: delivery.supply_request.reason,
           quantity: delivery.supply_request.quantity,
-          deliver_from: delivery.supply_request.deliver_from?.id,
-          deliver_to: delivery.supply_request.deliver_to.id,
           item: delivery.supply_request.item.id,
+          order: delivery.supply_request.order.id,
         } satisfies SupplyRequestCreate);
       }
 
@@ -902,7 +894,7 @@ export default function ReceiveItem({
             </div>
 
             {/* Bottom section - Request raised by */}
-            {delivery.supply_request && (
+            {/* {delivery.supply_request && (
               <div className="mt-8 bg-gray-100 rounded-lg border p-2">
                 <h3 className="text-base font-semibold">
                   {t("request_raised_by")}{" "}
@@ -1017,7 +1009,7 @@ export default function ReceiveItem({
                   </Button>
                 </div>
               </div>
-            )}
+            )} */}
 
             {deliveries?.results && deliveries?.results?.length > 1 && (
               <div className="mx-4 bg-gray-100 rounded-md p-3 mt-2 text-gray-950 border border-gray-200">

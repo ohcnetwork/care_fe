@@ -8,23 +8,23 @@ import {
 
 export default {
   listRequestOrder: {
-    path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/order/request/",
+    path: "/api/v1/facility/{facilityId}/order/request/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<RequestOrderRetrieve>>(),
   },
   retrieveRequestOrder: {
-    path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/order/request/{requestOrderId}/",
+    path: "/api/v1/facility/{facilityId}/order/request/{requestOrderId}/",
     method: HttpMethod.GET,
     TRes: Type<RequestOrderRetrieve>(),
   },
   createRequestOrder: {
-    path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/order/request/",
+    path: "/api/v1/facility/{facilityId}/order/request/",
     method: HttpMethod.POST,
     TRes: Type<RequestOrderRetrieve>(),
     TBody: Type<RequestOrderCreate>(),
   },
   updateRequestOrder: {
-    path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/order/request/{requestOrderId}/",
+    path: "/api/v1/facility/{facilityId}/order/request/{requestOrderId}/",
     method: HttpMethod.PUT,
     TRes: Type<RequestOrderRetrieve>(),
     TBody: Type<RequestOrderUpdate>(),
