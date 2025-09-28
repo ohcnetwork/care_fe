@@ -11,6 +11,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
@@ -20,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Page from "@/components/Common/Page";
@@ -117,19 +117,16 @@ export function AccountList({
           <div className="mb-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-between gap-4">
             <div className="flex flex-wrap gap-4">
               <FilterTabs
-                value={qParams.status ?? "all"}
+                value={qParams.status ?? ""}
                 onValueChange={(nextValue) =>
                   updateQuery({ status: nextValue ? nextValue : undefined })
                 }
                 className="overflow-y-auto max-w-[calc(100%)] max-sm:hidden text-gray-950"
-                options={[
-                  { value: "all", label: "all_accounts" },
-                  ...Object.keys(ACCOUNT_STATUS_COLORS).map((key) => ({
-                    value: key,
-                    label: key,
-                  })),
-                ]}
-                showAllOption={false}
+                allOptionLabel="all_accounts"
+                options={Object.keys(ACCOUNT_STATUS_COLORS).map((key) => ({
+                  value: key,
+                  label: key,
+                }))}
               />
 
               <Select

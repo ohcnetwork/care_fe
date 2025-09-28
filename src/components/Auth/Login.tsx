@@ -22,7 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FilterTabs } from "@/components/ui/filter-tabs"
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import {
   InputOTP,
@@ -91,6 +91,12 @@ const Login = (props: LoginProps) => {
   const { forgot } = props;
   const [params, setQueryParams] = useQueryParams();
   const { mode } = params;
+  const loginMode = (mode as LoginMode | undefined) ?? "staff";
+  useEffect(() => {
+    if (!mode) {
+      setQueryParams({ mode: loginMode });
+    }
+  }, [mode, loginMode, setQueryParams]);
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
@@ -360,9 +366,9 @@ const Login = (props: LoginProps) => {
                 <CardDescription>{t("choose_login_method")}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex w-full">
+                <div className="flex w/full">
                   <FilterTabs
-                    value={mode}
+                    value={loginMode}
                     onValueChange={(value) => {
                       setQueryParams({ mode: value as LoginMode });
                       if (value === "staff") {
@@ -382,7 +388,7 @@ const Login = (props: LoginProps) => {
                 </div>
 
                 {/* Staff Login */}
-                {mode === "staff" &&
+                {loginMode === "staff" &&
                   (!forgotPassword ?(
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="space-y-2">
@@ -521,7 +527,7 @@ const Login = (props: LoginProps) => {
                   ))}
 
                 {/* Patient Login */}
-                {mode === "patient" && (
+                {loginMode === "patient" && (
                   <form onSubmit={handlePatientLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="phone">{t("phone_number")}</Label>

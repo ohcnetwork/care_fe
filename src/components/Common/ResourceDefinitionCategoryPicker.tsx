@@ -976,7 +976,7 @@ export function ResourceDefinitionCategoryPicker<T>({
 
           <PopoverContent
             className={cn(
-              "p-0 shadow-lg border-0 -w-[var(--radix-popover-trigger-width)] sm:max-w-[80vw]",
+              "p-0 shadow-lg border-0 min-w-[var(--radix-popover-trigger-width)] sm:max-w-[80vw]",
               enableFavorites ? "md:max-w-[70vw]" : "min-w-[420px]",
             )}
             align="start"
