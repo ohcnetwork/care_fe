@@ -837,7 +837,7 @@ function AppointmentRow(props: {
       {/* Status Filter - Mobile */}
       <div className="md:hidden">
         <Select
-          value={props.status || "booked"}
+          value={statusTabValue}
           onValueChange={(value) => props.updateQuery({ status: value })}
         >
           <SelectTrigger className="h-8 w-40">

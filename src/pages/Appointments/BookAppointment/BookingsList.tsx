@@ -150,7 +150,7 @@ const AppointmentCard = ({
         </div>
         <Button
           variant="outline"
-          className="w-full border borde-gray-400 text-gray-950 font-semibold"
+          className="w-full border border-gray-400 text-gray-950 font-semibold"
           asChild
         >
           <Link

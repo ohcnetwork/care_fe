@@ -46,12 +46,14 @@ export default function DispensesView({
   ];
 
   const allStatuses = Object.values(MedicationDispenseStatus);
-  const [visibleTabs, setVisibleTabs] = useState<MedicationDispenseStatus[]>(
-    defaultVisibleStatuses,
-  );
+  const initialVisibleTabs = defaultVisibleStatuses.includes(status)
+    ? defaultVisibleStatuses
+    : [...defaultVisibleStatuses.slice(0, -1), status];
+  const [visibleTabs, setVisibleTabs] =
+    useState<MedicationDispenseStatus[]>(initialVisibleTabs);
   const [dropdownItems, setDropdownItems] = useState<
     MedicationDispenseStatus[]
-  >(allStatuses.filter((status) => !defaultVisibleStatuses.includes(status)));
+  >(allStatuses.filter((value) => !initialVisibleTabs.includes(value)));
 
   const handleDropdownSelect = (value: MedicationDispenseStatus) => {
     const lastVisibleTab = visibleTabs[visibleTabs.length - 1];

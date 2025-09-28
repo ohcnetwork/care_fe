@@ -7,8 +7,8 @@ import {
   ChevronUp,
   ChevronsDownUp,
   ChevronsUpDown,
-  SquarePenIcon,
-  ViewIcon,
+  Eye,
+  SquarePen,
 } from "lucide-react";
 import { useNavigate } from "raviger";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -245,6 +245,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
+  useEffect(() => {
+    if (!id && activeTab !== "edit") {
+      setActiveTab("edit");
+    }
+  }, [id, activeTab]);
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(
     new Set(),
   );
@@ -951,22 +956,19 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       <div className="mb-4">
         <FilterTabs
           value={activeTab}
-          onValueChange={(v) => {
-            if (v === "preview" && !id) return;
-            setActiveTab(v as "edit" | "preview");
-          }}
+          onValueChange={(v) => setActiveTab(v as "edit" | "preview")}
           options={[
             {
               value: "edit",
               label: "edit_form",
-              icon: <ViewIcon className="size-4" />,
+              icon: <SquarePen className="size-4" />,
             },
             ...(id
               ? [
                   {
                     value: "preview",
                     label: "form_preview",
-                    icon: <SquarePenIcon className="size-4" />,
+                    icon: <Eye className="size-4" />,
                   },
                 ]
               : []),

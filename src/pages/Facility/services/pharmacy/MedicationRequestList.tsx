@@ -123,7 +123,7 @@ export default function MedicationRequestList({
   // Handle tab selection
   const handleTabSelect = (value: string) => {
     updateQuery({
-      encounter_class: value === "all" ? undefined : value,
+      encounter_class: value ? value : undefined,
     });
   };
 
