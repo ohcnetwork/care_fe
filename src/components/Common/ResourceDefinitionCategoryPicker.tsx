@@ -40,6 +40,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   ResourceCategoryParent,
@@ -49,7 +50,6 @@ import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryA
 import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 interface CategoryBreadcrumb {
   slug: string;
@@ -786,31 +786,41 @@ export function ResourceDefinitionCategoryPicker<T>({
   ];
 
   const renderFavoritesContent = () => (
-  <div className="flex flex-col h-full">
-    <div className="px-4 py-2 border-b flex-shrink-0">
-      <FilterTabs
-        value={favSubTab}
-        onValueChange={setFavSubTab}
-        options={[
-          { value: "recent", label: t("recent") },
-          { value: "favorites", label: `${t("favorites")} (${favorites.length})` },
-        ]}
-        variant="underline"
-        className="w-full"
-        maxVisibleTabs={2}
-        showAllOption={false}
-      />
+    <div className="flex flex-col h-full">
+      <div className="px-4 py-2 border-b flex-shrink-0">
+        <FilterTabs
+          value={favSubTab}
+          onValueChange={setFavSubTab}
+          options={[
+            {
+              value: "recent",
+              label: "recent",
+              icon: <Clock className="h-4 w-4" />,
+            },
+            {
+              value: "favorites",
+              label: "favorites",
+              icon:
+                favorites.length > 0 ? (
+                  <Badge variant="secondary">{favorites.length}</Badge>
+                ) : undefined,
+            },
+          ]}
+          variant="underline"
+          className="w-full"
+          showAllOption={false}
+        />
+      </div>
+      <div className="flex-1 min-h-0 overflow-hidden">
+        {favSubTab === "recent" && (
+          <div className="h-full mt-0">{renderRecentItems()}</div>
+        )}
+        {favSubTab === "favorites" && (
+          <div className="h-full mt-0">{renderFavoriteItems()}</div>
+        )}
+      </div>
     </div>
-    <div className="flex-1 min-h-0 overflow-hidden">
-      {favSubTab === "recent" && (
-        <div className="h-full mt-0">{renderRecentItems()}</div>
-      )}
-      {favSubTab === "favorites" && (
-        <div className="h-full mt-0">{renderFavoriteItems()}</div>
-      )}
-    </div>
-  </div>
-);
+  );
 
   return (
     <div className="space-y-2">
@@ -1015,17 +1025,26 @@ export function ResourceDefinitionCategoryPicker<T>({
                   <div className="px-4 py-1 border-b bg-gray-50">
                     <FilterTabs
                       value={activeTab}
-                      onValueChange={(value) => setActiveTab(value as "card" | "list")}
+                      onValueChange={(value) =>
+                        setActiveTab(value as "card" | "list")
+                      }
                       options={[
                         {
                           value: "card",
                           label: "card",
-                          icon: <CareIcon icon="l-credit-card" className="text-lg" />,
+                          icon: (
+                            <CareIcon
+                              icon="l-credit-card"
+                              className="text-lg"
+                            />
+                          ),
                         },
                         {
                           value: "list",
                           label: "list",
-                          icon: <CareIcon icon="l-list-ul" className="text-lg" />,
+                          icon: (
+                            <CareIcon icon="l-list-ul" className="text-lg" />
+                          ),
                         },
                       ]}
                       className="flex"
