@@ -7,24 +7,24 @@ import {
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 
 export default {
-  listRequestOrder: {
-    path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/order/delivery/",
+  listDeliveryOrder: {
+    path: "/api/v1/facility/{facilityId}/order/delivery/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<DeliveryOrderRetrieve>>(),
   },
-  retrieveRequestOrder: {
-    path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/order/delivery/{deliveryOrderId}/",
+  retrieveDeliveryOrder: {
+    path: "/api/v1/facility/{facilityId}/order/delivery/{deliveryOrderId}/",
     method: HttpMethod.GET,
     TRes: Type<DeliveryOrderRetrieve>(),
   },
-  createRequestOrder: {
-    path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/order/delivery/",
+  createDeliveryOrder: {
+    path: "/api/v1/facility/{facilityId}/order/delivery/",
     method: HttpMethod.POST,
     TRes: Type<DeliveryOrderRetrieve>(),
     TBody: Type<DeliveryOrderCreate>(),
   },
-  updateRequestOrder: {
-    path: "/api/v1/facility/{facility_external_id}/location/{location_external_id}/order/delivery/{deliveryOrderId}/",
+  updateDeliveryOrder: {
+    path: "/api/v1/facility/{facilityId}/order/delivery/{deliveryOrderId}/",
     method: HttpMethod.PUT,
     TRes: Type<DeliveryOrderRetrieve>(),
     TBody: Type<DeliveryOrderUpdate>(),

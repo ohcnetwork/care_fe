@@ -174,7 +174,7 @@ export default function ReceiveItem({
 
   const { mutateAsync: updateSupplyDelivery, isPending: isUpdatingDelivery } =
     useMutation({
-      mutationFn: mutate(supplyDeliveryApi.updateSupplyDeliveryAsReceiver, {
+      mutationFn: mutate(supplyDeliveryApi.updateSupplyDelivery, {
         pathParams: { supplyDeliveryId: deliveryId },
       }),
     });
@@ -461,14 +461,14 @@ export default function ReceiveItem({
                   {delivery.status === "in_progress" ? (
                     <>
                       {t("dispatch_in_progress_from")}{" "}
-                      {delivery.origin?.name || delivery.supplier?.name}{" "}
-                      {t("to")} {delivery.destination.name}
+                      {/* {delivery.origin?.name || delivery.supplier?.name}{" "} */}
+                      {/* {t("to")} {delivery.destination.name} */}
                     </>
                   ) : delivery.status === "completed" ? (
                     <>
                       {t("received")} {t("from")}{" "}
-                      {delivery.origin?.name || delivery.supplier?.name}{" "}
-                      {t("to")} {delivery.destination.name}
+                      {/* {delivery.origin?.name || delivery.supplier?.name}{" "} */}
+                      {/* {t("to")} {delivery.destination.name} */}
                     </>
                   ) : null}
                 </div>

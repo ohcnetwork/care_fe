@@ -23,13 +23,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 import Page from "@/components/Common/Page";
@@ -39,14 +32,10 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import Autocomplete from "@/components/ui/autocomplete";
 import {
-  RequestOrderCategory,
-  RequestOrderIntent,
-  RequestOrderPriority,
-  RequestOrderReason,
-  RequestOrderRetrieve,
-  RequestOrderStatus,
-} from "@/types/inventory/requestOrder/requestOrder";
-import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
+  DeliveryOrderRetrieve,
+  DeliveryOrderStatus,
+} from "@/types/inventory/deliveryOrder/deliveryOrder";
+import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import organizationApi from "@/types/organization/organizationApi";
@@ -55,15 +44,11 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 
-const createRequestOrderFormSchema = (internal: boolean) =>
+const createDeliveryOrderFormSchema = (internal: boolean) =>
   z.object({
-    status: z.nativeEnum(RequestOrderStatus),
+    status: z.nativeEnum(DeliveryOrderStatus),
     name: z.string().min(1, "Name is required"),
     note: z.string().optional(),
-    intent: z.nativeEnum(RequestOrderIntent),
-    category: z.nativeEnum(RequestOrderCategory),
-    priority: z.nativeEnum(RequestOrderPriority),
-    reason: z.nativeEnum(RequestOrderReason),
     supplier: internal
       ? z.string().optional()
       : z.string().min(1, "Supplier is required"),
@@ -73,31 +58,32 @@ const createRequestOrderFormSchema = (internal: boolean) =>
     destination: z.string().min(1, "Destination is required"),
   });
 
-type FormValues = z.infer<ReturnType<typeof createRequestOrderFormSchema>>;
+type FormValues = z.infer<ReturnType<typeof createDeliveryOrderFormSchema>>;
 
 interface Props {
   facilityId: string;
   locationId: string;
   internal: boolean;
-  requestOrderId?: string;
+  deliveryOrderId?: string;
 }
 
-export default function RequestOrderForm({
+export default function DeliveryOrderForm({
   facilityId,
   locationId,
   internal,
-  requestOrderId,
+  deliveryOrderId,
 }: Props) {
   const { t } = useTranslation();
+
   const { goBack } = useAppHistory();
-  const isEditMode = Boolean(requestOrderId);
+  const isEditMode = Boolean(deliveryOrderId);
 
   const { data: existingData, isFetching } = useQuery({
-    queryKey: ["requestOrder", requestOrderId],
-    queryFn: query(requestOrderApi.retrieveRequestOrder, {
+    queryKey: ["deliveryOrder", deliveryOrderId],
+    queryFn: query(deliveryOrderApi.retrieveDeliveryOrder, {
       pathParams: {
         facilityId: facilityId,
-        requestOrderId: requestOrderId!,
+        deliveryOrderId: deliveryOrderId!,
       },
     }),
     enabled: isEditMode,
@@ -107,7 +93,7 @@ export default function RequestOrderForm({
 
   const returnPath = `/facility/${facilityId}/locations/${locationId}/${
     internal ? "internal_transfers" : "external_supply"
-  }/request_orders`;
+  }/delivery_orders`;
 
   const queryClient = useQueryClient();
   const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
@@ -156,18 +142,14 @@ export default function RequestOrderForm({
     })) || [];
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(createRequestOrderFormSchema(internal)),
+    resolver: zodResolver(createDeliveryOrderFormSchema(internal)),
     defaultValues: {
-      status: RequestOrderStatus.draft,
+      status: DeliveryOrderStatus.draft,
       name: "",
       note: "",
-      intent: RequestOrderIntent.order,
-      category: RequestOrderCategory.nonstock,
-      priority: RequestOrderPriority.routine,
-      reason: RequestOrderReason.ward_stock,
       supplier: undefined,
-      origin: undefined,
-      destination: locationId,
+      origin: internal ? locationId : undefined,
+      destination: internal ? "" : locationId,
     },
   });
 
@@ -177,10 +159,6 @@ export default function RequestOrderForm({
         status: existingData.status,
         name: existingData.name,
         note: existingData.note || "",
-        intent: existingData.intent,
-        category: existingData.category,
-        priority: existingData.priority,
-        reason: existingData.reason,
         supplier: existingData.supplier?.id || undefined,
         origin: existingData.origin?.id || undefined,
         destination: existingData.destination.id,
@@ -188,41 +166,41 @@ export default function RequestOrderForm({
     }
   }, [isEditMode, existingData, form]);
 
-  const { mutate: createRequestOrder, isPending: isCreating } = useMutation({
-    mutationFn: mutate(requestOrderApi.createRequestOrder, {
+  const { mutate: createDeliveryOrder, isPending: isCreating } = useMutation({
+    mutationFn: mutate(deliveryOrderApi.createDeliveryOrder, {
       pathParams: {
         facilityId: facilityId,
       },
     }),
-    onSuccess: (requestOrder: RequestOrderRetrieve) => {
-      queryClient.invalidateQueries({ queryKey: ["requestOrders"] });
+    onSuccess: (deliveryOrder: DeliveryOrderRetrieve) => {
+      queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
       toast.success(t("order_created"));
-      navigate(returnPath + "/" + requestOrder.id);
+      navigate(returnPath + "/" + deliveryOrder.id);
     },
   });
 
-  const { mutate: updateRequestOrder, isPending: isUpdating } = useMutation({
-    mutationFn: mutate(requestOrderApi.updateRequestOrder, {
+  const { mutate: updateDeliveryOrder, isPending: isUpdating } = useMutation({
+    mutationFn: mutate(deliveryOrderApi.updateDeliveryOrder, {
       pathParams: {
         facilityId: facilityId,
-        requestOrderId: requestOrderId!,
+        deliveryOrderId: deliveryOrderId!,
       },
     }),
-    onSuccess: (requestOrder: RequestOrderRetrieve) => {
-      queryClient.invalidateQueries({ queryKey: ["requestOrders"] });
+    onSuccess: (deliveryOrder: DeliveryOrderRetrieve) => {
+      queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
       toast.success(t("order_updated"));
-      navigate(returnPath + "/" + requestOrder.id);
+      navigate(returnPath + "/" + deliveryOrder.id);
     },
   });
 
   function onSubmit(data: FormValues) {
-    if (isEditMode && requestOrderId) {
-      updateRequestOrder({
+    if (isEditMode && deliveryOrderId) {
+      updateDeliveryOrder({
         ...data,
-        id: requestOrderId,
+        id: deliveryOrderId,
       });
     } else {
-      createRequestOrder(data);
+      createDeliveryOrder(data);
     }
   }
 
@@ -242,7 +220,11 @@ export default function RequestOrderForm({
   }
 
   return (
-    <Page title={title} hideTitleOnPage shortCutContext="facility:inventory">
+    <Page
+      title={title}
+      hideTitleOnPage
+      shortCutContext="facility:inventory:delivery"
+    >
       <div className="container mx-auto max-w-5xl">
         <div className="mb-6 relative">
           <Button
@@ -280,11 +262,11 @@ export default function RequestOrderForm({
 
                   <FormField
                     control={form.control}
-                    name={internal ? "origin" : "supplier"}
+                    name={internal ? "destination" : "supplier"}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          {internal ? t("deliver_from") : t("vendor")} *
+                          {internal ? t("deliver_to") : t("vendor")} *
                         </FormLabel>
                         <FormControl>
                           <Autocomplete
@@ -359,13 +341,13 @@ export default function RequestOrderForm({
                           >
                             {(isEditMode
                               ? [
-                                  RequestOrderStatus.pending,
-                                  RequestOrderStatus.abandoned,
-                                  RequestOrderStatus.entered_in_error,
+                                  DeliveryOrderStatus.pending,
+                                  DeliveryOrderStatus.abandoned,
+                                  DeliveryOrderStatus.entered_in_error,
                                 ]
                               : [
-                                  RequestOrderStatus.draft,
-                                  RequestOrderStatus.pending,
+                                  DeliveryOrderStatus.draft,
+                                  DeliveryOrderStatus.pending,
                                 ]
                             ).map((status) => (
                               <div
@@ -387,151 +369,7 @@ export default function RequestOrderForm({
                       </FormItem>
                     )}
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="priority"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("priority")}</FormLabel>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            value={field.value}
-                            className="flex flex-col sm:flex-row gap-2"
-                          >
-                            {Object.values(RequestOrderPriority).map(
-                              (priority) => (
-                                <div
-                                  key={priority}
-                                  className={cn(
-                                    "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
-                                    field.value === priority &&
-                                      "border-primary bg-primary/10",
-                                  )}
-                                >
-                                  <RadioGroupItem
-                                    value={priority}
-                                    id={priority}
-                                  />
-                                  <Label htmlFor={priority}>
-                                    {t(priority)}
-                                  </Label>
-                                </div>
-                              ),
-                            )}
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="reason"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("reason")}</FormLabel>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            value={field.value}
-                            className="flex flex-col sm:flex-row gap-2"
-                          >
-                            {Object.values(RequestOrderReason).map((reason) => (
-                              <div
-                                key={reason}
-                                className={cn(
-                                  "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
-                                  field.value === reason &&
-                                    "border-primary bg-primary/10",
-                                )}
-                              >
-                                <RadioGroupItem value={reason} id={reason} />
-                                <Label htmlFor={reason}>{t(reason)}</Label>
-                              </div>
-                            ))}
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="intent"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("intent")}</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger
-                              className="border border-gray-400"
-                              ref={field.ref}
-                            >
-                              <SelectValue placeholder={t("select_intent")} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.values(RequestOrderIntent).map((intent) => (
-                              <SelectItem key={intent} value={intent}>
-                                {t(intent)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("category")}</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          value={field.value}
-                          className="flex flex-col sm:flex-row gap-2"
-                        >
-                          {Object.values(RequestOrderCategory).map(
-                            (category) => (
-                              <div
-                                key={category}
-                                className={cn(
-                                  "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
-                                  field.value === category &&
-                                    "border-primary bg-primary/10",
-                                )}
-                              >
-                                <RadioGroupItem
-                                  value={category}
-                                  id={category}
-                                />
-                                <Label htmlFor={category}>{t(category)}</Label>
-                              </div>
-                            ),
-                          )}
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </CardContent>
             </Card>
 

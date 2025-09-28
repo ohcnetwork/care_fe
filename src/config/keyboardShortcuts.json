@@ -77,7 +77,11 @@
     { "key": "p", "action": "print-payment-receipt", "description": "Print Receipt", "when": "always" }
   ],
   "facility:inventory": [
-    { "key": "c", "action": "create-order", "description": "Create Order", "when": "always" }
+    { "key": "c", "action": "create-order", "description": "Create Order", "when": "always" },
+    { "key": "a", "action": "add-item", "description": "Add Item", "when": "always" }
+  ],
+  "facility:inventory:delivery": [
+    { "key": "l", "action": "load-from-order", "description": "Load from Order", "when": "always" }
   ],
 
   "encounter": [

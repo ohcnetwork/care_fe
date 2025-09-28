@@ -84,6 +84,7 @@ interface ChargeItemDefinitionFormProps {
   facilityId: string;
   initialData?: ChargeItemDefinitionRead;
   categorySlug?: string;
+  minimal?: boolean;
   isUpdate?: boolean;
   onSuccess?: (chargeItemDefinition: ChargeItemDefinitionRead) => void;
   onCancel?: () => void;
@@ -110,6 +111,8 @@ function MonetaryComponentSelectionSection({
   type,
   errors,
   availableMetrics,
+  minimal = false,
+  className = "",
 }: {
   title: string;
   description: string;
@@ -124,6 +127,8 @@ function MonetaryComponentSelectionSection({
   type: MonetaryComponentType;
   errors: FieldErrors<z.infer<typeof priceComponentSchema>>[];
   availableMetrics: Metrics[];
+  minimal?: boolean;
+  className?: string;
 }) {
   const { t } = useTranslation();
 
@@ -153,7 +158,9 @@ function MonetaryComponentSelectionSection({
   };
 
   return (
-    <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
+    <div
+      className={`space-y-4 ${minimal ? "p-3" : "p-4"} bg-gray-50 rounded-lg border ${className}`}
+    >
       <div className="flex items-center justify-between">
         <div>
           <h4 className="font-medium text-gray-900">{title}</h4>
@@ -253,6 +260,7 @@ function MonetaryComponentSelectionSection({
 export function ChargeItemDefinitionForm({
   facilityId,
   initialData,
+  minimal = false,
   isUpdate = false,
   categorySlug,
   onSuccess = () => {
@@ -714,31 +722,60 @@ export function ChargeItemDefinitionForm({
 
         {/* Pricing Components */}
         <Card>
-          <CardHeader>
-            <CardTitle>{t("pricing_components")}</CardTitle>
+          <CardHeader className={minimal ? "pb-3" : ""}>
+            <CardTitle className={minimal ? "text-lg" : ""}>
+              {t("pricing_components")}
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className={minimal ? "space-y-4 pt-0" : "space-y-6"}>
             {/* Base Price */}
-            <div className="rounded-lg border p-4 bg-gray-50 space-y-2">
-              <div>
-                <h4 className="text-lg font-medium text-gray-900">
-                  {t("base_price")}
-                </h4>
-                <p className="text-sm text-gray-600">
-                  {t("base_price_explanation")}
-                </p>
+            <div className={"flex md:flex-row flex-col gap-4"}>
+              <div className={`p-4 w-full bg-gray-50 rounded-lg border`}>
+                <FormItem className="flex items-center justify-between gap-2">
+                  <FormLabel className={`font-medium text-gray-900`}>
+                    {t("base_price")}
+                  </FormLabel>
+                  <div className="flex flex-col items-end gap-2">
+                    <FormField
+                      control={form.control}
+                      name="price_components.0.amount"
+                      render={({ field }) => (
+                        <FormItem className="w-full space-y-1">
+                          <FormControl>
+                            <MonetaryAmountInput
+                              {...field}
+                              value={field.value ?? 0}
+                              onChange={(e) =>
+                                field.onChange(String(e.target.value))
+                              }
+                              placeholder="0.00"
+                            />
+                          </FormControl>
+                          <FormMessage>
+                            {
+                              form.formState.errors.price_components?.[0]
+                                ?.amount?.message
+                            }
+                          </FormMessage>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </FormItem>
               </div>
-
-              <FormField
-                control={form.control}
-                name="price_components.0.amount"
-                render={({ field }) => (
-                  <FormItem className="w-full space-y-1">
-                    <FormControl>
+              {/* MRP */}
+              <div className={`p-4 w-full bg-gray-50 rounded-lg border`}>
+                <FormItem className="flex items-center justify-between gap-2">
+                  <FormLabel
+                    className={`font-medium text-gray-900 ${minimal ? "text-base" : "text-xl"}`}
+                  >
+                    {t("mrp")}
+                  </FormLabel>
+                  <div className="flex flex-col items-end gap-2">
+                    <FormControl className="w-48">
                       <MonetaryAmountInput
-                        {...field}
-                        value={field.value ?? 0}
-                        onChange={(e) => field.onChange(String(e.target.value))}
+                        value={mrp ?? 0}
+                        onChange={(e) => handleMrpChange(e.target.value)}
                         placeholder="0.00"
                       />
                     </FormControl>
@@ -748,115 +785,109 @@ export function ChargeItemDefinitionForm({
                           ?.message
                       }
                     </FormMessage>
-                  </FormItem>
-                )}
-              />
+                  </div>
+                </FormItem>
+              </div>
             </div>
-            {/* Discounts */}
-            <MonetaryComponentSelectionSection
-              title={t("discounts")}
-              description={t("select_applicable_discounts")}
-              components={availableDiscounts}
-              selectedComponents={getSelectedComponents(
-                MonetaryComponentType.discount,
-              )}
-              onComponentToggle={(component, selected) =>
-                handleComponentToggle(
-                  component,
-                  selected,
-                  MonetaryComponentType.discount,
-                )
-              }
-              onValueChange={handleComponentValueChange}
-              onConditionsChange={handleComponentConditionsChange}
-              type={MonetaryComponentType.discount}
-              errors={getSelectedComponentError(MonetaryComponentType.discount)}
-              availableMetrics={availableMetrics}
-            />
-
-            {/* Taxes */}
-            <MonetaryComponentSelectionSection
-              title={t("taxes")}
-              description={t("select_applicable_taxes")}
-              components={availableTaxes}
-              selectedComponents={getSelectedComponents(
-                MonetaryComponentType.tax,
-              )}
-              onComponentToggle={(component, selected) =>
-                handleComponentToggle(
-                  component,
-                  selected,
+            <div className="flex md:flex-row flex-col gap-4">
+              {/* Taxes */}
+              <MonetaryComponentSelectionSection
+                title={t("taxes")}
+                description={t("select_applicable_taxes")}
+                components={availableTaxes}
+                selectedComponents={getSelectedComponents(
                   MonetaryComponentType.tax,
-                )
-              }
-              onValueChange={handleComponentValueChange}
-              onConditionsChange={handleComponentConditionsChange}
-              type={MonetaryComponentType.tax}
-              errors={getSelectedComponentError(MonetaryComponentType.tax)}
-              availableMetrics={availableMetrics}
-            />
-
-            {/* MRP */}
-            <div className="p-4 bg-gray-50 rounded-lg border">
-              <FormItem className="flex items-center justify-between gap-2">
-                <FormLabel className="font-medium text-gray-900 text-xl">
-                  {t("mrp")}
-                </FormLabel>
-                <div className="flex flex-col items-end gap-2">
-                  <FormControl className="w-48">
-                    <MonetaryAmountInput
-                      value={mrp ?? 0}
-                      onChange={(e) => handleMrpChange(e.target.value)}
-                      placeholder="0.00"
-                    />
-                  </FormControl>
-                  <FormMessage>
-                    {
-                      form.formState.errors.price_components?.[0]?.amount
-                        ?.message
-                    }
-                  </FormMessage>
-                </div>
-              </FormItem>
+                )}
+                onComponentToggle={(component, selected) =>
+                  handleComponentToggle(
+                    component,
+                    selected,
+                    MonetaryComponentType.tax,
+                  )
+                }
+                onValueChange={handleComponentValueChange}
+                onConditionsChange={handleComponentConditionsChange}
+                type={MonetaryComponentType.tax}
+                errors={getSelectedComponentError(MonetaryComponentType.tax)}
+                availableMetrics={availableMetrics}
+                minimal={minimal}
+                className={minimal ? "w-full" : ""}
+              />
+              {/* Discounts */}
+              <MonetaryComponentSelectionSection
+                title={t("discounts")}
+                className={minimal ? "w-full" : ""}
+                description={t("select_applicable_discounts")}
+                components={availableDiscounts}
+                selectedComponents={getSelectedComponents(
+                  MonetaryComponentType.discount,
+                )}
+                onComponentToggle={(component, selected) =>
+                  handleComponentToggle(
+                    component,
+                    selected,
+                    MonetaryComponentType.discount,
+                  )
+                }
+                onValueChange={handleComponentValueChange}
+                onConditionsChange={handleComponentConditionsChange}
+                type={MonetaryComponentType.discount}
+                errors={getSelectedComponentError(
+                  MonetaryComponentType.discount,
+                )}
+                availableMetrics={availableMetrics}
+                minimal={minimal}
+              />
             </div>
 
             {/* Price Summary */}
-            <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100">
-              <h4 className="font-medium text-green-900 mb-3">
-                {t("price_summary")}
-              </h4>
-              <div className="space-y-2 divide-y divide-green-200">
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-gray-600">{t("base_price")}</span>
-                  <MonetaryDisplay
-                    className="font-medium text-gray-900"
-                    amount={basePrice}
-                  />
+            {!minimal && (
+              <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100">
+                <h4 className="font-medium text-green-900 mb-3">
+                  {t("price_summary")}
+                </h4>
+                <div className="space-y-2 divide-y divide-green-200">
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-600">{t("base_price")}</span>
+                    <MonetaryDisplay
+                      className="font-medium text-gray-900"
+                      amount={basePrice}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-2">
+        <div
+          className={`flex justify-end ${minimal ? "space-x-1" : "space-x-2"}`}
+        >
           <Button
             type="button"
             variant="outline"
+            size={minimal ? "sm" : "default"}
             disabled={isPending}
             onClick={onCancel}
           >
             {t("cancel")}
           </Button>
-          <Button type="submit" disabled={isPending}>
+          <Button
+            type="submit"
+            size={minimal ? "sm" : "default"}
+            disabled={isPending}
+          >
             {isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2
+                  className={`${minimal ? "mr-1" : "mr-2"} h-4 w-4 animate-spin`}
+                />
                 {t("saving")}
               </>
             ) : (
               <>
-                <CheckIcon className="mr-2 h-4 w-4" />
+                <CheckIcon className={`${minimal ? "mr-1" : "mr-2"} h-4 w-4`} />
                 {isUpdate ? t("update") : t("create")}
               </>
             )}

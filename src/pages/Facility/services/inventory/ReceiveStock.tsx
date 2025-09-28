@@ -137,6 +137,7 @@ export function ReceiveStock({
             supplied_item_quantity: entry.supplied_item_quantity,
             status: SupplyDeliveryStatus.in_progress,
             supplied_item_type: SupplyDeliveryType.product,
+            order: "deliveryOrderId",
           } satisfies SupplyDeliveryCreate,
         })),
     });

@@ -483,6 +483,7 @@ export function ProductFormContent({
                         <div className="mt-6">
                           <ChargeItemDefinitionForm
                             facilityId={facilityId}
+                            minimal={true}
                             onSuccess={(
                               chargeItemDefinition: ChargeItemDefinitionRead,
                             ) => {

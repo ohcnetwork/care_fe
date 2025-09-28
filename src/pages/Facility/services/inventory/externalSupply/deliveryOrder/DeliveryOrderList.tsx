@@ -1,21 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Check } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { OrgSelect } from "@/components/Common/OrgSelect";
@@ -23,14 +12,10 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
-import {
-  REQUEST_ORDER_PRIORITY_COLORS,
-  RequestOrderPriority,
-} from "@/types/inventory/requestOrder/requestOrder";
 import query from "@/Utils/request/query";
 
-import RequestOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/RequestOrderTable";
-import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
+import DeliveryOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/DeliveryOrderTable";
+import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface Props {
@@ -40,7 +25,7 @@ interface Props {
   isRequester: boolean;
 }
 
-export function RequestOrderList({
+export function DeliveryOrderList({
   facilityId,
   locationId,
   internal,
@@ -59,6 +44,7 @@ export function RequestOrderList({
         },
       ]
     : ([
+        ...(isRequester ? [] : [{ value: "draft", label: "draft" }]),
         { value: "pending", label: "pending" },
         { value: "in_progress", label: "in_progress" },
         {
@@ -73,7 +59,6 @@ export function RequestOrderList({
     limit: 14,
     disableCache: true,
   });
-  const [priorityPopoverOpen, setPriorityPopoverOpen] = useState(false);
 
   const handleTabChange = (value: string) => {
     setQueryParams({
@@ -89,17 +74,17 @@ export function RequestOrderList({
 
   const { data: response, isLoading } = useQuery({
     queryKey: [
-      "requestOrders",
+      "deliveryOrders",
       locationId,
       internal,
       isRequester,
       qParams,
       effectiveStatus,
     ],
-    queryFn: query.debounced(requestOrderApi.listRequestOrder, {
+    queryFn: query.debounced(deliveryOrderApi.listDeliveryOrder, {
       pathParams: { facilityId: facilityId },
       queryParams: {
-        ...(isRequester ? { destination: locationId } : { origin: locationId }),
+        ...(isRequester ? { origin: locationId } : { destination: locationId }),
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: effectiveStatus,
@@ -123,66 +108,12 @@ export function RequestOrderList({
         noOptionsMessage={t("no_vendor_found")}
         className="w-[250px]"
       />
-
-      <Popover open={priorityPopoverOpen} onOpenChange={setPriorityPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            className="gap-2 font-medium"
-          >
-            <BarChart3 className="size-4" />
-            <span>{t("filter_by_priority")}</span>
-            {qParams.priority && (
-              <Badge
-                variant={
-                  REQUEST_ORDER_PRIORITY_COLORS[
-                    qParams.priority as RequestOrderPriority
-                  ]
-                }
-                className="ml-2"
-              >
-                {t(qParams.priority)}
-              </Badge>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0" align="start">
-          <Command>
-            <CommandGroup>
-              {Object.values(RequestOrderPriority).map((priority) => (
-                <CommandItem
-                  key={priority}
-                  value={priority}
-                  onSelect={() => {
-                    updateQuery({
-                      priority:
-                        qParams.priority === priority ? undefined : priority,
-                    });
-                    setPriorityPopoverOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      qParams.priority === priority
-                        ? "opacity-100"
-                        : "opacity-0",
-                    )}
-                  />
-                  {t(priority)}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </Command>
-        </PopoverContent>
-      </Popover>
     </div>
   );
 
   return (
     <Page
-      title={t(internal ? "orders" : "purchase_orders")}
+      title={t(internal ? "delivery" : "inward_entry")}
       hideTitleOnPage
       shortCutContext="facility:inventory"
     >
@@ -190,7 +121,7 @@ export function RequestOrderList({
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold text-gray-900">
-              {internal ? t("orders") : t("purchase_orders")}
+              {internal ? t("delivery") : t("inward_entry")}
             </h1>
           </div>
           <div className="flex items-center gap-2">
@@ -200,7 +131,7 @@ export function RequestOrderList({
                 navigate(
                   `/facility/${facilityId}/locations/${locationId}/${
                     internal ? "internal_transfers" : "external_supply"
-                  }/request_orders/new`,
+                  }/delivery_orders/new`,
                 )
               }
             >
@@ -231,8 +162,8 @@ export function RequestOrderList({
               className="mt-2 space-y-4"
             >
               {renderFilters()}
-              <RequestOrderTable
-                requests={orders}
+              <DeliveryOrderTable
+                deliverys={orders}
                 isLoading={isLoading}
                 facilityId={facilityId}
                 locationId={locationId}

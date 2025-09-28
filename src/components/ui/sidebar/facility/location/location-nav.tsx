@@ -65,8 +65,16 @@ export function LocationNav() {
               url: `${baseUrl}/internal_transfers/to_receive`,
             },
             {
+              name: t("received"),
+              url: `${baseUrl}/internal_transfers/received`,
+            },
+            {
               name: t("to_dispatch"),
               url: `${baseUrl}/internal_transfers/to_dispatch`,
+            },
+            {
+              name: t("dispatched"),
+              url: `${baseUrl}/internal_transfers/dispatched`,
             },
             {
               header: t("external_supply"),
@@ -76,7 +84,7 @@ export function LocationNav() {
             },
             {
               name: t("inward_entry"),
-              url: `${baseUrl}/external_supply/inward_entry`,
+              url: `${baseUrl}/external_supply/delivery_orders`,
             },
           ],
         },

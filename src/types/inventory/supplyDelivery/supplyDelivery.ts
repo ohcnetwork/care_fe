@@ -1,3 +1,4 @@
+import { DeliveryOrderRetrieve } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductRead } from "@/types/inventory/product/product";
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
@@ -48,6 +49,7 @@ export interface SupplyDeliveryCreate extends Omit<SupplyDeliveryBase, "id"> {
   origin?: string; // Location ID
   destination: string; // Location ID
   supply_request?: string; // Supply Request ID
+  order: string; // Delivery Order ID
 }
 
 export interface SupplyDeliveryUpsert extends Omit<SupplyDeliveryBase, "id"> {
@@ -58,6 +60,7 @@ export interface SupplyDeliveryUpsert extends Omit<SupplyDeliveryBase, "id"> {
   origin?: string; // Location ID
   destination: string; // Location ID
   supply_request?: string; // Supply Request ID
+  order: string; // Delivery Order ID
 }
 
 export interface SupplyDeliveryUpdate {
@@ -74,6 +77,7 @@ export interface SupplyDeliveryRead extends SupplyDeliveryBase {
   supplier?: Organization;
   created_date?: string;
   modified_date?: string;
+  order: DeliveryOrderRetrieve;
 }
 
 export interface SupplyDeliveryRetrieve extends SupplyDeliveryRead {
