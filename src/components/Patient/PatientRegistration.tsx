@@ -555,8 +555,8 @@ const PatientBasicsContent = ({
                   value={field.value}
                   onValueChange={field.onChange}
                   options={[
-                    { value: "dob", label: t("date") },
-                    { value: "age", label: t("age") },
+                    { value: "dob", label: "date" },
+                    { value: "age", label: "age" },
                   ]}
                   variant="background"
                   showAllOption={false}

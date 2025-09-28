@@ -117,8 +117,8 @@ export default function SupplyDeliveryList({
                 }
                 className="max-sm:hidden"
                 options={[
-                  { value: "incoming", label: t("incoming") },
-                  { value: "outgoing", label: t("outgoing") },
+                  { value: "incoming", label: "incoming" },
+                  { value: "outgoing", label: "outgoing" },
                 ]}
                 showAllOption={false}
               />

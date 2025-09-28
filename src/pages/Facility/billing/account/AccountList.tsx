@@ -123,10 +123,10 @@ export function AccountList({
                 }
                 className="overflow-y-auto max-w-[calc(100%)] max-sm:hidden text-gray-950"
                 options={[
-                  { value: "all", label: t("all_accounts") },
+                  { value: "all", label: "all_accounts" },
                   ...Object.keys(ACCOUNT_STATUS_COLORS).map((key) => ({
                     value: key,
-                    label: t(key),
+                    label: key,
                   })),
                 ]}
                 showAllOption={false}

@@ -41,7 +41,6 @@ interface BookingsListProps {
 }
 
 export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
-  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("upcoming");
 
   return (
@@ -51,9 +50,9 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
           value={activeTab}
           onValueChange={setActiveTab}
           options={[
-            { value: "upcoming", label: t("upcoming") },
-            { value: "past", label: t("past") },
-            { value: "cancelled", label: t("cancelled") },
+            { value: "upcoming", label: "upcoming" },
+            { value: "past", label: "past"},
+            { value: "cancelled", label: "cancelled" },
           ]}
           showAllOption={false}
           className="sm:flex sm:flex-col sm:w-52 h-fit sm:bg-gray-50 items-center justify-center w-full bg-gray-100"

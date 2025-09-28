@@ -457,8 +457,8 @@ export default function DispensedMedicationList({
           onValueChange={(value) => updateQuery({ payment_status: value })}
           className="w-full"
           options={[
-            {value: "paid", label: t("paid")},
-            {value: "unpaid", label: t("unpaid")},
+            {value: "paid", label: "paid"},
+            {value: "unpaid", label: "unpaid"},
           ]}
 
         />
