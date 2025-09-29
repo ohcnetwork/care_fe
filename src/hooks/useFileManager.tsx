@@ -35,8 +35,6 @@ import fileApi from "@/types/files/fileApi";
 
 export interface FileManagerOptions {
   type: string;
-  onArchive?: () => void;
-  onEdit?: () => void;
   uploadedFiles?: FileReadMinimal[];
 }
 export interface FileManagerResult {
@@ -62,7 +60,7 @@ export interface FileManagerResult {
 export default function useFileManager(
   options: FileManagerOptions,
 ): FileManagerResult {
-  const { type: fileType, onArchive, onEdit, uploadedFiles } = options;
+  const { type: fileType, uploadedFiles } = options;
 
   const { t } = useTranslation();
   const [file_state, setFileState] = useState<StateInterface>({
@@ -175,7 +173,6 @@ export default function useFileManager(
     setArchiveDialogueOpen(null);
     setArchiving(false);
     setArchiveReason("");
-    onArchive?.();
   };
 
   const archiveFile = (
@@ -227,7 +224,6 @@ export default function useFileManager(
     onSuccess: (data) => {
       toast.success(t("file_name_changed_successfully"));
       setEditDialogueOpen(null);
-      onEdit?.();
       queryClient.invalidateQueries({
         queryKey: ["files", fileType, data.associating_id],
       });

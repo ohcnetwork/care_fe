@@ -35,7 +35,6 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import RoleForm from "@/pages/Admin/Roles/RoleForm";
-import permissionApi from "@/types/emr/permission/permissionApi";
 import { RoleRead } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
 
@@ -104,18 +103,7 @@ export default function RolesIndex() {
     }),
   });
 
-  const { data: permissionsResponse, isLoading: _permissionsLoading } =
-    useQuery({
-      queryKey: ["permissions"],
-      queryFn: query(permissionApi.listPermissions, {
-        queryParams: {
-          limit: 1000, // Get all permissions for the form
-        },
-      }),
-    });
-
   const roles = rolesResponse?.results || [];
-  const permissions = permissionsResponse?.results || [];
 
   const handleEdit = (role: RoleRead) => {
     setSelectedRole(role);
@@ -170,12 +158,8 @@ export default function RolesIndex() {
                       : t("add_role")}
                   </SheetTitle>
                 </SheetHeader>
-                <div className="mt-6 pb-6">
-                  <RoleForm
-                    role={selectedRole}
-                    permissions={permissions}
-                    onSuccess={handleSheetClose}
-                  />
+                <div className="mt-6 overflow-auto pr-2">
+                  <RoleForm role={selectedRole} onSuccess={handleSheetClose} />
                 </div>
               </SheetContent>
             </Sheet>
