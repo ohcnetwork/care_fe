@@ -1,4 +1,5 @@
-import { useRoutes } from "raviger";
+import careConfig from "@careConfig";
+import { Redirect, useRoutes } from "raviger";
 
 import { Authenticate } from "@/components/Auth/Authenticate";
 import Login from "@/components/Auth/Login";
@@ -14,9 +15,20 @@ import { LicensesPage } from "@/pages/Licenses/Licenses";
 import PatientLogin from "@/pages/PublicAppointments/auth/PatientLogin";
 
 export const routes = {
-  "/": () => <LandingPage />,
-  "/facilities": () => <FacilitiesPage />,
-  "/facility/:id": ({ id }: { id: string }) => <FacilityDetailsPage id={id} />,
+  "/": () =>
+    careConfig.disablePatientLogin ? <Redirect to="/login" /> : <LandingPage />,
+  "/facilities": () =>
+    careConfig.disablePatientLogin ? (
+      <Redirect to="/login" />
+    ) : (
+      <FacilitiesPage />
+    ),
+  "/facility/:id": ({ id }: { id: string }) =>
+    careConfig.disablePatientLogin ? (
+      <Redirect to="/login" />
+    ) : (
+      <FacilityDetailsPage id={id} />
+    ),
   "/facility/:facilityId/appointments/:staffId/otp/:page": ({
     facilityId,
     staffId,
@@ -25,7 +37,12 @@ export const routes = {
     facilityId: string;
     staffId: string;
     page: string;
-  }) => <PatientLogin facilityId={facilityId} staffId={staffId} page={page} />,
+  }) =>
+    careConfig.disablePatientLogin ? (
+      <Redirect to="/login" />
+    ) : (
+      <PatientLogin facilityId={facilityId} staffId={staffId} page={page} />
+    ),
   "/login": () => <Login />,
   "/2fa": () => <Authenticate />,
   "/forgot-password": () => <Login forgot={true} />,
@@ -38,10 +55,12 @@ export const routes = {
 };
 
 export default function PublicRouter() {
+  const routeResult = useRoutes(routes);
+
   return (
     <>
       <BrowserWarning />
-      {useRoutes(routes) || <Login />}
+      {routeResult || <Login />}
     </>
   );
 }

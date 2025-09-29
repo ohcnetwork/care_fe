@@ -8,7 +8,6 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
@@ -16,18 +15,18 @@ import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-interface ResponsesCardProps {
+interface LeftCardProps {
   response: QuestionnaireResponse;
   isActive: boolean;
   onClick: () => void;
   showTitle?: boolean;
 }
-function ResponsesCard({
+function LeftCard({
   response,
   isActive,
   onClick,
   showTitle = true,
-}: ResponsesCardProps) {
+}: LeftCardProps) {
   const { t } = useTranslation();
   return (
     <Card
@@ -61,24 +60,24 @@ function ResponsesCard({
 }
 
 interface LeftPanelProps {
-  encounter: any;
+  encounterId?: string;
   patientId: string;
   canAccess: boolean;
   responseId?: string;
   selectedQuestionnaireTitle: string;
-  selectedQuestionnaire: any | null;
+  questionnaireId?: string;
   setSelectedQuestionnaireTitle: (title: string) => void;
   setQueryParams: (params: any) => void;
   onResponseClick: (response: QuestionnaireResponse) => void;
 }
 
 function LeftPanel({
-  encounter,
+  encounterId,
   patientId,
   canAccess,
   responseId,
   selectedQuestionnaireTitle,
-  selectedQuestionnaire,
+  questionnaireId,
   setSelectedQuestionnaireTitle,
   setQueryParams,
   onResponseClick,
@@ -90,8 +89,8 @@ function LeftPanel({
       <div className="relative w-full pb-2">
         <QuestionnaireSearch
           placeholder={
-            selectedQuestionnaire
-              ? selectedQuestionnaireTitle || selectedQuestionnaire.title
+            questionnaireId
+              ? selectedQuestionnaireTitle
               : t("select_questionnaire")
           }
           subjectType="encounter"
@@ -107,13 +106,13 @@ function LeftPanel({
             >
               <div className="flex justify-start items-center gap-2 text-primary-800 flex-1">
                 <span className="text-left whitespace-normal break-words">
-                  {selectedQuestionnaire
-                    ? selectedQuestionnaireTitle || selectedQuestionnaire.title
+                  {questionnaireId
+                    ? selectedQuestionnaireTitle
                     : t("select_questionnaire")}
                 </span>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-                {selectedQuestionnaire && (
+                {questionnaireId && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -127,7 +126,7 @@ function LeftPanel({
                     <X className="size-4" />
                   </Button>
                 )}
-                {!selectedQuestionnaire && (
+                {!questionnaireId && (
                   <ChevronDown className="size-4 flex-shrink-0" />
                 )}
               </div>
@@ -137,16 +136,16 @@ function LeftPanel({
       </div>
       <div className="flex-1 overflow-y-auto">
         <QuestionnaireResponsesList
-          encounter={encounter}
+          encounterId={encounterId}
           patientId={patientId}
           canAccess={canAccess}
-          questionnaireId={selectedQuestionnaire?.id}
+          questionnaireId={questionnaireId}
           renderItem={(response: QuestionnaireResponse) => (
-            <ResponsesCard
+            <LeftCard
               response={response}
               isActive={responseId === response.id}
               onClick={() => onResponseClick(response)}
-              showTitle={!selectedQuestionnaire}
+              showTitle={!questionnaireId}
             />
           )}
         />
@@ -155,12 +154,17 @@ function LeftPanel({
   );
 }
 
-export const EncounterResponsesTab = () => {
-  const {
-    selectedEncounter: encounter,
-    patientId,
-    canReadSelectedEncounter: canAccess,
-  } = useEncounter();
+interface EncounterResponsesTabProps {
+  patientId: string;
+  encounterId?: string;
+  canAccess?: boolean;
+}
+
+export const EncounterResponsesTab = ({
+  patientId,
+  encounterId,
+  canAccess = true,
+}: EncounterResponsesTabProps) => {
   const { t } = useTranslation();
   const [qParams, setQueryParams] = useQueryParams<{
     questionnaireId?: string;
@@ -168,18 +172,6 @@ export const EncounterResponsesTab = () => {
   }>();
 
   const { questionnaireId, responseId } = qParams;
-
-  const selectedQuestionnaire = questionnaireId
-    ? {
-        id: questionnaireId,
-        slug: "",
-        questions: [],
-        title: "",
-        status: "active",
-        subject_type: "encounter",
-        tags: [],
-      }
-    : null;
 
   const [selectedQuestionnaireTitle, setSelectedQuestionnaireTitle] =
     useState<string>("");
@@ -196,11 +188,11 @@ export const EncounterResponsesTab = () => {
     <div className="flex flex-col md:flex-row h-full">
       <div className="hidden md:flex md:w-1/5 flex flex-col gap-3 pt-1 md:h-full md:overflow-y-auto">
         <LeftPanel
-          encounter={encounter}
+          encounterId={encounterId}
           patientId={patientId}
           canAccess={canAccess}
           responseId={responseId}
-          selectedQuestionnaire={selectedQuestionnaire}
+          questionnaireId={questionnaireId}
           selectedQuestionnaireTitle={selectedQuestionnaireTitle}
           setSelectedQuestionnaireTitle={setSelectedQuestionnaireTitle}
           setQueryParams={setQueryParams}
@@ -212,7 +204,7 @@ export const EncounterResponsesTab = () => {
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>
               <Button variant="outline" size="sm" className="w-full">
-                <Menu className="h-4 w-4 mr-2" />
+                <Menu className="size-4 mr-2" />
                 {t("view_responses")}
               </Button>
             </DrawerTrigger>
@@ -223,11 +215,11 @@ export const EncounterResponsesTab = () => {
               <ScrollArea className="h-full">
                 <div className="p-3 h-full">
                   <LeftPanel
-                    encounter={encounter}
+                    encounterId={encounterId}
                     patientId={patientId}
                     canAccess={canAccess}
                     responseId={responseId}
-                    selectedQuestionnaire={selectedQuestionnaire}
+                    questionnaireId={questionnaireId}
                     selectedQuestionnaireTitle={selectedQuestionnaireTitle}
                     setSelectedQuestionnaireTitle={
                       setSelectedQuestionnaireTitle
@@ -242,13 +234,13 @@ export const EncounterResponsesTab = () => {
         </div>
       )}
       <div className="flex-1 h-full overflow-y-auto">
-        <ScrollArea className="h-full">
+        <ScrollArea key={questionnaireId} className="h-full">
           <div className="space-y-4 p-3 overflow-anchor-auto">
             <QuestionnaireResponsesList
-              encounter={encounter}
+              encounterId={encounterId}
               patientId={patientId}
               canAccess={canAccess}
-              questionnaireId={selectedQuestionnaire?.id}
+              questionnaireId={questionnaireId}
               renderItem={(response: QuestionnaireResponse) => {
                 return (
                   <div
@@ -264,6 +256,7 @@ export const EncounterResponsesTab = () => {
                     >
                       <ResponseCard
                         item={response}
+                        showTitle={!questionnaireId}
                         onTitleClick={(qid) => {
                           setQueryParams({ questionnaireId: qid });
                           setSelectedQuestionnaireTitle(

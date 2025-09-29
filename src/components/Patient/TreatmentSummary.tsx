@@ -583,7 +583,7 @@ export default function TreatmentSummary({
             {/* Questionnaire Responses Section */}
             <div>
               <QuestionnaireResponsesList
-                encounter={encounter}
+                encounterId={encounterId}
                 patientId={encounter.patient.id}
                 isPrintPreview={true}
                 onlyUnstructured={true}
