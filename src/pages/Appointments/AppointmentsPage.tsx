@@ -386,7 +386,6 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           {activeTab === "list" && (
             <Button
-              data-shortcut-id="print-button"
               variant="outline"
               disabled={
                 !qParams.date_from ||
@@ -401,7 +400,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
             >
               <CareIcon icon="l-print" className="text-lg" />
               {t("print")}
-              <ShortcutBadge actionId="print-button" className="bg-white" />
+              <ShortcutBadge actionId="print-button" />
             </Button>
           )}
           <PatientIdentifierFilter
