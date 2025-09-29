@@ -299,7 +299,7 @@ export function ChargeItemList({
           <TableSkeleton count={5} />
         ) : chargeItems.length === 0 ? (
           <EmptyState
-            icon="l-file"
+            icon={<CareIcon icon="l-file" className="text-primary size-6" />}
             title={t("no_charge_items_found")}
             description={t("no_charge_items_in_category")}
           />

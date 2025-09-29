@@ -73,6 +73,7 @@ declare global {
         labelText: string,
         buttonValue: string,
       ): Chainable<Element>;
+      clickConfirmAction(label: string): Chainable<JQuery<HTMLElement>>;
     }
   }
 }
