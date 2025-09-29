@@ -610,7 +610,6 @@ const AddMedicationSheet = ({
                                 as_needed_for: value || undefined,
                               });
                             }}
-                            asSheet
                           />
 
                           <InstructionsPopover
