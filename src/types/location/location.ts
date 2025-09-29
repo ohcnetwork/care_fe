@@ -16,8 +16,6 @@ import { Code } from "@/types/base/code/code";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
-export type AvailabilityStatus = "available" | "unavailable";
-
 export type Status = "active" | "inactive" | "unknown";
 
 export type OperationalStatus = "C" | "H" | "O" | "U" | "K" | "I";
@@ -34,11 +32,11 @@ export interface LocationBase {
   location_type?: Code;
   form: LocationForm;
   mode: LocationMode;
-  availability_status: AvailabilityStatus;
 }
 
 export interface LocationDetail extends LocationBase {
   id: string;
+  has_children: boolean;
   organizations: FacilityOrganizationRead[];
   sort_index: number;
 }
@@ -56,6 +54,12 @@ export interface LocationWrite extends LocationBase {
   parent?: string;
   organizations: string[];
   mode: LocationMode;
+}
+
+export interface LocationImport extends LocationBase {
+  id?: string;
+  mode: LocationMode;
+  children: LocationImport[];
 }
 
 export const LocationFormOptions = [

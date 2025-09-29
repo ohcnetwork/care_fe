@@ -35,7 +35,7 @@ export const UserStatusIndicator = ({
   addPadding?: boolean;
 }) => {
   const authUser = useAuthUser();
-  const isAuthUser = user.id === authUser.external_id;
+  const isAuthUser = user.id === authUser.id;
   const { t } = useTranslation();
 
   return (
@@ -230,7 +230,9 @@ export const UserList = ({ users }: { users?: UserReadMinimal[] }) => {
       <table className="relative min-w-full divide-y divide-gray-200">
         <UserListHeader />
         <tbody className="divide-y divide-gray-200 bg-white">
-          {users?.map((user) => <UserListRow key={user.id} user={user} />)}
+          {users?.map((user) => (
+            <UserListRow key={user.id} user={user} />
+          ))}
         </tbody>
       </table>
     </div>

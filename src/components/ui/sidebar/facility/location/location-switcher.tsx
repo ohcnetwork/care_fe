@@ -69,6 +69,7 @@ export function LocationSwitcher() {
         setLocation={setLocation}
         open={openDialog}
         setOpen={setOpenDialog}
+        myLocations={true}
       />
       <div className="flex flex-col items-start gap-4">
         <Button variant="ghost" onClick={() => navigate(fallbackUrl)}>
@@ -102,18 +103,24 @@ export function LocationSwitcher() {
   );
 }
 
-function LocationSelectorDialog({
+export function LocationSelectorDialog({
   facilityId,
   location,
   setLocation,
   open,
   setOpen,
+  navigateUrl,
+  myLocations = false,
+  onLocationSelect,
 }: {
   facilityId: string;
   location: LocationList | undefined;
   setLocation: (location: LocationList | undefined) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
+  navigateUrl?: (location: LocationList) => string;
+  myLocations?: boolean;
+  onLocationSelect?: (location: LocationList) => void;
 }) {
   const { t } = useTranslation();
   const [locationLevel, setLocationLevel] = useState<LocationList[]>([]);
@@ -142,9 +149,8 @@ function LocationSelectorDialog({
         ...(currentParentId !== "" && {
           parent: currentParentId,
         }),
-        ...(currentParentId === "" && {
-          mode: "kind",
-        }),
+        mode: "kind",
+        ...(myLocations && !currentParentId && { mine: true }),
         ordering: "sort_index",
         ...(searchValue && { name: searchValue }),
         limit: resultsPerPage,
@@ -172,9 +178,15 @@ function LocationSelectorDialog({
     setSearchValue("");
     setCurrentPage(1);
     if (newLocation.id !== oldLocationId) {
-      navigate(
-        `/facility/${facilityId}/locations/${newLocation.id}/${subPath}`,
-      );
+      if (onLocationSelect) {
+        onLocationSelect(newLocation);
+      } else if (navigateUrl) {
+        navigate(navigateUrl(newLocation));
+      } else {
+        navigate(
+          `/facility/${facilityId}/locations/${newLocation.id}/${subPath}`,
+        );
+      }
     }
   };
 
@@ -308,9 +320,8 @@ function LocationSelectorDialog({
               >
                 <span>{t("done")}</span>
                 <span className="flex text-xs items-center gap-1 p-1 shadow rounded-md bg-green-900">
-                  {"shift"}
-                  {"+"}
-                  <CareIcon icon="l-corner-down-left" />
+                  {t("shift_key")} +
+                  <CareIcon icon="l-corner-down-left" className="size-3" />
                 </span>
               </Button>
             </div>
@@ -384,6 +395,7 @@ function LocationCommandItem({
   return (
     <CommandItem
       key={location.id}
+      value={location.id}
       onSelect={() =>
         location.has_children
           ? handleSelect(location)

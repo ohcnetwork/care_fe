@@ -10,10 +10,10 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { CommandInput } from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
@@ -38,6 +38,7 @@ interface Props {
   popoverClassName?: string;
   facilityId?: string;
   organizationId?: string;
+  disabled?: boolean;
 }
 
 const PAGE_LIMIT = 50;
@@ -50,6 +51,7 @@ export default function UserSelector({
   popoverClassName,
   facilityId,
   organizationId,
+  disabled,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -114,6 +116,7 @@ export default function UserSelector({
           role="combobox"
           className="min-w-60 w-full justify-start"
           data-cy="select-assigned-user"
+          disabled={disabled}
         >
           {selected ? (
             <div className="flex items-center gap-2">

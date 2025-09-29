@@ -3,8 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useQueryParams } from "raviger";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -49,12 +48,16 @@ import {
   getSlotsPerSession,
   getTokenDuration,
 } from "@/pages/Scheduling/utils";
-import { ScheduleAvailabilityCreateRequest } from "@/types/scheduling/schedule";
+import {
+  SchedulableResourceType,
+  ScheduleAvailabilityCreateRequest,
+} from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
 interface Props {
   facilityId: string;
-  userId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
   trigger?: React.ReactNode;
 }
 
@@ -64,7 +67,8 @@ type QueryParams = {
 
 export default function CreateScheduleTemplateSheet({
   facilityId,
-  userId,
+  resourceType,
+  resourceId,
   trigger,
 }: Props) {
   const { t } = useTranslation();
@@ -188,7 +192,7 @@ export default function CreateScheduleTemplateSheet({
       setQParams({ sheet: null });
       form.reset();
       queryClient.invalidateQueries({
-        queryKey: ["user-schedule-templates", { facilityId, userId }],
+        queryKey: ["schedule", facilityId, { resourceType, resourceId }],
       });
     },
   });
@@ -198,7 +202,8 @@ export default function CreateScheduleTemplateSheet({
       valid_from: dateQueryString(values.valid_from),
       valid_to: dateQueryString(values.valid_to),
       name: values.name,
-      user: userId,
+      resource_type: resourceType,
+      resource_id: resourceId,
       availabilities: values.availabilities.map(
         (availability) =>
           ({

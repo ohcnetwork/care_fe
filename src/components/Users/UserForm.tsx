@@ -39,8 +39,7 @@ import {
   validateRule,
 } from "@/components/Users/UserFormValidations";
 
-import { GENDER_TYPES, NAME_PREFIXES } from "@/common/constants";
-import { GENDERS } from "@/common/constants";
+import { GENDERS, GENDER_TYPES, NAME_PREFIXES } from "@/common/constants";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -362,7 +361,7 @@ export default function UserForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger data-cy="user-type-select">
+                    <SelectTrigger data-cy="user-type-select" ref={field.ref}>
                       <SelectValue placeholder={t("select_user_type")} />
                     </SelectTrigger>
                   </FormControl>
@@ -738,7 +737,7 @@ export default function UserForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger data-cy="gender-select">
+                    <SelectTrigger data-cy="gender-select" ref={field.ref}>
                       <SelectValue placeholder={t("select_gender")} />
                     </SelectTrigger>
                   </FormControl>

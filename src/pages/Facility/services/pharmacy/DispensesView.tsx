@@ -18,10 +18,10 @@ import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/components/PatientHeader";
 import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
 import patientApi from "@/types/emr/patient/patientApi";
 
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import DispensedMedicationList from "./DispensedMedicationList";
 
 interface Props {
@@ -87,6 +87,8 @@ export default function DispensesView({
               `/facility/${facilityId}/locations/${locationId}/medication_dispense/`,
             )
           }
+          data-shortcut-id="go-back"
+          size="sm"
         >
           <ArrowLeftIcon className="size-4" />
           {t("back_to_dispense_queue")}
