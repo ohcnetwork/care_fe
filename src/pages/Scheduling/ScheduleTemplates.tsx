@@ -1,7 +1,9 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { Edit3Icon } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { Trans, useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -9,25 +11,38 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 
 import Loading from "@/components/Common/Loading";
-import { formatAvailabilityTime } from "@/components/Users/UserAvailabilityTab";
+import ScheduleChargeItemDefinitionSelector from "@/pages/Scheduling/components/ScheduleChargeItemDefinitionSelector";
 
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import scheduleApi from "@/types/scheduling/scheduleApi";
+
+import { getPermissions } from "@/common/Permissions";
+import { usePermissions } from "@/context/PermissionContext";
 import EditScheduleTemplateSheet from "@/pages/Scheduling/components/EditScheduleTemplateSheet";
 import {
+  formatAvailabilityTime,
   getDaysOfWeekFromAvailabilities,
   getSlotsPerSession,
 } from "@/pages/Scheduling/utils";
-import { ScheduleTemplate } from "@/types/scheduling/schedule";
+import facilityApi from "@/types/facility/facilityApi";
+import {
+  SchedulableResourceType,
+  ScheduleTemplate,
+} from "@/types/scheduling/schedule";
 
 interface Props {
   items?: ScheduleTemplate[];
   facilityId: string;
-  userId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
 }
 
 export default function ScheduleTemplates({
   items,
   facilityId,
-  userId,
+  resourceType,
+  resourceId,
 }: Props) {
   const { t } = useTranslation();
   if (items == null) {
@@ -50,7 +65,8 @@ export default function ScheduleTemplates({
           <ScheduleTemplateItem
             template={template}
             facilityId={facilityId}
-            userId={userId}
+            resourceType={resourceType}
+            resourceId={resourceId}
           />
         </li>
       ))}
@@ -61,14 +77,43 @@ export default function ScheduleTemplates({
 const ScheduleTemplateItem = ({
   template,
   facilityId,
-  userId,
+  resourceType,
+  resourceId,
 }: {
   template: ScheduleTemplate;
   facilityId: string;
-  userId: string;
+  resourceType: SchedulableResourceType;
+  resourceId: string;
 }) => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams<{ edit: string | null }>();
+  const { data: facilityData } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId },
+    }),
+  });
+  const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
+  const { canSetChargeItemDefinition } = getPermissions(
+    hasPermission,
+    facilityData?.permissions ?? [],
+  );
+
+  const { mutate: setChargeItemDefinition } = useMutation({
+    mutationFn: mutate(scheduleApi.templates.setChargeItemDefinition, {
+      pathParams: {
+        facilityId,
+        id: template.id,
+      },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["schedule", facilityId, { resourceType, resourceId }],
+      });
+      toast.success(t("charge_item_definition_updated_successfully"));
+    },
+  });
 
   return (
     <div className="rounded-lg bg-white py-2 shadow-sm">
@@ -92,11 +137,26 @@ const ScheduleTemplateItem = ({
           </div>
         </div>
 
-        <div>
+        <div className="flex gap-2">
+          {canSetChargeItemDefinition && (
+            <ScheduleChargeItemDefinitionSelector
+              facilityId={facilityId}
+              scheduleTemplate={template}
+              onChange={(value) =>
+                setChargeItemDefinition({
+                  charge_item_definition: value.charge_item_definition_slug,
+                  re_visit_allowed_days: value.re_visit_allowed_days || 0,
+                  re_visit_charge_item_definition:
+                    value.re_visit_charge_item_definition_slug || null,
+                })
+              }
+            />
+          )}
           <EditScheduleTemplateSheet
             template={template}
             facilityId={facilityId}
-            userId={userId}
+            resourceId={resourceId}
+            resourceType={resourceType}
             open={qParams.edit === template.id}
             onOpenChange={(open) =>
               setQParams({ ...qParams, edit: open ? template.id : null })

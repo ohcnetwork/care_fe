@@ -1,4 +1,6 @@
 import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
+import { SlugConfig } from "@/types/base/slug/slugConfig";
 
 export enum ChargeItemDefinitionStatus {
   draft = "draft",
@@ -21,13 +23,21 @@ export interface ChargeItemDefinitionBase {
   description?: string;
   purpose?: string;
   price_components: MonetaryComponent[];
+  category: ResourceCategoryRead;
+  slug_config: SlugConfig;
 }
 
 export interface ChargeItemDefinitionRead extends ChargeItemDefinitionBase {
   version?: number;
+  category: ResourceCategoryRead;
 }
 
 export interface ChargeItemDefinitionCreate
-  extends Omit<ChargeItemDefinitionBase, "id"> {
+  extends Omit<
+    ChargeItemDefinitionBase,
+    "id" | "category" | "slug_config" | "slug"
+  > {
+  slug_value: string;
+  category: string;
   version?: number;
 }

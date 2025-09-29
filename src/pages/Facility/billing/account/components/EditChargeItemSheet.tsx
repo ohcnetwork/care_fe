@@ -1,11 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PencilIcon } from "lucide-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
+
+import {
+  useShortcutDisplay,
+  useShortcutSubContext,
+} from "@/context/ShortcutContext";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -39,14 +44,18 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-import mutate from "@/Utils/request/mutate";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   ChargeItemRead,
   ChargeItemStatus,
   ChargeItemUpdate,
+  MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
 
 const formSchema = z.object({
   title: z.string(),
@@ -66,16 +75,23 @@ interface EditChargeItemSheetProps {
   facilityId: string;
   item: ChargeItemRead;
   trigger?: React.ReactNode;
+  accountId: string;
 }
 
 export function EditChargeItemSheet({
   facilityId,
   item,
+  accountId,
   trigger,
 }: EditChargeItemSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  // Register shortcuts for this sheet
+  useShortcutSubContext("facility:billing:invoice");
+  const getShortcutDisplay = useShortcutDisplay();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -112,6 +128,9 @@ export function EditChargeItemSheet({
   };
 
   const baseComponent = getComponentsByType(MonetaryComponentType.base)[0];
+  const mrpComponent = getComponentsByType(
+    MonetaryComponentType.informational,
+  ).find((c) => c.code?.code === MRP_CODE);
   const totalBaseComponent = getTotalComponentsByType(
     MonetaryComponentType.base,
   )[0];
@@ -136,7 +155,7 @@ export function EditChargeItemSheet({
     },
     onSuccess: () => {
       toast.success(t("charge_item_updated"));
-      queryClient.invalidateQueries({ queryKey: ["chargeItems"] });
+      queryClient.invalidateQueries({ queryKey: ["chargeItems", accountId] });
       setIsOpen(false);
     },
     onError: (error) => {
@@ -217,7 +236,7 @@ export function EditChargeItemSheet({
                             defaultValue={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger ref={field.ref}>
                                 <SelectValue placeholder={t("select_status")} />
                               </SelectTrigger>
                             </FormControl>
@@ -259,9 +278,29 @@ export function EditChargeItemSheet({
                   <Separator className="my-4" />
 
                   <div>
-                    <h3 className="text-sm font-medium mb-3">
-                      {t("pricing_details")}
-                    </h3>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-medium">
+                        {t("pricing_details")}
+                      </h3>
+                      {(item.status === ChargeItemStatus.planned ||
+                        item.status === ChargeItemStatus.billable) && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="border-gray-400 gap-1"
+                          onClick={() => {
+                            setIsEditDialogOpen(true);
+                          }}
+                          data-shortcut-id="edit-invoice-item"
+                        >
+                          <CareIcon icon="l-edit" className="size-4" />
+                          {t("edit")}
+                          <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200 ml-2">
+                            {getShortcutDisplay("edit-invoice-item")}
+                          </div>
+                        </Button>
+                      )}
+                    </div>
 
                     <div className="rounded-md border bg-card">
                       <div className="p-4 text-sm">
@@ -315,6 +354,14 @@ export function EditChargeItemSheet({
                               </span>
                             </div>
                           ))}
+
+                          {mrpComponent && (
+                            <div className="flex justify-between">
+                              <span>{t("mrp")}</span>
+
+                              <MonetaryDisplay amount={mrpComponent.amount} />
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -405,7 +452,7 @@ export function EditChargeItemSheet({
                           <Textarea
                             {...field}
                             value={field.value || ""}
-                            disabled
+                            onChange={field.onChange}
                           />
                         </FormControl>
                         <FormMessage />
@@ -416,12 +463,25 @@ export function EditChargeItemSheet({
 
                 <SheetFooter className="pt-2">
                   <SheetClose asChild>
-                    <Button variant="outline" type="button">
+                    <Button
+                      variant="outline"
+                      type="button"
+                      data-shortcut-id={isOpen ? "cancel-action" : undefined}
+                    >
                       {t("cancel")}
+                      <ShortcutBadge actionId="cancel-action" />
                     </Button>
                   </SheetClose>
-                  <Button type="submit" disabled={isPending}>
+                  <Button
+                    type="submit"
+                    disabled={isPending}
+                    data-shortcut-id={isOpen ? "submit-action" : undefined}
+                  >
                     {isPending ? t("saving") : t("save")}
+                    <ShortcutBadge
+                      actionId="submit-action"
+                      className="bg-white"
+                    />
                   </Button>
                 </SheetFooter>
               </form>
@@ -429,6 +489,20 @@ export function EditChargeItemSheet({
           </div>
         </ScrollArea>
       </SheetContent>
+
+      <EditInvoiceDialog
+        open={isEditDialogOpen}
+        onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+        }}
+        facilityId={facilityId}
+        chargeItems={[item]}
+        onSuccess={() => {
+          queryClient.invalidateQueries({
+            queryKey: ["chargeItems", accountId],
+          });
+        }}
+      />
     </Sheet>
   );
 }

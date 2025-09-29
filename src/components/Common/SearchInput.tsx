@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -20,7 +26,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import { isAppleDevice } from "@/Utils/utils";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { isValidPhoneNumber } from "react-phone-number-input";
 
 interface SearchOption {
   key: string;
@@ -44,30 +51,18 @@ interface SearchInputProps
 }
 
 const KeyboardShortcutHint = ({ open }: { open: boolean }) => {
+  const { t } = useTranslation();
   return (
     <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center space-x-2 text-xs text-gray-500">
       {open ? (
         <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-          <kbd>Esc</kbd>
+          <kbd>{t("esc")}</kbd>
         </span>
-      ) : isAppleDevice ? (
-        <div className="flex gap-1 font-medium">
-          <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-            <kbd>⌘</kbd>
-          </span>
-          <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-            <kbd>K</kbd>
-          </span>
-        </div>
       ) : (
-        <div className="flex gap-1 font-medium">
-          <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-            <kbd>Ctrl</kbd>
-          </span>
-          <span className="border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-500">
-            <kbd>K</kbd>
-          </span>
-        </div>
+        <ShortcutBadge
+          actionId="search-input-shortcut"
+          className="text-gray-500"
+        />
       )}
     </div>
   );
@@ -81,6 +76,7 @@ const SearchInputFieldRenderer = ({
   autoFocus,
   isSingleOption,
   open,
+  onSearch,
   ...prop
 }: {
   selectedOption: SearchOption;
@@ -91,7 +87,37 @@ const SearchInputFieldRenderer = ({
   autoFocus?: boolean;
   isSingleOption: boolean;
   open: boolean;
+  onSearch: (key: string, value: string) => void;
 }) => {
+  const handlePhoneChange = useCallback(
+    (value: string | undefined) => {
+      const phoneValue = value || "";
+      setSearchValue(phoneValue);
+
+      // Only validate if there's a value and it's not empty
+      if (phoneValue && phoneValue.trim() !== "") {
+        const isValid = isValidPhoneNumber(phoneValue);
+
+        // Only call onSearch if the phone number is valid
+        if (isValid) {
+          onSearch(selectedOption.key, phoneValue);
+        }
+      } else {
+        onSearch(selectedOption.key, phoneValue);
+      }
+    },
+    [selectedOption.key, onSearch, setSearchValue],
+  );
+
+  const handleTextChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      setSearchValue(value);
+      onSearch(selectedOption.key, value);
+    },
+    [selectedOption.key, onSearch, setSearchValue],
+  );
+
   switch (selectedOption.type) {
     case "phone":
       return (
@@ -100,7 +126,7 @@ const SearchInputFieldRenderer = ({
             name={selectedOption.key}
             placeholder={selectedOption.placeholder}
             value={searchValue}
-            onChange={(value) => setSearchValue(value || "")}
+            onChange={handlePhoneChange}
             className={inputClassName}
             autoFocus={autoFocus}
             ref={inputRef}
@@ -117,7 +143,7 @@ const SearchInputFieldRenderer = ({
             placeholder={selectedOption.placeholder}
             ref={inputRef as React.RefObject<HTMLInputElement>}
             value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
+            onChange={handleTextChange}
             className={cn(
               !isSingleOption &&
                 "grow border-none shadow-none focus-visible:ring-0",
@@ -141,37 +167,49 @@ export default function SearchInput({
   autoFocus = false,
   ...props
 }: SearchInputProps) {
+  const { t } = useTranslation();
+
+  // Always call hooks at the top level
   const initialOptionIndex = Math.max(
-    options.findIndex((option) => option.value !== ""),
+    options?.findIndex((option) => option.value !== "") ?? -1,
     0,
   );
-  const { t } = useTranslation();
   const [selectedOptionIndex, setSelectedOptionIndex] =
     useState(initialOptionIndex);
-  const selectedOption = options[selectedOptionIndex];
-  const [searchValue, setSearchValue] = useState(selectedOption.value || "");
+  const [searchValue, setSearchValue] = useState("");
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [focusedIndex, setFocusedIndex] = useState(0);
-  const [error, setError] = useState<string | undefined | boolean>();
-  const isSingleOption = options.length == 1;
+
+  // Safe access to options
+  const safeOptions = useMemo(() => options || [], [options]);
+  const selectedOption = safeOptions[selectedOptionIndex] || safeOptions[0];
+  const isSingleOption = safeOptions.length === 1;
+  const hasOptions = safeOptions.length > 0;
   const handleOptionChange = useCallback(
     (index: number) => {
+      // Ensure index is within bounds
+      if (index < 0 || index >= safeOptions.length) {
+        return;
+      }
       setSelectedOptionIndex(index);
-      const option = options[index];
+      const option = safeOptions[index];
       setSearchValue(option.value || "");
-      setFocusedIndex(options.findIndex((op) => op.key === option.key));
+      setFocusedIndex(safeOptions.findIndex((op) => op.key === option.key));
       setOpen(false);
       inputRef.current?.focus();
-      setError(false);
-      onSearch(option.key, option.value);
-      onFieldChange?.(options[index]);
+
+      // Only call onSearch if there's a value to search
+      if (option.value) {
+        onSearch(option.key, option.value);
+      }
+      onFieldChange?.(safeOptions[index]);
     },
-    [onSearch],
+    [onSearch, safeOptions, onFieldChange],
   );
 
-  const unselectedOptions = options.filter(
-    (option) => option.key !== selectedOption.key,
+  const unselectedOptions = safeOptions.filter(
+    (option) => option.key !== selectedOption?.key,
   );
 
   useEffect(() => {
@@ -208,29 +246,50 @@ export default function SearchInput({
             prevIndex === 0 ? unselectedOptions.length - 1 : prevIndex - 1,
           );
         } else if (e.key === "Enter") {
-          const selectedOptionIndex = options.findIndex(
-            (option) => option.key === unselectedOptions[focusedIndex].key,
-          );
-          handleOptionChange(selectedOptionIndex);
+          if (focusedIndex >= 0 && focusedIndex < unselectedOptions.length) {
+            const selectedOptionIndex = options.findIndex(
+              (option) => option.key === unselectedOptions[focusedIndex].key,
+            );
+            handleOptionChange(selectedOptionIndex);
+          }
         }
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [focusedIndex, open, handleOptionChange, options]);
-
-  useEffect(() => {
-    if (selectedOption.value !== searchValue) {
-      onSearch(selectedOption.key, searchValue);
-    }
-  }, [searchValue]);
+  }, [
+    focusedIndex,
+    open,
+    handleOptionChange,
+    safeOptions,
+    unselectedOptions,
+    options,
+  ]);
 
   useEffect(() => {
     if (autoFocus) {
       inputRef.current?.focus();
     }
   }, [autoFocus, open, selectedOptionIndex]);
+
+  // Handle empty options case after all hooks
+  if (!hasOptions) {
+    return (
+      <div
+        className={cn(
+          "border rounded-lg border-gray-200 bg-white shadow-sm",
+          className,
+        )}
+      >
+        <div className="flex items-center rounded-lg p-3">
+          <div className="text-gray-500 text-sm">
+            {t("no_search_options_available")}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -284,7 +343,7 @@ export default function SearchInput({
                             className="bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
                           >
                             <CareIcon icon="l-check" className="mr-1" />
-                            {t(options[selectedOptionIndex].display)}
+                            {t(safeOptions[selectedOptionIndex]?.display || "")}
                           </Button>
                         </div>
                       </div>
@@ -302,7 +361,7 @@ export default function SearchInput({
                                 key={option.key}
                                 onSelect={() =>
                                   handleOptionChange(
-                                    options.findIndex(
+                                    safeOptions.findIndex(
                                       (option) =>
                                         option.key ===
                                         unselectedOptions[index].key,
@@ -352,25 +411,22 @@ export default function SearchInput({
             autoFocus={autoFocus}
             isSingleOption={isSingleOption}
             open={open}
+            onSearch={onSearch}
             {...props}
           />
         </div>
       </div>
-      {error && (
-        <div className="px-2 mb-1 text-xs font-medium tracking-wide transition-opacity duration-300 error-text text-danger-500">
-          {t("phone_number_validation_error")}
-        </div>
-      )}
+
       {enableOptionButtons && !isSingleOption && (
         <div className="flex flex-wrap gap-2 p-2 border-t rounded-b-lg bg-gray-50 border-t-gray-100">
-          {options.map((option, i) => (
+          {safeOptions.map((option, i) => (
             <Button
               key={option.key}
               onClick={() => handleOptionChange(i)}
               variant="outline"
               size="xs"
               className={cn(
-                selectedOption.key === option.key
+                selectedOption?.key === option.key
                   ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200",
                 buttonClassName,

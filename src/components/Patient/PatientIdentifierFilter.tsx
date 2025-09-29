@@ -39,7 +39,7 @@ import {
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 
-interface PatientIdentifierFilterProps {
+interface Props {
   onSelect: (patientId: string | undefined) => void;
   placeholder?: string;
   className?: string;
@@ -51,7 +51,7 @@ export default function PatientIdentifierFilter({
   placeholder,
   className,
   patientId,
-}: PatientIdentifierFilterProps) {
+}: Props) {
   const { t } = useTranslation();
   const { facility, facilityId } = useCurrentFacility();
   const [open, setOpen] = useState(false);
@@ -61,9 +61,7 @@ export default function PatientIdentifierFilter({
   const [pendingPatient, setPendingPatient] = useState<
     PatientRead | PartialPatientModel | null
   >(null);
-  const [searchType, setSearchType] = useState(
-    facility?.patient_instance_identifier_configs?.[0]?.id ?? "",
-  );
+  const [searchType, setSearchType] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [verificationOpen, setVerificationOpen] = useState(false);
@@ -75,7 +73,7 @@ export default function PatientIdentifierFilter({
     } else if (!patientId) {
       setSelectedPatient(null);
     }
-  }, [patientId]);
+  }, [patientId, selectedPatient]);
 
   // Fetch patient details when patientId is provided
   const { data: patientDetails } = useQuery({
@@ -93,13 +91,13 @@ export default function PatientIdentifierFilter({
     }
   }, [patientDetails]);
 
-  // Patient search query
-  const { data: patientList, isFetching } = useQuery({
+  // Patient search query (for identifier-based search)
+  const { data: patientList, isFetching: isPatientFetching } = useQuery({
     queryKey: ["patient-search", searchTerm, searchType],
     queryFn: query.debounced(patientApi.searchPatient, {
       body:
         searchType && searchTerm
-          ? { config: searchType, value: searchTerm }
+          ? { config: searchType, value: searchTerm, page_size: 20 }
           : {},
     }),
     enabled: !!searchType && !!searchTerm,
@@ -119,16 +117,6 @@ export default function PatientIdentifierFilter({
     enabled: false,
   });
 
-  // Handle successful verification
-  useEffect(() => {
-    if (verifiedPatient) {
-      handleSelectPatient(verifiedPatient);
-      setVerificationOpen(false);
-      setYearOfBirth("");
-      setPendingPatient(null);
-    }
-  }, [verifiedPatient]);
-
   const handleSelectPatient = useCallback(
     (patient: PatientRead | PartialPatientModel) => {
       setSelectedPatient(patient);
@@ -138,6 +126,16 @@ export default function PatientIdentifierFilter({
     },
     [onSelect],
   );
+
+  // Handle successful verification
+  useEffect(() => {
+    if (verifiedPatient) {
+      handleSelectPatient(verifiedPatient);
+      setVerificationOpen(false);
+      setYearOfBirth("");
+      setPendingPatient(null);
+    }
+  }, [verifiedPatient, handleSelectPatient]);
 
   const handlePatientSelect = (patient: PatientRead | PartialPatientModel) => {
     if (patientList?.partial) {
@@ -187,11 +185,15 @@ export default function PatientIdentifierFilter({
             <Command shouldFilter={false}>
               <div className="relative flex items-center px-3 py-2">
                 <CommandInput
-                  placeholder={t("search_by_identifier", {
-                    name: facility?.patient_instance_identifier_configs?.find(
-                      (c) => c.id === searchType,
-                    )?.config.display,
-                  })}
+                  placeholder={
+                    searchType
+                      ? t("search_by_identifier", {
+                          name: facility?.patient_instance_identifier_configs?.find(
+                            (c) => c.id === searchType,
+                          )?.config.display,
+                        })
+                      : t("select_search_type")
+                  }
                   value={searchTerm}
                   onValueChange={setSearchTerm}
                   className="pl-8 pr-8 border-none focus:ring-0 focus:outline-none"
@@ -233,34 +235,37 @@ export default function PatientIdentifierFilter({
               </div>
 
               <CommandList>
-                {!searchTerm ? (
+                {!searchType ? (
+                  <CommandEmpty>{t("select_search_type")}</CommandEmpty>
+                ) : !searchTerm ? (
                   <CommandEmpty>{t("start_typing_to_search")}</CommandEmpty>
-                ) : isFetching ? (
+                ) : isPatientFetching ? (
                   <CommandEmpty>{t("searching")}</CommandEmpty>
                 ) : !patientList?.results.length ? (
                   <CommandEmpty>
                     {t("no_results_found_for", { term: searchTerm })}
                   </CommandEmpty>
-                ) : null}
-                <CommandGroup>
-                  {patientList?.results.map((patient) => (
-                    <CommandItem
-                      key={patient.id}
-                      value={patient.name}
-                      onSelect={() => handlePatientSelect(patient)}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          selectedPatient?.id === patient.id
-                            ? "opacity-100"
-                            : "opacity-0",
-                        )}
-                      />
-                      {patient.name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                ) : (
+                  <CommandGroup>
+                    {patientList.results.map((patient) => (
+                      <CommandItem
+                        key={patient.id}
+                        value={patient.name}
+                        onSelect={() => handlePatientSelect(patient)}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedPatient?.id === patient.id
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
+                        />
+                        {patient.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                )}
               </CommandList>
             </Command>
           </PopoverContent>
