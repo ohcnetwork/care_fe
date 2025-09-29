@@ -139,7 +139,7 @@ export default function PaymentsData({
             allOptionLabel="all_status"
           />
           <Select
-            defaultValue={qParams.status ?? "all"}
+            value={qParams.status ?? "all"}
             onValueChange={(value) =>
               updateQuery({ status: value === "all" ? undefined : value })
             }
@@ -283,8 +283,10 @@ export default function PaymentsData({
                       </Button>
                     )}
                   </TableCell>
-                  <TableCell>{typeMap[payment.reconciliation_type]}</TableCell>
-                  <TableCell>{methodMap[payment.method]}</TableCell>
+                  <TableCell>
+                    {t(typeMap[payment.reconciliation_type])}
+                  </TableCell>
+                  <TableCell>{t(methodMap[payment.method])}</TableCell>
                   <TableCell>
                     <MonetaryDisplay
                       amount={String(

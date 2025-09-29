@@ -94,11 +94,12 @@ const Login = (props: LoginProps) => {
   const { mode } = params;
   const loginMode = (mode as LoginMode | undefined) ?? "staff";
   useEffect(() => {
-  const desired = disablePatientLogin && loginMode === "patient" ? "staff" : loginMode;
-  if (!mode || mode !== desired) {
-    setQueryParams({ mode: desired as LoginMode }, { replace: false });
-  }
-}, [mode, loginMode, setQueryParams, disablePatientLogin]);
+    const desired =
+      disablePatientLogin && loginMode === "patient" ? "staff" : loginMode;
+    if (!mode || mode !== desired) {
+      setQueryParams({ mode: desired as LoginMode });
+    }
+  }, [mode, loginMode, setQueryParams, disablePatientLogin]);
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
@@ -110,12 +111,13 @@ const Login = (props: LoginProps) => {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
-  const [resendOtpCountdown, setResendOtpCountdown] = useState<number>(resendOtpTimeout ?? 60);
-    useState(resendOtpTimeout);
+  const [resendOtpCountdown, setResendOtpCountdown] = useState<number>(
+    resendOtpTimeout ?? 60,
+  );
 
   // Timer Function for resend OTP
   useEffect(() => {
-    if (resendOtpCountdown <= 0) return;
+    if (!Number.isFinite(resendOtpCountdown) || resendOtpCountdown <= 0) return;
     const timer = setInterval(() => setResendOtpCountdown((t) => t - 1), 1000);
     return () => clearInterval(timer);
   }, [resendOtpCountdown]);
@@ -297,7 +299,7 @@ const Login = (props: LoginProps) => {
 
     if (!isOtpSent) {
       sendOtp({ phone_number: phone });
-      setResendOtpCountdown(resendOtpTimeout);
+      setResendOtpCountdown(resendOtpTimeout ?? 60);
     } else {
       verifyOtp({ phone_number: phone, otp });
     }
@@ -620,7 +622,7 @@ const Login = (props: LoginProps) => {
                             className="h-auto p-0"
                             onClick={() => {
                               sendOtp({ phone_number: phone });
-                              setResendOtpCountdown(resendOtpTimeout);
+                              setResendOtpCountdown(resendOtpTimeout ?? 60);
                             }}
                           >
                             {t("resend_otp")}

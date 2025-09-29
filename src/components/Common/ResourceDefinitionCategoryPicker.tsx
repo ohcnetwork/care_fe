@@ -247,7 +247,7 @@ export function ResourceDefinitionCategoryPicker<T>({
 
   // Keep raw API results and mapped display definitions separate
   const rawDefinitions = useMemo(
-    () => ((definitionsResponse?.results || []) as T[]),
+    () => (definitionsResponse?.results || []) as T[],
     [definitionsResponse?.results],
   );
 
@@ -273,21 +273,18 @@ export function ResourceDefinitionCategoryPicker<T>({
   const rawBySlug = useMemo(() => {
     const allRaw = [
       ...((definitionsResponse?.results || []) as T[]),
-      ...(
-        Array.isArray(favoritesResponse)
-          ? (favoritesResponse as T[])
-          : ((favoritesResponse as unknown as { results?: T[] })?.results || [])
-      ),
-      ...(
-        Array.isArray(recentResponse)
-          ? (recentResponse as T[])
-          : ((recentResponse as unknown as { results?: T[] })?.results || [])
-      ),
+      ...(Array.isArray(favoritesResponse)
+        ? (favoritesResponse as T[])
+        : (favoritesResponse as unknown as { results?: T[] })?.results || []),
+      ...(Array.isArray(recentResponse)
+        ? (recentResponse as T[])
+        : (recentResponse as unknown as { results?: T[] })?.results || []),
     ] as T[];
 
     const entries = allRaw.map((item) => {
-      const def =
-        mapper ? mapper(item) : (item as unknown as BaseCategoryPickerDefinition);
+      const def = mapper
+        ? mapper(item)
+        : (item as unknown as BaseCategoryPickerDefinition);
       return [def.slug, item] as const;
     });
     return new Map<string, T>(entries);
@@ -344,8 +341,8 @@ export function ResourceDefinitionCategoryPicker<T>({
   });
 
   const handleDefinitionSelect = (definition: BaseCategoryPickerDefinition) => {
-  const original = (rawBySlug.get(definition.slug) ??
-    (definition as unknown)) as T;
+    const original = (rawBySlug.get(definition.slug) ??
+      (definition as unknown)) as T;
     if (enableFavorites && favoritesConfig) {
       addToRecentMutation.mutate(definition.slug);
     }
@@ -945,9 +942,10 @@ export function ResourceDefinitionCategoryPicker<T>({
                     onValueChange={setActiveTab}
                     options={tabOptions}
                     variant="underline"
-                    className="px-4 py-3 border-b flex-shrink-0"
+                    className="w-full"
                     maxVisibleTabs={2}
                     showAllOption={false}
+                    data-cy="rcp-mobile-main-tabs"
                   />
                 </div>
                 <div className="flex-1 min-h-0 overflow-hidden">

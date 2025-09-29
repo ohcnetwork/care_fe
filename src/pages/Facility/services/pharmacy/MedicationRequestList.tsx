@@ -1,14 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpRightSquare, NotepadText } from "lucide-react";
+import { ArrowUpRightSquare } from "lucide-react";
 import { navigate } from "raviger";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Separator } from "@/components/ui/separator";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -71,12 +70,7 @@ export default function MedicationRequestList({
     .filter(Boolean) as TagConfig[];
 
   // State for visible tabs and dropdown items
-  const [visibleTabs] = useState<("all" | EncounterClass)[]>([
-    "all",
-    "imp",
-    "amb",
-    "emer",
-  ]);
+  const [visibleTabs] = useState<EncounterClass[]>(["imp", "amb", "emer"]);
   const [dropdownItems] = useState<EncounterClass[]>(["obsenc", "vr", "hh"]);
 
   // Create filter configurations
@@ -124,7 +118,7 @@ export default function MedicationRequestList({
 
   // Handle tab selection
   const handleTabSelect = (value: string) =>
-  updateQuery({ encounter_class: value === "" ? undefined : value });
+    updateQuery({ encounter_class: value === "" ? undefined : value });
 
   // Handle dropdown item selection
 
@@ -149,7 +143,7 @@ export default function MedicationRequestList({
 
   // Encounter class tab options with icons
   const encounterClassTabOptions = [
-    ...visibleTabs.slice(1).map((key) => ({
+    ...visibleTabs.map((key) => ({
       value: key,
       label: `encounter_class__${key}`,
       icon: React.createElement(ENCOUNTER_CLASS_ICONS[key as EncounterClass], {
@@ -201,13 +195,15 @@ export default function MedicationRequestList({
         <div className="flex flex-wrap gap-2">
           {/* Encounter Class Tabs with icons */}
           <FilterTabs
-            value={qParams.encounter_class || "all"}
+            value={qParams.encounter_class || ""}
+            defaultVisibleOptions={visibleTabs}
+            showAllOption
+            allOptionLabel="all_prescriptions"
             onValueChange={handleTabSelect}
             options={encounterClassTabOptions}
             variant="background"
             showMoreDropdown
             maxVisibleTabs={maxVisibleTabs}
-            showAllOption={false}
             className="overflow-y-auto text-gray-950"
           />
         </div>
