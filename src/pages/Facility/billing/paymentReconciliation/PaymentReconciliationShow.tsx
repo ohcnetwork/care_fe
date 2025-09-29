@@ -17,7 +17,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
   PAYMENT_RECONCILIATION_OUTCOME_COLORS,
   PAYMENT_RECONCILIATION_STATUS_COLORS,
@@ -65,7 +65,7 @@ export function PaymentReconciliationShow({
   const { goBack } = useAppHistory();
   const queryClient = useQueryClient();
 
-  useFacilityShortcuts("general");
+  useShortcutSubContext();
 
   const { data: payment, isLoading } = useQuery({
     queryKey: ["paymentReconciliation", paymentReconciliationId],

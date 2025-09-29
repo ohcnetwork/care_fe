@@ -16,6 +16,7 @@ import {
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import {
   SUPPLY_REQUEST_PRIORITY_COLORS,
   SUPPLY_REQUEST_STATUS_COLORS,
@@ -52,7 +53,7 @@ export default function PurchaseOrderTable({
         description={
           emptyDescription || t("no_supply_requests_found_description")
         }
-        icon="l-box"
+        icon={<CareIcon icon="l-box" className="text-primary size-6" />}
       />
     );
   }
