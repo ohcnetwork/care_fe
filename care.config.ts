@@ -59,7 +59,9 @@ const careConfig = {
     ENCOUNTER_CLASS) as NonEmptyArray<EncounterClass>,
 
   defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
-    "hh") as EncounterClass,
+    (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",").length === 1
+      ? env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",")[0]
+      : undefined)) as EncounterClass,
 
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||

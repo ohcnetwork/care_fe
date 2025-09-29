@@ -2,12 +2,60 @@ import { z } from "zod";
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
 import { ENCOUNTER_CLASS } from "../src/types/emr/encounter/encounter";
 
+const logoSchema = z
+  .string()
+  .refine(
+    (val) => {
+      try {
+        JSON.parse(val);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: "Logo must be a valid JSON string",
+    },
+  )
+  .transform((val) => JSON.parse(val))
+  .refine((logo) => logo.light && logo.dark, {
+    message: "Logo must have light and dark variants",
+  })
+  .refine(
+    (logo) => {
+      const light = z.string().url().safeParse(logo.light);
+      return light;
+    },
+    {
+      message: "Logo light must be a valid URL",
+    },
+  )
+  .refine(
+    (logo) => {
+      const dark = z.string().url().safeParse(logo.dark);
+      return dark;
+    },
+    {
+      message: "Header logo dark must be a valid URL",
+    },
+  );
+
 const envSchema = z
   .object({
     REACT_CARE_API_URL: z.string().url(),
+    REACT_SBOM_BASE_URL: z.string().url().optional(),
+    REACT_GITHUB_URL: z.string().url().optional(),
+    REACT_OHCN_URL: z.string().url().optional(),
+    REACT_DASHBOARD_URL: z.string().url().optional(),
     REACT_SENTRY_DSN: z.string().url().optional(),
     REACT_SENTRY_ENVIRONMENT: z.string().optional(),
     REACT_DEFAULT_PAYMENT_TERMS: z.string().optional(),
+    REACT_HEADER_LOGO: logoSchema.optional(),
+    REACT_MAIN_LOGO: logoSchema.optional(),
+    REACT_CUSTOM_LOGO: logoSchema.optional(),
+    REACT_CUSTOM_DESCRIPTION: z.string().optional(),
+    REACT_CUSTOM_LOGO_ALT: logoSchema.optional(),
+    REACT_ALLOWED_LOCALES: z.string().optional(),
     REACT_CDN_URLS: z
       .string()
       .optional()
@@ -17,6 +65,9 @@ const envSchema = z
     REACT_ALLOWED_ENCOUNTER_CLASSES: z
       .string()
       .transform((val) => val.split(",").map((v) => v.trim()))
+      .refine((values) => new Set(values).size === values.length, {
+        message: "Duplicate encounter classes",
+      })
       .refine(
         (values) => values.every((v) => ENCOUNTER_CLASS.includes(v as any)),
         {
@@ -67,14 +118,15 @@ const envSchema = z
         });
       }
     }
-    if (data.REACT_SENTRY_DSN) {
-      if (!data.REACT_SENTRY_ENVIRONMENT) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Sentry environment is required when Sentry DSN is set",
-          path: ["REACT_SENTRY_ENVIRONMENT"],
-        });
-      }
+    if (
+      (data.REACT_SENTRY_DSN && !data.REACT_SENTRY_ENVIRONMENT) ||
+      (data.REACT_SENTRY_ENVIRONMENT && !data.REACT_SENTRY_DSN)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Sentry environment and DSN are required together",
+        path: ["REACT_SENTRY_ENVIRONMENT", "REACT_SENTRY_DSN"],
+      });
     }
   });
 
