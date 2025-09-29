@@ -85,32 +85,8 @@ const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
   verification_status: "confirmed",
   severity: "moderate",
   category: "problem_list_item",
-  onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+  onset: { onset_datetime: dateQueryString(new Date()) },
 };
-
-function DatePickerField({
-  onsetDatetime,
-  onChange,
-  disabled,
-  isSymptomInSheet,
-  hasId,
-}: {
-  onsetDatetime?: string;
-  onChange: (date: Date | undefined) => void;
-  disabled?: boolean;
-  isSymptomInSheet: boolean;
-  hasId: boolean;
-}) {
-  return (
-    <CombinedDatePicker
-      value={onsetDatetime ? new Date(onsetDatetime) : undefined}
-      onChange={onChange}
-      disabled={disabled || (!isSymptomInSheet && hasId)}
-      dateFormat="P"
-      buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
-    />
-  );
-}
 
 function StatusSelect({
   status,
@@ -365,12 +341,15 @@ const SymptomRow = React.memo(function SymptomRow({
           <div className="text-sm font-medium text-gray-700 mb-1">
             {t("onset_date")}
           </div>
-          <DatePickerField
-            onsetDatetime={symptom.onset?.onset_datetime}
+          <CombinedDatePicker
+            value={
+              symptom.onset?.onset_datetime
+                ? new Date(symptom.onset.onset_datetime)
+                : undefined
+            }
             onChange={handleDateChange}
-            disabled={disabled}
-            isSymptomInSheet={isSymptomInSheet}
-            hasId={!!symptom.id}
+            disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </div>
         <div>
@@ -507,12 +486,15 @@ const SymptomRow = React.memo(function SymptomRow({
                   <div className="block text-sm font-medium  mb-1">
                     {t("onset_date")}
                   </div>
-                  <DatePickerField
-                    onsetDatetime={symptom.onset?.onset_datetime}
+                  <CombinedDatePicker
+                    value={
+                      symptom.onset?.onset_datetime
+                        ? new Date(symptom.onset.onset_datetime)
+                        : undefined
+                    }
                     onChange={handleDateChange}
-                    disabled={disabled}
-                    isSymptomInSheet={isSymptomInSheet}
-                    hasId={!!symptom.id}
+                    disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+                    buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
                   />
                 </div>
                 <div>
@@ -574,12 +556,15 @@ const SymptomRow = React.memo(function SymptomRow({
           </div>
         </TableCell>
         <TableCell>
-          <DatePickerField
-            onsetDatetime={symptom.onset?.onset_datetime}
+          <CombinedDatePicker
+            value={
+              symptom.onset?.onset_datetime
+                ? new Date(symptom.onset.onset_datetime)
+                : undefined
+            }
             onChange={handleDateChange}
-            disabled={disabled}
-            isSymptomInSheet={isSymptomInSheet}
-            hasId={!!symptom.id}
+            disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+            buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>
         <TableCell>
@@ -870,7 +855,9 @@ export function SymptomQuestion({
                 <TableHeader>
                   <TableRow className="bg-gray-50">
                     <TableHead className="w-[40%]">{t("symptom")}</TableHead>
-                    <TableHead className="text-center">{t("date")}</TableHead>
+                    <TableHead className="text-center">
+                      {t("onset_date")}
+                    </TableHead>
                     <TableHead className="text-center">{t("status")}</TableHead>
                     <TableHead className="text-center">
                       {t("severity")}

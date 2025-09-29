@@ -35,8 +35,8 @@ const FacilityDeleteDialog = ({
   const confirmationText = `Delete ${facility.name}`;
 
   const { mutate: deleteFacility, isPending } = useMutation({
-    mutationFn: mutate(facilityApi.deleteFacility, {
-      pathParams: { id: facility.id || "" },
+    mutationFn: mutate(facilityApi.delete, {
+      pathParams: { facilityId: facility.id || "" },
     }),
     onSuccess: () => {
       toast.success(

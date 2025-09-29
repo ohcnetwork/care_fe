@@ -12,9 +12,9 @@ import { ValidationHelper } from "@/components/Users/UserFormValidations";
 import { LocalStorageKeys } from "@/common/constants";
 import { validatePassword } from "@/common/validation";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import authApi from "@/types/auth/authApi";
 
 interface ResetPasswordProps {
   token: string;
@@ -72,7 +72,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
     return form;
   };
   const { mutate: resetPassword } = useMutation({
-    mutationFn: mutate(routes.resetPassword),
+    mutationFn: mutate(authApi.resetPassword),
     onSuccess: () => {
       localStorage.removeItem(LocalStorageKeys.accessToken);
       toast.success(t("password_reset_success"));
@@ -96,7 +96,7 @@ const ResetPassword = (props: ResetPasswordProps) => {
 
   const { isError } = useQuery({
     queryKey: ["checkResetToken", { token: props.token }],
-    queryFn: query(routes.checkResetToken, { body: { token: props.token } }),
+    queryFn: query(authApi.checkResetToken, { body: { token: props.token } }),
     enabled: !!props.token,
   });
 

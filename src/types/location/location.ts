@@ -14,9 +14,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { Code } from "@/types/base/code/code";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { FacilityOrganization } from "@/types/facilityOrganization/facilityOrganization";
-
-export type AvailabilityStatus = "available" | "unavailable";
+import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
 export type Status = "active" | "inactive" | "unknown";
 
@@ -34,12 +32,12 @@ export interface LocationBase {
   location_type?: Code;
   form: LocationForm;
   mode: LocationMode;
-  availability_status: AvailabilityStatus;
 }
 
 export interface LocationDetail extends LocationBase {
   id: string;
-  organizations: FacilityOrganization[];
+  has_children: boolean;
+  organizations: FacilityOrganizationRead[];
   sort_index: number;
 }
 
@@ -56,6 +54,12 @@ export interface LocationWrite extends LocationBase {
   parent?: string;
   organizations: string[];
   mode: LocationMode;
+}
+
+export interface LocationImport extends LocationBase {
+  id?: string;
+  mode: LocationMode;
+  children: LocationImport[];
 }
 
 export const LocationFormOptions = [

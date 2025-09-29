@@ -10,10 +10,10 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { CommandInput } from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
@@ -23,21 +23,22 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import facilityApi from "@/types/facility/facilityApi";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 import UserApi from "@/types/user/userApi";
 
 interface Props {
-  selected?: UserBase;
-  onChange: (user: UserBase) => void;
+  selected?: UserReadMinimal;
+  onChange: (user: UserReadMinimal) => void;
   placeholder?: string;
   noOptionsMessage?: string;
   popoverClassName?: string;
   facilityId?: string;
   organizationId?: string;
+  disabled?: boolean;
 }
 
 const PAGE_LIMIT = 50;
@@ -50,6 +51,7 @@ export default function UserSelector({
   popoverClassName,
   facilityId,
   organizationId,
+  disabled,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -60,7 +62,7 @@ export default function UserSelector({
     if (!facilityId) return undefined;
     return organizationId
       ? { facilityId, organizationId }
-      : { facility_id: facilityId };
+      : { facilityId: facilityId };
   };
 
   const getQueryParams = (pageParam: number) => ({
@@ -82,7 +84,7 @@ export default function UserSelector({
         facilityId
           ? organizationId
             ? facilityOrganizationApi.listUsers
-            : routes.facility.getUsers
+            : facilityApi.getUsers
           : UserApi.list,
         {
           pathParams: getPathParams(),
@@ -114,6 +116,7 @@ export default function UserSelector({
           role="combobox"
           className="min-w-60 w-full justify-start"
           data-cy="select-assigned-user"
+          disabled={disabled}
         >
           {selected ? (
             <div className="flex items-center gap-2">
@@ -152,7 +155,7 @@ export default function UserSelector({
                 : noOptionsMessage || t("no_results")}
             </CommandEmpty>
             <CommandGroup>
-              {usersList?.map((user: UserBase, i) => (
+              {usersList?.map((user: UserReadMinimal, i) => (
                 <CommandItem
                   key={user.id}
                   value={`${formatName(user)} ${user.username ?? ""}`}

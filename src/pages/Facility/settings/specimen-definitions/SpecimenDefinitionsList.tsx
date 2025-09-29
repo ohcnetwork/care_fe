@@ -21,8 +21,10 @@ import {
 } from "@/components/ui/table";
 
 import Page from "@/components/Common/Page";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -64,7 +66,7 @@ function SpecimenDefinitionCard({
             size="sm"
             onClick={() =>
               navigate(
-                `/facility/${facilityId}/settings/specimen_definitions/${definition.id}`,
+                `/facility/${facilityId}/settings/specimen_definitions/${definition.slug}`,
               )
             }
           >
@@ -98,7 +100,7 @@ export function SpecimenDefinitionsList({
   }, []);
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["specimen_definitions", facilityId, qParams],
+    queryKey: ["specimenDefinitions", facilityId, qParams],
     queryFn: query.debounced(specimenDefinitionApi.listSpecimenDefinitions, {
       pathParams: { facilityId },
       queryParams: {
@@ -160,7 +162,7 @@ export function SpecimenDefinitionsList({
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(SpecimenDefinitionStatus)}
-                  label="status"
+                  label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>
@@ -179,9 +181,11 @@ export function SpecimenDefinitionsList({
           </>
         ) : specimenDefinitions.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
-            title={t("no_definitions_found")}
-            description={t("adjust_filters")}
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
+            title={t("no_specimen_definitions_found")}
+            description={t("adjust_specimen_definition_filters")}
           />
         ) : (
           <>
@@ -189,7 +193,7 @@ export function SpecimenDefinitionsList({
             <div className="grid gap-4 md:hidden">
               {specimenDefinitions.map((definition) => (
                 <SpecimenDefinitionCard
-                  key={definition.id}
+                  key={definition.slug}
                   definition={definition}
                   facilityId={facilityId}
                 />
@@ -209,7 +213,7 @@ export function SpecimenDefinitionsList({
                   </TableHeader>
                   <TableBody className="bg-white">
                     {specimenDefinitions.map((definition) => (
-                      <TableRow key={definition.id} className="divide-x">
+                      <TableRow key={definition.slug} className="divide-x">
                         <TableCell className="font-medium">
                           {definition.title}
                         </TableCell>
@@ -233,7 +237,7 @@ export function SpecimenDefinitionsList({
                             size="sm"
                             onClick={() =>
                               navigate(
-                                `/facility/${facilityId}/settings/specimen_definitions/${definition.id}`,
+                                `/facility/${facilityId}/settings/specimen_definitions/${definition.slug}`,
                               )
                             }
                           >

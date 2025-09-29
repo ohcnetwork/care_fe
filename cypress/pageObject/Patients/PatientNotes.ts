@@ -5,7 +5,7 @@ export class PatientNotes {
   }
 
   openEncounterNotesTab() {
-    cy.verifyAndClickElement('[data-cy="tab-notes"]', "Notes");
+    cy.get("[role='tablist']").contains("Notes").click();
     return this;
   }
 

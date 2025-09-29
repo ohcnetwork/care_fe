@@ -4,29 +4,9 @@ import { Trans, useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -38,6 +18,8 @@ import {
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import { RoleSelect } from "@/components/Common/RoleSelect";
 import UserSelector from "@/components/Common/UserSelector";
 
 import { getPermissions } from "@/common/Permissions";
@@ -47,8 +29,8 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import patientApi from "@/types/emr/patient/patientApi";
-import roleApi from "@/types/emr/role/roleApi";
-import { UserBase } from "@/types/user/user";
+import { RoleBase } from "@/types/emr/role/role";
+import { UserReadMinimal } from "@/types/user/user";
 
 import { PatientProps } from ".";
 
@@ -60,14 +42,8 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserBase>();
-  const [selectedRole, setSelectedRole] = useState<string>("");
-
-  const { data: roles } = useQuery({
-    queryKey: ["roles"],
-    queryFn: query(roleApi.listRoles),
-    enabled: open,
-  });
+  const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
+  const [selectedRole, setSelectedRole] = useState<RoleBase>();
 
   const { mutate: assignUser } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
@@ -82,7 +58,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
       toast.success("User added to patient successfully");
       setOpen(false);
       setSelectedUser(undefined);
-      setSelectedRole("");
+      setSelectedRole(undefined);
     },
     onError: (error) => {
       const errorData = error.cause as { errors: { msg: string }[] };
@@ -100,13 +76,13 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
     assignUser({
       user: selectedUser.id,
-      role: selectedRole,
+      role: selectedRole.id,
     });
   };
 
-  const handleUserChange = (user: UserBase) => {
+  const handleUserChange = (user: UserReadMinimal) => {
     setSelectedUser(user);
-    setSelectedRole("");
+    setSelectedRole(undefined);
   };
 
   return (
@@ -147,9 +123,6 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                         {formatName(selectedUser)}
                       </p>
                     </TooltipComponent>
-                    <span className="text-sm text-gray-500">
-                      {selectedUser.email}
-                    </span>
                   </div>
                 </div>
 
@@ -187,25 +160,9 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
                 <label className="text-sm font-medium">
                   {t("select_role")}
                 </label>
-                <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger data-cy="patient-user-role-select">
-                    <SelectValue placeholder={t("select_role")} />
-                  </SelectTrigger>
-                  <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                    {roles?.results?.map((role) => (
-                      <SelectItem key={role.id} value={role.id}>
-                        <div className="flex flex-col items-start">
-                          <span>{role.name}</span>
-                          {role.description && (
-                            <span className="text-xs text-gray-500">
-                              {role.description}
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div>
+                  <RoleSelect value={selectedRole} onChange={setSelectedRole} />
+                </div>
               </div>
 
               <Button
@@ -226,6 +183,9 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
 export const PatientUsers = ({ patientData }: PatientProps) => {
   const patientId = patientData.id;
+  const [userToRemove, setUserToRemove] = useState<UserReadMinimal | null>(
+    null,
+  );
 
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -302,49 +262,18 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                 </div>
               </div>
               {canWritePatient && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      data-cy="patient-user-remove-button"
-                      className="absolute top-0 right-0"
-                    >
-                      <CareIcon icon="l-trash" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>{t("remove_user")}</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        <Trans
-                          i18nKey="are_you_sure_want_to_remove"
-                          values={{ name: formatName(user) }}
-                          components={{
-                            strong: (
-                              <strong className="inline-block align-bottom truncate max-w-32 sm:max-w-96 md:max-w-32 lg:max-w-28 xl:max-w-36" />
-                            ),
-                          }}
-                        />
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                      <AlertDialogAction
-                        data-cy="patient-user-remove-confirm-button"
-                        onClick={() => removeUser(user.id)}
-                        className={cn(
-                          buttonVariants({ variant: "destructive" }),
-                        )}
-                      >
-                        {t("remove")}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  data-cy="patient-user-remove-button"
+                  className="absolute top-0 right-0"
+                  onClick={() => setUserToRemove(user)}
+                >
+                  <CareIcon icon="l-trash" />
+                </Button>
               )}
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
+            <div className="mt-4 grid grid-cols-2  gap-y-2">
               <div className="text-sm">
                 <div className="text-gray-500">{t("phone_number")}</div>
                 <div className="font-medium">
@@ -352,11 +281,32 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                     formatPhoneNumberIntl(user.phone_number)}
                 </div>
               </div>
-              <div className="text-sm">
+              <div className="text-sm ml-4">
                 <div className="text-gray-500">{t("user_type")}</div>
                 <div className="font-medium">{user.user_type}</div>
               </div>
             </div>
+            <ConfirmActionDialog
+              open={!!userToRemove}
+              onOpenChange={(open) => !open && setUserToRemove(null)}
+              title={t("remove_user")}
+              description={
+                <Trans
+                  i18nKey="are_you_sure_want_to_remove"
+                  values={{
+                    name: formatName(user),
+                  }}
+                  components={{
+                    strong: (
+                      <strong className="inline-block align-bottom truncate max-w-72 sm:max-w-full md:max-w-full lg:max-w-full xl:max-w-full" />
+                    ),
+                  }}
+                />
+              }
+              variant="destructive"
+              confirmText={t("remove")}
+              onConfirm={() => removeUser(userToRemove!.id)}
+            />
           </div>
         ))}
       </div>

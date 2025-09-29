@@ -1,8 +1,6 @@
-import { FacilityModel } from "@/components/Facility/models";
-import { UserBareMinimum } from "@/components/Users/models";
-
 import { PatientRead } from "@/types/emr/patient/patient";
-import { UserBase } from "@/types/user/user";
+import { FacilityRead } from "@/types/facility/facility";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const RESOURCE_REQUEST_STATUSES = [
   "pending",
@@ -17,12 +15,12 @@ export const RESOURCE_REQUEST_STATUSES = [
 export type ResourceRequestStatus = (typeof RESOURCE_REQUEST_STATUSES)[number];
 
 export interface ResourceRequest {
-  approving_facility: FacilityModel | null;
-  assigned_facility: FacilityModel | undefined;
+  approving_facility: FacilityRead | null;
+  assigned_facility: FacilityRead | undefined;
   category: string;
   emergency: boolean;
   id: string;
-  origin_facility: FacilityModel;
+  origin_facility: FacilityRead;
   priority: number;
   reason: string;
   referring_facility_contact_name: string;
@@ -30,9 +28,9 @@ export interface ResourceRequest {
   requested_quantity: number;
   status: ResourceRequestStatus;
   title: string;
-  assigned_to: UserBase | null;
-  created_by: UserBase;
-  updated_by: UserBase;
+  assigned_to: UserReadMinimal | null;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   created_date: string;
   modified_date: string;
   related_patient: PatientRead | null;
@@ -83,7 +81,7 @@ export interface UpdateResourceRequest {
 
 export interface CommentModel {
   id: string;
-  created_by: UserBareMinimum;
+  created_by: UserReadMinimal;
   created_date: string;
   comment: string;
 }

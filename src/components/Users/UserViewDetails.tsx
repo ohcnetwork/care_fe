@@ -7,10 +7,10 @@ import {
   Organization,
   renderGeoOrganizations,
 } from "@/types/organization/organization";
-import { UserBase } from "@/types/user/user";
+import { UserRead } from "@/types/user/user";
 
 interface UserViewDetailsProps {
-  user: UserBase;
+  user: UserRead;
 }
 
 const LabelValue = ({
@@ -65,7 +65,8 @@ export const BasicInfoDetails = ({ user }: UserViewDetailsProps) => {
   return (
     <div className="pt-2 pb-5">
       <Badge text={t("basic_info")} />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
         <LabelValue id="username" label={t("username")} value={user.username} />
         <LabelValue
           id="prefix"
@@ -87,7 +88,11 @@ export const BasicInfoDetails = ({ user }: UserViewDetailsProps) => {
           label={t("suffix")}
           value={user.suffix || "-"}
         />
-        <LabelValue id="gender" label={t("gender")} value={user.gender} />
+        <LabelValue
+          id="gender"
+          label={t("gender")}
+          value={user.gender ? t(`GENDER__${user.gender}`) : "-"}
+        />
       </div>
     </div>
   );
@@ -99,7 +104,7 @@ export const ContactInfoDetails = ({ user }: UserViewDetailsProps) => {
   return (
     <div className="pt-2 pb-5">
       <Badge text={t("contact_info")} />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
         <LabelValue id="email" label={t("email")} value={user.email} />
         <LabelValue
           id="phone_number"
@@ -127,7 +132,7 @@ export const GeoOrgDetails = ({ user }: UserViewDetailsProps) => {
   return (
     <div className="pt-2 pb-5">
       <Badge text={t("location")} />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
         {geoOrganizationDetails.map((detail) => (
           <LabelValue
             key={detail.label}

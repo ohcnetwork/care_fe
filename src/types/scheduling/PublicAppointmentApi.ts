@@ -2,6 +2,7 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import {
   Appointment,
   AppointmentCreatePublicRequest,
+  SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 
@@ -10,7 +11,12 @@ export default {
     path: "/api/v1/otp/slots/get_slots_for_day/",
     method: HttpMethod.POST,
     TRes: Type<{ results: TokenSlot[] }>(),
-    TBody: Type<{ facility: string; user: string; day: string }>(),
+    TBody: Type<{
+      facility: string;
+      resource_type: SchedulableResourceType;
+      resource_id: string;
+      day: string;
+    }>(),
   },
   getAppointments: {
     path: "/api/v1/otp/slots/get_appointments/",
