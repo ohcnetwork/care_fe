@@ -228,7 +228,6 @@ export function ChargeItemsTable({
             variant="outline"
             onClick={() => navigate(`../${accountId}/charge_items/print`)}
             className="w-full sm:w-auto"
-            data-shortcut-id="print-button"
           >
             <PrinterIcon className="size-4 mr-2" />
             {t("print_charge_items")}
@@ -238,7 +237,6 @@ export function ChargeItemsTable({
             variant="outline"
             onClick={() => setIsAddChargeItemsOpen(true)}
             className="w-full sm:w-auto"
-            data-shortcut-id="add-charge-item"
           >
             <PlusIcon className="size-4 mr-2" />
             {t("add_charge_items")}
