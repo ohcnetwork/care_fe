@@ -241,7 +241,7 @@ export default function ValueSetSearchContent({
             <div
               className={cn(
                 activeTab === 0 ? "block" : "hidden",
-                "md:block flex-1 overflow-auto max-h-[30vh] md:max-h-[35vh] ",
+                "md:block flex-1",
               )}
             >
               <CommandGroup>

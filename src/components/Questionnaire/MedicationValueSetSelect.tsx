@@ -26,7 +26,6 @@ import ValueSetSearchContent from "@/components/Questionnaire/ValueSetSearchCont
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-import query from "@/Utils/request/query";
 import {
   Drawer,
   DrawerContent,
@@ -42,6 +41,8 @@ import {
   ProductKnowledgeStatus,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
+import query from "@/Utils/request/query";
+import { isAppleDevice } from "@/Utils/utils";
 
 interface Props {
   onSelect: (value: Code) => void;
@@ -209,7 +210,7 @@ export default function MedicationValueSetSelect({
           }}
           value={search}
           className="border-none ring-0 text-base md:text-sm"
-          autoFocus
+          autoFocus={!isAppleDevice}
         />
       )}
       {children}
@@ -225,8 +226,8 @@ export default function MedicationValueSetSelect({
         }
         className="w-full p-0"
       >
-        <TabsContent value="product" className="p-0">
-          <CommandList className="overflow-y-auto">
+        <TabsContent value="product" className="p-0 overflow-y-auto">
+          <CommandList>
             <CommandEmpty>
               {search.length < 3 ? (
                 <p className="p-4 text-sm text-gray-500">
@@ -282,7 +283,7 @@ export default function MedicationValueSetSelect({
           </CommandList>
         </TabsContent>
 
-        <TabsContent value="valueset" className="p-0">
+        <TabsContent value="valueset" className="p-0 overflow-y-auto">
           <ValueSetSearchContent
             system="system-medication"
             onSelect={(selected) => {
@@ -358,7 +359,9 @@ export default function MedicationValueSetSelect({
             </DrawerTitle>
             {renderBreadcrumbs()}
           </DrawerHeader>
-          {renderCommand(renderTabContent())}
+          <div className="flex-1 overflow-y-auto">
+            {renderCommand(renderTabContent())}
+          </div>
         </DrawerContent>
       </Drawer>
     );
