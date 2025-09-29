@@ -24,6 +24,35 @@ function LocationCard({
   service_type: InternalType | undefined;
 }) {
   const { t } = useTranslation();
+  const getButtonTextAndLink = (
+    facilityId: string,
+    locationId: string,
+    service_type: InternalType | undefined,
+  ) => {
+    switch (service_type) {
+      case InternalType.pharmacy:
+        return {
+          text: t("view_prescriptions"),
+          link: `/facility/${facilityId}/locations/${locationId}/medication_requests/`,
+        };
+      case InternalType.lab:
+        return {
+          text: t("view_requests"),
+          link: `/facility/${facilityId}/locations/${locationId}/service_requests/`,
+        };
+      default:
+        return {
+          text: t("view_schedule"),
+          link: `/facility/${facilityId}/locations/${locationId}/schedule/`,
+        };
+    }
+  };
+
+  const { text, link } = getButtonTextAndLink(
+    facilityId,
+    location.id,
+    service_type,
+  );
 
   return (
     <Card className="transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md">
@@ -45,36 +74,15 @@ function LocationCard({
             </p>
           </div>
 
-          {service_type === InternalType.pharmacy && (
-            <Button
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/locations/${location.id}/medication_requests/`,
-                )
-              }
-              variant="outline"
-              size="sm"
-              className="shrink-0 w-full sm:w-auto px-3 text-xs"
-            >
-              {t("view_prescriptions")}
-              <CareIcon icon="l-arrow-right" className="size-3 ml-1" />
-            </Button>
-          )}
-          {service_type === InternalType.lab && (
-            <Button
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/locations/${location.id}/service_requests/`,
-                )
-              }
-              variant="outline"
-              size="sm"
-              className="shrink-0 w-full sm:w-auto px-3 text-xs"
-            >
-              {t("view_requests")}
-              <CareIcon icon="l-arrow-right" className="size-3 ml-1" />
-            </Button>
-          )}
+          <Button
+            onClick={() => navigate(link)}
+            variant="outline"
+            size="sm"
+            className="shrink-0 w-full sm:w-auto px-3 text-xs"
+          >
+            {text}
+            <CareIcon icon="l-arrow-right" className="size-3 ml-1" />
+          </Button>
         </div>
       </CardContent>
     </Card>

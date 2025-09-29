@@ -13,7 +13,7 @@ export default {
     TRes: Type<PaginatedResponse<ProductKnowledgeBase>>(),
   },
   retrieveProductKnowledge: {
-    path: "/api/v1/product_knowledge/{productKnowledgeId}/",
+    path: "/api/v1/product_knowledge/{slug}/",
     method: HttpMethod.GET,
     TRes: Type<ProductKnowledgeBase>(),
   },
@@ -24,9 +24,24 @@ export default {
     TBody: Type<ProductKnowledgeCreate>(),
   },
   updateProductKnowledge: {
-    path: "/api/v1/product_knowledge/{productKnowledgeId}/",
+    path: "/api/v1/product_knowledge/{slug}/",
     method: HttpMethod.PUT,
     TRes: Type<ProductKnowledgeBase>(),
     TBody: Type<ProductKnowledgeUpdate>(),
+  },
+  addFavorite: {
+    path: "/api/v1/product_knowledge/{slug}/add_favorite/",
+    method: HttpMethod.POST,
+    TRes: Type<ProductKnowledgeBase>(),
+  },
+  removeFavorite: {
+    path: "/api/v1/product_knowledge/{slug}/remove_favorite/",
+    method: HttpMethod.POST,
+    TRes: Type<ProductKnowledgeBase>(),
+  },
+  listFavorites: {
+    path: "/api/v1/product_knowledge/",
+    method: HttpMethod.GET,
+    TRes: Type<ProductKnowledgeBase[]>(),
   },
 } as const;
