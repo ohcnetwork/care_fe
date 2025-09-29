@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { FilterTabs } from "@/components/ui/filter-tabs";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
 import { DispenseHistory } from "@/components/Medicine/MedicationRequestTable/DispenseHistory";
@@ -16,7 +16,13 @@ import query from "@/Utils/request/query";
 import { Button } from "@/components/ui/button";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import { ClipboardList, PlusIcon, ReceiptTextIcon, Syringe, History } from "lucide-react";
+import {
+  ClipboardList,
+  History,
+  PlusIcon,
+  ReceiptTextIcon,
+  Syringe,
+} from "lucide-react";
 import { Link } from "raviger";
 
 interface EmptyStateProps {

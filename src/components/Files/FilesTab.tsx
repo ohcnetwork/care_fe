@@ -22,8 +22,7 @@ interface FilesTabsProps {
   readOnly?: boolean;
 }
 
-const allowedTabs = ["all", "discharge_summary", "drawings"] as const;
-type TabType = (typeof allowedTabs)[number];
+type TabType = "all" | "discharge_summary" | "drawings";
 
 export const FilesTab = ({
   patient,

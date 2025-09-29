@@ -11,6 +11,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Sheet,
   SheetContent,
@@ -26,7 +27,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { PaginatedResponse } from "@/Utils/request/types";
 
