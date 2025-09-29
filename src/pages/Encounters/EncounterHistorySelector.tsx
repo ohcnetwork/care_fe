@@ -11,6 +11,13 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
@@ -24,13 +31,6 @@ import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -155,11 +155,16 @@ function EncounterCard({
 
 interface Props {
   onSelect?: () => void;
+  scrollRootRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-const EncounterHistoryList = ({ onSelect }: Props) => {
+const EncounterHistoryList = ({ onSelect, scrollRootRef }: Props) => {
   const { t } = useTranslation();
-  const { ref, inView } = useInView();
+  const { ref, inView } = useInView({
+    root: scrollRootRef?.current,
+    rootMargin: "100px",
+    threshold: 0,
+  });
 
   const [status, setStatus] = useState<string>();
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
@@ -240,6 +245,24 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       fetchNextPage();
     }
   }, [inView, hasNextPage, fetchNextPage]);
+
+  // Fallback for Android: Manual scroll detection
+  useEffect(() => {
+    const scrollContainer = scrollRootRef?.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const isNearBottom = scrollTop + clientHeight >= scrollHeight - 200;
+
+      if (isNearBottom && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    };
+
+    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+  }, [scrollRootRef, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
     for (const [key, value] of Object.entries(query)) {
@@ -386,6 +409,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 
 export default function EncounterHistorySelector() {
   const [isOpen, setIsOpen] = useState(false);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
   const { t } = useTranslation();
 
@@ -395,20 +419,28 @@ export default function EncounterHistorySelector() {
         <h2 className="px-2 mb-2 text-xs font-medium text-gray-600 uppercase">
           {t("chosen_encounter")}
         </h2>
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger className="w-full">
+        <Drawer open={isOpen} onOpenChange={setIsOpen}>
+          <DrawerTrigger className="w-full">
             <EncounterSheetTrigger />
-          </SheetTrigger>
-          <SheetContent
-            side="bottom"
-            className="max-h-[85vh] rounded-t-3xl overflow-y-auto mb-2"
-          >
-            <SheetHeader className="px-4 pb-2">
-              <SheetTitle>{t("past_encounters")}</SheetTitle>
-            </SheetHeader>
-            <EncounterHistoryList onSelect={() => setIsOpen(false)} />
-          </SheetContent>
-        </Sheet>
+          </DrawerTrigger>
+          <DrawerContent className="min-h-[65vh] max-h-[85vh] pt-2 pb-0">
+            <DrawerHeader className="px-4 pb-2">
+              <DrawerTitle className="text-lg font-semibold">
+                {t("past_encounters")}
+              </DrawerTitle>
+            </DrawerHeader>
+            <div
+              ref={scrollContainerRef}
+              className="flex-1 overflow-y-auto overscroll-contain px-3"
+              style={{ WebkitOverflowScrolling: "touch" }}
+            >
+              <EncounterHistoryList
+                onSelect={() => setIsOpen(false)}
+                scrollRootRef={scrollContainerRef}
+              />
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
       <div className="hidden lg:block pr-3">
         <ScrollArea className="h-[calc(100vh-9rem)] pr-3">
