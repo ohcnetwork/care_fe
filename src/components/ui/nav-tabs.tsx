@@ -29,6 +29,7 @@ interface Props<TabKey extends string> {
   tabTriggerClassName?: string;
   showMoreAfterIndex?: number;
   tabContentClassName?: string;
+  className?: string;
 }
 
 const getTabsToShowAndShowMore = <TabKey extends string>(

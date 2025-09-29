@@ -201,34 +201,6 @@ export function AccountShow({
     });
   };
 
-  const showBedTab = Boolean(encounterId) || tab === "bed_charge_items";
-  const tabOptions = [
-    {
-      value: "invoices",
-      label: "invoices",
-      icon: <CareIcon icon="l-receipt" className="size-4" />,
-    },
-    {
-      value: "charge_items",
-      label: "charge_items",
-      icon: <CareIcon icon="l-list-ul" className="size-4" />,
-    },
-    {
-      value: "payments",
-      label: "payments",
-      icon: <CareIcon icon="l-money-bill" className="size-4" />,
-    },
-    ...(showBedTab
-      ? [
-          {
-            value: "bed_charge_items" as const,
-            label: "bed_charge_items",
-            icon: <CareIcon icon="l-bed" className="size-4" />,
-          },
-        ]
-      : []),
-  ];
-
   if (isLoading) {
     return <TableSkeleton count={5} />;
   }
