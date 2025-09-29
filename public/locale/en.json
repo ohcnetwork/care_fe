@@ -5338,6 +5338,7 @@
   "view_and_manage_invoices": "View and manage invoices",
   "view_and_manage_patient_encounters": "View and manage patient encounters",
   "view_and_manage_payments": "View and manage payments",
+  "view_appointments": "View Appointments",
   "view_asset": "View Assets",
   "view_associated_encounter": "View associated encounter",
   "view_care_team": "View Care Team",
@@ -5429,6 +5430,5 @@
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞",
-  "view_appointments": "View Appointments"
+  "℞": "℞"
 }
