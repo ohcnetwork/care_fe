@@ -17,22 +17,22 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { conditionalAttribute } from "@/Utils/utils";
+import { conditionalAttribute, isAppleDevice } from "@/Utils/utils";
 import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
@@ -82,9 +82,9 @@ export function QuestionnaireSearch({
     <Command filter={() => 1}>
       <CommandInput
         placeholder={t("search_questionnaires")}
-        className="outline-hidden border-none ring-0 shadow-none"
+        className="outline-hidden border-none ring-0 shadow-none text-base"
         onValueChange={setSearch}
-        autoFocus
+        autoFocus={!isAppleDevice}
       />
       <CommandList className="overflow-y-auto">
         <CommandEmpty>
@@ -120,8 +120,8 @@ export function QuestionnaireSearch({
 
   if (isMobile) {
     return (
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger asChild>
+      <Drawer open={isOpen} onOpenChange={setIsOpen}>
+        <DrawerTrigger asChild>
           {trigger || (
             <Button
               data-cy="add-questionnaire-button"
@@ -143,17 +143,15 @@ export function QuestionnaireSearch({
               <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
             </Button>
           )}
-        </SheetTrigger>
+        </DrawerTrigger>
 
-        <SheetContent
-          side="bottom"
-          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
-        >
-          <SheetTitle className="sr-only">{t("questionnaire")}</SheetTitle>
-          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
-          <div className="mt-6 h-full">{content}</div>
-        </SheetContent>
-      </Sheet>
+        <DrawerContent className="min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
+          <DrawerTitle className="sr-only">{t("questionnaire")}</DrawerTitle>
+          <div className="mt-6 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
+            {content}
+          </div>
+        </DrawerContent>
+      </Drawer>
     );
   }
 
