@@ -3855,6 +3855,7 @@
   "questionnaire_other": "Questionnaires",
   "questionnaire_question_dependent": "This question is used in following question(s) as an enable when condition: ",
   "questionnaire_response_logs": "Questionnaire Response Logs",
+  "questionnaire_responses": "Questionnaire Responses",
   "questionnaire_service_request_no_encounter": "Service Requests cannot be recorded without an active encounter",
   "questionnaire_submission_failed": "Failed to submit questionnaire",
   "questionnaire_submitted_successfully": "Questionnaire submitted successfully",
