@@ -65,7 +65,10 @@ const formSchema = z.object({
   alternate_identifier: z.string().trim().optional(),
   category: z.string(),
   code: codeSchema.nullable(),
-  base_unit: codeSchema,
+  base_unit: codeSchema.refine(
+    (val) => !!val.code && !!val.display && !!val.system,
+    { message: "field_required" },
+  ),
   names: z
     .array(
       z.object({
@@ -506,8 +509,8 @@ function ProductKnowledgeFormContent({
                       )}
                     />
                     <FormMessage>
-                      {form.formState.errors.base_unit &&
-                        t("base_unit_required")}
+                      {form.formState.errors.base_unit?.message &&
+                        t(form.formState.errors.base_unit.message)}
                     </FormMessage>
                   </div>
                 </div>
