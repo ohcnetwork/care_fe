@@ -1,11 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import {
   useInfiniteQuery,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
@@ -47,7 +47,6 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
 
   const isEditMode = !!role?.id;
 
-  // ----- Form Schema -----
   const roleSchema = z.object({
     name: z.string().trim().min(1, t("name_is_required")),
     description: z.string().trim().optional(),
@@ -72,7 +71,6 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const hasPermissionSelected =
     watchedPermissions && watchedPermissions.length > 0;
 
-  // ----- Infinite Query for Permissions -----
   const getQueryParams = (pageParam: number) => ({
     limit: String(PAGE_LIMIT),
     offset: String(pageParam),
@@ -106,7 +104,6 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
     if (inView && hasNextPage) fetchNextPage();
   }, [inView, hasNextPage, fetchNextPage]);
 
-  // ----- Mutations -----
   const createRoleMutation = useMutation({
     mutationFn: mutate(roleApi.createRole),
     onSuccess: () => {
@@ -126,15 +123,13 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   });
 
   useEffect(() => {
-    if (isEditMode) {
-      form.reset({
-        name: role?.name || "",
-        description: role?.description || "",
-        permissions: role?.permissions.map((p) => p.slug) || [],
-        is_archived: role?.is_archived ?? false,
-      });
-    }
-  }, [form, role, isEditMode]);
+    form.reset({
+      name: role?.name || "",
+      description: role?.description || "",
+      permissions: role?.permissions.map((p) => p.slug) || [],
+      is_archived: role?.is_archived ?? false,
+    });
+  }, [form, role]);
 
   const onSubmit = (data: z.infer<typeof roleSchema>) => {
     const payload = {
@@ -154,7 +149,6 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const isLoading =
     createRoleMutation.isPending || updateRoleMutation.isPending;
 
-  // ----- Helpers -----
   const handlePermissionToggle = (slug: string) => {
     const current = form.watch("permissions") || [];
     if (current.includes(slug)) {
@@ -191,7 +185,6 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
     onSuccess();
   };
 
-  // ----- Render -----
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -310,7 +303,9 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                       >
                         <Checkbox
                           id={permission.slug}
-                          checked={watchedPermissions?.includes(permission.slug)}
+                          checked={watchedPermissions?.includes(
+                            permission.slug,
+                          )}
                           onCheckedChange={() =>
                             handlePermissionToggle(permission.slug)
                           }
@@ -357,8 +352,8 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
             {isLoading
               ? t("saving")
               : isEditMode
-              ? t("update_role")
-              : t("create_role")}
+                ? t("update_role")
+                : t("create_role")}
           </Button>
         </div>
       </form>
