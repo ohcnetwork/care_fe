@@ -471,7 +471,6 @@ export default function AppointmentDetail(props: Props) {
                         icon={<PlusSquare className="text-primary-500" />}
                         title={t("start_consultation")}
                         actionId="start-consultation"
-                        data-shortcut-id="start-consultation"
                         onClick={() => {
                           updateAppointment({
                             status: AppointmentStatus.IN_CONSULTATION,
@@ -494,7 +493,6 @@ export default function AppointmentDetail(props: Props) {
                             icon={<PlusSquare className="text-primary-500" />}
                             title={t("start_consultation")}
                             actionId="start-consultation"
-                            data-shortcut-id="start-consultation"
                           />
                         }
                         onSuccess={() => {
@@ -518,7 +516,6 @@ export default function AppointmentDetail(props: Props) {
                           icon={<SquareActivity className="text-orange-500" />}
                           title={t("create_encounter")}
                           actionId="create-encounter"
-                          data-shortcut-id="create-encounter"
                         />
                       }
                       onSuccess={() => {
@@ -534,7 +531,6 @@ export default function AppointmentDetail(props: Props) {
                     icon={<PrinterIcon className="size-4" />}
                     title={t("print_appointment")}
                     actionId="print-appointment"
-                    data-shortcut-id="print-appointment"
                     href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
                   />
                 </div>

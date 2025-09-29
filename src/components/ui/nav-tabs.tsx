@@ -14,12 +14,14 @@ import {
 import PageTitle from "@/components/Common/PageHeadTitle";
 import { FilterTabs } from "@/components/ui/filter-tabs"; // <-- Add this import
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { entriesOf, keysOf } from "@/Utils/utils";
 
 interface NavTabDefinition {
   label: string;
   component: React.ReactNode;
   icon?: React.ReactNode; // Optional: support icons in tabs
+  shortcutId?: string;
 }
 
 interface Props<TabKey extends string> {
