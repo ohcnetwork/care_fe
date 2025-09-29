@@ -271,14 +271,15 @@ export function ResourceDefinitionCategoryPicker<T>({
 
   // Map slug -> original T across defs/favorites/recent so selection can return T
   const rawBySlug = useMemo(() => {
+    // Prefer full definitions over (potentially sparse) favorites/recent
     const allRaw = [
-      ...((definitionsResponse?.results || []) as T[]),
       ...(Array.isArray(favoritesResponse)
         ? (favoritesResponse as T[])
         : (favoritesResponse as unknown as { results?: T[] })?.results || []),
       ...(Array.isArray(recentResponse)
         ? (recentResponse as T[])
         : (recentResponse as unknown as { results?: T[] })?.results || []),
+      ...((definitionsResponse?.results || []) as T[]),
     ] as T[];
 
     const entries = allRaw.map((item) => {

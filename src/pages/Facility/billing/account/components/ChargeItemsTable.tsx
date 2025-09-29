@@ -195,6 +195,7 @@ export function ChargeItemsTable({
               charge_item_status: value || undefined,
             })
           }
+          label={t("status")}
           className="max-sm:hidden w-2/3 md:w-full overflow-x-auto"
           options={tabOptions}
         />
@@ -310,7 +311,7 @@ export function ChargeItemsTable({
                         )}
                       </Button>
                     </TableCell>
-                    <TableCell className="bor-medium">
+                    <TableCell className="border-x p-3 text-gray-950">
                       {item.title}
                       {item.description && (
                         <p className="text-xs text-gray-500 whitespace-pre-wrap">

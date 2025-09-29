@@ -504,7 +504,7 @@ export default function ReportBuilder({
                 </Button>
                 {reportTemplateId && (
                   <Button
-                    type="submit"
+                    type="button"
                     variant="primary"
                     className="w-full"
                     onClick={() => onSubmit(form.getValues(), true)}

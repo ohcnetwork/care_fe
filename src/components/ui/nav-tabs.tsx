@@ -12,7 +12,6 @@ import {
 import PageTitle from "@/components/Common/PageHeadTitle";
 import { FilterTabs } from "@/components/ui/filter-tabs"; // <-- Add this import
 
-import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { entriesOf, keysOf } from "@/Utils/utils";
 
 interface NavTabDefinition {
@@ -39,12 +38,24 @@ const getTabsToShowAndShowMore = <TabKey extends string>(
 ) => {
   selectedTab ??= allTabKeys[0];
 
-  if (showMoreAfterIndex == null || allTabKeys.length <= showMoreAfterIndex) {
+  const cap =
+    showMoreAfterIndex == null
+      ? allTabKeys.length
+      : Math.max(0, showMoreAfterIndex);
+
+  if (cap === 0) {
+    return {
+      visibleTabs: [selectedTab],
+      showMoreTabs: allTabKeys.filter((k) => k !== selectedTab),
+    };
+  }
+
+  if (allTabKeys.length <= cap) {
     return { visibleTabs: allTabKeys, showMoreTabs: [] };
   }
 
-  const visibleTabs = allTabKeys.slice(0, showMoreAfterIndex);
-  const showMoreTabs = allTabKeys.slice(showMoreAfterIndex);
+  const visibleTabs = allTabKeys.slice(0, cap);
+  const showMoreTabs = allTabKeys.slice(cap);
 
   if (visibleTabs.includes(selectedTab)) {
     return { visibleTabs, showMoreTabs };
@@ -123,13 +134,15 @@ export const NavTabs = <TabKey extends string>({
           </DropdownMenu>
         )}
       </div>
+      {setPageTitle && (
+        <PageTitle title={t(tabs[currentTab ?? allTabKeys[0]].label)} />
+      )}
       {entriesOf(tabs).map(([key, tab]) => (
         <div
           key={key}
           hidden={key !== (currentTab ?? allTabKeys[0])}
           className={tabContentClassName}
         >
-          {setPageTitle && <PageTitle title={tab.label} />}
           {tab.component}
         </div>
       ))}

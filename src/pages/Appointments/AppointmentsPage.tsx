@@ -795,7 +795,7 @@ function AppointmentRow(props: {
         user: props.practitioners ?? undefined,
         date_after: props.date_from,
         date_before: props.date_to,
-        tags: props.tags,
+        tags: props.tags?.join(","),
         tags_behavior: props.tags_behavior,
         limit: props.resultsPerPage,
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,

@@ -97,7 +97,13 @@ export default function MedicationValueSetSelect({
   const MIN_SEARCH_LEN = 3;
 
   const { data: productKnowledge, isFetching: isProductLoading } = useQuery({
-    queryKey: ["productKnowledge", "medication", currentCategory, search],
+    queryKey: [
+      "productKnowledge",
+      facilityId,
+      "medication",
+      currentCategory,
+      search,
+    ],
     queryFn: query.debounced(productKnowledgeApi.listProductKnowledge, {
       queryParams: {
         facility: facilityId,
