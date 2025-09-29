@@ -651,15 +651,15 @@ export const updateActiveEncounterList = ({
   if (action == "createEncounter" && normalizeEncounter) {
     const ActiveEncouterList = queryClient.getQueryData<
       PaginatedResponse<EncounterRead>
-    >(["encounters", "live", patientID]);
+    >(["encounters", patientID, "active"]);
 
     const newList = addEncounterToList(ActiveEncouterList, normalizeEncounter);
 
-    queryClient.setQueryData(["encounters", "live", patientID], newList);
+    queryClient.setQueryData(["encounters", patientID, "active"], newList);
   } else if (action === "markAsCompleteEncounter" && normalizeEncounter) {
     const ActiveEncouterList = queryClient.getQueryData<
       PaginatedResponse<EncounterRead>
-    >(["encounters", "live", patientID]);
+    >(["encounters", patientID, "active"]);
 
     const UpdatedActiveEncounterList: PaginatedResponse<EncounterRead> =
       ActiveEncouterList?.results
@@ -677,7 +677,7 @@ export const updateActiveEncounterList = ({
             results: [],
           };
     queryClient.setQueryData(
-      ["encounters", "live", patientID],
+      ["encounters", patientID, "active"],
       UpdatedActiveEncounterList,
     );
   }

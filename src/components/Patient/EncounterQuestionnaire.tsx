@@ -13,7 +13,7 @@ import query from "@/Utils/request/query";
 import {
   PatientDeceasedInfo,
   PatientHeader,
-} from "@/pages/Facility/services/serviceRequests/PatientHeader";
+} from "@/components/Patient/PatientHeader";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 
 interface Props {

@@ -28,6 +28,7 @@ import {
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
+import { ScheduleResourceFormState } from "../Schedule/ResourceSelector";
 
 interface NormalizeAndSetQueryDataParams {
   entry: any;
@@ -45,15 +46,15 @@ interface NormalizeAndSetQueryDataParams {
 interface QueueAppointmentRecordOfflineParams {
   createAppointmentData: AppointmentCreateRequest;
   selectedSlot: TokenSlot | undefined;
-  selectedPracticioner: UserReadMinimal | null;
+  selectedResource: ScheduleResourceFormState;
   authUser: CurrentUserRead;
   status: AppointmentNonCancelledStatus;
   facilityId: string;
   patientId: string;
   selectedSlotId: string | undefined;
   selectedTags: TagConfig[];
-  selectedDateOffline: Date;
-  selectedMonthOffline: Date;
+  selectedDate: Date;
+  slotMonth: Date;
   queryClient: QueryClient;
   db: AppCacheDB;
   t: (key: string) => string;
@@ -419,15 +420,15 @@ const normalizeAndSetQueryDataForCancel = async ({
 export const queueNewAppointmentOffline = async ({
   createAppointmentData,
   selectedSlot,
-  selectedPracticioner,
+  selectedResource,
   authUser,
   status,
   facilityId,
   patientId,
   selectedSlotId,
   selectedTags,
-  selectedDateOffline,
-  selectedMonthOffline,
+  selectedDate,
+  slotMonth,
   queryClient,
   db: _db,
   t,

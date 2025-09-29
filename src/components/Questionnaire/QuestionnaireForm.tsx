@@ -32,7 +32,7 @@ import { HTTPError } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
-import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
+import { MedicationRequestCreate } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/file";
 import {
@@ -168,7 +168,7 @@ function ValidationErrorDisplay({
             icon="l-exclamation-circle"
             className="size-5 text-red-500"
           />
-          <h3 className="font-medium text-red-700">Validation Errors</h3>
+          <h3 className="font-medium text-red-700">{t("validation_errors")}</h3>
         </div>
 
         {/* Server-level errors */}
@@ -324,7 +324,7 @@ const STRUCTURED_TYPE_VALIDATORS = {
     response: ResponseValue | undefined,
     questionId: string,
   ) => {
-    const medicationData = (response?.value as MedicationRequest[]) || [];
+    const medicationData = (response?.value as MedicationRequestCreate[]) || [];
     return validateMedicationRequestQuestion(medicationData, questionId);
   },
   files: (response: ResponseValue | undefined, quesitonId: string) => {
@@ -1243,7 +1243,7 @@ export function QuestionnaireForm({
 
         <DebugPreview
           data={questionnaireForms}
-          title="QuestionnaireForm"
+          title={t("from")}
           className="p-4 space-y-6 max-w-4xl m-2"
         />
       </div>

@@ -137,6 +137,7 @@ export default function BookAppointment({ patientId }: Props) {
     appointmentRequestData: AppointmentCreateRequest,
   ) => {
     const status = "booked";
+    
     await queueNewAppointmentOffline({
       createAppointmentData: appointmentRequestData,
       selectedSlot: OfflineSelectedSlot,

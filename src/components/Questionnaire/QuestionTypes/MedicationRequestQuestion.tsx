@@ -8,17 +8,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Collapsible,
@@ -42,7 +32,9 @@ import {
 } from "@/components/ui/select";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { DateTimeInput } from "@/components/Common/DateTimeInput";
+import UserSelector from "@/components/Common/UserSelector";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
@@ -52,6 +44,7 @@ import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValue
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
@@ -64,7 +57,7 @@ import {
   INACTIVE_MEDICATION_STATUSES,
   MEDICATION_REQUEST_INTENT,
   MEDICATION_REQUEST_TIMING_OPTIONS,
-  MedicationRequest,
+  MedicationRequestCreate,
   MedicationRequestDosageInstruction,
   MedicationRequestIntent,
   MedicationRequestRead,
@@ -75,6 +68,7 @@ import {
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
+import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
@@ -85,6 +79,7 @@ import {
   useFieldError,
   validateFields,
 } from "@/types/questionnaire/validation";
+import { UserReadMinimal } from "@/types/user/user";
 
 function formatDoseRange(range?: DoseRange): string {
   if (!range?.high?.value) return "";
@@ -116,7 +111,7 @@ const MEDICATION_REQUEST_FIELDS = {
     required: true,
     validate: (value: unknown) => {
       const dosageInstruction =
-        value as MedicationRequest["dosage_instruction"][0];
+        value as MedicationRequestCreate["dosage_instruction"][0];
       return !!(
         dosageInstruction?.dose_and_rate?.dose_quantity ||
         dosageInstruction?.dose_and_rate?.dose_range
@@ -128,7 +123,7 @@ const MEDICATION_REQUEST_FIELDS = {
     required: true,
     validate: (value: unknown) => {
       const dosageInstruction =
-        value as MedicationRequest["dosage_instruction"][0];
+        value as MedicationRequestCreate["dosage_instruction"][0];
       return !!(
         dosageInstruction?.timing || dosageInstruction?.as_needed_boolean
       );
@@ -139,7 +134,7 @@ const MEDICATION_REQUEST_FIELDS = {
     required: false,
     validate: (value: unknown) => {
       const dosageInstruction =
-        value as MedicationRequest["dosage_instruction"][0];
+        value as MedicationRequestCreate["dosage_instruction"][0];
       if (dosageInstruction?.timing) {
         const duration = dosageInstruction.timing.repeat.bounds_duration;
         return !!(duration?.value && duration?.unit);
@@ -150,7 +145,7 @@ const MEDICATION_REQUEST_FIELDS = {
 } as const;
 
 export function validateMedicationRequestQuestion(
-  values: MedicationRequest[],
+  values: MedicationRequestCreate[],
   questionId: string,
 ): QuestionValidationError[] {
   return values.reduce((errors: QuestionValidationError[], value, index) => {
@@ -211,9 +206,17 @@ export function MedicationRequestQuestion({
 }: MedicationRequestQuestionProps) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
+  const currentUser = useAuthUser() as UserReadMinimal;
   const isPreview = patientId === "preview";
   const medications =
-    (questionnaireResponse.values?.[0]?.value as MedicationRequest[]) || [];
+    (questionnaireResponse.values?.[0]?.value as MedicationRequestCreate[]) ||
+    [];
+
+  const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
+    `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
+  );
+
+  console.log("alternateIdentifier", alternateIdentifier);
 
   const { data: patientMedications } = useQuery({
     queryKey: ["medication_requests", patientId, encounterId],
@@ -256,6 +259,7 @@ export function MedicationRequestQuestion({
               ...medication,
               requested_product_internal: medication.requested_product,
               requested_product: medication.requested_product?.id,
+              requester: medication.requester || currentUser,
             })),
           },
         ],
@@ -274,12 +278,19 @@ export function MedicationRequestQuestion({
   const desktopLayout = useBreakpoints({ lg: true, default: false });
 
   const [newMedicationInSheet, setNewMedicationInSheet] =
-    useState<MedicationRequest | null>(null);
+    useState<MedicationRequestCreate | null>(null);
+
+  const createPrescriptionObject = {
+    status: PrescriptionStatus.active,
+    alternate_identifier: alternateIdentifier,
+  };
 
   const handleAddMedication = (medication: Code) => {
-    const initialDetails = {
-      ...parseMedicationStringToRequest(medication),
+    const initialDetails: MedicationRequestCreate = {
+      ...parseMedicationStringToRequest(currentUser, medication),
+      create_prescription: createPrescriptionObject,
       authored_on: new Date().toISOString(),
+      requester: currentUser,
     };
 
     if (desktopLayout) {
@@ -293,7 +304,14 @@ export function MedicationRequestQuestion({
     productKnowledge: ProductKnowledgeBase,
   ) => {
     const initialDetails = {
-      ...parseMedicationStringToRequest(undefined, productKnowledge),
+      ...parseMedicationStringToRequest(
+        currentUser,
+        undefined,
+        productKnowledge,
+      ),
+      create_prescription: createPrescriptionObject,
+      authored_on: new Date().toISOString(),
+      requester: currentUser,
     };
 
     if (desktopLayout) {
@@ -303,8 +321,11 @@ export function MedicationRequestQuestion({
     }
   };
 
-  const addNewMedication = (medication: MedicationRequest) => {
-    const newMedications: MedicationRequest[] = [...medications, medication];
+  const addNewMedication = (medication: MedicationRequestCreate) => {
+    const newMedications: MedicationRequestCreate[] = [
+      ...medications,
+      medication,
+    ];
 
     updateQuestionnaireResponseCB(
       [{ type: "medication_request", value: newMedications }],
@@ -331,21 +352,28 @@ export function MedicationRequestQuestion({
           requested_product,
           ...request
         } = record as MedicationRequestRead;
+        delete request.prescription;
+
         return {
           ...request,
           requested_product: requested_product?.id,
           requested_product_internal: requested_product,
-        };
+          requester: request.requester || currentUser,
+          create_prescription: createPrescriptionObject,
+          medication: requested_product?.id ? null : request.medication,
+        } as MedicationRequestCreate;
       } else {
         const statement = record as MedicationStatementRead;
         return {
-          ...parseMedicationStringToRequest(statement.medication),
+          ...parseMedicationStringToRequest(currentUser, statement.medication),
+          create_prescription: createPrescriptionObject,
           authored_on: new Date().toISOString(),
           note: statement.note,
-        } as MedicationRequest;
+          requester: currentUser,
+        } as MedicationRequestCreate;
       }
     });
-    const newMedications: MedicationRequest[] = [
+    const newMedications: MedicationRequestCreate[] = [
       ...medications,
       ...medicationRequests,
     ];
@@ -395,7 +423,7 @@ export function MedicationRequestQuestion({
 
   const handleUpdateMedication = (
     index: number,
-    updates: Partial<MedicationRequest>,
+    updates: Partial<MedicationRequestCreate>,
   ) => {
     const newMedications = medications.map((medication, i) =>
       i === index ? { ...medication, ...updates } : medication,
@@ -425,6 +453,7 @@ export function MedicationRequestQuestion({
           index={-1}
           questionId={questionnaireResponse.question_id}
           errors={errors}
+          facilityId={facilityId}
         />
       )}
     </div>
@@ -441,33 +470,17 @@ export function MedicationRequestQuestion({
         medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
       )}
     >
-      <AlertDialog
+      <ConfirmActionDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("remove_medication")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("remove_medication_confirmation", {
-                medication: displayMedicationName(
-                  medications[medicationToDelete!],
-                ),
-              })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmRemoveMedication}
-              className={cn(buttonVariants({ variant: "destructive" }))}
-              data-cy="confirm-remove-medication"
-            >
-              {t("remove")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onConfirm={confirmRemoveMedication}
+        title={t("remove_medication")}
+        description={t("remove_medication_confirmation", {
+          medication: displayMedicationName(medications[medicationToDelete!]),
+        })}
+        confirmText={t("remove")}
+        variant="destructive"
+      />
       <HistoricalRecordSelector<MedicationRequestRead | MedicationStatementRead>
         title={t("medication_history")}
         structuredTypes={[
@@ -581,14 +594,14 @@ export function MedicationRequestQuestion({
           <div className="min-w-fit">
             <div
               className={cn(
-                "max-w-[2344px] relative lg:border border-gray-200 rounded-md",
+                "max-w-[2624px] relative lg:border border-gray-200 rounded-md",
                 {
                   "bg-gray-50/50": !desktopLayout,
                 },
               )}
             >
               {/* Header - Only show on desktop */}
-              <div className="hidden lg:grid grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_180px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
+              <div className="hidden lg:grid grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_280px_180px_48px] bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-500">
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("medicine")}
                 </div>
@@ -620,6 +633,9 @@ export function MedicationRequestQuestion({
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("authored_on")}
+                </div>
+                <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
+                  {t("requester")}
                 </div>
                 <div className="font-semibold text-gray-600 p-3 border-r border-gray-200">
                   {t("note")}
@@ -766,6 +782,7 @@ export function MedicationRequestQuestion({
                                   index={index}
                                   questionId={questionnaireResponse.question_id}
                                   errors={errors}
+                                  facilityId={facilityId}
                                 />
                               </CardContent>
                             </CollapsibleContent>
@@ -782,6 +799,7 @@ export function MedicationRequestQuestion({
                           index={index}
                           questionId={questionnaireResponse.question_id}
                           errors={errors}
+                          facilityId={facilityId}
                         />
                       )}
                     </React.Fragment>
@@ -829,13 +847,14 @@ export function MedicationRequestQuestion({
 }
 
 interface MedicationRequestGridRowProps {
-  medication: MedicationRequest;
+  medication: MedicationRequestCreate;
   disabled?: boolean;
-  onUpdate?: (medication: Partial<MedicationRequest>) => void;
+  onUpdate?: (medication: Partial<MedicationRequestCreate>) => void;
   onRemove?: () => void;
   index: number;
   questionId: string;
   errors?: QuestionValidationError[];
+  facilityId?: string;
 }
 
 const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
@@ -846,6 +865,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   index,
   questionId,
   errors,
+  facilityId,
 }) => {
   const { t } = useTranslation();
   const [showDosageDialog, setShowDosageDialog] = useState(false);
@@ -997,7 +1017,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 lg:grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_180px_48px] border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
+        "grid grid-cols-1 lg:grid-cols-[280px_220px_180px_160px_300px_180px_250px_180px_160px_220px_280px_180px_48px] border-b border-gray-200 hover:bg-gray-50/50 space-y-3 lg:space-y-0",
         {
           "opacity-40 pointer-events-none": disabled,
         },
@@ -1398,6 +1418,21 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           disabled={disabled || isReadOnly}
         />
       </div>
+      {/* Requester */}
+      <div className="lg:px-1 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
+        <Label className="mb-1.5 block text-sm lg:hidden">
+          {t("requester")}
+        </Label>
+        <UserSelector
+          selected={medication.requester}
+          onChange={(user) => {
+            onUpdate?.({ requester: user });
+          }}
+          placeholder={t("select_requester")}
+          facilityId={facilityId}
+          disabled={disabled || isReadOnly}
+        />
+      </div>
       {/* Notes */}
       <div
         className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
@@ -1432,7 +1467,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
 };
 
 export const reverseFrequencyOption = (
-  option: MedicationRequest["dosage_instruction"][0]["timing"],
+  option: MedicationRequestCreate["dosage_instruction"][0]["timing"],
 ) => {
   return Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).find(
     ([key]) => key === option?.code?.code,

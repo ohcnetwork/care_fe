@@ -167,7 +167,12 @@ export function MultiQRCodePrintSheet({
           <ScrollArea className="h-[calc(100vh-12rem)] pr-4">
             {localSpecimens.length === 0 ? (
               <EmptyState
-                icon="l-qrcode-scan"
+                icon={
+                  <CareIcon
+                    icon="l-qrcode-scan"
+                    className="text-primary size-6"
+                  />
+                }
                 title={t("no_specimens_available")}
                 description={t("no_specimens_available_description")}
               />

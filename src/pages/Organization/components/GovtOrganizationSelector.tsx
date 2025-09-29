@@ -113,7 +113,7 @@ export default function GovtOrganizationSelector({
   setSelectedOrganization,
   ...props
 }: GovtOrganizationSelectorProps) {
-  const [selectedLevels, setSelectedLevels] = useState<Organization[]>([]);
+  const [selectedLevels, setSelectedLevels] = useState(selected || []);
 
   useEffect(() => {
     // Needs the child-most level to be selected to be valid
@@ -131,7 +131,7 @@ export default function GovtOrganizationSelector({
   useEffect(() => {
     if (selected && selected.length > 0) {
       let currentOrg = selected[0];
-      if (currentOrg.level_cache === 0) {
+      if (currentOrg?.level_cache === 0) {
         setSelectedLevels(selected);
       } else {
         const levels: Organization[] = [];

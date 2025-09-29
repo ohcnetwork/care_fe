@@ -55,6 +55,9 @@ import {
 } from "@/OfflineSupport/offlineWriteHelpers";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
+
+import { useShortcutSubContext } from "@/context/ShortcutContext";
+
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS_ICONS,
@@ -65,9 +68,12 @@ import {
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 
 import { queueNewEncounterOffline } from "./offlineQueue";
+
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 interface Props {
   patientId: string;
@@ -103,6 +109,7 @@ export default function CreateEncounterForm({
   const queryClient = useQueryClient();
   const user = useAuthUser();
   const { t } = useTranslation();
+  useShortcutSubContext();
 
   const [offlineSelectedOrganizations, setOfflineSelectedOrganizations] =
     useState<FacilityOrganizationRead[]>([]);
@@ -143,7 +150,6 @@ export default function CreateEncounterForm({
     EncounterCreate
   >({
     mutationFn: mutate(encounterApi.create),
-    networkMode: "always",
     onSuccess: async (data: EncounterRead) => {
       if (offlineEntryId) {
         try {
@@ -464,7 +470,7 @@ export default function CreateEncounterForm({
                 name="tags"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("tags")}</FormLabel>
+                    <FormLabel>{t("tags", { count: 2 })}</FormLabel>
                     <FormControl className="mt-0">
                       <TagSelectorPopover
                         selected={selectedTags}
@@ -524,8 +530,10 @@ export default function CreateEncounterForm({
                   form.reset();
                 }}
                 className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+                data-shortcut-id={isOpen ? "cancel-action" : undefined}
               >
                 {t("cancel")}
+                <ShortcutBadge actionId="cancel-action" alwaysShow />
               </Button>
               <Button
                 data-cy="create-encounter-button"
@@ -536,8 +544,14 @@ export default function CreateEncounterForm({
                   (!onlineManager.isOnline() &&
                     hasReachedEncounterLimitOffline === true)
                 }
+                data-shortcut-id={isOpen ? "submit-action" : undefined}
               >
                 {isPending ? t("creating") : t("create_encounter")}
+                <ShortcutBadge
+                  actionId="submit-action"
+                  alwaysShow
+                  className="bg-white"
+                />
               </Button>
             </div>
           </form>

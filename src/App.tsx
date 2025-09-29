@@ -22,6 +22,9 @@ import queryClient from "@/Utils/request/queryClient";
 import { SyncProvider } from "@/context/SyncContext";
 
 import { createUserPersister } from "./OfflineSupport/createUserPersister";
+
+import { ShortcutProvider } from "@/context/ShortcutContext";
+
 import { PubSubProvider } from "./Utils/pubsubContext";
 
 onlineManager.setEventListener(() => {
@@ -60,27 +63,30 @@ const App = () => {
         <ScrollToTop />
         <Suspense fallback={<Loading />}>
           <PubSubProvider>
-            <PluginEngine>
-              <SyncProvider>
-                <HistoryAPIProvider>
-                  <AuthUserProvider
-                    unauthorized={<Routers.PublicRouter />}
-                    otpAuthorized={<Routers.PatientRouter />}
-                  >
-                    <Routers.AppRouter />
-                  </AuthUserProvider>
-                </HistoryAPIProvider>
-                <Toaster
-                  position="top-right"
-                  theme="light"
-                  richColors
-                  expand
-                  // For `richColors` to work, pass at-least an empty object.
-                  // Refer: https://github.com/shadcn-ui/ui/issues/2234.
-                  toastOptions={{ closeButton: true }}
-                />
-              </SyncProvider>
-            </PluginEngine>
+            <ShortcutProvider>
+              <PluginEngine>
+                <SyncProvider>
+                  <HistoryAPIProvider>
+                    <AuthUserProvider
+                      unauthorized={<Routers.PublicRouter />}
+                      otpAuthorized={<Routers.PatientRouter />}
+                    >
+                      <Routers.AppRouter />
+                    </AuthUserProvider>
+                  </HistoryAPIProvider>
+                  <Toaster
+                    position="top-center"
+                    theme="light"
+                    richColors
+                    expand
+                    // For `richColors` to work, pass at-least an empty object.
+                    // Refer: https://github.com/shadcn-ui/ui/issues/2234.
+
+                    toastOptions={{}}
+                  />
+                </SyncProvider>
+              </PluginEngine>
+            </ShortcutProvider>
           </PubSubProvider>
         </Suspense>
 

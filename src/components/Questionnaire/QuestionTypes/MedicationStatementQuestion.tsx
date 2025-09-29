@@ -10,17 +10,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Collapsible,
@@ -38,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
@@ -52,7 +43,7 @@ import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import {
   MEDICATION_REQUEST_TIMING_OPTIONS,
-  MedicationRequest,
+  MedicationRequestCreate,
   MedicationRequestRead,
   displayMedicationName,
 } from "@/types/emr/medicationRequest/medicationRequest";
@@ -257,7 +248,7 @@ export function MedicationStatementQuestion({
     const newMedications = selected.map((record) => {
       if ("dosage_instruction" in record) {
         // Convert MedicationRequest to MedicationStatementRequest
-        const request = record as MedicationRequest;
+        const request = record as MedicationRequestCreate;
         return {
           ...MEDICATION_STATEMENT_INITIAL_VALUE,
           medication: request.medication,
@@ -339,31 +330,17 @@ export function MedicationStatementQuestion({
         medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
       )}
     >
-      <AlertDialog
+      <ConfirmActionDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("remove_medication")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("remove_medication_confirmation", {
-                medication:
-                  medications[medicationToDelete!]?.medication?.display,
-              })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmRemoveMedication}
-              className={cn(buttonVariants({ variant: "destructive" }))}
-            >
-              {t("remove")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={t("remove_medication")}
+        description={t("remove_medication_confirmation", {
+          medication: medications[medicationToDelete!]?.medication?.display,
+        })}
+        onConfirm={confirmRemoveMedication}
+        confirmText={t("remove")}
+        variant="destructive"
+      />
 
       <HistoricalRecordSelector<MedicationRequestRead | MedicationStatementRead>
         title={t("medication_history")}
@@ -986,7 +963,7 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
 
 // Helper function to find the frequency option from timing
 const reverseFrequencyOption = (
-  timing?: MedicationRequest["dosage_instruction"][0]["timing"],
+  timing?: MedicationRequestCreate["dosage_instruction"][0]["timing"],
 ) => {
   if (!timing?.code?.code) return undefined;
   return Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).find(
