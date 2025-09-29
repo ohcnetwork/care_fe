@@ -5368,7 +5368,6 @@
   "view_request": "View Request",
   "view_requests": "View Requests",
   "view_responses": "View Responses",
-  "view_schedule": "View Schedule",
   "view_service_details": "View Details",
   "view_specimen_history": "View Specimen History",
   "view_statement": "View Statement",
@@ -5430,5 +5429,6 @@
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞"
+  "℞": "℞",
+  "view_appointments": "View Appointments"
 }
