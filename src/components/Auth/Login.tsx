@@ -360,17 +360,14 @@ const Login = (props: LoginProps) => {
                   Welcome back
                 </CardTitle>
                 <CardDescription>
-                  Choose your login method to continue
+                  {disablePatientLogin
+                    ? "Sign in to your account to continue"
+                    : "Choose your login method to continue"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {disablePatientLogin ? (
                   <>
-                    <div className="flex w-full justify-center pb-2">
-                      <span className="font-semibold text-lg">
-                        {t("staff_login")}
-                      </span>
-                    </div>
                     {/* Staff Login */}
                     {!forgotPassword ? (
                       <form onSubmit={handleSubmit} className="space-y-4">
