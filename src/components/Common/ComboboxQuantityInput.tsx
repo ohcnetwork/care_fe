@@ -44,7 +44,6 @@ export function ComboboxQuantityInput({
   units = DOSAGE_UNITS_CODES,
   className,
 }: Props) {
-  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState(
     quantity?.value?.toString() || "",
