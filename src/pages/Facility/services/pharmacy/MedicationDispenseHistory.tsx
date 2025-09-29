@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FilterTabs } from "@/components/ui/filter-tabs";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 
 import Page from "@/components/Common/Page";
@@ -105,6 +106,12 @@ export default function MedicationDispenseHistory({
       <div>
         {isLoading ? (
           <TableSkeleton count={5} />
+        ) : prescriptionQueue?.results?.length === 0 ? (
+          <EmptyState
+            icon="l-prescription-bottle"
+            title={t("no_prescriptions_found")}
+            description={t("no_prescriptions_found_description")}
+          />
         ) : (
           <Table>
             <TableHeader>
@@ -117,59 +124,49 @@ export default function MedicationDispenseHistory({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {prescriptionQueue?.results?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    {t("no_prescriptions_found")}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                prescriptionQueue?.results?.map(
-                  (item: MedicationDispenseSummary) => (
-                    <TableRow key={item.encounter.id}>
-                      <TableCell className="font-semibold">
-                        {item.encounter.patient.name}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            ENCOUNTER_CLASSES_COLORS[
-                              item.encounter.encounter_class
-                            ]
-                          }
-                        >
-                          {t(
-                            `encounter_class__${item.encounter.encounter_class}`,
-                          )}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            ENCOUNTER_STATUS_COLORS[item.encounter.status]
-                          }
-                        >
-                          {t(`encounter_status__${item.encounter.status}`)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{item.count}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="outline"
-                          className="font-semibold"
-                          onClick={() => {
-                            navigate(
-                              `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${item.encounter.patient.id}/preparation`,
-                            );
-                          }}
-                        >
-                          <EyeIcon />
-                          {t("view")}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ),
-                )
+              {prescriptionQueue?.results?.map(
+                (item: MedicationDispenseSummary) => (
+                  <TableRow key={item.encounter.id}>
+                    <TableCell className="font-semibold">
+                      {item.encounter.patient.name}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          ENCOUNTER_CLASSES_COLORS[
+                            item.encounter.encounter_class
+                          ]
+                        }
+                      >
+                        {t(
+                          `encounter_class__${item.encounter.encounter_class}`,
+                        )}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={ENCOUNTER_STATUS_COLORS[item.encounter.status]}
+                      >
+                        {t(`encounter_status__${item.encounter.status}`)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{item.count}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        className="font-semibold"
+                        onClick={() => {
+                          navigate(
+                            `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${item.encounter.patient.id}/preparation`,
+                          );
+                        }}
+                      >
+                        <EyeIcon />
+                        {t("view")}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ),
               )}
             </TableBody>
           </Table>

@@ -83,6 +83,7 @@ const Login = (props: LoginProps) => {
     customLogo,
     customLogoAlt,
     resendOtpTimeout,
+    disablePatientLogin,
   } = careConfig;
   const initForm: any = {
     username: "",
@@ -113,9 +114,10 @@ const Login = (props: LoginProps) => {
 
   // Timer Function for resend OTP
   useEffect(() => {
-    if (resendOtpCountdown <= 0) {
-      return;
-    }
+    if (resendOtpCountdown <= 0) return;
+    const timer = setInterval(() => setResendOtpCountdown((t) => t - 1), 1000);
+    return () => clearInterval(timer);
+  }, [resendOtpCountdown]);
 
     const timer = setInterval(() => {
       setResendOtpCountdown((prevTime) => prevTime - 1);
@@ -363,10 +365,14 @@ const Login = (props: LoginProps) => {
                 <CardTitle className="text-2xl font-bold">
                   {t("welcome_back")}
                 </CardTitle>
-                <CardDescription>{t("choose_login_method")}</CardDescription>
+                <CardDescription>
+                  {disablePatientLogin
+                    ? t("sign_in_to_continue")
+                    : t("choose_login_method")}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex w/full">
+                <div className="flex w-full">
                   <FilterTabs
                     value={loginMode}
                     onValueChange={(value) => {
@@ -527,7 +533,7 @@ const Login = (props: LoginProps) => {
                   ))}
 
                 {/* Patient Login */}
-                {loginMode === "patient" && (
+                {loginMode === "patient" && !disablePatientLogin && (
                   <form onSubmit={handlePatientLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="phone">{t("phone_number")}</Label>
