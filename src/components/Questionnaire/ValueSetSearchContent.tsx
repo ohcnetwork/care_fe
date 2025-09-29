@@ -233,7 +233,7 @@ export default function ValueSetSearchContent({
           {t("searching")}
         </div>
       ) : (
-        <CommandList className="h-75 overflow-hidden">
+        <CommandList className="max-h-[30vh] md:max-h-[35vh] overflow-hidden">
           <CommandEmpty>
             {search.length < 3 ? (
               <p className="p-4 text-sm text-gray-500">
@@ -249,7 +249,7 @@ export default function ValueSetSearchContent({
             <div
               className={cn(
                 activeTab === 0 ? "block" : "hidden",
-                "md:block flex-1 overflow-auto h-[300px]",
+                "md:block flex-1 overflow-auto max-h-[30vh] md:max-h-[35vh] ",
               )}
             >
               <CommandGroup>
@@ -297,7 +297,7 @@ export default function ValueSetSearchContent({
                 "border-gray-200",
               )}
             >
-              <CommandGroup className="h-75 overflow-auto">
+              <CommandGroup className="max-h-[30vh] md:max-h-[35vh] overflow-auto">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-normal text-gray-700 p-1">
                     {t("starred")}
@@ -315,7 +315,7 @@ export default function ValueSetSearchContent({
                 </div>
                 {favouritesQuery.isFetched &&
                   favouritesQuery.data?.length === 0 && (
-                    <div className="flex items-center flex-col justify-center h-[200px] md:h-[250px] text-xs text-gray-500">
+                    <div className="flex items-center flex-col justify-center max-h-[30vh] md:max-h-[35vh] text-xs text-gray-500">
                       {t("no_starred", {
                         star: "☆",
                       })}
