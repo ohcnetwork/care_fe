@@ -17,6 +17,8 @@
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -147,7 +149,17 @@ export function EntitySelectionSheet({
           disabled={disabled}
           placeholder={placeholder || t(`select_${entityType}`)}
           title={t(`select_${entityType}`)}
-          value={selectedEntity || undefined}
+          mobileTrigger={
+            <Button
+              variant="outline"
+              role="combobox"
+              className="w-full border border-primary rounded-md px-2 text-primary-700"
+              disabled={disabled}
+            >
+              <CareIcon icon="l-plus" className="mr-2" />
+              <span className="font-semibold">{placeholder}</span>
+            </Button>
+          }
         />
       ) : (
         <ValueSetSelect
@@ -157,6 +169,17 @@ export function EntitySelectionSheet({
           disabled={disabled}
           searchPostFix={searchPostFix}
           title={t(`select_${entityType}`)}
+          mobileTrigger={
+            <Button
+              variant="outline"
+              role="combobox"
+              className="w-full border border-primary rounded-md px-2 text-primary-700"
+              disabled={disabled}
+            >
+              <CareIcon icon="l-plus" className="mr-2" />
+              <span className="font-semibold">{placeholder}</span>
+            </Button>
+          }
         />
       )}
       <Drawer

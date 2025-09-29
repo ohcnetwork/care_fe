@@ -3,8 +3,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -38,6 +36,7 @@ interface Props {
   showCode?: boolean;
   title?: string;
   closeOnSelect?: boolean;
+  mobileTrigger?: React.ReactNode;
 }
 
 export default function ValueSetSelect({
@@ -53,6 +52,7 @@ export default function ValueSetSelect({
   closeOnSelect = true,
   showCode = false,
   title,
+  mobileTrigger,
 }: Props) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -74,80 +74,34 @@ export default function ValueSetSelect({
       return () => clearTimeout(timer);
     }
   }, [internalOpen, isMobile]);
-
   if (isMobile && !hideTrigger) {
     return (
-      <Drawer open={internalOpen} onOpenChange={setInternalOpen}>
+      <Drawer
+        open={internalOpen || controlledOpen}
+        onOpenChange={setInternalOpen}
+      >
         <DrawerTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            onClick={() => setInternalOpen(true)}
-            className={cn(
-              "w-full justify-between",
-              "h-auto md:h-9 whitespace-normal text-left md:truncate",
-              !value?.display && "text-gray-400",
-            )}
-            disabled={disabled}
-          >
-            <span>{value?.display || placeholder}</span>
-            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-          </Button>
-        </DrawerTrigger>
-        <DrawerContent className="min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
-          <DrawerTitle className="sr-only">
-            {title || t("select_value")}
-          </DrawerTitle>
-          <div className="pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
-            <ValueSetSearchContent
-              system={system}
-              onSelect={(selected) => {
-                onSelect(selected);
-                if (closeOnSelect) {
-                  setInternalOpen(false);
-                } else {
-                  inputRef.current?.focus();
-                }
-              }}
-              count={count}
-              searchPostFix={searchPostFix}
-              showCode={showCode}
-              search={search}
-              onSearchChange={setSearch}
-              title={title}
-            />
-          </div>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  if (isMobile && !hideTrigger) {
-    return (
-      <Drawer open={internalOpen} onOpenChange={setInternalOpen}>
-        <DrawerTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            className={cn(
-              "w-full justify-between border border-primary rounded-md px-2 h-auto whitespace-normal text-left",
-              !value?.display && "text-gray-400",
-            )}
-            disabled={disabled}
-          >
-            <div className="flex items-center">
-              <CareIcon
-                icon="l-plus"
-                className="mr-2 text-primary-700 font-normal"
-              />
-              <span className="text-primary-700 flex items-center font-semibold text-wrap text-sm md:text-base">
+          {mobileTrigger ? (
+            mobileTrigger
+          ) : (
+            <Button
+              variant="white"
+              role="combobox"
+              className={cn(
+                "w-full flex justify-between h-auto whitespace-normal text-left font-normal border-gray-300 shadow-xs",
+                !value?.display && "text-gray-500 hover:bg-white",
+              )}
+              disabled={disabled}
+            >
+              <span>
                 {value?.display || placeholder}
                 {value?.display && showCode && (
                   <span className="text-xs ml-1">({value?.code})</span>
                 )}
               </span>
-            </div>
-          </Button>
+              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+            </Button>
+          )}
         </DrawerTrigger>
         <DrawerContent className="min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
           <DrawerTitle className="sr-only">
@@ -175,6 +129,29 @@ export default function ValueSetSelect({
           </div>
         </DrawerContent>
       </Drawer>
+    );
+  }
+
+  if (hideTrigger) {
+    return (
+      <ValueSetSearchContent
+        system={system}
+        onSelect={(selected) => {
+          onSelect(selected);
+          if (closeOnSelect) {
+            setInternalOpen(false);
+          } else {
+            inputRef.current?.focus();
+          }
+        }}
+        count={count}
+        searchPostFix={searchPostFix}
+        showCode={showCode}
+        search={search}
+        onSearchChange={setSearch}
+        title={title}
+        placeholder={placeholder}
+      />
     );
   }
 
@@ -185,29 +162,27 @@ export default function ValueSetSelect({
         onOpenChange={setInternalOpen}
         modal={true}
       >
-        {!hideTrigger && (
-          <PopoverTrigger asChild disabled={disabled}>
-            <Button
-              type="button"
-              variant="outline"
-              role="combobox"
-              className={cn(
-                "justify-between truncate",
-                !value?.display && "text-gray-400",
+        <PopoverTrigger asChild disabled={disabled}>
+          <Button
+            type="button"
+            variant="white"
+            role="combobox"
+            className={cn(
+              "flex justify-between truncate font-normal border-gray-300 shadow-xs",
+              !value?.display && "text-gray-500 hover:bg-white",
+            )}
+            disabled={disabled}
+          >
+            <span className="truncate">
+              {value?.display || placeholder}
+              {value?.display && showCode && (
+                <span className="text-xs ml-1">({value?.code})</span>
               )}
-            >
-              <span className="truncate">
-                {value?.display || placeholder}
-                {value?.display && showCode && (
-                  <span className="text-xs ml-1">({value?.code})</span>
-                )}
-              </span>
-              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-        )}
-
-        {hideTrigger ? (
+            </span>
+            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="transition-all w-150 p-0" align="start">
           <ValueSetSearchContent
             system={system}
             onSelect={(selected) => {
@@ -218,6 +193,7 @@ export default function ValueSetSelect({
                 inputRef.current?.focus();
               }
             }}
+            placeholder={placeholder}
             count={count}
             searchPostFix={searchPostFix}
             showCode={showCode}
@@ -225,28 +201,7 @@ export default function ValueSetSelect({
             onSearchChange={setSearch}
             title={title}
           />
-        ) : (
-          <PopoverContent className="transition-all w-150 p-0" align="start">
-            <ValueSetSearchContent
-              system={system}
-              onSelect={(selected) => {
-                onSelect(selected);
-                if (closeOnSelect) {
-                  setInternalOpen(false);
-                } else {
-                  inputRef.current?.focus();
-                }
-              }}
-              placeholder={placeholder}
-              count={count}
-              searchPostFix={searchPostFix}
-              showCode={showCode}
-              search={search}
-              onSearchChange={setSearch}
-              title={title}
-            />
-          </PopoverContent>
-        )}
+        </PopoverContent>
       </Popover>
     </>
   );
