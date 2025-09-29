@@ -1,12 +1,14 @@
-import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+import React from "react";
 
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export interface EmptyStateProps {
-  icon?: IconName;
+  icon?: React.ReactNode;
   title: string;
   description?: string;
   action?: React.ReactNode;
+  className?: string;
 }
 
 export function EmptyState({
@@ -14,19 +16,21 @@ export function EmptyState({
   title,
   description,
   action,
+  className,
 }: EmptyStateProps) {
   return (
-    <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">
+    <Card
+      className={cn(
+        "flex flex-col items-center justify-center p-6 text-center border-dashed",
+        className,
+      )}
+    >
       {icon && (
-        <div className="rounded-full bg-primary/10 p-3 mb-4">
-          <CareIcon icon={icon} className="size-6 text-primary" />
-        </div>
+        <div className="rounded-full bg-primary/10 p-3 mb-3">{icon}</div>
       )}
       <h3 className="text-lg font-semibold mb-1">{title}</h3>
-      {description && (
-        <p className="text-sm text-gray-500 mb-4">{description}</p>
-      )}
-      {action && <div className="mt-2">{action}</div>}
+      {description && <p className="text-sm text-gray-500">{description}</p>}
+      {action && <div className="mt-5">{action}</div>}
     </Card>
   );
 }

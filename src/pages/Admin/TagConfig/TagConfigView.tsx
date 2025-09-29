@@ -150,7 +150,7 @@ export default function TagConfigView({
     return (
       <Page title={t("tag_config_details")} hideTitleOnPage>
         <EmptyState
-          icon="l-tag-alt"
+          icon={<CareIcon icon="l-tag-alt" className="text-primary size-6" />}
           title={t("tag_config_not_found")}
           description={t("tag_config_not_found_description")}
         />
