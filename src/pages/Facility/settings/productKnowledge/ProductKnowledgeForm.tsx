@@ -960,7 +960,10 @@ function ProductKnowledgeFormContent({
                                     </FormItem>
                                   )}
                                 />
-                                <FormMessage></FormMessage>
+                                <FormMessage>
+                                  {form.formState.errors.definitional
+                                    ?.intended_routes?.[index] && t("required")}
+                                </FormMessage>
                               </div>
                               <Button
                                 type="button"
