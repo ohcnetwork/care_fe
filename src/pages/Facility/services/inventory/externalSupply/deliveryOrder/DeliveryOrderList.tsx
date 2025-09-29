@@ -163,7 +163,7 @@ export function DeliveryOrderList({
             >
               {renderFilters()}
               <DeliveryOrderTable
-                deliverys={orders}
+                deliveries={orders}
                 isLoading={isLoading}
                 facilityId={facilityId}
                 locationId={locationId}

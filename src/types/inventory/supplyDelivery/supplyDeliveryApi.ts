@@ -1,5 +1,6 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { DeliveryOrderRetrieve } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import {
   SupplyDeliveryBase,
   SupplyDeliveryCreate,
@@ -43,5 +44,11 @@ export default {
     method: HttpMethod.PUT,
     TRes: Type<SupplyDeliveryBase>(),
     TBody: Type<SupplyDeliveryUpdate>(),
+  },
+  request_orders: {
+    path: "/api/v1/supply_delivery/request_orders/",
+    method: HttpMethod.GET,
+    TQueryParams: Type<{ request_order: string }>(),
+    TRes: Type<PaginatedResponse<DeliveryOrderRetrieve>>(),
   },
 } as const;

@@ -14,18 +14,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
 import { AddItemsForm } from "./AddItemsForm";
 
+import DeliveryOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/DeliveryOrderTable";
 import {
   REQUEST_ORDER_PRIORITY_COLORS,
   REQUEST_ORDER_STATUS_COLORS,
   RequestOrderStatus,
 } from "@/types/inventory/requestOrder/requestOrder";
 import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
+import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SUPPLY_REQUEST_STATUS_COLORS } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { Link } from "raviger";
@@ -60,6 +64,17 @@ export function RequestOrderShow({ facilityId, requestOrderId }: Props) {
       enabled: !!requestOrderId,
     },
   );
+
+  const { data: supplyDeliveries, isLoading: isLoadingSupplyDeliveries } =
+    useQuery({
+      queryKey: ["supplyDeliveries", requestOrderId],
+      queryFn: query(supplyDeliveryApi.request_orders, {
+        queryParams: {
+          request_order: requestOrderId,
+        },
+      }),
+      enabled: !!requestOrderId,
+    });
 
   const { mutate: approveOrder, isPending: isApproving } = useMutation({
     mutationFn: mutate(requestOrderApi.updateRequestOrder, {
@@ -127,7 +142,11 @@ export function RequestOrderShow({ facilityId, requestOrderId }: Props) {
   const canAddSupplyRequests = requestOrder.status === RequestOrderStatus.draft;
 
   return (
-    <Page title={t("request_order_details")} hideTitleOnPage>
+    <Page
+      title={t("request_order_details")}
+      hideTitleOnPage
+      shortCutContext="facility:inventory"
+    >
       <div className="space-y-6">
         {/* Back Button */}
         <div className="flex items-center justify-between gap-2">
@@ -149,6 +168,14 @@ export function RequestOrderShow({ facilityId, requestOrderId }: Props) {
                 {isApproving ? t("approving") : t("approve_order")}
               </Button>
             )}
+            <Button variant="outline" asChild>
+              <Link
+                href={`/external_supply/delivery_orders/new?supplyOrder=${requestOrderId}`}
+              >
+                {t("create_supply_delivery")}
+                <ShortcutBadge actionId="create-order" />
+              </Link>
+            </Button>
           </div>
         </div>
         {/* Request Order Details */}
@@ -200,84 +227,179 @@ export function RequestOrderShow({ facilityId, requestOrderId }: Props) {
           </CardContent>
         </Card>
 
-        {/* Supply Requests Section */}
+        {/* Supply Requests and Deliveries Tabs */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">{t("supply_requests")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoadingSupplyRequests ? (
-              <div className="space-y-2">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                ))}
+          <CardContent className="p-0">
+            <Tabs defaultValue="supply-requests" className="w-full">
+              <div className="border-b bg-gray-50/50 px-6 pt-6">
+                <TabsList className="grid w-full grid-cols-2 bg-white shadow-sm">
+                  <TabsTrigger
+                    value="supply-requests"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                      {t("supply_requests")}
+                      {supplyRequests?.results &&
+                        supplyRequests.results.length > 0 && (
+                          <Badge variant="secondary" className="ml-1 text-xs">
+                            {supplyRequests.results.length}
+                          </Badge>
+                        )}
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="supply-deliveries"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                      {t("supply_deliveries")}
+                      {supplyDeliveries?.results &&
+                        supplyDeliveries.results.length > 0 && (
+                          <Badge variant="secondary" className="ml-1 text-xs">
+                            {supplyDeliveries.results.length}
+                          </Badge>
+                        )}
+                    </div>
+                  </TabsTrigger>
+                </TabsList>
               </div>
-            ) : (
-              <div className="space-y-6">
-                {/* Existing Supply Requests Table */}
-                {supplyRequests?.results &&
-                  supplyRequests.results.length > 0 && (
-                    <div className="space-y-4">
-                      <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
-                        <Table className="rounded-lg border shadow-sm w-full bg-white">
-                          <TableHeader className="bg-gray-100">
-                            <TableRow className="border-b">
-                              <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                                {t("item")}
-                              </TableHead>
-                              <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                                {t("quantity")}
-                              </TableHead>
-                              <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                                {t("status")}
-                              </TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody className="bg-white">
-                            {supplyRequests.results.map((supplyRequest) => (
-                              <TableRow
-                                key={supplyRequest.id}
-                                className="border-b hover:bg-gray-50"
-                              >
-                                <TableCell className="border-x p-3 text-gray-950">
-                                  <div className="font-medium">
-                                    {supplyRequest.item.name}
-                                  </div>
-                                </TableCell>
-                                <TableCell className="border-x p-3 text-gray-950">
-                                  {supplyRequest.quantity}
-                                </TableCell>
-                                <TableCell className="border-x p-3 text-gray-950">
-                                  <Badge
-                                    variant={
-                                      SUPPLY_REQUEST_STATUS_COLORS[
-                                        supplyRequest.status
-                                      ]
-                                    }
-                                  >
-                                    {t(supplyRequest.status)}
-                                  </Badge>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
+
+              <TabsContent value="supply-requests" className="p-6 space-y-6">
+                {isLoadingSupplyRequests ? (
+                  <div className="space-y-4">
+                    <div className="animate-pulse">
+                      <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+                      <div className="space-y-3">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                          <div
+                            key={i}
+                            className="h-16 bg-gray-200 rounded"
+                          ></div>
+                        ))}
                       </div>
                     </div>
-                  )}
+                  </div>
+                ) : (
+                  <>
+                    {/* Supply Requests Table */}
+                    {supplyRequests?.results &&
+                    supplyRequests.results.length > 0 ? (
+                      <div className="space-y-4">
+                        <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
+                          <Table>
+                            <TableHeader className="bg-gray-50">
+                              <TableRow>
+                                <TableHead className="font-semibold text-gray-700">
+                                  {t("item")}
+                                </TableHead>
+                                <TableHead className="font-semibold text-gray-700">
+                                  {t("quantity")}
+                                </TableHead>
+                                <TableHead className="font-semibold text-gray-700">
+                                  {t("status")}
+                                </TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {supplyRequests.results.map((supplyRequest) => (
+                                <TableRow
+                                  key={supplyRequest.id}
+                                  className="hover:bg-gray-50/50"
+                                >
+                                  <TableCell className="font-medium">
+                                    {supplyRequest.item.name}
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="font-semibold text-gray-900">
+                                      {supplyRequest.quantity}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge
+                                      variant={
+                                        SUPPLY_REQUEST_STATUS_COLORS[
+                                          supplyRequest.status
+                                        ]
+                                      }
+                                      className="font-medium"
+                                    >
+                                      {t(supplyRequest.status)}
+                                    </Badge>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                          <div className="w-6 h-6 bg-gray-300 rounded"></div>
+                        </div>
+                        <p className="text-gray-500 font-medium">
+                          {t("no_supply_requests_found")}
+                        </p>
+                        <p className="text-gray-400 text-sm mt-1">
+                          {t("add_items_to_get_started")}
+                        </p>
+                      </div>
+                    )}
 
-                {/* Add New Items Form - Always show when in draft mode */}
-                {canAddSupplyRequests && (
-                  <AddItemsForm
-                    requestOrderId={requestOrderId}
-                    onSuccess={handleSupplyRequestSuccess}
-                  />
+                    {/* Add New Items Form - Always show when in draft mode */}
+                    {canAddSupplyRequests && (
+                      <div className="border-t pt-6">
+                        <AddItemsForm
+                          requestOrderId={requestOrderId}
+                          onSuccess={handleSupplyRequestSuccess}
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
-              </div>
-            )}
+              </TabsContent>
+
+              <TabsContent value="supply-deliveries" className="p-6">
+                {isLoadingSupplyDeliveries ? (
+                  <div className="space-y-4">
+                    <div className="animate-pulse">
+                      <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+                      <div className="space-y-3">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                          <div
+                            key={i}
+                            className="h-16 bg-gray-200 rounded"
+                          ></div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : supplyDeliveries?.results &&
+                  supplyDeliveries.results.length > 0 ? (
+                  <DeliveryOrderTable
+                    deliveries={supplyDeliveries.results}
+                    isLoading={false}
+                    facilityId={facilityId}
+                    locationId={requestOrder?.destination.id || ""}
+                    internal={false}
+                  />
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                      <div className="w-6 h-6 bg-gray-300 rounded"></div>
+                    </div>
+                    <p className="text-gray-500 font-medium">
+                      {t("no_supply_deliveries_found")}
+                    </p>
+                    <p className="text-gray-400 text-sm mt-1">
+                      {t("deliveries_will_appear_here")}
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>

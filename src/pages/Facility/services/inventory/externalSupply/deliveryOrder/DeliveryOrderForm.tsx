@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -36,6 +36,7 @@ import {
   DeliveryOrderStatus,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
+import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
 import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import organizationApi from "@/types/organization/organizationApi";
@@ -77,6 +78,8 @@ export default function DeliveryOrderForm({
 
   const { goBack } = useAppHistory();
   const isEditMode = Boolean(deliveryOrderId);
+  const [qParams] = useQueryParams();
+  const supplyOrderId = qParams.supplyOrder;
 
   const { data: existingData, isFetching } = useQuery({
     queryKey: ["deliveryOrder", deliveryOrderId],
@@ -89,11 +92,26 @@ export default function DeliveryOrderForm({
     enabled: isEditMode,
   });
 
+  const { data: supplyOrderData, isFetching: isFetchingSupplyOrder } = useQuery(
+    {
+      queryKey: ["requestOrder", supplyOrderId],
+      queryFn: query(requestOrderApi.retrieveRequestOrder, {
+        pathParams: {
+          facilityId: facilityId,
+          requestOrderId: supplyOrderId!,
+        },
+      }),
+      enabled: !!supplyOrderId && !isEditMode,
+    },
+  );
+
   const title = isEditMode ? t("edit_order") : t("create_order");
 
-  const returnPath = `/facility/${facilityId}/locations/${locationId}/${
+  const basePath = `/facility/${facilityId}/locations/${locationId}/${
     internal ? "internal_transfers" : "external_supply"
-  }/delivery_orders`;
+  }`;
+
+  const returnPath = `${basePath}/${supplyOrderId ? `request_orders/${supplyOrderId}` : "delivery_orders"}`;
 
   const queryClient = useQueryClient();
   const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
@@ -163,8 +181,18 @@ export default function DeliveryOrderForm({
         origin: existingData.origin?.id || undefined,
         destination: existingData.destination.id,
       });
+    } else if (!isEditMode && supplyOrderData) {
+      // Prefill form with supply order data
+      form.reset({
+        status: DeliveryOrderStatus.draft,
+        name: supplyOrderData.name,
+        note: supplyOrderData.note || "",
+        supplier: supplyOrderData.supplier?.id || undefined,
+        origin: supplyOrderData.origin?.id || undefined,
+        destination: supplyOrderData.destination.id,
+      });
     }
-  }, [isEditMode, existingData, form]);
+  }, [isEditMode, existingData, supplyOrderData, form]);
 
   const { mutate: createDeliveryOrder, isPending: isCreating } = useMutation({
     mutationFn: mutate(deliveryOrderApi.createDeliveryOrder, {
@@ -175,7 +203,12 @@ export default function DeliveryOrderForm({
     onSuccess: (deliveryOrder: DeliveryOrderRetrieve) => {
       queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
       toast.success(t("order_created"));
-      navigate(returnPath + "/" + deliveryOrder.id);
+      navigate(
+        basePath +
+          "/delivery_orders/" +
+          deliveryOrder.id +
+          (supplyOrderId ? `?supplyOrder=${supplyOrderId}` : ""),
+      );
     },
   });
 
@@ -206,7 +239,10 @@ export default function DeliveryOrderForm({
 
   const isPending = isCreating || isUpdating;
 
-  if (isEditMode && isFetching) {
+  if (
+    (isEditMode && isFetching) ||
+    (!isEditMode && supplyOrderId && isFetchingSupplyOrder)
+  ) {
     return (
       <Page title={title} hideTitleOnPage>
         <div className="container mx-auto max-w-3xl">

@@ -23,7 +23,7 @@ import {
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 
 interface Props {
-  deliverys: DeliveryOrderRetrieve[];
+  deliveries: DeliveryOrderRetrieve[];
   isLoading: boolean;
   facilityId: string;
   locationId: string;
@@ -31,7 +31,7 @@ interface Props {
 }
 
 export default function DeliveryOrderTable({
-  deliverys,
+  deliveries,
   isLoading,
   facilityId,
   locationId,
@@ -43,7 +43,7 @@ export default function DeliveryOrderTable({
     return <TableSkeleton count={5} />;
   }
 
-  if (deliverys.length === 0) {
+  if (deliveries.length === 0) {
     return (
       <EmptyState
         title={t("no_orders_found")}
@@ -68,7 +68,7 @@ export default function DeliveryOrderTable({
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white text-base">
-          {deliverys.map((delivery: DeliveryOrderRetrieve) => (
+          {deliveries.map((delivery: DeliveryOrderRetrieve) => (
             <TableRow key={delivery.id} className="divide-x">
               <TableCell className="font-semibold text-gray-950">
                 {delivery.name}
