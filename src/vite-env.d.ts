@@ -12,7 +12,6 @@ interface ImportMetaEnv {
   readonly REACT_DASHBOARD_URL?: string;
   readonly REACT_GITHUB_URL?: string;
   readonly REACT_OHCN_URL?: string;
-  readonly REACT_HEADER_LOGO?: string;
   readonly REACT_MAIN_LOGO?: string;
   readonly REACT_STATE_LOGO?: string;
   readonly REACT_CUSTOM_LOGO?: string;

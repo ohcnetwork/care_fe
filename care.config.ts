@@ -40,10 +40,6 @@ const careConfig = {
     ohcn: env.REACT_OHCN_URL || "https://ohc.network?ref=care",
   },
 
-  headerLogo: logo(env.REACT_HEADER_LOGO, {
-    light: "https://cdn.ohc.network/header_logo.png",
-    dark: "https://cdn.ohc.network/header_logo.png",
-  }),
   mainLogo: logo(env.REACT_MAIN_LOGO, {
     light: "/images/care_logo.svg",
     dark: "/images/care_logo.svg",

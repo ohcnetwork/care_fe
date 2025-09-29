@@ -2,7 +2,12 @@ import { z } from "zod";
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
 import { ENCOUNTER_CLASS } from "../src/types/emr/encounter/encounter";
 
-const logoSchema = z
+const logSchema = z.object({
+  light: z.string().url(),
+  dark: z.string().url(),
+});
+
+const logSchemaString = z
   .string()
   .refine(
     (val) => {
@@ -18,27 +23,7 @@ const logoSchema = z
     },
   )
   .transform((val) => JSON.parse(val))
-  .refine((logo) => logo.light && logo.dark, {
-    message: "Logo must have light and dark variants",
-  })
-  .refine(
-    (logo) => {
-      const light = z.string().url().safeParse(logo.light);
-      return light;
-    },
-    {
-      message: "Logo light must be a valid URL",
-    },
-  )
-  .refine(
-    (logo) => {
-      const dark = z.string().url().safeParse(logo.dark);
-      return dark;
-    },
-    {
-      message: "Header logo dark must be a valid URL",
-    },
-  );
+  .pipe(logSchema);
 
 const envSchema = z
   .object({
@@ -50,12 +35,14 @@ const envSchema = z
     REACT_SENTRY_DSN: z.string().url().optional(),
     REACT_SENTRY_ENVIRONMENT: z.string().optional(),
     REACT_DEFAULT_PAYMENT_TERMS: z.string().optional(),
-    REACT_HEADER_LOGO: logoSchema.optional(),
-    REACT_MAIN_LOGO: logoSchema.optional(),
-    REACT_CUSTOM_LOGO: logoSchema.optional(),
+    REACT_MAIN_LOGO: logSchemaString.optional(),
+    REACT_CUSTOM_LOGO: logSchemaString.optional(),
     REACT_CUSTOM_DESCRIPTION: z.string().optional(),
-    REACT_CUSTOM_LOGO_ALT: logoSchema.optional(),
+    REACT_CUSTOM_LOGO_ALT: logSchemaString.optional(),
     REACT_ALLOWED_LOCALES: z.string().optional(),
+    REACT_MAPS_FALLBACK_URL_TEMPLATE: z.string().url().optional(),
+    REACT_RECAPTCHA_SITE_KEY: z.string(),
+    REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: z.string().optional(),
     REACT_CDN_URLS: z
       .string()
       .optional()
