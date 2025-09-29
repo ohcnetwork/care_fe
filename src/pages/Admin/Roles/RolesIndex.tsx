@@ -248,7 +248,7 @@ export default function RolesIndex() {
                                 ))}
                               {role.permissions.length > 3 && (
                                 <Badge variant="outline" className="text-xs">
-                                  +{role.permissions.length - 3} more
+                                  +{role.permissions.length - 3} {t("more")}
                                 </Badge>
                               )}
                             </div>

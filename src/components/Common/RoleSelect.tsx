@@ -77,6 +77,8 @@ export function RoleSelect({
     if (inView && hasNextPage) fetchNextPage();
   }, [inView, hasNextPage, fetchNextPage]);
 
+  const visibleRoles = rolesList?.filter((role) => !role.is_archived) || [];
+
   return (
     <Popover open={open} onOpenChange={setOpen} modal>
       <PopoverTrigger asChild>
@@ -105,35 +107,33 @@ export function RoleSelect({
               {isFetching ? t("searching") : t("no_roles_found")}
             </CommandEmpty>
             <CommandGroup>
-              {rolesList
-                ?.filter((role) => !role.is_archived)
-                .map((role, i) => (
-                  <CommandItem
-                    key={role.id}
-                    value={role.name}
-                    onSelect={() => {
-                      onChange(role);
-                      setOpen(false);
-                    }}
-                    className="cursor-pointer"
-                    ref={i === rolesList.length - 1 ? ref : undefined}
-                  >
-                    <CheckIcon
-                      className={cn(
-                        "mr-2 size-4",
-                        value?.id === role.id ? "opacity-100" : "opacity-0",
-                      )}
-                    />
-                    <div className="flex flex-col items-start">
-                      <span>{role.name}</span>
-                      {role.description && (
-                        <span className="text-xs text-gray-500">
-                          {role.description}
-                        </span>
-                      )}
-                    </div>
-                  </CommandItem>
-                ))}
+              {visibleRoles.map((role, i) => (
+                <CommandItem
+                  key={role.id}
+                  value={role.name}
+                  onSelect={() => {
+                    onChange(role);
+                    setOpen(false);
+                  }}
+                  className="cursor-pointer"
+                  ref={i === visibleRoles.length - 1 ? ref : undefined}
+                >
+                  <CheckIcon
+                    className={cn(
+                      "mr-2 size-4",
+                      value?.id === role.id ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                  <div className="flex flex-col items-start">
+                    <span>{role.name}</span>
+                    {role.description && (
+                      <span className="text-xs text-gray-500">
+                        {role.description}
+                      </span>
+                    )}
+                  </div>
+                </CommandItem>
+              ))}
               {isFetchingNextPage && (
                 <div className="text-center text-sm py-2">{t("loading")}</div>
               )}
