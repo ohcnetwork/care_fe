@@ -639,10 +639,10 @@ export function MultiFilterStyleTagSelector({
               <div className="flex justify-between">
                 <div className="flex gap-1 my-4 mx-2">
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
-                    <ArrowUp className="h-5 w-5" />
+                    <ArrowUp className="h-3 w-3" />
                   </div>
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
-                    <ArrowDown className="h-5 w-5" />
+                    <ArrowDown className="h-3 w-3" />
                   </div>
                   <span className="text-xs text-gray-700 self-center">
                     {t("navigate")}
@@ -650,15 +650,15 @@ export function MultiFilterStyleTagSelector({
                 </div>
                 <div className="flex gap-1 my-4 mx-2">
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
-                    <Space className="h-5 w-5" />
+                    <Space className="h-3 w-3" />
                   </div>
                   <span className="text-xs text-gray-700 self-center">
                     {t("to_select")}
                   </span>
                 </div>
-                <div className="flex gap-1 my-2 mx-2">
-                  <button className="bg-green-800 text-white px-3 py-2 rounded-md flex items-center gap-2">
-                    <span className="text-md font-bold">{t("done")}</span>
+                <div className="flex gap-1 m-2">
+                  <button className="bg-green-800 text-white rounded-md gap-2 h-9 w-[82px] flex items-center justify-center">
+                    <span className="text-sm font-bold">{t("done")}</span>
                     <CornerDownLeft className="h-4 w-4" />
                   </button>
                 </div>
