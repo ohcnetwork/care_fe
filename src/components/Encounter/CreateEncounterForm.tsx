@@ -363,23 +363,17 @@ export default function CreateEncounterForm({
                   form.reset();
                 }}
                 className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
-                data-shortcut-id={isOpen ? "cancel-action" : undefined}
               >
                 {t("cancel")}
-                <ShortcutBadge actionId="cancel-action" alwaysShow />
+                <ShortcutBadge actionId="cancel-action" />
               </Button>
               <Button
                 data-cy="create-encounter-button"
                 type="submit"
                 disabled={isPending || !form.watch("organizations").length}
-                data-shortcut-id={isOpen ? "submit-action" : undefined}
               >
                 {isPending ? t("creating") : t("create_encounter")}
-                <ShortcutBadge
-                  actionId="submit-action"
-                  alwaysShow
-                  className="bg-white"
-                />
+                <ShortcutBadge actionId="submit-action" className="bg-white" />
               </Button>
             </div>
           </form>
