@@ -5,10 +5,6 @@ import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -34,6 +30,7 @@ import SearchInput from "@/components/Common/SearchInput";
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
@@ -45,6 +42,8 @@ import {
   PatientRead,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { FacilityRead } from "@/types/facility/facility";
+import { TFunction } from "i18next";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
   useShortcutSubContext();
@@ -62,47 +61,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     hasPermission,
     facility?.permissions ?? [],
   );
-
-  const handleCreatePatient = useCallback(() => {
-    navigate(`/facility/${facilityId}/patient/create`, {
-      query: {
-        // queryParams,
-        // phone_number: qParams.value,
-      },
-    });
-  }, [facilityId]);
-
-  function AddPatientButton({ outline }: { outline?: boolean }) {
-    return (
-      <Button
-        variant={outline ? "outline" : "primary_gradient"}
-        className={cn("gap-3 group")}
-        onClick={handleCreatePatient}
-        data-cy="create-new-patient-button"
-        data-shortcut-id="submit-action"
-      >
-        <CareIcon icon="l-plus" className="size-4" />
-        {t("add_new_patient")}
-        <ShortcutBadge actionId="submit-action" className="bg-white" />
-      </Button>
-    );
-  }
-
-  // Build search options
-  const searchOptions = [
-    ...(facility?.patient_instance_identifier_configs || []),
-  ]
-    .sort((a) => (a.config.auto_maintained ? -1 : 1))
-    .map((c) => ({
-      key: c.id,
-      type:
-        c.config.system === "system.care.ohc.network/patient-phone-number"
-          ? ("phone" as const)
-          : ("text" as const),
-      placeholder: t("search_by_identifier", { name: c.config.display }),
-      value: "",
-      display: c.config.display,
-    }));
 
   // Track identifier search state
   const [identifierSearch, setIdentifierSearch] = useState<{
@@ -170,7 +128,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       <div className="container max-w-5xl mx-auto py-6">
         {canCreatePatient && (
           <div className="flex justify-center md:justify-end">
-            <AddPatientButton />
+            <AddPatientButton facilityId={facilityId} />
           </div>
         )}
         <div className="space-y-6 mt-6">
@@ -189,7 +147,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             <div className="space-y-6">
               <SearchInput
                 data-cy="patient-search"
-                options={searchOptions}
+                options={getSearchOptions(t, facility)}
                 onSearch={handleSearch}
                 className="w-full"
                 autoFocus
@@ -211,7 +169,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                           <p className="text-sm text-gray-500 mb-6">
                             {t("no_patient_record_text")}
                           </p>
-                          <AddPatientButton outline />
+                          <AddPatientButton facilityId={facilityId} outline />
                         </div>
                       </div>
                     ) : (
@@ -306,5 +264,52 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+const getSearchOptions = (t: TFunction, facility?: FacilityRead) => {
+  if (!facility) {
+    return [];
+  }
+
+  const { patient_instance_identifier_configs: configs } = facility;
+
+  // Auto-maintained configs first, then non-auto-maintained configs
+  return [
+    ...configs.filter((c) => c.config.auto_maintained),
+    ...configs.filter((c) => !c.config.auto_maintained),
+  ].map((c) => ({
+    key: c.id,
+    type:
+      c.config.system === "system.care.ohc.network/patient-phone-number"
+        ? ("phone" as const)
+        : ("text" as const),
+    placeholder: t("search_by_identifier", { name: c.config.display }),
+    value: "",
+    display: c.config.display,
+  }));
+};
+
+function AddPatientButton({
+  facilityId,
+  outline,
+}: {
+  facilityId: string;
+  outline?: boolean;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <Button
+      variant={outline ? "outline" : "primary_gradient"}
+      className="gap-3 group"
+      onClick={() => navigate(`/facility/${facilityId}/patient/create`)}
+      data-cy="create-new-patient-button"
+      data-shortcut-id="submit-action"
+    >
+      <CareIcon icon="l-plus" className="size-4" />
+      {t("add_new_patient")}
+      <ShortcutBadge actionId="submit-action" className="bg-white" />
+    </Button>
   );
 }
