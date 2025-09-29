@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
-import { useCallback, useState } from "react";
+import { navigate, useQueryParams } from "raviger";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -46,12 +46,16 @@ import { FacilityRead } from "@/types/facility/facility";
 import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { TFunction } from "i18next";
 
+const PHONE_NUMBER_CONFIG_SYSTEM =
+  "system.care.ohc.network/patient-phone-number";
+
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
   useShortcutSubContext();
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<
     PartialPatientModel | PatientRead | null
   >(null);
+  const [qParams] = useQueryParams();
   const [verificationOpen, setVerificationOpen] = useState(false);
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -107,6 +111,23 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     }
   };
 
+  useEffect(() => {
+    if (!facility) {
+      return;
+    }
+
+    const phoneNumberConfig = getPhoneNumberConfig(
+      facility.patient_instance_identifier_configs,
+    );
+
+    if (qParams.phone_number && phoneNumberConfig) {
+      setIdentifierSearch({
+        config: phoneNumberConfig.id,
+        value: qParams.phone_number,
+      });
+    }
+  }, [qParams.phone_number, facility]);
+
   const handleVerify = () => {
     if (!selectedPatient || !yearOfBirth || yearOfBirth.length !== 4) {
       toast.error(t("valid_year_of_birth"));
@@ -153,7 +174,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           <div>
             <div className="space-y-6">
               <SearchInput
-                data-cy="patient-search"
                 options={getSearchOptions(t, facility)}
                 onSearch={handleSearch}
                 className="w-full"
@@ -246,7 +266,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
               type="text"
               placeholder={`${t("year_of_birth")} (YYYY)`}
               value={yearOfBirth}
-              data-cy="year-of-birth-input"
               onChange={(e) => {
                 const value = e.target.value;
                 if (/^\d{0,4}$/.test(value)) {
@@ -264,15 +283,10 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             <Button
               variant="outline"
               onClick={() => setVerificationOpen(false)}
-              data-cy="cancel-verification-button"
             >
               {t("cancel")}
             </Button>
-            <Button
-              className="mb-2"
-              onClick={handleVerify}
-              data-cy="confirm-verification-button"
-            >
+            <Button className="mb-2" onClick={handleVerify}>
               {t("verify")}
             </Button>
           </DialogFooter>
@@ -289,14 +303,24 @@ const getSearchOptions = (t: TFunction, facility?: FacilityRead) => {
 
   const { patient_instance_identifier_configs: configs } = facility;
 
-  // Auto-maintained configs first, then non-auto-maintained configs
+  // Phone number configs first, followed by auto-maintained configs, and then non-auto-maintained configs
   return [
-    ...configs.filter((c) => c.config.auto_maintained),
+    // Phone number configs
+    ...configs.filter(
+      ({ config }) =>
+        config.auto_maintained && config.system === PHONE_NUMBER_CONFIG_SYSTEM,
+    ),
+    // Auto-maintained configs but not phone number configs
+    ...configs.filter(
+      ({ config }) =>
+        config.auto_maintained && config.system !== PHONE_NUMBER_CONFIG_SYSTEM,
+    ),
+    // Non-auto-maintained configs
     ...configs.filter((c) => !c.config.auto_maintained),
   ].map((c) => ({
     key: c.id,
     type:
-      c.config.system === "system.care.ohc.network/patient-phone-number"
+      c.config.system === PHONE_NUMBER_CONFIG_SYSTEM
         ? ("phone" as const)
         : ("text" as const),
     placeholder: t("search_by_identifier", { name: c.config.display }),
@@ -305,13 +329,17 @@ const getSearchOptions = (t: TFunction, facility?: FacilityRead) => {
   }));
 };
 
+const getPhoneNumberConfig = (identifierConfigs: PatientIdentifierConfig[]) => {
+  return identifierConfigs.find(
+    (c) => c.config.system === PHONE_NUMBER_CONFIG_SYSTEM,
+  );
+};
+
 const getPhoneNumberFromIdentifierSearch = (
   identifierConfigs: PatientIdentifierConfig[],
   identifierSearch: { config?: string; value?: string },
 ) => {
-  const phoneNumberConfig = identifierConfigs.find(
-    (c) => c.config.system === "system.care.ohc.network/patient-phone-number",
-  );
+  const phoneNumberConfig = getPhoneNumberConfig(identifierConfigs);
 
   if (phoneNumberConfig && identifierSearch.config === phoneNumberConfig.id) {
     return identifierSearch.value;
@@ -333,23 +361,19 @@ function AddPatientButton({
 }) {
   const { t } = useTranslation();
 
+  const phoneNumber =
+    identifierSearch &&
+    getPhoneNumberFromIdentifierSearch(identifierConfigs, identifierSearch);
+
   return (
     <Button
       variant={outline ? "outline" : "primary_gradient"}
       className="gap-3 group"
       onClick={() =>
         navigate(`/facility/${facilityId}/patient/create`, {
-          query: {
-            phone_number:
-              identifierSearch &&
-              getPhoneNumberFromIdentifierSearch(
-                identifierConfigs,
-                identifierSearch,
-              ),
-          },
+          query: phoneNumber ? { phone_number: phoneNumber } : undefined,
         })
       }
-      data-cy="create-new-patient-button"
       data-shortcut-id="submit-action"
     >
       <CareIcon icon="l-plus" className="size-4" />
