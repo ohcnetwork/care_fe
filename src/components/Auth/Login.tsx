@@ -96,7 +96,7 @@ const Login = (props: LoginProps) => {
   useEffect(() => {
   const desired = disablePatientLogin && loginMode === "patient" ? "staff" : loginMode;
   if (!mode || mode !== desired) {
-    setQueryParams({ mode: desired as LoginMode });
+    setQueryParams({ mode: desired as LoginMode }, { replace: false });
   }
 }, [mode, loginMode, setQueryParams, disablePatientLogin]);
   const initErr: any = {};
@@ -371,7 +371,7 @@ const Login = (props: LoginProps) => {
     value={loginMode}
     onValueChange={(value) => {
       if (disablePatientLogin && value === "patient") return;
-      setQueryParams({ mode: value as LoginMode });
+      setQueryParams({ mode: value as LoginMode }, { replace: false });
       if (value === "staff") {
         resetPatientLogin();
       } else {

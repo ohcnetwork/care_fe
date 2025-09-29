@@ -19,8 +19,8 @@ import medicationRequestApi from "@/types/emr/medicationRequest/medicationReques
 import {
   ClipboardList,
   History,
-  PlusIcon,
-  ReceiptTextIcon,
+  Plus as PlusIcon,
+  ReceiptText as ReceiptTextIcon,
   Syringe,
 } from "lucide-react";
 import { Link } from "raviger";

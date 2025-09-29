@@ -94,6 +94,8 @@ export default function MedicationValueSetSelect({
     enabled: !!facilityId && !search,
   });
 
+  const MIN_SEARCH_LEN = 3;
+
   const { data: productKnowledge, isFetching: isProductLoading } = useQuery({
     queryKey: ["productKnowledge", "medication", currentCategory, search],
     queryFn: query.debounced(productKnowledgeApi.listProductKnowledge, {
@@ -101,12 +103,16 @@ export default function MedicationValueSetSelect({
         facility: facilityId,
         limit: 100,
         offset: 0,
-        name: search,
+        name: search.length >= MIN_SEARCH_LEN ? search : undefined,
         product_type: "medication",
         category: search ? undefined : currentCategory,
         status: ProductKnowledgeStatus.active,
       },
     }),
+    enabled:
+      !!facilityId &&
+      // allow browsing (no search) OR valid long-enough search
+      (search.length === 0 || search.length >= MIN_SEARCH_LEN),
   });
 
   useEffect(() => {
@@ -238,10 +244,10 @@ export default function MedicationValueSetSelect({
             )}
 
             <CommandList className="max-h-[300px] overflow-auto">
-              <CommandEmpty>
-                {search.length < 3 ? (
+              <CommandEmpty aria-live="polite">
+                {search.length < MIN_SEARCH_LEN ? (
                   <p className="p-4 text-sm text-gray-500">
-                    {t("min_char_length_error", { min_length: 3 })}
+                    {t("min_char_length_error", { min_length: MIN_SEARCH_LEN })}
                   </p>
                 ) : isProductLoading || isCategoriesLoading ? (
                   <p className="p-4 text-sm text-gray-500">{t("searching")}</p>
@@ -289,7 +295,7 @@ export default function MedicationValueSetSelect({
                 </>
               )}
               {/* Search Results */}
-              {search && renderProductItems()}
+              {search.length >= MIN_SEARCH_LEN && renderProductItems()}
             </CommandList>
           </Command>
         </div>
