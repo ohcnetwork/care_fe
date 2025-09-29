@@ -24,6 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -247,6 +248,12 @@ export function ChargeItemsTable({
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />
+      ) : !chargeItems?.results?.length ? (
+        <EmptyState
+          icon="l-receipt"
+          title={t("no_charge_items")}
+          description={t("no_charge_items_description")}
+        />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
           <Table className="rounded-lg border shadow-sm w-full bg-white">
@@ -280,204 +287,187 @@ export function ChargeItemsTable({
               </TableRow>
             </TableHeader>
             <TableBody className="bg-white">
-              {!chargeItems?.results?.length ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center text-gray-500">
-                    {t("no_charge_items")}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                chargeItems.results.flatMap((item) => {
-                  const isExpanded = expandedItems[item.id] || false;
-                  const baseComponent = getBaseComponent(item);
-                  const baseAmount = String(baseComponent?.amount || "0");
-                  const linkedResource = getLinkedResource(item);
+              {chargeItems.results.flatMap((item) => {
+                const isExpanded = expandedItems[item.id] || false;
+                const baseComponent = getBaseComponent(item);
+                const baseAmount = String(baseComponent?.amount || "0");
+                const linkedResource = getLinkedResource(item);
 
-                  const mrpAmount = item.unit_price_components.find(
-                    (c) =>
-                      c.monetary_component_type ===
-                        MonetaryComponentType.informational &&
-                      c.code?.code === MRP_CODE,
-                  )?.amount;
-                  const mainRow = (
-                    <TableRow
-                      key={item.id}
-                      className="border-b hover:bg-gray-50"
-                    >
-                      <TableCell className="border-x p-3 text-gray-950">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => toggleItemExpand(item.id)}
-                        >
-                          {isExpanded ? (
-                            <ChevronUp className="h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </TableCell>
-                      <TableCell className="bor-medium">
-                        {item.title}
-                        {item.description && (
-                          <p className="text-xs text-gray-500 whitespace-pre-wrap">
-                            {item.description}
-                          </p>
-                        )}
-                      </TableCell>
-                      <TableCell className="border-x p-3 text-gray-950">
-                        {linkedResource !== "" ? (
-                          <Link
-                            href={linkedResource}
-                            className="flex items-center gap-0.5 underline text-gray-600"
-                          >
-                            {t(item.service_resource)}
-                            <ExternalLinkIcon className="size-3" />
-                          </Link>
+                const mrpAmount = item.unit_price_components.find(
+                  (c) =>
+                    c.monetary_component_type ===
+                      MonetaryComponentType.informational &&
+                    c.code?.code === MRP_CODE,
+                )?.amount;
+                const mainRow = (
+                  <TableRow key={item.id} className="border-b hover:bg-gray-50">
+                    <TableCell className="border-x p-3 text-gray-950">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => toggleItemExpand(item.id)}
+                      >
+                        {isExpanded ? (
+                          <ChevronUp className="h-4 w-4" />
                         ) : (
-                          <span className="text-gray-500">
-                            {t(item.service_resource)}
-                          </span>
+                          <ChevronDown className="h-4 w-4" />
                         )}
-                      </TableCell>
-                      <TableCell className="border-x p-3 text-gray-950">
-                        <MonetaryDisplay amount={mrpAmount} />
-                      </TableCell>
-                      <TableCell className="border-x p-3 text-gray-950">
-                        <MonetaryDisplay amount={baseAmount} />
-                      </TableCell>
-                      <TableCell className="border-x p-3 text-gray-950">
-                        {item.quantity}
-                      </TableCell>
-                      <TableCell className="border-x p-3 text-gray-950 font-medium">
-                        <MonetaryDisplay amount={item.total_price} />
-                      </TableCell>
-                      <TableCell className="border-x p-3 text-gray-950">
-                        <div className="flex items-center gap-1">
-                          <Badge
-                            variant={CHARGE_ITEM_STATUS_COLORS[item.status]}
-                          >
-                            {t(item.status)}
-                          </Badge>
-                          {item.paid_invoice && (
-                            <Link
-                              href={`/facility/${facilityId}/billing/invoices/${item.paid_invoice.id}`}
-                              className="flex items-center gap-0.5 underline text-gray-600"
-                              title={t("view_invoice")}
-                            >
-                              <ExternalLinkIcon className="size-3.5" />
-                            </Link>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="border-x p-3 text-gray-950">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>
-                              {t("actions")}
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                              <div
-                                className="flex items-center"
-                                onClick={() => {
-                                  // This will trigger the item to be edited, but actual edit UI is rendered elsewhere
-                                  document
-                                    .getElementById(
-                                      `edit-charge-item-${item.id}`,
-                                    )
-                                    ?.click();
-                                }}
-                              >
-                                <PencilIcon className="mr-2 h-4 w-4" />
-                                <span>{t("edit")}</span>
-                              </div>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        {/* Invisible trigger for the edit sheet */}
-                        <span className="hidden">
-                          <EditChargeItemSheet
-                            facilityId={facilityId}
-                            item={item}
-                            accountId={accountId}
-                            trigger={
-                              <Button
-                                id={`edit-charge-item-${item.id}`}
-                                className="hidden"
-                              >
-                                Edit
-                              </Button>
-                            }
-                          />
+                      </Button>
+                    </TableCell>
+                    <TableCell className="bor-medium">
+                      {item.title}
+                      {item.description && (
+                        <p className="text-xs text-gray-500 whitespace-pre-wrap">
+                          {item.description}
+                        </p>
+                      )}
+                    </TableCell>
+                    <TableCell className="border-x p-3 text-gray-950">
+                      {linkedResource !== "" ? (
+                        <Link
+                          href={linkedResource}
+                          className="flex items-center gap-0.5 underline text-gray-600"
+                        >
+                          {t(item.service_resource)}
+                          <ExternalLinkIcon className="size-3" />
+                        </Link>
+                      ) : (
+                        <span className="text-gray-500">
+                          {t(item.service_resource)}
                         </span>
-                      </TableCell>
-                    </TableRow>
-                  );
-
-                  if (!isExpanded) return [mainRow];
-
-                  const detailRows = [
-                    <PriceComponentRow
-                      key={`${item.id}-discounts`}
-                      label={t("discounts")}
-                      components={getComponentsByType(
-                        item,
-                        MonetaryComponentType.discount,
                       )}
-                    />,
-                    <PriceComponentRow
-                      key={`${item.id}-taxes`}
-                      label={t("taxes")}
-                      components={getComponentsByType(
-                        item,
-                        MonetaryComponentType.tax,
-                      )}
-                    />,
-                  ];
+                    </TableCell>
+                    <TableCell className="border-x p-3 text-gray-950">
+                      <MonetaryDisplay amount={mrpAmount} />
+                    </TableCell>
+                    <TableCell className="border-x p-3 text-gray-950">
+                      <MonetaryDisplay amount={baseAmount} />
+                    </TableCell>
+                    <TableCell className="border-x p-3 text-gray-950">
+                      {item.quantity}
+                    </TableCell>
+                    <TableCell className="border-x p-3 text-gray-950 font-medium">
+                      <MonetaryDisplay amount={item.total_price} />
+                    </TableCell>
+                    <TableCell className="border-x p-3 text-gray-950">
+                      <div className="flex items-center gap-1">
+                        <Badge variant={CHARGE_ITEM_STATUS_COLORS[item.status]}>
+                          {t(item.status)}
+                        </Badge>
+                        {item.paid_invoice && (
+                          <Link
+                            href={`/facility/${facilityId}/billing/invoices/${item.paid_invoice.id}`}
+                            className="flex items-center gap-0.5 underline text-gray-600"
+                            title={t("view_invoice")}
+                          >
+                            <ExternalLinkIcon className="size-3.5" />
+                          </Link>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="border-x p-3 text-gray-950">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem asChild>
+                            <div
+                              className="flex items-center"
+                              onClick={() => {
+                                // This will trigger the item to be edited, but actual edit UI is rendered elsewhere
+                                document
+                                  .getElementById(`edit-charge-item-${item.id}`)
+                                  ?.click();
+                              }}
+                            >
+                              <PencilIcon className="mr-2 h-4 w-4" />
+                              <span>{t("edit")}</span>
+                            </div>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
 
-                  // Add a summary row
-                  const summaryRow = (
-                    <TableRow
-                      key={`${item.id}-summary`}
-                      className="bg-muted/30 font-medium border-b"
-                    >
-                      <TableCell></TableCell>
-                      <TableCell className="text-gray-950">
-                        {t("total")}
-                      </TableCell>
-                      <TableCell></TableCell>
-                      <TableCell></TableCell>
-                      <TableCell></TableCell>
-                      <TableCell className="p-3">
-                        <MonetaryDisplay amount={item.total_price} />
-                      </TableCell>
-                      <TableCell></TableCell>
-                    </TableRow>
-                  );
+                      {/* Invisible trigger for the edit sheet */}
+                      <span className="hidden">
+                        <EditChargeItemSheet
+                          facilityId={facilityId}
+                          item={item}
+                          accountId={accountId}
+                          trigger={
+                            <Button
+                              id={`edit-charge-item-${item.id}`}
+                              className="hidden"
+                            >
+                              Edit
+                            </Button>
+                          }
+                        />
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                );
 
-                  const emptyRow = (
-                    <TableRow key={`${item.id}-empty`} className="bg-muted">
-                      <TableCell colSpan={7}></TableCell>
-                    </TableRow>
-                  );
+                if (!isExpanded) return [mainRow];
 
-                  return [mainRow, ...detailRows, summaryRow, emptyRow].filter(
-                    Boolean,
-                  );
-                })
-              )}
+                const detailRows = [
+                  <PriceComponentRow
+                    key={`${item.id}-discounts`}
+                    label={t("discounts")}
+                    components={getComponentsByType(
+                      item,
+                      MonetaryComponentType.discount,
+                    )}
+                  />,
+                  <PriceComponentRow
+                    key={`${item.id}-taxes`}
+                    label={t("taxes")}
+                    components={getComponentsByType(
+                      item,
+                      MonetaryComponentType.tax,
+                    )}
+                  />,
+                ];
+
+                // Add a summary row
+                const summaryRow = (
+                  <TableRow
+                    key={`${item.id}-summary`}
+                    className="bg-muted/30 font-medium border-b"
+                  >
+                    <TableCell></TableCell>
+                    <TableCell className="text-gray-950">
+                      {t("total")}
+                    </TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell className="p-3">
+                      <MonetaryDisplay amount={item.total_price} />
+                    </TableCell>
+                    <TableCell></TableCell>
+                  </TableRow>
+                );
+
+                const emptyRow = (
+                  <TableRow key={`${item.id}-empty`} className="bg-muted">
+                    <TableCell colSpan={7}></TableCell>
+                  </TableRow>
+                );
+
+                return [mainRow, ...detailRows, summaryRow, emptyRow].filter(
+                  Boolean,
+                );
+              })}
             </TableBody>
           </Table>
         </div>
