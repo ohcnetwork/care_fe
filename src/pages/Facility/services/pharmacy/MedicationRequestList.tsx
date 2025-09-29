@@ -123,11 +123,8 @@ export default function MedicationRequestList({
   });
 
   // Handle tab selection
-  const handleTabSelect = (value: string) => {
-    updateQuery({
-      encounter_class: value ? value : undefined,
-    });
-  };
+  const handleTabSelect = (value: string) =>
+  updateQuery({ encounter_class: value === "" ? undefined : value });
 
   // Handle dropdown item selection
 
@@ -152,11 +149,6 @@ export default function MedicationRequestList({
 
   // Encounter class tab options with icons
   const encounterClassTabOptions = [
-    {
-      value: "all",
-      label: "all_prescriptions",
-      icon: <NotepadText className="size-4" />,
-    },
     ...visibleTabs.slice(1).map((key) => ({
       value: key,
       label: `encounter_class__${key}`,
@@ -200,6 +192,7 @@ export default function MedicationRequestList({
             PrescriptionStatus.cancelled,
           ]}
           showAllOption={false}
+          allOptionLabel="all_prescriptions"
           className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent h-auto"
         />
       </div>

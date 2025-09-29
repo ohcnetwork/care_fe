@@ -94,10 +94,11 @@ const Login = (props: LoginProps) => {
   const { mode } = params;
   const loginMode = (mode as LoginMode | undefined) ?? "staff";
   useEffect(() => {
-    if (!mode) {
-      setQueryParams({ mode: loginMode });
-    }
-  }, [mode, loginMode, setQueryParams]);
+  const desired = disablePatientLogin && loginMode === "patient" ? "staff" : loginMode;
+  if (!mode || mode !== desired) {
+    setQueryParams({ mode: desired as LoginMode });
+  }
+}, [mode, loginMode, setQueryParams, disablePatientLogin]);
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
@@ -109,7 +110,7 @@ const Login = (props: LoginProps) => {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
-  const [resendOtpCountdown, setResendOtpCountdown] =
+  const [resendOtpCountdown, setResendOtpCountdown] = useState<number>(resendOtpTimeout ?? 60);
     useState(resendOtpTimeout);
 
   // Timer Function for resend OTP
@@ -119,17 +120,10 @@ const Login = (props: LoginProps) => {
     return () => clearInterval(timer);
   }, [resendOtpCountdown]);
 
-    const timer = setInterval(() => {
-      setResendOtpCountdown((prevTime) => prevTime - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
   // Remember the last login mode
   useEffect(() => {
-    localStorage.setItem(LocalStorageKeys.loginPreference, mode);
-  }, [mode]);
+  localStorage.setItem(LocalStorageKeys.loginPreference, loginMode);
+}, [loginMode]);
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
@@ -190,7 +184,7 @@ const Login = (props: LoginProps) => {
         errorMessage = error.message;
       }
       setOtpValidationError(errorMessage);
-      toast.error(errorMessage);
+      toast.error(t(errorMessage));
     },
   });
 
@@ -374,19 +368,24 @@ const Login = (props: LoginProps) => {
               <CardContent>
                 <div className="flex w-full">
                   <FilterTabs
-                    value={loginMode}
-                    onValueChange={(value) => {
-                      setQueryParams({ mode: value as LoginMode });
-                      if (value === "staff") {
-                        resetPatientLogin();
-                      } else {
-                        setForgotPassword(false);
-                      }
-                    }}
-                    options={[
-                      { value: "staff", label: "staff_login"},
-                      { value: "patient", label: "patient_login"},
-                    ]}
+    value={loginMode}
+    onValueChange={(value) => {
+      if (disablePatientLogin && value === "patient") return;
+      setQueryParams({ mode: value as LoginMode });
+      if (value === "staff") {
+        resetPatientLogin();
+      } else {
+        setForgotPassword(false);
+      }
+    }}
+    options={
+      disablePatientLogin
+        ? [{ value: "staff", label: "staff_login" }]
+        : [
+            { value: "staff", label: "staff_login" },
+            { value: "patient", label: "patient_login" },
+          ]
+    }
                     variant="background"
                     className="flex-1 mb-2"
                     showAllOption={false}

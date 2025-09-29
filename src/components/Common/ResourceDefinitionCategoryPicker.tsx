@@ -245,12 +245,17 @@ export function ResourceDefinitionCategoryPicker<T>({
     [categoriesResponse?.results],
   );
 
+  // Keep raw API results and mapped display definitions separate
+  const rawDefinitions = useMemo(
+    () => ((definitionsResponse?.results || []) as T[]),
+    [definitionsResponse?.results],
+  );
+
   const definitions = useMemo(() => {
-    const results = definitionsResponse?.results || [];
     return mapper
-      ? results.map(mapper)
-      : (results as BaseCategoryPickerDefinition[]);
-  }, [definitionsResponse?.results, mapper]);
+      ? rawDefinitions.map(mapper)
+      : (rawDefinitions as unknown as BaseCategoryPickerDefinition[]);
+  }, [rawDefinitions, mapper]);
 
   const favorites = useMemo(() => {
     if (!enableFavorites || !favoritesResponse) return [];
@@ -263,6 +268,30 @@ export function ResourceDefinitionCategoryPicker<T>({
       ? favoritesArray.map(mapper)
       : (favoritesArray as BaseCategoryPickerDefinition[]);
   }, [favoritesResponse, mapper, enableFavorites]);
+
+  // Map slug -> original T across defs/favorites/recent so selection can return T
+  const rawBySlug = useMemo(() => {
+    const allRaw = [
+      ...((definitionsResponse?.results || []) as T[]),
+      ...(
+        Array.isArray(favoritesResponse)
+          ? (favoritesResponse as T[])
+          : ((favoritesResponse as unknown as { results?: T[] })?.results || [])
+      ),
+      ...(
+        Array.isArray(recentResponse)
+          ? (recentResponse as T[])
+          : ((recentResponse as unknown as { results?: T[] })?.results || [])
+      ),
+    ] as T[];
+
+    const entries = allRaw.map((item) => {
+      const def =
+        mapper ? mapper(item) : (item as unknown as BaseCategoryPickerDefinition);
+      return [def.slug, item] as const;
+    });
+    return new Map<string, T>(entries);
+  }, [definitionsResponse?.results, favoritesResponse, recentResponse, mapper]);
 
   const recentlyUsed = useMemo(() => {
     if (!enableFavorites || !recentResponse) return [];
@@ -315,6 +344,8 @@ export function ResourceDefinitionCategoryPicker<T>({
   });
 
   const handleDefinitionSelect = (definition: BaseCategoryPickerDefinition) => {
+  const original = (rawBySlug.get(definition.slug) ??
+    (definition as unknown)) as T;
     if (enableFavorites && favoritesConfig) {
       addToRecentMutation.mutate(definition.slug);
     }
@@ -333,10 +364,10 @@ export function ResourceDefinitionCategoryPicker<T>({
           ) as T[],
         );
       } else {
-        onValueChange([...currentValues, definition] as T[]);
+        onValueChange([...currentValues, original] as T[]);
       }
     } else {
-      onValueChange(definition as T);
+      onValueChange(original as T);
       setOpen(false);
       resetSearch();
     }

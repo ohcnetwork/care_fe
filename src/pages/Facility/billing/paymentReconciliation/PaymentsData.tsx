@@ -83,11 +83,13 @@ export default function PaymentsData({
   });
 
   useEffect(() => {
-    updateQuery({ ordering: "-payment_datetime" });
-  }, []);
+    if (!qParams.ordering) {
+      updateQuery({ ordering: "-payment_datetime" });
+    }
+  }, [qParams.ordering, updateQuery]);
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["payments", accountId, qParams],
+    queryKey: ["payments", facilityId, accountId, qParams],
     queryFn: query(paymentReconciliationApi.listPaymentReconciliation, {
       pathParams: { facilityId },
       queryParams: {
