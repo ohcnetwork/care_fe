@@ -90,25 +90,20 @@ export function AddSupplyDeliveryForm({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [searchInventoryItem, setSearchInventoryItem] = useState("");
-  const [editingItem, setEditingItem] = useState<{
-    entry: {
-      product_knowledge?: ProductKnowledgeBase;
-      supplied_item?: ProductRead;
-      supplied_item_quantity: number;
-      supply_request?: SupplyRequestRead;
-      _is_inward_stock?: boolean;
-    };
-    index: number | null;
-  } | null>(null);
 
   const { data: inventoryItems, isLoading: isLoadingInventoryItems } = useQuery(
     {
-      queryKey: ["inventoryItems", facilityId, searchInventoryItem],
+      queryKey: [
+        "inventoryItems",
+        facilityId,
+        destination,
+        searchInventoryItem,
+      ],
       queryFn: query(inventoryApi.list, {
         pathParams: { facilityId, locationId: origin || "" },
         queryParams: { product_knowledge: searchInventoryItem },
       }),
-      enabled: Boolean(searchInventoryItem && origin),
+      enabled: !!searchInventoryItem && !!origin,
     },
   );
 
@@ -145,7 +140,7 @@ export function AddSupplyDeliveryForm({
   const loadFromSupplyRequests = () => {
     if (supplyRequests.length > 0) {
       const itemsFromRequests = supplyRequests.map((request) => ({
-        supplied_inventory_item: "",
+        supplied_inventory_item: undefined,
         supplied_item_quantity: request.quantity,
         product_knowledge: request.item,
         supplied_item: undefined,
@@ -255,14 +250,16 @@ export function AddSupplyDeliveryForm({
                                 <FormControl>
                                   <ProductKnowledgeSelect
                                     value={field.value}
-                                    onChange={(product) => {
-                                      field.onChange(product);
+                                    onChange={(productKnowledge) => {
+                                      field.onChange(productKnowledge);
                                       // Reset inventory item when product changes
                                       form.setValue(
                                         `items.${index}.supplied_inventory_item`,
                                         "",
                                       );
-                                      setSearchInventoryItem(product.id);
+                                      setSearchInventoryItem(
+                                        productKnowledge.id,
+                                      );
                                     }}
                                     placeholder={t("select_product")}
                                     className="w-full"
