@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -159,27 +159,30 @@ export default function HealthcareServiceShow({
               ) : (
                 <div className="grid gap-2">
                   {healthcareService.locations.map((location) => (
-                    <div
+                    <Link
                       key={location.id}
-                      className="flex items-center justify-between rounded-lg border p-3"
+                      href={`/facility/${facilityId}/locations/${location.id}/medication_requests`}
+                      basePath="/"
                     >
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {location.name}
-                        </p>
+                      <div className="flex items-center justify-between rounded-lg border p-3">
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {location.name}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            navigate(
+                              `/facility/${facilityId}/locations/${location.id}/medication_requests`,
+                            )
+                          }
+                        >
+                          <CareIcon icon="l-arrow-right" className="size-4" />
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/locations/${location.id}/medication_requests`,
-                          )
-                        }
-                      >
-                        <CareIcon icon="l-arrow-right" className="size-4" />
-                      </Button>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}

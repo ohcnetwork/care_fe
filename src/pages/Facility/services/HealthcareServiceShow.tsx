@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
@@ -55,37 +55,38 @@ function LocationCard({
   );
 
   return (
-    <Card className="transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md">
-      <CardContent className="flex items-start gap-3 py-3 px-4">
-        <div className="shrink-0 relative size-10 rounded-sm flex p-4 items-center justify-center">
-          <ColoredIndicator
-            id={location.id}
-            className="absolute inset-0 rounded-sm opacity-20"
-          />
-          <CareIcon icon="l-flask" className="size-6 relative z-1" />
-        </div>
-        <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-2">
-          <div className="min-w-0 flex-1">
-            <h3 className="font-semibold truncate text-gray-900 text-base">
-              {location.name}
-            </h3>
-            <p className="mt-0.5 text-xs text-gray-500 line-clamp-1">
-              {location.description}
-            </p>
+    <Link href={link} basePath="/">
+      <Card className="transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md">
+        <CardContent className="flex items-start gap-3 py-3 px-4">
+          <div className="shrink-0 relative size-10 rounded-sm flex p-4 items-center justify-center">
+            <ColoredIndicator
+              id={location.id}
+              className="absolute inset-0 rounded-sm opacity-20"
+            />
+            <CareIcon icon="l-flask" className="size-6 relative z-1" />
           </div>
+          <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-2">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold truncate text-gray-900 text-base">
+                {location.name}
+              </h3>
+              <p className="mt-0.5 text-xs text-gray-500 line-clamp-1">
+                {location.description}
+              </p>
+            </div>
 
-          <Button
-            onClick={() => navigate(link)}
-            variant="outline"
-            size="sm"
-            className="shrink-0 w-full sm:w-auto px-3 text-xs"
-          >
-            {text}
-            <CareIcon icon="l-arrow-right" className="size-3 ml-1" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 w-full sm:w-auto px-3 text-xs"
+            >
+              {text}
+              <CareIcon icon="l-arrow-right" className="size-3 ml-1" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
 
