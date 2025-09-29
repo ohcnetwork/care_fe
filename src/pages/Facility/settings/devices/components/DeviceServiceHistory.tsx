@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   ExpandableText,
   ExpandableTextContent,
@@ -86,6 +87,12 @@ export default function DeviceServiceHistory({
       <CardContent>
         {isLoading ? (
           <TableSkeleton count={5} />
+        ) : serviceHistory?.results?.length === 0 ? (
+          <EmptyState
+            icon="l-wrench"
+            title={t("service_records_none")}
+            description={t("service_records_none_description")}
+          />
         ) : (
           <div>
             <Table>
@@ -97,44 +104,36 @@ export default function DeviceServiceHistory({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {serviceHistory?.results?.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={3} className="text-center">
-                      {t("service_records_none")}
+                {serviceHistory?.results.map((service: ServiceHistory) => (
+                  <TableRow key={service.id}>
+                    <TableCell className="font-medium">
+                      {format(new Date(service.serviced_on), "PPP")}
+                    </TableCell>
+                    <TableCell className="max-w-md whitespace-normal">
+                      <ExpandableText>
+                        <ExpandableTextContent>
+                          {service.note}
+                        </ExpandableTextContent>
+                        <ExpandableTextExpandButton>
+                          {t("read_more")}
+                        </ExpandableTextExpandButton>
+                      </ExpandableText>
+                    </TableCell>
+                    <TableCell className="text-right ">
+                      <EditServiceHistorySheet
+                        facilityId={facilityId}
+                        deviceId={deviceId}
+                        serviceRecord={service}
+                        onServiceUpdated={handleServiceUpdated}
+                        trigger={
+                          <Button variant="ghost" size="icon">
+                            <Edit className="size-4" />
+                          </Button>
+                        }
+                      />
                     </TableCell>
                   </TableRow>
-                ) : (
-                  serviceHistory?.results.map((service: ServiceHistory) => (
-                    <TableRow key={service.id}>
-                      <TableCell className="font-medium">
-                        {format(new Date(service.serviced_on), "PPP")}
-                      </TableCell>
-                      <TableCell className="max-w-md whitespace-normal">
-                        <ExpandableText>
-                          <ExpandableTextContent>
-                            {service.note}
-                          </ExpandableTextContent>
-                          <ExpandableTextExpandButton>
-                            {t("read_more")}
-                          </ExpandableTextExpandButton>
-                        </ExpandableText>
-                      </TableCell>
-                      <TableCell className="text-right ">
-                        <EditServiceHistorySheet
-                          facilityId={facilityId}
-                          deviceId={deviceId}
-                          serviceRecord={service}
-                          onServiceUpdated={handleServiceUpdated}
-                          trigger={
-                            <Button variant="ghost" size="icon">
-                              <Edit className="size-4" />
-                            </Button>
-                          }
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                ))}
               </TableBody>
             </Table>
             <div className="flex w-full items-center justify-center mt-4">

@@ -4,6 +4,7 @@ import {
   ENCOUNTER_CLASS,
   EncounterClass,
 } from "@/types/emr/encounter/encounter";
+import { NonEmptyArray } from "@/Utils/types";
 
 const env = import.meta.env;
 
@@ -55,7 +56,7 @@ const careConfig = {
     .split(",")
     .map((l) => l.trim()),
   encounterClasses: (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",") ??
-    ENCOUNTER_CLASS) as [EncounterClass, ...EncounterClass[]],
+    ENCOUNTER_CLASS) as NonEmptyArray<EncounterClass>,
 
   defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
     "hh") as EncounterClass,
@@ -142,6 +143,11 @@ const careConfig = {
     ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)
     : 2,
 
+  /**
+   * Disable patient login if set to "true"
+   */
+  disablePatientLogin: boolean("REACT_DISABLE_PATIENT_LOGIN", false),
+
   patientRegistration: {
     /**
      * Minimum number of geo-organization levels the user must select
@@ -156,6 +162,8 @@ const careConfig = {
             1,
           )
         : undefined,
+
+    defaultGeoOrganization: env.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG,
 
     minimalPatientRegistration: boolean(
       "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
