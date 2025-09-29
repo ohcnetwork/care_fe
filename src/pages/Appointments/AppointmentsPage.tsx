@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -55,7 +56,6 @@ import {
   CardListSkeleton,
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
-import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useFilters, { FilterState } from "@/hooks/useFilters";
@@ -95,11 +95,6 @@ import {
   FilterDateRange,
   shortDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -409,7 +404,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
               <ShortcutBadge actionId="print-button" className="bg-white" />
             </Button>
           )}
-          <PatientEncounterOrIdentifierFilter
+          <PatientIdentifierFilter
             onSelect={(patientId) => updateQuery({ patient: patientId })}
             placeholder={t("search_patients")}
             className="w-full sm:w-auto"
@@ -662,6 +657,7 @@ function AppointmentColumn(props: {
                   <AppointmentCard
                     appointment={appointment}
                     showStatus={props.statusGroup.statuses.length > 1}
+                    showPractitioner={props.resourceIds.length > 1}
                   />
                 </Link>
               </li>
@@ -677,9 +673,11 @@ function AppointmentColumn(props: {
 function AppointmentCard({
   appointment,
   showStatus,
+  showPractitioner,
 }: {
   appointment: AppointmentRead;
   showStatus: boolean;
+  showPractitioner: boolean;
 }) {
   const { patient } = appointment;
   const { t } = useTranslation();
@@ -702,39 +700,16 @@ function AppointmentCard({
           </p>
         </div>
 
-        <div className="flex">
-          {appointment.resource_type ===
-            SchedulableResourceType.Practitioner && (
-            <div className="flex items-center justify-center">
-              <Tooltip>
-                <TooltipTrigger className="size-14">
-                  <ScheduleResourceIcon
-                    resource={appointment}
-                    className="size-14 rounded-r-none"
-                  />
-                </TooltipTrigger>
-                <TooltipContent className="flex flex-col gap-0">
-                  <span className="text-sm font-medium">
-                    {formatScheduleResourceName(appointment)}
-                  </span>
-                </TooltipContent>
-              </Tooltip>
+        {appointment.token && (
+          <div className="flex">
+            <div className="bg-gray-100 px-2 py-1 ml-px text-center rounded-md">
+              <p className="text-[10px] uppercase">{t("token")}</p>
+              <p className="font-bold text-2xl uppercase">
+                {appointment.token?.number ?? "--"}
+              </p>
             </div>
-          )}
-          <div
-            className={cn(
-              "bg-gray-100 px-2 py-1 ml-px text-center",
-              appointment.resource_type === SchedulableResourceType.Practitioner
-                ? "rounded-l-none rounded-r-md"
-                : "rounded-md",
-            )}
-          >
-            <p className="text-[10px] uppercase">{t("token")}</p>
-            <p className="font-bold text-2xl uppercase">
-              {appointment.token?.number ?? "--"}
-            </p>
           </div>
-        </div>
+        )}
       </div>
       <div className="flex flex-wrap gap-1">
         {appointment.tags.map((tag) => (
@@ -751,6 +726,18 @@ function AppointmentCard({
           </Badge>
         )}
       </div>
+      {showPractitioner &&
+        appointment.resource_type === SchedulableResourceType.Practitioner && (
+          <div className="flex items-center justify-start gap-1 pr-2 bg-gray-100 w-fit rounded-full mt-1">
+            <ScheduleResourceIcon
+              resource={appointment}
+              className="size-5 rounded-full"
+            />
+            <span className="text-xs font-semibold text-gray-500">
+              {formatScheduleResourceName(appointment)}
+            </span>
+          </div>
+        )}
     </div>
   );
 }

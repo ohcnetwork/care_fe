@@ -68,7 +68,7 @@ function RoleCard({
               ))}
               {role.permissions.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{role.permissions.length - 3} more
+                  +{role.permissions.length - 3} {t("more")}
                 </Badge>
               )}
             </div>
@@ -211,7 +211,7 @@ export default function RolesIndex() {
           </>
         ) : roles.length === 0 ? (
           <EmptyState
-            icon="l-user"
+            icon={<CareIcon icon="l-user" className="text-primary size-6" />}
             title={t("no_roles_found")}
             description={t("adjust_role_filters")}
           />

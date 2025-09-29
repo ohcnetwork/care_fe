@@ -241,7 +241,7 @@ export default function ValueSetSearchContent({
             <div
               className={cn(
                 activeTab === 0 ? "block" : "hidden",
-                "md:block flex-1 overflow-auto h-[300px]",
+                "md:block flex-1 overflow-auto max-h-[30vh] md:max-h-[35vh] ",
               )}
             >
               <CommandGroup>
@@ -307,7 +307,7 @@ export default function ValueSetSearchContent({
                 </div>
                 {favouritesQuery.isFetched &&
                   favouritesQuery.data?.length === 0 && (
-                    <div className="flex items-center flex-col justify-center h-[200px] md:h-[250px] text-xs text-gray-500">
+                    <div className="flex items-center flex-col justify-center max-h-[30vh] md:max-h-[35vh] text-xs text-gray-500">
                       {t("no_starred", {
                         star: "☆",
                       })}
