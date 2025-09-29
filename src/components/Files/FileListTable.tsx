@@ -25,13 +25,11 @@ import {
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
-import { FileUploadModel } from "@/components/Patient/models";
 
 import useFileManager from "@/hooks/useFileManager";
 
-import { FILE_EXTENSIONS } from "@/common/constants";
-
 import { formatName } from "@/Utils/utils";
+import { FILE_EXTENSIONS, FileReadMinimal } from "@/types/files/file";
 
 const icons: Record<keyof typeof FILE_EXTENSIONS | "UNKNOWN", IconName> = {
   AUDIO: "l-volume",
@@ -43,12 +41,11 @@ const icons: Record<keyof typeof FILE_EXTENSIONS | "UNKNOWN", IconName> = {
 };
 
 interface FileListTableProps {
-  files: FileUploadModel[];
+  files: FileReadMinimal[];
   type: "diagnostic_report" | "patient" | "encounter";
   associatingId: string;
   canEdit?: boolean;
   showHeader?: boolean;
-  onRefetch?: () => void;
 }
 
 export function FileListTable({
@@ -57,18 +54,15 @@ export function FileListTable({
   associatingId,
   canEdit = false,
   showHeader = true,
-  onRefetch,
 }: FileListTableProps) {
   const { t } = useTranslation();
   const [selectedArchivedFile, setSelectedArchivedFile] =
-    useState<FileUploadModel | null>(null);
-  useState<FileUploadModel | null>(null);
+    useState<FileReadMinimal | null>(null);
+  useState<FileReadMinimal | null>(null);
   const [openArchivedFileDialog, setOpenArchivedFileDialog] = useState(false);
 
   const fileManager = useFileManager({
     type,
-    onArchive: onRefetch,
-    onEdit: onRefetch,
     uploadedFiles: files
       .slice()
       .reverse()
@@ -78,11 +72,11 @@ export function FileListTable({
       })),
   });
 
-  const getFileType = (file: FileUploadModel) => {
+  const getFileType = (file: FileReadMinimal) => {
     return fileManager.getFileType(file);
   };
 
-  const getArchivedMessage = (file: FileUploadModel) => {
+  const getArchivedMessage = (file: FileReadMinimal) => {
     return (
       <div className="flex flex-row gap-2 justify-end">
         <span className="text-gray-200/90 self-center uppercase font-bold">
@@ -104,7 +98,7 @@ export function FileListTable({
     );
   };
 
-  const DetailButtons = ({ file }: { file: FileUploadModel }) => {
+  const DetailButtons = ({ file }: { file: FileReadMinimal }) => {
     return (
       <>
         <div className="flex flex-row gap-2 justify-end">

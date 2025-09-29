@@ -16,9 +16,9 @@ import UserListAndCardView from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
+import facilityApi from "@/types/facility/facilityApi";
 
 export default function FacilityUsers(props: { facilityId: string }) {
   const { t } = useTranslation();
@@ -34,8 +34,8 @@ export default function FacilityUsers(props: { facilityId: string }) {
 
   const { data: userListData, isFetching: userListFetching } = useQuery({
     queryKey: ["facilityUsers", facilityId, qParams, resultsPerPage],
-    queryFn: query.debounced(routes.facility.getUsers, {
-      pathParams: { facility_id: facilityId },
+    queryFn: query.debounced(facilityApi.getUsers, {
+      pathParams: { facilityId },
       queryParams: {
         username: qParams.username,
         limit: resultsPerPage,

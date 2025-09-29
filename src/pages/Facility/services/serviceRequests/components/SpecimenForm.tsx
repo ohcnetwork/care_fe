@@ -1,7 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Info, QrCode, Scan /* User */ } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -39,6 +38,7 @@ interface SpecimenFormProps {
   facilityId: string;
   draftSpecimen: SpecimenRead | undefined;
   serviceRequestId: string;
+  disableEdit: boolean;
 }
 
 export function SpecimenForm({
@@ -47,10 +47,11 @@ export function SpecimenForm({
   facilityId,
   draftSpecimen,
   serviceRequestId,
+  disableEdit,
 }: SpecimenFormProps) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
-  const currentUserId = authUser.external_id;
+  const currentUserId = authUser.id;
   const queryClient = useQueryClient();
 
   const [identifierMode, setIdentifierMode] = useState<"scan" | "generate">(
@@ -71,7 +72,7 @@ export function SpecimenForm({
       >;
     }
   >({
-    specimen_definition: specimenDefinition.id,
+    specimen_definition: specimenDefinition.slug,
     specimen: {
       status: SpecimenStatus.available,
       specimen_type: specimenDefinition.type_collected,
@@ -305,11 +306,13 @@ export function SpecimenForm({
                     handleSpecimenChange("accession_identifier", e.target.value)
                   }
                   placeholder={t("specimen_scan_placeholder")}
+                  disabled={disableEdit}
                 />
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleScanBarcode}
+                  disabled={disableEdit}
                 >
                   <Scan className="h-4 w-4" />
                 </Button>
@@ -343,6 +346,7 @@ export function SpecimenForm({
                         : null,
                     )
                   }
+                  disabled={disableEdit}
                 />
               </div>
               <div>
@@ -368,6 +372,7 @@ export function SpecimenForm({
                         })
                       }
                       step="any"
+                      disabled={disableEdit}
                     />
                     {errors.quantityValue && (
                       <p className="text-sm text-red-600 mt-1">
@@ -389,6 +394,7 @@ export function SpecimenForm({
                         })
                       }
                       value={specimenData.specimen.collection?.quantity?.unit}
+                      disabled={disableEdit}
                     />
                     {errors.quantityUnit && (
                       <p className="text-sm text-red-600 mt-1">
@@ -409,6 +415,7 @@ export function SpecimenForm({
                   handleCollectionChange("body_site", code)
                 }
                 value={specimenData.specimen.collection?.body_site}
+                disabled={disableEdit}
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
@@ -429,6 +436,7 @@ export function SpecimenForm({
                     specimenData.specimen.collection
                       ?.fasting_status_codeable_concept
                   }
+                  disabled={disableEdit}
                 />
               </div>
 
@@ -456,6 +464,7 @@ export function SpecimenForm({
                       },
                     })
                   }
+                  disabled={disableEdit}
                 />
               </div>
             </div>
@@ -515,6 +524,7 @@ export function SpecimenForm({
                   handleSpecimenChange("note", e.target.value || null)
                 }
                 className="min-h-[80px]"
+                disabled={disableEdit}
               />
             </div>
 
@@ -522,7 +532,9 @@ export function SpecimenForm({
               <Button type="button" variant="outline" onClick={onCancel}>
                 {t("cancel")}
               </Button>
-              <Button type="submit">{t("collect")}</Button>
+              <Button type="submit" disabled={disableEdit}>
+                {t("collect")}
+              </Button>
             </div>
           </div>
         </div>

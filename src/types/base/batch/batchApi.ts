@@ -1,5 +1,5 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
-import { BatchSubmissionResult } from "@/types/questionnaire/batch";
+import { BatchRequestResponse } from "@/types/base/batch/batch";
 
 import { BatchRequestBody } from "./batch";
 
@@ -7,7 +7,7 @@ const batchApi = {
   batchRequest: {
     path: "/api/v1/batch_requests/",
     method: HttpMethod.POST,
-    TRes: Type<{ results: BatchSubmissionResult[] }>(),
+    TRes: Type<BatchRequestResponse>(),
     TBody: Type<BatchRequestBody>(),
   },
 } as const;

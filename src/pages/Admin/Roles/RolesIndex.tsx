@@ -26,23 +26,24 @@ import {
 } from "@/components/ui/table";
 
 import Page from "@/components/Common/Page";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  CardGridSkeleton,
+  TableSkeleton,
+} from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import RoleForm from "@/pages/Admin/Roles/RoleForm";
-import permissionApi from "@/types/emr/permission/permissionApi";
-import { Role } from "@/types/emr/role/role";
+import { RoleRead } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
 
 function RoleCard({
   role,
   onEdit,
 }: {
-  role: Role;
-  onEdit: (role: Role) => void;
+  role: RoleRead;
+  onEdit: (role: RoleRead) => void;
 }) {
   const { t } = useTranslation();
   return (
@@ -66,7 +67,7 @@ function RoleCard({
               ))}
               {role.permissions.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{role.permissions.length - 3} more
+                  +{role.permissions.length - 3} {t("more")}
                 </Badge>
               )}
             </div>
@@ -88,7 +89,7 @@ export default function RolesIndex() {
     disableCache: true,
   });
 
-  const [selectedRole, setSelectedRole] = React.useState<Role | null>(null);
+  const [selectedRole, setSelectedRole] = React.useState<RoleRead | null>(null);
 
   const { data: rolesResponse, isLoading: rolesLoading } = useQuery({
     queryKey: ["roles", qParams],
@@ -102,20 +103,9 @@ export default function RolesIndex() {
     }),
   });
 
-  const { data: permissionsResponse, isLoading: _permissionsLoading } =
-    useQuery({
-      queryKey: ["permissions"],
-      queryFn: query(permissionApi.listPermissions, {
-        queryParams: {
-          limit: 1000, // Get all permissions for the form
-        },
-      }),
-    });
-
   const roles = rolesResponse?.results || [];
-  const permissions = permissionsResponse?.results || [];
 
-  const handleEdit = (role: Role) => {
+  const handleEdit = (role: RoleRead) => {
     setSelectedRole(role);
   };
 
@@ -149,6 +139,7 @@ export default function RolesIndex() {
                     name: "",
                     description: "",
                     permissions: [],
+                    is_system: false,
                   });
                 }
               }}
@@ -167,12 +158,8 @@ export default function RolesIndex() {
                       : t("add_role")}
                   </SheetTitle>
                 </SheetHeader>
-                <div className="mt-6 pb-6">
-                  <RoleForm
-                    role={selectedRole}
-                    permissions={permissions}
-                    onSuccess={handleSheetClose}
-                  />
+                <div className="mt-6 overflow-auto pr-2">
+                  <RoleForm role={selectedRole} onSuccess={handleSheetClose} />
                 </div>
               </SheetContent>
             </Sheet>
@@ -208,7 +195,7 @@ export default function RolesIndex() {
           </>
         ) : roles.length === 0 ? (
           <EmptyState
-            icon="l-user"
+            icon={<CareIcon icon="l-user" className="text-primary size-6" />}
             title={t("no_roles_found")}
             description={t("adjust_role_filters")}
           />
@@ -216,7 +203,7 @@ export default function RolesIndex() {
           <>
             {/* Mobile Card View */}
             <div className="grid gap-4 md:hidden">
-              {roles.map((role: Role) => (
+              {roles.map((role: RoleRead) => (
                 <RoleCard key={role.id} role={role} onEdit={handleEdit} />
               ))}
             </div>
@@ -233,7 +220,7 @@ export default function RolesIndex() {
                     </TableRow>
                   </TableHeader>
                   <TableBody className="bg-white">
-                    {roles.map((role: Role) => (
+                    {roles.map((role: RoleRead) => (
                       <TableRow key={role.id} className="divide-x">
                         <TableCell className="font-medium">
                           {role.name}

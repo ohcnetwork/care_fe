@@ -93,30 +93,9 @@ export const dateTimeQueryString = (date: DateLike, isEndDate = false) => {
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/**
- * Referred from: https://stackoverflow.com/a/9039885/7887936
- * @returns `true` if device is iOS, else `false`
- */
-function _isAppleDevice() {
-  if (navigator.platform.includes("Mac")) return true;
-  return (
-    [
-      "iPad Simulator",
-      "iPhone Simulator",
-      "iPod Simulator",
-      "iPad",
-      "iPhone",
-      "iPod",
-    ].includes(navigator.platform) ||
-    // iPad on iOS 13 detection
-    (navigator.userAgent.includes("Mac") && "ontouchend" in document)
-  );
-}
-
-/**
- * `true` if device is an Apple device, else `false`
- */
-export const isAppleDevice = _isAppleDevice();
+export const isAppleDevice =
+  /iPhone|iPad|iPod|Mac/i.test(navigator.userAgent) ||
+  (navigator.userAgent.includes("Mac") && "ontouchend" in document);
 
 function hasTouch() {
   try {
@@ -143,6 +122,14 @@ export const getMapUrl = (latitude: string, longitude: string) => {
     : careConfig.mapFallbackUrlTemplate
         .replace("{lat}", latitude)
         .replace("{long}", longitude);
+};
+
+export const isValidLatitude = (latitude: number) => {
+  return Number.isFinite(latitude) && latitude >= -90 && latitude <= 90;
+};
+
+export const isValidLongitude = (longitude: number) => {
+  return Number.isFinite(longitude) && longitude >= -180 && longitude <= 180;
 };
 
 const getRelativeDateSuffix = (abbreviated: boolean) => {
@@ -210,6 +197,20 @@ export const humanizeStrings = (strings: readonly string[], empty = "") => {
  */
 export const keysOf = <T extends object>(obj: T) => {
   return Object.keys(obj) as (keyof T)[];
+};
+
+/**
+ * Although same as `Objects.entries(...)`, this provides better type-safety.
+ */
+export const entriesOf = <T extends object>(obj: T) => {
+  return Object.entries(obj) as [keyof T, T[keyof T]][];
+};
+
+/**
+ * Although same as `Objects.values(...)`, this provides better type-safety.
+ */
+export const valuesOf = <T extends object>(obj: T) => {
+  return Object.values(obj) as T[keyof T][];
 };
 
 export const properCase = (str: string) => {

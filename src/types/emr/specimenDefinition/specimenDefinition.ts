@@ -1,5 +1,6 @@
 import { Code } from "@/types/base/code/code";
-import { UserBase } from "@/types/user/user";
+import { SlugConfig } from "@/types/base/slug/slugConfig";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum SpecimenDefinitionStatus {
   draft = "draft",
@@ -93,16 +94,18 @@ export interface SpecimenDefinition {
   type_collected: Code;
   patient_preparation?: Code[];
   collection?: Code;
+  slug_config: SlugConfig;
 }
 
 export interface SpecimenDefinitionCreate
-  extends Omit<SpecimenDefinition, "id" | "facility"> {
+  extends Omit<SpecimenDefinition, "id" | "facility" | "slug_config" | "slug"> {
+  slug_value: string;
   type_tested?: TypeTestedSpec;
 }
 
 export interface SpecimenDefinitionRead extends SpecimenDefinition {
-  created_by: UserBase;
-  updated_by: UserBase;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
   created_at: string;
   updated_at: string;
   type_tested?: TypeTestedSpec;

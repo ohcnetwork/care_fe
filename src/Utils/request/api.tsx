@@ -1,30 +1,19 @@
-import {
-  CommentModel,
-  FacilityModel,
-  FacilityRequest,
-} from "@/components/Facility/models";
-import { FileUploadModel } from "@/components/Patient/models";
-import { AuthUserModel, UpdatePasswordForm } from "@/components/Users/models";
-
 import { PaginatedResponse } from "@/Utils/request/types";
 import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
-import { MFAAuthenticationToken } from "@/types/auth/otp";
-import { BatchRequestBody } from "@/types/base/batch/batch";
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
 import { PatientRead } from "@/types/emr/patient/patient";
-import {
-  BaseFacility,
-  CreateFacility,
-  FacilityData,
-} from "@/types/facility/facility";
 import { PlugConfig } from "@/types/plugConfig";
-import { BatchSubmissionResult } from "@/types/questionnaire/batch";
 import {
+  CommentModel,
   CreateResourceRequest,
   ResourceRequest,
   UpdateResourceRequest,
 } from "@/types/resourceRequest/resourceRequest";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -32,18 +21,6 @@ import { UserBase } from "@/types/user/user";
  */
 export function Type<T>(): T {
   return {} as T;
-}
-
-export interface JwtTokenObtainPair {
-  access: string;
-  refresh: string;
-}
-
-export type LoginResponse = JwtTokenObtainPair | MFAAuthenticationToken;
-
-export interface LoginCredentials {
-  username: string;
-  password: string;
 }
 
 export enum HttpMethod {
@@ -70,143 +47,14 @@ export const API = <TResponse, TBody = undefined>(
  * @deprecated use object specific api instead
  */
 const routes = {
-  // Auth Endpoints
-  login: {
-    path: "/api/v1/auth/login/",
-    method: "POST",
-    noAuth: true,
-    TRes: Type<LoginResponse>(),
-    TBody: Type<LoginCredentials>(),
-  },
-
-  logout: {
-    path: "/api/v1/auth/logout/",
-    method: "POST",
-    TBody: Type<JwtTokenObtainPair>(),
-  },
-
-  token_refresh: {
-    path: "/api/v1/auth/token/refresh/",
-    method: "POST",
-    TRes: Type<JwtTokenObtainPair>(),
-    TBody: Type<{ refresh: JwtTokenObtainPair["refresh"] }>(),
-  },
-
-  checkResetToken: {
-    path: "/api/v1/password_reset/check/",
-    method: "POST",
-    noAuth: true,
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<{
-      token: string;
-    }>(),
-  },
-
-  resetPassword: {
-    path: "/api/v1/password_reset/confirm/",
-    method: "POST",
-    noAuth: true,
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<{
-      password: string;
-      confirm: string;
-    }>(),
-  },
-
-  forgotPassword: {
-    path: "/api/v1/password_reset/",
-    method: "POST",
-    noAuth: true,
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<{
-      username: string;
-    }>(),
-  },
-
-  updatePassword: {
-    path: "/api/v1/password_change/",
-    method: "PUT",
-    TRes: Type<{ message: string }>(),
-    TBody: Type<UpdatePasswordForm>(),
-  },
-  // User Endpoints
-  currentUser: {
-    path: "/api/v1/users/getcurrentuser/",
-    TRes: Type<AuthUserModel>(),
-  },
-
-  deleteProfilePicture: {
-    path: "/api/v1/users/{username}/profile_picture/",
-    method: "DELETE",
-    TRes: Type<AuthUserModel>(),
-    TBody: Type<void>(),
-  },
-
-  getPermittedFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: "GET",
-    TRes: Type<FacilityData>(),
-  },
-
-  getAnyFacility: {
-    path: "/api/v1/getallfacilities/{id}/",
-    method: "GET",
-    TRes: Type<FacilityModel>(),
-  },
-
-  updateFacility: {
-    path: "/api/v1/facility/{id}/",
-    method: "PUT",
-    TRes: Type<FacilityModel>(),
-    TBody: Type<FacilityRequest>(),
-  },
-
-  deleteFacilityCoverImage: {
-    path: "/api/v1/facility/{id}/cover_image/",
-    method: "DELETE",
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<void>(),
-  },
-
   getScheduleAbleFacilityUser: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
-    TRes: Type<UserBase>(),
+    TRes: Type<UserReadMinimal>(),
   },
 
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
-    TRes: Type<PaginatedResponse<UserBase>>(),
-  },
-
-  //Profile
-
-  getUserDetails: {
-    path: "/api/v1/users/{username}/",
-    method: "GET",
-    TRes: Type<UserBase>(),
-  },
-
-  viewUpload: {
-    path: "/api/v1/files/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<FileUploadModel>>(),
-  },
-  retrieveUpload: {
-    path: "/api/v1/files/{id}/",
-    method: "GET",
-    TRes: Type<FileUploadModel>(),
-  },
-  editUpload: {
-    path: "/api/v1/files/{id}/",
-    method: "PUT",
-    TBody: Type<Partial<FileUploadModel>>(),
-    TRes: Type<FileUploadModel>(),
-  },
-  archiveUpload: {
-    path: "/api/v1/files/{id}/archive/",
-    method: "POST",
-    TRes: Type<FileUploadModel>(),
-    TBody: Type<{ archive_reason: string }>(),
+    TRes: Type<PaginatedResponse<UserReadMinimal>>(),
   },
 
   // Request
@@ -244,30 +92,6 @@ const routes = {
     TBody: Type<Partial<CommentModel>>(),
   },
 
-  facility: {
-    getUsers: {
-      path: "/api/v1/facility/{facility_id}/users/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<UserBase>>(),
-    },
-    list: {
-      path: "/api/v1/facility/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<BaseFacility>>(),
-    },
-    create: {
-      path: "/api/v1/facility/",
-      method: "POST",
-      TRes: Type<BaseFacility>(),
-      TBody: Type<CreateFacility>(),
-    },
-    show: {
-      path: "/api/v1/facility/{id}/",
-      method: "GET",
-      TRes: Type<FacilityData>(),
-    },
-  },
-
   valueset: {
     expand: {
       path: "/api/v1/valueset/{system}/expand/",
@@ -281,7 +105,7 @@ const routes = {
     path: "/api/v1/batch_requests/",
     method: "POST",
     TRes: Type<{
-      results: BatchSubmissionResult[];
+      results: BatchRequestResponse[];
     }>(),
     TBody: Type<BatchRequestBody>(),
   },

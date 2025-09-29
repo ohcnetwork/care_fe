@@ -7,42 +7,40 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 
+import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 import { SpecimenDefinitionForm } from "./SpecimenDefinitionForm";
 
 interface UpdateSpecimenDefinitionProps {
   facilityId: string;
-  specimenDefinitionId: string;
+  specimenSlug: string;
 }
 
 export function UpdateSpecimenDefinition({
   facilityId,
-  specimenDefinitionId,
+  specimenSlug,
 }: UpdateSpecimenDefinitionProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { data: specimenDefinition, isFetching } = useQuery({
-    queryKey: ["specimen_definitions", facilityId, specimenDefinitionId],
+    queryKey: ["specimenDefinitions", facilityId, specimenSlug],
     queryFn: query(specimenDefinitionApi.retrieveSpecimenDefinition, {
-      pathParams: { facilityId, specimenDefinitionId },
+      pathParams: { facilityId, specimenSlug },
     }),
   });
 
   const { mutate: updateSpecimenDefinition, isPending: isUpdating } =
     useMutation({
       mutationFn: mutate(specimenDefinitionApi.updateSpecimenDefinition, {
-        pathParams: { facilityId, specimenDefinitionId },
+        pathParams: { facilityId, specimenSlug },
       }),
-      onSuccess: () => {
+      onSuccess: (specimenDefinition: SpecimenDefinitionRead) => {
         toast.success(t("specimen_definition_updated"));
         queryClient.invalidateQueries({
-          queryKey: ["specimen_definitions", facilityId],
+          queryKey: ["specimenDefinitions", facilityId],
         });
-        queryClient.invalidateQueries({
-          queryKey: ["specimen_definitions", facilityId, specimenDefinitionId],
-        });
-        navigate(`/specimen_definitions/${specimenDefinitionId}`);
+        navigate(`/specimen_definitions/${specimenDefinition.slug}`);
       },
     });
 

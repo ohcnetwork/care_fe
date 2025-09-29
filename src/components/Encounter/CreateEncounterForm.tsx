@@ -11,10 +11,8 @@ import * as z from "zod";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -24,11 +22,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -47,44 +40,47 @@ import {
 
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import mutate from "@/Utils/request/mutate";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
-  ENCOUNTER_CLASS,
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
-  EncounterClass,
   EncounterCreate,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
 
 interface Props {
   patientId: string;
   facilityId: string;
   patientName: string;
-  encounterClass?: EncounterClass;
+  appointment?: string;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
+  disableRedirectOnSuccess?: boolean;
 }
 
 export default function CreateEncounterForm({
   patientId,
   facilityId,
   patientName,
-  encounterClass,
+  appointment,
   trigger,
   onSuccess,
+  disableRedirectOnSuccess = false,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  useShortcutSubContext();
 
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
-    encounter_class: z.enum(ENCOUNTER_CLASS),
+    encounter_class: z.enum(careConfig.encounterClasses),
     priority: z.enum(ENCOUNTER_PRIORITY),
     organizations: z.array(z.string()).min(1, {
       message: t("at_least_one_department_is_required"),
@@ -97,7 +93,7 @@ export default function CreateEncounterForm({
     resolver: zodResolver(encounterFormSchema),
     defaultValues: {
       status: "planned",
-      encounter_class: encounterClass || careConfig.defaultEncounterType,
+      encounter_class: careConfig.defaultEncounterType,
       priority: "routine",
       organizations: [],
       start_date: new Date().toISOString(),
@@ -119,9 +115,11 @@ export default function CreateEncounterForm({
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.();
-      navigate(
-        `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
-      );
+      if (!disableRedirectOnSuccess) {
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
+        );
+      }
     },
   });
 
@@ -134,6 +132,7 @@ export default function CreateEncounterForm({
         start: data.start_date,
       },
       tags: data.tags,
+      appointment: appointment,
     };
 
     createEncounter(encounterRequest);
@@ -179,41 +178,21 @@ export default function CreateEncounterForm({
                   return (
                     <FormItem>
                       <FormLabel>{t("date_and_time")}</FormLabel>
-                      <div className="flex sm:gap-2 flex-wrap">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "flex-1 justify-start text-left font-normal h-8",
-                                !field.value && "text-gray-500",
-                              )}
-                            >
-                              <CareIcon
-                                icon="l-calender"
-                                className="mr-2 size-4"
-                              />
-                              {date.toLocaleDateString()}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={date}
-                              onSelect={(newDate) => {
-                                if (!newDate) return;
-                                const updatedDate = new Date(newDate);
-                                updatedDate.setHours(date.getHours());
-                                updatedDate.setMinutes(date.getMinutes());
-                                field.onChange(updatedDate.toISOString());
-                              }}
-                              autoFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
+                      <div className="flex gap-2">
+                        <DatePicker
+                          date={date}
+                          onChange={(newDate) => {
+                            if (!newDate) return;
+                            const updatedDate = new Date(newDate);
+                            updatedDate.setHours(date.getHours());
+                            updatedDate.setMinutes(date.getMinutes());
+                            field.onChange(updatedDate.toISOString());
+                          }}
+                          className="h-9"
+                        />
                         <Input
                           type="time"
-                          className="sm:w-[150px] border-t-0 sm:border-t text-sm py-px border-gray-400 shadow-sm h-8"
+                          className="border-gray-400 text-sm sm:py-px shadow-sm"
                           value={date.toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -243,7 +222,7 @@ export default function CreateEncounterForm({
                   <FormItem>
                     <FormLabel>{t("type_of_encounter")}</FormLabel>
                     <div className="grid grid-cols-2 gap-3">
-                      {ENCOUNTER_CLASS.map((value) => {
+                      {careConfig.encounterClasses.map((value) => {
                         const Icon = ENCOUNTER_CLASS_ICONS[value];
                         return (
                           <Button
@@ -251,7 +230,7 @@ export default function CreateEncounterForm({
                             type="button"
                             data-cy={`encounter-type-${value}`}
                             className={cn(
-                              "h-auto min-h-24 w-full justify-start text-lg",
+                              "h-auto min-h-24 w-full justify-center text-lg",
                               field.value === value &&
                                 "ring-2 ring-primary text-primary",
                             )}
@@ -341,7 +320,7 @@ export default function CreateEncounterForm({
                 name="tags"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("tags")}</FormLabel>
+                    <FormLabel>{t("tags", { count: 2 })}</FormLabel>
                     <FormControl className="mt-0">
                       <TagSelectorPopover
                         selected={selectedTags}
@@ -386,6 +365,7 @@ export default function CreateEncounterForm({
                 className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
               >
                 {t("cancel")}
+                <ShortcutBadge actionId="cancel-action" />
               </Button>
               <Button
                 data-cy="create-encounter-button"
@@ -393,6 +373,7 @@ export default function CreateEncounterForm({
                 disabled={isPending || !form.watch("organizations").length}
               >
                 {isPending ? t("creating") : t("create_encounter")}
+                <ShortcutBadge actionId="submit-action" className="bg-white" />
               </Button>
             </div>
           </form>

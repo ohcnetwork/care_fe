@@ -22,7 +22,7 @@ export class PatientDetails {
   }
 
   selectUserRole(role: string) {
-    cy.clickAndSelectOption('[data-cy="patient-user-role-select"]', role);
+    cy.typeAndSelectOption('button:contains("Select Role")', role, false);
     return this;
   }
 
@@ -46,10 +46,7 @@ export class PatientDetails {
   }
 
   confirmUserRemoval() {
-    cy.verifyAndClickElement(
-      '[data-cy="patient-user-remove-confirm-button"]',
-      "Remove",
-    );
+    cy.clickConfirmAction("Remove");
     return this;
   }
 

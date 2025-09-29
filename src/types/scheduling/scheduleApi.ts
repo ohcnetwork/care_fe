@@ -10,15 +10,18 @@ import {
   AvailabilityHeatmapRequest,
   AvailabilityHeatmapResponse,
   GetSlotsForDayResponse,
+  SchedulableResourceType,
   ScheduleAvailability,
   ScheduleAvailabilityCreateRequest,
   ScheduleException,
   ScheduleExceptionCreateRequest,
   ScheduleTemplate,
   ScheduleTemplateCreateRequest,
+  ScheduleTemplateSetChargeItemDefinitionRequest,
   ScheduleTemplateUpdateRequest,
 } from "@/types/scheduling/schedule";
-import { UserBase } from "@/types/user/user";
+import { TokenGenerate, TokenRetrieve } from "@/types/tokens/token/token";
+import { UserReadMinimal } from "@/types/user/user";
 
 export default {
   /**
@@ -52,6 +55,12 @@ export default {
       method: HttpMethod.DELETE,
       TBody: Type<void>(),
       TRes: Type<void>(),
+    },
+    setChargeItemDefinition: {
+      path: "/api/v1/facility/{facilityId}/schedule/{id}/set_charge_item_definition/",
+      method: HttpMethod.POST,
+      TRes: Type<ScheduleTemplate>(),
+      TBody: Type<ScheduleTemplateSetChargeItemDefinitionRequest>(),
     },
 
     /**
@@ -104,7 +113,11 @@ export default {
       path: "/api/v1/facility/{facilityId}/slots/get_slots_for_day/",
       method: HttpMethod.POST,
       TRes: Type<GetSlotsForDayResponse>(),
-      TBody: Type<{ user: string; day: string }>(),
+      TBody: Type<{
+        resource_type: SchedulableResourceType;
+        resource_id: string;
+        day: string;
+      }>(),
     },
     availabilityStats: {
       path: "/api/v1/facility/{facilityId}/slots/availability_stats/",
@@ -152,17 +165,24 @@ export default {
       TBody: Type<AppointmentRescheduleRequest>(),
       TRes: Type<Appointment>(),
     },
+    generateToken: {
+      path: "/api/v1/facility/{facilityId}/appointments/{id}/generate_token/",
+      method: HttpMethod.POST,
+      TRes: Type<Appointment>(),
+      TBody: Type<TokenGenerate>(),
+    },
     /**
      * Lists schedulable users for a facility
      */
     availableUsers: {
       path: "/api/v1/facility/{facilityId}/appointments/available_users/",
       method: HttpMethod.GET,
-      TRes: Type<{ users: UserBase[] }>(),
+      TRes: Type<{ users: UserReadMinimal[] }>(),
     },
     getPublicScheduleableFacilityUser: {
       path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
-      TRes: Type<UserBase>(),
+      method: HttpMethod.GET,
+      TRes: Type<UserReadMinimal>(),
     },
     /**
      * Get appointments across facilities
@@ -171,6 +191,15 @@ export default {
       path: "/api/v1/patient/{patientId}/get_appointments/",
       method: HttpMethod.GET,
       TRes: Type<PaginatedResponse<Appointment>>(),
+    },
+
+    /**
+     * Get tokens for a patient
+     */
+    get_tokens: {
+      path: "/api/v1/patient/{patientId}/get_tokens/",
+      method: HttpMethod.GET,
+      TRes: Type<PaginatedResponse<TokenRetrieve>>(),
     },
 
     // Tag-related endpoints

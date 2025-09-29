@@ -4,16 +4,6 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +22,7 @@ import {
 } from "@/components/ui/sheet";
 
 import { Avatar } from "@/components/Common/Avatar";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import UserSelector from "@/components/Common/UserSelector";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
@@ -41,12 +32,14 @@ import FacilityOrganizationSelector from "@/pages/Facility/settings/organization
 import { Code } from "@/types/base/code/code";
 import careTeamApi from "@/types/careTeam/careTeamApi";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { UserBase } from "@/types/user/user";
+import { UserReadMinimal } from "@/types/user/user";
 
 type CareTeamSheetProps = {
   trigger: React.ReactNode;
   encounter: EncounterRead;
   canWrite: boolean;
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
 };
 
 export function EmptyState() {
@@ -67,14 +60,30 @@ export function CareTeamSheet({
   trigger,
   encounter,
   canWrite,
+  ...props
 }: CareTeamSheetProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
+  const [open, _setOpen] = useState(false);
   const queryClient = useQueryClient();
-  const [selectedUser, setSelectedUser] = useState<UserBase | undefined>();
+  const [selectedUser, setSelectedUser] = useState<
+    UserReadMinimal | undefined
+  >();
   const [selectedOrganization, setSelectedOrganization] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<Code | null>(null);
-  const [memberToRemove, setMemberToRemove] = useState<UserBase | undefined>();
+  const [memberToRemove, setMemberToRemove] = useState<
+    UserReadMinimal | undefined
+  >();
+
+  useEffect(() => {
+    if (props.open != null) {
+      _setOpen(props.open);
+    }
+  }, [props.open]);
+
+  const setOpen = (open: boolean) => {
+    _setOpen(open);
+    props.setOpen?.(open);
+  };
 
   // Reset state when sheet is closed
   useEffect(() => {
@@ -138,7 +147,7 @@ export function CareTeamSheet({
     setSelectedUser(undefined);
   };
 
-  const confirmRemoveMember = (member: UserBase) => {
+  const confirmRemoveMember = (member: UserReadMinimal) => {
     setMemberToRemove(member);
   };
 
@@ -356,29 +365,17 @@ export function CareTeamSheet({
           </div>
         </ScrollArea>
 
-        <AlertDialog
+        <ConfirmActionDialog
           open={!!memberToRemove}
           onOpenChange={(open) => !open && setMemberToRemove(undefined)}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                {t("confirm_removing_member")}
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                {t("confirm_removing_member_description", {
-                  member: memberToRemove ? formatName(memberToRemove) : "",
-                })}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-              <AlertDialogAction onClick={handleRemoveMember}>
-                {t("remove")}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          title={t("confirm_removing_member")}
+          description={t("confirm_removing_member_description", {
+            member: memberToRemove ? formatName(memberToRemove) : "",
+          })}
+          onConfirm={handleRemoveMember}
+          confirmText={t("remove")}
+          variant="destructive"
+        />
       </SheetContent>
     </Sheet>
   );

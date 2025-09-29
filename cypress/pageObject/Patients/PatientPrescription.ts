@@ -8,7 +8,7 @@ interface MedicationDetails {
 
 export class PatientPrescription {
   clickMedicinesTab() {
-    cy.verifyAndClickElement('[data-cy="tab-medicines"]', "Medicines");
+    cy.get("[role='tablist']").contains("Medicines").click();
     return this;
   }
   clickEditPrescription() {
@@ -97,10 +97,7 @@ export class PatientPrescription {
       .then(($button) => {
         if (!$button.is(":disabled")) {
           cy.wrap($button).click();
-          cy.verifyAndClickElement(
-            '[data-cy="confirm-remove-medication"]',
-            "Remove",
-          );
+          cy.clickConfirmAction("Remove");
         }
       });
     return this;

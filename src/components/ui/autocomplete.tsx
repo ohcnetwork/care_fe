@@ -14,15 +14,22 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { isAppleDevice } from "@/Utils/utils";
 
 interface AutoCompleteOption {
   label: string;
@@ -50,6 +57,8 @@ interface AutocompleteProps {
   ref?: React.RefCallback<HTMLButtonElement | null>;
 
   "aria-invalid"?: boolean;
+  shortcutId?: string;
+  shortcutDisplay?: string;
 }
 
 export default function Autocomplete({
@@ -70,6 +79,8 @@ export default function Autocomplete({
   showClearButton = true,
   "data-cy": dataCy,
   ref,
+  shortcutId,
+  shortcutDisplay,
   ...props
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
@@ -140,8 +151,8 @@ export default function Autocomplete({
         placeholder={inputPlaceholder}
         disabled={disabled}
         onValueChange={handleInputChange}
-        className="outline-hidden border-none ring-0 shadow-none"
-        autoFocus
+        className="outline-hidden border-none ring-0 shadow-none text-base"
+        autoFocus={!isAppleDevice}
       />
       <CommandList className="overflow-y-auto">
         {isLoading ? (
@@ -187,107 +198,128 @@ export default function Autocomplete({
 
   if (isMobile) {
     return (
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button
-            aria-invalid={props["aria-invalid"]}
-            title={
-              value
-                ? freeInput
-                  ? inputValue || value
-                  : selectedOption?.label
-                : undefined
-            }
-            variant="outline"
-            ref={ref}
-            role="combobox"
-            aria-expanded={open}
-            className={cn("w-full justify-between", className)}
-            disabled={disabled}
-            data-cy={dataCy}
-            type="button"
+      <div className="relative w-full">
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerTrigger asChild>
+            <Button
+              aria-invalid={props["aria-invalid"]}
+              title={
+                value
+                  ? freeInput
+                    ? inputValue || value
+                    : selectedOption?.label
+                  : undefined
+              }
+              variant="outline"
+              ref={ref}
+              role="combobox"
+              aria-expanded={open}
+              className={cn("w-full justify-between", className)}
+              disabled={disabled}
+              data-cy={dataCy}
+              type="button"
+            >
+              <span className="overflow-hidden">
+                {value
+                  ? freeInput
+                    ? inputValue || value
+                    : selectedOption?.label
+                  : placeholder}
+              </span>
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent
+            aria-describedby={undefined}
+            className="min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg"
           >
-            <span className="overflow-hidden">
-              {value
-                ? freeInput
-                  ? inputValue || value
-                  : selectedOption?.label
-                : placeholder}
-            </span>
-            {selectedOption && showClearButton ? (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-3 p-0 hover:bg-transparent opacity-50"
-                onClick={handleClear}
-                title={t("clear")}
-              >
-                <Cross2Icon className="size-3" />
-                <span className="sr-only">{t("clear")}</span>
-              </Button>
-            ) : (
-              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-            )}
+            <DrawerTitle className="sr-only">
+              {t("autocomplete_options")}
+            </DrawerTitle>
+
+            <div className="mt-6 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
+              <Command>{commandContent}</Command>
+            </div>
+          </DrawerContent>
+        </Drawer>
+        {selectedOption && showClearButton ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-1 top-1/2 -translate-y-1/2 p-0 hover:bg-transparent opacity-50 z-10"
+            onClick={handleClear}
+            title={t("clear")}
+          >
+            <Cross2Icon className="size-3" />
+            <span className="sr-only">{t("clear")}</span>
           </Button>
-        </SheetTrigger>
-        <SheetContent
-          side="bottom"
-          className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
-        >
-          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
-          <div className="mt-6 h-full">
-            <Command>{commandContent}</Command>
-          </div>
-        </SheetContent>
-      </Sheet>
+        ) : (
+          <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
+        )}
+      </div>
     );
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen} modal={true}>
-      <PopoverTrigger asChild className={popoverClassName}>
-        <Button
-          title={selectedOption ? selectedOption.label : undefined}
-          variant="outline"
-          role="combobox"
-          aria-invalid={props["aria-invalid"]}
-          aria-expanded={open}
-          className={cn("w-full justify-between", className)}
-          disabled={disabled}
-          data-cy={dataCy}
-          onClick={() => setOpen(!open)}
-          ref={ref}
-        >
-          <span
-            className={cn(
-              inputValue && "truncate",
-              !selectedOption && "text-gray-500",
-            )}
+    <div className="relative w-full">
+      <Popover open={open} onOpenChange={setOpen} modal={true}>
+        <PopoverTrigger asChild className={popoverClassName}>
+          <Button
+            title={selectedOption ? selectedOption.label : undefined}
+            variant="outline"
+            role="combobox"
+            aria-invalid={props["aria-invalid"]}
+            aria-expanded={open}
+            className={cn("w-full justify-between", className)}
+            disabled={disabled}
+            data-cy={dataCy}
+            onClick={() => setOpen(!open)}
+            ref={ref}
+            data-shortcut-id={shortcutId}
           >
-            {displayText}
-          </span>
-          {selectedOption && showClearButton ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-3 p-0 hover:bg-transparent opacity-50"
-              onClick={handleClear}
-              title={t("clear")}
+            <span
+              className={cn(
+                inputValue && "truncate",
+                !selectedOption && "text-gray-500",
+              )}
             >
-              <Cross2Icon className="size-3" />
-              <span className="sr-only">{t("clear")}</span>
-            </Button>
-          ) : (
-            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-          )}
+              {displayText}
+            </span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]"
+          align={align}
+        >
+          <Command>{commandContent}</Command>
+        </PopoverContent>
+      </Popover>
+      {selectedOption && showClearButton ? (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-1 top-1/2 -translate-y-1/2 p-0 hover:bg-transparent opacity-50 z-10"
+          onClick={handleClear}
+          title={t("clear")}
+        >
+          <Cross2Icon className="size-3" />
+          <span className="sr-only">{t("clear")}</span>
         </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]"
-        align={align}
-      >
-        <Command>{commandContent}</Command>
-      </PopoverContent>
-    </Popover>
+      ) : (
+        <>
+          {shortcutDisplay ? (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 ">
+              <div className="flex items-center justify-center gap-1">
+                <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
+                  <ShortcutBadge actionId={shortcutId ?? ""} />
+                </div>
+                <CaretSortIcon className="size-3 shrink-0 opacity-50" />
+              </div>
+            </div>
+          ) : (
+            <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
+          )}
+        </>
+      )}
+    </div>
   );
 }

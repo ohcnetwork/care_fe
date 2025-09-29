@@ -1,6 +1,5 @@
-import { FileUploadModel } from "@/components/Patient/models";
-
-import { UserBase } from "@/types/user/user";
+import { FileRead } from "@/types/files/file";
+import { UserReadMinimal } from "@/types/user/user";
 
 export const CONSENT_CATEGORIES = [
   "research",
@@ -38,7 +37,7 @@ export interface ConsentPeriod {
 
 export interface ConsentVerification {
   verified: boolean;
-  verified_by: UserBase;
+  verified_by: UserReadMinimal;
   verification_date: string;
   verification_type: VerificationType;
 }
@@ -52,7 +51,7 @@ export interface ConsentModel {
   period: ConsentPeriod;
   encounter: string;
   decision: ConsentDecision;
-  source_attachments: FileUploadModel[];
+  source_attachments: FileRead[];
   verification_details: ConsentVerification[];
   note?: string;
 }

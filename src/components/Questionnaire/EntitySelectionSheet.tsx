@@ -17,6 +17,8 @@
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -87,6 +89,11 @@ interface EntitySelectionSheetProps {
    * This is called when the user clicks the "Add" button
    */
   onConfirm: () => void;
+  /**
+   * If `true`, renders the `MedicationValueSetSelect`.
+   * Defaults to `false`.
+   */
+  enableProduct?: boolean;
 }
 
 export function EntitySelectionSheet({
@@ -101,6 +108,7 @@ export function EntitySelectionSheet({
   onConfirm,
   children,
   placeholder,
+  enableProduct = false,
 }: EntitySelectionSheetProps) {
   const { t } = useTranslation();
   const [selectedEntity, setSelectedEntity] = useState<Code | null>(null);
@@ -133,14 +141,24 @@ export function EntitySelectionSheet({
 
   return (
     <>
-      {system === "system-medication" ? (
+      {enableProduct ? (
         <MedicationValueSetSelect
           onSelect={handleSelect}
           onProductSelect={handleProductSelect}
           disabled={disabled}
           placeholder={placeholder || t(`select_${entityType}`)}
           title={t(`select_${entityType}`)}
-          value={selectedEntity || undefined}
+          mobileTrigger={
+            <Button
+              variant="outline"
+              role="combobox"
+              className="w-full border border-primary rounded-md px-2 text-primary-700"
+              disabled={disabled}
+            >
+              <CareIcon icon="l-plus" className="mr-2" />
+              <span className="font-semibold">{placeholder}</span>
+            </Button>
+          }
         />
       ) : (
         <ValueSetSelect
@@ -150,6 +168,17 @@ export function EntitySelectionSheet({
           disabled={disabled}
           searchPostFix={searchPostFix}
           title={t(`select_${entityType}`)}
+          mobileTrigger={
+            <Button
+              variant="outline"
+              role="combobox"
+              className="w-full border border-primary rounded-md px-2 text-primary-700"
+              disabled={disabled}
+            >
+              <CareIcon icon="l-plus" className="mr-2" />
+              <span className="font-semibold">{placeholder}</span>
+            </Button>
+          }
         />
       )}
       <Sheet open={open} onOpenChange={onOpenChange}>
@@ -182,7 +211,7 @@ export function EntitySelectionSheet({
               </SheetHeader>
               <div className="flex-1 overflow-y-auto pb-safe">{children}</div>
             </div>
-          ) : system === "system-medication" ? (
+          ) : enableProduct ? (
             <MedicationValueSetSelect
               onSelect={handleSelect}
               onProductSelect={handleProductSelect}

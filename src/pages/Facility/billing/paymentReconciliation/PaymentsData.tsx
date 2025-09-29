@@ -9,6 +9,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -85,7 +86,7 @@ export default function PaymentsData({
   }, []);
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["payments", qParams, accountId],
+    queryKey: ["payments", accountId, qParams],
     queryFn: query(paymentReconciliationApi.listPaymentReconciliation, {
       pathParams: { facilityId },
       queryParams: {
@@ -103,14 +104,14 @@ export default function PaymentsData({
 
   return (
     <>
-      <div className="flex flex-row justify-between items-center gap-2 my-4 max-sm:flex-col w-full">
-        <div className="flex flex-row justify-start items-center gap-3 max-sm:flex-col w-full">
+      <div className="flex w-full flex-col items-center my-4 gap-2 md:flex-row md:flex-wrap md:gap-y-4 md:justify-start lg:flex-nowrap lg:justify-between">
+        <div className="flex w-full flex-col items-center gap-3 md:flex-row md:flex-wrap md:gap-y-4">
           <Tabs
             defaultValue={qParams.status ?? "all"}
             onValueChange={(value) =>
               updateQuery({ status: value === "all" ? undefined : value })
             }
-            className="max-sm:hidden"
+            className="hidden sm:flex"
           >
             <TabsList>
               <TabsTrigger value="all">{t("all_status")}</TabsTrigger>
@@ -149,7 +150,7 @@ export default function PaymentsData({
                 reconciliation_type: value === "all" ? undefined : value,
               })
             }
-            className="max-sm:hidden"
+            className="hidden sm:flex"
           >
             <TabsList>
               <TabsTrigger value="all">{t("all_type")}</TabsTrigger>
@@ -203,6 +204,12 @@ export default function PaymentsData({
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />
+      ) : !payments?.length ? (
+        <EmptyState
+          icon="l-credit-card"
+          title={t("no_payments")}
+          description={t("no_payments_description")}
+        />
       ) : (
         <div>
           <Table>
@@ -219,92 +226,84 @@ export default function PaymentsData({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {!payments?.length ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center text-gray-500">
-                    {t("no_payments")}
+              {payments.map((payment) => (
+                <TableRow key={payment.id}>
+                  <TableCell>
+                    <Button variant="link" asChild>
+                      <Link
+                        href={`/facility/${facilityId}/billing/account/${payment.account?.id}`}
+                        className="hover:text-primary "
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <div className="text-base flex items-center gap-1 underline underline-offset-2">
+                          {payment.account?.name}
+                          <CareIcon
+                            icon="l-external-link-alt"
+                            className="size-3"
+                          />
+                        </div>
+                      </Link>
+                    </Button>
                   </TableCell>
-                </TableRow>
-              ) : (
-                payments.map((payment) => (
-                  <TableRow key={payment.id}>
-                    <TableCell>
+                  <TableCell>
+                    {payment.payment_datetime
+                      ? format(
+                          new Date(payment.payment_datetime),
+                          "MMM d, yyyy hh:mm a",
+                        )
+                      : "-"}
+                  </TableCell>
+                  <TableCell>
+                    {payment.target_invoice && (
                       <Button variant="link" asChild>
                         <Link
-                          href={`/facility/${facilityId}/billing/account/${payment.account?.id}`}
-                          className="hover:text-primary "
+                          href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice?.id}`}
+                          className="hover:text-primary underline underline-offset-2"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <div className="text-base flex items-center gap-1 underline underline-offset-2">
-                            {payment.account?.name}
-                            <CareIcon
-                              icon="l-external-link-alt"
-                              className="size-3"
-                            />
-                          </div>
+                          {t("view_invoice")}
+                          <CareIcon
+                            icon="l-external-link-alt"
+                            className="size-3"
+                          />
                         </Link>
                       </Button>
-                    </TableCell>
-                    <TableCell>
-                      {payment.payment_datetime
-                        ? format(
-                            new Date(payment.payment_datetime),
-                            "MMM d, yyyy hh:mm a",
-                          )
-                        : "-"}
-                    </TableCell>
-                    <TableCell>
-                      {payment.target_invoice && (
-                        <Button variant="link" asChild>
-                          <Link
-                            href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice?.id}`}
-                            className="hover:text-primary underline underline-offset-2"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {t("view_invoice")}
-                            <CareIcon
-                              icon="l-external-link-alt"
-                              className="size-3"
-                            />
-                          </Link>
-                        </Button>
+                    )}
+                  </TableCell>
+                  <TableCell>{typeMap[payment.reconciliation_type]}</TableCell>
+                  <TableCell>{methodMap[payment.method]}</TableCell>
+                  <TableCell>
+                    <MonetaryDisplay
+                      amount={String(
+                        payment.is_credit_note
+                          ? -payment.amount
+                          : payment.amount,
                       )}
-                    </TableCell>
-                    <TableCell>
-                      {typeMap[payment.reconciliation_type]}
-                    </TableCell>
-                    <TableCell>{methodMap[payment.method]}</TableCell>
-                    <TableCell>
-                      <MonetaryDisplay amount={payment.amount} />
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          PAYMENT_RECONCILIATION_STATUS_COLORS[payment.status]
-                        }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        PAYMENT_RECONCILIATION_STATUS_COLORS[payment.status]
+                      }
+                    >
+                      {t(payment.status)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="outline" className="font-semibold" asChild>
+                      <Link
+                        href={`/facility/${facilityId}/billing/payments/${payment.id}`}
                       >
-                        {t(payment.status)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        className="font-semibold"
-                        asChild
-                      >
-                        <Link
-                          href={`/facility/${facilityId}/billing/payments/${payment.id}`}
-                        >
-                          <EyeIcon />
-                          {t("view")}
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
+                        <EyeIcon />
+                        {t("view")}
+                      </Link>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>

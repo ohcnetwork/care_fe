@@ -32,7 +32,7 @@ export function EditDiscountMonetarySheet({
   const [open, setOpen] = useState(false);
 
   const { mutate: updateComponent, isPending } = useMutation({
-    mutationFn: mutate(facilityApi.updateMonetaryComponents, {
+    mutationFn: mutate(facilityApi.setMonetaryComponents, {
       pathParams: { facilityId },
     }),
     onSuccess: () => {
@@ -48,7 +48,7 @@ export function EditDiscountMonetarySheet({
           <PencilIcon className="size-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="sm:max-w-md">
+      <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("edit_discount_component")}</SheetTitle>
         </SheetHeader>

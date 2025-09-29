@@ -1,6 +1,8 @@
 import { ChevronDown, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -82,7 +84,6 @@ function InstructionContentSection({
             system="system-additional-instruction"
             value={null}
             hideTrigger={true}
-            controlledOpen={true}
             onSelect={(instruction: Code) => {
               if (instruction) addInstruction(instruction);
             }}
@@ -107,9 +108,12 @@ const TriggerButton = (
   const { t } = useTranslation();
   return (
     <Button
-      variant="outline"
+      variant="white"
       data-cy="instructions"
-      className="w-full justify-between"
+      className={cn(
+        "w-full justify-between border-gray-300 font-normal shadow-xs h-auto",
+        currentInstructions.length === 0 && "text-gray-500 hover:bg-white",
+      )}
       disabled={disabledButton}
     >
       <span className="truncate block max-w-full">

@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRightSquare, BarChart3, SlidersHorizontal } from "lucide-react";
-import { Check } from "lucide-react";
+import {
+  ArrowUpRightSquare,
+  BarChart3,
+  Check,
+  SlidersHorizontal,
+} from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,6 +33,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
 import { makeUrl } from "@/Utils/request/utils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
@@ -227,7 +232,7 @@ export default function ToReceiveSupplyRequestTable({
         <TableSkeleton count={5} />
       ) : !requests.length ? (
         <EmptyState
-          icon="l-box"
+          icon={<CareIcon icon="l-box" className="text-primary size-6" />}
           title={t("no_requests_found")}
           description={t("no_requests_found_description")}
         />
@@ -263,7 +268,7 @@ export default function ToReceiveSupplyRequestTable({
                         {request.quantity}
                       </span>
                       <span className="text-gray-600 capitalize">
-                        {request.item.definitional?.dosage_form?.display}
+                        {request.item.base_unit.display}
                       </span>
                     </div>
                   </TableCell>
