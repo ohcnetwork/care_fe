@@ -1,4 +1,5 @@
 import { Code } from "@/types/base/code/code";
+import { Condition } from "@/types/base/condition/condition";
 
 export enum MonetaryComponentType {
   base = "base",
@@ -13,6 +14,7 @@ export interface MonetaryComponent {
   code?: Code;
   factor?: number;
   amount?: string;
+  conditions: Condition[];
 }
 
 export interface MonetaryComponentRead extends MonetaryComponent {

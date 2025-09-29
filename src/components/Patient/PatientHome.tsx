@@ -22,9 +22,10 @@ import patientApi from "@/types/emr/patient/patientApi";
 import {
   PatientDeceasedInfo,
   PatientHeader,
-} from "@/pages/Facility/services/serviceRequests/PatientHeader";
+} from "@/components/Patient/PatientHeader";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
+import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
-
 export const PatientHome = (props: {
   facilityId?: string;
   id: string;
@@ -34,7 +35,7 @@ export const PatientHome = (props: {
 
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-
+  useShortcutSubContext();
   const { data: patientData, isLoading } = useQuery({
     queryKey: ["patient", id],
     queryFn: query(patientApi.getPatient, {
@@ -50,7 +51,7 @@ export const PatientHome = (props: {
     hasPermission,
   );
 
-  const { canCreateAppointment } = getPermissions(
+  const { canWriteAppointment } = getPermissions(
     hasPermission,
     patientData?.permissions ?? [],
   );
@@ -61,7 +62,7 @@ export const PatientHome = (props: {
 
   const tabs = getPatientTabs;
 
-  const Tab = tabs.find((t) => t.route === page)?.component;
+  const Tab = tabs.find((t) => t.route === page);
 
   if (!patientData) {
     return <div>{t("patient_not_found")}</div>;
@@ -72,14 +73,14 @@ export const PatientHome = (props: {
       title={t("patient_details")}
       options={
         <>
-          {facilityId && canCreateAppointment && (
-            <Button asChild variant="primary">
-              <Link
-                href={`/facility/${facilityId}/patient/${id}/book-appointment`}
-              >
-                {t("schedule_appointment")}
-              </Link>
-            </Button>
+          {facilityId && canWriteAppointment && (
+            <BookAppointmentSheet
+              patientId={id}
+              facilityId={facilityId}
+              trigger={
+                <Button variant="primary">{t("schedule_appointment")}</Button>
+              }
+            />
           )}
         </>
       }
@@ -129,22 +130,39 @@ export const PatientHome = (props: {
         </div>
         <div className="lg:flex">
           <div className="h-full lg:mr-7 lg:basis-5/6">
-            {Tab && (
-              <Tab
-                facilityId={facilityId || ""}
+            {Tab?.component && (
+              <Tab.component
+                facilityId={
+                  Tab?.route === "appointments" ? undefined : facilityId || ""
+                }
                 patientId={id}
                 patientData={patientData}
               />
             )}
           </div>
-          {Tab !== PatientNotesTab && (
+          {Tab?.component !== PatientNotesTab && (
             <div className="sticky top-20 mt-8 mx-4 md:mx-0 h-full lg:basis-1/6">
               <section className="mb-4 space-y-2 md:flex">
                 <div className="w-full lg:mx-0">
                   <div className="font-semibold text-secondary-900">
                     {t("actions")}
                   </div>
+                  {/* Add link to patient home page */}
+
                   <div className="mt-2 h-full space-y-2">
+                    <Button asChild variant="outline" className="w-full">
+                      <Link
+                        href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                          {
+                            phone_number: patientData.phone_number,
+                            year_of_birth: patientData.year_of_birth.toString(),
+                            partial_id: patientData.id.slice(0, 5),
+                          },
+                        ).toString()}`}
+                      >
+                        {t("patient_home")}
+                      </Link>
+                    </Button>
                     <div className="space-y-3 text-left text-lg font-semibold text-secondary-900">
                       <div className="space-y-2">
                         <PLUGIN_Component
