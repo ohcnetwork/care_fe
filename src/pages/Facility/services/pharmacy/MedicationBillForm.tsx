@@ -690,7 +690,7 @@ const AddMedicationSheet = ({
 };
 
 export default function MedicationBillForm({ patientId }: Props) {
-  useShortcutSubContext();
+  useShortcutSubContext("facility:general");
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { facilityId } = useCurrentFacility();
@@ -1275,7 +1275,6 @@ export default function MedicationBillForm({ patientId }: Props) {
               {t("go_back")}
             </BackButton>
             <Button
-              data-shortcut-id="billing-action"
               onClick={handleDispense}
               disabled={
                 !form.watch("items").some((q) => q.isSelected) || isPending

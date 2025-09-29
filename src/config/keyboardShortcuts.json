@@ -6,7 +6,8 @@
     { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action", "when": "always" },
     { "key": "shift+arrowLeft", "action": "go-back", "description": "Go Back", "when": "always" },
     { "key": "enter", "action": "enter-action", "description": "Enter Current Action", "when": "always" },
-    { "key": "cmd+k", "action": "search-input-shortcut", "description": "Search Input", "when": "always" }
+    { "key": "cmd+k", "action": "search-input-shortcut", "description": "Search Input", "when": "always" },
+    { "key": "e", "action": "edit-button", "description": "Edit", "when": "always" }
     
   ],
 
@@ -22,6 +23,13 @@
   "facility:patient": [
     { "key": "h", "action": "patient-home", "description": "Go to Patient Home", "when": "always" }
   ],
+
+  "facility:patient:search": [
+    { "key": "shift+?", "action": "show-shortcuts", "description": "Show Keyboard Shortcuts", "when": "always" },
+    { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action", "when": "always" },
+    { "key": "cmd+k", "action": "search-input-shortcut", "description": "Search Input", "when": "always" }
+  ],
+  
   "facility:patient:home": [
     { "key": "p", "action": "print-token", "description": "Print Token", "when": "always" },
     { "key": "e", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
@@ -39,7 +47,8 @@
   ],
 
   "facility:pharmacy": [
-    { "key": "d", "action": "dispense-button", "description": "Dispense Medication", "when": "always" }
+    { "key": "d", "action": "dispense-button", "description": "Dispense Medication", "when": "always" },
+    { "key": "b", "action": "billing-action", "description": "Billing related action", "when": "always" }
   ],
 
 "facility:pharmacy:supply-delivery": [
@@ -68,13 +77,14 @@
     { "key": "shift+1", "action": "switch-to-invoices-tab", "description": "Switch to Invoices Tab", "when": "always" },
     { "key": "shift+2", "action": "switch-to-charge-items-tab", "description": "Switch to Charge Items Tab", "when": "always" },
     { "key": "shift+3", "action": "switch-to-payments-tab", "description": "Switch to Payments Tab", "when": "always" },
-    { "key": "shift+4", "action": "switch-to-bed-associations-tab", "description": "Switch to Bed Associations Tab", "when": "always" }
+    { "key": "shift+4", "action": "switch-to-bed-charge-items-tab", "description": "Switch to Bed Charge Items Tab", "when": "always" }
   ],
 
   "facility:payment": [
     { "key": "c", "action": "mark-payment-cancelled", "description": "Mark as Cancelled", "when": "always" },
     { "key": "e", "action": "mark-payment-error", "description": "Mark as Entered in Error", "when": "always" },
-    { "key": "p", "action": "print-payment-receipt", "description": "Print Receipt", "when": "always" }
+    { "key": "p", "action": "print-payment-receipt", "description": "Print Receipt", "when": "always" },
+    { "key": "v", "action": "view-invoice", "description": "View Invoice", "when": "always" }
   ],
 
   "encounter": [

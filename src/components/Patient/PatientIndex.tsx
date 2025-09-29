@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -37,7 +37,7 @@ import { GENDER_TYPES } from "@/common/constants";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { useShortcuts, useShortcutSubContext } from "@/context/ShortcutContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getPartialId,
@@ -47,11 +47,12 @@ import {
 import patientApi from "@/types/emr/patient/patientApi";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
-  useShortcutSubContext();
+  useShortcutSubContext("facility:patient:search:-global");
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<
     PartialPatientModel | PatientRead | null
   >(null);
+  const shortcuts = useShortcuts();
   const [verificationOpen, setVerificationOpen] = useState(false);
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -62,6 +63,11 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     hasPermission,
     facility?.permissions ?? [],
   );
+
+  useEffect(() => {
+    shortcuts.setIgnoreInputFields(true);
+    return () => shortcuts.setIgnoreInputFields(false);
+  }, [shortcuts]);
 
   const handleCreatePatient = useCallback(() => {
     navigate(`/facility/${facilityId}/patient/create`, {
@@ -79,7 +85,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         className={cn("gap-3 group")}
         onClick={handleCreatePatient}
         data-cy="create-new-patient-button"
-        data-shortcut-id="submit-action"
       >
         <CareIcon icon="l-plus" className="size-4" />
         {t("add_new_patient")}
