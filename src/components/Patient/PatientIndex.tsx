@@ -174,7 +174,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           <div>
             <div className="space-y-6">
               <SearchInput
-                options={getSearchOptions(t, facility)}
+                options={getSearchOptions(t, identifierSearch, facility)}
                 onSearch={handleSearch}
                 className="w-full"
                 autoFocus
@@ -296,7 +296,11 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   );
 }
 
-const getSearchOptions = (t: TFunction, facility?: FacilityRead) => {
+const getSearchOptions = (
+  t: TFunction,
+  searchIdentifier: { config?: string; value?: string },
+  facility?: FacilityRead,
+) => {
   if (!facility) {
     return [];
   }
@@ -324,7 +328,8 @@ const getSearchOptions = (t: TFunction, facility?: FacilityRead) => {
         ? ("phone" as const)
         : ("text" as const),
     placeholder: t("search_by_identifier", { name: c.config.display }),
-    value: "",
+    value:
+      searchIdentifier.config === c.id ? (searchIdentifier.value ?? "") : "",
     display: c.config.display,
   }));
 };
