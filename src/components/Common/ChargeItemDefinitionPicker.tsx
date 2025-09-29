@@ -8,6 +8,7 @@ import {
   FolderOpen,
   Home,
   Loader2,
+  Plus,
   Search,
   X,
 } from "lucide-react";
@@ -32,7 +33,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-import query from "@/Utils/request/query";
+import { ChargeItemDefinitionDrawer } from "@/components/Common/ChargeItemDefinitionDrawer";
 import {
   ResourceCategoryParent,
   ResourceCategoryRead,
@@ -42,6 +43,7 @@ import {
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import query from "@/Utils/request/query";
 
 /**
  * ChargeItemDefinitionPicker - A unified component for selecting charge item definitions with hierarchical category navigation
@@ -74,6 +76,8 @@ interface ChargeItemDefinitionPickerProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  showCreateButton?: boolean;
+  categorySlug?: string;
 }
 
 interface CategoryBreadcrumb {
@@ -91,6 +95,8 @@ export function ChargeItemDefinitionPicker({
   placeholder,
   disabled = false,
   className,
+  showCreateButton = false,
+  categorySlug,
 }: ChargeItemDefinitionPickerProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -103,6 +109,7 @@ export function ChargeItemDefinitionPicker({
   >(undefined);
   const [viewMode, setViewMode] = useState<ViewMode>("categories");
   const [searchQuery, setSearchQuery] = useState("");
+  const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
 
   // Fetch categories for current level
   const {
@@ -272,6 +279,14 @@ export function ChargeItemDefinitionPicker({
     resetSearch();
   };
 
+  const handleCreateSuccess = (
+    chargeItemDefinition: ChargeItemDefinitionRead,
+  ) => {
+    onValueChange(chargeItemDefinition.slug);
+    setCreateDrawerOpen(false);
+    setOpen(false);
+  };
+
   const getDisplayValue = () => {
     if (isLoadingSelected) {
       return (
@@ -408,6 +423,17 @@ export function ChargeItemDefinitionPicker({
                   >
                     <Folder className="h-3 w-3 mr-1" />
                     {t("back")}
+                  </Button>
+                )}
+                {showCreateButton && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCreateDrawerOpen(true)}
+                    className="h-9 px-2"
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    {t("create")}
                   </Button>
                 )}
                 {value && (
@@ -619,6 +645,14 @@ export function ChargeItemDefinitionPicker({
           </Command>
         </div>
       </PopoverContent>
+
+      <ChargeItemDefinitionDrawer
+        open={createDrawerOpen}
+        onOpenChange={setCreateDrawerOpen}
+        facilityId={facilityId}
+        categorySlug={categorySlug}
+        onSuccess={handleCreateSuccess}
+      />
     </Popover>
   );
 }
