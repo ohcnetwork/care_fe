@@ -104,7 +104,7 @@
     "i18next-resources-to-backend": "^1.2.1",
     "input-otp": "^1.4.2",
     "jotai": "^2.12.3",
-    "jspdf": "^3.0.1",
+    "jspdf": "^3.0.2",
     "libphonenumber-js": "^1.11.18",
     "lucide-react": "^0.503.0",
     "markdown-it": "^14.1.0",
