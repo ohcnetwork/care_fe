@@ -1219,7 +1219,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 dosageInstruction?.as_needed_boolean ||
                 isReadOnly
               }
-              className="h-9 text-sm"
+              className="h-9 text-base"
             />
           )}
           <Select
@@ -1418,7 +1418,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onChange={(e) => onUpdate?.({ note: e.target.value })}
           placeholder={t("additional_notes")}
           disabled={disabled}
-          className="h-9 text-sm"
+          className="h-9 text-base"
         />
       </div>
 
