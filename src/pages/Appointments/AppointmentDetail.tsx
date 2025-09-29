@@ -137,7 +137,7 @@ export default function AppointmentDetail(props: Props) {
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
 
-  useShortcutSubContext("facility:appointment:detail&facility:billing:invoice");
+  useShortcutSubContext("facility:appointment");
 
   const { canViewAppointments, canWriteAppointment } = getPermissions(
     hasPermission,
@@ -341,10 +341,7 @@ export default function AppointmentDetail(props: Props) {
                         >
                           <PlusCircledIcon className="size-4 mr-2" />
                           {t("generate_token")}
-                          <ShortcutBadge
-                            actionId="generate-token"
-                            className="bg-gray-200"
-                          />
+                          <ShortcutBadge actionId="generate-token" />
                         </Button>
                       }
                       onSuccess={() => {
@@ -838,7 +835,7 @@ const AppointmentActions = ({
           >
             <EnterIcon className="size-4" />
             {t("check_in")}
-            <ShortcutBadge actionId="check-in-action" className="bg-gray-200" />
+            <ShortcutBadge actionId="check-in-action" />
           </Button>
         )}
 
@@ -852,20 +849,17 @@ const AppointmentActions = ({
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
 
-            {/* Mark as Fulfilled - For in consultation */}
-            {currentStatus === AppointmentStatus.IN_CONSULTATION && (
-              <DropdownMenuItem
-                onClick={() =>
-                  updateAppointment({
-                    status: AppointmentStatus.FULFILLED,
-                    note: appointment.note,
-                  })
-                }
-              >
-                <CheckCircledIcon className="size-4 mr-2" />
-                {t("mark_as_fulfilled")}
-              </DropdownMenuItem>
-            )}
+            <DropdownMenuItem
+              onClick={() =>
+                updateAppointment({
+                  status: AppointmentStatus.FULFILLED,
+                  note: appointment.note,
+                })
+              }
+            >
+              <CheckCircledIcon className="size-4 mr-2" />
+              {t("mark_as_fulfilled")}
+            </DropdownMenuItem>
 
             {/* Secondary Actions */}
             {canWriteAppointment && (
