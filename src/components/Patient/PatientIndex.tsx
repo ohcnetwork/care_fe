@@ -89,19 +89,20 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   }
 
   // Build search options
-  const searchOptions =
-    facility?.patient_instance_identifier_configs
-      ?.sort((a, _b) => (a.config.auto_maintained ? -1 : 1))
-      .map((c) => ({
-        key: c.id,
-        type:
-          c.config.system === "system.care.ohc.network/patient-phone-number"
-            ? ("phone" as const)
-            : ("text" as const),
-        placeholder: t("search_by_identifier", { name: c.config.display }),
-        value: "",
-        display: c.config.display,
-      })) || [];
+  const searchOptions = [
+    ...(facility?.patient_instance_identifier_configs || []),
+  ]
+    .sort((a) => (a.config.auto_maintained ? -1 : 1))
+    .map((c) => ({
+      key: c.id,
+      type:
+        c.config.system === "system.care.ohc.network/patient-phone-number"
+          ? ("phone" as const)
+          : ("text" as const),
+      placeholder: t("search_by_identifier", { name: c.config.display }),
+      value: "",
+      display: c.config.display,
+    }));
 
   // Track identifier search state
   const [identifierSearch, setIdentifierSearch] = useState<{
