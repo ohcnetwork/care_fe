@@ -43,6 +43,7 @@ import {
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import { FacilityRead } from "@/types/facility/facility";
+import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { TFunction } from "i18next";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
@@ -128,7 +129,13 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       <div className="container max-w-5xl mx-auto py-6">
         {canCreatePatient && (
           <div className="flex justify-center md:justify-end">
-            <AddPatientButton facilityId={facilityId} />
+            <AddPatientButton
+              facilityId={facilityId}
+              identifierConfigs={
+                facility?.patient_instance_identifier_configs || []
+              }
+              identifierSearch={identifierSearch}
+            />
           </div>
         )}
         <div className="space-y-6 mt-6">
@@ -169,7 +176,15 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                           <p className="text-sm text-gray-500 mb-6">
                             {t("no_patient_record_text")}
                           </p>
-                          <AddPatientButton facilityId={facilityId} outline />
+                          <AddPatientButton
+                            facilityId={facilityId}
+                            outline
+                            identifierConfigs={
+                              facility?.patient_instance_identifier_configs ||
+                              []
+                            }
+                            identifierSearch={identifierSearch}
+                          />
                         </div>
                       </div>
                     ) : (
@@ -290,12 +305,31 @@ const getSearchOptions = (t: TFunction, facility?: FacilityRead) => {
   }));
 };
 
+const getPhoneNumberFromIdentifierSearch = (
+  identifierConfigs: PatientIdentifierConfig[],
+  identifierSearch: { config?: string; value?: string },
+) => {
+  const phoneNumberConfig = identifierConfigs.find(
+    (c) => c.config.system === "system.care.ohc.network/patient-phone-number",
+  );
+
+  if (phoneNumberConfig && identifierSearch.config === phoneNumberConfig.id) {
+    return identifierSearch.value;
+  }
+
+  return undefined;
+};
+
 function AddPatientButton({
   facilityId,
   outline,
+  identifierConfigs,
+  identifierSearch,
 }: {
   facilityId: string;
   outline?: boolean;
+  identifierConfigs: PatientIdentifierConfig[];
+  identifierSearch?: { config?: string; value?: string };
 }) {
   const { t } = useTranslation();
 
@@ -303,7 +337,18 @@ function AddPatientButton({
     <Button
       variant={outline ? "outline" : "primary_gradient"}
       className="gap-3 group"
-      onClick={() => navigate(`/facility/${facilityId}/patient/create`)}
+      onClick={() =>
+        navigate(`/facility/${facilityId}/patient/create`, {
+          query: {
+            phone_number:
+              identifierSearch &&
+              getPhoneNumberFromIdentifierSearch(
+                identifierConfigs,
+                identifierSearch,
+              ),
+          },
+        })
+      }
       data-cy="create-new-patient-button"
       data-shortcut-id="submit-action"
     >
