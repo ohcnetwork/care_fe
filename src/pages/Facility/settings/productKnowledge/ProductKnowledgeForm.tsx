@@ -107,7 +107,9 @@ function ProductKnowledgeFormContent({
   existingData,
   categorySlug,
   onSuccess = () =>
-    navigate(`/facility/${facilityId}/settings/product_knowledge`),
+    navigate(
+      `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
+    ),
 }: {
   facilityId: string;
   slug?: string;
@@ -997,7 +999,9 @@ function ProductKnowledgeFormContent({
                 type="button"
                 variant="outline"
                 onClick={() =>
-                  navigate(`/facility/${facilityId}/settings/product_knowledge`)
+                  navigate(
+                    `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
+                  )
                 }
               >
                 {t("cancel")}

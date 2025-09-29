@@ -13,7 +13,7 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<TokenRead>>(),
     defaultQueryParams: {
-      ordering: "number",
+      ordering: "created_date",
     },
   },
   get: {

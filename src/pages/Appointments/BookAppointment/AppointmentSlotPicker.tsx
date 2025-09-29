@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -90,7 +89,7 @@ export function AppointmentSlotPicker({
   return (
     <div
       className={cn(
-        "sm:flex flex-col gap-3 w-full",
+        "sm:flex flex-col gap-3 w-full overflow-y-auto",
         !resourceId && "opacity-50 pointer-events-none",
       )}
     >
@@ -124,77 +123,75 @@ export function AppointmentSlotPicker({
           ))}
         </div>
       ) : (
-        <ScrollArea className="h-110 sm:h-90">
-          <div>
-            {slotsQuery.data == null && (
-              <div className="flex flex-col gap-5">
-                <div className="flex flex-col gap-3">
-                  <div className="w-32 h-4 bg-gray-50 rounded" />
-                  <div className="grid grid-cols-4 gap-2">
-                    {Array.from({ length: 12 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="h-12 bg-gray-50 rounded flex text-gray-400 items-center justify-center"
-                      >
-                        --:--
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <div className="w-32 h-4 bg-gray-50 rounded" />
-                  <div className="grid grid-cols-4 gap-4">
-                    {Array.from({ length: 12 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="h-12 bg-gray-50 rounded flex text-gray-400 items-center justify-center"
-                      >
-                        --:--
-                      </div>
-                    ))}
-                  </div>
+        <div>
+          {slotsQuery.data == null && (
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-3">
+                <div className="w-32 h-4 bg-gray-50 rounded" />
+                <div className="grid grid-cols-4 gap-2">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="h-12 bg-gray-50 rounded flex text-gray-400 items-center justify-center"
+                    >
+                      --:--
+                    </div>
+                  ))}
                 </div>
               </div>
-            )}
+              <div className="flex flex-col gap-3">
+                <div className="w-32 h-4 bg-gray-50 rounded" />
+                <div className="grid grid-cols-4 gap-4">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="h-12 bg-gray-50 rounded flex text-gray-400 items-center justify-center"
+                    >
+                      --:--
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
-            {slotsQuery.data?.length === 0 && (
-              <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
-                <p className="text-gray-400">
-                  {t("no_slots_available_for_this_date")}
-                </p>
-              </div>
-            )}
-            {!!slotsQuery.data?.length &&
-              groupSlotsByAvailability(slotsQuery.data).map(
-                ({ availability, slots }) => (
-                  <div key={availability.name} className="flex flex-col">
-                    <div className="flex flex-row gap-2 items-center mb-2 mt-2 sm:mt-0">
-                      <ClipboardCheck size={16} />
-                      <span className="text-sm font-medium text-gray-700">
-                        {availability.name}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-1 xl:grid-cols-3 2xl:grid-cols-5 gap-2">
-                      {slots.map((slot) => (
-                        <TokenSlotButton
-                          key={slot.id}
-                          slot={slot}
-                          availability={availability}
-                          selectedSlotId={selectedSlotId}
-                          onClick={() => {
-                            handleSlotSelect(
-                              selectedSlotId === slot.id ? undefined : slot.id,
-                            );
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <Separator className="my-6" />
+          {slotsQuery.data?.length === 0 && (
+            <div className="flex items-center justify-center py-32 border-2 border-gray-200 border-dashed rounded-lg text-center">
+              <p className="text-gray-400">
+                {t("no_slots_available_for_this_date")}
+              </p>
+            </div>
+          )}
+          {!!slotsQuery.data?.length &&
+            groupSlotsByAvailability(slotsQuery.data).map(
+              ({ availability, slots }) => (
+                <div key={availability.name} className="flex flex-col">
+                  <div className="flex flex-row gap-2 items-center mb-2 mt-2 sm:mt-0">
+                    <ClipboardCheck size={16} />
+                    <span className="text-sm font-medium text-gray-700">
+                      {availability.name}
+                    </span>
                   </div>
-                ),
-              )}
-          </div>
-        </ScrollArea>
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-1 xl:grid-cols-3 2xl:grid-cols-5 gap-2">
+                    {slots.map((slot) => (
+                      <TokenSlotButton
+                        key={slot.id}
+                        slot={slot}
+                        availability={availability}
+                        selectedSlotId={selectedSlotId}
+                        onClick={() => {
+                          handleSlotSelect(
+                            selectedSlotId === slot.id ? undefined : slot.id,
+                          );
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <Separator className="my-6" />
+                </div>
+              ),
+            )}
+        </div>
       )}
     </div>
   );

@@ -105,15 +105,15 @@ function ChargeItemTableRow({
   const { t } = useTranslation();
 
   return (
-    <TableRow className="hover:bg-gray-50 cursor-pointer">
-      <TableCell
-        className="font-medium cursor-pointer"
-        onClick={() =>
-          navigate(
-            `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}`,
-          )
-        }
-      >
+    <TableRow
+      className="hover:bg-gray-50 cursor-pointer"
+      onClick={() =>
+        navigate(
+          `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}`,
+        )
+      }
+    >
+      <TableCell className="font-medium cursor-pointer">
         <div className="flex items-center space-x-3">
           <div>
             <div className="font-medium text-gray-900">{definition.title}</div>
@@ -299,7 +299,7 @@ export function ChargeItemList({
           <TableSkeleton count={5} />
         ) : chargeItems.length === 0 ? (
           <EmptyState
-            icon="l-file"
+            icon={<CareIcon icon="l-file" className="text-primary size-6" />}
             title={t("no_charge_items_found")}
             description={t("no_charge_items_in_category")}
           />

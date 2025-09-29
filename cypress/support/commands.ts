@@ -339,3 +339,11 @@ Cypress.Commands.add(
       });
   },
 );
+
+Cypress.Commands.add("clickConfirmAction", (label: string) => {
+  cy.get('div[data-slot="alert-dialog-footer"]')
+    .should("be.visible")
+    .within(() => {
+      cy.contains("button", label).click();
+    });
+});
