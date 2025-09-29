@@ -170,6 +170,7 @@ const Login = (props: LoginProps) => {
       }
     },
     onError: (error: any) => {
+      console.log(error);
       let errorMessage = "invalid_otp";
       if (
         error.cause &&
@@ -359,12 +360,12 @@ const Login = (props: LoginProps) => {
             <Card className="mx-4">
               <CardHeader className="space-y-1 px-4">
                 <CardTitle className="text-2xl font-bold">
-                  {t("welcome_back")}
+                  {t("welcome_back_login_title")}
                 </CardTitle>
                 <CardDescription>
                   {disablePatientLogin
-                    ? t("sign_in_to_continue")
-                    : t("choose_login_method")}
+                    ? t("sign_in_to_your_account_to_continue")
+                    : t("choose_your_login_method_to_continue")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -498,9 +499,7 @@ const Login = (props: LoginProps) => {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="forgot_username">
-                            {t("username")}
-                          </Label>
+                          <Label htmlFor="username">{t("username")}</Label>
                           <Input
                             id="forgot_username"
                             name="username"
@@ -519,6 +518,44 @@ const Login = (props: LoginProps) => {
                             </p>
                           )}
                         </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="password">{t("password")}</Label>
+                          <PasswordInput
+                            id="password"
+                            name="password"
+                            data-cy="password"
+                            autoComplete="current-password"
+                            value={form.password}
+                            onChange={handleChange}
+                            className={cn(
+                              errors.password &&
+                                "border-red-500 focus-visible:ring-red-500",
+                            )}
+                          />
+                          {errors.password && (
+                            <p className="text-sm text-red-500">
+                              {t(errors.password)}
+                            </p>
+                          )}
+                        </div>
+
+                        {isCaptchaEnabled && reCaptchaSiteKey && (
+                          <div className="py-4">
+                            <ReCaptcha
+                              sitekey={reCaptchaSiteKey}
+                              onChange={onCaptchaChange}
+                            />
+                          </div>
+                        )}
+
+                        <Button
+                          variant="link"
+                          type="button"
+                          onClick={() => setForgotPassword(true)}
+                          className="px-0"
+                        >
+                          {t("forget_password")}
+                        </Button>
 
                         <Button
                           type="submit"
