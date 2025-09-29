@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -37,7 +37,7 @@ import { GENDER_TYPES } from "@/common/constants";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { useShortcuts, useShortcutSubContext } from "@/context/ShortcutContext";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getPartialId,
@@ -47,7 +47,6 @@ import {
 import patientApi from "@/types/emr/patient/patientApi";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
-  const shortcuts = useShortcuts();
   useShortcutSubContext();
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<
@@ -58,12 +57,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const { hasPermission } = usePermissions();
 
   const { facility } = useCurrentFacility();
-
-  // Enable shortcuts to work when this search component is active
-  useEffect(() => {
-    shortcuts.setIgnoreInputFields(true);
-    return () => shortcuts.setIgnoreInputFields(false);
-  }, [shortcuts]);
 
   const { canCreatePatient } = getPermissions(
     hasPermission,
