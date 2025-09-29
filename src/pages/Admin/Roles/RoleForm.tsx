@@ -1,6 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
@@ -21,26 +26,28 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { Permission } from "@/types/emr/permission/permission";
+import permissionApi from "@/types/emr/permission/permissionApi";
 import { RoleRead } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
-import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 
 interface RoleFormProps {
   role: RoleRead | null;
-  permissions: Permission[];
   onSuccess: () => void;
 }
 
-export default function RoleForm({
-  role,
-  permissions,
-  onSuccess,
-}: RoleFormProps) {
+const PAGE_LIMIT = 100;
+
+export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { ref, inView } = useInView();
+
   const isEditMode = !!role?.id;
 
+  // ----- Form Schema -----
   const roleSchema = z.object({
     name: z.string().trim().min(1, t("name_is_required")),
     description: z.string().trim().optional(),
@@ -65,6 +72,41 @@ export default function RoleForm({
   const hasPermissionSelected =
     watchedPermissions && watchedPermissions.length > 0;
 
+  // ----- Infinite Query for Permissions -----
+  const getQueryParams = (pageParam: number) => ({
+    limit: String(PAGE_LIMIT),
+    offset: String(pageParam),
+  });
+
+  const {
+    data: permissionsList,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["permissions"],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query.debounced(permissionApi.listPermissions, {
+        queryParams: getQueryParams(pageParam),
+      })({ signal });
+      return response;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * PAGE_LIMIT;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+    select: (data) => data?.pages.flatMap((p) => p.results) || [],
+  });
+
+  const permissions: Permission[] = permissionsList || [];
+
+  useEffect(() => {
+    if (inView && hasNextPage) fetchNextPage();
+  }, [inView, hasNextPage, fetchNextPage]);
+
+  // ----- Mutations -----
   const createRoleMutation = useMutation({
     mutationFn: mutate(roleApi.createRole),
     onSuccess: () => {
@@ -92,7 +134,7 @@ export default function RoleForm({
         is_archived: role?.is_archived ?? false,
       });
     }
-  }, [form, role]);
+  }, [form, role, isEditMode]);
 
   const onSubmit = (data: z.infer<typeof roleSchema>) => {
     const payload = {
@@ -112,6 +154,7 @@ export default function RoleForm({
   const isLoading =
     createRoleMutation.isPending || updateRoleMutation.isPending;
 
+  // ----- Helpers -----
   const handlePermissionToggle = (slug: string) => {
     const current = form.watch("permissions") || [];
     if (current.includes(slug)) {
@@ -148,6 +191,7 @@ export default function RoleForm({
     onSuccess();
   };
 
+  // ----- Render -----
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -258,16 +302,15 @@ export default function RoleForm({
               render={() => (
                 <FormItem>
                   <div className="space-y-3 max-h-60 overflow-y-auto">
-                    {permissions.map((permission) => (
+                    {permissions.map((permission, index) => (
                       <div
                         key={permission.slug}
                         className="flex items-center space-x-2"
+                        ref={index === permissions.length - 1 ? ref : undefined}
                       >
                         <Checkbox
                           id={permission.slug}
-                          checked={watchedPermissions?.includes(
-                            permission.slug,
-                          )}
+                          checked={watchedPermissions?.includes(permission.slug)}
                           onCheckedChange={() =>
                             handlePermissionToggle(permission.slug)
                           }
@@ -287,6 +330,9 @@ export default function RoleForm({
                         </Label>
                       </div>
                     ))}
+                    {(isFetching || isFetchingNextPage) && (
+                      <div className="text-center text-sm">{t("loading")}</div>
+                    )}
                   </div>
                   <FormMessage />
                 </FormItem>
@@ -311,8 +357,8 @@ export default function RoleForm({
             {isLoading
               ? t("saving")
               : isEditMode
-                ? t("update_role")
-                : t("create_role")}
+              ? t("update_role")
+              : t("create_role")}
           </Button>
         </div>
       </form>

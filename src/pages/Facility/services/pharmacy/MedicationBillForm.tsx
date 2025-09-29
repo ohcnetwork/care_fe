@@ -610,7 +610,6 @@ const AddMedicationSheet = ({
                                 as_needed_for: value || undefined,
                               });
                             }}
-                            asSheet
                           />
 
                           <InstructionsPopover
@@ -2640,8 +2639,6 @@ export default function MedicationBillForm({ patientId }: Props) {
             setMedicationToMarkComplete(null);
           }}
           confirmText={t("mark_as_already_given")}
-          cancelText={t("cancel")}
-          variant="primary"
         />
         <ConfirmActionDialog
           open={medicationToRemove !== null}
@@ -2678,8 +2675,7 @@ export default function MedicationBillForm({ patientId }: Props) {
             setMedicationToRemove(null);
           }}
           confirmText={t("remove_medication")}
-          cancelText={t("cancel")}
-          variant="primary"
+          variant="destructive"
         />
       </div>
     </Page>
