@@ -16,6 +16,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -23,7 +24,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -383,8 +383,8 @@ export default function FacilityOrganizationSelector(
         onValueChange={handleOrganizationViewChange}
         className="w-full sm:w-auto"
         options={[
-          {value: "mine", label: t("my_organizations")},
-          {value: "all", label: t("all_organizations")}
+          { value: "mine", label: t("my_organizations") },
+          { value: "all", label: t("all_organizations") },
         ]}
         showAllOption={false}
       />

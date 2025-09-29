@@ -7,8 +7,8 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { FilterTabs } from "@/components/ui/filter-tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -31,7 +31,9 @@ function PatientIndex() {
     Appointment | undefined
   >();
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"scheduled" | "history">("scheduled");
+  const [activeTab, setActiveTab] = useState<"scheduled" | "history">(
+    "scheduled",
+  );
 
   const patient = usePatientContext();
   const selectedPatient = patient?.selectedPatient;
@@ -205,7 +207,9 @@ function PatientIndex() {
         <div className="mt-4">
           <FilterTabs
             value={activeTab}
-            onValueChange={(value) => setActiveTab(value as "scheduled" | "history")}
+            onValueChange={(value) =>
+              setActiveTab(value as "scheduled" | "history")
+            }
             options={tabOptions}
             variant="background"
             className="w-full mb-4"
@@ -214,13 +218,11 @@ function PatientIndex() {
           />
 
           {/* Conditional rendering based on activeTab */}
-          {activeTab === "scheduled" && (
-            getAppointmentCardContent(scheduledAppointments)
-          )}
+          {activeTab === "scheduled" &&
+            getAppointmentCardContent(scheduledAppointments)}
 
-          {activeTab === "history" && (
-            getAppointmentCardContent(pastAppointments)
-          )}
+          {activeTab === "history" &&
+            getAppointmentCardContent(pastAppointments)}
         </div>
       </div>
     </>

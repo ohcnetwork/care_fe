@@ -206,8 +206,8 @@ export default function ValueSetSearchContent({
               value={activeTab.toString()}
               onValueChange={(value) => setActiveTab(Number(value))}
               options={[
-                {value: "0", label: "search"},
-                {value: "1", label: "starred"}
+                { value: "0", label: "search" },
+                { value: "1", label: "starred" },
               ]}
               className="flex-1"
               variant="background"

@@ -32,7 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -592,7 +591,7 @@ export function AccountShow({
         setPageTitle={false}
         showMoreAfterIndex={showMoreAfterIndex}
       />
-      
+
       <AccountSheet
         open={sheetOpen}
         onOpenChange={setSheetOpen}

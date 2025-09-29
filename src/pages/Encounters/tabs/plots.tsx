@@ -77,7 +77,7 @@ export const EncounterPlotsTab = () => {
               canAccess={canAccess}
             />
           </div>
-        ) : null
+        ) : null,
       )}
     </div>
   );

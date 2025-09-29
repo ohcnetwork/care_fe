@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Select,
   SelectContent,
@@ -27,7 +28,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -457,10 +457,9 @@ export default function DispensedMedicationList({
           onValueChange={(value) => updateQuery({ payment_status: value })}
           className="w-full"
           options={[
-            {value: "paid", label: "paid"},
-            {value: "unpaid", label: "unpaid"},
+            { value: "paid", label: "paid" },
+            { value: "unpaid", label: "unpaid" },
           ]}
-
         />
       </div>
 

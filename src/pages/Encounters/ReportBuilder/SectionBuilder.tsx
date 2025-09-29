@@ -21,6 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   FormControl,
   FormField,
@@ -37,7 +38,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import query from "@/Utils/request/query";
 import { ReportTemplateFormData } from "@/pages/Encounters/ReportBuilder/schema";
@@ -784,19 +784,17 @@ function SectionItem({
             </div>
           )}
 
-            {dataSource && (
-              activeTab === "fields" && (
-                <div className="space-y-4 mt-4">
-                  <SectionFieldsAndColumns
-                  form={form}
-                  index={index}
-                  availableSections={availableSections}
-                  isEnabled={isEnabled}
-                  isTable={isTable}
-                />
-                </div>
-              )
-            )}
+          {dataSource && activeTab === "fields" && (
+            <div className="space-y-4 mt-4">
+              <SectionFieldsAndColumns
+                form={form}
+                index={index}
+                availableSections={availableSections}
+                isEnabled={isEnabled}
+                isTable={isTable}
+              />
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

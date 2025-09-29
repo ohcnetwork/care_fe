@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Form,
   FormControl,
@@ -26,7 +27,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import Loading from "@/components/Common/Loading";
 
@@ -534,30 +534,26 @@ export default function ReportBuilder({
                     className="w-full"
                     showAllOption={false}
                   />
-                    {hasLayoutErrors && (
-                      <Badge variant="destructive" size="sm">
-                        {t("layout_error")}
-                      </Badge>
-                    )}
-                    {hasHeaderErrors && (
-                      <Badge variant="destructive" size="sm">
-                        {t("header_error")}
-                      </Badge>
-                    )}
-                    {hasSectionsErrors && (
-                      <Badge variant="destructive" size="sm">
-                        {t("sections_error")}
-                      </Badge>
-                    )}
-                    {activeTab === "layout" && (
-                      <LayoutBuilder form={form} />
-                    )}
-                    {activeTab === "header" && (
-                      <HeaderBuilder form={form} />
-                    )}
-                    {activeTab === "sections" && (
-                      <SectionBuilder form={form} facilityId={facilityId} />
-                    )}
+                  {hasLayoutErrors && (
+                    <Badge variant="destructive" size="sm">
+                      {t("layout_error")}
+                    </Badge>
+                  )}
+                  {hasHeaderErrors && (
+                    <Badge variant="destructive" size="sm">
+                      {t("header_error")}
+                    </Badge>
+                  )}
+                  {hasSectionsErrors && (
+                    <Badge variant="destructive" size="sm">
+                      {t("sections_error")}
+                    </Badge>
+                  )}
+                  {activeTab === "layout" && <LayoutBuilder form={form} />}
+                  {activeTab === "header" && <HeaderBuilder form={form} />}
+                  {activeTab === "sections" && (
+                    <SectionBuilder form={form} facilityId={facilityId} />
+                  )}
                 </CardContent>
               </Card>
               <ReportBuilderPreview form={form} />

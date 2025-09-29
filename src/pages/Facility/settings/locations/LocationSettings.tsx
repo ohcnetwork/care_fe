@@ -9,9 +9,9 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { AnimatedWrapper } from "@/components/Common/AnimatedWrapper";
 import Page from "@/components/Common/Page";
@@ -150,8 +150,16 @@ export default function LocationSettings({
             className="mt-2 sm:mt-0"
             showAllOption={false}
             options={[
-              { value: "list", label: "list", icon: <CareIcon icon="l-list-ul" className="text-lg" /> },
-              { value: "map", label: "map", icon: <CareIcon icon="l-map" className="text-lg" /> },
+              {
+                value: "list",
+                label: "list",
+                icon: <CareIcon icon="l-list-ul" className="text-lg" />,
+              },
+              {
+                value: "map",
+                label: "map",
+                icon: <CareIcon icon="l-map" className="text-lg" />,
+              },
             ]}
           />
         </div>

@@ -1,8 +1,8 @@
-import { navigate } from "raviger";
 import { FilterTabs } from "@/components/ui/filter-tabs";
 import { EncounterList } from "@/pages/Encounters/EncounterList";
 import LocationList from "@/pages/Facility/locations/LocationList";
 import { EncounterClass } from "@/types/emr/encounter/encounter";
+import { navigate } from "raviger";
 
 interface EncountersOverviewProps {
   facilityId: string;

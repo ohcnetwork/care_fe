@@ -51,7 +51,7 @@ export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
           onValueChange={setActiveTab}
           options={[
             { value: "upcoming", label: "upcoming" },
-            { value: "past", label: "past"},
+            { value: "past", label: "past" },
             { value: "cancelled", label: "cancelled" },
           ]}
           showAllOption={false}

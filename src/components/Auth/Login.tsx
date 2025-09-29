@@ -97,7 +97,7 @@ const Login = (props: LoginProps) => {
     const desired =
       disablePatientLogin && loginMode === "patient" ? "staff" : loginMode;
     if (!mode || mode !== desired) {
-      setQueryParams({ mode: desired as LoginMode });
+      setQueryParams({ mode: desired as LoginMode }, { replace: false });
     }
   }, [mode, loginMode, setQueryParams, disablePatientLogin]);
   const initErr: any = {};
@@ -124,8 +124,8 @@ const Login = (props: LoginProps) => {
 
   // Remember the last login mode
   useEffect(() => {
-  localStorage.setItem(LocalStorageKeys.loginPreference, loginMode);
-}, [loginMode]);
+    localStorage.setItem(LocalStorageKeys.loginPreference, loginMode);
+  }, [loginMode]);
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
@@ -370,24 +370,27 @@ const Login = (props: LoginProps) => {
               <CardContent>
                 <div className="flex w-full">
                   <FilterTabs
-    value={loginMode}
-    onValueChange={(value) => {
-      if (disablePatientLogin && value === "patient") return;
-      setQueryParams({ mode: value as LoginMode }, { replace: false });
-      if (value === "staff") {
-        resetPatientLogin();
-      } else {
-        setForgotPassword(false);
-      }
-    }}
-    options={
-      disablePatientLogin
-        ? [{ value: "staff", label: "staff_login" }]
-        : [
-            { value: "staff", label: "staff_login" },
-            { value: "patient", label: "patient_login" },
-          ]
-    }
+                    value={loginMode}
+                    onValueChange={(value) => {
+                      if (disablePatientLogin && value === "patient") return;
+                      setQueryParams(
+                        { mode: value as LoginMode },
+                        { replace: false },
+                      );
+                      if (value === "staff") {
+                        resetPatientLogin();
+                      } else {
+                        setForgotPassword(false);
+                      }
+                    }}
+                    options={
+                      disablePatientLogin
+                        ? [{ value: "staff", label: "staff_login" }]
+                        : [
+                            { value: "staff", label: "staff_login" },
+                            { value: "patient", label: "patient_login" },
+                          ]
+                    }
                     variant="background"
                     className="flex-1 mb-2"
                     showAllOption={false}
@@ -396,7 +399,7 @@ const Login = (props: LoginProps) => {
 
                 {/* Staff Login */}
                 {loginMode === "staff" &&
-                  (!forgotPassword ?(
+                  (!forgotPassword ? (
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="username">{t("username")}</Label>
@@ -653,14 +656,14 @@ const Login = (props: LoginProps) => {
                     )}
                   </form>
                 )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <LanguageSelectorLogin />
+            <LanguageSelectorLogin />
+          </div>
         </div>
       </div>
     </div>
-  </div>
   );
 };
 
