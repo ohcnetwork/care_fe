@@ -333,7 +333,6 @@ export function InvoiceShow({
         <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
           {invoice?.status === InvoiceStatus.draft && (
             <Button
-              data-shortcut-id="issue-invoice"
               variant="outline_primary"
               onClick={() => handleStatusChange(InvoiceStatus.issued)}
               disabled={isUpdatingInvoice}
@@ -345,7 +344,6 @@ export function InvoiceShow({
           )}
           {invoice?.status === InvoiceStatus.issued && (
             <Button
-              data-shortcut-id="mark-as-balanced"
               variant="outline_primary"
               onClick={() => handleStatusChange(InvoiceStatus.balanced)}
               disabled={isUpdatingInvoice}
@@ -356,10 +354,7 @@ export function InvoiceShow({
             </Button>
           )}
           {invoice.status === InvoiceStatus.issued && (
-            <Button
-              data-shortcut-id="record-payment"
-              onClick={() => setIsPaymentSheetOpen(true)}
-            >
+            <Button onClick={() => setIsPaymentSheetOpen(true)}>
               <CareIcon icon="l-plus" className="mr-2 size-4" />
               {t("record_payment")}
               <ShortcutBadge actionId="record-payment" />
@@ -382,7 +377,6 @@ export function InvoiceShow({
             <div className="flex flex-row gap-2">
               {invoice.status === InvoiceStatus.draft && (
                 <Button
-                  data-shortcut-id="edit-invoice-items"
                   variant="outline"
                   className="border-gray-400 gap-1"
                   onClick={() => {
@@ -392,14 +386,13 @@ export function InvoiceShow({
                 >
                   <CareIcon icon="l-edit" className="size-4" />
                   {t("edit_items")}
-                  <ShortcutBadge actionId="edit-invoice-items" />
+                  <ShortcutBadge actionId="edit-button" />
                 </Button>
               )}
               <Button
                 variant="outline"
                 asChild
                 className="border-gray-400 gap-1"
-                data-shortcut-id="print-invoice"
               >
                 <Link
                   href={`/facility/${facilityId}/billing/invoice/${invoiceId}/print`}
@@ -768,7 +761,6 @@ export function InvoiceShow({
                     setOpen={setIsAddChargeItemSheetOpen}
                     trigger={
                       <Button
-                        data-shortcut-id="add-charge-item"
                         variant="ghost"
                         className="w-full border border-gray-400 text-gray-950 font-semibold text-sm shadow-sm"
                         disabled={isAddChargeItemSheetOpen}
@@ -1083,11 +1075,7 @@ export function InvoiceShow({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              data-shortcut-id={
-                chargeItemToRemove !== null ? "cancel-action" : undefined
-              }
-            >
+            <AlertDialogCancel>
               {t("cancel")}
               <ShortcutBadge actionId="cancel-action" />
             </AlertDialogCancel>
@@ -1095,9 +1083,6 @@ export function InvoiceShow({
               className={cn(buttonVariants({ variant: "destructive" }))}
               onClick={handleRemoveChargeItem}
               disabled={isRemoving}
-              data-shortcut-id={
-                chargeItemToRemove !== null ? "submit-action" : undefined
-              }
             >
               {isRemoving ? t("removing_with_dots") : t("remove")}
               <ShortcutBadge actionId="submit-action" />
@@ -1127,9 +1112,7 @@ export function InvoiceShow({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              data-shortcut-id={reasonDialogOpen ? "cancel-action" : undefined}
-            >
+            <AlertDialogCancel>
               {t("cancel")}
               <ShortcutBadge actionId="cancel-action" />
             </AlertDialogCancel>
@@ -1144,7 +1127,6 @@ export function InvoiceShow({
                       : "destructive",
                 }),
               )}
-              data-shortcut-id={reasonDialogOpen ? "submit-action" : undefined}
             >
               {t("confirm")}
               <ShortcutBadge actionId="submit-action" />
@@ -1179,7 +1161,6 @@ export function InvoiceShow({
             </div>
             <div className="flex items-center bg-white rounded-r-lg p-2 pl-0">
               <Button
-                data-shortcut-id="navigate-to-source"
                 variant="primary"
                 onClick={() => navigate(sourceUrl)}
                 className="shadow ml-2"
