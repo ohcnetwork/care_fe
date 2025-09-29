@@ -34,7 +34,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
-import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { useShortcuts, useShortcutSubContext } from "@/context/ShortcutContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getPartialId,
@@ -50,11 +50,12 @@ const PHONE_NUMBER_CONFIG_SYSTEM =
   "system.care.ohc.network/patient-phone-number";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
-  useShortcutSubContext();
+  useShortcutSubContext("facility:patient:search:-global");
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<
     PartialPatientModel | PatientRead | null
   >(null);
+  const shortcuts = useShortcuts();
   const [qParams] = useQueryParams();
   const [verificationOpen, setVerificationOpen] = useState(false);
   const { t } = useTranslation();
@@ -66,6 +67,11 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     hasPermission,
     facility?.permissions ?? [],
   );
+
+  useEffect(() => {
+    shortcuts.setIgnoreInputFields(true);
+    return () => shortcuts.setIgnoreInputFields(false);
+  }, [shortcuts]);
 
   // Track identifier search state
   const [identifierSearch, setIdentifierSearch] = useState<{
@@ -110,6 +116,11 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       });
     }
   };
+
+  useEffect(() => {
+    shortcuts.setIgnoreInputFields(true);
+    return () => shortcuts.setIgnoreInputFields(false);
+  }, [shortcuts]);
 
   useEffect(() => {
     if (!facility) {

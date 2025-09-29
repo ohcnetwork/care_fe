@@ -50,19 +50,20 @@ export default function DiagnosticReportView({
   });
 
   // Query to fetch files for the diagnostic report
-  const { data: files = { results: [], count: 0 }, refetch: refetchFiles } =
-    useQuery<PaginatedResponse<FileReadMinimal>>({
-      queryKey: ["files", "diagnostic_report", report?.id],
-      queryFn: query(fileApi.list, {
-        queryParams: {
-          file_type: "diagnostic_report",
-          associating_id: report?.id,
-          limit: 100,
-          offset: 0,
-        },
-      }),
-      enabled: !!report?.id,
-    });
+  const { data: files = { results: [], count: 0 } } = useQuery<
+    PaginatedResponse<FileReadMinimal>
+  >({
+    queryKey: ["files", "diagnostic_report", report?.id],
+    queryFn: query(fileApi.list, {
+      queryParams: {
+        file_type: "diagnostic_report",
+        associating_id: report?.id,
+        limit: 100,
+        offset: 0,
+      },
+    }),
+    enabled: !!report?.id,
+  });
 
   if (isLoading) {
     return (
@@ -170,7 +171,6 @@ export default function DiagnosticReportView({
                 associatingId={report.id}
                 canEdit={true}
                 showHeader={false}
-                onRefetch={refetchFiles}
               />
             </CardContent>
           </Card>

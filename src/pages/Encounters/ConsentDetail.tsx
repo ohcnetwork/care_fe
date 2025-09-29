@@ -78,8 +78,6 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
   const fileManager = useFileManager({
     type: FileType.CONSENT,
     uploadedFiles: consent?.source_attachments || [],
-    onArchive: () => {},
-    onEdit: () => {},
   });
 
   const isLoading = isLoadingConsent;
