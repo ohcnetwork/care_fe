@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -289,6 +290,12 @@ export default function MedicationRequestList({
       <div>
         {isLoading ? (
           <TableSkeleton count={5} />
+        ) : prescriptionQueue?.results?.length === 0 ? (
+          <EmptyState
+            icon="l-prescription-bottle"
+            title={t("no_prescriptions_found")}
+            description={t("no_prescriptions_found_description")}
+          />
         ) : (
           <Table>
             <TableHeader>
@@ -301,98 +308,90 @@ export default function MedicationRequestList({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {prescriptionQueue?.results?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    {t("no_prescriptions_found")}
+              {prescriptionQueue?.results?.map((item: PrescriptionSummary) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-semibold">
+                    {item.encounter.patient.name}
+                    <div className="text-xs text-gray-500">
+                      {t("by")}: {formatName(item.prescribed_by)}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {t("at")}: {formatDateTime(item.created_date)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={PRESCRIPTION_STATUS_STYLES[item.status]}>
+                      {t(`prescription_status__${item.status}`)}
+                    </Badge>
+                  </TableCell>
+
+                  <TableCell className="text-sm">
+                    <div>
+                      <Badge
+                        size="sm"
+                        variant={
+                          ENCOUNTER_CLASSES_COLORS[
+                            item.encounter.encounter_class
+                          ]
+                        }
+                      >
+                        {t(
+                          `encounter_class__${item.encounter.encounter_class}`,
+                        )}
+                      </Badge>
+                    </div>
+                  </TableCell>
+
+                  <TableCell>
+                    <div className="flex flex-wrap gap-2">
+                      <TagAssignmentSheet
+                        entityType="prescription"
+                        entityId={item.id}
+                        facilityId={facilityId}
+                        currentTags={item.tags || []}
+                        onUpdate={() => {
+                          queryClient.invalidateQueries({
+                            queryKey: [
+                              "prescriptionQueue",
+                              facilityId,
+                              qParams,
+                            ],
+                          });
+                        }}
+                        patientId={item.encounter.patient.id}
+                      />
+                      {item.tags && item.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {item.tags.map((tag) => (
+                            <Badge
+                              key={tag.id}
+                              variant="outline"
+                              size="sm"
+                              className="text-xs"
+                            >
+                              {getTagHierarchyDisplay(tag)}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      className="font-semibold"
+                      onClick={() => {
+                        navigate(
+                          `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}`,
+                        );
+                      }}
+                    >
+                      <ArrowUpRightSquare strokeWidth={1.5} />
+                      {t("see_prescription")}
+                    </Button>
                   </TableCell>
                 </TableRow>
-              ) : (
-                prescriptionQueue?.results?.map((item: PrescriptionSummary) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-semibold">
-                      {item.encounter.patient.name}
-                      <div className="text-xs text-gray-500">
-                        {t("by")}: {formatName(item.prescribed_by)}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {t("at")}: {formatDateTime(item.created_date)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={PRESCRIPTION_STATUS_STYLES[item.status]}>
-                        {t(`prescription_status__${item.status}`)}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell className="text-sm">
-                      <div>
-                        <Badge
-                          size="sm"
-                          variant={
-                            ENCOUNTER_CLASSES_COLORS[
-                              item.encounter.encounter_class
-                            ]
-                          }
-                        >
-                          {t(
-                            `encounter_class__${item.encounter.encounter_class}`,
-                          )}
-                        </Badge>
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="flex flex-wrap gap-2">
-                        <TagAssignmentSheet
-                          entityType="prescription"
-                          entityId={item.id}
-                          facilityId={facilityId}
-                          currentTags={item.tags || []}
-                          onUpdate={() => {
-                            queryClient.invalidateQueries({
-                              queryKey: [
-                                "prescriptionQueue",
-                                facilityId,
-                                qParams,
-                              ],
-                            });
-                          }}
-                          patientId={item.encounter.patient.id}
-                        />
-                        {item.tags && item.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {item.tags.map((tag) => (
-                              <Badge
-                                key={tag.id}
-                                variant="outline"
-                                size="sm"
-                                className="text-xs"
-                              >
-                                {getTagHierarchyDisplay(tag)}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        className="font-semibold"
-                        onClick={() => {
-                          navigate(
-                            `/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${item.encounter.patient.id}/prescription/${item.id}`,
-                          );
-                        }}
-                      >
-                        <ArrowUpRightSquare strokeWidth={1.5} />
-                        {t("see_prescription")}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
+              ))}
             </TableBody>
           </Table>
         )}
