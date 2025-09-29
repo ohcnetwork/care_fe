@@ -6,8 +6,6 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 
 import PaginationComponent from "@/components/Common/Pagination";
@@ -20,14 +18,19 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import { getPermissions } from "@/common/Permissions";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { TimelineWrapper } from "@/components/Common/TimelineWrapper";
+import { EmptyState } from "@/components/ui/empty-state";
 import { usePermissions } from "@/context/PermissionContext";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import { CaptionsOff, PlusIcon } from "lucide-react";
 
 const EncounterHistory = (props: PatientProps) => {
   const { patientData, facilityId } = props;
   const patientId = patientData.id;
+  useShortcutSubContext("facility:patient:home");
 
   const { t } = useTranslation();
 
@@ -73,43 +76,25 @@ const EncounterHistory = (props: PatientProps) => {
             {encounterData?.results?.length === 0 ? (
               facilityId ? (
                 <div className="p-2">
-                  <div className="h-full flex w-full items-center justify-center">
-                    <CreateEncounterForm
-                      facilityId={facilityId}
-                      patientId={patientId}
-                      patientName={patientData.name}
-                      trigger={
-                        <Button
-                          variant="outline"
-                          data-cy="create-encounter-button"
-                          className="group relative w-full h-[100px] md:h-[200px] overflow-hidden border-0 p-0 shadow-md hover:shadow-xl transition-all duration-300 justify-center"
-                        >
-                          <div className="p-4 md:p-6 w-full">
-                            <div className="flex w-full items-center gap-3 md:gap-4">
-                              <div className="flex size-10 md:size-12 items-center justify-center rounded-xl">
-                                <CareIcon
-                                  icon="l-stethoscope"
-                                  className="size-5 md:size-6 text-primary"
-                                />
-                              </div>
-                              <div className="flex flex-col items-start gap-0.5">
-                                <span className="text-base md:text-lg font-semibold text-gray-800 group-hover:text-primary transition-colors line-clamp-1">
-                                  {t("create_encounter")}
-                                </span>
-                                <span className="text-xs md:text-sm text-gray-500 line-clamp-1">
-                                  {t("start_a_new_clinical_encounter")}
-                                </span>
-                              </div>
-                              <CareIcon
-                                icon="l-arrow-right"
-                                className="ml-auto size-4 md:size-5 text-gray-400 transform translate-x-0 opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100"
-                              />
-                            </div>
-                          </div>
-                        </Button>
-                      }
-                    />
-                  </div>
+                  <EmptyState
+                    title={t("no_active_encounters_found")}
+                    description={t("create_a_new_encounter_to_get_started")}
+                    icon={<CaptionsOff className="size-5 text-primary m-1" />}
+                    action={
+                      <CreateEncounterForm
+                        facilityId={facilityId}
+                        patientId={patientId}
+                        patientName={patientData.name}
+                        trigger={
+                          <Button>
+                            <PlusIcon />
+                            {t("create_encounter")}
+                            <ShortcutBadge actionId="create-encounter" />
+                          </Button>
+                        }
+                      />
+                    }
+                  />
                 </div>
               ) : (
                 <div className="p-2">

@@ -416,7 +416,7 @@ export default function MedicationDispenseList({
         <EmptyState
           title={t("no_medications_found")}
           description={t("no_medications_found_description")}
-          icon="l-tablets"
+          icon={<CareIcon icon="l-tablets" className="text-primary size-6" />}
         />
       ) : (
         <div className="space-y-8">
@@ -536,7 +536,12 @@ export default function MedicationDispenseList({
                   <EmptyState
                     title={t("no_results")}
                     description={t("try_adjusting_your_filters")}
-                    icon="l-search"
+                    icon={
+                      <CareIcon
+                        icon="l-search"
+                        className="text-primary size-6"
+                      />
+                    }
                   />
                 )}
               </div>
@@ -562,7 +567,12 @@ export default function MedicationDispenseList({
                   <EmptyState
                     title={t("no_results")}
                     description={t("try_adjusting_your_filters")}
-                    icon="l-search"
+                    icon={
+                      <CareIcon
+                        icon="l-search"
+                        className="text-primary size-6"
+                      />
+                    }
                   />
                 )}
               </div>
