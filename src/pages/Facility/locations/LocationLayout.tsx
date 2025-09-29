@@ -118,7 +118,11 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     />
   ),
   "/internal_transfers/request_orders/:id": ({ id }: { id: string }) => (
-    <RequestOrderShow facilityId={facilityId} requestOrderId={id} />
+    <RequestOrderShow
+      facilityId={facilityId}
+      requestOrderId={id}
+      internal={true}
+    />
   ),
   "/internal_transfers/to_dispatch": () => (
     <RequestOrderList
@@ -232,7 +236,11 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     />
   ),
   "/external_supply/request_orders/:id": ({ id }: { id: string }) => (
-    <RequestOrderShow facilityId={facilityId} requestOrderId={id} />
+    <RequestOrderShow
+      facilityId={facilityId}
+      requestOrderId={id}
+      internal={false}
+    />
   ),
   "/external_supply/deliveries/:id": ({ id }: { id: string }) => (
     <ReceiveItem

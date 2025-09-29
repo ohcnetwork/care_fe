@@ -40,9 +40,14 @@ import { Link } from "raviger";
 interface Props {
   facilityId: string;
   requestOrderId: string;
+  internal: boolean;
 }
 
-export function RequestOrderShow({ facilityId, requestOrderId }: Props) {
+export function RequestOrderShow({
+  facilityId,
+  requestOrderId,
+  internal,
+}: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -186,7 +191,7 @@ export function RequestOrderShow({ facilityId, requestOrderId }: Props) {
             )}
             <Button variant="outline" asChild>
               <Link
-                href={`/external_supply/delivery_orders/new?supplyOrder=${requestOrderId}`}
+                href={`/${internal ? "internal_transfers" : "external_supply"}/delivery_orders/new?supplyOrder=${requestOrderId}`}
               >
                 {t("create_supply_delivery")}
                 <ShortcutBadge actionId="create-order" />
