@@ -36,7 +36,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
-import { Code, CodeSchema } from "@/types/base/code/code";
+import { Code } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import {
@@ -49,6 +49,56 @@ import {
   UCUM_TIME_UNITS_CODES,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
+
+// Define a Code schema to match the API type
+const codeSchema = z.object({
+  code: z.string().min(1, "Code is required"),
+  display: z.string().min(1, "Display name is required"),
+  system: z.string().min(1, "System is required"),
+});
+
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  slug_value: z.string().min(1, "Slug is required"),
+  product_type: z.nativeEnum(ProductKnowledgeType),
+  status: z.nativeEnum(ProductKnowledgeStatus),
+  alternate_identifier: z.string().trim().optional(),
+  category: z.string(),
+  code: codeSchema.nullable(),
+  base_unit: codeSchema.nullable(),
+  names: z
+    .array(
+      z.object({
+        name_type: z.nativeEnum(ProductNameTypes),
+        name: z.string().min(1, "Name is required"),
+      }),
+    )
+    .default([]),
+  storage_guidelines: z
+    .array(
+      z.object({
+        note: z.string().min(1, "Note is required"),
+        stability_duration: z
+          .object({
+            value: z.number().int().optional(),
+            unit: codeSchema,
+          })
+          .refine((data) => data.value !== undefined && data.value !== null),
+      }),
+    )
+    .default([]),
+  definitional: z
+    .object({
+      dosage_form: codeSchema.optional(),
+      intended_routes: z.array(codeSchema).default([]),
+    })
+    .nullable()
+    .optional()
+    .refine((data) => {
+      if (!data) return true; // definitional is optional
+      return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
+    }),
+});
 
 export default function ProductKnowledgeForm({
   facilityId,
@@ -121,58 +171,6 @@ function ProductKnowledgeFormContent({
   const queryClient = useQueryClient();
   const isEditMode = Boolean(slug);
 
-  const formSchema = z.object({
-    name: z.string().trim().min(1, t("field_required")),
-    slug_value: z.string().trim().min(1, t("field_required")),
-    product_type: z.nativeEnum(ProductKnowledgeType),
-    status: z.nativeEnum(ProductKnowledgeStatus),
-    alternate_identifier: z.string().trim().optional(),
-    category: z.string(),
-    code: CodeSchema.nullable(),
-    base_unit: CodeSchema.nullable(),
-    names: z
-      .array(
-        z.object({
-          name_type: z.nativeEnum(ProductNameTypes),
-          name: z.string().min(1, t("field_required")),
-        }),
-      )
-      .default([]),
-    storage_guidelines: z
-      .array(
-        z.object({
-          note: z.string().min(1, t("field_required")),
-          stability_duration: z
-            .object({
-              value: z.number().int().optional(),
-              unit: CodeSchema,
-            })
-            .refine((data) => data.value !== undefined && data.value !== null),
-        }),
-      )
-      .default([]),
-    definitional: z
-      .object({
-        dosage_form: CodeSchema.optional(),
-        intended_routes: z
-          .array(
-            CodeSchema.refine(
-              (data) => data.code && data.display && data.system,
-              {
-                message: t("field_required"),
-              },
-            ),
-          )
-          .default([]),
-      })
-      .nullable()
-      .optional()
-      .refine((data) => {
-        if (!data) return true; // definitional is optional
-        return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
-      }),
-  });
-
   // Create default storage guidelines and units
   const defaultUnitCode: Code = {
     code: "d",
@@ -203,8 +201,6 @@ function ProductKnowledgeFormContent({
     }
 
     return {
-      name: "",
-      slug: "",
       product_type: ProductKnowledgeType.medication,
       names: [],
       storage_guidelines: [],
@@ -948,8 +944,8 @@ function ProductKnowledgeFormContent({
                                       </FormLabel>
                                       <FormControl>
                                         <ValueSetSelect
-                                          {...routeField}
                                           system="system-route"
+                                          value={routeField.value}
                                           placeholder={t("select_route")}
                                           onSelect={(code) => {
                                             routeField.onChange({
@@ -964,7 +960,7 @@ function ProductKnowledgeFormContent({
                                     </FormItem>
                                   )}
                                 />
-                                <FormMessage />
+                                <FormMessage></FormMessage>
                               </div>
                               <Button
                                 type="button"
