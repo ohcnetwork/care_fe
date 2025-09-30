@@ -47,10 +47,10 @@ export default function OrganizationIndex() {
         <Card className="border-dashed">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center">
-              No Organizations Found
+              {t("no_organizations_found")}
             </CardTitle>
             <CardDescription className="text-center">
-              You don't have access to any organizations yet.
+              {t("organization_forbidden")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center p-6">
@@ -58,8 +58,7 @@ export default function OrganizationIndex() {
               <CareIcon icon="d-hospital" className="size-12 text-primary" />
             </div>
             <p className="text-center text-sm text-gray-500 max-w-sm mb-4">
-              Organizations help you manage facilities, users, and resources
-              efficiently. Contact your administrator to get access.
+              {t("organization_access_help")}
             </p>
           </CardContent>
         </Card>

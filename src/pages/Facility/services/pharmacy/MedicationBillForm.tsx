@@ -610,7 +610,6 @@ const AddMedicationSheet = ({
                                 as_needed_for: value || undefined,
                               });
                             }}
-                            asSheet
                           />
 
                           <InstructionsPopover
@@ -690,7 +689,7 @@ const AddMedicationSheet = ({
 };
 
 export default function MedicationBillForm({ patientId }: Props) {
-  useShortcutSubContext();
+  useShortcutSubContext("facility:general");
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { facilityId } = useCurrentFacility();
@@ -1275,7 +1274,6 @@ export default function MedicationBillForm({ patientId }: Props) {
               {t("go_back")}
             </BackButton>
             <Button
-              data-shortcut-id="billing-action"
               onClick={handleDispense}
               disabled={
                 !form.watch("items").some((q) => q.isSelected) || isPending
@@ -2640,8 +2638,6 @@ export default function MedicationBillForm({ patientId }: Props) {
             setMedicationToMarkComplete(null);
           }}
           confirmText={t("mark_as_already_given")}
-          cancelText={t("cancel")}
-          variant="primary"
         />
         <ConfirmActionDialog
           open={medicationToRemove !== null}
@@ -2678,8 +2674,7 @@ export default function MedicationBillForm({ patientId }: Props) {
             setMedicationToRemove(null);
           }}
           confirmText={t("remove_medication")}
-          cancelText={t("cancel")}
-          variant="primary"
+          variant="destructive"
         />
       </div>
     </Page>

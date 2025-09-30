@@ -74,15 +74,34 @@ export const PatientInfoHoverCard = ({
               <span className="font-semibold">{identifier.value}</span>
             </div>
           ))}
-          <div className="flex flex-col gap-1 text-sm font-medium">
-            <span className="text-gray-700">{t("emergency_contact")}</span>
-            <div className="flex flex-row gap-2 items-center">
-              <Phone size={14} strokeWidth={1.5} />
-              <span className="text-gray-950">
-                {patient.emergency_phone_number || patient.phone_number}
-              </span>
+          {patient.phone_number && (
+            <div className="flex flex-col gap-1 text-sm font-medium">
+              <span className="text-gray-700">{t("contact")}</span>
+              <a
+                className="flex flex-row gap-2 items-center"
+                href={`tel:${patient.phone_number}`}
+              >
+                <Phone size={14} strokeWidth={1.5} />
+                <span className="text-gray-950">{patient.phone_number}</span>
+              </a>
             </div>
-          </div>
+          )}
+          {patient.emergency_phone_number &&
+            patient.phone_number !== patient.emergency_phone_number && (
+              <div className="flex flex-col gap-1 text-sm font-medium">
+                <span className="text-gray-700">{t("emergency_contact")}</span>
+
+                <a
+                  className="flex flex-row gap-2 items-center"
+                  href={`tel:${patient.emergency_phone_number}`}
+                >
+                  <Phone size={14} strokeWidth={1.5} />
+                  <span className="text-gray-950">
+                    {patient.emergency_phone_number}
+                  </span>
+                </a>
+              </div>
+            )}
         </div>
         <div className="flex items-start border-t border-gray-200 pt-2">
           <div className="flex flex-col gap-1 text-sm font-medium w-full">

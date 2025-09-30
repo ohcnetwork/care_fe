@@ -57,7 +57,7 @@ export default function SupplyDeliveryTable({
       <EmptyState
         title={t("no_supply_deliveries_found")}
         description={t("no_supply_deliveries_found_description")}
-        icon="l-box"
+        icon={<CareIcon icon="l-box" className="text-primary size-6" />}
       />
     );
   }

@@ -8,24 +8,14 @@ import {
   PenLine,
   Trash,
 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -40,6 +30,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import mutate from "@/Utils/request/mutate";
 import { LocationList, LocationTypeIcons } from "@/types/location/location";
@@ -75,6 +67,9 @@ export function LocationTable({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [locationToDelete, setLocationToDelete] = useState<LocationList | null>(
+    null,
+  );
 
   const deleteLocation = useMutation({
     mutationFn: (locationId: string) => {
@@ -264,53 +259,20 @@ export function LocationTable({
                         {/* Delete button or spacer */}
                         {!location.has_children &&
                         !location.current_encounter ? (
-                          <AlertDialog>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-destructive hover:text-destructive"
-                                    data-cy="delete-location-button"
-                                  >
-                                    <Trash className="size-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                              </TooltipTrigger>
-                              <TooltipContent>{t("delete")}</TooltipContent>
-                            </Tooltip>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  {t("remove_name", {
-                                    name: location.name,
-                                  })}
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  {t("are_you_sure_want_to_delete", {
-                                    name: location.name,
-                                  })}
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>
-                                  {t("cancel")}
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  data-cy="remove-location-button"
-                                  onClick={() =>
-                                    deleteLocation.mutate(location.id)
-                                  }
-                                  className={buttonVariants({
-                                    variant: "destructive",
-                                  })}
-                                >
-                                  {t("remove")}
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => setLocationToDelete(location)}
+                                data-cy="delete-location-button"
+                              >
+                                <Trash className="size-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{t("delete")}</TooltipContent>
+                          </Tooltip>
                         ) : (
                           <div className="size-9"></div>
                         )}
@@ -323,6 +285,19 @@ export function LocationTable({
           })}
         </TableBody>
       </Table>
+      <ConfirmActionDialog
+        open={!!locationToDelete}
+        onOpenChange={(open) => !open && setLocationToDelete(null)}
+        title={t("remove_name", {
+          name: locationToDelete?.name,
+        })}
+        description={t("are_you_sure_want_to_delete", {
+          name: locationToDelete?.name,
+        })}
+        confirmText={t("remove")}
+        onConfirm={() => deleteLocation.mutate(locationToDelete!.id)}
+        variant="destructive"
+      />
     </div>
   );
 }

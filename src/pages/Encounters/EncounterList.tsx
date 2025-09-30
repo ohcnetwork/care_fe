@@ -26,7 +26,7 @@ import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
 import useFilters from "@/hooks/useFilters";
 
-import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import {
   EncounterClass,
   EncounterListRead,
@@ -36,7 +36,7 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
 
 interface EncounterListProps {
   encounters?: EncounterRead[];
@@ -64,10 +64,17 @@ const buildQueryParams = (
     params.priority = priority;
   }
   if (created_date_after) {
-    params.created_date_after = created_date_after;
+    // Convert date string to datetime for API call
+    params.created_date_after = dateTimeQueryString(
+      new Date(created_date_after),
+    );
   }
   if (created_date_before) {
-    params.created_date_before = created_date_before;
+    // Convert date string to datetime for API call (end of day)
+    params.created_date_before = dateTimeQueryString(
+      new Date(created_date_before),
+      true,
+    );
   }
   return params;
 };
@@ -248,7 +255,7 @@ export function EncounterList({
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <PatientEncounterOrIdentifierFilter
+                <PatientIdentifierFilter
                   onSelect={(patientId) =>
                     updateQuery({ patient_filter: patientId })
                   }
