@@ -75,7 +75,7 @@ export function TimelineEncounterCard({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <CardContent className="p-5">
+        <CardContent className="p-4">
           <div className="font-semibold text-base mb-2">
             {t(`encounter_class__${encounter.encounter_class}`)}
           </div>
@@ -95,25 +95,26 @@ export function TimelineEncounterCard({
             </Badge>
           </div>
 
-          <div className="grid gap-3 sm:gap-6 sm:flex sm:flex-wrap ">
-            <div>
-              <div className="text-gray-600">{t("start_date")}</div>
-              <div className="font-semibold text-gray-900">
-                {encounter.period.start
-                  ? formatDateTime(encounter.period.start)
-                  : t("not_started")}
+          <div className="grid gap-3 sm:gap-6 sm:flex sm:flex-wrap text-sm">
+            <div className="flex gap-2">
+              <div>
+                <div className="text-gray-600">{t("start_date")}</div>
+                <div className="font-semibold text-gray-900">
+                  {encounter.period.start
+                    ? formatDateTime(encounter.period.start)
+                    : t("not_started")}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-gray-600">{t("end_date")}</div>
+                <div className="font-semibold text-gray-900">
+                  {encounter.period.end
+                    ? formatDateTime(encounter.period.end)
+                    : t("ongoing") + "..."}
+                </div>
               </div>
             </div>
-
-            <div>
-              <div className="text-gray-600">{t("end_date")}</div>
-              <div className="font-semibold text-gray-900">
-                {encounter.period.end
-                  ? formatDateTime(encounter.period.end)
-                  : t("ongoing") + "..."}
-              </div>
-            </div>
-
             <div>
               <div className="text-gray-600">{t("facility")}</div>
               <div className="font-semibold text-gray-900">
@@ -138,7 +139,7 @@ export function TimelineEncounterCard({
           )}
         </CardContent>
         <CardFooter className="p-1">
-          <div className="bg-gray-100 p-4 rounded-b-lg w-full">
+          <div className="bg-gray-100 p-2 rounded-b-lg w-full">
             <Button asChild variant="outline" disabled={!canAccess}>
               <Link
                 href={
