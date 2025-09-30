@@ -7,6 +7,16 @@ const logoSchema = z.object({
   dark: z.string().url(),
 });
 
+const booleanAsStringSchema = z
+  .string()
+  .refine((val) => val === "true" || val === "false", {
+    message: "Must be a boolean",
+  });
+
+const numberAsString = z.string().refine((val) => !isNaN(parseInt(val)), {
+  message: "Must be a valid number",
+});
+
 const logoSchemaString = z
   .string()
   .refine(
@@ -33,7 +43,7 @@ const envSchema = z
     REACT_PUBLIC_URL: z.string().url(),
     REACT_APP_COVER_IMAGE: z.string().url(),
     REACT_APP_COVER_IMAGE_ALT: z.string().url(),
-    REACT_SBOM_BASE_URL: z.string().url(),
+    REACT_SBOM_BASE_URL: z.string().url().optional(),
     REACT_GITHUB_URL: z.string().url().optional(),
     REACT_OHCN_URL: z.string().url().optional(),
     REACT_SENTRY_DSN: z.string().url().optional(),
@@ -47,47 +57,11 @@ const envSchema = z
     REACT_MAPS_FALLBACK_URL_TEMPLATE: z.string().url().optional(),
     REACT_ENABLED_APPS: z.string().optional(),
     REACT_RECAPTCHA_SITE_KEY: z.string(),
-    REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: z.string().optional(),
-    REACT_JWT_TOKEN_REFRESH_INTERVAL: z
-      .string()
-      .refine(
-        (val) => {
-          parseInt(val);
-        },
-        {
-          message: "Must be a valid number",
-        },
-      )
-      .optional(),
-    REACT_DISABLE_PATIENT_LOGIN: z.string().refine(
-      (val) => {
-        const bool = val === "true" || val === "false";
-        return bool;
-      },
-      {
-        message: "Must be a boolean",
-      },
-    ),
-    REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION: z.string().refine(
-      (val) => {
-        const bool = val === "true" || val === "false";
-        return bool;
-      },
-      {
-        message: "Must be a boolean",
-      },
-    ),
-    REACT_APPOINTMENTS_DEFAULT_DATE_FILTER: z
-      .string()
-      .refine(
-        (val) => {
-          parseInt(val);
-        },
-        {
-          message: "Must be a valid number",
-        },
-      )
-      .optional(),
+    REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: numberAsString.optional(),
+    REACT_JWT_TOKEN_REFRESH_INTERVAL: numberAsString.optional(),
+    REACT_DISABLE_PATIENT_LOGIN: booleanAsStringSchema.optional(),
+    REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION: booleanAsStringSchema.optional(),
+    REACT_APPOINTMENTS_DEFAULT_DATE_FILTER: numberAsString.optional(),
     REACT_OBSERVATION_PLOTS_CONFIG_URL: z.string().url().optional(),
     REACT_DEFAULT_COUNTRY: z.string().optional(),
     REACT_DEFAULT_COUNTRY_NAME: z.string().optional(),
@@ -101,7 +75,7 @@ const envSchema = z
       .string()
       .transform((val) => val.split(",").map((v) => v.trim()))
       .refine((values) => new Set(values).size === values.length, {
-        message: "Duplicate encounter classes",
+        message: "Duplicate encounter classes are not allowed",
       })
       .refine(
         (values) => values.every((v) => ENCOUNTER_CLASS.includes(v as any)),
@@ -111,21 +85,9 @@ const envSchema = z
       )
       .optional(),
     REACT_ALLOWED_LOCALES: z.string().optional(),
-    REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED: z
-      .string()
-      .refine(
-        (val) => {
-          const num = parseInt(val);
-          return 1 <= num && num <= 50;
-        },
-        {
-          message:
-            "Must be greater than or equal to  1 and less than or equal to 50",
-        },
-      )
-      .optional(),
+    REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED: numberAsString.optional(),
     REACT_DEFAULT_ENCOUNTER_TYPE: z.string().optional(),
-    REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.string().optional(),
+    REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.string().uuid().optional(),
   })
   .superRefine(async (data, ctx) => {
     const allowedClasses =
@@ -160,7 +122,7 @@ const envSchema = z
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Sentry environment and DSN are required together",
+        message: "Sentry environment and DSN are both required",
         path: ["REACT_SENTRY_ENVIRONMENT", "REACT_SENTRY_DSN"],
       });
     }
