@@ -62,7 +62,7 @@ function LocationCard({
             id={location.id}
             className="absolute inset-0 rounded-sm opacity-20"
           />
-          <CareIcon icon="l-flask" className="size-6 relative z-1" />
+          <CareIcon icon="l-flask" className="size-6 relative z-10" />
         </div>
         <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-2">
           <div className="min-w-0 flex-1">
@@ -194,7 +194,7 @@ export default function HealthcareServiceShow({
                   id={service.managing_organization.id}
                   className="absolute inset-0 rounded-sm opacity-20"
                 />
-                <CareIcon icon="l-building" className="size-6 relative z-1" />
+                <CareIcon icon="l-building" className="size-6 relative z-10" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold truncate text-gray-900 text-base">

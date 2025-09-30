@@ -202,7 +202,7 @@ export default function HealthcareServiceShow({
                     />
                     <CareIcon
                       icon="l-building"
-                      className="size-6 relative z-1"
+                      className="size-6 relative z-10"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
