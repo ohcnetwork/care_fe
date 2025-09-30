@@ -67,7 +67,10 @@ export function ShortcutProvider({
   const actions = useMemo((): FacilityAction[] => {
     const allContexts = expandShortcutContext(subContext || "");
 
-    return ["global", ...allContexts]
+    return [
+      ...(subContext?.includes("-global") ? [] : ["global"]),
+      ...allContexts,
+    ]
       .map((context) => {
         const contextActions = actionsJson[context as keyof typeof actionsJson];
 

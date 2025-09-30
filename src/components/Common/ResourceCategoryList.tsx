@@ -296,7 +296,9 @@ export function ResourceCategoryList({
           <TableSkeleton count={5} />
         ) : isRootLevel && categories.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
             title={t("no_categories_found")}
             description={t("create_your_first_category")}
           />
