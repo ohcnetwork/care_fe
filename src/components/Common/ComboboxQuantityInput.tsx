@@ -48,6 +48,7 @@ export function ComboboxQuantityInput({
   const [inputValue, setInputValue] = React.useState(
     quantity?.value?.toString() || "",
   );
+  const { t } = useTranslation();
   const [selectedUnit, setSelectedUnit] = React.useState(quantity?.unit);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [activeIndex, setActiveIndex] = React.useState<number>(-1);

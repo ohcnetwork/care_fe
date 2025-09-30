@@ -250,7 +250,7 @@ export function ChargeItemsTable({
         <EmptyState
           icon="l-receipt"
           title={t("no_charge_items")}
-          description={t("no_charge_items_description")}
+          description={t("no_charge_items")}
         />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">

@@ -168,6 +168,7 @@ const Login = (props: LoginProps) => {
       }
     },
     onError: (error: any) => {
+      console.log(error);
       let errorMessage = "invalid_otp";
       if (
         error.cause &&
@@ -361,7 +362,7 @@ const Login = (props: LoginProps) => {
                 </CardTitle>
                 <CardDescription>
                   {disablePatientLogin
-                    ? t("sign_in_to_continue")
+                    ? t("sign_in_to_your_account_to_continue")
                     : t("choose_login_method")}
                 </CardDescription>
               </CardHeader>

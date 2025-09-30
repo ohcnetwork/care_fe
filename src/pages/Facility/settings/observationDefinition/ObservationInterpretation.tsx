@@ -751,7 +751,7 @@ export function ConditionComponent({
                       onValueChange={(value) => handleSetMetric(value, index)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a metric" />
+                        <SelectValue placeholder={t("select_a_metric")} />
                       </SelectTrigger>
                       <SelectContent>
                         {metrics?.map((metric: Metrics) => (
@@ -772,7 +772,7 @@ export function ConditionComponent({
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select an operation" />
+                        <SelectValue placeholder={t("select_an_operation")} />
                       </SelectTrigger>
                       <SelectContent>
                         {metric.allowed_operations.map(
@@ -846,7 +846,7 @@ function InterpretationComponent({
         />
       </div>
       <div className="flex flex-col gap-2 flex-1">
-        <FormLabel className="text-sm">{t("color")}</FormLabel>
+        <FormLabel className="text-sm">{t("colour")}</FormLabel>
         <Select
           value={interpretation.color}
           onValueChange={(value) => handleColorChange(value)}
@@ -1073,7 +1073,7 @@ function CustomValueSetInterpretationComponent({
             onValueChange={(value) => handleSetValueset(value, index)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a value set" />
+              <SelectValue placeholder={t("select_a_value_set")} />
             </SelectTrigger>
             <SelectContent>
               {valuesets?.results?.map((valueset) => (
