@@ -178,7 +178,7 @@ export const PrescriptionPreview = ({
       title={`${t("prescriptions")} - ${patient.name}`}
       disabled={!prescriptions?.length}
     >
-      <div className="min-h-screen md:p-2 max-w-4xl mx-auto">
+      <div className="md:p-2 max-w-4xl mx-auto">
         <div>
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4 pb-2 border-b border-gray-200">
