@@ -109,7 +109,7 @@ export function AddSupplyDeliveryForm({
 
   const inventoryItemOptions =
     inventoryItems?.results.map((item: InventoryRead) => ({
-      label: `${t("lot")} #${item.product.batch?.lot_number} ${item.product.expiration_date ? `(${t("expiry")} ${formatDate(item.product.expiration_date, "dd/MM/yyyy")})` : ""}`,
+      label: `#${item.product.batch?.lot_number} ${item.product.expiration_date ? `(${formatDate(item.product.expiration_date, "dd/MM/yyyy")})` : ""}, QTY: ${item.net_content}`,
       value: item.id,
     })) || [];
 
@@ -283,7 +283,8 @@ export function AddSupplyDeliveryForm({
                                       value={field.value || ""}
                                       onChange={field.onChange}
                                       isLoading={isLoadingInventoryItems}
-                                      onSearch={setSearchInventoryItem}
+                                      // TODO: Make this work
+                                      //   onSearch={setSearchInventoryItem}
                                       placeholder={t("select_inventory_item")}
                                       inputPlaceholder={t(
                                         "search_inventory_item",

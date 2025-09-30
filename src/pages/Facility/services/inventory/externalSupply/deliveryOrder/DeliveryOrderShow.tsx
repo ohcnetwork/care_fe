@@ -291,10 +291,10 @@ export function DeliveryOrderShow({ facilityId, deliveryOrderId }: Props) {
                                     href={`/external_supply/deliveries/${supplyDelivery.id}`}
                                   >
                                     <div className="font-medium">
-                                      {
-                                        supplyDelivery.supplied_item
-                                          .product_knowledge.name
-                                      }
+                                      {supplyDelivery.supplied_item
+                                        ?.product_knowledge?.name ||
+                                        supplyDelivery.supplied_inventory_item
+                                          ?.product?.product_knowledge?.name}
                                     </div>
                                   </Link>
                                 </TableCell>
