@@ -1006,7 +1006,6 @@
   "choose_layout_style": "Choose the layout style that best fits your sub-questions from the available options.",
   "choose_localbody": "Choose Local Body",
   "choose_location": "Choose Location",
-  "choose_login_method": "Choose your login method to continue",
   "choose_other_search_type": "Choose other search types",
   "choose_resource": "Choose practitioner/location/healthcare service to see availability.",
   "choose_service_point_to_call_patient": "Choose a service point to call {{patientName}} ({{tokenNumber}}) to.",

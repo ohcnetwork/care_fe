@@ -363,7 +363,7 @@ const Login = (props: LoginProps) => {
                 <CardDescription>
                   {disablePatientLogin
                     ? t("sign_in_to_your_account_to_continue")
-                    : t("choose_login_method")}
+                    : t("choose_your_login_method_to_continue")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
