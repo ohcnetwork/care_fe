@@ -96,8 +96,8 @@ export interface CommentModel {
 }
 
 // converting to lowercase as old data in db are in uppercase and new are in lowercase
-export const getResourceRequestCategoryEnum = (category?: string) => {
-  const categoryText = category?.toLowerCase() as ResourceRequestCategory;
+export const getResourceRequestCategoryEnum = (category: string) => {
+  const categoryText = category.toLowerCase() as ResourceRequestCategory;
   if (valuesOf(ResourceRequestCategory).includes(categoryText)) {
     return categoryText;
   }
