@@ -167,7 +167,7 @@ const config = [
       ...i18nextPlugin.configs.recommended.rules,
       "i18next/no-literal-string": [
         dynamicRules({
-          error: isPreCommit,
+          error: isPreCommit || isProduction,
           warn: DEFAULT,
         }),
         {
