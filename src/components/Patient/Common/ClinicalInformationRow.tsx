@@ -111,14 +111,17 @@ export default function ClinicalInformationRow({
 
       {showNote && note && (
         <div className="col-span-full relative border border-gray-200 p-2 pt-4 bg-gray-50 rounded -mt-2.5 rounded-t-none">
-          <div className="font-semibold text-gray-800">{t("note")}:</div>
+          <div className="text-sm font-semibold text-gray-800">
+            {t("note")}
+            {":"}
+          </div>
 
           <Button
             variant="link"
-            className="absolute top-2 right-4 flex items-center gap-1 p-0 text-sm"
+            className="absolute top-0 right-2 flex items-center gap-1 p-0 text-sm"
             onClick={() => setShowNote(false)}
           >
-            <X size={14} />
+            <X />
             <span className="underline">{t("hide_note")}</span>
           </Button>
 
