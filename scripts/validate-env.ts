@@ -62,6 +62,7 @@ const envSchema = z
     REACT_DISABLE_PATIENT_LOGIN: booleanAsStringSchema.optional(),
     REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION: booleanAsStringSchema.optional(),
     REACT_APPOINTMENTS_DEFAULT_DATE_FILTER: numberAsString.optional(),
+    REACT_ENCOUNTER_DEFAULT_DATE_FILTER: numberAsString.optional(),
     REACT_OBSERVATION_PLOTS_CONFIG_URL: z.string().url().optional(),
     REACT_DEFAULT_COUNTRY: z.string().optional(),
     REACT_DEFAULT_COUNTRY_NAME: z.string().optional(),

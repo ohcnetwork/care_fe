@@ -20,6 +20,8 @@ interface ImportMetaEnv {
   readonly REACT_RECAPTCHA_SITE_KEY?: string;
   readonly REACT_JWT_TOKEN_REFRESH_INTERVAL?: string;
   readonly REACT_DEFAULT_ENCOUNTER_TYPE?: string;
+  readonly REACT_ENCOUNTER_DEFAULT_DATE_FILTER?: string;
+  readonly REACT_APPOINTMENTS_DEFAULT_DATE_FILTER?: string;
   readonly REACT_ALLOWED_ENCOUNTER_CLASSES?: string;
   readonly REACT_ALLOWED_LOCALES?: string;
   readonly REACT_ENABLED_APPS?: string;
