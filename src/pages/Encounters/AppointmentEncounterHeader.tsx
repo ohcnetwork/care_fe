@@ -109,8 +109,6 @@ export const AppointmentEncounterHeader = ({
     startEncounter({
       ...encounter,
       status: "in_progress",
-      patient: encounter.patient.id,
-      facility: encounter.facility.id,
     });
   };
 
@@ -172,8 +170,6 @@ export const AppointmentEncounterHeader = ({
         reference_id: "encounter-closed",
         body: {
           ...encounter,
-          patient: encounter.patient.id,
-          facility: encounter.facility.id,
           status: "completed",
           period: {
             start: encounter.period.start,

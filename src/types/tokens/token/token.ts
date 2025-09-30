@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { PatientRead } from "@/types/emr/patient/patient";
+import { PatientListRead } from "@/types/emr/patient/patient";
 import {
   Appointment,
   SchedulableResourceType,
@@ -58,7 +58,7 @@ export interface TokenRead extends Token {
   category: TokenCategoryRead;
   sub_queue?: TokenSubQueueRead;
   note: string;
-  patient?: PatientRead;
+  patient?: PatientListRead;
   number: number;
   status: TokenStatus;
   queue: TokenQueueRead;

@@ -237,7 +237,7 @@ export type AppointmentRead = Appointment & {
   created_by: UserReadMinimal;
   modified_date: string;
   associated_encounter?: EncounterListRead;
-}
+};
 
 export interface AppointmentCreateRequest {
   patient: string;

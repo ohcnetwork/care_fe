@@ -153,7 +153,8 @@ export const PatientHome = (props: {
                         href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
                           {
                             phone_number: patientData.phone_number,
-                            year_of_birth: patientData.year_of_birth.toString(),
+                            year_of_birth:
+                              patientData.year_of_birth?.toString() ?? "",
                             partial_id: patientData.id.slice(0, 5),
                           },
                         ).toString()}`}
