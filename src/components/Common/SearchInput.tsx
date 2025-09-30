@@ -208,6 +208,12 @@ export default function SearchInput({
     [onSearch, safeOptions, onFieldChange],
   );
 
+  useEffect(() => {
+    if (selectedOption) {
+      setSearchValue(selectedOption.value);
+    }
+  }, [selectedOption?.value]);
+
   const unselectedOptions = safeOptions.filter(
     (option) => option.key !== selectedOption?.key,
   );

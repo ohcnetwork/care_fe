@@ -138,7 +138,13 @@ export const EncounterShow = (props: Props) => {
     },
     responses: {
       label: t(`ENCOUNTER_TAB__qnr_responses`),
-      component: <EncounterResponsesTab />,
+      component: (
+        <EncounterResponsesTab
+          patientId={patient?.id}
+          encounterId={selectedEncounter?.id}
+          canAccess={canAccess}
+        />
+      ),
     },
     files: {
       label: t(`ENCOUNTER_TAB__files`),
