@@ -41,12 +41,14 @@ interface Props {
   facilityId: string;
   requestOrderId: string;
   internal: boolean;
+  locationId: string;
 }
 
 export function RequestOrderShow({
   facilityId,
   requestOrderId,
   internal,
+  locationId,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -160,6 +162,8 @@ export function RequestOrderShow({
     );
   }
 
+  const isRequester = requestOrder?.destination.id === locationId;
+
   const canAddSupplyRequests = requestOrder.status === RequestOrderStatus.draft;
 
   return (
@@ -189,14 +193,18 @@ export function RequestOrderShow({
                 {isApproving ? t("approving") : t("approve_order")}
               </Button>
             )}
-            <Button variant="outline" asChild>
-              <Link
-                href={`/${internal ? "internal_transfers" : "external_supply"}/delivery_orders/new?supplyOrder=${requestOrderId}`}
-              >
-                {t("create_supply_delivery")}
-                <ShortcutBadge actionId="create-order" />
-              </Link>
-            </Button>
+            {((internal && !isRequester) ||
+              (!internal &&
+                requestOrder.status === RequestOrderStatus.pending)) && (
+              <Button variant="outline" asChild>
+                <Link
+                  href={`/${internal ? "internal_transfers" : "external_supply"}/delivery_orders/new?supplyOrder=${requestOrderId}`}
+                >
+                  {t("create_supply_delivery")}
+                  <ShortcutBadge actionId="create-order" />
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
         {/* Request Order Details */}

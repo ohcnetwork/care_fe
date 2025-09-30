@@ -84,7 +84,7 @@ export function DeliveryOrderList({
     queryFn: query.debounced(deliveryOrderApi.listDeliveryOrder, {
       pathParams: { facilityId: facilityId },
       queryParams: {
-        ...(isRequester ? { origin: locationId } : { destination: locationId }),
+        ...(isRequester ? { destination: locationId } : { origin: locationId }),
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: effectiveStatus,

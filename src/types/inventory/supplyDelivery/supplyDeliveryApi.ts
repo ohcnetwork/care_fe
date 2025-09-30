@@ -5,7 +5,6 @@ import {
   SupplyDeliveryBase,
   SupplyDeliveryCreate,
   SupplyDeliveryRead,
-  SupplyDeliveryRetrieve,
   SupplyDeliveryUpdate,
   SupplyDeliveryUpsert,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
@@ -19,7 +18,7 @@ export default {
   retrieveSupplyDelivery: {
     path: "/api/v1/supply_delivery/{supplyDeliveryId}/",
     method: HttpMethod.GET,
-    TRes: Type<SupplyDeliveryRetrieve>(),
+    TRes: Type<SupplyDeliveryRead>(),
   },
   createSupplyDelivery: {
     path: "/api/v1/supply_delivery/",

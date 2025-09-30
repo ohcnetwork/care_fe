@@ -15,7 +15,6 @@ import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList
 import RequestOrderForm from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderForm";
 import { RequestOrderList } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderList";
 import { RequestOrderShow } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderShow";
-import ReceiveItem from "@/pages/Facility/services/inventory/internalTransfer/ReceiveItem";
 
 import DeliveryOrderForm from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderForm";
 import { DeliveryOrderList } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderList";
@@ -87,19 +86,7 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       facilityId={facilityId}
       locationId={locationId}
       internal={true}
-      isRequester={false}
-    />
-  ),
-  "/internal_transfers/to_receive/:deliveryId": ({
-    deliveryId,
-  }: {
-    deliveryId: string;
-  }) => (
-    <ReceiveItem
-      facilityId={facilityId}
-      locationId={locationId}
-      deliveryId={deliveryId}
-      mode="internal"
+      isRequester={true}
     />
   ),
   "/internal_transfers/request_orders/new": () => (
@@ -120,6 +107,7 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   "/internal_transfers/request_orders/:id": ({ id }: { id: string }) => (
     <RequestOrderShow
       facilityId={facilityId}
+      locationId={locationId}
       requestOrderId={id}
       internal={true}
     />
@@ -164,7 +152,12 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     />
   ),
   "/internal_transfers/delivery_orders/:id": ({ id }: { id: string }) => (
-    <DeliveryOrderShow facilityId={facilityId} deliveryOrderId={id} />
+    <DeliveryOrderShow
+      facilityId={facilityId}
+      deliveryOrderId={id}
+      locationId={locationId}
+      internal={true}
+    />
   ),
   // "/internal_transfers/create_delivery": () => (
   //   <SupplyDeliveryCreate facilityId={facilityId} locationId={locationId} />
@@ -239,15 +232,8 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     <RequestOrderShow
       facilityId={facilityId}
       requestOrderId={id}
-      internal={false}
-    />
-  ),
-  "/external_supply/deliveries/:id": ({ id }: { id: string }) => (
-    <ReceiveItem
-      facilityId={facilityId}
       locationId={locationId}
-      deliveryId={id}
-      mode="external"
+      internal={false}
     />
   ),
 
@@ -302,12 +288,13 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     />
   ),
   "/external_supply/delivery_orders/:id": ({ id }: { id: string }) => (
-    <DeliveryOrderShow facilityId={facilityId} deliveryOrderId={id} />
+    <DeliveryOrderShow
+      facilityId={facilityId}
+      deliveryOrderId={id}
+      locationId={locationId}
+      internal={false}
+    />
   ),
-
-  // "/external_supply/inward_entry/receive": () => (
-  //   <ReceiveStock facilityId={facilityId} locationId={locationId} />
-  // ),
 
   "/medication_requests/patient/:patientId": ({
     patientId,

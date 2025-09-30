@@ -59,7 +59,9 @@ export default function DeliveryOrderTable({
         <TableHeader className="bg-gray-100">
           <TableRow className="divide-x">
             <TableHead className="text-gray-700">{t("name")}</TableHead>
-            <TableHead className="text-gray-700">{t("supplier")}</TableHead>
+            <TableHead className="text-gray-700">
+              {t(internal ? "origin" : "supplier")}
+            </TableHead>
             <TableHead className="text-gray-700">{t("deliver_to")}</TableHead>
             <TableHead className="text-gray-700">{t("status")}</TableHead>
             <TableHead className="w-[100px] text-gray-700">
