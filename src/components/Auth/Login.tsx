@@ -40,11 +40,11 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
 import authApi from "@/types/auth/authApi";
-import { TokenData } from "@/types/auth/otp";
+import { TokenData } from "@/types/otp/otp";
+import otpApi from "@/types/otp/otpApi";
 
 import { AuthHero } from "./AuthHero";
 
@@ -127,7 +127,7 @@ const Login = (props: LoginProps) => {
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
-    mutationFn: mutate(routes.otp.sendOtp),
+    mutationFn: mutate(otpApi.send),
     onSuccess: () => {
       setIsOtpSent(true);
       setOtpError("");
@@ -147,9 +147,7 @@ const Login = (props: LoginProps) => {
   // Verify OTP Mutation
   const { mutate: verifyOtp, isPending: verifyOtpPending } = useMutation({
     mutationFn: async (data: OtpLoginData) => {
-      const response = await mutate(routes.otp.loginByOtp, { silent: true })(
-        data,
-      );
+      const response = await mutate(otpApi.login, { silent: true })(data);
       if ("errors" in response) {
         throw response;
       }
@@ -358,7 +356,7 @@ const Login = (props: LoginProps) => {
             <Card className="mx-4">
               <CardHeader className="space-y-1 px-4">
                 <CardTitle className="text-2xl font-bold">
-                  {t("welcome_back_login_title")}
+                  {t("welcome_back")}
                 </CardTitle>
                 <CardDescription>
                   {disablePatientLogin
@@ -643,7 +641,7 @@ const Login = (props: LoginProps) => {
                                 type="text"
                                 value={form.username}
                                 onChange={handleChange}
-                                placeholder="Enter your username"
+                                placeholder={t("enter_your_username")}
                                 className={cn(
                                   errors.username &&
                                     "border-red-500 focus-visible:ring-red-500",

@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, navigate } from "raviger";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -164,13 +164,13 @@ export default function LocationView({
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           {breadcrumbs.map((breadcrumb, index) => (
-            <BreadcrumbItem key={breadcrumb.id}>
-              {index === breadcrumbs.length - 1 ? (
-                <span className="font-semibold text-gray-900">
-                  {breadcrumb.name}
-                </span>
-              ) : (
-                <>
+            <React.Fragment key={breadcrumb.id}>
+              <BreadcrumbItem>
+                {index === breadcrumbs.length - 1 ? (
+                  <span className="font-semibold text-gray-900">
+                    {breadcrumb.name}
+                  </span>
+                ) : (
                   <BreadcrumbLink
                     asChild={!isNested}
                     className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
@@ -190,10 +190,10 @@ export default function LocationView({
                       </Link>
                     )}
                   </BreadcrumbLink>
-                  <BreadcrumbSeparator />
-                </>
-              )}
-            </BreadcrumbItem>
+                )}
+              </BreadcrumbItem>
+              {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+            </React.Fragment>
           ))}
         </BreadcrumbList>
       </Breadcrumb>

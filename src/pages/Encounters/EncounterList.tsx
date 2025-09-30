@@ -33,6 +33,8 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
 import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
+import careConfig from "@careConfig";
+import { subDays } from "date-fns";
 
 interface EncounterListProps {
   encounters?: EncounterRead[];
@@ -167,10 +169,19 @@ export function EncounterList({
     // Set default date range if no dates are present
     if (!created_date_after && !created_date_before) {
       const today = new Date();
-      updateQuery({
-        created_date_after: dateQueryString(today),
-        created_date_before: dateQueryString(today),
-      });
+      const defaultDays = careConfig.encounterDateFilter;
+      if (defaultDays === 0) {
+        // Today only
+        updateQuery({
+          created_date_after: dateQueryString(today),
+          created_date_before: dateQueryString(today),
+        });
+      } else {
+        updateQuery({
+          created_date_after: dateQueryString(subDays(today, defaultDays)),
+          created_date_before: dateQueryString(today),
+        });
+      }
     }
   }, [created_date_after, created_date_before, updateQuery]);
 
