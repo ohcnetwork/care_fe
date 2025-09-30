@@ -20,6 +20,7 @@ import {
 
 import useFilters from "@/hooks/useFilters";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
 import { makeUrl } from "@/Utils/request/utils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
@@ -152,7 +153,7 @@ export default function SupplyDeliveryTable({
         <TableSkeleton count={5} />
       ) : !deliveries.length ? (
         <EmptyState
-          icon="l-box"
+          icon={<CareIcon icon="l-box" className="text-primary size-6" />}
           title={t("no_deliveries_found")}
           description={t("no_deliveries_found_description")}
         />

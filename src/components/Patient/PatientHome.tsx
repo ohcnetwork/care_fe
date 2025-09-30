@@ -23,7 +23,7 @@ import {
   PatientDeceasedInfo,
   PatientHeader,
 } from "@/components/Patient/PatientHeader";
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
 export const PatientHome = (props: {
@@ -35,7 +35,7 @@ export const PatientHome = (props: {
 
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-  useFacilityShortcuts();
+  useShortcutSubContext();
   const { data: patientData, isLoading } = useQuery({
     queryKey: ["patient", id],
     queryFn: query(patientApi.getPatient, {
@@ -62,7 +62,7 @@ export const PatientHome = (props: {
 
   const tabs = getPatientTabs;
 
-  const Tab = tabs.find((t) => t.route === page)?.component;
+  const Tab = tabs.find((t) => t.route === page);
 
   if (!patientData) {
     return <div>{t("patient_not_found")}</div>;
@@ -128,15 +128,17 @@ export const PatientHome = (props: {
         </div>
         <div className="lg:flex">
           <div className="h-full lg:mr-7 lg:basis-5/6">
-            {Tab && (
-              <Tab
-                facilityId={facilityId || ""}
+            {Tab?.component && (
+              <Tab.component
+                facilityId={
+                  Tab?.route === "appointments" ? undefined : facilityId || ""
+                }
                 patientId={id}
                 patientData={patientData}
               />
             )}
           </div>
-          {Tab !== PatientNotesTab && (
+          {Tab?.component !== PatientNotesTab && (
             <div className="sticky top-20 mt-8 mx-4 md:mx-0 h-full lg:basis-1/6">
               <section className="mb-4 space-y-2 md:flex">
                 <div className="w-full lg:mx-0">

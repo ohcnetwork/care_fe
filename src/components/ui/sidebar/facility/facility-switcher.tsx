@@ -79,7 +79,7 @@ export function FacilitySwitcher({
                 )}
               >
                 <Link href={`/facility/${facility.id}/overview`}>
-                  <div className="flex size-6 items-center justify-center rounded-sm border border-gray-200">
+                  <div className="flex size-6 items-center justify-center rounded-sm border border-gray-200 shrink-0">
                     <Hospital className="size-4 shrink-0 text-current" />
                   </div>
                   {facility.name}

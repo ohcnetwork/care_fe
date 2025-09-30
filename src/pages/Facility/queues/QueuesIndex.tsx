@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { MoreVertical, Pencil, Plus, Settings, Square, X } from "lucide-react";
+import { MoreVertical, Pencil, Plus, Settings, Square } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -48,6 +48,7 @@ import {
 import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import { UserReadMinimal } from "@/types/user/user";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import { dateQueryString } from "@/Utils/utils";
 import { startOfDay } from "date-fns";
 import dayjs from "dayjs";
@@ -74,7 +75,7 @@ function QueueRow({
   const { t } = useTranslation();
   const queueLink =
     resourceType === SchedulableResourceType.Practitioner
-      ? `/facility/${facilityId}/queues/${queue.id}/${resourceType}/${resourceId}/ongoing`
+      ? `/facility/${facilityId}/practitioner/${resourceId}/queues/${queue.id}/ongoing`
       : `/queues/${queue.id}/ongoing`;
 
   return (
@@ -146,10 +147,6 @@ function QueueRow({
                 </DropdownMenuItem>
               }
             />
-            <DropdownMenuItem className="text-red-600 focus:text-red-600">
-              <X className="h-4 w-4 mr-2" />
-              {t("end_queue")}
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
@@ -348,7 +345,12 @@ export default function QueuesIndex({
               </div>
             ) : queues.length === 0 ? (
               <EmptyState
-                icon="l-folder-open"
+                icon={
+                  <CareIcon
+                    icon="l-folder-open"
+                    className="text-primary size-6"
+                  />
+                }
                 title={t("no_queues_found")}
                 description={t("no_queues_found_description")}
                 action={
@@ -445,7 +447,9 @@ export default function QueuesIndex({
               </div>
             ) : subQueues.length === 0 ? (
               <EmptyState
-                icon="l-map-pin"
+                icon={
+                  <CareIcon icon="l-map-pin" className="text-primary size-6" />
+                }
                 title={t("no_service_points_found")}
                 description={t("no_service_points_found_description")}
                 action={
