@@ -1,26 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Loader2, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { Link, navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -35,27 +25,28 @@ import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefini
 
 interface SpecimenDefinitionDetailProps {
   facilityId: string;
-  specimenDefinitionId: string;
+  specimenSlug: string;
 }
 
 export function SpecimenDefinitionDetail({
   facilityId,
-  specimenDefinitionId,
+  specimenSlug,
 }: SpecimenDefinitionDetailProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: specimenDefinition, isLoading } = useQuery({
-    queryKey: ["specimenDefinitions", facilityId, specimenDefinitionId],
+    queryKey: ["specimenDefinitions", facilityId, specimenSlug],
     queryFn: query(specimenDefinitionApi.retrieveSpecimenDefinition, {
-      pathParams: { facilityId, specimenDefinitionId },
+      pathParams: { facilityId, specimenSlug },
     }),
   });
 
   const { mutate: updateSpecimenDefinition, isPending: isDeleting } =
     useMutation({
       mutationFn: mutate(specimenDefinitionApi.updateSpecimenDefinition, {
-        pathParams: { facilityId, specimenDefinitionId },
+        pathParams: { facilityId, specimenSlug },
       }),
       onSuccess: () => {
         toast.success(t("specimen_definition_retired_successfully"));
@@ -72,6 +63,7 @@ export function SpecimenDefinitionDetail({
     updateSpecimenDefinition({
       ...specimenDefinition,
       status: SpecimenDefinitionStatus.retired,
+      slug_value: specimenDefinition.slug_config.slug_value,
     });
   };
 
@@ -118,48 +110,17 @@ export function SpecimenDefinitionDetail({
           </div>
           <div className="flex gap-2">
             {specimenDefinition.status !== SpecimenDefinitionStatus.retired && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="text-destructive"
-                    size="sm"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    {t("delete")}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("are_you_sure")}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      <Alert variant="destructive" className="mt-4">
-                        <AlertTitle>{t("warning")}</AlertTitle>
-                        <AlertDescription>
-                          {t("are_you_sure_want_to_delete", {
-                            name: specimenDefinition.title,
-                          })}
-                        </AlertDescription>
-                      </Alert>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      className={cn(buttonVariants({ variant: "destructive" }))}
-                      onClick={handleDelete}
-                    >
-                      {isDeleting ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      ) : (
-                        t("confirm")
-                      )}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <Button
+                variant="outline"
+                className="text-destructive"
+                size="sm"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {t("delete")}
+              </Button>
             )}
-            <Link href={`/specimen_definitions/${specimenDefinitionId}/edit`}>
+            <Link href={`/specimen_definitions/${specimenSlug}/edit`}>
               <Button variant="outline" size="sm">
                 <Pencil className="h-4 w-4 mr-2" />
                 {t("edit")}
@@ -183,10 +144,6 @@ export function SpecimenDefinitionDetail({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-sm font-medium text-gray-400">{t("slug")}</p>
-              <p>{specimenDefinition.slug}</p>
-            </div>
             {specimenDefinition.derived_from_uri && (
               <div>
                 <p className="text-sm font-medium text-gray-400">
@@ -380,6 +337,25 @@ export function SpecimenDefinitionDetail({
           </div>
         )}
       </Card>
+      <ConfirmActionDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={t("are_you_sure")}
+        description={
+          <Alert variant="destructive" className="mt-4">
+            <AlertTitle>{t("warning")}</AlertTitle>
+            <AlertDescription>
+              {t("are_you_sure_want_to_delete", {
+                name: specimenDefinition.title,
+              })}
+            </AlertDescription>
+          </Alert>
+        }
+        confirmText={t("confirm")}
+        onConfirm={handleDelete}
+        variant="destructive"
+        disabled={isDeleting}
+      />
     </div>
   );
 }

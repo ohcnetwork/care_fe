@@ -6,10 +6,12 @@ import { ChargeItemDefinitionForm } from "./ChargeItemDefinitionForm";
 
 interface CreateChargeItemDefinitionProps {
   facilityId: string;
+  categorySlug: string;
 }
 
 export function CreateChargeItemDefinition({
   facilityId,
+  categorySlug,
 }: CreateChargeItemDefinitionProps) {
   const { t } = useTranslation();
 
@@ -25,7 +27,10 @@ export function CreateChargeItemDefinition({
           </p>
         </div>
 
-        <ChargeItemDefinitionForm facilityId={facilityId} />
+        <ChargeItemDefinitionForm
+          facilityId={facilityId}
+          categorySlug={categorySlug}
+        />
       </div>
     </Page>
   );

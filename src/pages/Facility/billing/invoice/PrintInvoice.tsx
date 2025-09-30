@@ -1,8 +1,7 @@
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
-import { differenceInYears, format } from "date-fns";
+import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
 
@@ -19,10 +18,14 @@ import {
 
 import Loading from "@/components/Common/Loading";
 
-import query from "@/Utils/request/query";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import query from "@/Utils/request/query";
+
+import { cn } from "@/lib/utils";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { formatPatientAge } from "@/Utils/utils";
 
 type PrintInvoiceProps = {
   facilityId: string;
@@ -32,21 +35,43 @@ type PrintInvoiceProps = {
 export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
   const { t } = useTranslation();
 
-  const { data: invoice, isLoading } = useQuery({
+  const { data: invoice, isLoading: isInvoiceLoading } = useQuery({
     queryKey: ["invoice", invoiceId],
     queryFn: query(invoiceApi.retrieveInvoice, {
       pathParams: { facilityId, invoiceId },
     }),
   });
 
-  if (isLoading || !invoice) {
+  const { facility, isFacilityLoading } = useCurrentFacility();
+
+  if (isInvoiceLoading || isFacilityLoading || !invoice || !facility) {
     return <Loading />;
   }
+  interface DetailRowProps {
+    label: string;
+    value?: string | null;
+    isStrong?: boolean;
+    className?: string;
+  }
+
+  const DetailRow = ({
+    label,
+    value,
+    isStrong = false,
+    className = "",
+  }: DetailRowProps) => {
+    return (
+      <div className="flex">
+        <span className={cn("text-gray-600", className)}>{label}</span>
+        <span className="text-gray-600">: </span>
+        <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
+          {value || "-"}
+        </span>
+      </div>
+    );
+  };
 
   const patient = invoice.account.patient;
-  const age = patient.date_of_birth
-    ? differenceInYears(new Date(), new Date(patient.date_of_birth))
-    : null;
 
   const getUnitComponentsByType = (item: any, type: MonetaryComponentType) => {
     return (
@@ -83,76 +108,69 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
   };
 
   return (
-    <PrintPreview title={`${t("invoice")} #${invoice.id}`}>
-      <div className="min-h-screen py-8 max-w-4xl mx-auto">
+    <PrintPreview title={`${t("invoice")} ${invoice.number}`}>
+      <div className="max-w-5xl mx-auto">
         {/* Header with Facility Name and Logo */}
-        <div className="flex justify-between items-start pb-6 border-b border-gray-200">
-          <div className="space-y-4 flex-1">
-            <div>
-              <h1 className="text-3xl font-semibold">{invoice.number}</h1>
-              <h2 className="text-gray-500 uppercase text-sm tracking-wide font-semibold mt-1">
-                {t("invoice")} #{invoice.id}
-              </h2>
-            </div>
-          </div>
+        <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
           <img
             src={careConfig.mainLogo?.dark}
             alt="Care Logo"
-            className="h-10 w-auto object-contain ml-6"
+            className="h-10 w-auto object-contain mb-2 sm:mb-0 order-2"
           />
-        </div>
-
-        {/* Invoice Information */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Bill To Section */}
-          <div>
-            <h3 className="text-gray-500 font-semibold mb-2">{t("bill_to")}</h3>
-            <div className="space-y-1">
-              <p className="font-medium text-lg">{patient.name}</p>
-              <p className="text-sm text-gray-600">
-                {age !== null && `${age} ${t("years")} • `}
-                {patient.gender && `${t(patient.gender)} • `}
-                {formatPhoneNumberIntl(patient.phone_number)}
-              </p>
-              <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                {patient.address}
-              </p>
-              <p className="text-sm text-gray-600">{patient.pincode}</p>
-            </div>
-          </div>
-
-          {/* Invoice Details */}
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-500">{t("invoice_date")}</span>
-              <span>
-                {invoice.issue_date
-                  ? format(new Date(invoice.issue_date), "dd MMM, yyyy h:mm a")
-                  : "-"}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">{t("invoice_number")}</span>
-              <span>{invoice.id}</span>
-            </div>
-            {invoice.note && (
-              <div className="mt-4">
-                <span className="text-gray-500">{t("note")}</span>
-                <p className="text-sm mt-1 whitespace-pre-wrap">
-                  {invoice.note}
-                </p>
+          <div className="text-left">
+            <h1 className="text-3xl font-semibold">{facility.name}</h1>
+            {facility.address && (
+              <div className="text-gray-500 whitespace-pre-wrap break-words text-sm">
+                {facility.address}
+                {facility.phone_number && (
+                  <p className="text-gray-500 text-sm">
+                    {facility.phone_number}
+                  </p>
+                )}
               </div>
             )}
           </div>
         </div>
 
-        <Separator className="my-4" />
+        {/* Invoice Information */}
+        <div>
+          {/* Bill To Section */}
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              {/* <h5 className="text-gray-500 font-semibold mb-2">{t("bill_to")}</h5> */}
+              <DetailRow label={t("inv_no")} value={invoice.number} />
+              <DetailRow
+                label={t("date")}
+                value={
+                  invoice.issue_date
+                    ? format(
+                        new Date(invoice.issue_date),
+                        "dd MMM, yyyy h:mm a",
+                      )
+                    : "-"
+                }
+              />
+            </div>
+            <div className="flex justify-between">
+              <DetailRow label={t("name")} value={patient.name.toUpperCase()} />
+              <DetailRow
+                label={`${t("age")} / ${t("sex")}`}
+                value={
+                  patient
+                    ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
+                    : undefined
+                }
+              />
+              <DetailRow label={t("address")} value={patient.address} />
+            </div>
+          </div>
+        </div>
 
         {/* Items Table */}
-        <div className="overflow-x-auto">
-          <Table className="w-full">
+        <div className="overflow-x-auto mt-4">
+          <Table className="w-full border">
             <TableHeader>
-              <TableRow>
+              <TableRow className="divide-x">
                 <TableHead className="p-1 font-medium text-gray-500">
                   {t("item")}
                 </TableHead>
@@ -168,12 +186,12 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                 {getApplicableTaxColumns(invoice).map((taxCode) => (
                   <TableHead
                     key={taxCode}
-                    className="p-1 font-medium text-gray-500"
+                    className="p-1 font-medium text-gray-500 text-center"
                   >
                     {t(taxCode)}
                   </TableHead>
                 ))}
-                <TableHead className="p-1 font-medium text-gray-500">
+                <TableHead className="p-1 font-medium text-gray-500 text-right">
                   {t("total")}
                 </TableHead>
               </TableRow>
@@ -184,7 +202,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                 const baseAmount = baseComponent?.amount || 0;
 
                 return (
-                  <TableRow key={item.id} className="border-b">
+                  <TableRow key={item.id} className="border-b divide-x">
                     <TableCell className="p-1 align-top">
                       {item.title}
                     </TableCell>
@@ -237,7 +255,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                         })()}
                       </TableCell>
                     ))}
-                    <TableCell className="p-1 align-top">
+                    <TableCell className="p-1 align-top text-right">
                       <MonetaryDisplay amount={item.total_price} />
                     </TableCell>
                   </TableRow>
@@ -248,14 +266,17 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
         </div>
 
         {/* Totals */}
-        <div className="flex flex-col items-end space-y-2 mt-6">
+        <div className="flex flex-col items-end border space-y-2">
           {/* Base Amount */}
           {invoice.total_price_components
             ?.filter(
               (c) => c.monetary_component_type === MonetaryComponentType.base,
             )
             .map((component, index) => (
-              <div key={`base-${index}`} className="flex w-64 justify-between">
+              <div
+                key={`base-${index}`}
+                className="flex w-64 justify-between mr-1"
+              >
                 <span className="text-gray-500">
                   {component.code?.display || t("base_amount")}
                 </span>
@@ -272,7 +293,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
             .map((component, index) => (
               <div
                 key={`surcharge-${index}`}
-                className="flex w-64 justify-between text-gray-500 text-sm"
+                className="flex w-64 justify-between text-gray-500 text-sm mr-1"
               >
                 <span>
                   {component.code && `${component.code.display} `}(
@@ -293,7 +314,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
             .map((component, index) => (
               <div
                 key={`discount-${index}`}
-                className="flex w-64 justify-between text-gray-500 text-sm"
+                className="flex w-64 justify-between text-gray-500 text-sm mr-1"
               >
                 <span>
                   {component.code && `${component.code.display} `}(
@@ -313,7 +334,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
             .map((component, index) => (
               <div
                 key={`tax-${index}`}
-                className="flex w-64 justify-between text-gray-500 text-sm"
+                className="flex w-64 justify-between text-gray-500 text-sm mr-1"
               >
                 <span>
                   {component.code && `${component.code.display} `}({t("tax")})
@@ -327,13 +348,13 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
           <Separator className="my-2" />
 
           {/* Subtotal */}
-          <div className="flex w-64 justify-between">
+          <div className="flex w-64 justify-between mr-1">
             <span className="text-gray-500">{t("net_amount")}</span>
             <MonetaryDisplay amount={String(invoice.total_net)} />
           </div>
 
           {/* Total */}
-          <div className="flex w-64 justify-between font-bold">
+          <div className="flex w-64 justify-between font-bold mr-1">
             <span>{t("total")}</span>
             <MonetaryDisplay amount={String(invoice.total_gross)} />
           </div>

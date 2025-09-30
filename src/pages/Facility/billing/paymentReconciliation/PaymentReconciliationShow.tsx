@@ -17,8 +17,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
   PAYMENT_RECONCILIATION_OUTCOME_COLORS,
   PAYMENT_RECONCILIATION_STATUS_COLORS,
@@ -26,6 +25,9 @@ import {
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 const methodMap: Record<PaymentReconciliationPaymentMethod, string> = {
   cash: "Cash",
@@ -62,6 +64,8 @@ export function PaymentReconciliationShow({
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const queryClient = useQueryClient();
+
+  useShortcutSubContext("facility:payment");
 
   const { data: payment, isLoading } = useQuery({
     queryKey: ["paymentReconciliation", paymentReconciliationId],
@@ -110,7 +114,7 @@ export function PaymentReconciliationShow({
         <div className="flex items-center gap-2">
           <div>
             <h1 className="text-2xl font-bold flex items-center flex-wrap gap-2">
-              {t("payment")}
+              {t(payment.is_credit_note ? "refund" : "payment")}
             </h1>
             <span className="text-sm text-gray-500">#{payment.id}</span>
             <div className="flex flex-wrap space-x-1">
@@ -135,6 +139,7 @@ export function PaymentReconciliationShow({
           >
             <CareIcon icon="l-print" className="mr-2 size-4" />
             {t("print_receipt")}
+            <ShortcutBadge actionId="print-button" />
           </Link>
         </Button>
       </div>
@@ -251,16 +256,17 @@ export function PaymentReconciliationShow({
                             }
                           />
                         )}
-                        {payment.returned_amount != null && (
-                          <InfoItem
-                            label={t("change_returned")}
-                            value={
-                              <MonetaryDisplay
-                                amount={payment.returned_amount}
-                              />
-                            }
-                          />
-                        )}
+                        {!payment.is_credit_note &&
+                          payment.returned_amount != null && (
+                            <InfoItem
+                              label={t("change_returned")}
+                              value={
+                                <MonetaryDisplay
+                                  amount={payment.returned_amount}
+                                />
+                              }
+                            />
+                          )}
                       </div>
                     </div>
                   </>
@@ -318,7 +324,7 @@ export function PaymentReconciliationShow({
                   </div>
                 </div>
 
-                <div className="mt-4 flex justify-end gap-2">
+                <div className="mt-4 flex justify-end flex-col sm:flex-row gap-2">
                   <Button variant="outline" size="sm" asChild>
                     <Link
                       href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
@@ -382,6 +388,7 @@ export function PaymentReconciliationShow({
                 <Button className="w-full" variant="outline" asChild>
                   <Link
                     href={`/facility/${facilityId}/billing/payments/${paymentReconciliationId}/print`}
+                    className="flex items-center w-full relative"
                   >
                     <CareIcon icon="l-print" className="mr-2 size-4" />
                     {t("print_receipt")}
@@ -391,9 +398,11 @@ export function PaymentReconciliationShow({
                   <Button className="w-full" variant="outline" asChild>
                     <Link
                       href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
+                      className="flex items-center w-full relative"
                     >
                       <CareIcon icon="l-eye" className="mr-2 size-4" />
                       {t("view_invoice")}
+                      <ShortcutBadge actionId="view-invoice" />
                     </Link>
                   </Button>
                 )}
@@ -402,7 +411,7 @@ export function PaymentReconciliationShow({
                     PaymentReconciliationStatus.entered_in_error && (
                     <>
                       <Button
-                        className="w-full"
+                        className="w-full flex items-center relative"
                         variant="outline"
                         onClick={() =>
                           updatePaymentMutation.mutate({
@@ -414,9 +423,10 @@ export function PaymentReconciliationShow({
                       >
                         <CareIcon icon="l-ban" className="mr-2 size-4" />
                         {t("mark_as_cancelled")}
+                        <ShortcutBadge actionId="mark-payment-cancelled" />
                       </Button>
                       <Button
-                        className="w-full"
+                        className="w-full flex items-center relative"
                         variant="outline"
                         onClick={() =>
                           updatePaymentMutation.mutate({
@@ -432,15 +442,17 @@ export function PaymentReconciliationShow({
                           className="mr-2 size-4"
                         />
                         {t("mark_as_entered_in_error")}
+                        <ShortcutBadge actionId="mark-payment-error" />
                       </Button>
                     </>
                   )}
                 <Button
-                  className="w-full"
+                  className="w-full flex items-center relative"
                   variant="outline"
                   onClick={() =>
                     goBack(`/facility/${facilityId}/billing/payments`)
                   }
+                  data-shortcut-id="go-back"
                 >
                   <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
                   {t("back_to_payments")}
