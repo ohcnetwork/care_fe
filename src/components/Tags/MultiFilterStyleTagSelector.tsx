@@ -664,7 +664,7 @@ export function MultiFilterStyleTagSelector({
                     className="bg-green-800 text-white px-3 py-2 rounded-md flex items-center gap-2"
                   >
                     <span className="text-sm font-bold">{t("done")}</span>
-                    <CornerDownLeft className="h-4 w-4" />
+                    <CornerDownLeft className="size-4" />
                   </button>
                 </div>
               </div>
