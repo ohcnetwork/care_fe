@@ -123,7 +123,7 @@ export const VitalsList = ({
   if (isLoading) {
     return (
       <EncounterAccordionLayout
-        title="vitals"
+        title={t("vitals")}
         readOnly={true}
         className={className}
       >
@@ -135,7 +135,7 @@ export const VitalsList = ({
 
   return (
     <EncounterAccordionLayout
-      title="vitals"
+      title={t("vitals")}
       readOnly={true}
       className={className}
     >
