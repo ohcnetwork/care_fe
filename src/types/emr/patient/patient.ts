@@ -80,6 +80,7 @@ export interface PatientSearchRequest {
   phone_number?: string;
   config?: string;
   value?: string;
+  page_size?: number;
 }
 
 export interface PatientSearchRetrieveRequest {

@@ -333,7 +333,6 @@ export default function AddChargeItemsBillingSheet({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isPending}
-                data-shortcut-id={open ? "cancel-action" : undefined}
               >
                 {t("cancel")}
                 <ShortcutBadge actionId="cancel-action" />

@@ -139,34 +139,46 @@ export interface AvailabilityHeatmapResponse {
   [date: string]: { total_slots: number; booked_slots: number };
 }
 
-export const AppointmentNonCancelledStatuses = [
-  "proposed",
-  "pending",
-  "booked",
-  "arrived",
-  "fulfilled",
-  "noshow",
-  "checked_in",
-  "waitlist",
-  "in_consultation",
-] as const;
+export enum AppointmentStatus {
+  PROPOSED = "proposed",
+  PENDING = "pending",
+  BOOKED = "booked",
+  ARRIVED = "arrived",
+  CHECKED_IN = "checked_in",
+  WAITLIST = "waitlist",
+  IN_CONSULTATION = "in_consultation",
+  FULFILLED = "fulfilled",
+  NO_SHOW = "noshow",
+  CANCELLED = "cancelled",
+  ENTERED_IN_ERROR = "entered_in_error",
+  RESCHEDULED = "rescheduled",
+}
 
-export const AppointmentCancelledStatuses = [
-  "cancelled",
-  "entered_in_error",
-  "rescheduled",
-] as const;
+export const PastAppointmentStatuses = [
+  AppointmentStatus.FULFILLED,
+  AppointmentStatus.NO_SHOW,
+];
 
-export const AppointmentStatuses = [
-  ...AppointmentNonCancelledStatuses,
-  ...AppointmentCancelledStatuses,
-] as const;
+export const UpcomingAppointmentStatuses = [
+  AppointmentStatus.PROPOSED,
+  AppointmentStatus.PENDING,
+  AppointmentStatus.BOOKED,
+  AppointmentStatus.ARRIVED,
+  AppointmentStatus.CHECKED_IN,
+  AppointmentStatus.WAITLIST,
+  AppointmentStatus.IN_CONSULTATION,
+];
 
-export const AppointmentFinalStatuses: AppointmentStatus[] = [
-  "fulfilled",
-  "cancelled",
-  "entered_in_error",
-  "rescheduled",
+export const CancelledAppointmentStatuses = [
+  AppointmentStatus.CANCELLED,
+  AppointmentStatus.ENTERED_IN_ERROR,
+  AppointmentStatus.RESCHEDULED,
+  AppointmentStatus.NO_SHOW,
+];
+
+export const AppointmentFinalStatuses = [
+  ...CancelledAppointmentStatuses,
+  ...PastAppointmentStatuses,
 ];
 
 export const APPOINTMENT_STATUS_COLORS = {
@@ -186,14 +198,6 @@ export const APPOINTMENT_STATUS_COLORS = {
   AppointmentStatus,
   React.ComponentProps<typeof Badge>["variant"]
 >;
-
-export type AppointmentNonCancelledStatus =
-  (typeof AppointmentNonCancelledStatuses)[number];
-
-export type AppointmentCancelledStatus =
-  (typeof AppointmentCancelledStatuses)[number];
-
-export type AppointmentStatus = (typeof AppointmentStatuses)[number];
 
 type LocationResource = {
   resource: LocationList;
@@ -220,7 +224,7 @@ export type Appointment = {
   token_slot: TokenSlot;
   patient: PatientRead;
   booked_on: string;
-  status: AppointmentNonCancelledStatus;
+  status: AppointmentStatus;
   note: string;
   booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;

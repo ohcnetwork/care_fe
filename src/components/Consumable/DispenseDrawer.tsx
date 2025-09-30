@@ -34,6 +34,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import {
   Dialog,
   DialogContent,
@@ -515,7 +516,12 @@ export default function DispenseDrawer({
               <form>
                 {fields.length === 0 ? (
                   <EmptyState
-                    icon="l-syringe"
+                    icon={
+                      <CareIcon
+                        icon="l-syringe"
+                        className="text-primary size-6"
+                      />
+                    }
                     title={t("no_items_added_yet")}
                     description={t("add_items_to_dispense_now_no_invoice")}
                     action={

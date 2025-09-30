@@ -13,6 +13,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
@@ -60,7 +61,9 @@ export function ObservationHistorySheet({
           <div className="space-y-4">
             {deletedObservations.length === 0 ? (
               <EmptyState
-                icon="l-history"
+                icon={
+                  <CareIcon icon="l-history" className="text-primary size-6" />
+                }
                 title={t("no_deleted_observations")}
                 description={t("no_deleted_observations_description")}
               />
