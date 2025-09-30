@@ -28,9 +28,9 @@ import { usePatientSignOut } from "@/hooks/usePatientSignOut";
 import { LocalStorageKeys } from "@/common/constants";
 
 import query from "@/Utils/request/query";
-import { TokenData } from "@/types/auth/otp";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
+import { TokenData } from "@/types/otp/otp";
 
 const { customLogo, stateLogo, mainLogo } = careConfig;
 

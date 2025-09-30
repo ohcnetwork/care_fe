@@ -17,16 +17,16 @@ import { usePatientContext } from "@/hooks/usePatientUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { PatientRead } from "@/types/emr/patient/patient";
+import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { Appointment } from "@/types/scheduling/schedule";
 
 interface PatientCardProps {
-  patient: PatientRead;
+  patient: PublicPatientRead;
   selectedPatient: string | null;
   setSelectedPatient: (patientId: string) => void;
-  getPatienDobOrAge: (patient: PatientRead) => string;
+  getPatienDobOrAge: (patient: PublicPatientRead) => string;
 }
 
 function PatientCard({
@@ -79,10 +79,10 @@ function PatientList({
   setSelectedPatient,
   getPatienDobOrAge,
 }: {
-  patients: PatientRead[];
+  patients: PublicPatientRead[];
   selectedPatient: string | null;
   setSelectedPatient: (patientId: string | null) => void;
-  getPatienDobOrAge: (patient: PatientRead) => string;
+  getPatienDobOrAge: (patient: PublicPatientRead) => string;
 }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-0 sm:p-4">
@@ -130,7 +130,7 @@ export default function PatientSelect({
 
   const { data: patientData, isLoading } = useQuery({
     queryKey: ["otp-patient"],
-    queryFn: query(publicPatientApi.listPatient, {
+    queryFn: query(publicPatientApi.list, {
       headers: {
         Authorization: `Bearer ${tokenData.token}`,
         "Content-Type": "application/json",
@@ -175,7 +175,7 @@ export default function PatientSelect({
     );
   };
 
-  const getPatienDobOrAge = (patient: PatientRead) => {
+  const getPatienDobOrAge = (patient: PublicPatientRead) => {
     if (patient.date_of_birth) {
       return dayjs(patient.date_of_birth).format("DD MMM YYYY");
     }

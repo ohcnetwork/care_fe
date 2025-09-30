@@ -111,3 +111,13 @@ export interface PublicPatientRead {
   geo_organization: Organization;
   blood_group: BloodGroupChoices;
 }
+
+export interface PublicPatientCreate {
+  name: string;
+  gender: GenderChoices;
+  date_of_birth?: string;
+  age?: number;
+  address: string;
+  pincode: number;
+  geo_organization: string;
+}
