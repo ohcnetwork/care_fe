@@ -50,10 +50,28 @@ function RoleCard({
     <Card>
       <CardContent className="p-6">
         <div className="mb-4 flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <h3 className="font-medium text-gray-900 mb-2">{role.name}</h3>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 mb-2">
+              <h3
+                className="font-medium text-gray-900 mb-2 truncate"
+                title={role.name}
+              >
+                {role.name}
+              </h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(role)}
+                className="shrink-0 w-full sm:w-auto"
+              >
+                <CareIcon icon="l-edit" className="size-4" />
+                {t("edit")}
+              </Button>
+            </div>
             {role.description && (
-              <p className="text-sm text-gray-600 mb-3">{role.description}</p>
+              <div className="text-sm text-gray-600 mb-3">
+                {role.description}
+              </div>
             )}
             <div className="flex flex-wrap gap-1">
               {role.permissions.slice(0, 3).map((permission) => (
@@ -72,10 +90,6 @@ function RoleCard({
               )}
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => onEdit(role)}>
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("edit")}
-          </Button>
         </div>
       </CardContent>
     </Card>
@@ -202,7 +216,7 @@ export default function RolesIndex() {
         ) : (
           <>
             {/* Mobile Card View */}
-            <div className="grid gap-4 md:hidden">
+            <div className="flex flex-col gap-4 md:hidden">
               {roles.map((role: RoleRead) => (
                 <RoleCard key={role.id} role={role} onEdit={handleEdit} />
               ))}
@@ -222,11 +236,13 @@ export default function RolesIndex() {
                   <TableBody className="bg-white">
                     {roles.map((role: RoleRead) => (
                       <TableRow key={role.id} className="divide-x">
-                        <TableCell className="font-medium">
-                          {role.name}
+                        <TableCell className="font-medium max-w-48">
+                          <div className="truncate" title={role.name}>
+                            {role.name}
+                          </div>
                         </TableCell>
-                        <TableCell className="text-gray-600">
-                          {role.description || "-"}
+                        <TableCell className="text-gray-600 max-w-80 whitespace-normal">
+                          {role.description ? role.description : "-"}
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
