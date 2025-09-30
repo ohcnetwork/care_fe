@@ -27,7 +27,7 @@ import ValueSetSearchContent from "@/components/Questionnaire/ValueSetSearchCont
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
@@ -46,6 +46,7 @@ interface Props {
   value?: Code;
   hideTrigger?: boolean;
   wrapTextForSmallScreen?: boolean;
+  mobileTrigger?: React.ReactNode;
 }
 
 export default function MedicationValueSetSelect({
@@ -57,6 +58,7 @@ export default function MedicationValueSetSelect({
   value,
   hideTrigger = false,
   wrapTextForSmallScreen = false,
+  mobileTrigger,
 }: Props) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
@@ -201,7 +203,8 @@ export default function MedicationValueSetSelect({
               setSearch(value);
             }}
             value={search}
-            className="border-none ring-0"
+            className="border-none ring-0 text-base md:text-sm"
+            autoFocus
           />
 
           {/* Breadcrumbs navigation */}
@@ -302,6 +305,7 @@ export default function MedicationValueSetSelect({
           title={title}
           search={search}
           onSearchChange={setSearch}
+          placeholder={placeholder}
         />
       </TabsContent>
     </Tabs>
@@ -309,30 +313,35 @@ export default function MedicationValueSetSelect({
 
   if (isMobile && !hideTrigger) {
     return (
-      <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            className={cn(
-              "w-full justify-between",
-              wrapTextForSmallScreen
-                ? "h-auto whitespace-normal text-left"
-                : "truncate",
-              !value?.display && "text-gray-400",
-            )}
-            disabled={disabled}
-          >
-            <span>{value?.display || placeholder}</span>
-            <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
-          </Button>
-        </DrawerTrigger>
-        <DrawerContent>
-          <div className="mt-4 h-full overflow-y-auto">
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          {mobileTrigger ? (
+            mobileTrigger
+          ) : (
+            <Button
+              variant="outline"
+              role="combobox"
+              className={cn(
+                "w-full justify-between",
+                wrapTextForSmallScreen
+                  ? "h-auto whitespace-normal text-left"
+                  : "truncate",
+                !value?.display && "text-gray-400",
+              )}
+              disabled={disabled}
+            >
+              <span>{value?.display || placeholder}</span>
+              <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+            </Button>
+          )}
+        </SheetTrigger>
+        <SheetContent side="bottom" className="px-0 pt-2 pb-0 rounded-t-2xl">
+          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
+          <div className="mt-8 h-full overflow-y-auto">
             {renderTabContent()}
           </div>
-        </DrawerContent>
-      </Drawer>
+        </SheetContent>
+      </Sheet>
     );
   }
 
@@ -344,14 +353,17 @@ export default function MedicationValueSetSelect({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant="white"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className={cn(
+            "w-full justify-between font-normal border-gray-300 shadow-xs",
+            !value?.display && "text-gray-500 hover:bg-white",
+          )}
           disabled={disabled}
         >
           <span className="truncate">{value?.display || placeholder}</span>
-          <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[600px] p-0" align="start">

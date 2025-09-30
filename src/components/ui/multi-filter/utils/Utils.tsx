@@ -175,6 +175,20 @@ export function createFilterConfig(
 
 export const longDateRangeOptions: DateRangeOption[] = [
   {
+    label: "today",
+    getDateRange: () => ({
+      from: new Date(),
+      to: new Date(),
+    }),
+  },
+  {
+    label: "yesterday",
+    getDateRange: () => ({
+      from: subDays(new Date(), 1),
+      to: subDays(new Date(), 1),
+    }),
+  },
+  {
     label: "last_count_days",
     getDateRange: () => ({
       from: subDays(new Date(), 7),

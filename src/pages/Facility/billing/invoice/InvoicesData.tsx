@@ -7,6 +7,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
@@ -156,6 +157,12 @@ export default function InvoicesData({
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />
+      ) : !invoices?.length ? (
+        <EmptyState
+          icon="l-file-alt"
+          title={t("no_invoices")}
+          description={t("no_invoices_description")}
+        />
       ) : (
         <div>
           <Table>
@@ -168,61 +175,53 @@ export default function InvoicesData({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {!invoices?.length ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-gray-500">
-                    {t("no_invoices")}
+              {invoices.map((invoice) => (
+                <TableRow key={invoice.id}>
+                  <TableCell>
+                    <div>{invoice.number}</div>
+                  </TableCell>
+
+                  <TableCell>
+                    <Badge variant={INVOICE_STATUS_COLORS[invoice.status]}>
+                      {t(statusMap[invoice.status].label)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <MonetaryDisplay
+                      className="font-medium"
+                      amount={String(invoice.total_gross)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-4">
+                      <Button
+                        variant="outline"
+                        className="font-semibold"
+                        asChild
+                      >
+                        <Link
+                          href={`/facility/${facilityId}/billing/invoice/${invoice.id}/print`}
+                        >
+                          <PrinterIcon strokeWidth={1.5} />
+                          {t("print")}
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="font-semibold"
+                        asChild
+                      >
+                        <Link
+                          href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
+                        >
+                          <ArrowUpRightSquare strokeWidth={1.5} />
+                          {t("see_invoice")}
+                        </Link>
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
-              ) : (
-                invoices.map((invoice) => (
-                  <TableRow key={invoice.id}>
-                    <TableCell>
-                      <div>{invoice.number}</div>
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge variant={INVOICE_STATUS_COLORS[invoice.status]}>
-                        {t(statusMap[invoice.status].label)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <MonetaryDisplay
-                        className="font-medium"
-                        amount={String(invoice.total_gross)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-4">
-                        <Button
-                          variant="outline"
-                          className="font-semibold"
-                          asChild
-                        >
-                          <Link
-                            href={`/facility/${facilityId}/billing/invoice/${invoice.id}/print`}
-                          >
-                            <PrinterIcon strokeWidth={1.5} />
-                            {t("print")}
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="font-semibold"
-                          asChild
-                        >
-                          <Link
-                            href={`/facility/${facilityId}/billing/invoices/${invoice.id}`}
-                          >
-                            <ArrowUpRightSquare strokeWidth={1.5} />
-                            {t("see_invoice")}
-                          </Link>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
+              ))}
             </TableBody>
           </Table>
         </div>
