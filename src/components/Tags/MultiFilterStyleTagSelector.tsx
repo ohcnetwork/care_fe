@@ -253,7 +253,7 @@ export function MultiFilterStyleTagSelector({
                 <div className="px-4 pb-3">
                   <input
                     type="text"
-                    placeholder="Search tags..."
+                    placeholder={t("search_tags")}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-xs transition-colors file:border-0 file:bg-transparent focus:ring-primary-500 focus:border-primary-500 file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-300 h-8 text-sm"
@@ -639,10 +639,10 @@ export function MultiFilterStyleTagSelector({
               <div className="flex justify-between">
                 <div className="flex gap-1 my-4 mx-2">
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
-                    <ArrowUp className="h-3 w-3" />
+                    <ArrowUp className="size-3" />
                   </div>
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
-                    <ArrowDown className="h-3 w-3" />
+                    <ArrowDown className="size-3" />
                   </div>
                   <span className="text-xs text-gray-700 self-center">
                     {t("navigate")}
@@ -650,14 +650,19 @@ export function MultiFilterStyleTagSelector({
                 </div>
                 <div className="flex gap-1 my-4 mx-2">
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
-                    <Space className="h-3 w-3" />
+                    <Space className="size-3" />
                   </div>
                   <span className="text-xs text-gray-700 self-center">
                     {t("to_select")}
                   </span>
                 </div>
-                <div className="flex gap-1 m-2">
-                  <button className="bg-green-800 text-white rounded-md gap-2 h-9 w-[82px] flex items-center justify-center">
+                <div className="flex gap-1 my-2 mx-2">
+                  <button
+                    type="button"
+                    data-cy="tag-selector-done"
+                    onClick={() => setOpen(false)}
+                    className="bg-green-800 text-white px-3 py-2 rounded-md flex items-center gap-2"
+                  >
                     <span className="text-sm font-bold">{t("done")}</span>
                     <CornerDownLeft className="h-4 w-4" />
                   </button>
