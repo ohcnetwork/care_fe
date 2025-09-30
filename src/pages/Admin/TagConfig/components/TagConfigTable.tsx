@@ -1,18 +1,8 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +13,7 @@ import {
   ExpandableTextExpandButton,
 } from "@/components/ui/expandable-text";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import {
   CardGridSkeleton,
   TableSkeleton,
@@ -66,6 +57,7 @@ function TagConfigCard({
   onArchive?: (config: TagConfig) => void;
 }) {
   const { t } = useTranslation();
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
 
   const handleCardClick = () => {
     onView(config.id);
@@ -79,7 +71,7 @@ function TagConfigCard({
       <CardContent className="p-6">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="flex-1">
-            <div className="mb-2 flex items-center gap-2">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
               <Badge variant={TAG_STATUS_COLORS[config.status]}>
                 {t(config.status)}
               </Badge>
@@ -91,7 +83,9 @@ function TagConfigCard({
                 </Badge>
               )}
             </div>
-            <h3 className="font-medium text-gray-900">{config.display}</h3>
+            <h3 className="font-medium text-gray-900 text-lg">
+              {config.display}
+            </h3>
             <p className="mt-1 text-sm text-gray-500 capitalize">
               {t(config.resource)} | {t("priority")}: {config.priority}
             </p>
@@ -106,51 +100,37 @@ function TagConfigCard({
               </ExpandableText>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div
+            className="flex items-center gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
             {showArchiveAction && onArchive && config.status !== "archived" && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-red-600 hover:text-red-700"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  >
-                    <CareIcon icon="l-trash" className="size-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {t("archive_child_tag")}
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t("archive_child_tag_confirmation", {
-                        name: config.display,
-                      })}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel onClick={(e) => e.stopPropagation()}>
-                      {t("cancel")}
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onArchive(config);
-                      }}
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      {t("archive")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowArchiveDialog(true)}
+                >
+                  <CareIcon icon="l-trash" className="size-4" />
+                </Button>
+                <ConfirmActionDialog
+                  open={showArchiveDialog}
+                  onOpenChange={setShowArchiveDialog}
+                  title={t("archive_child_tag")}
+                  description={t("archive_child_tag_confirmation", {
+                    name: config.display,
+                  })}
+                  variant="destructive"
+                  onConfirm={() => {
+                    onArchive(config);
+                  }}
+                  confirmText={t("archive")}
+                />
+              </>
             )}
             <Button variant="outline" size="sm">
               <CareIcon icon="l-arrow-right" className="size-4" />
+              {t("view")}
             </Button>
           </div>
         </div>
@@ -171,6 +151,8 @@ export default function TagConfigTable({
   emptyStateIcon = "l-tag-alt" as IconName,
 }: TagConfigTableProps) {
   const { t } = useTranslation();
+  const [tagConfigToArchive, setTagConfigToArchive] =
+    useState<TagConfig | null>(null);
 
   if (isLoading) {
     return (
@@ -188,7 +170,9 @@ export default function TagConfigTable({
   if (configs.length === 0) {
     return (
       <EmptyState
-        icon={emptyStateIcon}
+        icon={
+          <CareIcon icon={emptyStateIcon} className="text-primary size-6" />
+        }
         title={t(emptyStateTitle)}
         description={t(emptyStateDescription)}
       />
@@ -275,12 +259,14 @@ export default function TagConfigTable({
                     </TableCell>
                   )}
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div
+                      className="flex items-center gap-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
+                        onClick={() => {
                           onView(config.id);
                         }}
                       >
@@ -290,51 +276,36 @@ export default function TagConfigTable({
                       {showArchiveAction &&
                         onArchive &&
                         config.status !== "archived" && (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="text-red-600 hover:text-red-700"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                }}
-                              >
-                                <CareIcon icon="l-trash" className="size-4" />
-                                {t("archive")}
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent
-                              onClick={(e) => e.stopPropagation()}
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => setTagConfigToArchive(config)}
                             >
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  {t("archive_child_tag")}
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
+                              <CareIcon icon="l-trash" className="size-4" />
+                              {t("archive")}
+                            </Button>
+                            <ConfirmActionDialog
+                              open={!!tagConfigToArchive}
+                              onOpenChange={(open) =>
+                                !open && setTagConfigToArchive(null)
+                              }
+                              title={t("archive_child_tag")}
+                              description={
+                                <>
                                   {t("archive_child_tag_confirmation", {
-                                    name: config.display,
+                                    name: tagConfigToArchive?.display,
                                   })}
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {t("cancel")}
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onArchive(config);
-                                  }}
-                                  className="bg-red-600 hover:bg-red-700"
-                                >
-                                  {t("archive")}
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                                </>
+                              }
+                              variant="destructive"
+                              onConfirm={() => {
+                                onArchive(tagConfigToArchive!);
+                              }}
+                              confirmText={t("archive")}
+                            />
+                          </>
                         )}
                     </div>
                   </TableCell>

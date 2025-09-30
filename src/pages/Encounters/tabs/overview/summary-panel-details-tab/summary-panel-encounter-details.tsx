@@ -9,10 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-import { Avatar } from "@/components/Common/Avatar";
-
 import query from "@/Utils/request/query";
-import { StatusBadge } from "@/pages/Encounters/EncounterProperties";
+import { Avatar } from "@/components/Common/Avatar";
+import {
+  EncounterClassBadge,
+  StatusBadge,
+} from "@/pages/Encounters/EncounterProperties";
 import { OverviewSidebarSheet } from "@/pages/Encounters/tabs/overview/overview-sidebar-sheet";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
@@ -20,11 +22,7 @@ import {
   AccountStatus,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
-import {
-  ENCOUNTER_CLASSES_COLORS,
-  ENCOUNTER_CLASS_ICONS,
-  ENCOUNTER_PRIORITY_COLORS,
-} from "@/types/emr/encounter/encounter";
+import { ENCOUNTER_PRIORITY_COLORS } from "@/types/emr/encounter/encounter";
 
 export const SummaryPanelEncounterDetails = () => {
   const { t } = useTranslation();
@@ -49,7 +47,6 @@ export const SummaryPanelEncounterDetails = () => {
   });
 
   if (!encounter) return null;
-  const EncounterClassIcon = ENCOUNTER_CLASS_ICONS[encounter.encounter_class];
   return (
     <div className="flex flex-col gap-2">
       <div className="xl:hidden flex flex-col sm:flex-row p-3 bg-white -mt-1 rounded-lg gap-4 shadow">
@@ -70,16 +67,7 @@ export const SummaryPanelEncounterDetails = () => {
                   {t("encounter_class")}:
                 </span>
                 <div>
-                  <Badge
-                    variant={
-                      ENCOUNTER_CLASSES_COLORS[encounter.encounter_class]
-                    }
-                  >
-                    <EncounterClassIcon className="size-3" />
-                    <span className="whitespace-nowrap">
-                      {t(`encounter_class__${encounter.encounter_class}`)}
-                    </span>
-                  </Badge>
+                  <EncounterClassBadge encounter={encounter} />
                 </div>
               </div>
               <div>
@@ -96,24 +84,26 @@ export const SummaryPanelEncounterDetails = () => {
                 </div>
               </div>
 
-              <div>
-                <span className="text-sm font-medium text-gray-700">
-                  {t("location")}:
-                </span>
+              {encounter.current_location && (
                 <div>
-                  {encounter.current_location?.name ? (
-                    <Badge
-                      variant="secondary"
-                      className="inline-flex items-center gap-1.5"
-                    >
-                      <CareIcon icon="l-location-point" className="size-3" />
-                      {encounter.current_location?.name || t("none")}
-                    </Badge>
-                  ) : (
-                    <span>--</span>
-                  )}
+                  <span className="text-sm font-medium text-gray-700">
+                    {t("location")}:
+                  </span>
+                  <div>
+                    {encounter.current_location?.name ? (
+                      <Badge
+                        variant="secondary"
+                        className="inline-flex items-center gap-1.5"
+                      >
+                        <CareIcon icon="l-location-point" className="size-3" />
+                        {encounter.current_location?.name || t("none")}
+                      </Badge>
+                    ) : (
+                      <span>--</span>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="flex flex-col gap-4">
@@ -186,9 +176,7 @@ export const SummaryPanelEncounterDetails = () => {
             }
           />
         </div>
-
         <Separator className="sm:hidden" />
-
         <div className="flex flex-col gap-4">
           <div className="flex flex-row gap-6">
             <div className="flex flex-col">
@@ -221,7 +209,7 @@ export const SummaryPanelEncounterDetails = () => {
                     </span>
                   </>
                 ) : (
-                  <span>--({t("ongoing")})</span>
+                  <span>{t("ongoing")}</span>
                 )}
               </div>
             </div>
@@ -251,36 +239,38 @@ export const SummaryPanelEncounterDetails = () => {
             </div>
           </div>
 
-          <div className="flex flex-row gap-2">
-            <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-gray-700">
-                {t("care_team")}:
-              </span>
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  {encounter.care_team.length > 0 ? (
-                    encounter.care_team
-                      .slice(0, 3)
-                      .map((member) => (
-                        <Avatar
-                          key={member.member.id}
-                          name={member.member.first_name}
-                          imageUrl={member.member.profile_picture_url}
-                          className="size-10 rounded-full border border-white shadow-sm"
-                        />
-                      ))
-                  ) : (
-                    <span>--</span>
+          {encounter.care_team.length > 0 && (
+            <div className="flex flex-row gap-2">
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-gray-700">
+                  {t("care_team")}:
+                </span>
+                <div className="flex items-center gap-2">
+                  <div className="flex -space-x-2">
+                    {encounter.care_team.length > 0 ? (
+                      encounter.care_team
+                        .slice(0, 3)
+                        .map((member) => (
+                          <Avatar
+                            key={member.member.id}
+                            name={member.member.first_name}
+                            imageUrl={member.member.profile_picture_url}
+                            className="size-10 rounded-full border border-white shadow-sm"
+                          />
+                        ))
+                    ) : (
+                      <span>--</span>
+                    )}
+                  </div>
+                  {encounter.care_team.length > 3 && (
+                    <div className="flex items-center justify-center text-sm font-medium text-gray-700 rounded-full bg-gray-100 size-10 border border-white shadow-sm -ml-4">
+                      <span>+{encounter.care_team.length - 3}</span>
+                    </div>
                   )}
                 </div>
-                {encounter.care_team.length > 3 && (
-                  <div className="flex items-center justify-center text-sm font-medium text-gray-700 rounded-full bg-gray-100 size-10 border border-white shadow-sm -ml-4">
-                    <span>+{encounter.care_team.length - 3}</span>
-                  </div>
-                )}
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
       <OverviewSidebarSheet

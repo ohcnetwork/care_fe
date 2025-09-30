@@ -4,22 +4,9 @@ import { Trans, useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -31,6 +18,7 @@ import {
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { Avatar } from "@/components/Common/Avatar";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { RoleSelect } from "@/components/Common/RoleSelect";
 import UserSelector from "@/components/Common/UserSelector";
 
@@ -195,6 +183,9 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
 export const PatientUsers = ({ patientData }: PatientProps) => {
   const patientId = patientData.id;
+  const [userToRemove, setUserToRemove] = useState<UserReadMinimal | null>(
+    null,
+  );
 
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -271,48 +262,15 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                 </div>
               </div>
               {canWritePatient && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      data-cy="patient-user-remove-button"
-                      className="absolute top-0 right-0"
-                    >
-                      <CareIcon icon="l-trash" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>{t("remove_user")}</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        <Trans
-                          i18nKey="are_you_sure_want_to_remove"
-                          values={{
-                            name: formatName(user),
-                          }}
-                          components={{
-                            strong: (
-                              <strong className="inline-block align-bottom truncate max-w-72 sm:max-w-full md:max-w-full lg:max-w-full xl:max-w-full" />
-                            ),
-                          }}
-                        />
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                      <AlertDialogAction
-                        data-cy="patient-user-remove-confirm-button"
-                        onClick={() => removeUser(user.id)}
-                        className={cn(
-                          buttonVariants({ variant: "destructive" }),
-                        )}
-                      >
-                        {t("remove")}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  data-cy="patient-user-remove-button"
+                  className="absolute top-0 right-0"
+                  onClick={() => setUserToRemove(user)}
+                >
+                  <CareIcon icon="l-trash" />
+                </Button>
               )}
             </div>
             <div className="mt-4 grid grid-cols-2  gap-y-2">
@@ -328,6 +286,27 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                 <div className="font-medium">{user.user_type}</div>
               </div>
             </div>
+            <ConfirmActionDialog
+              open={!!userToRemove}
+              onOpenChange={(open) => !open && setUserToRemove(null)}
+              title={t("remove_user")}
+              description={
+                <Trans
+                  i18nKey="are_you_sure_want_to_remove"
+                  values={{
+                    name: formatName(user),
+                  }}
+                  components={{
+                    strong: (
+                      <strong className="inline-block align-bottom truncate max-w-72 sm:max-w-full md:max-w-full lg:max-w-full xl:max-w-full" />
+                    ),
+                  }}
+                />
+              }
+              variant="destructive"
+              confirmText={t("remove")}
+              onConfirm={() => removeUser(userToRemove!.id)}
+            />
           </div>
         ))}
       </div>
