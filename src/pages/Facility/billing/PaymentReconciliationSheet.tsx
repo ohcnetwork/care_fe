@@ -43,7 +43,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
   PaymentReconciliationCreate,
@@ -121,7 +121,7 @@ export function PaymentReconciliationSheet({
   const queryClient = useQueryClient();
   const [tenderAmount, setTenderAmount] = useState<string>("0");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
-  useFacilityShortcuts("payment-reconciliation-sheet");
+  useShortcutSubContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -477,11 +477,7 @@ export function PaymentReconciliationSheet({
             </div>
 
             <SheetFooter>
-              <Button
-                type="submit"
-                disabled={isPending}
-                data-shortcut-id="submit-action"
-              >
+              <Button type="submit" disabled={isPending}>
                 {isPending ? (
                   <>
                     <CareIcon
@@ -493,7 +489,7 @@ export function PaymentReconciliationSheet({
                 ) : (
                   t("record_payment")
                 )}
-                <ShortcutBadge actionId="submit-action" className="bg-white" />
+                <ShortcutBadge actionId="submit-action" />
               </Button>
             </SheetFooter>
           </form>

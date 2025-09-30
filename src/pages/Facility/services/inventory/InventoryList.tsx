@@ -129,7 +129,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
           </div>
         ) : !data?.results?.length ? (
           <EmptyState
-            icon="l-box"
+            icon={<CareIcon icon="l-box" className="text-primary size-6" />}
             title={t("no_inventory")}
             description={t("no_inventory_description")}
           />
