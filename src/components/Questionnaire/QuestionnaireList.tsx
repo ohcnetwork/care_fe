@@ -7,7 +7,7 @@ import {
   PlusIcon,
   Search,
 } from "lucide-react";
-import { useNavigate } from "raviger";
+import { Link, useNavigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -75,7 +75,7 @@ const RenderCard = ({
   const navigate = useNavigate();
 
   return (
-    <div className="xl:hidden space-y-4">
+    <div className="md:hidden space-y-4">
       {isLoading ? (
         <CardGridSkeleton count={5} />
       ) : questionnaireList.length === 0 ? (
@@ -97,6 +97,7 @@ const RenderCard = ({
                   </p>
                   <Badge
                     variant={QUESTIONNAIRE_STATUS_COLORS[questionnaire.status]}
+                    className="whitespace-nowrap flex-shrink-0"
                   >
                     {t(questionnaire.status)}
                   </Badge>
@@ -156,7 +157,7 @@ const RenderTable = ({
   const { t } = useTranslation();
 
   return (
-    <div className="hidden xl:block overflow-hidden rounded-lg bg-white shadow-sm overflow-x-auto">
+    <div className="hidden md:block overflow-hidden rounded-lg bg-white shadow-sm overflow-x-auto">
       {isLoading ? (
         <TableSkeleton count={5} />
       ) : questionnaireList.length === 0 ? (
@@ -224,7 +225,6 @@ const RenderTable = ({
 };
 
 export function QuestionnaireList() {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
@@ -253,49 +253,57 @@ export function QuestionnaireList() {
           <p className="text-gray-600">{t("manage_and_view_questionnaires")}</p>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-between mt-8 gap-2">
-          <div className="flex lg:flex-row flex-col items-center gap-4">
+        <div className="mt-8 mb-4">
+          <div className="w-full overflow-x-auto pb-1">
             <Tabs
               defaultValue="active"
               value={qParams.status || "active"}
               onValueChange={(value) => updateQuery({ status: value })}
-              className="w-full"
             >
-              <TabsList>
-                <TabsTrigger value="active">
-                  <FileCheckIcon className="size-4" />
-                  {t("active")}
-                </TabsTrigger>
-                <TabsTrigger value="draft">
-                  <NotepadTextDashedIcon className="size-4" />
-                  {t("draft")}
-                </TabsTrigger>
-                <TabsTrigger value="retired">
-                  <ArchiveIcon className="size-4" />
-                  {t("retired")}
-                </TabsTrigger>
-              </TabsList>
+              <div className="min-w-full sm:min-w-[50%] md:min-w-[40%]">
+                <TabsList className="flex w-full">
+                  <TabsTrigger value="active" className="flex-1">
+                    <FileCheckIcon className="size-4" />
+                    {t("active")}
+                  </TabsTrigger>
+                  <TabsTrigger value="draft" className="flex-1">
+                    <NotepadTextDashedIcon className="size-4" />
+                    {t("draft")}
+                  </TabsTrigger>
+                  <TabsTrigger value="retired" className="flex-1">
+                    <ArchiveIcon className="size-4" />
+                    {t("retired")}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
             </Tabs>
-            <div className="relative md:min-w-80 w-full">
-              <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
-              <Input
-                data-cy="questionnaire-search"
-                placeholder={t("search_questionnaires")}
-                className="pl-10"
-                value={qParams.title || ""}
-                onChange={(e) => updateQuery({ title: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center md:self-start">
-            <Button onClick={() => navigate("/admin/questionnaire/create")}>
-              <PlusIcon className="size-4" />
-              {t("create_questionnaire")}
-            </Button>
           </div>
         </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="relative w-full sm:max-w-md">
+            <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
+            <Input
+              data-cy="questionnaire-search"
+              placeholder={t("search_questionnaires")}
+              className="pl-10 w-full"
+              value={qParams.title || ""}
+              onChange={(e) => updateQuery({ title: e.target.value })}
+            />
+          </div>
+
+          <Button className="w-full sm:w-auto">
+            <Link
+              href="/admin/questionnaire/create"
+              className="flex items-center gap-2"
+            >
+              <PlusIcon className="size-4" />
+              {t("create_questionnaire")}
+            </Link>
+          </Button>
+        </div>
       </div>
+
       <RenderTable
         questionnaireList={questionnaireList}
         isLoading={isLoading}

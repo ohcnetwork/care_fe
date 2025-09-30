@@ -22,10 +22,12 @@ interface ImportMetaEnv {
   readonly REACT_JWT_TOKEN_REFRESH_INTERVAL?: string;
   readonly REACT_MIN_ENCOUNTER_DATE?: string;
   readonly REACT_DEFAULT_ENCOUNTER_TYPE?: string;
+  readonly REACT_ALLOWED_ENCOUNTER_CLASSES?: string;
   readonly REACT_ALLOWED_LOCALES?: string;
   readonly REACT_ENABLED_APPS?: string;
   readonly REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB?: string;
   readonly REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION?: string;
+  readonly REACT_DISABLE_PATIENT_LOGIN?: string;
 
   // Plugins related envs...
   readonly REACT_SENTRY_DSN?: string;

@@ -11,20 +11,10 @@ export default {
     method: HttpMethod.POST,
     TBody: Type<PublicPatientCreate>(),
     TRes: Type<PublicPatientRead>(),
-    auth: {
-      key: "Authorization",
-      value: "Bearer {token}",
-      type: "header",
-    },
   },
   list: {
     path: "/api/v1/otp/patient/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<PublicPatientRead>>(),
-    auth: {
-      key: "Authorization",
-      value: "Bearer {token}",
-      type: "header",
-    },
   },
 } as const;
