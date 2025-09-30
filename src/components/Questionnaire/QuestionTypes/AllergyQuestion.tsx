@@ -117,7 +117,7 @@ function CategorySelect({
     >
       <SelectTrigger className="h-9 w-full lg:h-8 lg:w-[2rem] lg:px-0 lg:[&>svg]:hidden lg:flex lg:items-center lg:justify-center">
         <SelectValue
-          placeholder={t("cat")}
+          placeholder={t("select_category")}
           className="lg:text-center lg:h-full lg:flex lg:items-center lg:justify-center lg:m-0 lg:p-0"
         >
           {category && (
