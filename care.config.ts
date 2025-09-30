@@ -143,6 +143,11 @@ const careConfig = {
     ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)
     : 2,
 
+  /**
+   * Disable patient login if set to "true"
+   */
+  disablePatientLogin: boolean("REACT_DISABLE_PATIENT_LOGIN", false),
+
   patientRegistration: {
     /**
      * Minimum number of geo-organization levels the user must select

@@ -162,9 +162,6 @@ function ProductKnowledgeTableRow({
           {t(product.status)}
         </Badge>
       </TableCell>
-      <TableCell className="text-sm text-gray-500">
-        {/* {product.category.title} */}
-      </TableCell>
       <TableCell>
         <div className="flex items-center space-x-2">
           <TooltipProvider>
@@ -330,7 +327,9 @@ export function ProductKnowledgeList({
           <TableSkeleton count={5} />
         ) : products.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
             title={t("no_product_knowledge_found")}
             description={t("no_products_in_category")}
           />
@@ -348,12 +347,7 @@ export function ProductKnowledgeList({
                           {t("product_type")}
                         </TableHead>
                         <TableHead className="w-[15%]">{t("status")}</TableHead>
-                        <TableHead className="w-[20%]">
-                          {t("category")}
-                        </TableHead>
-                        <TableHead className="w-[15%] text-right">
-                          {t("actions")}
-                        </TableHead>
+                        <TableHead className="w-[5%]">{t("actions")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

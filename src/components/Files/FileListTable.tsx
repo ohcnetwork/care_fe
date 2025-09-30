@@ -46,7 +46,6 @@ interface FileListTableProps {
   associatingId: string;
   canEdit?: boolean;
   showHeader?: boolean;
-  onRefetch?: () => void;
 }
 
 export function FileListTable({
@@ -55,7 +54,6 @@ export function FileListTable({
   associatingId,
   canEdit = false,
   showHeader = true,
-  onRefetch,
 }: FileListTableProps) {
   const { t } = useTranslation();
   const [selectedArchivedFile, setSelectedArchivedFile] =
@@ -65,8 +63,6 @@ export function FileListTable({
 
   const fileManager = useFileManager({
     type,
-    onArchive: onRefetch,
-    onEdit: onRefetch,
     uploadedFiles: files
       .slice()
       .reverse()

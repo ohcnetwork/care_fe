@@ -9,6 +9,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -134,7 +135,7 @@ const CriticalActionConfirmationDialog = ({
           </div>
         </AlertDialogHeader>
         <div className="space-y-3 text-sm text-black">
-          {description}
+          <AlertDialogDescription>{description}</AlertDialogDescription>
           <div>
             <span>
               <Trans

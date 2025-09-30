@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 
 interface DebugPreviewProps {
   data: unknown;
@@ -7,6 +8,7 @@ interface DebugPreviewProps {
 }
 
 export function DebugPreview({ data, title, className }: DebugPreviewProps) {
+  const { t } = useTranslation();
   if (!import.meta.env.DEV) {
     return null;
   }
@@ -15,7 +17,7 @@ export function DebugPreview({ data, title, className }: DebugPreviewProps) {
     <Card className={className}>
       <CardHeader>
         <CardTitle className="text-xl font-semibold">
-          {title || "Debug Preview"}
+          {title || t("debug_preview")}
         </CardTitle>
       </CardHeader>
       <CardContent>
