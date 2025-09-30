@@ -40,7 +40,7 @@ import {
 
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import mutate from "@/Utils/request/mutate";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS_ICONS,
@@ -51,6 +51,8 @@ import {
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
 
 interface Props {
   patientId: string;
@@ -74,6 +76,7 @@ export default function CreateEncounterForm({
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  useShortcutSubContext();
 
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
@@ -227,7 +230,7 @@ export default function CreateEncounterForm({
                             type="button"
                             data-cy={`encounter-type-${value}`}
                             className={cn(
-                              "h-auto min-h-24 w-full justify-start text-lg",
+                              "h-auto min-h-24 w-full justify-center text-lg",
                               field.value === value &&
                                 "ring-2 ring-primary text-primary",
                             )}
@@ -317,7 +320,7 @@ export default function CreateEncounterForm({
                 name="tags"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("tags")}</FormLabel>
+                    <FormLabel>{t("tags", { count: 2 })}</FormLabel>
                     <FormControl className="mt-0">
                       <TagSelectorPopover
                         selected={selectedTags}
@@ -362,6 +365,7 @@ export default function CreateEncounterForm({
                 className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
               >
                 {t("cancel")}
+                <ShortcutBadge actionId="cancel-action" />
               </Button>
               <Button
                 data-cy="create-encounter-button"
@@ -369,6 +373,7 @@ export default function CreateEncounterForm({
                 disabled={isPending || !form.watch("organizations").length}
               >
                 {isPending ? t("creating") : t("create_encounter")}
+                <ShortcutBadge actionId="submit-action" className="bg-white" />
               </Button>
             </div>
           </form>

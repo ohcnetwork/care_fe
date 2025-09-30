@@ -4,28 +4,17 @@ export interface BatchRequestResult<T = unknown> {
   status_code: number;
 }
 
-export interface BatchRequestBody {
+export interface BatchRequestResponse<T = unknown> {
+  results: BatchRequestResult<T>[];
+}
+
+export interface BatchRequestBody<T = any> {
   requests: Array<{
     url: string;
     method: string;
     reference_id: string;
-    body: any;
+    body: T;
   }>;
-}
-
-export interface BatchRequestError {
-  question_id?: string;
-  msg?: string;
-  error?: string;
-  type?: string;
-  loc?: string[];
-  ctx?: {
-    error?: string;
-  };
-}
-
-export interface BatchErrorData {
-  errors: BatchRequestError[];
 }
 
 export interface BatchResponseBase {

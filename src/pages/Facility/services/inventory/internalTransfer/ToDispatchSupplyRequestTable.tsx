@@ -32,6 +32,7 @@ import {
 
 import useFilters from "@/hooks/useFilters";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { ProductKnowledgeStatus } from "@/types/inventory/productKnowledge/productKnowledge";
@@ -102,7 +103,7 @@ export default function ToDispatchSupplyRequestTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row items-center gap-4">
         <ProductKnowledgeSelect
           value={selectedProduct}
           onChange={(product) => updateQuery({ item: product?.id })}
@@ -225,7 +226,7 @@ export default function ToDispatchSupplyRequestTable({
         <TableSkeleton count={5} />
       ) : !requests.length ? (
         <EmptyState
-          icon="l-box"
+          icon={<CareIcon icon="l-box" className="text-primary size-6" />}
           title={t("no_requests_found")}
           description={t("no_requests_found_description")}
         />
