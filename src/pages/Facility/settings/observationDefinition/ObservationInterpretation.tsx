@@ -640,7 +640,7 @@ export function ConditionComponent({
         return (
           <Input
             type="number"
-            placeholder="Value"
+            placeholder={t("enter_value")}
             value={currentValue}
             onChange={(e) => handleSetValue(e.target.value, index)}
             className="w-fit"
@@ -656,7 +656,7 @@ export function ConditionComponent({
           <div className="flex flex-col sm:flex-row gap-2">
             <Input
               type="number"
-              placeholder="Min"
+              placeholder={t("enter_min_value")}
               className="w-full sm:w-32"
               value={currentRange.min || ""}
               onChange={(e) =>
@@ -671,7 +671,7 @@ export function ConditionComponent({
             />
             <Input
               type="number"
-              placeholder="Max"
+              placeholder={t("enter_max_value")}
               className="w-full sm:w-32"
               value={currentRange.max || ""}
               onChange={(e) =>
@@ -692,7 +692,7 @@ export function ConditionComponent({
         return (
           <Input
             type="text"
-            placeholder="Enter comma-separated values"
+            placeholder={t("enter_comma_separated_values")}
             value={currentValues.join(", ")}
             onChange={(e) => {
               const valuesArray = e.target.value
@@ -852,7 +852,7 @@ function InterpretationComponent({
           onValueChange={(value) => handleColorChange(value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select a color" />
+            <SelectValue placeholder={t("select_a_colour")} />
           </SelectTrigger>
           <SelectContent>
             {Object.entries(COLOR_OPTIONS).map(([key, value]) => (

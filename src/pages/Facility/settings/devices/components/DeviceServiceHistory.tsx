@@ -32,6 +32,7 @@ import query from "@/Utils/request/query";
 import { ServiceHistory } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import AddServiceHistorySheet from "./AddServiceHistorySheet";
 import EditServiceHistorySheet from "./EditServiceHistorySheet";
 
@@ -89,9 +90,8 @@ export default function DeviceServiceHistory({
           <TableSkeleton count={5} />
         ) : serviceHistory?.results?.length === 0 ? (
           <EmptyState
-            icon="l-wrench"
+            icon={<CareIcon icon="l-wrench" className="size-6 text-primary" />}
             title={t("service_records_none")}
-            description={t("service_records_none_description")}
           />
         ) : (
           <div>
