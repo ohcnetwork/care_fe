@@ -37,6 +37,7 @@ export interface PatientIdentifierConfigData {
   display: string;
   retrieve_config: RetrieveConfig;
   default_value?: string;
+  auto_maintained: boolean;
 }
 
 export interface PatientIdentifierMeta {

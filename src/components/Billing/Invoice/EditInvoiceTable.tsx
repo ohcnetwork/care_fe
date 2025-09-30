@@ -312,24 +312,13 @@ export function EditInvoiceTable({
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            data-shortcut-id={enableShortcut ? "cancel-action" : undefined}
-          >
+          <Button type="button" variant="outline" onClick={onClose}>
             {t("cancel")}
             {enableShortcut && <ShortcutBadge actionId="cancel-action" />}
           </Button>
-          <Button
-            type="submit"
-            disabled={isPending}
-            data-shortcut-id={enableShortcut ? "submit-action" : undefined}
-          >
+          <Button type="submit" disabled={isPending}>
             {isPending ? t("saving") : t("save")}
-            {enableShortcut && (
-              <ShortcutBadge actionId="submit-action" className="bg-white" />
-            )}
+            {enableShortcut && <ShortcutBadge actionId="submit-action" />}
           </Button>
         </div>
       </form>

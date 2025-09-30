@@ -6,6 +6,7 @@ import Autocomplete from "@/components/ui/autocomplete";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -53,9 +54,9 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
           <SheetTitle className="text-xl font-semibold">
             {t("valueset_preview")}
           </SheetTitle>
-          <p className="text-sm text-gray-500">
+          <SheetDescription>
             {t("valueset_preview_description")}
-          </p>
+          </SheetDescription>
         </SheetHeader>
         <div className="px-1 mt-6">
           <Autocomplete

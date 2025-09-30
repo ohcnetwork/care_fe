@@ -36,13 +36,16 @@ export const ScheduleResourceSelector = ({
       return (
         <PractitionerSelector
           facilityId={facilityId}
-          selected={selectedResource.resource}
-          onSelect={(user) => {
+          selected={
+            selectedResource.resource ? [selectedResource.resource] : []
+          }
+          onSelect={(users) => {
             setSelectedResource({
-              resource: user,
+              resource: users[0] || null,
               resource_type: selectedResource.resource_type,
             });
           }}
+          multiple={false}
         />
       );
 
