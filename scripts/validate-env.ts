@@ -2,12 +2,12 @@ import { z } from "zod";
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
 import { ENCOUNTER_CLASS } from "../src/types/emr/encounter/encounter";
 
-const logSchema = z.object({
+const logoSchema = z.object({
   light: z.string().url(),
   dark: z.string().url(),
 });
 
-const logSchemaString = z
+const logoSchemaString = z
   .string()
   .refine(
     (val) => {
@@ -23,7 +23,7 @@ const logSchemaString = z
     },
   )
   .transform((val) => JSON.parse(val))
-  .pipe(logSchema);
+  .pipe(logoSchema);
 
 const envSchema = z
   .object({
@@ -33,32 +33,64 @@ const envSchema = z
     REACT_PUBLIC_URL: z.string().url(),
     REACT_APP_COVER_IMAGE: z.string().url(),
     REACT_APP_COVER_IMAGE_ALT: z.string().url(),
-    REACT_SBOM_BASE_URL: z.string().url().optional(),
+    REACT_SBOM_BASE_URL: z.string().url(),
     REACT_GITHUB_URL: z.string().url().optional(),
     REACT_OHCN_URL: z.string().url().optional(),
-    REACT_DASHBOARD_URL: z.string().url().optional(),
     REACT_SENTRY_DSN: z.string().url().optional(),
     REACT_SENTRY_ENVIRONMENT: z.string().optional(),
     REACT_DEFAULT_PAYMENT_TERMS: z.string().optional(),
-    REACT_MAIN_LOGO: logSchemaString.optional(),
-    REACT_STATE_LOGO: logSchemaString.optional(),
-    REACT_CUSTOM_LOGO: logSchemaString.optional(),
+    REACT_MAIN_LOGO: logoSchemaString.optional(),
+    REACT_STATE_LOGO: logoSchemaString.optional(),
+    REACT_CUSTOM_LOGO: logoSchemaString.optional(),
     REACT_CUSTOM_DESCRIPTION: z.string().optional(),
-    REACT_CUSTOM_LOGO_ALT: logSchemaString.optional(),
+    REACT_CUSTOM_LOGO_ALT: logoSchemaString.optional(),
     REACT_MAPS_FALLBACK_URL_TEMPLATE: z.string().url().optional(),
     REACT_ENABLED_APPS: z.string().optional(),
     REACT_RECAPTCHA_SITE_KEY: z.string(),
     REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: z.string().optional(),
-    REACT_JWT_TOKEN_REFRESH_INTERVAL: z.string().optional(),
-    REACT_MIN_ENCOUNTER_DATE: z.string().optional(),
-    REACT_DISABLE_PATIENT_LOGIN: z.string().optional(),
-    REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION: z.string().optional(),
-    REACT_APPOINTMENTS_DEFAULT_DATE_FILTER: z.string().optional(),
+    REACT_JWT_TOKEN_REFRESH_INTERVAL: z
+      .string()
+      .refine(
+        (val) => {
+          parseInt(val);
+        },
+        {
+          message: "Must be a valid number",
+        },
+      )
+      .optional(),
+    REACT_DISABLE_PATIENT_LOGIN: z.string().refine(
+      (val) => {
+        const bool = val === "true" || val === "false";
+        return bool;
+      },
+      {
+        message: "Must be a boolean",
+      },
+    ),
+    REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION: z.string().refine(
+      (val) => {
+        const bool = val === "true" || val === "false";
+        return bool;
+      },
+      {
+        message: "Must be a boolean",
+      },
+    ),
+    REACT_APPOINTMENTS_DEFAULT_DATE_FILTER: z
+      .string()
+      .refine(
+        (val) => {
+          parseInt(val);
+        },
+        {
+          message: "Must be a valid number",
+        },
+      )
+      .optional(),
     REACT_OBSERVATION_PLOTS_CONFIG_URL: z.string().url().optional(),
     REACT_DEFAULT_COUNTRY: z.string().optional(),
     REACT_DEFAULT_COUNTRY_NAME: z.string().optional(),
-    REACT_RESEND_OTP_TIMEOUT: z.string().optional(),
-    REACT_IMAGE_UPLOAD_MAX_SIZE_MB: z.string().optional(),
     REACT_CDN_URLS: z
       .string()
       .optional()

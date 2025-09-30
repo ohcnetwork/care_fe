@@ -35,7 +35,6 @@ const careConfig = {
   apiUrl: env.REACT_CARE_API_URL,
   sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
   urls: {
-    dashboard: env.REACT_DASHBOARD_URL,
     github: env.REACT_GITHUB_URL || "https://github.com/ohcnetwork",
     ohcn: env.REACT_OHCN_URL || "https://ohc.network?ref=care",
   },
@@ -54,10 +53,11 @@ const careConfig = {
   encounterClasses: (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",") ??
     ENCOUNTER_CLASS) as NonEmptyArray<EncounterClass>,
 
-  defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
+  defaultEncounterType:
+    (env.REACT_DEFAULT_ENCOUNTER_TYPE as EncounterClass) ||
     (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",").length === 1
-      ? env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",")[0]
-      : undefined)) as EncounterClass,
+      ? (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",")[0] as EncounterClass)
+      : undefined),
 
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
@@ -70,8 +70,6 @@ const careConfig = {
       ? parseInt(env.REACT_JWT_TOKEN_REFRESH_INTERVAL)
       : 5 * 60e3,
   },
-
-  minEncounterDate: new Date(env.REACT_MIN_ENCOUNTER_DATE || "2020-01-01"),
 
   // Plugins related configs...
   sentry: {
