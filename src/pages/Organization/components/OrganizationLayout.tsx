@@ -138,9 +138,7 @@ export default function OrganizationLayout({
                       </Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  <BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
                 </React.Fragment>
               ))}
               <BreadcrumbItem key={org.id}>
