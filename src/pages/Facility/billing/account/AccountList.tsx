@@ -234,7 +234,7 @@ export function AccountList({
             <TableBody>
               {accounts.map((account: AccountRead) => (
                 <TableRow key={account.id}>
-                  <TableCell>
+                  <TableCell className="whitespace-normal">
                     <div className="flex items-center gap-3">
                       <Avatar
                         name={account.name}
@@ -285,10 +285,11 @@ export function AccountList({
                         ` - ${formatDate(account.service_period?.end)}`}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
+                  <TableCell className="whitespace-normal">
+                    <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
                       <Button
                         variant="ghost"
+                        size="sm"
                         className="font-semibold"
                         onClick={() => {
                           setEditingAccount(account);
@@ -300,6 +301,7 @@ export function AccountList({
                       </Button>
                       <Button
                         variant="outline"
+                        size="sm"
                         className="font-semibold"
                         onClick={() =>
                           navigate(
