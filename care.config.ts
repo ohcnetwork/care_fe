@@ -83,6 +83,14 @@ const careConfig = {
     environment: env.REACT_SENTRY_ENVIRONMENT || "staging",
   },
 
+  /**
+   * Relative number of days to show in the encounters page by default.
+   * 0 means today.
+   */
+  encounterDateFilter: env.REACT_ENCOUNTER_DEFAULT_DATE_FILTER
+    ? parseInt(env.REACT_ENCOUNTER_DEFAULT_DATE_FILTER)
+    : 0,
+
   appointments: {
     /**
      * Relative number of days to show in the appointments page by default.
