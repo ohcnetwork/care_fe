@@ -6,8 +6,8 @@ import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
 import EncounterHistory from "@/components/Patient/PatientDetailsTab/EncounterHistory";
 import { ClinicalHistory } from "./ClinicalHistory";
 
+import { BookingsList } from "@/pages/Appointments/BookAppointment/BookingsList";
 import { Accounts } from "./Accounts";
-import { Appointments } from "./Appointments";
 import { PatientFilesTab } from "./PatientFiles";
 import { PatientNotesTab } from "./PatientNotes";
 import { PatientUsers } from "./PatientUsers";
@@ -37,7 +37,7 @@ export const BASE_PATIENT_TABS: Tab[] = [
   },
   {
     route: "appointments",
-    component: Appointments,
+    component: BookingsList,
   },
   {
     route: "encounters",

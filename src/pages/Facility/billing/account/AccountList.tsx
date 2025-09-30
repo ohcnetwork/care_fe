@@ -114,7 +114,7 @@ export function AccountList({
             initialValues={editingAccount ? editingAccount : undefined}
             isEdit={!!editingAccount}
           />
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+          <div className="mb-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-between gap-4">
             <div className="flex flex-wrap gap-4">
               <Tabs
                 value={qParams.status ?? "all"}
@@ -215,7 +215,7 @@ export function AccountList({
           <TableSkeleton count={5} />
         ) : accounts.length === 0 ? (
           <EmptyState
-            icon="l-user"
+            icon={<CareIcon icon="l-user" className="text-primary size-6" />}
             title={t("no_accounts_found")}
             description={t("adjust_account_filters")}
           />

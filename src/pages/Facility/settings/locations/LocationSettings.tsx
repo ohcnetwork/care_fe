@@ -227,7 +227,7 @@ export default function LocationSettings({
                 ) : (
                   <>
                     <div className="flex flex-col justify-between items-start gap-2 sm:gap-4 md:pt-4 md:px-4">
-                      <div className="flex flex-col md:flex-row justify-between items-center w-full gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-4">
                         <Input
                           data-cy="location-search-input"
                           placeholder={t("search_by_name")}
@@ -235,7 +235,7 @@ export default function LocationSettings({
                           onChange={(e) => setSearchQuery(e.target.value)}
                           className="w-full lg:w-72"
                         />
-                        <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                        <div className="w-full sm:w-auto flex justify-center sm:justify-start">
                           <Button
                             data-cy="add-main-location-button"
                             variant="primary"

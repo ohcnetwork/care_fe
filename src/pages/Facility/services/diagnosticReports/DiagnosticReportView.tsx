@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { MoreVertical, Printer } from "lucide-react";
+import { ArrowLeft, MoreVertical, Printer } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -16,17 +16,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import BackButton from "@/components/Common/BackButton";
 import { FileListTable } from "@/components/Files/FileListTable";
-import { FileUploadModel } from "@/components/Patient/models";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import { ObservationHistorySheet } from "@/pages/Facility/services/serviceRequests/components/ObservationHistorySheet";
-import { PatientHeader } from "@/pages/Facility/services/serviceRequests/components/PatientHeader";
 import { DIAGNOSTIC_REPORT_STATUS_COLORS } from "@/types/emr/diagnosticReport/diagnosticReport";
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import { ObservationStatus } from "@/types/emr/observation/observation";
+import { FileReadMinimal } from "@/types/files/file";
+import fileApi from "@/types/files/fileApi";
 
 export default function DiagnosticReportView({
   facilityId,
@@ -50,19 +50,20 @@ export default function DiagnosticReportView({
   });
 
   // Query to fetch files for the diagnostic report
-  const { data: files = { results: [], count: 0 }, refetch: refetchFiles } =
-    useQuery<PaginatedResponse<FileUploadModel>>({
-      queryKey: ["files", "diagnostic_report", report?.id],
-      queryFn: query(routes.viewUpload, {
-        queryParams: {
-          file_type: "diagnostic_report",
-          associating_id: report?.id,
-          limit: 100,
-          offset: 0,
-        },
-      }),
-      enabled: !!report?.id,
-    });
+  const { data: files = { results: [], count: 0 } } = useQuery<
+    PaginatedResponse<FileReadMinimal>
+  >({
+    queryKey: ["files", "diagnostic_report", report?.id],
+    queryFn: query(fileApi.list, {
+      queryParams: {
+        file_type: "diagnostic_report",
+        associating_id: report?.id,
+        limit: 100,
+        offset: 0,
+      },
+    }),
+    enabled: !!report?.id,
+  });
 
   if (isLoading) {
     return (
@@ -79,7 +80,10 @@ export default function DiagnosticReportView({
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="space-y-6 flex justify-between">
-        <BackButton />
+        <BackButton>
+          <ArrowLeft />
+          <span>{t("back")}</span>
+        </BackButton>
         <Button
           variant="outline"
           onClick={() =>
@@ -94,13 +98,11 @@ export default function DiagnosticReportView({
       </div>
 
       <div className="space-y-6">
-        <div className="px-2">
-          <PatientHeader
-            patient={report.encounter.patient}
-            facilityId={report.encounter.facility.id}
-            encounterId={report.encounter.id}
-          />
-        </div>
+        <PatientHeader
+          patient={report.encounter.patient}
+          facilityId={report.encounter.facility.id}
+          className="md:p-0 p-0"
+        />
         {/* Report Details */}
         <Card>
           <CardHeader>
@@ -169,7 +171,6 @@ export default function DiagnosticReportView({
                 associatingId={report.id}
                 canEdit={true}
                 showHeader={false}
-                onRefetch={refetchFiles}
               />
             </CardContent>
           </Card>
