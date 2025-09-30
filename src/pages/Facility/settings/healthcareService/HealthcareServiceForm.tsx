@@ -404,6 +404,7 @@ function HealthcareServiceFormContent({
                     <FormItem>
                       <FormControl>
                         <FacilityOrganizationSelector
+                          value={field.value ? [field.value] : null}
                           currentOrganizations={
                             existingData?.managing_organization
                               ? [existingData.managing_organization]
