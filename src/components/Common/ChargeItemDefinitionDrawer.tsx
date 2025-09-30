@@ -42,27 +42,29 @@ export function ChargeItemDefinitionDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh] px-8">
-        <div className="max-w-8xl mx-auto">
-          <DrawerHeader className="relative">
-            <DrawerClose asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-4 top-4 h-6 w-6 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </DrawerClose>
+      <DrawerContent className="max-h-[90vh] flex flex-col">
+        <DrawerHeader className="relative px-8 flex-shrink-0">
+          <DrawerClose asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-4 top-4 h-6 w-6 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </DrawerClose>
+          <div className="max-w-8xl mx-auto w-full">
             <DrawerTitle className="text-left">
               Create Charge Item Definition
             </DrawerTitle>
             <DrawerDescription className="text-left">
               Create a new charge item definition for billing purposes.
             </DrawerDescription>
-          </DrawerHeader>
+          </div>
+        </DrawerHeader>
 
-          <div className="flex-1 overflow-y-auto px-6 pb-4">
+        <div className="flex-1 overflow-y-auto px-8">
+          <div className="max-w-8xl mx-auto w-full py-4">
             <div className="bg-gray-100 rounded-lg p-4">
               <ChargeItemDefinitionForm
                 facilityId={facilityId}

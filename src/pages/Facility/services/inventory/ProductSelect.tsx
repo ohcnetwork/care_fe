@@ -29,7 +29,7 @@ import productApi from "@/types/inventory/product/productApi";
 interface ProductSelectProps {
   facilityId: string;
   onSelect?: (product: ProductRead) => void;
-  selectedProductId?: string;
+  selectedProduct?: ProductRead;
   productKnowledgeId?: string;
   productKnowledgeSlug?: string;
   receivingItem?: string;
@@ -40,7 +40,7 @@ interface ProductSelectProps {
 export default function ProductSelect({
   facilityId,
   onSelect,
-  selectedProductId,
+  selectedProduct,
   productKnowledgeId,
   productKnowledgeSlug,
   receivingItem,
@@ -90,7 +90,9 @@ export default function ProductSelect({
                 <div className="flex items-center gap-2">
                   <SearchIcon className="h-4 w-4 text-gray-500" />
                   <span className="truncate">
-                    {searchQuery || t("search_product")}
+                    {selectedProduct?.batch?.lot_number ||
+                      searchQuery ||
+                      t("search_product")}
                   </span>
                 </div>
                 <CareIcon
@@ -195,7 +197,7 @@ export default function ProductSelect({
                               )}
                             </div>
                           </div>
-                          {selectedProductId === product.id && (
+                          {selectedProduct?.id === product.id && (
                             <CareIcon
                               icon="l-check"
                               className="size-4 text-primary-600 ml-2"

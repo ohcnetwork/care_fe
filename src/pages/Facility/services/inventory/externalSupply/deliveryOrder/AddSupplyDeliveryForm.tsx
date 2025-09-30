@@ -331,16 +331,13 @@ export function AddSupplyDeliveryForm({
                                 ) {
                                   form.setValue(`items.${index}`, {
                                     ...form.watch(`items.${index}`),
-                                    product_knowledge: form.watch(
-                                      `items.${index}.product_knowledge`,
-                                    ),
                                     supplied_item: product,
                                   });
                                 }
                               }}
-                              selectedProductId={
-                                form.watch(`items.${index}.supplied_item`)?.id
-                              }
+                              selectedProduct={form.watch(
+                                `items.${index}.supplied_item`,
+                              )}
                               disabled={
                                 !form.watch(`items.${index}.product_knowledge`)
                                   .slug
