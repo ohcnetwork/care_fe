@@ -5,7 +5,6 @@ import { Organization } from "@/types/organization/organization";
 export enum RequestOrderStatus {
   draft = "draft",
   pending = "pending",
-  in_progress = "in_progress",
   completed = "completed",
   abandoned = "abandoned",
   entered_in_error = "entered_in_error",
@@ -25,7 +24,6 @@ export enum RequestOrderIntent {
 export const REQUEST_ORDER_STATUS_COLORS = {
   draft: "gray",
   pending: "yellow",
-  in_progress: "green",
   completed: "green",
   abandoned: "destructive",
   entered_in_error: "gray",

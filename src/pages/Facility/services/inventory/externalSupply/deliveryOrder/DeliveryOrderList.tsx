@@ -34,21 +34,29 @@ export function DeliveryOrderList({
   const { t } = useTranslation();
 
   const [qParams, setQueryParams] = useQueryParams();
-  const TABS_CONFIG = isRequester
-    ? [
+
+  const TABS_CONFIG = internal
+    ? isRequester
+      ? [
+          { value: "pending", label: "in_transit" },
+          {
+            value: "completed",
+            label: "Completed",
+          },
+        ]
+      : [
+          { value: "draft", label: "draft" },
+          { value: "pending", label: "pending" },
+          {
+            value: "completed,abandoned,entered_in_error",
+            label: "completed",
+          },
+        ]
+    : ([
         { value: "draft", label: "draft" },
-        { value: "pending,in_progress", label: "Ordered" },
+        { value: "pending", label: "pending" },
         {
           value: "completed,abandoned,entered_in_error",
-          label: "Completed",
-        },
-      ]
-    : ([
-        ...(isRequester ? [] : [{ value: "draft", label: "draft" }]),
-        { value: "pending", label: "pending" },
-        { value: "in_progress", label: "in_progress" },
-        {
-          value: "completed",
           label: "completed",
         },
       ] as const);

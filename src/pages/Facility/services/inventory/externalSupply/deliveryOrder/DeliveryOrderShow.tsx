@@ -185,13 +185,13 @@ export function DeliveryOrderShow({
     });
   }
 
-  function handleMarkAsApproved() {
+  function handleUpdateDeliveryOrderStatus(status: DeliveryOrderStatus) {
     if (!deliveryOrder) return;
 
     updateDeliveryOrder({
       ...deliveryOrder,
-      status: DeliveryOrderStatus.pending,
-      supplier: deliveryOrder.supplier?.id || "",
+      status,
+      supplier: deliveryOrder.supplier?.id || undefined,
       origin: deliveryOrder.origin?.id || undefined,
       destination: deliveryOrder.destination.id,
     });
@@ -285,18 +285,6 @@ export function DeliveryOrderShow({
     });
   }
 
-  function handleMarkDeliveryOrderAsCompleted() {
-    if (!deliveryOrder) return;
-
-    updateDeliveryOrder({
-      ...deliveryOrder,
-      status: DeliveryOrderStatus.completed,
-      supplier: deliveryOrder.supplier?.id || "",
-      origin: deliveryOrder.origin?.id || undefined,
-      destination: deliveryOrder.destination.id,
-    });
-  }
-
   if (isLoading) {
     return (
       <Page title={t("delivery_order_details")} hideTitleOnPage>
@@ -350,14 +338,23 @@ export function DeliveryOrderShow({
               <Link href={`${deliveryOrderId}/edit`}>{t("edit")}</Link>
             </Button>
             {deliveryOrder.status === DeliveryOrderStatus.draft && (
-              <Button onClick={handleMarkAsApproved} disabled={isUpdating}>
+              <Button
+                onClick={() =>
+                  handleUpdateDeliveryOrderStatus(DeliveryOrderStatus.pending)
+                }
+                disabled={isUpdating}
+              >
                 {isUpdating ? t("updating") : t("mark_as_approved")}
               </Button>
             )}
             {deliveryOrder.status === DeliveryOrderStatus.pending &&
               isRequester && (
                 <Button
-                  onClick={handleMarkDeliveryOrderAsCompleted}
+                  onClick={() =>
+                    handleUpdateDeliveryOrderStatus(
+                      DeliveryOrderStatus.completed,
+                    )
+                  }
                   disabled={isUpdating}
                 >
                   {isUpdating ? t("updating") : t("mark_as_completed")}

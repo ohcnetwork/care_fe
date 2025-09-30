@@ -52,7 +52,7 @@ export function RequestOrderList({
   const TABS_CONFIG = isRequester
     ? [
         { value: "draft", label: "draft" },
-        { value: "pending,in_progress", label: "Ordered" },
+        { value: "pending", label: "Ordered" },
         {
           value: "completed,abandoned,entered_in_error",
           label: "Completed",
@@ -60,7 +60,6 @@ export function RequestOrderList({
       ]
     : ([
         { value: "pending", label: "pending" },
-        { value: "in_progress", label: "in_progress" },
         {
           value: "completed",
           label: "completed",

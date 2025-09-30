@@ -125,7 +125,7 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       facilityId={facilityId}
       locationId={locationId}
       internal={true}
-      isRequester={true}
+      isRequester={false}
     />
   ),
   "/internal_transfers/delivery_orders": () => (
