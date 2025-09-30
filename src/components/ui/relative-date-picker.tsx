@@ -144,7 +144,7 @@ export function RelativeDatePicker({
             disabled={!validateDate(selected.unit, selected.value)}
           >
             <SelectTrigger className="col-span-2">
-              <SelectValue placeholder="Select a number" />
+              <SelectValue placeholder={t("select_a_number")} />
             </SelectTrigger>
             <SelectContent>
               {Array.from({ length: maxValue }, (_, i) => i + 1).map((num) => {
