@@ -66,6 +66,7 @@ function SheetContent({
       >
         <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-gray-100 dark:ring-offset-gray-950 dark:focus:ring-gray-300 dark:data-[state=open]:bg-gray-800">
           <Cross2Icon className="size-4" />
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>
         {children}

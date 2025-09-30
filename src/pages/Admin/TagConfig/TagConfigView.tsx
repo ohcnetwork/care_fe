@@ -87,7 +87,6 @@ export default function TagConfigView({
       return mutate(tagConfigApi.update, {
         pathParams: { external_id: child.id! },
       })({
-        slug: childData.slug,
         display: childData.display,
         category: childData.category,
         description: childData.description || "",
@@ -151,7 +150,7 @@ export default function TagConfigView({
     return (
       <Page title={t("tag_config_details")} hideTitleOnPage>
         <EmptyState
-          icon="l-tag-alt"
+          icon={<CareIcon icon="l-tag-alt" className="text-primary size-6" />}
           title={t("tag_config_not_found")}
           description={t("tag_config_not_found_description")}
         />
@@ -181,7 +180,6 @@ export default function TagConfigView({
               <h1 className="text-2xl font-bold text-gray-900">
                 {tagConfig.display}
               </h1>
-              <p className="text-gray-600">{tagConfig.slug}</p>
             </div>
           </div>
           <Button onClick={() => setIsEditSheetOpen(true)}>
@@ -246,6 +244,18 @@ export default function TagConfigView({
                 </label>
                 <div className="mt-1 text-sm">
                   {tagConfig.has_children ? t("yes") : t("no")}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  {t("managing_organization")}
+                </label>
+                <div className="mt-1 text-sm">
+                  {tagConfig.facility_organization
+                    ? tagConfig.facility_organization.name
+                    : tagConfig.organization
+                      ? tagConfig.organization.name
+                      : t("none")}
                 </div>
               </div>
             </div>

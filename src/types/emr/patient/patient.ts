@@ -1,8 +1,7 @@
-import { UserBareMinimum } from "@/components/Users/models";
-
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum BloodGroupChoices {
   A_negative = "A_negative",
@@ -44,8 +43,8 @@ export interface PatientRead extends Omit<PatientBase, "geo_organization"> {
   year_of_birth: number;
   created_date: string;
   modified_date: string;
-  created_by: UserBareMinimum | null;
-  updated_by: UserBareMinimum | null;
+  created_by: UserReadMinimal | null;
+  updated_by: UserReadMinimal | null;
   permissions: string[];
   instance_tags: TagConfig[];
   facility_tags: TagConfig[];
@@ -81,6 +80,7 @@ export interface PatientSearchRequest {
   phone_number?: string;
   config?: string;
   value?: string;
+  page_size?: number;
 }
 
 export interface PatientSearchRetrieveRequest {
@@ -94,4 +94,28 @@ export function getPartialId(patient: PartialPatientModel | PatientRead) {
     return patient.partial_id;
   }
   return patient.id.slice(0, 5);
+}
+
+export interface PublicPatientRead {
+  id: string;
+  name: string;
+  gender: GenderChoices;
+  phone_number: string;
+  emergency_phone_number: string;
+  address: string;
+  pincode: number;
+  date_of_birth: string;
+  year_of_birth: number;
+  geo_organization: Organization;
+  blood_group: BloodGroupChoices;
+}
+
+export interface PublicPatientCreate {
+  name: string;
+  gender: GenderChoices;
+  date_of_birth?: string;
+  age?: number;
+  address: string;
+  pincode: number;
+  geo_organization: string;
 }

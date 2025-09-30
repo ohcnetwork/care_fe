@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Edit, MoreVertical } from "lucide-react";
+import { ArrowLeft, Edit, MoreVertical } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -64,7 +64,10 @@ export default function PurchaseOrdersBySupplier({
     return (
       <Page title={t("purchase_orders_by_supplier")} hideTitleOnPage>
         <div className="p-4">
-          <BackButton />
+          <BackButton>
+            <ArrowLeft />
+            <span>{t("back")}</span>
+          </BackButton>
           <TableSkeleton count={5} />
         </div>
       </Page>
@@ -75,7 +78,10 @@ export default function PurchaseOrdersBySupplier({
     return (
       <Page title={t("purchase_orders_by_supplier")} hideTitleOnPage>
         <div className="p-4">
-          <BackButton />
+          <BackButton>
+            <ArrowLeft />
+            <span>{t("back")}</span>
+          </BackButton>
           <p>{t("no_purchase_orders_found")}</p>
         </div>
       </Page>
@@ -87,7 +93,10 @@ export default function PurchaseOrdersBySupplier({
   return (
     <Page title={t("purchase_orders_by_supplier")} hideTitleOnPage>
       <div className="p-2">
-        <BackButton />
+        <BackButton>
+          <ArrowLeft />
+          <span>{t("back")}</span>
+        </BackButton>
       </div>
       <div className="space-y-2 px-4 pb-2">
         <div className="p-4 flex flex-row justify-between">
@@ -139,7 +148,7 @@ export default function PurchaseOrdersBySupplier({
                 <span className="text-sm">{t("po_number")}</span>
               </p>
               <p className="text-gray-500 flex flex-row items-end gap-1">
-                <span className="text-black"> #Po-Supplier</span>
+                <span className="text-black"> #{t("po_supplier")}</span>
                 <span className="text-gray-500 text-xs font-normal mb-1">
                   ({purchaseOrders.length} {t("items")})
                 </span>
