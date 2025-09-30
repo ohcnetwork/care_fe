@@ -8,17 +8,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Collapsible,
@@ -42,6 +32,7 @@ import {
 } from "@/components/ui/select";
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import UserSelector from "@/components/Common/UserSelector";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
@@ -456,33 +447,17 @@ export function MedicationRequestQuestion({
         medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
       )}
     >
-      <AlertDialog
+      <ConfirmActionDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("remove_medication")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("remove_medication_confirmation", {
-                medication: displayMedicationName(
-                  medications[medicationToDelete!],
-                ),
-              })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmRemoveMedication}
-              className={cn(buttonVariants({ variant: "destructive" }))}
-              data-cy="confirm-remove-medication"
-            >
-              {t("remove")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onConfirm={confirmRemoveMedication}
+        title={t("remove_medication")}
+        description={t("remove_medication_confirmation", {
+          medication: displayMedicationName(medications[medicationToDelete!]),
+        })}
+        confirmText={t("remove")}
+        variant="destructive"
+      />
       <HistoricalRecordSelector<MedicationRequestRead | MedicationStatementRead>
         title={t("medication_history")}
         structuredTypes={[
@@ -1301,7 +1276,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Instructions */}
-      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("instructions")}
         </Label>
@@ -1317,7 +1292,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 });
               }}
               disabled={disabled || isReadOnly}
-              asSheet
             />
 
             <InstructionsPopover
@@ -1350,7 +1324,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onSelect={(route) => handleUpdateDosageInstruction({ route })}
           placeholder={t("select_route")}
           disabled={disabled || isReadOnly}
-          asSheet
         />
       </div>
       {/* Site */}
@@ -1365,7 +1338,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onSelect={(site) => handleUpdateDosageInstruction({ site })}
           placeholder={t("select_site")}
           disabled={disabled || isReadOnly}
-          asSheet
         />
       </div>
       {/* Method */}
@@ -1381,7 +1353,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           placeholder={t("select_method")}
           disabled={disabled || isReadOnly}
           count={20}
-          asSheet
         />
       </div>
       {/* Intent */}

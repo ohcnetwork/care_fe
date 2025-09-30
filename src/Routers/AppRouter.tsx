@@ -1,5 +1,5 @@
 import careConfig from "@careConfig";
-import { Redirect, usePath, useRedirect, useRoutes } from "raviger";
+import { usePath, useRedirect, useRoutes } from "raviger";
 
 import IconIndex from "@/CAREUI/icons/Index";
 
@@ -36,6 +36,7 @@ import UserDashboard from "@/pages/UserDashboard";
 const PATHS_WITHOUT_SIDEBAR = [
   // Exact matches
   "/",
+  "/login",
   "/session-expired",
   // Pattern matches (using regex)
   /^\/facility\/[^/]+\/services_requests\/[^/]+$/,
@@ -84,7 +85,6 @@ const Routes: AppRoutes = {
 
   "/apps": () => <PlugConfigList />,
   "/apps/plug-configs/:slug": ({ slug }) => <PlugConfigEdit slug={slug} />,
-  "/login": () => <Redirect to="/" />,
 };
 
 const AdminRouter: AppRoutes = {

@@ -8,6 +8,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
 import { ServiceCard } from "@/pages/Facility/settings/healthcareService/ServiceCard";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
@@ -52,7 +53,9 @@ export default function FacilityServicesPage({
           </div>
         ) : healthcareServices.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
             title={t("no_services_found")}
             description={""}
           />

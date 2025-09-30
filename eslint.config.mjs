@@ -25,6 +25,7 @@ fs.writeFileSync(
 );
 
 const isPreCommit = process.env.PRE_COMMIT === "true";
+const isProduction = process.env.NODE_ENV === "production";
 const DEFAULT = true;
 
 const dynamicRules = (ruleset, logKey) => {
@@ -182,7 +183,7 @@ const config = [
       ],
       "i18next-no-undefined-translation-keys/no-undefined-translation-keys": [
         dynamicRules({
-          error: isPreCommit,
+          error: isPreCommit || isProduction,
           warn: DEFAULT,
         }),
         {

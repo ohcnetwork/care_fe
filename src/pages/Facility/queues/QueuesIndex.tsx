@@ -48,6 +48,7 @@ import {
 import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import { UserReadMinimal } from "@/types/user/user";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import { dateQueryString } from "@/Utils/utils";
 import { startOfDay } from "date-fns";
 import dayjs from "dayjs";
@@ -344,7 +345,12 @@ export default function QueuesIndex({
               </div>
             ) : queues.length === 0 ? (
               <EmptyState
-                icon="l-folder-open"
+                icon={
+                  <CareIcon
+                    icon="l-folder-open"
+                    className="text-primary size-6"
+                  />
+                }
                 title={t("no_queues_found")}
                 description={t("no_queues_found_description")}
                 action={
@@ -441,7 +447,9 @@ export default function QueuesIndex({
               </div>
             ) : subQueues.length === 0 ? (
               <EmptyState
-                icon="l-map-pin"
+                icon={
+                  <CareIcon icon="l-map-pin" className="text-primary size-6" />
+                }
                 title={t("no_service_points_found")}
                 description={t("no_service_points_found_description")}
                 action={
