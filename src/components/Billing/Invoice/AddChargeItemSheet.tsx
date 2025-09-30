@@ -63,10 +63,10 @@ export default function AddChargeItemSheet({
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = React.useState(false);
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
-    limit: 10,
+    limit: 15,
     disableCache: true,
   });
-  useShortcutSubContext("facility:chargeItem:sheet");
+  useShortcutSubContext("facility:billing:invoice");
 
   // Get account information to extract patient ID
   const { data: account } = useQuery({
@@ -177,7 +177,6 @@ export default function AddChargeItemSheet({
             <Button
               variant="outline"
               size="sm"
-              data-shortcut-id="other-charge-items"
               onClick={() => setIsAddChargeItemsOpen(true)}
             >
               <PlusIcon className="size-4 mr-2" />
@@ -252,7 +251,6 @@ export default function AddChargeItemSheet({
         </div>
         <SheetFooter>
           <Button
-            data-shortcut-id={open ? "cancel-action" : undefined}
             variant="outline"
             onClick={() => setOpen(false)}
             disabled={isAddChargeItemsOpen}
@@ -261,7 +259,6 @@ export default function AddChargeItemSheet({
             <ShortcutBadge actionId="cancel-action" />
           </Button>
           <Button
-            data-shortcut-id={open ? "submit-action" : undefined}
             onClick={() =>
               attachItems({ charge_items: Array.from(selectedItems) })
             }

@@ -42,8 +42,8 @@ function LocationCard({
         };
       default:
         return {
-          text: t("view_schedule"),
-          link: `/facility/${facilityId}/locations/${locationId}/schedule/`,
+          text: t("view_appointments"),
+          link: `/facility/${facilityId}/locations/${locationId}/appointments/`,
         };
     }
   };

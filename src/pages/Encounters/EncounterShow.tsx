@@ -138,7 +138,13 @@ export const EncounterShow = (props: Props) => {
     },
     responses: {
       label: t(`ENCOUNTER_TAB__qnr_responses`),
-      component: <EncounterResponsesTab />,
+      component: (
+        <EncounterResponsesTab
+          patientId={patient?.id}
+          encounterId={selectedEncounter?.id}
+          canAccess={canAccess}
+        />
+      ),
     },
     files: {
       label: t(`ENCOUNTER_TAB__files`),
@@ -191,10 +197,12 @@ export const EncounterShow = (props: Props) => {
       {primaryEncounter &&
         primaryEncounter.appointment?.id &&
         canWritePrimaryEncounter && (
-          <AppointmentEncounterHeader
-            appointment={primaryEncounter.appointment}
-            encounter={primaryEncounter}
-          />
+          <div className="flex items-center justify-center -mt-2 mb-2">
+            <AppointmentEncounterHeader
+              appointment={primaryEncounter.appointment}
+              encounter={primaryEncounter}
+            />
+          </div>
         )}
 
       <div className="flex flex-col gap-2">

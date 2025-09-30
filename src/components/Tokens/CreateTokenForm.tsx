@@ -134,7 +134,7 @@ export default function CreateTokenForm({
       setIsOpen(false);
       form.reset();
       queryClient.invalidateQueries({
-        queryKey: ["tokens", facilityId],
+        queryKey: ["tokens", patient?.id, facilityId],
       });
       onSuccess?.();
       if (!disableRedirectOnSuccess) {
@@ -361,7 +361,6 @@ export default function CreateTokenForm({
                   !form.watch("resourceId") ||
                   !form.watch("categoryId")
                 }
-                data-shortcut-id="submit-action"
               >
                 {isPending ? t("creating") : t("create_token")}
                 <ShortcutBadge actionId="submit-action" className="bg-white" />
