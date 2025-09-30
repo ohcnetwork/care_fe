@@ -28,6 +28,11 @@ const logSchemaString = z
 const envSchema = z
   .object({
     REACT_CARE_API_URL: z.string().url(),
+    REACT_APP_TITLE: z.string(),
+    REACT_APP_META_DESCRIPTION: z.string(),
+    REACT_PUBLIC_URL: z.string().url(),
+    REACT_APP_COVER_IMAGE: z.string().url(),
+    REACT_APP_COVER_IMAGE_ALT: z.string().url(),
     REACT_SBOM_BASE_URL: z.string().url().optional(),
     REACT_GITHUB_URL: z.string().url().optional(),
     REACT_OHCN_URL: z.string().url().optional(),
@@ -36,13 +41,24 @@ const envSchema = z
     REACT_SENTRY_ENVIRONMENT: z.string().optional(),
     REACT_DEFAULT_PAYMENT_TERMS: z.string().optional(),
     REACT_MAIN_LOGO: logSchemaString.optional(),
+    REACT_STATE_LOGO: logSchemaString.optional(),
     REACT_CUSTOM_LOGO: logSchemaString.optional(),
     REACT_CUSTOM_DESCRIPTION: z.string().optional(),
     REACT_CUSTOM_LOGO_ALT: logSchemaString.optional(),
-    REACT_ALLOWED_LOCALES: z.string().optional(),
     REACT_MAPS_FALLBACK_URL_TEMPLATE: z.string().url().optional(),
+    REACT_ENABLED_APPS: z.string().optional(),
     REACT_RECAPTCHA_SITE_KEY: z.string(),
     REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB: z.string().optional(),
+    REACT_JWT_TOKEN_REFRESH_INTERVAL: z.string().optional(),
+    REACT_MIN_ENCOUNTER_DATE: z.string().optional(),
+    REACT_DISABLE_PATIENT_LOGIN: z.string().optional(),
+    REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION: z.string().optional(),
+    REACT_APPOINTMENTS_DEFAULT_DATE_FILTER: z.string().optional(),
+    REACT_OBSERVATION_PLOTS_CONFIG_URL: z.string().url().optional(),
+    REACT_DEFAULT_COUNTRY: z.string().optional(),
+    REACT_DEFAULT_COUNTRY_NAME: z.string().optional(),
+    REACT_RESEND_OTP_TIMEOUT: z.string().optional(),
+    REACT_IMAGE_UPLOAD_MAX_SIZE_MB: z.string().optional(),
     REACT_CDN_URLS: z
       .string()
       .optional()
@@ -62,6 +78,7 @@ const envSchema = z
         },
       )
       .optional(),
+    REACT_ALLOWED_LOCALES: z.string().optional(),
     REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED: z
       .string()
       .refine(
