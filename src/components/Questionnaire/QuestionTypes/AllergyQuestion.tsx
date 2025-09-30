@@ -224,6 +224,7 @@ function OccurrencePicker({
       value={lastOccurrence ? new Date(lastOccurrence) : undefined}
       onChange={onChange}
       disabled={disabled}
+      blockDate={(date) => date > new Date()}
       buttonClassName="h-9 mt-1 lg:h-8 lg:text-sm lg:px-2 lg:justify-start lg:font-normal lg:w-full lg:mt-0"
     />
   );
