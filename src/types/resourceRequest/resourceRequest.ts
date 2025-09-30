@@ -1,6 +1,7 @@
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 import { UserReadMinimal } from "@/types/user/user";
+import { valuesOf } from "@/Utils/utils";
 
 export const RESOURCE_REQUEST_STATUSES = [
   "pending",
@@ -17,7 +18,7 @@ export type ResourceRequestStatus = (typeof RESOURCE_REQUEST_STATUSES)[number];
 export interface ResourceRequest {
   approving_facility: FacilityRead | null;
   assigned_facility: FacilityRead | undefined;
-  category: string;
+  category: ResourceRequestCategory;
   emergency: boolean;
   id: string;
   origin_facility: FacilityRead;
@@ -46,6 +47,14 @@ export const RESOURCE_REQUEST_STATUS_COLORS = {
   completed: "secondary",
 } as const;
 
+export enum ResourceRequestCategory {
+  PATIENT_CARE = "patient_care",
+  COMFORT_DEVICES = "comfort_devices",
+  MEDICINES = "medicines",
+  FINANCIAL = "financial",
+  OTHER = "other",
+}
+
 export interface CreateResourceRequest {
   title: string;
   status: ResourceRequestStatus;
@@ -59,7 +68,7 @@ export interface CreateResourceRequest {
   related_patient: string;
   emergency: boolean;
   priority: number;
-  category: string;
+  category: ResourceRequestCategory;
 }
 
 export interface UpdateResourceRequest {
@@ -76,7 +85,7 @@ export interface UpdateResourceRequest {
   related_patient: string;
   emergency: boolean;
   priority: number;
-  category: string;
+  category: ResourceRequestCategory;
 }
 
 export interface CommentModel {
@@ -85,3 +94,12 @@ export interface CommentModel {
   created_date: string;
   comment: string;
 }
+
+// converting to lowercase as old data in db are in uppercase and new are in lowercase
+export const getResourceRequestCategoryEnum = (category: string) => {
+  const categoryText = category.toLowerCase() as ResourceRequestCategory;
+  if (valuesOf(ResourceRequestCategory).includes(categoryText)) {
+    return categoryText;
+  }
+  return ResourceRequestCategory.OTHER;
+};

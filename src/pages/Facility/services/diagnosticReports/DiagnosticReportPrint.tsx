@@ -151,7 +151,7 @@ export default function DiagnosticReportPrint({
   return (
     <div className="flex justify-center items-center">
       <PrintPreview
-        title={`${t("diagnostic_report")} - ${report.code?.display || "diagnostic_report"}`}
+        title={`${t("diagnostic_report")} - ${report.code?.display || t("diagnostic_report")}`}
       >
         <div className="py-8 max-w-4xl mx-auto">
           {/* Header with Facility Name and Logo */}
