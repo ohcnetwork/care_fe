@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SummaryPanelActionsTab } from "@/pages/Encounters/tabs/overview/summary-panel-actions.tab";
 import { SummaryPanelReportsTab } from "@/pages/Encounters/tabs/overview/summary-panel-reports-tab";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-
 import { SummaryPanelDetailTab } from "./summary-panel-details-tab";
 
 export const SummaryPanel = () => {
