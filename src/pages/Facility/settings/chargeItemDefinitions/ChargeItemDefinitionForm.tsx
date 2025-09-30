@@ -291,8 +291,8 @@ export function ChargeItemDefinitionForm({
     slug_value: z
       .string()
       .trim()
-      .min(1, { message: t("field_required") })
-      .max(25, t("character_count_validation", { min: 1, max: 25 }))
+      .min(5, t("character_count_validation", { min: 5, max: 25 }))
+      .max(25, t("character_count_validation", { min: 5, max: 25 }))
       .regex(/^[a-z0-9-]+$/, {
         message: t("slug_format_message"),
       }),
