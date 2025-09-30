@@ -29,6 +29,7 @@ import {
 
 import useFilters from "@/hooks/useFilters";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
@@ -292,7 +293,12 @@ export default function MedicationRequestList({
           <TableSkeleton count={5} />
         ) : prescriptionQueue?.results?.length === 0 ? (
           <EmptyState
-            icon="l-prescription-bottle"
+            icon={
+              <CareIcon
+                icon="l-prescription-bottle"
+                className="text-primary size-6"
+              />
+            }
             title={t("no_prescriptions_found")}
             description={t("no_prescriptions_found_description")}
           />
