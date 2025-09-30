@@ -51,70 +51,7 @@ import {
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { ObservationInterpretation } from "./ObservationInterpretation";
 
-const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug_value: z
-    .string()
-    .min(1, "Slug is required")
-    .max(25, "Slug should not exceed 25 characters"),
-  description: z.string().min(1, "Description is required"),
-  status: z.enum(OBSERVATION_DEFINITION_STATUS),
-  category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]]),
-  permitted_data_type: z.nativeEnum(QuestionType),
-  code: z.object({
-    code: z.string().min(1, "Code is required"),
-    display: z.string().min(1, "Display name is required"),
-    system: z.string().min(1, "System is required"),
-  }),
-  body_site: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  method: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  permitted_unit: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  component: z
-    .array(
-      z.object({
-        code: z
-          .object({
-            code: z.string(),
-            display: z.string(),
-            system: z.string(),
-          })
-          .refine((data) => data.code && data.display && data.system, {
-            message: "Required",
-          }),
-        permitted_data_type: z.nativeEnum(QuestionType),
-        permitted_unit: z
-          .object({
-            code: z.string(),
-            display: z.string(),
-            system: z.string(),
-          })
-          .refine((data) => data.code && data.display && data.system, {
-            message: "Required",
-          }),
-        qualified_ranges: qualifiedRangeSchema,
-      }),
-    )
-    .default([]),
-  qualified_ranges: qualifiedRangeSchema,
-});
+
 
 export default function ObservationDefinitionForm({
   facilityId,
@@ -126,6 +63,71 @@ export default function ObservationDefinitionForm({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
+
+  const formSchemaWithTranslations = z.object({
+    title: z.string().min(1, t("field_required")),
+    slug_value: z
+      .string()
+      .min(1, t("field_required"))
+      .max(25, t("character_count_validation", { min: 1, max: 25 })),
+    description: z.string().min(1, t("field_required")),
+    status: z.enum(OBSERVATION_DEFINITION_STATUS),
+    category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]]),
+    permitted_data_type: z.nativeEnum(QuestionType),
+    code: z.object({
+      code: z.string().min(1, t("field_required")),
+      display: z.string().min(1, t("field_required")),
+      system: z.string().min(1, t("field_required")),
+    }),
+    body_site: z
+      .object({
+        code: z.string().min(1, t("field_required")),
+        display: z.string().min(1, t("field_required")),
+        system: z.string().min(1, t("field_required")),
+      })
+      .nullable(),
+    method: z
+      .object({
+        code: z.string().min(1, t("field_required")),
+        display: z.string().min(1, t("field_required")),
+        system: z.string().min(1, t("field_required")),
+      })
+      .nullable(),
+    permitted_unit: z
+      .object({
+        code: z.string().min(1, t("field_required")),
+        display: z.string().min(1, t("field_required")),
+        system: z.string().min(1, t("field_required")),
+      })
+      .nullable(),
+    component: z
+      .array(
+        z.object({
+          code: z
+            .object({
+              code: z.string(),
+              display: z.string(),
+              system: z.string(),
+            })
+            .refine((data) => data.code && data.display && data.system, {
+              message: t("field_required"),
+            }),
+          permitted_data_type: z.nativeEnum(QuestionType),
+          permitted_unit: z
+            .object({
+              code: z.string(),
+              display: z.string(),
+              system: z.string(),
+            })
+            .refine((data) => data.code && data.display && data.system, {
+              message: t("field_required"),
+            }),
+          qualified_ranges: qualifiedRangeSchema,
+        }),
+      )
+      .default([]),
+    qualified_ranges: qualifiedRangeSchema,
+  });
 
   const isEditMode = Boolean(observationSlug);
 
@@ -184,7 +186,7 @@ function ObservationDefinitionFormContent({
   const isEditMode = Boolean(observationSlug);
 
   const form = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchemaWithTranslations),
     defaultValues:
       isEditMode && existingData
         ? {
@@ -273,7 +275,7 @@ function ObservationDefinitionFormContent({
 
   const isPending = isCreating || isUpdating;
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  function onSubmit(data: z.infer<typeof formSchemaWithTranslations>) {
     if (isEditMode && observationSlug) {
       updateObservationDefinition(data as ObservationDefinitionUpdateSpec);
     } else {

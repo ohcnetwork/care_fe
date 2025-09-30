@@ -82,8 +82,18 @@ export function ResourceCategoryForm({
   const queryClient = useQueryClient();
   const isEditing = !!categorySlug;
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const formSchemaWithTranslations = z.object({
+    title: z.string().min(1, t("field_required")),
+    slug_value: z
+      .string()
+      .min(5, t("character_count_validation", { min: 5, max: 25 }))
+      .max(25, t("character_count_validation", { min: 5, max: 25 })),
+    description: z.string().optional(),
+    resource_sub_type: z.nativeEnum(ResourceCategorySubType),
+  });
+
+  const form = useForm<z.infer<typeof formSchemaWithTranslations>>({
+    resolver: zodResolver(formSchemaWithTranslations),
     defaultValues: {
       title: "",
       slug_value: "",

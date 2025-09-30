@@ -57,97 +57,7 @@ import observationDefinitionApi from "@/types/emr/observationDefinition/observat
 import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 
-const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug_value: z
-    .string()
-    .min(1, "Slug is required")
-    .max(25, "Slug should not exceed 25 characters"),
-  description: z.string().min(1, "Description is required"),
-  usage: z.string().min(1, "Usage is required"),
-  derived_from_uri: z.string().nullable(),
-  status: z.nativeEnum(Status),
-  classification: z.nativeEnum(Classification),
-  kind: z.nativeEnum(Kind),
-  healthcare_service: z.string().nullable(),
-  code: z.object({
-    code: z.string().min(1, "Code is required"),
-    display: z.string().min(1, "Display name is required"),
-    system: z.string().min(1, "System is required"),
-  }),
-  body_site: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  diagnostic_report_codes: z
-    .array(
-      z.object({
-        code: z.string().min(1, "Code is required"),
-        display: z.string().min(1, "Display name is required"),
-        system: z.string().min(1, "System is required"),
-      }),
-    )
-    .default([]),
-  specimen_requirements: z
-    .array(
-      z.object({
-        value: z.string(),
-        label: z.string(),
-        details: z.array(
-          z
-            .object({
-              label: z.string(),
-              value: z
-                .string()
-                .optional()
-                .transform((v) => v ?? undefined),
-            })
-            .transform((obj) => ({
-              ...obj,
-              value: obj.value ?? undefined,
-            })),
-        ),
-      }),
-    )
-    .default([]),
-  observation_result_requirements: z
-    .array(
-      z.object({
-        value: z.string(),
-        label: z.string(),
-        details: z.array(
-          z
-            .object({
-              label: z.string(),
-              value: z
-                .string()
-                .optional()
-                .transform((v) => v ?? undefined),
-            })
-            .transform((obj) => ({
-              ...obj,
-              value: obj.value ?? undefined,
-            })),
-        ),
-      }),
-    )
-    .default([]),
-  charge_item_definitions: z
-    .array(z.custom<ChargeItemDefinitionBase>())
-    .default([]),
-  locations: z
-    .array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-      }),
-    )
-    .default([]),
-  category: z.string(),
-});
+
 
 export default function ActivityDefinitionForm({
   facilityId,
@@ -159,6 +69,98 @@ export default function ActivityDefinitionForm({
   categorySlug?: string;
 }) {
   const { t } = useTranslation();
+
+  const formSchemaWithTranslations = z.object({
+    title: z.string().min(1, t("field_required")),
+    slug_value: z
+      .string()
+      .min(1, t("field_required"))
+      .max(25, t("character_count_validation", { min: 1, max: 25 })),
+    description: z.string().min(1, t("field_required")),
+    usage: z.string().min(1, t("field_required")),
+    derived_from_uri: z.string().nullable(),
+    status: z.nativeEnum(Status),
+    classification: z.nativeEnum(Classification),
+    kind: z.nativeEnum(Kind),
+    healthcare_service: z.string().nullable(),
+    code: z.object({
+      code: z.string().min(1, t("field_required")),
+      display: z.string().min(1, t("field_required")),
+      system: z.string().min(1, t("field_required")),
+    }),
+    body_site: z
+      .object({
+        code: z.string().min(1, t("field_required")),
+        display: z.string().min(1, t("field_required")),
+        system: z.string().min(1, t("field_required")),
+      })
+      .nullable(),
+    diagnostic_report_codes: z
+      .array(
+        z.object({
+          code: z.string().min(1, t("field_required")),
+          display: z.string().min(1, t("field_required")),
+          system: z.string().min(1, t("field_required")),
+        }),
+      )
+      .default([]),
+    specimen_requirements: z
+      .array(
+        z.object({
+          value: z.string(),
+          label: z.string(),
+          details: z.array(
+            z
+              .object({
+                label: z.string(),
+                value: z
+                  .string()
+                  .optional()
+                  .transform((v) => v ?? undefined),
+              })
+              .transform((obj) => ({
+                ...obj,
+                value: obj.value ?? undefined,
+              })),
+          ),
+        }),
+      )
+      .default([]),
+    observation_result_requirements: z
+      .array(
+        z.object({
+          value: z.string(),
+          label: z.string(),
+          details: z.array(
+            z
+              .object({
+                label: z.string(),
+                value: z
+                  .string()
+                  .optional()
+                  .transform((v) => v ?? undefined),
+              })
+              .transform((obj) => ({
+                ...obj,
+                value: obj.value ?? undefined,
+              })),
+          ),
+        }),
+      )
+      .default([]),
+    charge_item_definitions: z
+      .array(z.custom<ChargeItemDefinitionBase>())
+      .default([]),
+    locations: z
+      .array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+        }),
+      )
+      .default([]),
+    category: z.string(),
+  });
 
   const isEditMode = Boolean(activityDefinitionSlug);
 
@@ -248,7 +250,7 @@ function ActivityDefinitionFormContent({
     });
 
   const form = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchemaWithTranslations),
     defaultValues:
       isEditMode && existingData
         ? {
@@ -397,7 +399,7 @@ function ActivityDefinitionFormContent({
 
   const isPending = isCreating || isUpdating;
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  function onSubmit(data: z.infer<typeof formSchemaWithTranslations>) {
     const transformedData = {
       ...data,
       specimen_requirements: data.specimen_requirements.map(
