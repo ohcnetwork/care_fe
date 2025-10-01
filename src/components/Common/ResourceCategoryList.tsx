@@ -25,7 +25,9 @@ import {
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { ResourceCategoryForm } from "@/components/Common/ResourceCategoryForm";
+import useFilters from "@/hooks/useFilters";
 import {
   ResourceCategoryRead,
   ResourceCategoryResourceType,
@@ -194,6 +196,10 @@ export function ResourceCategoryList({
   const [editingCategory, setEditingCategory] = React.useState<string | null>(
     null,
   );
+  const { qParams, Pagination, resultsPerPage } = useFilters({
+    limit: RESULTS_PER_PAGE_LIMIT,
+    disableCache: true,
+  });
 
   // Fetch current category by slug
   const { data: currentCategory } = useQuery({
@@ -207,13 +213,15 @@ export function ResourceCategoryList({
   // Fetch categories for current level
   const { data: categoriesResponse, isLoading: isLoadingCategories } = useQuery(
     {
-      queryKey: ["resourceCategories", facilityId, categorySlug],
+      queryKey: ["resourceCategories", facilityId, categorySlug, qParams],
       queryFn: query(resourceCategoryApi.list, {
         pathParams: { facilityId },
         queryParams: {
           resource_type: resourceType,
           parent: categorySlug || "",
           ordering: "title",
+          limit: resultsPerPage,
+          offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         },
       }),
     },
@@ -331,6 +339,8 @@ export function ResourceCategoryList({
           onClose={() => setIsCategoryFormOpen(false)}
           onSuccess={handleCategoryFormSuccess}
         />
+
+        <Pagination totalCount={categoriesResponse?.count || 0} />
       </div>
     </TooltipProvider>
   );
