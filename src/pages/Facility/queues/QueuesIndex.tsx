@@ -1,5 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
-import { MoreVertical, Pencil, Plus, Settings, Square } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  CheckIcon,
+  MoreVertical,
+  Notebook,
+  Pencil,
+  Plus,
+  Settings,
+} from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -48,6 +55,9 @@ import {
 import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import { UserReadMinimal } from "@/types/user/user";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import mutate from "@/Utils/request/mutate";
+import queryClient from "@/Utils/request/queryClient";
 import { dateQueryString } from "@/Utils/utils";
 import { startOfDay } from "date-fns";
 import dayjs from "dayjs";
@@ -76,6 +86,17 @@ function QueueRow({
     resourceType === SchedulableResourceType.Practitioner
       ? `/facility/${facilityId}/practitioner/${resourceId}/queues/${queue.id}/ongoing`
       : `/queues/${queue.id}/ongoing`;
+
+  const { mutate: setPrimary } = useMutation({
+    mutationFn: mutate(tokenQueueApi.setPrimary, {
+      pathParams: { facility_id: facilityId, id: queue.id },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["tokenQueues", facilityId],
+      });
+    },
+  });
 
   return (
     <TableRow className="hover:bg-gray-200">
@@ -124,13 +145,13 @@ function QueueRow({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <MoreVertical className="h-4 w-4" />
+              <MoreVertical className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="border border-gray-200">
             <DropdownMenuItem asChild>
               <Link href={queueLink} className="flex items-center gap-2">
-                <Square className="h-4 w-4" />
+                <Notebook className="size-4 mr-2" />
                 {t("open_queue_board")}
               </Link>
             </DropdownMenuItem>
@@ -141,11 +162,18 @@ function QueueRow({
               queueId={queue.id}
               trigger={
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <Pencil className="h-4 w-4 mr-2" />
+                  <Pencil className="size-4 mr-2" />
                   {t("edit_queue_name")}
                 </DropdownMenuItem>
               }
             />
+            <DropdownMenuItem
+              onClick={() => setPrimary({})}
+              disabled={queue.is_primary}
+            >
+              <CheckIcon className="size-4 mr-2" />
+              {t("set_as_primary")}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
@@ -256,7 +284,6 @@ export default function QueuesIndex({
         date: qParams.date,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        ordering: "-created_date",
       },
     }),
   });
@@ -326,7 +353,7 @@ export default function QueuesIndex({
               initialDate={startOfDay(qParams.date)}
               trigger={
                 <Button size="sm" className="font-bold" disabled={isPast}>
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="size-4 mr-2" />
                   {t("create_queue")}
                 </Button>
               }
@@ -344,7 +371,12 @@ export default function QueuesIndex({
               </div>
             ) : queues.length === 0 ? (
               <EmptyState
-                icon="l-folder-open"
+                icon={
+                  <CareIcon
+                    icon="l-folder-open"
+                    className="text-primary size-6"
+                  />
+                }
                 title={t("no_queues_found")}
                 description={t("no_queues_found_description")}
                 action={
@@ -355,7 +387,7 @@ export default function QueuesIndex({
                     initialDate={startOfDay(qParams.date)}
                     trigger={
                       <Button disabled={isPast}>
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="size-4 mr-2" />
                         {t("create_first_queue")}
                       </Button>
                     }
@@ -428,7 +460,7 @@ export default function QueuesIndex({
                   resourceId={effectiveResourceId}
                   trigger={
                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <Plus className="h-4 w-4" />
+                      <Plus className="size-4" />
                     </Button>
                   }
                 />
@@ -441,7 +473,9 @@ export default function QueuesIndex({
               </div>
             ) : subQueues.length === 0 ? (
               <EmptyState
-                icon="l-map-pin"
+                icon={
+                  <CareIcon icon="l-map-pin" className="text-primary size-6" />
+                }
                 title={t("no_service_points_found")}
                 description={t("no_service_points_found_description")}
                 action={
@@ -451,7 +485,7 @@ export default function QueuesIndex({
                     resourceId={effectiveResourceId}
                     trigger={
                       <Button>
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="size-4 mr-2" />
                         {t("add_first_service_point")}
                       </Button>
                     }

@@ -17,6 +17,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 
 import { AllergyHistory } from "./AllergyHistory";
 import { DiagnosesHistory } from "./DiagnosesHistory";
+import { ResponsesHistory } from "./ResponsesHistory";
 import { SymptomsHistory } from "./SymptomsHistory";
 
 export function ClinicalHistoryPage({
@@ -72,6 +73,10 @@ export function ClinicalHistoryPage({
     medications: {
       label: t("past_medications"),
       component: <MedicationHistory patientId={patientId} />,
+    },
+    responses: {
+      label: t("questionnaire_responses"),
+      component: <ResponsesHistory patientId={patientId} />,
     },
   } as const;
 

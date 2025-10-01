@@ -77,10 +77,10 @@ export const MedicationsTable = ({
 
   return (
     <div
-      className="border border-gray-200 rounded-lg overflow-hidden"
+      className=" @container border border-gray-200 rounded-lg"
       data-cy="medications-table"
     >
-      <Table>
+      <Table className="@lg:min-w-auto min-w-6xl">
         <TableHeader>
           <TableRow className="divide-x bg-gray-100">
             <TableHead>{t("medicine")}</TableHead>
@@ -114,11 +114,12 @@ export const MedicationsTable = ({
                       "line-through",
                   )}
                 >
-                  <TableCell className="py-2 px-3">
+                  <TableCell className="py-2 px-3 break-words whitespace-normal">
                     {displayMedicationName(medication)}
                   </TableCell>
                   <TableCell className="py-2 px-3">{dosage}</TableCell>
-                  <TableCell className="py-2 px-3">
+                  <TableCell className="py-2 px-3 break-words whitespace-normal">
+                    {" "}
                     {instruction?.as_needed_boolean
                       ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display})`
                       : frequency?.meaning}
@@ -135,7 +136,7 @@ export const MedicationsTable = ({
                   <TableCell className="py-2 px-3">
                     {duration ? `${duration.value} ${duration.unit}` : "-"}
                   </TableCell>
-                  <TableCell className="py-2 px-3">
+                  <TableCell className="py-2 px-3 break-words whitespace-normal">
                     {remarks || "-"}
                     {notes ? ` (${t("note")}: ${notes})` : ""}
                   </TableCell>

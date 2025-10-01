@@ -175,6 +175,12 @@ export const AppointmentEncounterHeader = ({
           patient: encounter.patient.id,
           facility: encounter.facility.id,
           status: "completed",
+          period: {
+            start: encounter.period.start,
+            end: encounter.period.end
+              ? encounter.period.end
+              : new Date().toISOString(),
+          },
         },
       },
       {

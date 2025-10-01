@@ -80,9 +80,8 @@ export default function PatientHomeTabs({
             canListEncounters={canListEncounters}
           />
         )}
-
         {activeTab === "appointments" && canWriteAppointment && (
-          <BookingsList patientId={patientId} facilityId={facility.id} />
+          <BookingsList patientId={patientId} />
         )}
 
         {activeTab === "tokens" && canCreateToken && isTab && (

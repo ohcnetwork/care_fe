@@ -60,7 +60,7 @@ const CustomNode = ({ data }: NodeProps) => {
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    data.onEdit(data.id);
+    data.onEdit?.(data.id);
   };
 
   return (

@@ -399,7 +399,6 @@ export function CreateInvoicePage({
                   type="button"
                   variant="outline"
                   onClick={() => setIsAddChargeItemsOpen(true)}
-                  data-shortcut-id="add-charge-item"
                 >
                   <PlusIcon className="size-4 mr-2" />
                   {t("add_charge_items")}
@@ -634,7 +633,6 @@ export function CreateInvoicePage({
               type="submit"
               variant="primary_gradient"
               disabled={createMutation.isPending || isAddChargeItemsOpen}
-              data-shortcut-id="submit-action"
             >
               {createMutation.isPending ? (
                 <div className="flex items-center gap-2">
@@ -645,23 +643,13 @@ export function CreateInvoicePage({
                 <div className="flex items-center gap-2">
                   <PlusIcon className="size-4" />
                   {t("create_invoice")}
+                  <ShortcutBadge actionId="submit-action" />
                 </div>
               )}
-              <ShortcutBadge actionId="submit-action" className="bg-white" />
             </Button>
           </div>
         </form>
       </Form>
-
-      {/* Hidden button for add charge items shortcut */}
-      {!disableCreateChargeItems && (
-        <div className="hidden">
-          <Button
-            data-shortcut-id="add-charge-items-create-invoice"
-            onClick={() => setIsAddChargeItemsOpen(true)}
-          />
-        </div>
-      )}
 
       {account?.patient && (
         <AddChargeItemsBillingSheet

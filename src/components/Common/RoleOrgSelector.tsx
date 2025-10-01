@@ -40,7 +40,12 @@ interface RoleOrgSelectorProps {
 
 export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
   const { t } = useTranslation();
-  const { onChange, currentOrganizations, singleSelection = false } = props;
+  const {
+    value,
+    onChange,
+    currentOrganizations,
+    singleSelection = false,
+  } = props;
 
   const [selectedOrganizations, setSelectedOrganizations] = useState<
     Organization[]
@@ -65,6 +70,21 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
       },
     }),
   });
+
+  // Sync selectedOrganizations with value prop
+  useEffect(() => {
+    if (value?.length && currentOrganizations?.length) {
+      const matchingOrganizations = currentOrganizations.filter((org) =>
+        value.includes(org.id),
+      );
+
+      if (matchingOrganizations.length === value.length) {
+        setSelectedOrganizations(matchingOrganizations);
+      }
+    } else {
+      setSelectedOrganizations([]);
+    }
+  }, [value, currentOrganizations]);
 
   const handleSelect = (org: Organization) => {
     const isAlreadySelected = !!currentOrganizations?.find(
