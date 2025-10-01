@@ -10,12 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import TagConfigFormDrawer from "./components/TagConfigFormDrawer";
 
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
@@ -31,7 +26,6 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
-import TagConfigForm from "./TagConfigForm";
 import TagConfigTable from "./components/TagConfigTable";
 
 interface TagConfigViewProps {
@@ -327,36 +321,24 @@ export default function TagConfigView({
         </Card>
 
         {/* Edit Sheet */}
-        <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
-          <SheetContent className="overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>{t("edit_tag_config")}</SheetTitle>
-            </SheetHeader>
-            <div className="mt-6 pb-6">
-              <TagConfigForm
-                configId={tagId}
-                onSuccess={handleEditSuccess}
-                facilityId={facilityId}
-              />
-            </div>
-          </SheetContent>
-        </Sheet>
+        <TagConfigFormDrawer
+          title={t("edit_tag_config")}
+          configId={tagId}
+          onSuccess={handleEditSuccess}
+          facilityId={facilityId}
+          open={isEditSheetOpen}
+          onOpenChange={setIsEditSheetOpen}
+        />
 
         {/* Add Child Sheet */}
-        <Sheet open={isAddChildSheetOpen} onOpenChange={setIsAddChildSheetOpen}>
-          <SheetContent className="overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>{t("add_child_tag")}</SheetTitle>
-            </SheetHeader>
-            <div className="mt-6 pb-6">
-              <TagConfigForm
-                parentId={tagId}
-                onSuccess={handleAddChildSuccess}
-                facilityId={facilityId}
-              />
-            </div>
-          </SheetContent>
-        </Sheet>
+        <TagConfigFormDrawer
+          title={t("add_child_tag")}
+          parentId={tagId}
+          onSuccess={handleAddChildSuccess}
+          facilityId={facilityId}
+          open={isAddChildSheetOpen}
+          onOpenChange={setIsAddChildSheetOpen}
+        />
       </div>
     </Page>
   );

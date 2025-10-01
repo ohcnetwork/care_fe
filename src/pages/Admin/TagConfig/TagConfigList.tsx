@@ -8,12 +8,6 @@ import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 
 import Page from "@/components/Common/Page";
 
@@ -27,7 +21,7 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
-import TagConfigForm from "./TagConfigForm";
+import TagConfigFormDrawer from "./components/TagConfigFormDrawer";
 import TagConfigTable from "./components/TagConfigTable";
 
 interface TagConfigListProps {
@@ -101,23 +95,19 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
                 {t("manage_tag_config_description")}
               </p>
             </div>
-            <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
-              <Button onClick={handleAdd}>
-                <CareIcon icon="l-plus" className="mr-2" />
-                {t("add_tag_config")}
-              </Button>
-              <SheetContent className="overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>{t("add_tag_config")}</SheetTitle>
-                </SheetHeader>
-                <div className="mt-6 pb-6">
-                  <TagConfigForm
-                    onSuccess={handleSheetClose}
-                    facilityId={facilityId}
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
+            <TagConfigFormDrawer
+              title={t("add_tag_config")}
+              facilityId={facilityId}
+              onSuccess={handleSheetClose}
+              open={isSheetOpen}
+              onOpenChange={handleSheetOpenChange}
+              trigger={
+                <Button onClick={handleAdd}>
+                  <CareIcon icon="l-plus" className="mr-2" />
+                  {t("add_tag_config")}
+                </Button>
+              }
+            />
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
