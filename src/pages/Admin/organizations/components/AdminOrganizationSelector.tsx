@@ -16,6 +16,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -23,7 +24,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -120,8 +120,9 @@ export default function FacilityOrganizationSelector(
     );
   };
 
-  const handleOrganizationViewChange = (value: string) => {
-    setShowAllOrgs(value === "all");
+  const handleOrganizationViewChange = (incomingValue: string) => {
+    const nextValue = incomingValue === "" ? "all" : incomingValue;
+    setShowAllOrgs(nextValue === "all");
     setSelectedOrganizations([]);
     setCurrentSelection(null);
     setNavigationLevels([]);
@@ -310,16 +311,16 @@ export default function FacilityOrganizationSelector(
         </div>
       </div>
 
-      <Tabs
+      <FilterTabs
         value={showAllOrgs ? "all" : "mine"}
         onValueChange={handleOrganizationViewChange}
-        className="w-full sm:w-auto"
-      >
-        <TabsList className="grid w-full grid-cols-2 sm:w-[300px]">
-          <TabsTrigger value="mine">{t("my_organizations")}</TabsTrigger>
-          <TabsTrigger value="all">{t("all_organizations")}</TabsTrigger>
-        </TabsList>
-      </Tabs>
+        options={[
+          { value: "mine", label: "my_organizations" },
+          { value: "all", label: "all_organizations" },
+        ]}
+        showAllOption={false}
+        className="grid w-full grid-cols-2 sm:w-[300px]"
+      />
 
       <div className="space-y-3">
         <div className="space-y-3">

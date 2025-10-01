@@ -6,11 +6,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import Loading from "@/components/Common/Loading";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import Loading from "@/components/Common/Loading";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import licenseUrls from "@/pages/Licenses/components/license-urls.json";
 import { getPackageUrl } from "@/pages/Licenses/utils";
@@ -27,7 +26,11 @@ export const LicensesPage = () => {
 
   const { data, isLoading } = useQuery<LicensesSbom>({
     queryKey: ["sbom", tab],
-    queryFn: () => fetch(sbomUrlMap[tab]).then((res) => res.json()),
+    queryFn: async ({ signal }) => {
+      const res = await fetch(sbomUrlMap[tab], { signal });
+      if (!res.ok) throw new Error(`Failed to fetch SBOM (${res.status})`);
+      return res.json();
+    },
   });
 
   return (
@@ -41,15 +44,15 @@ export const LicensesPage = () => {
 
       <div className="p-4">
         <div className="mb-4 flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-          <Tabs
+          <FilterTabs
             value={tab}
             onValueChange={(value) => setTab(value as "frontend" | "backend")}
-          >
-            <TabsList>
-              <TabsTrigger value="frontend">{t("care_frontend")}</TabsTrigger>
-              <TabsTrigger value="backend">{t("care_backend")}</TabsTrigger>
-            </TabsList>
-          </Tabs>
+            options={[
+              { value: "frontend", label: "care_frontend" },
+              { value: "backend", label: "care_backend" },
+            ]}
+            showAllOption={false}
+          />
         </div>
 
         {isLoading || !data ? <Loading /> : <SbomViewer data={data} />}
@@ -109,7 +112,11 @@ const SbomPackage = ({
         target="_blank"
         rel="noopener noreferrer"
         className="hover:text-primary-dark block text-primary"
-        href={`${getPackageUrl(pkg.name, pkg.versionInfo, pkg.externalRefs[0].referenceLocator)}`}
+        href={`${getPackageUrl(
+          pkg.name,
+          pkg.versionInfo,
+          pkg.externalRefs?.[0]?.referenceLocator,
+        )}`}
       >
         <strong className="text-lg">{`${pkg.name} v${pkg.versionInfo}`}</strong>
       </a>

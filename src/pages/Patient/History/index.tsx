@@ -1,123 +1,232 @@
 import { useQuery } from "@tanstack/react-query";
-import { X } from "lucide-react";
-import { navigate, useQueryParams } from "raviger";
+import dayjs from "dayjs";
+import { Link, navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { NavTabs } from "@/components/ui/nav-tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import Page from "@/components/Common/Page";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
-import useBreakpoints from "@/hooks/useBreakpoints";
+import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
-import { MedicationHistory } from "@/pages/Patient/History/MedicationHistory";
-import patientApi from "@/types/emr/patient/patientApi";
+import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
+import {
+  APPOINTMENT_STATUS_COLORS,
+  Appointment,
+  formatScheduleResourceName,
+} from "@/types/scheduling/schedule";
 
-import { AllergyHistory } from "./AllergyHistory";
-import { DiagnosesHistory } from "./DiagnosesHistory";
-import { ResponsesHistory } from "./ResponsesHistory";
-import { SymptomsHistory } from "./SymptomsHistory";
+import AppointmentDialog from "./components/AppointmentDialog";
 
-export function ClinicalHistoryPage({
-  patientId,
-  tab = "symptoms",
-  fallBackUrl,
-}: {
-  fallBackUrl?: string;
-  patientId: string;
-  tab: string;
-}) {
+function PatientIndex() {
   const { t } = useTranslation();
-  const [{ sourceUrl }] = useQueryParams();
 
-  const { data: patient } = useQuery({
-    queryKey: ["patient", patientId],
-    queryFn: query(patientApi.getPatient, {
-      pathParams: { id: patientId },
+  const [selectedAppointment, setSelectedAppointment] = useState<
+    Appointment | undefined
+  >();
+  const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"scheduled" | "history">(
+    "scheduled",
+  );
+
+  const patient = usePatientContext();
+  const selectedPatient = patient?.selectedPatient;
+  const tokenData = patient?.tokenData;
+
+  if (!tokenData) {
+    navigate("/login");
+  }
+
+  const { data: appointmentsData, isLoading } = useQuery({
+    queryKey: ["appointment", tokenData?.phoneNumber],
+    queryFn: query(PublicAppointmentApi.getAppointments, {
+      headers: {
+        Authorization: `Bearer ${tokenData?.token}`,
+      },
     }),
+    enabled: !!tokenData?.token,
   });
 
-  const handleClose = () => {
-    navigate(sourceUrl || fallBackUrl);
-  };
-
-  const handleTabChange = (value: string) => {
-    navigate(value, {
-      ...(sourceUrl ? { query: { sourceUrl } } : {}),
-    });
-  };
-
-  const showMoreAfterIndex = useBreakpoints({
-    default: 1,
-    xs: 2,
-    sm: 6,
-    xl: 9,
-    "2xl": 12,
-  });
-
-  const tabs = {
-    symptoms: {
-      label: t("past_symptoms"),
-      component: <SymptomsHistory patientId={patientId} />,
-    },
-    diagnoses: {
-      label: t("past_diagnoses"),
-      component: <DiagnosesHistory patientId={patientId} />,
-    },
-    allergies: {
-      label: t("allergies"),
-      component: <AllergyHistory patientId={patientId} />,
-    },
-    medications: {
-      label: t("past_medications"),
-      component: <MedicationHistory patientId={patientId} />,
-    },
-    responses: {
-      label: t("questionnaire_responses"),
-      component: <ResponsesHistory patientId={patientId} />,
-    },
-  } as const;
-
-  return (
-    <Page
-      title={
-        patient
-          ? t("patient_clinical_history_page_title", { name: patient?.name })
-          : t("loading")
-      }
-      hideTitleOnPage
-    >
-      <div className="flex justify-between items-center bg-gray-100 -mx-3 -mt-8 md:-mt-8 md:-mx-9 px-3 md:px-6 pb-3 pt-2 md:rounded-t-lg">
-        <div>
-          {patient ? (
-            <h5 className="text-lg font-semibold">
-              {t("patient_clinical_history_page_title", { name: patient.name })}
-            </h5>
-          ) : (
-            <Skeleton className="w-20 h-4" />
-          )}
+  if (isLoading) {
+    return (
+      <div>
+        <div className="flex justify-between w-full mb-8">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-8 w-48" />
         </div>
-        <div>
-          <Button variant="outline" onClick={handleClose} size="icon">
-            <X className="size-4" />
-          </Button>
+        <Skeleton className="h-8 w-48" />
+        <div className="grid gap-4 mt-4">
+          <CardListSkeleton count={6} />
         </div>
       </div>
-      <section>
-        <NavTabs
-          className="w-full mt-4"
-          tabContentClassName="mt-8"
-          tabs={tabs}
-          currentTab={tab}
-          onTabChange={handleTabChange}
-          setPageTitle={false}
-          showMoreAfterIndex={showMoreAfterIndex}
-        />
-      </section>
-    </Page>
+    );
+  }
+
+  const appointments = appointmentsData?.results
+    .filter((appointment) => appointment?.patient.id == selectedPatient?.id)
+    .sort(
+      (a, b) =>
+        new Date(a.token_slot.start_datetime).getTime() -
+        new Date(b.token_slot.start_datetime).getTime(),
+    );
+
+  const pastAppointments = appointments?.filter((appointment) =>
+    dayjs().isAfter(dayjs(appointment.token_slot.start_datetime)),
+  );
+
+  const scheduledAppointments = appointments?.filter((appointment) =>
+    dayjs().isBefore(dayjs(appointment.token_slot.start_datetime)),
+  );
+
+  // Tab options for FilterTabs
+  const tabOptions = [
+    {
+      value: "scheduled",
+      label: "scheduled",
+    },
+    {
+      value: "history",
+      label: "history",
+    },
+  ];
+
+  const getAppointmentCard = (appointment: Appointment) => {
+    const appointmentTime = dayjs(appointment.token_slot.start_datetime);
+    const appointmentDate = appointmentTime.format("DD MMMM YYYY");
+    const appointmentTimeSlot = appointmentTime.format("hh:mm a");
+    return (
+      <Card key={appointment.id} className="shadow-sm overflow-hidden">
+        <CardHeader className="px-6 pb-3 bg-secondary-200 flex flex-col md:flex-row justify-between">
+          <CardTitle>
+            <div className="flex flex-col">
+              <span className="text-xs font-medium">
+                {t(appointment.resource_type, { count: 1 })}:{" "}
+              </span>
+              <span className="text-sm">
+                {formatScheduleResourceName(appointment)}
+              </span>
+            </div>
+          </CardTitle>
+          <Button
+            variant="secondary"
+            className="border border-secondary-400"
+            onClick={() => {
+              setSelectedAppointment(appointment);
+              setAppointmentDialogOpen(true);
+            }}
+          >
+            <span>{t("view_details")}</span>
+          </Button>
+        </CardHeader>
+
+        <CardContent className="mt-2 pt-2 px-6 pb-3">
+          <div className="flex flex-col md:flex-row gap-4 justify-between">
+            <div className="flex flex-row gap-3 justify-between md:flex-row md:flex-grow md:mr-6">
+              <div className="flex flex-col gap-0 items-start md:flex-grow md:mr-4">
+                <span className="text-xs font-medium">{t("location")}: </span>
+                <span className="text-sm">
+                  <Link href={`/facility/${appointment.facility.id}`}>
+                    <span className="text-sm underline underline-offset-2 hover:cursor-pointer">
+                      {appointment.facility?.name}
+                    </span>
+                  </Link>
+                </span>
+              </div>
+              <div className="flex flex-col gap-0 items-start md:flex-none">
+                <span className="text-xs font-medium">{t("status")}: </span>
+                <span>
+                  <Badge
+                    variant={APPOINTMENT_STATUS_COLORS[appointment.status]}
+                  >
+                    {t(appointment.status)}
+                  </Badge>
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-row gap-3 justify-between md:flex-none">
+              <div className="flex flex-col gap-0 items-start">
+                <span className="text-xs font-medium">{t("date")}: </span>
+                <span className="text-sm">{appointmentDate}</span>
+              </div>
+              <div className="flex flex-col gap-0 items-start">
+                <span className="text-xs font-medium">{t("time_slot")}: </span>
+                <span className="text-sm">{appointmentTimeSlot}</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const getAppointmentCardContent = (
+    appointments: Appointment[] | undefined,
+  ) => {
+    return (
+      <div className="grid gap-4 mb-2">
+        {appointments && appointments.length > 0 ? (
+          appointments.map((appointment) => getAppointmentCard(appointment))
+        ) : (
+          <div className="col-span-full text-center bg-white shadow-sm rounded p-4 font-medium">
+            {t("no_appointments")}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <AppointmentDialog
+        setAppointmentDialogOpen={setAppointmentDialogOpen}
+        appointment={selectedAppointment}
+        open={appointmentDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedAppointment(undefined);
+          }
+          setAppointmentDialogOpen(open);
+        }}
+      />
+      <div className="container mx-auto mt-2">
+        <div className="flex justify-between w-full">
+          <span className="text-xl font-bold">{t("appointments")}</span>
+          <Button variant="primary_gradient" className="sticky right-0" asChild>
+            <Link href="/facilities">
+              <span>{t("book_appointment")}</span>
+            </Link>
+          </Button>
+        </div>
+
+        <div className="mt-4">
+          <FilterTabs
+            value={activeTab}
+            onValueChange={(value) =>
+              setActiveTab(value as "scheduled" | "history")
+            }
+            options={tabOptions}
+            variant="background"
+            className="w-full mb-4"
+            showAllOption={false}
+            maxVisibleTabs={2}
+          />
+
+          {/* Conditional rendering based on activeTab */}
+          {activeTab === "scheduled" &&
+            getAppointmentCardContent(scheduledAppointments)}
+
+          {activeTab === "history" &&
+            getAppointmentCardContent(pastAppointments)}
+        </div>
+      </div>
+    </>
   );
 }
 
-export default ClinicalHistoryPage;
+export default PatientIndex;
