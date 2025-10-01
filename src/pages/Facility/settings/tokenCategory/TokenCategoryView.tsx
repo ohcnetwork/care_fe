@@ -110,7 +110,9 @@ export default function TokenCategoryView({
             variant="outline"
             className="mt-4"
             onClick={() =>
-              navigate(`/facility/${facilityId}/settings/token_category`)
+              navigate(
+                `/facility/${facilityId}/settings/token_category/practitioner`,
+              )
             }
           >
             <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
@@ -132,7 +134,9 @@ export default function TokenCategoryView({
           size="xs"
           className="mb-2"
           onClick={() =>
-            navigate(`/facility/${facilityId}/settings/token_category`)
+            navigate(
+              `/facility/${facilityId}/settings/token_category/${tokenCategory.resource_type}`,
+            )
           }
         >
           <CareIcon icon="l-arrow-left" className="size-4" />
@@ -175,7 +179,7 @@ export default function TokenCategoryView({
               variant="outline"
               onClick={() =>
                 navigate(
-                  `/facility/${facilityId}/settings/token_category/${tokenCategory.id}/edit`,
+                  `/facility/${facilityId}/settings/token_category/${tokenCategory.resource_type}/${tokenCategory.id}/edit`,
                 )
               }
             >

@@ -1,4 +1,4 @@
-import { useRoutes } from "raviger";
+import { Redirect, useRoutes } from "raviger";
 
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
@@ -13,6 +13,8 @@ import DevicesList from "@/pages/Facility/settings/devices/DevicesList";
 import UpdateDevice from "@/pages/Facility/settings/devices/UpdateDevice";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
+
+import { SchedulableResourceType } from "@/types/scheduling/schedule";
 
 import ActivityDefinitionForm from "./activityDefinition/ActivityDefinitionForm";
 import ActivityDefinitionList from "./activityDefinition/ActivityDefinitionList";
@@ -229,13 +231,42 @@ const getRoutes = (facilityId: string) => ({
   "/product/:id/edit": ({ id }: { id: string }) => (
     <ProductForm facilityId={facilityId} productId={id} />
   ),
-  "/token_category": () => <TokenCategoryList facilityId={facilityId} />,
-  "/token_category/new": () => <TokenCategoryForm facilityId={facilityId} />,
-  "/token_category/:id": ({ id }: { id: string }) => (
-    <TokenCategoryView facilityId={facilityId} tokenCategoryId={id} />
+  "/token_category": () => (
+    <Redirect
+      to={`/facility/${facilityId}/settings/token_category/${SchedulableResourceType.Practitioner}`}
+    />
   ),
-  "/token_category/:id/edit": ({ id }: { id: string }) => (
-    <TokenCategoryForm facilityId={facilityId} tokenCategoryId={id} />
+  ...[...Object.values(SchedulableResourceType)].reduce(
+    (acc, resourceType) => ({
+      ...acc,
+      [`/token_category/${resourceType}`]: () => (
+        <TokenCategoryList
+          facilityId={facilityId}
+          resourceType={resourceType}
+        />
+      ),
+      [`/token_category/${resourceType}/new`]: () => (
+        <TokenCategoryForm
+          facilityId={facilityId}
+          resourceType={resourceType}
+        />
+      ),
+      [`/token_category/${resourceType}/:id`]: ({ id }: { id: string }) => (
+        <TokenCategoryView facilityId={facilityId} tokenCategoryId={id} />
+      ),
+      [`/token_category/${resourceType}/:id/edit`]: ({
+        id,
+      }: {
+        id: string;
+      }) => (
+        <TokenCategoryForm
+          facilityId={facilityId}
+          resourceType={resourceType}
+          tokenCategoryId={id}
+        />
+      ),
+    }),
+    {},
   ),
 
   "/reportbuilder": () => <ReportBuilderList facilityId={facilityId} />,

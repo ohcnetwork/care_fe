@@ -1,7 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -31,6 +29,7 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import useAppHistory from "@/hooks/useAppHistory";
 import {
   SCHEDULABLE_RESOURCE_TYPE_COLORS,
   SchedulableResourceType,
@@ -44,12 +43,12 @@ import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 
 export default function TokenCategoryForm({
   facilityId,
+  resourceType,
   tokenCategoryId,
-  onSuccess,
 }: {
   facilityId: string;
+  resourceType: SchedulableResourceType;
   tokenCategoryId?: string;
-  onSuccess?: (tokenCategory: TokenCategoryRead) => void;
 }) {
   const { t } = useTranslation();
 
@@ -101,7 +100,7 @@ export default function TokenCategoryForm({
           facilityId={facilityId}
           tokenCategoryId={tokenCategoryId}
           existingData={existingData}
-          onSuccess={onSuccess}
+          resourceType={resourceType}
           containerClassName="rounded-lg border border-gray-200 bg-white p-6"
         />
       </div>
@@ -114,20 +113,17 @@ export function TokenCategoryFormContent({
   tokenCategoryId,
   existingData,
   containerClassName,
-  onSuccess = () => navigate(`/facility/${facilityId}/settings/token_category`),
-  onCancel = () => navigate(`/facility/${facilityId}/settings/token_category`),
+  resourceType,
   disableButtons = false,
-  externalSubmitRef,
 }: {
   facilityId: string;
   tokenCategoryId?: string;
   existingData?: TokenCategoryRead;
   containerClassName?: string;
-  onSuccess?: (tokenCategory: TokenCategoryRead) => void;
-  onCancel?: () => void;
+  resourceType: SchedulableResourceType;
   disableButtons?: boolean;
-  externalSubmitRef?: React.RefObject<(() => void) | null>;
 }) {
+  const { goBack } = useAppHistory();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(tokenCategoryId);
@@ -153,7 +149,7 @@ export function TokenCategoryFormContent({
           }
         : {
             name: "",
-            resource_type: SchedulableResourceType.Practitioner,
+            resource_type: resourceType,
             shorthand: "",
           },
   });
@@ -162,10 +158,10 @@ export function TokenCategoryFormContent({
     mutationFn: mutate(tokenCategoryApi.create, {
       pathParams: { facility_id: facilityId },
     }),
-    onSuccess: (tokenCategory: TokenCategoryRead) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tokenCategories"] });
       toast.success(t("token_category_created_successfully"));
-      onSuccess?.(tokenCategory);
+      goBack(`/facility/${facilityId}/settings/token_category/${resourceType}`);
     },
   });
 
@@ -182,7 +178,7 @@ export function TokenCategoryFormContent({
         queryKey: ["tokenCategory", tokenCategoryId],
       });
       toast.success(t("token_category_updated_successfully"));
-      navigate(`/facility/${facilityId}/settings/token_category`);
+      goBack(`/facility/${facilityId}/settings/token_category/${resourceType}`);
     },
   });
 
@@ -205,15 +201,6 @@ export function TokenCategoryFormContent({
       createTokenCategory(createPayload);
     }
   }
-
-  useEffect(() => {
-    if (externalSubmitRef) {
-      externalSubmitRef.current = () => {
-        form.handleSubmit(onSubmit)();
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [externalSubmitRef]);
 
   return (
     <Form {...form}>
@@ -294,7 +281,15 @@ export function TokenCategoryFormContent({
 
         {!disableButtons && (
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                goBack(
+                  `/facility/${facilityId}/settings/token_category/${resourceType}`,
+                )
+              }
+            >
               {t("cancel")}
             </Button>
             <Button type="submit" disabled={isPending}>
