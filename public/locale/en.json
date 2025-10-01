@@ -1077,6 +1077,7 @@
   "click_to_add_dosage_instructions": "Click to add dosage instructions",
   "click_to_add_first_question": "Click to add the first question",
   "clone": "Clone",
+  "clone_role": "Clone Role",
   "clone_questionnaire": "Clone Questionnaire",
   "clone_questionnaire_description": "Create a copy of this questionnaire with a new slug and select organizations.",
   "cloning": "Cloning...",
