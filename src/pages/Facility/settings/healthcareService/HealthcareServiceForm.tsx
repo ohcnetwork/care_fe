@@ -30,6 +30,8 @@ import Page from "@/components/Common/Page";
 import RequirementsSelector from "@/components/Common/RequirementsSelector";
 import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 
+import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+
 // import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import mutate from "@/Utils/request/mutate";
@@ -65,6 +67,7 @@ const formSchema = z.object({
       }),
     )
     .min(1, "At least one location is required"),
+  managing_organization: z.string().nullable().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -147,11 +150,13 @@ function HealthcareServiceFormContent({
               id: loc.id,
               name: loc.name,
             })),
+            managing_organization: existingData.managing_organization?.id,
           }
         : {
             styling_metadata: { careIcon: "" },
             extra_details: "",
             locations: [],
+            managing_organization: null,
           },
   });
 
@@ -200,6 +205,7 @@ function HealthcareServiceFormContent({
         ...data,
         facility: facilityId,
         locations: data.locations.map((loc) => loc.id),
+        managing_organization: data.managing_organization || undefined,
       } as HealthcareServiceUpdateSpec);
     } else {
       const payload: HealthcareServiceCreateSpec = {
@@ -207,6 +213,7 @@ function HealthcareServiceFormContent({
         facility: facilityId,
         styling_metadata,
         locations: data.locations.map((loc) => loc.id),
+        managing_organization: data.managing_organization || undefined,
       };
       createHealthcareService(payload);
     }
@@ -366,6 +373,49 @@ function HealthcareServiceFormContent({
                               onChange={field.onChange}
                             />
                           }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Managing Organization Section */}
+            <div className="rounded-lg border border-gray-200 bg-white p-4">
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-base font-medium text-gray-900">
+                    {t("managing_organization")}{" "}
+                    <span className="text-sm font-normal text-gray-500">
+                      ({t("optional")})
+                    </span>
+                  </h2>
+                  <p className="mt-0.5 text-sm text-gray-500">
+                    {t("select_organization_that_manages_this_service")}
+                  </p>
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="managing_organization"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <FacilityOrganizationSelector
+                          value={field.value ? [field.value] : null}
+                          currentOrganizations={
+                            existingData?.managing_organization
+                              ? [existingData.managing_organization]
+                              : []
+                          }
+                          onChange={(value) => {
+                            field.onChange(value?.[0] || null);
+                          }}
+                          facilityId={facilityId}
+                          singleSelection={true}
+                          optional={true}
                         />
                       </FormControl>
                       <FormMessage />
