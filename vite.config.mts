@@ -1,4 +1,3 @@
-import { ValidateEnv } from "@julr/vite-plugin-validate-env";
 import federation from "@originjs/vite-plugin-federation";
 import reactScan from "@react-scan/vite-plugin-react-scan";
 import tailwindcss from "@tailwindcss/vite";
@@ -8,14 +7,14 @@ import fs from "fs";
 import { JSDOM } from "jsdom";
 import { marked } from "marked";
 import path from "path";
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig, loadEnv, type UserConfig } from "vite";
 import checker from "vite-plugin-checker";
 import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
-import { z } from "zod";
 
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
+import validateEnv from "./scripts/validate-env";
 
 // Convert goal description markdown to HTML
 function getDescriptionHtml(description: string) {
@@ -140,9 +139,10 @@ function getRemotes(enabledApps: string) {
   }, {});
 }
 
-/** @type {import('vite').UserConfig} */
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode }): Promise<UserConfig> => {
   const env = loadEnv(mode, process.cwd(), "");
+
+  await validateEnv(env);
 
   const cdnUrls =
     env.REACT_CDN_URLS ||
@@ -179,24 +179,6 @@ export default defineConfig(({ mode }) => {
           "react-i18next",
           "@tanstack/react-query",
         ],
-      }),
-      ValidateEnv({
-        validator: "zod",
-        schema: {
-          REACT_CARE_API_URL: z.string().url(),
-
-          REACT_SENTRY_DSN: z.string().url().optional(),
-          REACT_SENTRY_ENVIRONMENT: z.string().optional(),
-
-          REACT_DEFAULT_PAYMENT_TERMS: z.string().optional(),
-
-          REACT_CDN_URLS: z
-            .string()
-            .optional()
-            .transform((val) => val?.split(" "))
-            .pipe(z.array(z.string().url()).optional())
-            .describe("Optional: Space-separated list of CDN URLs"),
-        },
       }),
       viteStaticCopy({
         targets: [
