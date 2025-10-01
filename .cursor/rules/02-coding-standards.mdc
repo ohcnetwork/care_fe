@@ -6,36 +6,38 @@ alwaysApply: false
 # Coding Standards
 
 ## TypeScript Guidelines
-- Use TypeScript for all new code
-- Prefer interfaces over types for object definitions
-- Use functional components with proper type definitions
-- Avoid using `any` type; use proper type definitions
-- Use type inference where possible
+- Strict TypeScript configuration
+- Use interfaces for data structures  
+- Proper nullability for optional fields
+- zod validation for runtime data validation
+- Avoid `any` type
 
-## Component Structure
-- One component per file is preferred. 
-- Prefer default exports for components
-- Follow the component naming pattern: `ComponentName.tsx`
-- Place components in appropriate feature directories
-- Keep components small and focused
+## Components Structure
+- One component per file
+- Descriptive naming: `PatientOverview.tsx`, `MedicationList.tsx`
+- Organize by feature: Patient/, Facility/, Medication/
+- WCAG 2.1 AA accessibility compliance
+- Proper error boundaries
 
-## Styling Guidelines
-- Use Tailwind CSS for styling
-- Follow mobile-first responsive design
-- Use Shadcn UI components when available
+## UI Standards
+- shadcn/ui for standard components
+- CAREUI for custom components
+- Tailwind CSS design system
+- Mobile-first responsive design
 
-## State Management
-- Use TanStack Query for API data management
-- Prefer React Context for global state
-- Use local state for component-specific data
+## Data Management
+- TanStack Query for API data
+- React Context for app state
+- Proper error handling
+- Data validation patterns
 
 ## File Naming
-- Use kebab-case for directories: `auth-wizard/`
-- Use PascalCase for component files: `AuthWizard.tsx`
-- Use camelCase for utility files: `useAuth.ts`
+- kebab-case directories: `patient-management/`
+- PascalCase components: `PatientVitals.tsx`
+- Camel case hooks: `usePatientData.ts`
 
 ## Testing
-- Write tests in Cypress for E2E testing
-- Follow testing guidelines in `cypress/docs/`
-- Test components in isolation
-- Write meaningful test descriptions
+- Cypress E2E for critical workflows
+- Accessibility testing
+- Follow patterns in `cypress/docs/`
+- Write clear test descriptions

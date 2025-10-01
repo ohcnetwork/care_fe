@@ -5,12 +5,12 @@ alwaysApply: false
 ---
 # Project Structure
 
-This React TypeScript application follows a modular architecture with clear separation of concerns.
+CARE frontend follows healthcare-focused modular architecture for medical workflows.
 
 ## Main Entry Points
 - [src/index.tsx](mdc:src/index.tsx) - Application bootstrap
 - [src/App.tsx](mdc:src/App.tsx) - Root component
-- [src/vite.config.mts](mdc:vite.config.mts) - Vite configuration
+- [vite.config.mts](mdc:vite.config.mts) - Build configuration
 
 ## Key Directories
 - `src/components/` - Reusable UI components

@@ -1,41 +1,76 @@
-You are an expert in TypeScript, React, Shadcn UI, Tailwind.
+# CARE Frontend
 
-Key Principles
+You are an expert in TypeScript, React, Shadcn UI, Tailwind, and CARE frontend development.
 
-- Write concise, technical TypeScript code with accurate examples.
-- Use functional and declarative programming patterns; avoid classes.
-- Prefer iteration and modularization over code duplication.
-- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+This is a healthcare management system for TeleICU & hospital capacity administration.
 
-Naming Conventions
+## Key Principles
 
-- Use lowercase with dashes for directories (e.g., components/auth-wizard).
-- Favor named exports for components.
+- Write concise, technical TypeScript code with accurate examples
+- Use functional and declarative programming patterns; avoid classes
+- Prefer iteration and modularization over code duplication
+- Use descriptive variable names with auxiliary verbs (e.g., isPatientActive, hasEmergencyStatus)
+- Implement HIPAA-compliant data handling practices
 
-TypeScript Usage
+## Naming Conventions
 
-- Use TypeScript for all code; prefer interfaces over types.
-- Avoid enums; use maps instead.
-- Use functional components with TypeScript interfaces.
+- Use lowercase with dashes for directories (e.g., patient-management/, facility-overview/)
+- Favor named exports for components
+- Use PascalCase for components (PatientOverview, MedicationList)
+- Use camelCase for functions and variables (fetchPatientData, isEmergencyCase)
 
-Syntax and Formatting
+## TypeScript Usage
 
-- Use the "function" keyword for pure functions.
-- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
-- Use declarative JSX.
+- Use TypeScript for all code; prefer interfaces over types for medical data structures
+- Avoid enums; use maps instead (except for medical constants like BloodGroupChoices)
+- Use functional components with TypeScript interfaces
+- Strict typing for all medical data and API interfaces
 
-UI and Styling
+## Syntax and Formatting
 
-- Use Shadcn UI, Radix, and Tailwind for components and styling.
-- Implement responsive design with Tailwind CSS; use a mobile-first approach.
+- Use the "function" keyword for pure functions
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements
+- Use declarative JSX
+- Handle medical data with proper null checks and error boundaries
 
-General Guidelines
+## UI and Styling
 
-- Care uses TanStack Query for data fetching from the API along with query and mutate utilities for the queryFn and mutationFn. (Docs @ /Utils/request/README.md)
-- APIs are defined in the api.tsx file.
-- Use raviger for routing.
-- Add and reuse proper translations for the components in the en.json file.
+- Use Shadcn UI, Radix, and Tailwind for components and styling
+- Use CAREUI for healthcare-specific components (Calendar, medical forms)
+- Implement responsive design with Tailwind CSS; use a mobile-first approach
+- Follow medical color conventions (red=critical, yellow=warning, green=stable)
 
-# Testing Guidelines
+## Healthcare Data & API Guidelines
 
-For Cypress testing guidelines, refer to cypress/docs/*.md
+- CARE uses TanStack Query for data fetching with query and mutate utilities (/Utils/request/README.md)
+- APIs are defined in the api.tsx files within type directories
+- Use zod validation for all medical data inputs
+- Implement audit logging for medical data access
+- Handle PHI (Protected Health Information) with appropriate security measures
+
+## Routing & Navigation
+
+- Use raviger for healthcare workflow routing
+- Organize routes by medical domains (Patient/, Facility/, Medication/)
+- Implement proper navigation history for clinical workflows
+
+## Internationalization
+
+- Add and reuse proper translations in en.json for medical terminology
+- Use consistent medical term translations across components
+- Support healthcare-specific date/time formatting
+
+## Healthcare Standards
+
+- HIPAA compliance and PHI protection in all data handling
+- WCAG 2.1 AA accessibility for medical environments
+- Sub-100ms response times for emergency workflows
+- Proper error boundaries for critical medical data
+
+## Testing Guidelines
+
+For Cypress testing guidelines, refer to cypress/docs/*.md for healthcare workflow testing patterns.
+
+## Reference
+
+See .github/copilot-instructions.md and .cursor/rules/*.mdc for comprehensive guidance.

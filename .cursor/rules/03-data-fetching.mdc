@@ -8,10 +8,9 @@ alwaysApply: false
 
 ## TanStack Query Usage
 
-- Use TanStack Query with the `query` and `mutate` utilities from `@/Utils/request/`
-- Use appropriate query keys following the resource pattern
-- Leverage built-in features for pagination and debouncing
-- Implement proper error handling using the global error handler
+- Use TanStack Query with `query` and `mutate` utilities from `@/Utils/request/`
+- Consistent query key patterns
+- Proper error handling with global error handler
 
 ## API Route Definitions
 

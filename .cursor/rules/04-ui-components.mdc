@@ -5,12 +5,13 @@ alwaysApply: false
 ---
 # UI Component Guidelines
 
-## Component Library Usage
-- Use Shadcn UI components as the primary component library
-- NEVER modify the shadcn component files directly in `components/ui/*`
-- Follow the component documentation for proper usage
-- Customize components using Tailwind CSS
-- Maintain consistent styling across components
+## Component Libraries
+- shadcn/ui for standard components
+- CAREUI for custom components
+- NEVER modify shadcn files directly in `components/ui/*`
+- Tailwind CSS design system
+- WCAG 2.1 AA accessibility compliance
+- Consistent styling patterns
 
 ## Routing with Raviger
 

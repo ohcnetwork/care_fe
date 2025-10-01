@@ -1,22 +1,41 @@
 # AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance for AI coding agents working with the CARE frontend repository.
+
+## Complete Instructions System
+
+This repository uses a comprehensive healthcare-focused instructions system:
+
+- Main Instructions: Complete project overview and workflows (`.github/copilot-instructions.md`)
+- Path-Specific Instructions: Context-aware guidance for specific file types (`.github/instructions/*.instructions.md`)
+- Agent Environment: Pre-configured development environment (`.github/workflows/copilot-setup-steps.yml`)
+
+For detailed project context, build instructions, and architecture information, refer to `.github/copilot-instructions.md`.
+
+## Project Context
+
+CARE is a Digital Public Good for TeleICU & Decentralised Administration of Healthcare Capacity. This React + TypeScript application manages:
+
+- Patient Management: EMR, medical records, consultation workflows
+- Facility Management: Bed allocation, staff assignments, resource tracking
+- Medical Workflows: Prescription management, diagnostic procedures, emergency protocols
+- Compliance: PHI protection, audit trails, HIPAA compliance
 
 ## Build/Lint/Test Commands
-- `npm run dev`: Start development server
-- `npm run build`: Build for production 
-- `npm run lint`: Run ESLint
-- `npm run lint-fix`: Run ESLint with auto-fix
-- `npm run format`: Format code with Prettier
-- `npm run cypress:open`: Open Cypress UI for interactive testing
-- Single test: `npm run cypress:run -- --spec "cypress/e2e/path/to/spec.cy.ts"`
 
-## Code Style Guidelines
-- **TypeScript**: Strict mode, ES2022 target, path aliases (`@/*` for src)
-- **Formatting**: Double quotes, 2-space indent, semicolons required
-- **Imports**: Order by 3rd-party → library → CAREUI → UI → components → hooks → utils → relative
-- **Types**: Use `interface` for objects, avoid explicit `any`, proper nullability
-- **Naming**: PascalCase for components/classes, camelCase for variables/functions
-- **Components**: Organized by feature, maintain separation of concerns
-- **Testing**: Follow Page Object Model, use data-cy attributes, AAA pattern (Arrange-Act-Assert)
-- **Error Handling**: Use dedicated error handlers, TypeScript strict null checks
+```bash
+npm run dev          # Start development server on http://localhost:4000
+npm run build        # Build for production (~2 minutes)
+npm run lint         # Run ESLint (~85 seconds)
+npm run format       # Format code with Prettier
+npm run cypress:open # Open Cypress UI for workflow testing
+```
+
+## Code Style Standards
+
+- TypeScript: Strict mode for data safety, healthcare-specific type definitions
+- Components: Feature-based organization (Patient/, Facility/, Medication/)
+- State Management: @tanstack/react-query for server data, React hooks for UI state
+- UI System: shadcn/ui for standard components, CAREUI for custom components
+- Testing: Cypress E2E testing for critical workflows
+- Security: PHI protection, audit logging, compliance patterns
