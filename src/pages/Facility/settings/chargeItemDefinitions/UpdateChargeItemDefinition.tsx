@@ -14,12 +14,12 @@ import { ChargeItemDefinitionForm } from "./ChargeItemDefinitionForm";
 
 interface UpdateChargeItemDefinitionProps {
   facilityId: string;
-  chargeItemDefinitionId: string;
+  slug: string;
 }
 
 export function UpdateChargeItemDefinition({
   facilityId,
-  chargeItemDefinitionId,
+  slug,
 }: UpdateChargeItemDefinitionProps) {
   const { t } = useTranslation();
 
@@ -29,9 +29,9 @@ export function UpdateChargeItemDefinition({
     isFetching,
     error,
   } = useQuery({
-    queryKey: ["chargeItemDefinitions", chargeItemDefinitionId],
+    queryKey: ["chargeItemDefinitions", slug],
     queryFn: query(chargeItemDefinitionApi.retrieveChargeItemDefinition, {
-      pathParams: { facilityId, chargeItemDefinitionId },
+      pathParams: { facilityId, slug },
     }),
     retry: 1,
   });
@@ -75,17 +75,14 @@ export function UpdateChargeItemDefinition({
   }
 
   if (!chargeItemDefinition) {
-    console.warn(
-      "No charge item definition found with ID:",
-      chargeItemDefinitionId,
-    );
+    console.warn("No charge item definition found with ID:", slug);
     navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
     return null;
   }
 
-  const handleSuccess = () => {
+  const handleSuccess = (slug: string) => {
     navigate(
-      `/facility/${facilityId}/settings/charge_item_definitions/${chargeItemDefinitionId}`,
+      `/facility/${facilityId}/settings/charge_item_definitions/${slug}`,
     );
   };
 
@@ -103,9 +100,12 @@ export function UpdateChargeItemDefinition({
 
         <ChargeItemDefinitionForm
           facilityId={facilityId}
+          categorySlug={chargeItemDefinition.category.slug}
           initialData={chargeItemDefinition}
           isUpdate={true}
-          onSuccess={handleSuccess}
+          onSuccess={(chargeItemDefinition) =>
+            handleSuccess(chargeItemDefinition.slug)
+          }
         />
       </div>
     </Page>

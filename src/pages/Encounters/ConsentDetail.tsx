@@ -1,6 +1,12 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { AlertCircle, ChevronLeft, Download, FileText } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  ChevronLeft,
+  Download,
+  FileText,
+} from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -72,8 +78,6 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
   const fileManager = useFileManager({
     type: FileType.CONSENT,
     uploadedFiles: consent?.source_attachments || [],
-    onArchive: () => {},
-    onEdit: () => {},
   });
 
   const isLoading = isLoadingConsent;
@@ -133,7 +137,10 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
 
   return (
     <div>
-      <BackButton />
+      <BackButton>
+        <ArrowLeft />
+        <span>{t("back")}</span>
+      </BackButton>
       <Page title="">
         <div className="container mx-auto py-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -14,20 +14,22 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { isAppleDevice } from "@/Utils/utils";
 
 interface AutoCompleteOption {
   label: string;
@@ -55,6 +57,8 @@ interface AutocompleteProps {
   ref?: React.RefCallback<HTMLButtonElement | null>;
 
   "aria-invalid"?: boolean;
+  shortcutId?: string;
+  shortcutDisplay?: string;
 }
 
 export default function Autocomplete({
@@ -75,6 +79,8 @@ export default function Autocomplete({
   showClearButton = true,
   "data-cy": dataCy,
   ref,
+  shortcutId,
+  shortcutDisplay,
   ...props
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
@@ -145,8 +151,8 @@ export default function Autocomplete({
         placeholder={inputPlaceholder}
         disabled={disabled}
         onValueChange={handleInputChange}
-        className="outline-hidden border-none ring-0 shadow-none"
-        autoFocus
+        className="outline-hidden border-none ring-0 shadow-none text-base"
+        autoFocus={!isAppleDevice}
       />
       <CommandList className="overflow-y-auto">
         {isLoading ? (
@@ -193,8 +199,8 @@ export default function Autocomplete({
   if (isMobile) {
     return (
       <div className="relative w-full">
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerTrigger asChild>
             <Button
               aria-invalid={props["aria-invalid"]}
               title={
@@ -221,22 +227,20 @@ export default function Autocomplete({
                   : placeholder}
               </span>
             </Button>
-          </SheetTrigger>
-          <SheetContent
-            side="bottom"
+          </DrawerTrigger>
+          <DrawerContent
             aria-describedby={undefined}
-            className="h-[50vh] px-0 pt-2 pb-0 rounded-t-lg"
+            className="min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg"
           >
-            <SheetTitle className="sr-only">
+            <DrawerTitle className="sr-only">
               {t("autocomplete_options")}
-            </SheetTitle>
+            </DrawerTitle>
 
-            <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto rounded-full bg-gray-300 mt-2" />
-            <div className="mt-6 h-full">
+            <div className="mt-6 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
               <Command>{commandContent}</Command>
             </div>
-          </SheetContent>
-        </Sheet>
+          </DrawerContent>
+        </Drawer>
         {selectedOption && showClearButton ? (
           <Button
             variant="ghost"
@@ -270,6 +274,7 @@ export default function Autocomplete({
             data-cy={dataCy}
             onClick={() => setOpen(!open)}
             ref={ref}
+            data-shortcut-id={shortcutId}
           >
             <span
               className={cn(
@@ -300,7 +305,20 @@ export default function Autocomplete({
           <span className="sr-only">{t("clear")}</span>
         </Button>
       ) : (
-        <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
+        <>
+          {shortcutDisplay ? (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 ">
+              <div className="flex items-center justify-center gap-1">
+                <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
+                  <ShortcutBadge actionId={shortcutId ?? ""} />
+                </div>
+                <CaretSortIcon className="size-3 shrink-0 opacity-50" />
+              </div>
+            </div>
+          ) : (
+            <CaretSortIcon className="absolute right-3 top-1/2 -translate-y-1/2 ml-2 size-4 shrink-0 opacity-50" />
+          )}
+        </>
       )}
     </div>
   );
