@@ -2,10 +2,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   CheckIcon,
   MoreVertical,
+  Notebook,
   Pencil,
   Plus,
   Settings,
-  Square,
 } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -145,13 +145,13 @@ function QueueRow({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <MoreVertical className="h-4 w-4" />
+              <MoreVertical className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="border border-gray-200">
             <DropdownMenuItem asChild>
               <Link href={queueLink} className="flex items-center gap-2">
-                <Square className="h-4 w-4" />
+                <Notebook className="size-4 mr-2" />
                 {t("open_queue_board")}
               </Link>
             </DropdownMenuItem>
@@ -162,7 +162,7 @@ function QueueRow({
               queueId={queue.id}
               trigger={
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <Pencil className="h-4 w-4 mr-2" />
+                  <Pencil className="size-4 mr-2" />
                   {t("edit_queue_name")}
                 </DropdownMenuItem>
               }
@@ -171,7 +171,7 @@ function QueueRow({
               onClick={() => setPrimary({})}
               disabled={queue.is_primary}
             >
-              <CheckIcon className="h-4 w-4 mr-2" />
+              <CheckIcon className="size-4 mr-2" />
               {t("set_as_primary")}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -354,7 +354,7 @@ export default function QueuesIndex({
               initialDate={startOfDay(qParams.date)}
               trigger={
                 <Button size="sm" className="font-bold" disabled={isPast}>
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="size-4 mr-2" />
                   {t("create_queue")}
                 </Button>
               }
@@ -388,7 +388,7 @@ export default function QueuesIndex({
                     initialDate={startOfDay(qParams.date)}
                     trigger={
                       <Button disabled={isPast}>
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="size-4 mr-2" />
                         {t("create_first_queue")}
                       </Button>
                     }
@@ -461,7 +461,7 @@ export default function QueuesIndex({
                   resourceId={effectiveResourceId}
                   trigger={
                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <Plus className="h-4 w-4" />
+                      <Plus className="size-4" />
                     </Button>
                   }
                 />
@@ -486,7 +486,7 @@ export default function QueuesIndex({
                     resourceId={effectiveResourceId}
                     trigger={
                       <Button>
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="size-4 mr-2" />
                         {t("add_first_service_point")}
                       </Button>
                     }
