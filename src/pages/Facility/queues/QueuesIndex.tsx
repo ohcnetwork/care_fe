@@ -284,7 +284,6 @@ export default function QueuesIndex({
         date: qParams.date,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        ordering: "-created_date",
       },
     }),
   });
