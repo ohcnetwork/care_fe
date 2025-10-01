@@ -9,9 +9,9 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
 import { PrintableQRCode } from "@/components/PrintableQRCode";
@@ -31,6 +31,7 @@ import {
 } from "@/types/emr/specimen/specimen";
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import type { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { format } from "date-fns";
 
 interface SpecimenFormProps {
   specimenDefinition: SpecimenDefinitionRead;
@@ -51,7 +52,7 @@ export function SpecimenForm({
 }: SpecimenFormProps) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
-  const currentUserId = authUser.id;
+  const currentUserId = authUser.id ?? null;
   const queryClient = useQueryClient();
 
   const [identifierMode, setIdentifierMode] = useState<"scan" | "generate">(
@@ -174,11 +175,9 @@ export function SpecimenForm({
     const quantity = specimenData.specimen.collection?.quantity;
     const newErrors: typeof errors = {};
 
-    if (!quantity?.value || quantity.value <= 0) {
+    if (quantity?.value == null) {
       newErrors.quantityValue = t("field_required");
-    }
-
-    if (quantity?.value && quantity.value <= 0) {
+    } else if (quantity.value <= 0) {
       newErrors.quantityValue = t("invalid_quantity");
     }
 
@@ -199,7 +198,7 @@ export function SpecimenForm({
         ...finalData,
         specimen: {
           ...finalData.specimen,
-          accession_identifier: draftSpecimen.accession_identifier,
+          accession_identifier: draftSpecimen.id,
         },
       };
     }
@@ -238,6 +237,13 @@ export function SpecimenForm({
     updateSpecimen(submissionPayload);
   };
 
+  function toDateTimeLocalValue(iso: string | null): string {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    return format(d, "yyyy-MM-dd'T'HH:mm");
+  }
+
   return (
     <div>
       <form className="space-y-8" onSubmit={handleSubmit}>
@@ -245,28 +251,30 @@ export function SpecimenForm({
           <div className="font-medium text-lg mb-2">
             {t("specimen_identification")}
           </div>
-          <Tabs
+          <FilterTabs
             value={identifierMode}
             onValueChange={(v) => setIdentifierMode(v as "scan" | "generate")}
-            defaultValue="generate"
-          >
-            <TabsList className="w-full">
-              <TabsTrigger
-                value="generate"
-                className="flex-1 flex items-center justify-center gap-2"
-              >
-                <QrCode className="h-4 w-4" />
-                {t("generate_qr")}
-              </TabsTrigger>
-              <TabsTrigger
-                value="scan"
-                className="flex-1 flex items-center justify-center gap-2"
-              >
-                <Scan className="h-4 w-4" />
-                {t("scan_existing")}
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="generate">
+            className="w-full mb-4"
+            options={[
+              {
+                value: "generate",
+                label: "generate_qr",
+                icon: <QrCode className="h-4 w-4" />,
+              },
+              {
+                value: "scan",
+                label: "scan_existing",
+                icon: <Scan className="h-4 w-4" />,
+              },
+            ]}
+            variant="background"
+            showAllOption={false}
+            maxVisibleTabs={2}
+          />
+
+          {/* Conditional rendering based on identifierMode */}
+          {identifierMode === "generate" && (
+            <>
               {draftSpecimen ? (
                 <>
                   <div className="rounded-lg bg-green-50 p-2 mb-4">
@@ -297,28 +305,32 @@ export function SpecimenForm({
                   </p>
                 </div>
               )}
-            </TabsContent>
-            <TabsContent value="scan">
-              <div className="flex gap-2">
-                <Input
-                  value={specimenData.specimen.accession_identifier}
-                  onChange={(e) =>
-                    handleSpecimenChange("accession_identifier", e.target.value)
-                  }
-                  placeholder={t("specimen_scan_placeholder")}
-                  disabled={disableEdit}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleScanBarcode}
-                  disabled={disableEdit}
-                >
-                  <Scan className="h-4 w-4" />
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
+            </>
+          )}
+
+          {identifierMode === "scan" && (
+            <div className="flex gap-2" data-cy="specimen-scan-section">
+              <Input
+                data-cy="specimen-accession-input"
+                value={specimenData.specimen.accession_identifier}
+                onChange={(e) =>
+                  handleSpecimenChange("accession_identifier", e.target.value)
+                }
+                placeholder={t("specimen_scan_placeholder")}
+                disabled={disableEdit}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleScanBarcode}
+                disabled={disableEdit}
+                aria-label={t("scan_barcode")}
+                data-cy="open-scan-dialog"
+              >
+                <Scan className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
         <div className="space-y-4">
           <div className="font-medium text-lg mb-2">
@@ -333,11 +345,10 @@ export function SpecimenForm({
                 <Input
                   className="h-9"
                   type="datetime-local"
-                  value={
-                    specimenData.specimen.collection?.collected_date_time?.split(
-                      ".",
-                    )[0] || ""
-                  }
+                  value={toDateTimeLocalValue(
+                    specimenData.specimen.collection?.collected_date_time ??
+                      null,
+                  )}
                   onChange={(e) =>
                     handleCollectionChange(
                       "collected_date_time",

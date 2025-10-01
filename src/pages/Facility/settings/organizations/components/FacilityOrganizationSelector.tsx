@@ -16,6 +16,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -23,7 +24,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -45,7 +45,6 @@ export default function FacilityOrganizationSelector(
 ) {
   const { t } = useTranslation();
   const {
-    value,
     onChange,
     facilityId,
     currentOrganizations,
@@ -95,21 +94,6 @@ export default function FacilityOrganizationSelector(
     })),
   });
 
-  // Sync selectedOrganizations with value prop
-  useEffect(() => {
-    if (value?.length && currentOrganizations?.length) {
-      const matchingOrganizations = currentOrganizations.filter((org) =>
-        value.includes(org.id),
-      );
-
-      if (matchingOrganizations.length === value.length) {
-        setSelectedOrganizations(matchingOrganizations);
-      }
-    } else {
-      setSelectedOrganizations([]);
-    }
-  }, [value, currentOrganizations]);
-
   const handleSelect = (org: FacilityOrganizationRead) => {
     const isAlreadySelected = !!currentOrganizations?.find(
       (o) => o.id === org.id,
@@ -153,7 +137,8 @@ export default function FacilityOrganizationSelector(
   };
 
   const handleOrganizationViewChange = (value: string) => {
-    setShowAllOrgs(value === "all");
+    const normalizedValue = value || "all";
+    setShowAllOrgs(normalizedValue === "all");
     setSelectedOrganizations([]);
     setCurrentSelection(null);
     setNavigationLevels([]);
@@ -393,20 +378,16 @@ export default function FacilityOrganizationSelector(
         </div>
       </div>
 
-      <Tabs
+      <FilterTabs
         value={showAllOrgs ? "all" : "mine"}
         onValueChange={handleOrganizationViewChange}
         className="w-full sm:w-auto"
-      >
-        <TabsList className="grid w-full grid-cols-2 sm:w-[300px]">
-          <TabsTrigger value="mine" data-cy="my-organizations-tab">
-            {t("my_organizations")}
-          </TabsTrigger>
-          <TabsTrigger value="all" data-cy="all-organizations-tab">
-            {t("all_organizations")}
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+        options={[
+          { value: "mine", label: t("my_organizations") },
+          { value: "all", label: t("all_organizations") },
+        ]}
+        showAllOption={false}
+      />
 
       <div className="space-y-3">
         <div className="space-y-3">

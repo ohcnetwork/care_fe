@@ -9,9 +9,9 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AnimatedWrapper } from "@/components/Common/AnimatedWrapper";
 import Page from "@/components/Common/Page";
@@ -144,30 +144,24 @@ export default function LocationSettings({
       <div className="container mx-auto">
         <div className="flex flex-col sm:flex-row items-start justify-between mb-2 sm:mb-4">
           <h3>{t("locations")}</h3>
-          <Tabs
+          <FilterTabs
             value={activeTab}
             onValueChange={(value) => setActiveTab(value as "list" | "map")}
             className="mt-2 sm:mt-0"
-          >
-            <TabsList className="flex">
-              <TabsTrigger
-                value="list"
-                id="location-list-view"
-                className="data-[state=active]:text-primary"
-              >
-                <CareIcon icon="l-list-ul" className="text-lg" />
-                <span>{t("list")}</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="map"
-                id="location-map-view"
-                className="data-[state=active]:text-primary"
-              >
-                <CareIcon icon="l-map" className="text-lg" />
-                <span>{t("map")}</span>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+            showAllOption={false}
+            options={[
+              {
+                value: "list",
+                label: "list",
+                icon: <CareIcon icon="l-list-ul" className="text-lg" />,
+              },
+              {
+                value: "map",
+                label: "map",
+                icon: <CareIcon icon="l-map" className="text-lg" />,
+              },
+            ]}
+          />
         </div>
 
         <div className="flex">
