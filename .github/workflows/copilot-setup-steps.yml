@@ -3,100 +3,101 @@ name: "Copilot Setup Steps"
 # Automatically run the setup steps when they are changed to allow for easy validation, and
 # allow manual testing through the repository's "Actions" tab
 on:
-    workflow_dispatch:
-    push:
-        paths:
-            - .github/workflows/copilot-setup-steps.yml
-    pull_request:
-        paths:
-            - .github/workflows/copilot-setup-steps.yml
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
 
 jobs:
-    # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
-    copilot-setup-steps:
-        runs-on: ubuntu-latest
+  # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
 
-        # Set minimal permissions needed for the setup steps
-        permissions:
-            contents: read # for actions/checkout
+    # Set minimal permissions needed for the setup steps
+    permissions:
+      contents: read # for actions/checkout
 
-        # Set a timeout to prevent infinite runs
-        timeout-minutes: 30
+    # Set a timeout to prevent infinite runs
+    timeout-minutes: 30
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v5
-              with:
-                  # Fetch full history for potential rollback operations
-                  fetch-depth: 0
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        with:
+          # Fetch full history for potential rollback operations
+          fetch-depth: 0
 
-            - name: Setup Node.js 22
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "22"
-                  cache: "npm"
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: "npm"
 
-            - name: Install dependencies (ignoring scripts)
-              run: npm install --ignore-scripts
-              timeout-minutes: 5
+      - name: Install Dependencies
+        run: npm install --ignore-scripts
+        timeout-minutes: 5
 
-            - name: Run postinstall scripts
-              run: npm run postinstall
-              timeout-minutes: 3
+      - name: Run Postinstall Scripts
+        run: npm run postinstall
+        timeout-minutes: 3
 
-            - name: Setup care apps
-              run: npm run setup
-              timeout-minutes: 2
+      - name: Setup Care Apps
+        run: npm run setup
+        timeout-minutes: 2
 
-            - name: Generate supported browsers list
-              run: npm run supported-browsers
-              timeout-minutes: 1
+      - name: Generate Supported Browsers List
+        run: npm run supported-browsers
+        timeout-minutes: 1
 
-            - name: Verify build can complete
-              run: npm run build
-              timeout-minutes: 10
-              env:
-                  NODE_OPTIONS: "--max-old-space-size=4096"
+      - name: Verify Build
+        run: npm run build
+        timeout-minutes: 10
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
 
-            - name: Cache Cypress binary
-              uses: actions/cache@v4
-              with:
-                  path: ~/.cache/Cypress
-                  key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-                  restore-keys: |
-                      cypress-${{ runner.os }}-
+      - name: Cache Cypress Binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            cypress-${{ runner.os }}-
 
-            - name: Install Cypress (with error handling)
-              run: |
-                  npm run cypress:install 2>/dev/null || echo "Cypress install failed (expected in restricted environments)"
-              timeout-minutes: 5
+      - name: Install Cypress
+        run: |
+          npm run cypress:install 2>/dev/null || echo "Cypress install failed (expected in restricted environments)"
+        timeout-minutes: 5
 
-            - name: Verify development server can start
-              run: |
-                  timeout 30s npm run dev &
-                  sleep 10
-                  curl -f http://localhost:4000 || echo "Dev server verification failed"
-                  pkill -f "vite" || true
-              timeout-minutes: 2
+      - name: Verify Development Server
+        run: |
+          timeout 30s npm run dev &
+          sleep 10
+          curl -f http://localhost:4000 || echo "Dev server verification failed"
+          pkill -f "vite" || true
+        timeout-minutes: 2
 
-            - name: Run linting check
-              run: npm run lint
-              timeout-minutes: 5
+      - name: Run Linting
+        run: npm run lint
+        timeout-minutes: 5
 
-            - name: Run formatting check
-              run: npm run format --check || npm run format
-              timeout-minutes: 2
+      - name: Run Formatting Check
+        run: npm run format --check || npm run format
+        timeout-minutes: 2
 
-            - name: Check for unimported modules
-              run: npm run unimported
-              timeout-minutes: 2
+      - name: Check Unimported Modules
+        run: npm run unimported
+        timeout-minutes: 2
 
-            - name: Display setup completion summary
-              run: |
-                  echo "✅ Copilot environment setup completed successfully!"
-                  echo "📦 Dependencies installed and cached"
-                  echo "🔧 Build tools configured and verified"
-                  echo "🧪 Linting and formatting tools ready"
-                  echo "🚀 Development server verified"
-                  echo ""
-                  echo "Environment is ready for Copilot coding agent to work efficiently."
+      - name: Display Setup Summary
+        run: |
+          echo "Copilot setup completed successfully!"
+          echo ""
+          echo "📦 Dependencies installed and cached"
+          echo "🔧 Build completed and verified"
+          echo "🧪 Linting and formatting checks passed"
+          echo "🚀 Development server tested"
+          echo ""
+          echo "Environment is ready for the Copilot coding agent."

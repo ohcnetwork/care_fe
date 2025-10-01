@@ -5,20 +5,100 @@ CARE is a Digital Public Good enabling TeleICU & Decentralised Administration of
 ## Important: Trust These Instructions
 Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here. This repository has custom setup requirements and workflows that must be followed exactly.
 
-## Path-Specific Instructions
-This repository includes path-specific instructions in `.github/instructions/` for:
-- `react-components.instructions.md` - React component guidelines
-- `cypress-tests.instructions.md` - E2E testing patterns
-- `utils.instructions.md` - Utility function standards
-- `typescript-types.instructions.md` - Type definition guidelines
-- `pages.instructions.md` - Page component architecture
+## Architecture Overview
 
-These are automatically applied by GitHub Copilot based on file paths you're working with.
+### Technology Stack
+- Frontend Framework: React 19.1.1 with TypeScript
+- Build Tool: Vite 6.3.5 for fast development and optimized builds
+- Styling: Tailwind CSS 4.1.3 with custom healthcare-specific design system
+- UI Components: shadcn/ui as primary system, CAREUI for healthcare-specific components
+- State Management: @tanstack/react-query for server state, React hooks for client state
+- Routing: raviger for application routing
+- Forms: react-hook-form with zod validation for medical data integrity
+- Internationalization: i18next for multi-language healthcare interfaces
+- Testing: Cypress for E2E testing of critical healthcare workflows
+
+### Project Structure
+- `src/components/` - React components organized by feature and domain
+- `src/CAREUI/` - Healthcare-specific component library
+- `src/pages/` - Page-level components and routing
+- `src/Utils/` - Utility functions and helpers
+- `src/types/` - TypeScript type definitions for medical data
+- `cypress/` - End-to-end tests for healthcare workflows
+
+## Cross-Cutting Concerns
+
+### Accessibility
+Healthcare applications must meet enhanced accessibility standards:
+- WCAG 2.1 AA compliance: Required for medical applications
+- Screen reader compatibility: Medical data must be accessible via assistive technology  
+- Keyboard navigation: Full keyboard support for clinical environments
+- High contrast support: Visibility in various clinical lighting conditions
+- Focus management: Clear focus indicators for complex medical workflows
+
+### Performance
+Critical performance requirements for healthcare environments:
+- Sub-100ms response times: Essential for emergency medical workflows
+- Optimized bundle sizes: Consider slow hospital network infrastructure
+- Memory efficiency: Long-running applications in clinical settings
+- Offline resilience: Core functionality must work without network connectivity
+
+### Security & Privacy
+Healthcare data requires stringent security measures:
+- Data encryption: All medical data must be encrypted in transit and at rest
+- HIPAA compliance: Follow healthcare privacy regulations
+- Audit trails: Log all medical data access and modifications
+- Role-based access: Implement proper medical role permissions
+
+### Internationalization
+Multi-language support for global healthcare deployment:
+- Medical terminology: Accurate translation of clinical terms
+- Cultural considerations: Adapt UI patterns for different healthcare systems
+- RTL support: Right-to-left language compatibility
+- Date/time formats: Localized formatting for medical timestamps
+
+## Path-Specific Instructions
+Specialized guidance automatically applied based on file paths:
+- `careui.instructions.md` - Healthcare-specific component development
+- `react-components.instructions.md` - React component architecture and patterns  
+- `cypress-tests.instructions.md` - E2E testing for healthcare workflows
+- `utils.instructions.md` - Utility function standards and medical data helpers
+- `typescript-types.instructions.md` - Type definitions for medical data structures
+- `pages.instructions.md` - Page component architecture and routing patterns
+- `hooks.instructions.md` - Custom React hooks for healthcare workflows
+- `common.instructions.md` - Core utilities, permissions, and validation
+- `lib.instructions.md` - Library functions and medical calculations
+- `providers.instructions.md` - Context providers and state management
+- `context.instructions.md` - React context definitions and patterns
+- `integrations.instructions.md` - Third-party service and medical system integrations
+- `config-files.instructions.md` - Build configuration and development setup
+
+Refer to specific instruction files in `.github/instructions/` for detailed guidance on each domain.
+
+## Coding Standards
+
+### Code Quality
+- TypeScript: Use strict TypeScript configuration for medical data safety
+- ESLint: Follow configured rules for React hooks, accessibility, and code quality
+- Prettier: Consistent code formatting across the healthcare application
+- Component patterns: Follow established patterns in existing codebase
+
+### Medical Data Handling
+- Type safety: Strict typing for all medical data structures and API interfaces
+- Validation: Use zod schemas for runtime validation of medical data
+- Error handling: Comprehensive error boundaries and user-friendly error messages
+- Logging: Appropriate logging for medical workflow debugging without exposing PHI
+
+### Documentation Requirements
+- Component documentation: Include medical use cases and accessibility notes
+- API documentation: Document medical data flows and validation requirements
+- Accessibility notes: Document WCAG compliance and medical device compatibility
+- Medical context: Explain healthcare workflows and clinical reasoning in code comments
 
 ## Working Effectively
 
 ### Environment Setup
-- **Node.js 22+** is required (check `.node-version` file)
+- Node.js 22+ is required (check `.node-version` file)
 - Install Node.js 22: `curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt-get install -y nodejs`
 - Or use nvm: `nvm install 22 && nvm use 22`
 
@@ -26,24 +106,24 @@ These are automatically applied by GitHub Copilot based on file paths you're wor
 - `npm install --ignore-scripts` -- installs dependencies without Cypress binary (takes ~16 seconds)
 - `npm run postinstall` -- installs platform-specific dependencies and generates headers (takes ~3 seconds)
 - `npm run setup` -- generates plugin map and setup (takes ~1 second)
-- `npm run build` -- production build. **NEVER CANCEL: Takes 2+ minutes. Set timeout to 180+ seconds.**
+- `npm run build` -- production build. NEVER CANCEL: Takes 2+ minutes. Set timeout to 180+ seconds.
 - `npm run dev` -- starts development server on http://localhost:4000 (takes ~5 seconds)
 - `npm run preview` -- starts production preview server (requires build first)
 
 ### Linting and Formatting
-- `npm run lint` -- runs ESLint. **Takes 85+ seconds. Set timeout to 120+ seconds.**
+- `npm run lint` -- runs ESLint. Takes 85+ seconds. Set timeout to 120+ seconds.
 - `npm run lint-fix` -- runs ESLint with auto-fix
 - `npm run format` -- formats code with Prettier (takes ~19 seconds)
 - `npm run unimported` -- checks for unused imports (takes ~7 seconds)
 
 ### Testing
-- **Cypress E2E Testing:**
-  - `npm run cypress:install` -- **FAILS due to network restrictions. Document this limitation.**
+- Cypress E2E Testing:
+  - `npm run cypress:install` -- FAILS due to network restrictions. Document this limitation.
   - `npm run cypress:open` -- opens Cypress UI (requires backend setup)
   - `npm run cypress:run` -- runs all tests headlessly (requires backend setup)
   - `npm run cypress:run:gui` -- runs tests in headed mode
-- **Testing requires local backend:** Follow [CARE backend setup docs](https://github.com/ohcnetwork/care#self-hosting)
-- **Environment setup for testing:**
+- Testing requires local backend: Follow [CARE backend setup docs](https://github.com/ohcnetwork/care#self-hosting)
+- Environment setup for testing:
   ```env
   REACT_CARE_API_URL=http://127.0.0.1:9000
   ```
@@ -51,21 +131,21 @@ These are automatically applied by GitHub Copilot based on file paths you're wor
 ## Validation
 
 ### Manual Validation Requirements
-- **ALWAYS run through complete development workflow after making changes:**
+- ALWAYS run through complete development workflow after making changes:
   1. `npm install --ignore-scripts && npm run postinstall && npm run setup`
   2. `npm run dev` -- verify development server starts and loads at http://localhost:4000
-  3. `npm run build` -- **NEVER CANCEL: Takes 2+ minutes**
+  3. `npm run build` -- NEVER CANCEL: Takes 2+ minutes
   4. `npm run preview` -- verify production build works
   5. Test basic UI functionality (login page, navigation)
 
 ### Build Time Expectations
-- **npm install (with --ignore-scripts):** ~16 seconds
-- **npm run postinstall:** ~3 seconds  
-- **npm run setup:** ~1 second
-- **npm run build:** ~2 minutes 11 seconds -- **NEVER CANCEL, Set timeout to 180+ seconds**
-- **npm run lint:** ~1 minute 25 seconds -- **Set timeout to 120+ seconds**
-- **npm run format:** ~19 seconds
-- **npm run dev:** ~5 seconds to start server
+- npm install (with --ignore-scripts): ~16 seconds
+- npm run postinstall: ~3 seconds  
+- npm run setup: ~1 second
+- npm run build: ~2 minutes 11 seconds -- NEVER CANCEL, Set timeout to 180+ seconds
+- npm run lint: ~1 minute 25 seconds -- Set timeout to 120+ seconds
+- npm run format: ~19 seconds
+- npm run dev: ~5 seconds to start server
 
 ### Required Validation Steps
 - Always run `npm run format` and `npm run lint` before committing changes
@@ -73,61 +153,37 @@ These are automatically applied by GitHub Copilot based on file paths you're wor
 - Application loads successfully showing CARE healthcare facility search and login interface
 - Build produces a functional PWA with service worker
 
-## Technology Stack
+## Key Dependencies & Tools
 
-### Core Technologies
-- **React 19.1.1** with TypeScript
-- **Vite 6.3.5** for build tooling
-- **Tailwind CSS 4.1.3** for styling
-- **Node.js 22+** (required by package.json engines field)
-
-### Key Dependencies
-- **@tanstack/react-query** for API state management
-- **raviger** for routing (note: uses deprecated `routes` API)
-- **i18next** for internationalization
-- **date-fns** for date handling
-- **zod** for schema validation
-- **framer-motion** for animations
+### Additional Dependencies
+- @tanstack/react-query for API state management
+- raviger for routing (note: uses deprecated `routes` API)
+- i18next for internationalization
+- date-fns for date handling
+- zod for schema validation
+- framer-motion for animations
 
 ### Development Tools
-- **ESLint 9.18.0** with TypeScript plugin
-- **Prettier 3.3.3** with Tailwind plugin
-- **Cypress 14.5.4** for E2E testing
-- **Vite PWA plugin** for service worker
+- ESLint 9.18.0 with TypeScript plugin
+- Prettier 3.3.3 with Tailwind plugin
+- Cypress 14.5.4 for E2E testing
+- Vite PWA plugin for service worker
 
-## Project Structure
-
-### Key Directories
-- `src/` -- main source code
-  - `components/` -- React components organized by feature
-  - `pages/` -- page-level components
-  - `Utils/` -- utility functions and helpers
-  - `types/` -- TypeScript type definitions
-  - `CAREUI/` -- custom UI component library
-  - `Locale/` -- internationalization files
-- `cypress/` -- E2E test files and configuration
-- `public/` -- static assets
-- `scripts/` -- build and setup scripts
-
-### Important Files
-- `package.json` -- dependencies and scripts
+## Configuration Files & Environment
+- `.env` -- environment variables (not committed)
+- `.env.docker` -- Docker environment template
+- `REACT_CARE_API_URL` -- backend API URL (required for full functionality)
 - `care.config.ts` -- application configuration
 - `vite.config.mts` -- Vite build configuration
 - `tsconfig.json` -- TypeScript configuration with path aliases
 - `cypress.config.ts` -- Cypress test configuration
-- `CLAUDE.md` -- Additional developer guidance
-
-### Configuration Files
-- `.env` -- environment variables (not committed)
-- `.env.docker` -- Docker environment template
-- `REACT_CARE_API_URL` -- backend API URL (required for full functionality)
 
 ## Common Issues and Solutions
 
 ### Known Limitations
-- **Cypress binary download fails** in restricted environments -- this is expected and documented
-- **Network errors** when running without backend configuration -- application still loads UI correctly
-- **Translation loading errors** without proper backend setup -- expected behavior
+- Cypress binary download fails in restricted environments -- this is expected and documented
+- Network errors when running without backend configuration -- application still loads UI correctly
+- Translation loading errors without proper backend setup -- expected behavior
 
 ### Environment Variables
 - `REACT_CARE_API_URL` -- backend API endpoint (default: staging API)
@@ -143,10 +199,10 @@ These are automatically applied by GitHub Copilot based on file paths you're wor
 ## Workflow Integration
 
 ### CI/CD Pipeline
-- **Linting:** Runs on every PR to `develop` branch
-- **Cypress Tests:** Runs with parallel execution and Docker backend
-- **Docker Build:** Multi-platform builds for production
-- **Deployment:** Automatic staging deployment on `develop` branch
+- Linting: Runs on every PR to `develop` branch
+- Cypress Tests: Runs with parallel execution and Docker backend
+- Docker Build: Multi-platform builds for production
+- Deployment: Automatic staging deployment on `develop` branch
 
 ### Git Workflow
 - Create branches: `issues/{issue#}/{short-name}`
@@ -169,27 +225,30 @@ These are automatically applied by GitHub Copilot based on file paths you're wor
 
 ## Security and Compliance
 
-### Code Quality
-- Strict TypeScript configuration
-- ESLint rules for React hooks and accessibility
-- Prettier for consistent formatting
-- Security scanning with CodeQL and OSSAR
-
-### Dependencies
+### Security Measures
 - Regular dependency updates via Renovate
-- Snyk security scanning
+- Snyk security scanning and vulnerability auditing
+- Security scanning with CodeQL and OSSAR
 - Audit vulnerabilities with `npm audit`
 
-## Agent Environment Setup
-This repository includes a custom Copilot coding agent environment setup at `.github/workflows/copilot-setup-steps.yml` that:
-- Preinstalls Node.js 22 and all dependencies
-- Runs all necessary setup scripts (postinstall, setup, supported-browsers)
-- Verifies the build process works correctly
-- Sets up Cypress testing environment
-- Configures linting and formatting tools
-- Validates the development server can start
+## Resources
 
-This environment setup ensures Copilot has everything needed to work efficiently without trial-and-error dependency installation.
+### Healthcare Standards
+- [FHIR (Fast Healthcare Interoperability Resources)](https://hl7.org/fhir/) - Healthcare data exchange standards
+- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/) - Web accessibility for medical applications
+- [HIPAA Compliance](https://www.hhs.gov/hipaa/index.html) - Healthcare privacy and security requirements
+
+### Technical Documentation
+- [React 19 Documentation](https://react.dev/) - Latest React features and patterns
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/) - TypeScript best practices
+- [Vite Guide](https://vitejs.dev/guide/) - Build tool configuration and optimization
+- [Tailwind CSS](https://tailwindcss.com/docs) - Utility-first CSS framework
+- [shadcn/ui](https://ui.shadcn.com/) - Primary component library documentation
+
+### Testing and Quality
+- [Cypress Documentation](https://docs.cypress.io/) - E2E testing for healthcare workflows
+- [React Hook Form](https://react-hook-form.com/) - Form handling for medical data
+- [Zod](https://zod.dev/) - Schema validation for healthcare data integrity
 
 ## Trust and Validation
 Always ensure changes maintain the existing code quality standards and follow the established patterns in the codebase. Trust these instructions and only perform additional searches if the information here is incomplete or found to be in error.
