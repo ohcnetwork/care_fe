@@ -57,52 +57,6 @@ const codeSchema = z.object({
   system: z.string().min(1, "System is required"),
 });
 
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  slug_value: z.string().min(1, "Slug is required"),
-  product_type: z.nativeEnum(ProductKnowledgeType),
-  status: z.nativeEnum(ProductKnowledgeStatus),
-  alternate_identifier: z.string().trim().optional(),
-  category: z.string(),
-  code: codeSchema.nullable(),
-  base_unit: codeSchema.refine(
-    (val) => !!val.code && !!val.display && !!val.system,
-    { message: "field_required" },
-  ),
-  names: z
-    .array(
-      z.object({
-        name_type: z.nativeEnum(ProductNameTypes),
-        name: z.string().min(1, "Name is required"),
-      }),
-    )
-    .default([]),
-  storage_guidelines: z
-    .array(
-      z.object({
-        note: z.string().min(1, "Note is required"),
-        stability_duration: z
-          .object({
-            value: z.number().int().optional(),
-            unit: codeSchema,
-          })
-          .refine((data) => data.value !== undefined && data.value !== null),
-      }),
-    )
-    .default([]),
-  definitional: z
-    .object({
-      dosage_form: codeSchema.optional(),
-      intended_routes: z.array(codeSchema).default([]),
-    })
-    .nullable()
-    .optional()
-    .refine((data) => {
-      if (!data) return true; // definitional is optional
-      return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
-    }),
-});
-
 export default function ProductKnowledgeForm({
   facilityId,
   slug,
@@ -180,6 +134,52 @@ function ProductKnowledgeFormContent({
     display: "Day",
     system: "http://unitsofmeasure.org",
   };
+
+  const formSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    slug_value: z.string().min(1, "Slug is required"),
+    product_type: z.nativeEnum(ProductKnowledgeType),
+    status: z.nativeEnum(ProductKnowledgeStatus),
+    alternate_identifier: z.string().trim().optional(),
+    category: z.string(),
+    code: codeSchema.nullable(),
+    base_unit: codeSchema.refine(
+      (val) => !!val.code && !!val.display && !!val.system,
+      { message: t("field_required") },
+    ),
+    names: z
+      .array(
+        z.object({
+          name_type: z.nativeEnum(ProductNameTypes),
+          name: z.string().min(1, "Name is required"),
+        }),
+      )
+      .default([]),
+    storage_guidelines: z
+      .array(
+        z.object({
+          note: z.string().min(1, "Note is required"),
+          stability_duration: z
+            .object({
+              value: z.number().int().optional(),
+              unit: codeSchema,
+            })
+            .refine((data) => data.value !== undefined && data.value !== null),
+        }),
+      )
+      .default([]),
+    definitional: z
+      .object({
+        dosage_form: codeSchema.optional(),
+        intended_routes: z.array(codeSchema).default([]),
+      })
+      .nullable()
+      .optional()
+      .refine((data) => {
+        if (!data) return true; // definitional is optional
+        return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
+      }),
+  });
 
   // Handle form initialization with proper mapping of types
   const getDefaultValues = () => {
@@ -505,13 +505,10 @@ function ProductKnowledgeFormContent({
                               ))}
                             </SelectContent>
                           </Select>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <FormMessage>
-                      {form.formState.errors.base_unit?.message &&
-                        t(form.formState.errors.base_unit.message)}
-                    </FormMessage>
                   </div>
                 </div>
 
