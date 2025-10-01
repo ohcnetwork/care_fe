@@ -29,6 +29,7 @@ interface Props {
   facilityId: string;
   locationId: string;
   internal: boolean;
+  isRequester: boolean;
 }
 
 export default function RequestOrderTable({
@@ -37,6 +38,7 @@ export default function RequestOrderTable({
   facilityId,
   locationId,
   internal,
+  isRequester,
 }: Props) {
   const { t } = useTranslation();
 
@@ -102,7 +104,7 @@ export default function RequestOrderTable({
                     navigate(
                       `/facility/${facilityId}/locations/${locationId}/${
                         internal ? "internal_transfers" : "external_supply"
-                      }/request_orders/${request.id}`,
+                      }/orders/${isRequester ? "outgoing" : "incoming"}/${request.id}`,
                     )
                   }
                 >

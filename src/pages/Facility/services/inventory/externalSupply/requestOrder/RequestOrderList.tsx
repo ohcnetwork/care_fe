@@ -235,6 +235,7 @@ export function RequestOrderList({
                 facilityId={facilityId}
                 locationId={locationId}
                 internal={internal}
+                isRequester={isRequester}
               />
               <div className="mt-4">
                 <Pagination totalCount={response?.count || 0} />

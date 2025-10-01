@@ -73,7 +73,7 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   ),
 
   // Inventory - Internal Transfers
-  "/internal_transfers/to_receive": () => (
+  "/internal_transfers/orders/outgoing": () => (
     <RequestOrderList
       facilityId={facilityId}
       locationId={locationId}
@@ -104,7 +104,7 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       internal={true}
     />
   ),
-  "/internal_transfers/request_orders/:id": ({ id }: { id: string }) => (
+  "/internal_transfers/orders/:tab/:id": ({ id }: { id: string }) => (
     <RequestOrderShow
       facilityId={facilityId}
       locationId={locationId}
@@ -112,7 +112,7 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       internal={true}
     />
   ),
-  "/internal_transfers/to_dispatch": () => (
+  "/internal_transfers/orders/incoming": () => (
     <RequestOrderList
       facilityId={facilityId}
       locationId={locationId}
