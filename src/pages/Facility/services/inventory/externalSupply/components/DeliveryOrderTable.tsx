@@ -17,6 +17,7 @@ import {
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
   DeliveryOrderRetrieve,
@@ -93,9 +94,14 @@ export default function DeliveryOrderTable({
                   className="shadow-sm border-gray-400 font-semibold text-gray-950"
                   onClick={() =>
                     navigate(
-                      `/facility/${facilityId}/locations/${locationId}/${
-                        internal ? "internal_transfers" : "external_supply"
-                      }/delivery_orders/${delivery.id}`,
+                      getInventoryBasePath(
+                        facilityId,
+                        locationId,
+                        internal,
+                        false,
+                        false,
+                        `${delivery.id}`,
+                      ),
                     )
                   }
                 >

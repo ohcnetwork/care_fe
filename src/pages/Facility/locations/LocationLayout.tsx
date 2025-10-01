@@ -68,231 +68,115 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   ),
 
   // Inventory
-  "/inventory": () => (
+  "/inventory/summary": () => (
     <InventoryList facilityId={facilityId} locationId={locationId} />
   ),
 
-  // Inventory - Internal Transfers
-  "/internal_transfers/orders/outgoing": () => (
+  // List Orders
+  "/inventory/:group/orders/:tab": ({
+    group,
+    tab,
+  }: {
+    group: string;
+    tab: string;
+  }) => (
     <RequestOrderList
       facilityId={facilityId}
       locationId={locationId}
-      internal={true}
-      isRequester={true}
+      internal={group === "internal"}
+      isRequester={tab == "outgoing"}
     />
   ),
-  "/internal_transfers/received": () => (
-    <DeliveryOrderList
-      facilityId={facilityId}
-      locationId={locationId}
-      internal={true}
-      isRequester={true}
-    />
-  ),
-  "/internal_transfers/request_orders/new": () => (
+  // Create Order
+  "/inventory/:group/orders/:tab/new": ({ group }: { group: string }) => (
     <RequestOrderForm
       facilityId={facilityId}
       locationId={locationId}
-      internal={true}
+      internal={group === "internal"}
     />
   ),
-  "/internal_transfers/request_orders/:id/edit": ({ id }: { id: string }) => (
-    <RequestOrderForm
-      facilityId={facilityId}
-      locationId={locationId}
-      requestOrderId={id}
-      internal={true}
-    />
-  ),
-  "/internal_transfers/orders/:tab/:id": ({ id }: { id: string }) => (
+  // View Order
+  "/inventory/:group/orders/:tab/:id": ({
+    group,
+    id,
+  }: {
+    group: string;
+    id: string;
+  }) => (
     <RequestOrderShow
       facilityId={facilityId}
       locationId={locationId}
       requestOrderId={id}
-      internal={true}
+      internal={group === "internal"}
     />
   ),
-  "/internal_transfers/orders/incoming": () => (
-    <RequestOrderList
-      facilityId={facilityId}
-      locationId={locationId}
-      internal={true}
-      isRequester={false}
-    />
-  ),
-  "/internal_transfers/dispatched": () => (
-    <DeliveryOrderList
-      facilityId={facilityId}
-      locationId={locationId}
-      internal={true}
-      isRequester={false}
-    />
-  ),
-  "/internal_transfers/delivery_orders": () => (
-    <DeliveryOrderList
-      facilityId={facilityId}
-      locationId={locationId}
-      internal={true}
-      isRequester={true}
-    />
-  ),
-  "/internal_transfers/delivery_orders/new": () => (
-    <DeliveryOrderForm
-      facilityId={facilityId}
-      locationId={locationId}
-      internal={true}
-    />
-  ),
-  "/internal_transfers/delivery_orders/:id/edit": ({ id }: { id: string }) => (
-    <DeliveryOrderForm
-      facilityId={facilityId}
-      locationId={locationId}
-      internal={true}
-      deliveryOrderId={id}
-    />
-  ),
-  "/internal_transfers/delivery_orders/:id": ({ id }: { id: string }) => (
-    <DeliveryOrderShow
-      facilityId={facilityId}
-      deliveryOrderId={id}
-      locationId={locationId}
-      internal={true}
-    />
-  ),
-  // "/internal_transfers/create_delivery": () => (
-  //   <SupplyDeliveryCreate facilityId={facilityId} locationId={locationId} />
-  // ),
-  // "/internal_transfers/to_dispatch/delivery/:id": ({ id }: { id: string }) => (
-  //   <SupplyRequestDispatch
-  //     facilityId={facilityId}
-  //     locationId={locationId}
-  //     supplyDeliveryId={id}
-  //   />
-  // ),
-  // "/internal_transfers/to_dispatch/:id": ({ id }: { id: string }) => (
-  //   <SupplyRequestDispatch
-  //     facilityId={facilityId}
-  //     locationId={locationId}
-  //     supplyRequestId={id}
-  //   />
-  // ),
-
-  // "/internal_transfers/requests/:id": ({ id }: { id: string }) => (
-  //   <SupplyRequestDetail
-  //     facilityId={facilityId}
-  //     locationId={locationId}
-  //     id={id}
-  //     mode="internal"
-  //   />
-  // ),
-  // "/internal_transfers/requests/:id/edit": ({ id }: { id: string }) => (
-  //   <SupplyRequestForm
-  //     facilityId={facilityId}
-  //     locationId={locationId}
-  //     supplyRequestId={id}
-  //     mode="internal"
-  //   />
-  // ),
-
-  // Inventory - External Supply
-  // "/external_supply/purchase_orders": () => (
-  //   <PurchaseOrders facilityId={facilityId} locationId={locationId} />
-  // ),
-  // "/external_supply/purchase_orders/new": () => (
-  //   <SupplyRequestForm
-  //     facilityId={facilityId}
-  //     locationId={locationId}
-  //     mode="external"
-  //   />
-  // ),
-  "/external_supply/request_orders/new": () => (
-    <RequestOrderForm
-      facilityId={facilityId}
-      locationId={locationId}
-      internal={false}
-    />
-  ),
-  "/external_supply/request_orders/:id/edit": ({ id }: { id: string }) => (
+  // Edit Order
+  "/inventory/:group/orders/:tab/:id/edit": ({
+    group,
+    id,
+  }: {
+    group: string;
+    id: string;
+  }) => (
     <RequestOrderForm
       facilityId={facilityId}
       locationId={locationId}
       requestOrderId={id}
-      internal={false}
-    />
-  ),
-  "/external_supply/request_orders": () => (
-    <RequestOrderList
-      facilityId={facilityId}
-      locationId={locationId}
-      internal={false}
-      isRequester={true}
-    />
-  ),
-  "/external_supply/request_orders/:id": ({ id }: { id: string }) => (
-    <RequestOrderShow
-      facilityId={facilityId}
-      requestOrderId={id}
-      locationId={locationId}
-      internal={false}
+      internal={group === "internal"}
     />
   ),
 
-  // "/external_supply/purchase_orders/supplier/:supplierId": ({
-  //   supplierId,
-  // }: {
-  //   supplierId: string;
-  // }) => (
-  //   <PurchaseOrdersBySupplier
-  //     facilityId={facilityId}
-  //     locationId={locationId}
-  //     supplierId={supplierId}
-  //   />
-  // ),
-  // "/external_supply/purchase_orders/:id": ({ id }: { id: string }) => (
-  //   <SupplyRequestDetail
-  //     facilityId={facilityId}
-  //     locationId={locationId}
-  //     id={id}
-  //     mode="external"
-  //   />
-  // ),
-  // "/external_supply/purchase_orders/:id/edit": ({ id }: { id: string }) => (
-  //   <SupplyRequestForm
-  //     facilityId={facilityId}
-  //     locationId={locationId}
-  //     supplyRequestId={id}
-  //     mode="external"
-  //   />
-  // ),
-  "/external_supply/delivery_orders": () => (
+  // List Deliveries
+  "/inventory/:group/deliveries/:tab": ({
+    group,
+    tab,
+  }: {
+    group: string;
+    tab: string;
+  }) => (
     <DeliveryOrderList
       facilityId={facilityId}
       locationId={locationId}
-      internal={false}
-      isRequester={false}
+      internal={group === "internal"}
+      isRequester={tab == "incoming"}
     />
   ),
-  "/external_supply/delivery_orders/new": () => (
+  // Create Delivery
+  "/inventory/:group/deliveries/:tab/new": ({ group }: { group: string }) => (
     <DeliveryOrderForm
       facilityId={facilityId}
       locationId={locationId}
-      internal={false}
+      internal={group === "internal"}
     />
   ),
-  "/external_supply/delivery_orders/:id/edit": ({ id }: { id: string }) => (
-    <DeliveryOrderForm
-      facilityId={facilityId}
-      locationId={locationId}
-      internal={false}
-      deliveryOrderId={id}
-    />
-  ),
-  "/external_supply/delivery_orders/:id": ({ id }: { id: string }) => (
+  // View Delivery
+  "/inventory/:group/deliveries/:tab/:id": ({
+    group,
+    id,
+  }: {
+    group: string;
+    id: string;
+  }) => (
     <DeliveryOrderShow
       facilityId={facilityId}
-      deliveryOrderId={id}
       locationId={locationId}
-      internal={false}
+      deliveryOrderId={id}
+      internal={group === "internal"}
+    />
+  ),
+  // Edit Delivery
+  "/inventory/:group/deliveries/:tab/:id/edit": ({
+    group,
+    id,
+  }: {
+    group: string;
+    id: string;
+  }) => (
+    <DeliveryOrderForm
+      facilityId={facilityId}
+      locationId={locationId}
+      deliveryOrderId={id}
+      internal={group === "internal"}
     />
   ),
 

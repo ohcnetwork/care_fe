@@ -31,6 +31,7 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import useAppHistory from "@/hooks/useAppHistory";
 
 import Autocomplete from "@/components/ui/autocomplete";
+import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import {
   DeliveryOrderRetrieve,
   DeliveryOrderStatus,
@@ -107,11 +108,13 @@ export default function DeliveryOrderForm({
 
   const title = isEditMode ? t("edit_order") : t("create_order");
 
-  const basePath = `/facility/${facilityId}/locations/${locationId}/${
-    internal ? "internal_transfers" : "external_supply"
-  }`;
-
-  const returnPath = `${basePath}/${supplyOrderId ? `request_orders/${supplyOrderId}` : "delivery_orders"}`;
+  const returnPath = getInventoryBasePath(
+    facilityId,
+    locationId,
+    internal,
+    false,
+    false,
+  );
 
   const queryClient = useQueryClient();
   const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
@@ -204,10 +207,14 @@ export default function DeliveryOrderForm({
       queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
       toast.success(t("order_created"));
       navigate(
-        basePath +
-          "/delivery_orders/" +
-          deliveryOrder.id +
-          (supplyOrderId ? `?supplyOrder=${supplyOrderId}` : ""),
+        getInventoryBasePath(
+          facilityId,
+          locationId,
+          internal,
+          false,
+          false,
+          `${deliveryOrder.id}${supplyOrderId ? `?supplyOrder=${supplyOrderId}` : ""}`,
+        ),
       );
     },
   });
@@ -222,7 +229,17 @@ export default function DeliveryOrderForm({
     onSuccess: (deliveryOrder: DeliveryOrderRetrieve) => {
       queryClient.invalidateQueries({ queryKey: ["deliveryOrders"] });
       toast.success(t("order_updated"));
-      navigate(returnPath + "/" + deliveryOrder.id);
+
+      navigate(
+        getInventoryBasePath(
+          facilityId,
+          locationId,
+          internal,
+          false,
+          false,
+          `${deliveryOrder.id}${supplyOrderId ? `?supplyOrder=${supplyOrderId}` : ""}`,
+        ),
+      );
     },
   });
 

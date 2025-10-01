@@ -17,6 +17,7 @@ import {
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import {
   REQUEST_ORDER_PRIORITY_COLORS,
   REQUEST_ORDER_STATUS_COLORS,
@@ -102,9 +103,14 @@ export default function RequestOrderTable({
                   className="shadow-sm border-gray-400 font-semibold text-gray-950"
                   onClick={() =>
                     navigate(
-                      `/facility/${facilityId}/locations/${locationId}/${
-                        internal ? "internal_transfers" : "external_supply"
-                      }/orders/${isRequester ? "outgoing" : "incoming"}/${request.id}`,
+                      getInventoryBasePath(
+                        facilityId,
+                        locationId,
+                        internal,
+                        true,
+                        isRequester,
+                        `${request.id}`,
+                      ),
                     )
                   }
                 >

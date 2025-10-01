@@ -52,40 +52,40 @@ export function LocationNav() {
         },
         {
           name: t("inventory"),
-          url: `${baseUrl}/inventory`,
+          url: `${baseUrl}/inventory/summary`,
           icon: <CareIcon icon="l-shop" />,
           children: [
             {
               name: t("items"),
-              url: `${baseUrl}/inventory`,
+              url: `${baseUrl}/inventory/summary`,
             },
             {
               header: t("orders"),
               name: t("outgoing_orders"),
-              url: `${baseUrl}/internal_transfers/orders/outgoing`,
+              url: `${baseUrl}/inventory/internal/orders/outgoing`,
             },
             {
               name: t("incoming_orders"),
-              url: `${baseUrl}/internal_transfers/orders/incoming`,
+              url: `${baseUrl}/inventory/internal/orders/incoming`,
             },
 
             {
               header: t("deliveries"),
               name: t("outgoing_deliveries"),
-              url: `${baseUrl}/internal_transfers/dispatched`,
+              url: `${baseUrl}/inventory/internal/deliveries/outgoing`,
             },
             {
               name: t("incoming_deliveries"),
-              url: `${baseUrl}/internal_transfers/received`,
+              url: `${baseUrl}/inventory/internal/deliveries/incoming`,
             },
             {
               header: t("external_supply"),
               name: t("purchase_orders"),
-              url: `${baseUrl}/external_supply/request_orders`,
+              url: `${baseUrl}/inventory/external/orders/outgoing`,
             },
             {
               name: t("purchase_deliveries"),
-              url: `${baseUrl}/external_supply/delivery_orders`,
+              url: `${baseUrl}/inventory/external/deliveries/outgoing`,
             },
           ],
         },

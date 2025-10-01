@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
@@ -17,6 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 
 import { OrgSelect } from "@/components/Common/OrgSelect";
 import Page from "@/components/Common/Page";
@@ -196,9 +196,14 @@ export function RequestOrderList({
               variant="primary"
               onClick={() =>
                 navigate(
-                  `/facility/${facilityId}/locations/${locationId}/${
-                    internal ? "internal_transfers" : "external_supply"
-                  }/request_orders/new`,
+                  getInventoryBasePath(
+                    facilityId,
+                    locationId,
+                    internal,
+                    true,
+                    isRequester,
+                    "new",
+                  ),
                 )
               }
             >

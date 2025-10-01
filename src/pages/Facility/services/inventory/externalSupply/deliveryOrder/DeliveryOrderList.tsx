@@ -15,6 +15,7 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 
 import DeliveryOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/DeliveryOrderTable";
+import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
@@ -136,9 +137,14 @@ export function DeliveryOrderList({
               variant="primary"
               onClick={() =>
                 navigate(
-                  `/facility/${facilityId}/locations/${locationId}/${
-                    internal ? "internal_transfers" : "external_supply"
-                  }/delivery_orders/new`,
+                  getInventoryBasePath(
+                    facilityId,
+                    locationId,
+                    internal,
+                    false,
+                    false,
+                    "new",
+                  ),
                 )
               }
             >
