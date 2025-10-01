@@ -1,6 +1,6 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
-import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/element/src/types";
-import "@excalidraw/excalidraw/index.css";
+import "@excalidraw/excalidraw/main.css";
+import { ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
 import {
   hashKey,
   useMutation,

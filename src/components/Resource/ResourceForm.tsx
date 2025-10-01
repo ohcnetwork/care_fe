@@ -410,6 +410,24 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                   </FormItem>
                 )}
               />
+              {/* Product Knowledge Picker - show as read-only in edit form, not as a FormField */}
+              {id && (resourceData as any)?.product_knowledge !== undefined && (
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-gray-700">
+                    {t("product_knowledge")}
+                  </label>
+                  <Input
+                    value={(resourceData as any)?.product_knowledge ?? ""}
+                    readOnly
+                    disabled
+                    data-cy="product-knowledge-picker"
+                    className="bg-gray-100 cursor-not-allowed"
+                  />
+                  <span className="text-xs text-gray-500">
+                    {t("product_knowledge_description")}
+                  </span>
+                </div>
+              )}
               {id && (
                 <FormField
                   control={form.control}

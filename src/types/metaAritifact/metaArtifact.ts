@@ -1,6 +1,5 @@
-import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/element/src/types";
-
 import { UserReadMinimal } from "@/types/user/user";
+import { ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
 
 type DrawingValue = {
   application: "excalidraw";
