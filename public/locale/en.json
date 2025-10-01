@@ -4501,6 +4501,7 @@
   "select_organization": "Select Organization",
   "select_organization_description": "Choose an organization from the list",
   "select_organization_placeholder": "Select Organization",
+  "select_organization_that_manages_this_service": "Select the organization that manages this service",
   "select_organization_type": "Select organization type",
   "select_organizations": "Select Organizations",
   "select_origin": "Select Origin",
