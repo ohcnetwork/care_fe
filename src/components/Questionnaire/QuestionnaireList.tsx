@@ -228,7 +228,6 @@ export function QuestionnaireList() {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
 
   const { data: response, isLoading } = useQuery({

@@ -204,7 +204,6 @@ export function ProductKnowledgeList({
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
 
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");

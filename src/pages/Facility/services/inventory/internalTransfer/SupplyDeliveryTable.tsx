@@ -50,7 +50,6 @@ export default function SupplyDeliveryTable({
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
   });
 
   // Use defaultStatus when status is not set or is invalid

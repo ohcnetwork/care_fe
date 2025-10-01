@@ -59,7 +59,6 @@ export default function ToReceiveSupplyRequestTable({
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
   });
 
   const effectiveStatus = qParams.status || SupplyRequestStatus.active;

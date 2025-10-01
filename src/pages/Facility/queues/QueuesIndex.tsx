@@ -199,9 +199,7 @@ export default function QueuesIndex({
   resourceId?: string;
 }) {
   const { t } = useTranslation();
-  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
-    disableCache: true,
-  });
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({});
 
   const { id: currentUserId } = useAuthUser();
 

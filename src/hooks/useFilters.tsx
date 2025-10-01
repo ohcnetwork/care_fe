@@ -25,12 +25,15 @@ interface FilterBadgeProps {
  */
 export default function useFilters({
   limit = 14,
-  cacheBlacklist = [],
-  disableCache = false,
+  cacheKeys = [],
 }: {
   limit?: number;
-  cacheBlacklist?: string[];
-  disableCache?: boolean;
+  /**
+   * Whitelist of query parameter keys to cache in localStorage.
+   * Only these keys will be persisted and restored on page navigation.
+   * Default is empty array (no caching).
+   */
+  cacheKeys?: string[];
 }) {
   const { t } = useTranslation();
   const hasPagination = limit > 0;
@@ -42,9 +45,8 @@ export default function useFilters({
   }>({ value: false });
 
   const updateCache = (query: QueryParam) => {
-    if (disableCache) return;
-    const blacklist = FILTERS_CACHE_BLACKLIST.concat(cacheBlacklist);
-    FiltersCache.set(query, blacklist);
+    if (cacheKeys.length === 0) return;
+    FiltersCache.set(query, cacheKeys);
   };
 
   const setQueryParams = (
@@ -73,11 +75,11 @@ export default function useFilters({
   const removeFilter = (param: string) => removeFilters([param]);
 
   useEffect(() => {
-    if (disableCache) {
-      // Clean-up any existing cache if present for this path.
+    if (cacheKeys.length === 0) {
+      // Clean-up any existing cache if present for this path when caching is disabled.
       FiltersCache.invalidate();
 
-      // Skip cache restoration logic for this usage.
+      // Skip cache restoration logic when caching is disabled.
       return;
     }
 
@@ -97,6 +99,7 @@ export default function useFilters({
 
     // Restore cache
     setQueryParams(cache);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {
@@ -300,5 +303,3 @@ const removeFromQuery = (query: Record<string, unknown>, params: string[]) => {
   }
   return result;
 };
-
-const FILTERS_CACHE_BLACKLIST = ["page", "limit", "offset"];

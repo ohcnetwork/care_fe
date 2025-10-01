@@ -209,7 +209,6 @@ export function BedChargeItemsTable({
   );
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
   const [addChargeItemState, setAddChargeItemState] = useState<{
     serviceRequestId: string;

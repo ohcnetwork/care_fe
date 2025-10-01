@@ -288,7 +288,6 @@ export default function DispensedMedicationList({
   const [selectedMedications, setSelectedMedications] = useState<string[]>([]);
   const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
     limit: 100,
-    disableCache: true,
   });
   const paymentFilter = (qParams.payment_status as "paid" | "unpaid") || "all";
   const [billableChargeItems, setBillableChargeItems] = useState<

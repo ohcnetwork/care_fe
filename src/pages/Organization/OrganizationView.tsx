@@ -30,7 +30,6 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
 
   const { data: children, isFetching } = useQuery({

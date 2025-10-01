@@ -64,7 +64,6 @@ export default function AddChargeItemSheet({
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
   useShortcutSubContext("facility:billing:invoice");
 

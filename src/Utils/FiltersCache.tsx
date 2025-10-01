@@ -8,16 +8,17 @@ const getKey = () => {
 };
 
 /**
- * Returns a sanitized filter object that ignores filters with no value or
- * filters that are part of the blacklist.
+ * Returns a sanitized filter object that only includes filters with values
+ * and filters that are part of the whitelist.
  *
  * @param filters Input filters to be sanitized
- * @param blacklist Optional array of filter keys that are to be ignored.
+ * @param whitelist Optional array of filter keys that are allowed to be cached.
  */
-const clean = (filters: Filters, blacklist?: string[]) => {
+const clean = (filters: Filters, whitelist?: string[]) => {
   const reducer = (cleaned: Filters, key: string) => {
     const valueAllowed = (filters[key] ?? "") != "";
-    if (valueAllowed && !blacklist?.includes(key)) {
+    const keyAllowed = !whitelist || whitelist.includes(key);
+    if (valueAllowed && keyAllowed) {
       cleaned[key] = filters[key];
     }
     return cleaned;
@@ -37,9 +38,9 @@ const get = (key?: string) => {
 /**
  * Sets the filters cache with the specified filters.
  */
-const set = (filters: Filters, blacklist?: string[], key?: string) => {
+const set = (filters: Filters, whitelist?: string[], key?: string) => {
   key ??= getKey();
-  filters = clean(filters, blacklist);
+  filters = clean(filters, whitelist);
 
   if (Object.keys(filters).length) {
     localStorage.setItem(key, JSON.stringify(filters));

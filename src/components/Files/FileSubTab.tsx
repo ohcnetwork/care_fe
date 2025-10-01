@@ -78,7 +78,6 @@ export const FilesPage = ({
   const { hasPermission } = usePermissions();
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
-    disableCache: true,
   });
   // const queryClient = useQueryClient();
   const { canViewClinicalData } = getPermissions(

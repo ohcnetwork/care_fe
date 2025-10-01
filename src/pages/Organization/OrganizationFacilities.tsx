@@ -37,7 +37,7 @@ export default function OrganizationFacilities({
   const { hasPermission } = usePermissions();
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
-    useFilters({ limit: 15, disableCache: true });
+    useFilters({ limit: 15 });
 
   const { data: facilities, isFetching } = useQuery({
     queryKey: ["organizationFacilities", id, qParams],

@@ -75,7 +75,6 @@ export default function InvoicesData({
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: RESULTS_PER_PAGE_LIMIT,
-    disableCache: true,
   });
 
   const { data: response, isLoading } = useQuery({

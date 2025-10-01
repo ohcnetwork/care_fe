@@ -95,7 +95,6 @@ export default function ObservationDefinitionList({
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
 
   // TODO: Remove this once we have a default status (robo's PR)

@@ -32,7 +32,6 @@ interface Props {
 export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();

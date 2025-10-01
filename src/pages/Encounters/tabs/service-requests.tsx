@@ -38,7 +38,6 @@ export const EncounterServiceRequestTab = () => {
     resultsPerPage,
   } = useFilters({
     limit: 20,
-    disableCache: true,
   });
 
   const maxVisibleTabs = useBreakpoints({ default: 2, md: 3 });

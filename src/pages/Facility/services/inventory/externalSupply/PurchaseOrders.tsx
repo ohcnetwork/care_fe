@@ -62,7 +62,6 @@ export function PurchaseOrders({ facilityId, locationId }: Props) {
   const currentTab = (qParams.tab as Tab) || "pending_pos";
   const { updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
   });
   const [priorityPopoverOpen, setPriorityPopoverOpen] = useState(false);
 

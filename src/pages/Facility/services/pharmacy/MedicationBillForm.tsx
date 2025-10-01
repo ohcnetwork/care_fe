@@ -2777,7 +2777,6 @@ export const DispensedItemsSheet = ({
 
   const { qParams, Pagination, resultsPerPage } = useFilters({
     limit: 10,
-    disableCache: true,
   });
 
   const { data: dispensedItems, isLoading } = useQuery({

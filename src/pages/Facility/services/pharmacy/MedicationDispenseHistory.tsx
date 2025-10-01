@@ -42,7 +42,6 @@ export default function MedicationDispenseHistory({
   const { t } = useTranslation();
   const { qParams, updateQuery } = useFilters({
     limit: 14,
-    disableCache: true,
   });
 
   const { data: prescriptionQueue, isLoading } = useQuery<

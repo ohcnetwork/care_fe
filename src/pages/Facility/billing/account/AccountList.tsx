@@ -74,7 +74,6 @@ export function AccountList({
     React.useState<AccountRead | null>(null);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
 
   const { data: response, isLoading } = useQuery({

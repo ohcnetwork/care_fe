@@ -25,7 +25,6 @@ export function IncomingDeliveries({ facilityId, locationId }: Props) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
   });
 
   const TABS_CONFIG = [

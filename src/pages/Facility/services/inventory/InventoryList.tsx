@@ -49,7 +49,6 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
   });
 
   // State to store the selected product knowledge object

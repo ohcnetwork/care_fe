@@ -181,7 +181,6 @@ export default function ServiceRequestList({
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
   });
   const [isBarcodeOpen, setBarcodeOpen] = useState(false);
 

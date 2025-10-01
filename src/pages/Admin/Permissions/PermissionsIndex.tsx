@@ -21,7 +21,6 @@ export function PermissionsIndex() {
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    disableCache: true,
   });
   const { data: response } = useQuery({
     queryKey: ["roles", qParams],

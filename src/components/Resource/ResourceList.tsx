@@ -64,7 +64,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
 
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
-    cacheBlacklist: ["title"],
+    cacheKeys: ["status", "incoming"],
   });
   const { status, title, incoming } = qParams;
 

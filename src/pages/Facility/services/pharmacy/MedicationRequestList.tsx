@@ -68,7 +68,6 @@ export default function MedicationRequestList({
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
-    disableCache: true,
   });
   const tagIds = qParams.tags?.split(",") || [];
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });

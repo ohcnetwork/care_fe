@@ -70,7 +70,7 @@ export default function BedAvailabilityDashboard({
   // Use query parameters for filters to enable URL sharing and navigation
   const { qParams, updateQuery } = useFilters({
     limit: 0, // Disable pagination as we want to show all wards
-    cacheBlacklist: ["refresh"], // Don't cache refresh parameter
+    cacheKeys: ["search", "ward", "status"], // Cache filter parameters
   });
 
   const searchQuery = (qParams.search as string) || "";
