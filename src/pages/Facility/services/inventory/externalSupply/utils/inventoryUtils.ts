@@ -6,7 +6,7 @@ export const getInventoryBasePath = (
   isRequester: boolean,
   tail: string = "",
 ) => {
-  return `/facility/${facilityId}/locations/${locationId}/${
+  return `/facility/${facilityId}/locations/${locationId}/inventory/${
     internal ? "internal" : "external"
   }/${order ? "orders" : "deliveries"}/${isRequester ? "outgoing" : "incoming"}/${tail}`;
 };
