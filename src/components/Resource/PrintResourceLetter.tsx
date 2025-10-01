@@ -6,11 +6,10 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Badge } from "@/components/ui/badge";
 
 import Loading from "@/components/Common/Loading";
-
+import { getResourceRequestCategoryEnum } from "@/types/resourceRequest/resourceRequest";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { getResourceRequestCategoryText } from "@/types/resourceRequest/resourceRequest";
-import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
 export default function PrintResourceLetter({ id }: { id: string }) {
   const { t } = useTranslation();
@@ -71,7 +70,9 @@ export default function PrintResourceLetter({ id }: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold">{t("category")}:</span>{" "}
-                {t(getResourceRequestCategoryText(data.category))}
+                {t(
+                  `resource_request_category__${getResourceRequestCategoryEnum(data.category)}`,
+                )}
               </div>
               <div className="mt-2">
                 <span className="font-semibold">

@@ -11,15 +11,14 @@ import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import CommentSection from "@/components/Resource/ResourceCommentSection";
-
-import query from "@/Utils/request/query";
-import { formatDateTime, formatName } from "@/Utils/utils";
 import { formatPatientAddress } from "@/components/Patient/utils";
+import CommentSection from "@/components/Resource/ResourceCommentSection";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
-import { getResourceRequestCategoryText } from "@/types/resourceRequest/resourceRequest";
+import { getResourceRequestCategoryEnum } from "@/types/resourceRequest/resourceRequest";
 import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
+import query from "@/Utils/request/query";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 function PatientCard({ patient }: { patient: PatientRead }) {
   const { t } = useTranslation();
@@ -176,7 +175,9 @@ export default function ResourceDetails({
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("category")}</p>
                 <p className="text-sm text-gray-500">
-                  {t(getResourceRequestCategoryText(data.category))}
+                  {t(
+                    `resource_request_category__${getResourceRequestCategoryEnum(data.category)}`,
+                  )}
                 </p>
               </div>
               <div className="space-y-1">

@@ -31,12 +31,12 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import {
-  getResourceRequestCategoryText,
   RESOURCE_REQUEST_ACTIVE_STATUSES,
   RESOURCE_REQUEST_COMPLETED_STATUSES,
   RESOURCE_REQUEST_STATUS_OPTIONS,
   ResourceRequestListRead,
   ResourceRequestStatus,
+  getResourceRequestCategoryEnum,
 } from "@/types/resourceRequest/resourceRequest";
 import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
@@ -158,14 +158,20 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       <TabsTrigger
                         value="active"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
-                        onClick={() => updateQuery({ status: "pending" })}
+                        onClick={() =>
+                          updateQuery({ status: ResourceRequestStatus.PENDING })
+                        }
                       >
                         {t("active")}
                       </TabsTrigger>
                       <TabsTrigger
                         value="completed"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
-                        onClick={() => updateQuery({ status: "completed" })}
+                        onClick={() =>
+                          updateQuery({
+                            status: ResourceRequestStatus.COMPLETED,
+                          })
+                        }
                       >
                         {t("completed")}
                       </TabsTrigger>
@@ -179,14 +185,18 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     <TabsTrigger
                       value="active"
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() => updateQuery({ status: "pending" })}
+                      onClick={() =>
+                        updateQuery({ status: ResourceRequestStatus.PENDING })
+                      }
                     >
                       {t("active")}
                     </TabsTrigger>
                     <TabsTrigger
                       value="completed"
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() => updateQuery({ status: "completed" })}
+                      onClick={() =>
+                        updateQuery({ status: ResourceRequestStatus.COMPLETED })
+                      }
                     >
                       {t("completed")}
                     </TabsTrigger>
@@ -276,7 +286,9 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                           <Badge variant="destructive">{t("emergency")}</Badge>
                         )}
                         <Badge variant="secondary">
-                          {t(getResourceRequestCategoryText(resource.category))}
+                          {t(
+                            `resource_request_category__${getResourceRequestCategoryEnum(resource.category)}`,
+                          )}
                         </Badge>
                       </div>
                       <div className="flex flex-row gap-2">

@@ -107,10 +107,11 @@ export interface CommentRead {
   comment: string;
 }
 
-export const getResourceRequestCategoryText = (category: string) => {
+// converting to lowercase as old data in db are in uppercase and new are in lowercase
+export const getResourceRequestCategoryEnum = (category: string) => {
   const categoryText = category.toLowerCase() as ResourceRequestCategory;
   if (valuesOf(ResourceRequestCategory).includes(categoryText)) {
-    return `resource_request_category__${categoryText}`;
+    return categoryText;
   }
-  return "other";
+  return ResourceRequestCategory.OTHER;
 };
