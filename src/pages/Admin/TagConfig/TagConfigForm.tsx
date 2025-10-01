@@ -259,7 +259,7 @@ export default function TagConfigForm({
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
-                disabled={isLoading || isEditing}
+                disabled={isLoading || isEditing || isCreatingChild}
               >
                 <FormControl>
                   <SelectTrigger ref={field.ref}>
