@@ -5,7 +5,6 @@ import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import duoToneIcons from "@/CAREUI/icons/DuoTonePaths.json";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { type HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
@@ -23,7 +22,7 @@ export function ServiceCard({ service, link }: Props) {
     `d-${name}` as DuoToneIconName;
 
   return (
-    <Link href={link} basePath="/">
+    <Link href={link} basePath="/" className="block">
       <Card className="transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md">
         <CardContent className="py-3 px-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
@@ -51,14 +50,10 @@ export function ServiceCard({ service, link }: Props) {
                 </p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="px-3 text-xs whitespace-nowrap w-full md:w-auto"
-            >
+            <div className="px-3 text-xs whitespace-nowrap w-full md:w-auto border rounded-md bg-white py-2 flex items-center justify-center gap-1 text-gray-700">
               {t("view_details")}
               <CareIcon icon="l-arrow-right" className="size-3" />
-            </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

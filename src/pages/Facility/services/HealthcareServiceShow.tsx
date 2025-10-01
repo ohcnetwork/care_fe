@@ -1,18 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
+import BackButton from "@/components/Common/BackButton";
 import { InternalType } from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
+import { ArrowLeft } from "lucide-react";
 
 function LocationCard({
   location,
@@ -55,7 +56,7 @@ function LocationCard({
   );
 
   return (
-    <Link href={link} basePath="/">
+    <Link href={link} basePath="/" className="block">
       <Card className="transition-all duration-200 hover:border-primary/50 hover:shadow-sm rounded-md">
         <CardContent className="flex items-start gap-3 py-3 px-4">
           <div className="shrink-0 relative size-10 rounded-sm flex p-4 items-center justify-center">
@@ -75,14 +76,10 @@ function LocationCard({
               </p>
             </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              className="shrink-0 w-full sm:w-auto px-3 text-xs"
-            >
+            <div className="shrink-0 w-full sm:w-auto px-3 text-xs border rounded-md bg-white py-2 flex items-center justify-center gap-1 text-gray-700">
               {text}
               <CareIcon icon="l-arrow-right" className="size-3 ml-1" />
-            </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -111,15 +108,10 @@ export default function HealthcareServiceShow({
 
   return (
     <div className="container px-4 mx-auto max-w-4xl space-y-6">
-      <Button
-        variant="outline"
-        onClick={() => navigate(`/facility/${facilityId}/services`)}
-        className="gap-2"
-        size="sm"
-      >
-        <CareIcon icon="l-arrow-left" className="size-4" />
-        {t("back_to_services")}
-      </Button>
+      <BackButton>
+        <ArrowLeft />
+        <span>{t("back_to_services")}</span>
+      </BackButton>
 
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
@@ -151,14 +143,7 @@ export default function HealthcareServiceShow({
               <p className="text-lg font-semibold mb-1">
                 {t("service_not_found")}
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-4"
-                onClick={() => navigate(`/facility/${facilityId}/services`)}
-              >
-                {t("back_to_services")}
-              </Button>
+              <BackButton>{t("back_to_services")}</BackButton>
             </Card>
           ) : service.locations.length === 0 ? (
             <Card className="flex flex-col items-center justify-center p-8 text-center border-dashed">

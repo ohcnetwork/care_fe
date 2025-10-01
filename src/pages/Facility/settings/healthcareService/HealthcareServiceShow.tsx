@@ -18,6 +18,7 @@ import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
+import BackButton from "@/components/Common/BackButton";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 
 type DuoToneIconName = keyof typeof duoToneIcons;
@@ -94,14 +95,7 @@ export default function HealthcareServiceShow({
             {t("healthcare_service_details")}
           </h1>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() =>
-                navigate(`/facility/${facilityId}/settings/healthcare_services`)
-              }
-            >
-              {t("back_to_list")}
-            </Button>
+            <BackButton>{t("back_to_list")}</BackButton>
             <Button
               onClick={() =>
                 navigate(
@@ -170,17 +164,9 @@ export default function HealthcareServiceShow({
                             {location.name}
                           </p>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() =>
-                            navigate(
-                              `/facility/${facilityId}/locations/${location.id}/medication_requests`,
-                            )
-                          }
-                        >
+                        <div className="p-2 flex items-center justify-center">
                           <CareIcon icon="l-arrow-right" className="size-4" />
-                        </Button>
+                        </div>
                       </div>
                     </Link>
                   ))}
