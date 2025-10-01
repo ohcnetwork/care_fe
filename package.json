@@ -93,7 +93,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "cross-env": "^7.0.3",
-    "cypress": "^14.5.3",
+    "cypress": "^15.3.0",
     "date-fns": "^4.0.0",
     "dayjs": "^1.11.13",
     "framer-motion": "^12.6.3",
