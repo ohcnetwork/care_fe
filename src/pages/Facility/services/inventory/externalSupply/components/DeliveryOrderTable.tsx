@@ -29,6 +29,7 @@ interface Props {
   facilityId: string;
   locationId: string;
   internal: boolean;
+  isRequester: boolean;
 }
 
 export default function DeliveryOrderTable({
@@ -37,6 +38,7 @@ export default function DeliveryOrderTable({
   facilityId,
   locationId,
   internal,
+  isRequester,
 }: Props) {
   const { t } = useTranslation();
 
@@ -99,7 +101,7 @@ export default function DeliveryOrderTable({
                         locationId,
                         internal,
                         false,
-                        false,
+                        isRequester,
                         `${delivery.id}`,
                       ),
                     )

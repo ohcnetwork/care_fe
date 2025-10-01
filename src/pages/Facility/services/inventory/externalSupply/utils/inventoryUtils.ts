@@ -8,5 +8,5 @@ export const getInventoryBasePath = (
 ) => {
   return `/facility/${facilityId}/locations/${locationId}/inventory/${
     internal ? "internal" : "external"
-  }/${order ? "orders" : "deliveries"}/${isRequester ? "outgoing" : "incoming"}/${tail}`;
+  }/${order ? "orders" : "deliveries"}/${order ? (isRequester ? "outgoing" : "incoming") : isRequester ? "incoming" : "outgoing"}/${tail}`;
 };

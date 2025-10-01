@@ -446,6 +446,7 @@ export function RequestOrderShow({
                     facilityId={facilityId}
                     locationId={requestOrder?.destination.id || ""}
                     internal={false}
+                    isRequester={false}
                   />
                 ) : (
                   <div className="text-center py-12">
