@@ -290,7 +290,9 @@ export function ChargeItemDefinitionForm({
     title: z.string().min(1, { message: t("field_required") }),
     slug_value: z
       .string()
-      .min(1, { message: t("field_required") })
+      .trim()
+      .min(5, t("character_count_validation", { min: 5, max: 25 }))
+      .max(25, t("character_count_validation", { min: 5, max: 25 }))
       .regex(/^[a-z0-9-]+$/, {
         message: t("slug_format_message"),
       }),
@@ -359,7 +361,7 @@ export function ChargeItemDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || "", 25), {
           shouldValidate: true,
         });
       }

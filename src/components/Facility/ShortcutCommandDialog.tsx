@@ -49,7 +49,10 @@ export function ShortcutCommandDialog({
 
   const facilityActions: ActionGroup[] = useMemo(() => {
     const allContexts = expandShortcutContext(subContext || "");
-    const contextsToSearch = [...allContexts, "global"];
+    const contextsToSearch = [
+      ...(subContext?.includes("-global") ? [] : ["global"]),
+      ...allContexts,
+    ];
 
     const actionGroups: ActionGroup[] = [];
 
