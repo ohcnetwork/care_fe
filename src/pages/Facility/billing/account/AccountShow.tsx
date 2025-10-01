@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { NavTabs } from "@/components/ui/nav-tabs";
 import {
   Select,
   SelectContent,
@@ -32,7 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -54,6 +53,7 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import AccountSheet from "./AccountSheet";
 import BedChargeItemsTable from "./components/BedChargeItemsTable";
 import ChargeItemsTable from "./components/ChargeItemsTable";
@@ -123,6 +123,14 @@ export function AccountShow({
 
   const hasBillableItems = (billableChargeItems?.count ?? 0) > 0;
 
+  const showMoreAfterIndex = useBreakpoints({
+    default: 1,
+    xs: 2,
+    sm: 6,
+    xl: 9,
+    "2xl": 12,
+  });
+
   const isAccountBillingClosed =
     account?.billing_status === AccountBillingStatus.closed_baddebt ||
     account?.billing_status === AccountBillingStatus.closed_voided ||
@@ -167,6 +175,13 @@ export function AccountShow({
     },
   });
 
+  const navigatePath = (key: string) => {
+    return (
+      `/facility/${facilityId}/billing/account/${accountId}/${key}` +
+      (encounterId !== undefined ? `?encounterId=${encounterId}` : "")
+    );
+  };
+
   const handleCloseAccount = () => {
     closeAccount({
       id: accountId,
@@ -206,6 +221,40 @@ export function AccountShow({
     );
   }
 
+  const tabs = {
+    invoices: {
+      label: t("invoices"),
+      component: <InvoicesData facilityId={facilityId} accountId={accountId} />,
+
+      shortcutId: "switch-to-invoices-tab",
+    },
+    charge_items: {
+      label: t("charge_items"),
+      component: (
+        <ChargeItemsTable
+          facilityId={facilityId}
+          accountId={accountId}
+          patientId={account.patient.id}
+        />
+      ),
+      shortcutId: "switch-to-charge-items-tab",
+    },
+    payments: {
+      label: t("payments"),
+      component: <PaymentsData facilityId={facilityId} accountId={accountId} />,
+      shortcutId: "switch-to-payments-tab",
+    },
+    ...(encounterId && {
+      bed_charge_items: {
+        label: t("bed_charge_items"),
+        component: (
+          <BedChargeItemsTable facilityId={facilityId} accountId={accountId} />
+        ),
+        shortcutId: "switch-to-bed-charge-items-tab",
+      },
+    }),
+  };
+
   return (
     <div className="space-y-3">
       <Button
@@ -235,12 +284,6 @@ export function AccountShow({
                         sheetOpen: true,
                       })
                     }
-                    data-shortcut-id={
-                      account.status === AccountStatus.active &&
-                      !isAccountBillingClosed
-                        ? "settle-close-account"
-                        : undefined
-                    }
                   >
                     <CareIcon icon="l-check" className="size-5" />
                     <span className="underline">{t("settle_close")}</span>
@@ -258,12 +301,6 @@ export function AccountShow({
                           `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
                         )
                       }
-                      data-shortcut-id={
-                        account.status === AccountStatus.active &&
-                        !isAccountBillingClosed
-                          ? "create-invoice"
-                          : undefined
-                      }
                     >
                       <CareIcon icon="l-plus" className="mr-2 size-4" />
                       {t("create_invoice")}
@@ -279,19 +316,10 @@ export function AccountShow({
                             isCreditNote: false,
                           })
                         }
-                        data-shortcut-id={
-                          account.status === AccountStatus.active &&
-                          !isAccountBillingClosed
-                            ? "record-payment-account"
-                            : undefined
-                        }
                       >
                         <CareIcon icon="l-plus" className="size-4" />
                         {t("record_payment")}
-                        <ShortcutBadge
-                          actionId="record-payment-account"
-                          className="bg-white"
-                        />
+                        <ShortcutBadge actionId="record-payment-account" />
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -345,15 +373,9 @@ export function AccountShow({
                                 sheetOpen: true,
                               })
                             }
-                            data-shortcut-id={
-                              account.status === AccountStatus.active &&
-                              !isAccountBillingClosed
-                                ? "settle-close-account"
-                                : undefined
-                            }
                           >
-                            <CareIcon icon="l-check" className="mr-2 size-5" />
                             {t("settle_close")}
+                            <ShortcutBadge actionId="settle-close-account" />
                           </DropdownMenuItem>
                         )}
                       <DropdownMenuItem
@@ -362,15 +384,9 @@ export function AccountShow({
                             `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
                           )
                         }
-                        data-shortcut-id={
-                          account.status === AccountStatus.active &&
-                          !isAccountBillingClosed
-                            ? "create-invoice"
-                            : undefined
-                        }
                       >
-                        <CareIcon icon="l-plus" className="mr-2 size-4" />
                         {t("create_invoice")}
+                        <ShortcutBadge actionId="create-invoice" />
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() =>
@@ -379,15 +395,9 @@ export function AccountShow({
                             isCreditNote: false,
                           })
                         }
-                        data-shortcut-id={
-                          account.status === AccountStatus.active &&
-                          !isAccountBillingClosed
-                            ? "record-payment-account"
-                            : undefined
-                        }
                       >
-                        <CareIcon icon="l-plus" className="mr-2 size-4" />
                         {t("record_payment")}
+                        <ShortcutBadge actionId="record-payment-account" />
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() =>
@@ -397,7 +407,6 @@ export function AccountShow({
                           })
                         }
                       >
-                        <CareIcon icon="l-minus" className="mr-2 size-4" />
                         {t("record_credit_note")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -457,7 +466,6 @@ export function AccountShow({
               variant="outline"
               className="border-gray-400 gap-1"
               onClick={() => setSheetOpen(true)}
-              data-shortcut-id="edit-account"
             >
               <CareIcon
                 icon="l-edit"
@@ -546,122 +554,15 @@ export function AccountShow({
       </div>
 
       {/* Tabs Section */}
-      <Tabs
-        value={tab}
-        onValueChange={(value) =>
-          navigate(
-            `/facility/${facilityId}/billing/account/${accountId}/${value}` +
-              (encounterId !== undefined ? `?encounterId=${encounterId}` : ""),
-          )
-        }
-        className="mt-8"
-      >
-        <div className="flex flex-row justify-between items-center">
-          <TabsList className="border-b border-gray-300 w-full flex justify-start gap-0 rounded-none bg-transparent p-0 overflow-x-auto">
-            <TabsTrigger
-              value="invoices"
-              className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:font-semibold text-gray-600"
-            >
-              {t("invoices")}
-              <ShortcutBadge actionId="switch-to-invoices-tab" />
-            </TabsTrigger>
-            <TabsTrigger
-              value="charge_items"
-              className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:font-semibold text-gray-600"
-            >
-              {t("charge_items")}
-              <ShortcutBadge actionId="switch-to-charge-items-tab" />
-            </TabsTrigger>
-            <TabsTrigger
-              value="payments"
-              className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent text-gray-600"
-            >
-              {t("payments")}
-              <ShortcutBadge actionId="switch-to-payments-tab" />
-            </TabsTrigger>
-            {encounterId && (
-              <TabsTrigger
-                value="bed_charge_items"
-                className="border-b-2 px-6 py-2 text-sm font-medium data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 rounded-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent text-gray-600"
-              >
-                {t("bed_charge_items")}
-                <ShortcutBadge actionId="switch-to-bed-associations-tab" />
-              </TabsTrigger>
-            )}
-          </TabsList>
-        </div>
-
-        {/* Hidden buttons for tab shortcuts */}
-        <div className="hidden">
-          <Button
-            data-shortcut-id="switch-to-invoices-tab"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/billing/account/${accountId}/invoices` +
-                  (encounterId !== undefined
-                    ? `?encounterId=${encounterId}`
-                    : ""),
-              )
-            }
-          />
-          <Button
-            data-shortcut-id="switch-to-charge-items-tab"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/billing/account/${accountId}/charge_items` +
-                  (encounterId !== undefined
-                    ? `?encounterId=${encounterId}`
-                    : ""),
-              )
-            }
-          />
-          <Button
-            data-shortcut-id="switch-to-payments-tab"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/billing/account/${accountId}/payments` +
-                  (encounterId !== undefined
-                    ? `?encounterId=${encounterId}`
-                    : ""),
-              )
-            }
-          />
-          {encounterId && (
-            <Button
-              data-shortcut-id="switch-to-bed-associations-tab"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/billing/account/${accountId}/bed_charge_items?encounterId=${encounterId}`,
-                )
-              }
-            />
-          )}
-        </div>
-
-        <TabsContent value="charge_items" className="mt-4">
-          <ChargeItemsTable
-            facilityId={facilityId}
-            accountId={accountId}
-            patientId={account.patient.id}
-          />
-        </TabsContent>
-
-        <TabsContent value="invoices" className="mt-4">
-          <InvoicesData facilityId={facilityId} accountId={accountId} />
-        </TabsContent>
-
-        <TabsContent value="payments">
-          <PaymentsData facilityId={facilityId} accountId={accountId} />
-        </TabsContent>
-        {
-          <TabsContent value="bed_charge_items" className="mt-4">
-            <BedChargeItemsTable
-              facilityId={facilityId}
-              accountId={accountId}
-            />
-          </TabsContent>
-        }
-      </Tabs>
+      <NavTabs
+        className="w-full mt-4"
+        tabContentClassName="mt-6"
+        tabs={tabs}
+        currentTab={tab}
+        onTabChange={(value) => navigate(navigatePath(value))}
+        setPageTitle={false}
+        showMoreAfterIndex={showMoreAfterIndex}
+      />
 
       <AccountSheet
         open={sheetOpen}

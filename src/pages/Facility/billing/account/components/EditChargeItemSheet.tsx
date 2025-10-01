@@ -7,10 +7,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import {
-  useShortcutDisplay,
-  useShortcutSubContext,
-} from "@/context/ShortcutContext";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -91,7 +88,6 @@ export function EditChargeItemSheet({
 
   // Register shortcuts for this sheet
   useShortcutSubContext("facility:billing:invoice");
-  const getShortcutDisplay = useShortcutDisplay();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -291,13 +287,10 @@ export function EditChargeItemSheet({
                           onClick={() => {
                             setIsEditDialogOpen(true);
                           }}
-                          data-shortcut-id="edit-invoice-item"
                         >
                           <CareIcon icon="l-edit" className="size-4" />
                           {t("edit")}
-                          <div className="text-xs flex items-center justify-center w-12 h-6 rounded-md border border-gray-200 ml-2">
-                            {getShortcutDisplay("edit-invoice-item")}
-                          </div>
+                          <ShortcutBadge actionId="edit-account" />
                         </Button>
                       )}
                     </div>
@@ -463,25 +456,14 @@ export function EditChargeItemSheet({
 
                 <SheetFooter className="pt-2">
                   <SheetClose asChild>
-                    <Button
-                      variant="outline"
-                      type="button"
-                      data-shortcut-id={isOpen ? "cancel-action" : undefined}
-                    >
+                    <Button variant="outline" type="button">
                       {t("cancel")}
                       <ShortcutBadge actionId="cancel-action" />
                     </Button>
                   </SheetClose>
-                  <Button
-                    type="submit"
-                    disabled={isPending}
-                    data-shortcut-id={isOpen ? "submit-action" : undefined}
-                  >
+                  <Button type="submit" disabled={isPending}>
                     {isPending ? t("saving") : t("save")}
-                    <ShortcutBadge
-                      actionId="submit-action"
-                      className="bg-white"
-                    />
+                    <ShortcutBadge actionId="submit-action" />
                   </Button>
                 </SheetFooter>
               </form>

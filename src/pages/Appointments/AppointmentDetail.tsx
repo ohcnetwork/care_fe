@@ -137,7 +137,7 @@ export default function AppointmentDetail(props: Props) {
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
 
-  useShortcutSubContext("facility:appointment:detail&facility:billing:invoice");
+  useShortcutSubContext("facility:appointment");
 
   const { canViewAppointments, canWriteAppointment } = getPermissions(
     hasPermission,
@@ -186,7 +186,6 @@ export default function AppointmentDetail(props: Props) {
       pathParams: { facilityId, id: props.appointmentId },
     }),
     onSuccess: (_) => {
-      console.log("invalidating appointment", props.appointmentId);
       queryClient.invalidateQueries({
         queryKey: ["appointment", props.appointmentId],
       });
@@ -206,11 +205,11 @@ export default function AppointmentDetail(props: Props) {
   return (
     <Page title={t("appointment_details")} hideTitleOnPage>
       <div className="container mx-auto max-w-7xl mt-4">
-        <div className="flex items-center gap-2 space-y-4">
-          <BackButton>
+        <div className="flex gap-2 items-center mb-2">
+          <BackButton size="icon" variant="ghost">
             <ChevronLeft />
           </BackButton>
-          <h4 className="font-semibold text-gray-800 mb-2">
+          <h4 className="font-semibold text-gray-800">
             {t("appointment_details")}
           </h4>
         </div>
@@ -342,10 +341,7 @@ export default function AppointmentDetail(props: Props) {
                         >
                           <PlusCircledIcon className="size-4 mr-2" />
                           {t("generate_token")}
-                          <ShortcutBadge
-                            actionId="generate-token"
-                            className="bg-gray-200"
-                          />
+                          <ShortcutBadge actionId="generate-token" />
                         </Button>
                       }
                       onSuccess={() => {
@@ -358,203 +354,183 @@ export default function AppointmentDetail(props: Props) {
                 </div>
               )
             )}
+            {appointment.associated_encounter?.id && (
+              <Card className="bg-white shadow-sm rounded-md p-1 mt-2">
+                <CardHeader className="p-2 bg-gray-50">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <AvatarIcon className="size-5 text-primary" />
+                    {t("encounter")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 p-2 px-1">
+                  {/* Encounter Status and Class */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant={
+                        ENCOUNTER_STATUS_COLORS[
+                          appointment.associated_encounter.status
+                        ]
+                      }
+                      className="text-xs"
+                    >
+                      {t(
+                        `encounter_status__${appointment.associated_encounter.status}`,
+                      )}
+                    </Badge>
+                    <Badge
+                      variant={
+                        ENCOUNTER_CLASSES_COLORS[
+                          appointment.associated_encounter.encounter_class
+                        ]
+                      }
+                      className="text-xs"
+                    >
+                      {t(
+                        `encounter_class__${appointment.associated_encounter.encounter_class}`,
+                      )}
+                    </Badge>
+                    <Badge
+                      variant={
+                        ENCOUNTER_PRIORITY_COLORS[
+                          appointment.associated_encounter.priority
+                        ]
+                      }
+                      className="text-xs"
+                    >
+                      {t(
+                        `encounter_priority__${appointment.associated_encounter.priority}`,
+                      )}
+                    </Badge>
+                  </div>
+
+                  {/* Tags */}
+                  {appointment.associated_encounter.tags &&
+                    appointment.associated_encounter.tags.length > 0 && (
+                      <div className="text-sm">
+                        <div className="flex flex-wrap gap-1">
+                          {appointment.associated_encounter.tags.map((tag) => (
+                            <Badge
+                              variant="outline"
+                              key={tag.id}
+                              className="text-xs"
+                            >
+                              {getTagHierarchyDisplay(tag)}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Encounter Action Buttons */}
+                  <div className="flex md:flex-row flex-col gap-2 mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate(
+                          `/facility/${facility.id}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
+                        )
+                      }
+                      className="flex items-center gap-2"
+                    >
+                      <EyeIcon className="size-4" />
+                      {t("view_encounter")}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        navigate(
+                          `/facility/${facility.id}/patient/${appointment.patient.id}`,
+                        )
+                      }
+                      className="flex items-center gap-2"
+                    >
+                      <PersonIcon className="size-4" />
+                      {t("view_patient")}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             {/* Lets only show encounter details if the appointment is not in a final status or if there is an encounter linked to the appointment */}
-            {![...AppointmentFinalStatuses, "noshow"].includes(
-              appointment.status,
-            ) && (
+            {![...AppointmentFinalStatuses].includes(appointment.status) && (
               <div>
-                {appointment.associated_encounter?.id && (
-                  <Card className="bg-white shadow-sm rounded-md p-1 mt-2">
-                    <CardHeader className="p-2 bg-gray-50">
-                      <CardTitle className="flex items-center gap-2 text-lg">
-                        <AvatarIcon className="size-5 text-primary" />
-                        {t("encounter")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4 p-2 px-1">
-                      {/* Encounter Status and Class */}
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge
-                          variant={
-                            ENCOUNTER_STATUS_COLORS[
-                              appointment.associated_encounter.status
-                            ]
-                          }
-                          className="text-xs"
-                        >
-                          {t(
-                            `encounter_status__${appointment.associated_encounter.status}`,
-                          )}
-                        </Badge>
-                        <Badge
-                          variant={
-                            ENCOUNTER_CLASSES_COLORS[
-                              appointment.associated_encounter.encounter_class
-                            ]
-                          }
-                          className="text-xs"
-                        >
-                          {t(
-                            `encounter_class__${appointment.associated_encounter.encounter_class}`,
-                          )}
-                        </Badge>
-                        <Badge
-                          variant={
-                            ENCOUNTER_PRIORITY_COLORS[
-                              appointment.associated_encounter.priority
-                            ]
-                          }
-                          className="text-xs"
-                        >
-                          {t(
-                            `encounter_priority__${appointment.associated_encounter.priority}`,
-                          )}
-                        </Badge>
-                      </div>
-
-                      {/* Tags */}
-                      {appointment.associated_encounter.tags &&
-                        appointment.associated_encounter.tags.length > 0 && (
-                          <div className="text-sm">
-                            <div className="flex flex-wrap gap-1">
-                              {appointment.associated_encounter.tags.map(
-                                (tag) => (
-                                  <Badge
-                                    variant="outline"
-                                    key={tag.id}
-                                    className="text-xs"
-                                  >
-                                    {getTagHierarchyDisplay(tag)}
-                                  </Badge>
-                                ),
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                      {/* Encounter Action Buttons */}
-                      <div className="flex md:flex-row flex-col gap-2 mt-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            navigate(
-                              `/facility/${facility.id}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
-                            )
-                          }
-                          className="flex items-center gap-2"
-                        >
-                          <EyeIcon className="size-4" />
-                          {t("view_encounter")}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            navigate(
-                              `/facility/${facility.id}/patient/${appointment.patient.id}`,
-                            )
-                          }
-                          className="flex items-center gap-2"
-                        >
-                          <PersonIcon className="size-4" />
-                          {t("view_patient")}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-                {/* 
-                {((canCheckIn &&
-                  // ["booked", "checked_in"].includes(currentStatus)) ||
-                  !appointment.associated_encounter?.id) && ( */}
-                <>
-                  <h3 className="text-base font-semibold mt-4">
-                    {t("quick_actions")}
-                  </h3>
-                  <div className="grid gap-1 grid-cols-1 md:grid-cols-2 mt-1">
-                    {/* Start Consultation - For booked and checked in appointments */}
-                    {["booked", "checked_in"].includes(currentStatus) &&
-                      (appointment.associated_encounter?.id ? (
-                        // When encounter exists: set status to in_consultation and redirect
-                        <QuickAction
-                          icon={<PlusSquare className="text-primary-500" />}
-                          title={t("start_consultation")}
-                          actionId="start-consultation"
-                          data-shortcut-id="start-consultation"
-                          onClick={() => {
-                            updateAppointment({
-                              status: "in_consultation",
-                              note: appointment.note,
-                            });
-                            navigate(
-                              `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
-                            );
-                          }}
-                        />
-                      ) : (
-                        // When no encounter exists: create encounter and set status to in_consultation
-                        <CreateEncounterForm
-                          patientId={appointment.patient.id}
-                          facilityId={facilityId}
-                          patientName={appointment.patient.name}
-                          appointment={appointment.id}
-                          trigger={
-                            <QuickAction
-                              icon={<PlusSquare className="text-primary-500" />}
-                              title={t("start_consultation")}
-                              actionId="start-consultation"
-                              data-shortcut-id="start-consultation"
-                            />
-                          }
-                          onSuccess={() => {
-                            updateAppointment({
-                              status: "in_consultation",
-                              note: appointment.note,
-                            });
-                          }}
-                        />
-                      ))}
-
-                    {!appointment.associated_encounter?.id && (
+                <h3 className="text-base font-semibold mt-4">
+                  {t("quick_actions")}
+                </h3>
+                <div className="grid gap-1 grid-cols-1 md:grid-cols-2 mt-1">
+                  {/* Start Consultation - For booked and checked in appointments */}
+                  {["booked", "checked_in"].includes(currentStatus) &&
+                    (appointment.associated_encounter?.id ? (
+                      // When encounter exists: set status to in_consultation and redirect
+                      <QuickAction
+                        icon={<PlusSquare className="text-primary-500" />}
+                        title={t("start_consultation")}
+                        actionId="start-consultation"
+                        onClick={() => {
+                          updateAppointment({
+                            status: AppointmentStatus.IN_CONSULTATION,
+                            note: appointment.note,
+                          });
+                          navigate(
+                            `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
+                          );
+                        }}
+                      />
+                    ) : (
+                      // When no encounter exists: create encounter and set status to in_consultation
                       <CreateEncounterForm
                         patientId={appointment.patient.id}
                         facilityId={facilityId}
                         patientName={appointment.patient.name}
                         appointment={appointment.id}
-                        disableRedirectOnSuccess={true}
                         trigger={
                           <QuickAction
-                            icon={
-                              <SquareActivity className="text-orange-500" />
-                            }
-                            title={t("create_encounter")}
-                            actionId="create-encounter"
-                            data-shortcut-id="create-encounter"
+                            icon={<PlusSquare className="text-primary-500" />}
+                            title={t("start_consultation")}
+                            actionId="start-consultation"
                           />
                         }
                         onSuccess={() => {
-                          console.log(
-                            "invalidating appointment",
-                            appointment.id,
-                          );
-                          queryClient.invalidateQueries({
-                            queryKey: ["appointment", appointment.id],
+                          updateAppointment({
+                            status: AppointmentStatus.IN_CONSULTATION,
+                            note: appointment.note,
                           });
                         }}
                       />
-                    )}
-                    {/* Print Appointment */}
-                    <QuickAction
-                      icon={<PrinterIcon className="size-4" />}
-                      title={t("print_appointment")}
-                      actionId="print-appointment"
-                      data-shortcut-id="print-appointment"
-                      href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
+                    ))}
+
+                  {!appointment.associated_encounter?.id && (
+                    <CreateEncounterForm
+                      patientId={appointment.patient.id}
+                      facilityId={facilityId}
+                      patientName={appointment.patient.name}
+                      appointment={appointment.id}
+                      disableRedirectOnSuccess={true}
+                      trigger={
+                        <QuickAction
+                          icon={<SquareActivity className="text-orange-500" />}
+                          title={t("create_encounter")}
+                          actionId="create-encounter"
+                        />
+                      }
+                      onSuccess={() => {
+                        console.log("invalidating appointment", appointment.id);
+                        queryClient.invalidateQueries({
+                          queryKey: ["appointment", appointment.id],
+                        });
+                      }}
                     />
-                  </div>
-                </>
-                {/* )} */}
+                  )}
+                  {/* Print Appointment */}
+                  <QuickAction
+                    icon={<PrinterIcon className="size-4" />}
+                    title={t("print_appointment")}
+                    actionId="print-appointment"
+                    href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -844,13 +820,13 @@ const AppointmentActions = ({
       {/* Primary Actions */}
       <div className="flex items-center justify-between gap-2">
         {/* Check In - Only for booked appointments */}
-        {currentStatus && currentStatus === "booked" && (
+        {currentStatus && currentStatus === AppointmentStatus.BOOKED && (
           <Button
             disabled={!canCheckIn}
             variant="primary"
             onClick={() =>
               updateAppointment({
-                status: "checked_in",
+                status: AppointmentStatus.CHECKED_IN,
                 note: appointment.note,
               })
             }
@@ -859,7 +835,7 @@ const AppointmentActions = ({
           >
             <EnterIcon className="size-4" />
             {t("check_in")}
-            <ShortcutBadge actionId="check-in-action" className="bg-gray-200" />
+            <ShortcutBadge actionId="check-in-action" />
           </Button>
         )}
 
@@ -873,20 +849,17 @@ const AppointmentActions = ({
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
 
-            {/* Mark as Fulfilled - For in consultation */}
-            {currentStatus === "in_consultation" && (
-              <DropdownMenuItem
-                onClick={() =>
-                  updateAppointment({
-                    status: "fulfilled",
-                    note: appointment.note,
-                  })
-                }
-              >
-                <CheckCircledIcon className="size-4 mr-2" />
-                {t("mark_as_fulfilled")}
-              </DropdownMenuItem>
-            )}
+            <DropdownMenuItem
+              onClick={() =>
+                updateAppointment({
+                  status: AppointmentStatus.FULFILLED,
+                  note: appointment.note,
+                })
+              }
+            >
+              <CheckCircledIcon className="size-4 mr-2" />
+              {t("mark_as_fulfilled")}
+            </DropdownMenuItem>
 
             {/* Secondary Actions */}
             {canWriteAppointment && (
@@ -894,7 +867,7 @@ const AppointmentActions = ({
                 <DropdownMenuSeparator />
 
                 {/* Reschedule */}
-                {appointment.status !== "in_consultation" && (
+                {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
                   <>
                     <AlertDialog
                       open={isRescheduleReasonOpen}
@@ -1069,7 +1042,10 @@ const AppointmentActions = ({
                 )}
 
                 {/* Mark as No Show */}
-                {["booked", "checked_in"].includes(currentStatus) && (
+                {[
+                  AppointmentStatus.BOOKED,
+                  AppointmentStatus.CHECKED_IN,
+                ].includes(currentStatus) && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -1101,7 +1077,7 @@ const AppointmentActions = ({
                         <AlertDialogAction
                           onClick={() =>
                             updateAppointment({
-                              status: "noshow",
+                              status: AppointmentStatus.NO_SHOW,
                               note: note,
                             })
                           }
@@ -1122,7 +1098,7 @@ const AppointmentActions = ({
                 )}
 
                 {/* Cancel Appointment */}
-                {appointment.status !== "in_consultation" && (
+                {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>

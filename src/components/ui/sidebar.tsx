@@ -193,7 +193,7 @@ function Sidebar({
           side={side}
         >
           <VisuallyHidden>
-            <SheetTitle>Sidebar</SheetTitle>
+            <SheetTitle>{t("sidebar")}</SheetTitle>
           </VisuallyHidden>
           <div className="flex flex-col w-full h-full">{children}</div>
         </SheetContent>
@@ -293,6 +293,7 @@ SidebarTrigger.displayName = "SidebarTrigger";
 
 function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
   const { toggleSidebar } = useSidebar();
+  const { t } = useTranslation();
 
   return (
     <button
@@ -300,7 +301,7 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
       aria-label="Toggle Sidebar"
       tabIndex={-1}
       onClick={toggleSidebar}
-      title="Toggle Sidebar"
+      title={t("toggle_sidebar")}
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",

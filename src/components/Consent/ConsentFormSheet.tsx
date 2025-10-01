@@ -78,7 +78,10 @@ const consentFormSchema = (isEdit: boolean) =>
         .array(
           z.object({
             file: z.instanceof(File),
-            name: z.string().min(1, { message: t("enter_file_name") }),
+            name: z
+              .string()
+              .trim()
+              .min(1, { message: t("enter_file_name") }),
           }),
         )
         .default([]),
