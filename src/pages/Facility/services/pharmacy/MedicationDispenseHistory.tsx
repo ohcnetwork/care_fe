@@ -22,6 +22,7 @@ import {
 
 import useFilters from "@/hooks/useFilters";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import {
@@ -111,7 +112,12 @@ export default function MedicationDispenseHistory({
           <TableSkeleton count={5} />
         ) : prescriptionQueue?.results?.length === 0 ? (
           <EmptyState
-            icon="l-prescription-bottle"
+            icon={
+              <CareIcon
+                icon="l-prescription-bottle"
+                className="text-primary size-6"
+              />
+            }
             title={t("no_prescriptions_found")}
             description={t("no_prescriptions_found_description")}
           />

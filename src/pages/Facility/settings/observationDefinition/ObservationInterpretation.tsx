@@ -640,7 +640,7 @@ export function ConditionComponent({
         return (
           <Input
             type="number"
-            placeholder={t("value")}
+            placeholder={t("enter_value")}
             value={currentValue}
             onChange={(e) => handleSetValue(e.target.value, index)}
             className="w-fit"
@@ -656,7 +656,7 @@ export function ConditionComponent({
           <div className="flex flex-col sm:flex-row gap-2">
             <Input
               type="number"
-              placeholder={t("min")}
+              placeholder={t("enter_min_value")}
               className="w-full sm:w-32"
               value={currentRange.min || ""}
               onChange={(e) =>
@@ -671,7 +671,7 @@ export function ConditionComponent({
             />
             <Input
               type="number"
-              placeholder={t("max")}
+              placeholder={t("enter_max_value")}
               className="w-full sm:w-32"
               value={currentRange.max || ""}
               onChange={(e) =>
