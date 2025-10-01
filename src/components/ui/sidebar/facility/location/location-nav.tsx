@@ -85,7 +85,7 @@ export function LocationNav() {
             },
             {
               name: t("purchase_deliveries"),
-              url: `${baseUrl}/inventory/external/deliveries/outgoing`,
+              url: `${baseUrl}/inventory/external/deliveries/incoming`,
             },
           ],
         },
