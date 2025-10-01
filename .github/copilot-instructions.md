@@ -2,7 +2,18 @@
 
 CARE is a Digital Public Good enabling TeleICU & Decentralised Administration of Healthcare Capacity across States. This is a React + TypeScript + Vite frontend application for the healthcare management system.
 
-Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
+## Important: Trust These Instructions
+Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here. This repository has custom setup requirements and workflows that must be followed exactly.
+
+## Path-Specific Instructions
+This repository includes path-specific instructions in `.github/instructions/` for:
+- `react-components.instructions.md` - React component guidelines
+- `cypress-tests.instructions.md` - E2E testing patterns
+- `utils.instructions.md` - Utility function standards
+- `typescript-types.instructions.md` - Type definition guidelines
+- `pages.instructions.md` - Page component architecture
+
+These are automatically applied by GitHub Copilot based on file paths you're working with.
 
 ## Working Effectively
 
@@ -169,4 +180,16 @@ Always reference these instructions first and fallback to search or bash command
 - Snyk security scanning
 - Audit vulnerabilities with `npm audit`
 
-Always ensure changes maintain the existing code quality standards and follow the established patterns in the codebase.
+## Agent Environment Setup
+This repository includes a custom Copilot coding agent environment setup at `.github/workflows/copilot-setup-steps.yml` that:
+- Preinstalls Node.js 22 and all dependencies
+- Runs all necessary setup scripts (postinstall, setup, supported-browsers)
+- Verifies the build process works correctly
+- Sets up Cypress testing environment
+- Configures linting and formatting tools
+- Validates the development server can start
+
+This environment setup ensures Copilot has everything needed to work efficiently without trial-and-error dependency installation.
+
+## Trust and Validation
+Always ensure changes maintain the existing code quality standards and follow the established patterns in the codebase. Trust these instructions and only perform additional searches if the information here is incomplete or found to be in error.
