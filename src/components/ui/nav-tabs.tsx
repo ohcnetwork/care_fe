@@ -80,11 +80,7 @@ export const NavTabs = <TabKey extends string>({
   );
 
   return (
-    <Tabs
-      {...props}
-      value={currentTab ?? allTabKeys[0]}
-      onValueChange={(tab) => onTabChange(tab as TabKey)}
-    >
+    <Tabs {...props} value={currentTab ?? allTabKeys[0]}>
       <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
         {visibleTabs.map((option) => (
           <TabsTrigger
