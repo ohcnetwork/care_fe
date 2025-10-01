@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { EyeIcon } from "lucide-react";
 import { Link } from "raviger";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -19,7 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import {
@@ -82,11 +83,13 @@ export default function PaymentsData({
   });
 
   useEffect(() => {
-    updateQuery({ ordering: "-payment_datetime" });
-  }, []);
+    if (!qParams.ordering) {
+      updateQuery({ ordering: "-payment_datetime" });
+    }
+  }, [qParams.ordering, updateQuery]);
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["payments", accountId, qParams],
+    queryKey: ["payments", facilityId, accountId, qParams],
     queryFn: query(paymentReconciliationApi.listPaymentReconciliation, {
       pathParams: { facilityId },
       queryParams: {
@@ -102,28 +105,41 @@ export default function PaymentsData({
 
   const payments = (response?.results as PaymentReconciliationRead[]) || [];
 
+  const statusTabOptions = useMemo(
+    () =>
+      Object.values(PaymentReconciliationStatus).map((status) => ({
+        value: status,
+        // pass translation keys; FilterTabs will call t()
+        label: status,
+      })),
+    [],
+  );
+
+  const typeTabOptions = useMemo(
+    () =>
+      Object.values(PaymentReconciliationType).map((type) => ({
+        value: type,
+        // pass translation keys from typeMap; FilterTabs will call t()
+        label: typeMap[type],
+      })),
+    [],
+  );
+
   return (
     <>
       <div className="flex w-full flex-col items-center my-4 gap-2 md:flex-row md:flex-wrap md:gap-y-4 md:justify-start lg:flex-nowrap lg:justify-between">
         <div className="flex w-full flex-col items-center gap-3 md:flex-row md:flex-wrap md:gap-y-4">
-          <Tabs
-            defaultValue={qParams.status ?? "all"}
+          <FilterTabs
+            value={qParams.status ?? ""}
             onValueChange={(value) =>
               updateQuery({ status: value === "all" ? undefined : value })
             }
             className="hidden sm:flex"
-          >
-            <TabsList>
-              <TabsTrigger value="all">{t("all_status")}</TabsTrigger>
-              {Object.values(PaymentReconciliationStatus).map((status) => (
-                <TabsTrigger key={status} value={status}>
-                  {t(status)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+            options={statusTabOptions}
+            allOptionLabel="all_status"
+          />
           <Select
-            defaultValue={qParams.status ?? "all"}
+            value={qParams.status ?? "all"}
             onValueChange={(value) =>
               updateQuery({ status: value === "all" ? undefined : value })
             }
@@ -143,28 +159,23 @@ export default function PaymentsData({
             </SelectContent>
           </Select>
 
-          <Tabs
-            defaultValue={qParams.reconciliation_type ?? "all"}
+          <FilterTabs
+            value={qParams.reconciliation_type ?? ""}
             onValueChange={(value) =>
               updateQuery({
                 reconciliation_type: value === "all" ? undefined : value,
               })
             }
             className="hidden sm:flex"
-          >
-            <TabsList>
-              <TabsTrigger value="all">{t("all_type")}</TabsTrigger>
-              {Object.values(PaymentReconciliationType).map((type) => (
-                <TabsTrigger key={type} value={type}>
-                  {t(typeMap[type])}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+            options={typeTabOptions}
+            allOptionLabel="all_type"
+          />
           <Select
-            defaultValue={qParams.status ?? "all"}
+            value={qParams.reconciliation_type ?? "all"}
             onValueChange={(value) =>
-              updateQuery({ status: value === "all" ? undefined : value })
+              updateQuery({
+                reconciliation_type: value === "all" ? undefined : value,
+              })
             }
           >
             <SelectTrigger className="sm:hidden border-gray-400 text-gray-950 rounded-sm">
@@ -206,9 +217,7 @@ export default function PaymentsData({
         <TableSkeleton count={3} />
       ) : !payments?.length ? (
         <EmptyState
-          icon={
-            <CareIcon icon="l-credit-card" className="text-primary size-6" />
-          }
+          icon="l-credit-card"
           title={t("no_payments")}
           description={t("no_payments_description")}
         />
@@ -274,8 +283,10 @@ export default function PaymentsData({
                       </Button>
                     )}
                   </TableCell>
-                  <TableCell>{typeMap[payment.reconciliation_type]}</TableCell>
-                  <TableCell>{methodMap[payment.method]}</TableCell>
+                  <TableCell>
+                    {t(typeMap[payment.reconciliation_type])}
+                  </TableCell>
+                  <TableCell>{t(methodMap[payment.method])}</TableCell>
                   <TableCell>
                     <MonetaryDisplay
                       amount={String(

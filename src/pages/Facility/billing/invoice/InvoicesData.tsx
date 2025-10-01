@@ -8,6 +8,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
@@ -18,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import {
@@ -100,25 +100,23 @@ export default function InvoicesData({
 
   const invoices = (response?.results as InvoiceRead[]) || [];
 
+  const tabOptions = Object.values(InvoiceStatus).map((status) => ({
+    value: status,
+    label: statusMap[status].label,
+  }));
+
   return (
     <>
       <div className="flex flex-row justify-between items-center gap-2 max-sm:flex-col pb-4">
-        <Tabs
-          defaultValue={qParams.status ?? "all"}
-          onValueChange={(value) =>
-            updateQuery({ status: value === "all" ? undefined : value })
-          }
-          className="max-sm:hidden"
-        >
-          <TabsList>
-            <TabsTrigger value="all">{t("all")}</TabsTrigger>
-            {Object.values(InvoiceStatus).map((status) => (
-              <TabsTrigger key={status} value={status}>
-                {t(statusMap[status].label)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+        <FilterTabs
+          value={qParams.status ?? "all"}
+          onValueChange={(value) => updateQuery({ status: value || undefined })}
+          className="hidden sm:flex"
+          options={tabOptions}
+          // Optional UX: label and underline variant for consistency
+          // label="filter_by_status"
+          // variant="underline"
+        />
         <div className="relative w-full sm:max-w-xs border border-gray-400 rounded-md">
           <CareIcon
             icon="l-search"
@@ -159,9 +157,9 @@ export default function InvoicesData({
         <TableSkeleton count={3} />
       ) : !invoices?.length ? (
         <EmptyState
-          icon={<CareIcon icon="l-file-alt" className="text-primary size-6" />}
+          icon="l-file-alt"
           title={t("no_invoices")}
-          description={t("try_adjusting_your_filters_or_search")}
+          description={t("no_invoices_description")}
         />
       ) : (
         <div>

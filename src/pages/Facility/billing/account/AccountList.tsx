@@ -11,6 +11,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
@@ -20,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Page from "@/components/Common/Page";
@@ -116,24 +116,18 @@ export function AccountList({
           />
           <div className="mb-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-between gap-4">
             <div className="flex flex-wrap gap-4">
-              <Tabs
-                value={qParams.status ?? "all"}
-                onValueChange={(value) =>
-                  updateQuery({ status: value === "all" ? undefined : value })
+              <FilterTabs
+                value={qParams.status ?? ""}
+                onValueChange={(nextValue) =>
+                  updateQuery({ status: nextValue ? nextValue : undefined })
                 }
                 className="overflow-y-auto max-w-[calc(100%)] max-sm:hidden text-gray-950"
-              >
-                <TabsList>
-                  <TabsTrigger value="all">{t("all_accounts")}</TabsTrigger>
-                  {Object.keys(ACCOUNT_STATUS_COLORS).map((key) => (
-                    <TabsTrigger key={key} value={key}>
-                      <span className="text-gray-950 font-medium text-sm">
-                        {t(key)}
-                      </span>
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
+                allOptionLabel="all_accounts"
+                options={Object.keys(ACCOUNT_STATUS_COLORS).map((key) => ({
+                  value: key,
+                  label: key,
+                }))}
+              />
 
               <Select
                 defaultValue={qParams.status ?? "all"}

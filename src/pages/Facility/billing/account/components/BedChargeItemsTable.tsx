@@ -20,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -36,7 +37,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -277,6 +277,11 @@ export function BedChargeItemsTable({
     );
   };
 
+  const tabOptions = Object.values(ChargeItemStatus).map((s) => ({
+    value: s,
+    label: s,
+  }));
+
   return (
     <div>
       <AddMultipleChargeItemsSheet
@@ -305,7 +310,7 @@ export function BedChargeItemsTable({
       />
       <div className="mb-4">
         {/* Desktop Tabs */}
-        <Tabs
+        <FilterTabs
           value={qParams.charge_item_status ?? "all"}
           onValueChange={(value) =>
             updateQuery({
@@ -313,16 +318,8 @@ export function BedChargeItemsTable({
             })
           }
           className="max-sm:hidden"
-        >
-          <TabsList>
-            <TabsTrigger value="all">{t("all")}</TabsTrigger>
-            {Object.values(ChargeItemStatus).map((status) => (
-              <TabsTrigger key={status} value={status}>
-                {t(status)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+          options={tabOptions}
+        />
         {/* Mobile Select */}
         <Select
           value={qParams.charge_item_status ?? "all"}

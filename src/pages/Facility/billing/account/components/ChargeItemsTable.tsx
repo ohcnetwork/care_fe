@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -41,7 +42,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -61,7 +61,6 @@ import {
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import query from "@/Utils/request/query";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
 import EditChargeItemSheet from "./EditChargeItemSheet";
@@ -180,28 +179,26 @@ export function ChargeItemsTable({
     }
   };
 
+  const tabOptions = Object.values(ChargeItemStatus).map((s) => ({
+    value: s,
+    label: s,
+  }));
+
   return (
     <div>
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-center gap-2">
         {/* Desktop Tabs */}
-        <Tabs
+        <FilterTabs
           value={qParams.charge_item_status ?? "all"}
           onValueChange={(value) =>
             updateQuery({
-              charge_item_status: value === "all" ? undefined : value,
+              charge_item_status: value || undefined,
             })
           }
+          label={t("status")}
           className="max-sm:hidden w-2/3 md:w-full overflow-x-auto"
-        >
-          <TabsList className="overflow-x-auto">
-            <TabsTrigger value="all">{t("all")}</TabsTrigger>
-            {Object.values(ChargeItemStatus).map((status) => (
-              <TabsTrigger key={status} value={status}>
-                {t(status)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+          options={tabOptions}
+        />
         {/* Mobile Select */}
         <Select
           value={qParams.charge_item_status ?? "all"}
@@ -249,8 +246,9 @@ export function ChargeItemsTable({
         <TableSkeleton count={3} />
       ) : !chargeItems?.results?.length ? (
         <EmptyState
-          icon={<CareIcon icon="l-receipt" className="text-primary size-6" />}
+          icon="l-receipt"
           title={t("no_charge_items")}
+          description={t("no_charge_items")}
         />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
@@ -313,7 +311,7 @@ export function ChargeItemsTable({
                         )}
                       </Button>
                     </TableCell>
-                    <TableCell className="bor-medium">
+                    <TableCell className="border-x p-3 text-gray-950">
                       {item.title}
                       {item.description && (
                         <p className="text-xs text-gray-500 whitespace-pre-wrap">
