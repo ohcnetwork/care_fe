@@ -51,8 +51,7 @@ export function RequestOrderList({
   const [qParams, setQueryParams] = useQueryParams();
   const TABS_CONFIG = isRequester
     ? [
-        { value: "draft", label: "draft" },
-        { value: "pending", label: "Ordered" },
+        { value: "draft,pending", label: "requested" },
         {
           value: "completed,abandoned,entered_in_error",
           label: "Completed",
