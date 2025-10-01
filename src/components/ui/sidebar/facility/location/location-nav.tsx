@@ -61,7 +61,6 @@ export function LocationNav() {
             },
             {
               header: t("orders"),
-              headerIcon: <CareIcon icon="l-box" className="text-gray-400" />,
               name: t("outgoing_orders"),
               url: `${baseUrl}/internal_transfers/to_receive`,
             },
@@ -72,17 +71,15 @@ export function LocationNav() {
 
             {
               header: t("deliveries"),
-              headerIcon: <CareIcon icon="l-box" className="text-gray-400" />,
-              name: t("incoming_deliveries"),
+              name: t("outgoing_deliveries"),
               url: `${baseUrl}/internal_transfers/dispatched`,
             },
             {
-              name: t("outgoing_deliveries"),
+              name: t("incoming_deliveries"),
               url: `${baseUrl}/internal_transfers/received`,
             },
             {
               header: t("external_supply"),
-              headerIcon: <CareIcon icon="l-box" className="text-gray-400" />,
               name: t("purchase_orders"),
               url: `${baseUrl}/external_supply/request_orders`,
             },
