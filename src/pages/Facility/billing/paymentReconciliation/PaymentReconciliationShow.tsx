@@ -75,15 +75,18 @@ export function PaymentReconciliationShow({
     enabled: !!paymentReconciliationId,
   });
 
-  const updatePaymentMutation = useMutation({
-    mutationFn: mutate(paymentReconciliationApi.updatePaymentReconciliation, {
+  const { mutate: cancelPayment, isPending } = useMutation({
+    mutationFn: mutate(paymentReconciliationApi.cancelPaymentReconciliation, {
       pathParams: { facilityId, paymentReconciliationId },
     }),
     onSuccess: () => {
-      toast.success(t("payment_status_updated"));
+      toast.success(t("payment_cancelled"));
       queryClient.invalidateQueries({
         queryKey: ["paymentReconciliation", paymentReconciliationId],
       });
+    },
+    onError: () => {
+      toast.error(t("failed_to_cancel_payment"));
     },
   });
 
@@ -414,12 +417,11 @@ export function PaymentReconciliationShow({
                         className="w-full flex items-center relative"
                         variant="outline"
                         onClick={() =>
-                          updatePaymentMutation.mutate({
-                            ...payment,
-                            status: PaymentReconciliationStatus.cancelled,
+                          cancelPayment({
+                            reason: PaymentReconciliationStatus.cancelled,
                           })
                         }
-                        disabled={updatePaymentMutation.isPending}
+                        disabled={isPending}
                       >
                         <CareIcon icon="l-ban" className="mr-2 size-4" />
                         {t("mark_as_cancelled")}
@@ -429,13 +431,12 @@ export function PaymentReconciliationShow({
                         className="w-full flex items-center relative"
                         variant="outline"
                         onClick={() =>
-                          updatePaymentMutation.mutate({
-                            ...payment,
-                            status:
+                          cancelPayment({
+                            reason:
                               PaymentReconciliationStatus.entered_in_error,
                           })
                         }
-                        disabled={updatePaymentMutation.isPending}
+                        disabled={isPending}
                       >
                         <CareIcon
                           icon="l-exclamation-triangle"
