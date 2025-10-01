@@ -81,7 +81,8 @@
     { "key": "a", "action": "add-item", "description": "Add Item", "when": "always" }
   ],
   "facility:inventory:delivery": [
-    { "key": "l", "action": "load-from-order", "description": "Load from Order", "when": "always" }
+    { "key": "l", "action": "load-from-order", "description": "Load from Order", "when": "always" },
+    { "key": "e", "action": "edit-delivery", "description": "Edit Delivery", "when": "always" }
   ],
 
   "encounter": [

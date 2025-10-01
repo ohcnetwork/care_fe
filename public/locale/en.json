@@ -1503,6 +1503,7 @@
   "delivery_details": "Delivery Details",
   "delivery_order_details": "Delivery Order Details",
   "delivery_order_not_found": "Delivery order not found",
+  "delivery_request_from_to": "This request is to dispatch items from <strong>{{from}}</strong> to <strong>{{to}}</strong>.",
   "demography": "Demography",
   "denied": "Denied",
   "denied_on": "Denied On",

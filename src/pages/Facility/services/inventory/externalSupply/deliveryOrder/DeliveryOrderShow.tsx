@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, MoreVertical, X } from "lucide-react";
+import { ChevronLeft, Edit, MoreVertical, X } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
+import BackButton from "@/components/Common/BackButton";
 import Page from "@/components/Common/Page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ import {
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -348,23 +350,38 @@ export function DeliveryOrderShow({
       title={t("delivery_order_details")}
       hideTitleOnPage
       shortCutContext="facility:inventory:delivery"
+      className="max-w-7xl mx-auto"
     >
       <div className="space-y-6">
-        {/* Back Button */}
-        <div className="flex items-center justify-between gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => window.history.back()}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t("back")}
-          </Button>
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-4">
+            <BackButton size="icon" className="shrink-0">
+              <ChevronLeft />
+            </BackButton>
+            <div>
+              <h4>{deliveryOrder.name}</h4>
+              <p className="text-sm text-gray-700">
+                <Trans
+                  i18nKey="delivery_request_from_to"
+                  values={{
+                    from: deliveryOrder.origin?.name || t("origin"),
+                    to: deliveryOrder.destination?.name || t("destination"),
+                  }}
+                  components={{
+                    strong: <span className="font-semibold text-gray-700" />,
+                  }}
+                />
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-2">
             <Button variant="outline" asChild>
-              <Link href={`${deliveryOrderId}/edit`}>{t("edit")}</Link>
+              <Link href={`${deliveryOrderId}/edit`}>
+                <Edit /> {t("edit")}
+                <ShortcutBadge actionId="edit-delivery" />
+              </Link>
             </Button>
+
             {deliveryOrder.status === DeliveryOrderStatus.draft && (
               <Button
                 onClick={() =>
@@ -390,53 +407,67 @@ export function DeliveryOrderShow({
               )}
           </div>
         </div>
+
         {/* Delivery Order Details */}
         <Card>
-          <CardHeader>
-            <div className="flex md:flex-row flex-col justify-between">
-              <CardTitle className="text-xl">{deliveryOrder.name}</CardTitle>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge
-                  variant={DELIVERY_ORDER_STATUS_COLORS[deliveryOrder.status]}
-                >
-                  {t(deliveryOrder.status)}
-                </Badge>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            {deliveryOrder.note && (
+          <CardContent className="space-y-1 p-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">
-                  {t("notes")}
+                <label className="text-sm font-medium text-gray-700">
+                  {t("deliver_to")}
                 </label>
-                <p className="text-sm">{deliveryOrder.note}</p>
-              </div>
-            )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-gray-500">
-                  {t("destination")}
-                </label>
-                <p className="text-sm">{deliveryOrder.destination.name}</p>
-              </div>
-              {deliveryOrder.supplier && (
-                <div>
-                  <label className="text-sm font-medium text-gray-500">
-                    {t("supplier")}
-                  </label>
-                  <p className="text-sm">{deliveryOrder.supplier.name}</p>
+                <div className="text-lg font-semibold text-gray-950">
+                  {deliveryOrder.destination.name}
                 </div>
-              )}
+              </div>
+
               {deliveryOrder.origin && (
                 <div>
-                  <label className="text-sm font-medium text-gray-500">
+                  <label className="text-sm font-medium text-gray-700">
                     {t("origin")}
                   </label>
-                  <p className="text-sm">{deliveryOrder.origin.name}</p>
+                  <div className="text-lg font-semibold text-gray-950">
+                    {deliveryOrder.origin.name}
+                  </div>
                 </div>
               )}
+
+              {deliveryOrder.supplier && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    {t("supplier")}
+                  </label>
+                  <div className="text-lg font-semibold text-gray-950">
+                    {deliveryOrder.supplier.name}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  {t("status")}
+                </label>
+                <div>
+                  <Badge
+                    className="rounded-sm"
+                    variant={DELIVERY_ORDER_STATUS_COLORS[deliveryOrder.status]}
+                  >
+                    {t(deliveryOrder.status)}
+                  </Badge>
+                </div>
+              </div>
             </div>
+
+            {deliveryOrder.note && (
+              <div className="pt-3">
+                <label className="text-sm font-medium text-gray-700">
+                  {t("note")}
+                </label>
+                <p className="text-sm whitespace-pre-wrap">
+                  {deliveryOrder.note}
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -532,7 +563,7 @@ export function DeliveryOrderShow({
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {isLoadingSupplyDeliveries ? (
               <div className="space-y-2">
                 {Array.from({ length: 3 }).map((_, i) => (
