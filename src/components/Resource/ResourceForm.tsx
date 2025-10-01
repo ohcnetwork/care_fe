@@ -41,21 +41,20 @@ import UserSelector from "@/components/Common/UserSelector";
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
-import {
-  RESOURCE_CATEGORY_CHOICES,
-  RESOURCE_STATUS_CHOICES,
-} from "@/common/constants";
+import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { mergeAutocompleteOptions } from "@/Utils/utils";
+import { mergeAutocompleteOptions, valuesOf } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
+  getResourceRequestCategoryEnum,
   RESOURCE_REQUEST_STATUSES,
   ResourceRequest,
+  ResourceRequestCategory,
 } from "@/types/resourceRequest/resourceRequest";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -74,7 +73,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const resourceFormSchema = z.object({
     status: z.enum(RESOURCE_REQUEST_STATUSES),
-    category: z.string().min(1, { message: t("field_required") }),
+    category: z.nativeEnum(ResourceRequestCategory),
     assigned_facility: z.object({
       id: z.string(),
       name: z.string(),
@@ -115,7 +114,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     resolver: zodResolver(resourceFormSchema),
     defaultValues: {
       status: "pending",
-      category: "",
       assigned_facility: undefined,
       assigned_to: "",
       emergency: "false" as const,
@@ -131,7 +129,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     if (resourceData) {
       form.reset({
         status: resourceData.status,
-        category: resourceData.category,
+        category: getResourceRequestCategoryEnum(resourceData.category),
         assigned_facility: resourceData.assigned_facility,
         assigned_to: resourceData.assigned_to?.id,
         emergency: resourceData.emergency ? "true" : "false",
@@ -399,9 +397,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {RESOURCE_CATEGORY_CHOICES.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.text}
+                        {valuesOf(ResourceRequestCategory).map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {t(`resource_request_category__${category}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>

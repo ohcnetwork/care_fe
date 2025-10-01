@@ -347,7 +347,6 @@ export const BookingListContent = ({
       />
     );
   }
-  console.log(facilityId);
   return (
     <div className="w-full">
       <div className="hidden sm:block">

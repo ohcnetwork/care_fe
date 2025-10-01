@@ -144,7 +144,7 @@ export const Demography = (props: PatientProps) => {
   const data: Data[] = [
     {
       id: "general-info",
-      allowEdit: canWritePatient,
+      allowEdit: canWritePatient && !!props.facilityId,
       details: [
         <PLUGIN_Component
           key="patient_details_tab__demography__general_info"
