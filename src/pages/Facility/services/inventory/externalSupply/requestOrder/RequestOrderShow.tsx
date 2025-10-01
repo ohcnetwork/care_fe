@@ -479,7 +479,7 @@ export function RequestOrderShow({
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-end">
+                    <div className="flex items-center justify-start">
                       <div>
                         <ProductKnowledgeSelect
                           value={selectedProductKnowledge}

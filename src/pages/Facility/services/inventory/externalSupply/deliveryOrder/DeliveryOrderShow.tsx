@@ -98,18 +98,6 @@ export function DeliveryOrderShow({
     }),
   });
 
-  const { data: requestOrders } = useQuery({
-    queryKey: ["requestOrders", deliveryOrderId],
-    queryFn: query(supplyRequestApi.requestOrders, {
-      queryParams: {
-        delivery_order: deliveryOrderId,
-      },
-    }),
-    enabled: !!deliveryOrderId,
-  });
-
-  const requestOrder = requestOrders?.results[0];
-
   const isRequester = locationId === deliveryOrder?.destination.id;
 
   const { data: supplyDeliveries, isLoading: isLoadingSupplyDeliveries } =
@@ -157,13 +145,13 @@ export function DeliveryOrderShow({
     useQuery({
       queryKey: [
         "allSupplyDeliveries",
-        requestOrder?.id,
+        deliveryOrder?.supplier?.id,
+        locationId,
         selectedProductKnowledgeDrawer?.id,
       ],
       queryFn: query(supplyDeliveryApi.listSupplyDelivery, {
         queryParams: {
           facility: facilityId,
-          request_order: requestOrder?.id,
           ...(internal
             ? {
                 supplied_inventory_item_product_knowledge:
@@ -172,6 +160,15 @@ export function DeliveryOrderShow({
             : {
                 supplied_item_product_knowledge:
                   selectedProductKnowledgeDrawer?.id,
+              }),
+          ...(internal
+            ? {
+                ...(isRequester
+                  ? { destination: locationId }
+                  : { origin: locationId }),
+              }
+            : {
+                supplier: deliveryOrder?.supplier?.id,
               }),
         },
       }),
@@ -365,13 +362,6 @@ export function DeliveryOrderShow({
             {t("back")}
           </Button>
           <div className="flex items-center gap-2">
-            {requestOrder && (
-              <Button variant="outline" asChild>
-                <Link href={`../request_orders/${requestOrder.id}`}>
-                  {t("view_request_order")}
-                </Link>
-              </Button>
-            )}
             <Button variant="outline" asChild>
               <Link href={`${deliveryOrderId}/edit`}>{t("edit")}</Link>
             </Button>
@@ -455,7 +445,7 @@ export function DeliveryOrderShow({
           <CardHeader className="text-lg flex flex-row justify-between">
             <CardTitle>{t("supply_deliveries")}</CardTitle>
             <div className="flex gap-2">
-              <div className="flex items-center ">
+              <div className="flex items-center">
                 <div>
                   <ProductKnowledgeSelect
                     value={selectedProductKnowledge}
