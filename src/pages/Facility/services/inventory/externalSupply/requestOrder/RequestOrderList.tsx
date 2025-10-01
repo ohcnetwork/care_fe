@@ -191,27 +191,29 @@ export function RequestOrderList({
               {internal ? t("orders") : t("purchase_orders")}
             </h1>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="primary"
-              onClick={() =>
-                navigate(
-                  getInventoryBasePath(
-                    facilityId,
-                    locationId,
-                    internal,
-                    true,
-                    isRequester,
-                    "new",
-                  ),
-                )
-              }
-            >
-              <CareIcon icon="l-plus" />
-              {t("create_order")}
-              <ShortcutBadge actionId="create-order" />
-            </Button>
-          </div>
+          {isRequester && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="primary"
+                onClick={() =>
+                  navigate(
+                    getInventoryBasePath(
+                      facilityId,
+                      locationId,
+                      internal,
+                      true,
+                      isRequester,
+                      "new",
+                    ),
+                  )
+                }
+              >
+                <CareIcon icon="l-plus" />
+                {t("create_order")}
+                <ShortcutBadge actionId="create-order" />
+              </Button>
+            </div>
+          )}
         </div>
 
         <Tabs value={currentTab} onValueChange={handleTabChange}>
