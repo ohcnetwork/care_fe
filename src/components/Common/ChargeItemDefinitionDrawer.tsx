@@ -55,10 +55,10 @@ export function ChargeItemDefinitionDrawer({
           </DrawerClose>
           <div className="max-w-8xl mx-auto w-full">
             <DrawerTitle className="text-left">
-              Create Charge Item Definition
+              {t("create_charge_item_definition")}
             </DrawerTitle>
             <DrawerDescription className="text-left">
-              Create a new charge item definition for billing purposes.
+              {t("create_charge_item_definition_description")}
             </DrawerDescription>
           </div>
         </DrawerHeader>
