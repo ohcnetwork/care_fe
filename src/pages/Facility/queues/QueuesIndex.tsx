@@ -1,5 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
-import { MoreVertical, Pencil, Plus, Settings, Square } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  CheckIcon,
+  MoreVertical,
+  Pencil,
+  Plus,
+  Settings,
+  Square,
+} from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -49,6 +56,8 @@ import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import mutate from "@/Utils/request/mutate";
+import queryClient from "@/Utils/request/queryClient";
 import { dateQueryString } from "@/Utils/utils";
 import { startOfDay } from "date-fns";
 import dayjs from "dayjs";
@@ -77,6 +86,17 @@ function QueueRow({
     resourceType === SchedulableResourceType.Practitioner
       ? `/facility/${facilityId}/practitioner/${resourceId}/queues/${queue.id}/ongoing`
       : `/queues/${queue.id}/ongoing`;
+
+  const { mutate: setPrimary } = useMutation({
+    mutationFn: mutate(tokenQueueApi.setPrimary, {
+      pathParams: { facility_id: facilityId, id: queue.id },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["tokenQueues", facilityId],
+      });
+    },
+  });
 
   return (
     <TableRow className="hover:bg-gray-200">
@@ -147,6 +167,13 @@ function QueueRow({
                 </DropdownMenuItem>
               }
             />
+            <DropdownMenuItem
+              onClick={() => setPrimary({})}
+              disabled={queue.is_primary}
+            >
+              <CheckIcon className="h-4 w-4 mr-2" />
+              {t("set_as_primary")}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
