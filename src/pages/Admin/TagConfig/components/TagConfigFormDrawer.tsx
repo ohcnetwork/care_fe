@@ -16,6 +16,7 @@ import {
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import TagConfigForm from "@/pages/Admin/TagConfig/TagConfigForm";
+import { isAppleDevice } from "@/Utils/utils";
 
 interface TagConfigFormDrawerProps {
   title: string;
@@ -60,7 +61,11 @@ export default function TagConfigFormDrawer({
   const renderContent = () => (
     <>
       {isMobile ? (
-        <Drawer open={open} onOpenChange={onOpenChange}>
+        <Drawer
+          open={open}
+          onOpenChange={onOpenChange}
+          repositionInputs={!isAppleDevice}
+        >
           {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
           <DrawerContent className="min-h-[65vh] max-h-[100vh]">
             <DrawerHeader className="flex flex-row items-center justify-between">
