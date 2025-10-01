@@ -14,12 +14,12 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
   return (
     <RadioGroup
       {...props}
-      className={cn("flex flex-wrap gap-4", props.className)}
+      className={cn("flex flex-wrap gap-4 items-start", props.className)}
     >
       {options.map((option) => (
         <div
           className={cn(
-            "border rounded-md p-2 w-full cursor-pointer sm:w-auto hover:border-primary-500 group text-left overflow-hidden",
+            "border rounded-md p-2 w-fit min-w-[3rem] cursor-pointer hover:border-primary-500 group text-left overflow-hidden",
             props.value === option.value
               ? "bg-primary-100 border-primary-500"
               : "bg-white border-gray-300",
@@ -35,11 +35,11 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
             }
           }}
         >
-          <div className="flex items-center justify-center space-x-2">
+          <div className="flex items-center space-x-2 min-w-0">
             <RadioGroupItem
               value={option.value.toString()}
               id={option.value}
-              className="h-4 w-4 border-2 border-gray-300 text-primary focus:ring-primary group-hover:border-primary-500"
+              className="h-4 w-4 border-2 border-gray-300 text-primary focus:ring-primary group-hover:border-primary-500 flex-shrink-0"
             />
             <Label
               htmlFor={option.value}
