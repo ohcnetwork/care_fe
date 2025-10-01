@@ -11,12 +11,13 @@ import {
   CancelledAppointmentStatuses,
   formatScheduleResourceName,
   PastAppointmentStatuses,
-  UpcomingAppointmentStatuses,
+  UpcomingAppointmentStatuses, // Add this
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Table,
   TableBody,
@@ -25,14 +26,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 
 interface BookingsListProps {
@@ -41,55 +41,50 @@ interface BookingsListProps {
 }
 
 export const BookingsList = ({ patientId, facilityId }: BookingsListProps) => {
-  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState("upcoming");
 
   return (
     <div className="mt-2">
-      <Tabs defaultValue="upcoming">
-        <div className="flex flex-col gap-2">
-          <TabsList className="grid grid-cols-3 bg-gray-100 h-10 w-full sm:w-fit">
-            <TabsTrigger
-              value="upcoming"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
-            >
-              {t("upcoming")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="past"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
-            >
-              {t("past")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="cancelled"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary-800"
-            >
-              {t("cancelled")}
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="upcoming" className="space-y-4 overflow-x-auto">
+      <div className="flex sm:flex-row flex-col gap-2">
+        <FilterTabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          options={[
+            { value: "upcoming", label: "upcoming" },
+            { value: "past", label: "past" },
+            { value: "cancelled", label: "cancelled" },
+          ]}
+          showAllOption={false}
+          className="sm:flex sm:flex-col sm:w-52 h-fit sm:bg-gray-50 items-center justify-center w-full bg-gray-100"
+        />
+        {activeTab === "upcoming" && (
+          <div className="space-y-4 overflow-x-scroll">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
               statuses={UpcomingAppointmentStatuses}
             />
-          </TabsContent>
-          <TabsContent value="past" className="space-y-4 overflow-x-auto">
+          </div>
+        )}
+        {activeTab === "past" && (
+          <div className="space-y-4 overflow-x-scroll">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
               statuses={PastAppointmentStatuses}
             />
-          </TabsContent>
-          <TabsContent value="cancelled" className="space-y-4 overflow-x-auto">
+          </div>
+        )}
+        {activeTab === "cancelled" && (
+          <div className="space-y-4 overflow-x-scroll">
             <BookingListContent
               patientId={patientId}
               facilityId={facilityId}
               statuses={CancelledAppointmentStatuses}
             />
-          </TabsContent>
-        </div>
-      </Tabs>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -154,7 +149,7 @@ const AppointmentCard = ({
         </div>
         <Button
           variant="outline"
-          className="w-full border borde-gray-400 text-gray-950 font-semibold"
+          className="w-full border border-gray-400 text-gray-950 font-semibold"
           asChild
         >
           <Link

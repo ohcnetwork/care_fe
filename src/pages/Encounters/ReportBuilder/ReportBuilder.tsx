@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Form,
   FormControl,
@@ -26,7 +27,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
 
@@ -412,7 +412,7 @@ export default function ReportBuilder({
   // TODO: Implement export functionality
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleExport = () => {
-    // Implementation pending
+    console.log("");
   };
 
   if (reportTemplateId && isTemplateLoading) {
@@ -504,7 +504,7 @@ export default function ReportBuilder({
                 </Button>
                 {reportTemplateId && (
                   <Button
-                    type="submit"
+                    type="button"
                     variant="primary"
                     className="w-full"
                     onClick={() => onSubmit(form.getValues(), true)}
@@ -522,43 +522,38 @@ export default function ReportBuilder({
                   <CardTitle>{t("report_builder_title")}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Tabs
+                  <FilterTabs
                     value={activeTab}
                     onValueChange={setActiveTab}
+                    options={[
+                      { value: "layout", label: "layout" },
+                      { value: "header", label: "header" },
+                      { value: "sections", label: "sections" },
+                    ]}
+                    variant="background"
                     className="w-full"
-                  >
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="layout">{t("layout")}</TabsTrigger>
-                      <TabsTrigger value="header">{t("header")}</TabsTrigger>
-                      <TabsTrigger value="sections">
-                        {t("sections")}
-                      </TabsTrigger>
-                    </TabsList>
-                    {hasLayoutErrors && (
-                      <Badge variant="destructive" size="sm">
-                        {t("layout_error")}
-                      </Badge>
-                    )}
-                    {hasHeaderErrors && (
-                      <Badge variant="destructive" size="sm">
-                        {t("header_error")}
-                      </Badge>
-                    )}
-                    {hasSectionsErrors && (
-                      <Badge variant="destructive" size="sm">
-                        {t("sections_error")}
-                      </Badge>
-                    )}
-                    <TabsContent value="layout">
-                      <LayoutBuilder form={form} />
-                    </TabsContent>
-                    <TabsContent value="header">
-                      <HeaderBuilder form={form} />
-                    </TabsContent>
-                    <TabsContent value="sections">
-                      <SectionBuilder form={form} facilityId={facilityId} />
-                    </TabsContent>
-                  </Tabs>
+                    showAllOption={false}
+                  />
+                  {hasLayoutErrors && (
+                    <Badge variant="destructive" size="sm">
+                      {t("layout_error")}
+                    </Badge>
+                  )}
+                  {hasHeaderErrors && (
+                    <Badge variant="destructive" size="sm">
+                      {t("header_error")}
+                    </Badge>
+                  )}
+                  {hasSectionsErrors && (
+                    <Badge variant="destructive" size="sm">
+                      {t("sections_error")}
+                    </Badge>
+                  )}
+                  {activeTab === "layout" && <LayoutBuilder form={form} />}
+                  {activeTab === "header" && <HeaderBuilder form={form} />}
+                  {activeTab === "sections" && (
+                    <SectionBuilder form={form} facilityId={facilityId} />
+                  )}
                 </CardContent>
               </Card>
               <ReportBuilderPreview form={form} />

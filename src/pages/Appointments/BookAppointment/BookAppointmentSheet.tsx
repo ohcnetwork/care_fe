@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Sheet,
   SheetContent,
@@ -8,7 +9,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { BookAppointmentDetails } from "./BookAppointmentDetails";
 import { BookingsList } from "./BookingsList";
@@ -28,6 +28,7 @@ export default function BookAppointmentSheet({
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState("appointment");
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -37,25 +38,18 @@ export default function BookAppointmentSheet({
           <SheetTitle>{t("book_appointment")}</SheetTitle>
         </SheetHeader>
         <div className="flex flex-col gap-4 mt-6">
-          <Tabs defaultValue="appointment">
-            <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-              <TabsTrigger
-                value="appointment"
-                className="border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {t("book_appointment")}
-              </TabsTrigger>
-              <TabsTrigger
-                value="encounter"
-                className="border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
-              >
-                {t("bookings")}
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent
-              value="appointment"
-              className="flex lg:flex-row gap-4 mt-2"
-            >
+          <FilterTabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            options={[
+              { value: "appointment", label: "book_appointment" },
+              { value: "encounter", label: "bookings" },
+            ]}
+            showAllOption={false}
+            className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto"
+          />
+          {activeTab === "appointment" && (
+            <div className="flex lg:flex-row gap-4 mt-2">
               <BookAppointmentDetails
                 patientId={patientId}
                 onSuccess={() => {
@@ -63,14 +57,11 @@ export default function BookAppointmentSheet({
                   onSuccess?.();
                 }}
               />
-            </TabsContent>
-            <TabsContent value="encounter">
-              <BookingsList
-                patientId={patientId}
-                facilityId={facilityId ?? ""}
-              />
-            </TabsContent>
-          </Tabs>
+            </div>
+          )}
+          {activeTab === "encounter" && (
+            <BookingsList patientId={patientId} facilityId={facilityId ?? ""} />
+          )}
         </div>
       </SheetContent>
     </Sheet>

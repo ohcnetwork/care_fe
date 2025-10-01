@@ -25,6 +25,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -48,7 +49,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -100,35 +100,39 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { PractitionerSelector } from "./components/PractitionerSelector";
 
-type AppointmentStatusGroup = {
+interface AppointmentStatusGroup {
   label: string;
+  labelKey: string;
   statuses: AppointmentStatus[];
-};
+}
 
-const getStatusGroups = (t: TFunction): AppointmentStatusGroup[] => {
-  return [
-    {
-      label: t("booked"),
-      statuses: [AppointmentStatus.BOOKED],
-    },
-    {
-      label: t("checked_in"),
-      statuses: [AppointmentStatus.CHECKED_IN],
-    },
-    {
-      label: t("in_consultation"),
-      statuses: [AppointmentStatus.IN_CONSULTATION],
-    },
-    {
-      label: t("fulfilled"),
-      statuses: [AppointmentStatus.FULFILLED],
-    },
-    {
-      label: t("non_fulfilled"),
-      statuses: CancelledAppointmentStatuses,
-    },
-  ];
-};
+const getStatusGroups = (t: TFunction): AppointmentStatusGroup[] => [
+  {
+    label: t("booked"),
+    labelKey: "booked",
+    statuses: [AppointmentStatus.BOOKED],
+  },
+  {
+    label: t("checked_in"),
+    labelKey: "checked_in",
+    statuses: [AppointmentStatus.CHECKED_IN],
+  },
+  {
+    label: t("in_consultation"),
+    labelKey: "in_consultation",
+    statuses: [AppointmentStatus.IN_CONSULTATION],
+  },
+  {
+    label: t("fulfilled"),
+    labelKey: "fulfilled",
+    statuses: [AppointmentStatus.FULFILLED],
+  },
+  {
+    label: t("non_fulfilled"),
+    labelKey: "non_fulfilled",
+    statuses: CancelledAppointmentStatuses,
+  },
+];
 
 function AppointmentsEmptyState() {
   const { t } = useTranslation();
@@ -259,7 +263,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
       "multi",
       t("tags", { count: 2 }),
     ),
-    dateFilter("date", t("date"), shortDateRangeOptions, true),
+    dateFilter("date", t("date"), shortDateRangeOptions),
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
@@ -328,21 +332,23 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     <Page
       title={t("appointments")}
       options={
-        <Tabs
+        <FilterTabs
           value={activeTab}
-          onValueChange={(value) => setActiveTab(value as "board" | "list")}
-        >
-          <TabsList>
-            <TabsTrigger value="board">
-              <CareIcon icon="l-kanban" />
-              <span>{t("board")}</span>
-            </TabsTrigger>
-            <TabsTrigger value="list">
-              <CareIcon icon="l-list-ul" />
-              <span>{t("list")}</span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+          onValueChange={(v) => setActiveTab(v as "board" | "list")}
+          options={[
+            {
+              value: "board",
+              label: "board",
+              icon: <CareIcon icon="l-kanban" />,
+            },
+            {
+              value: "list",
+              label: "list",
+              icon: <CareIcon icon="l-list-ul" />,
+            },
+          ]}
+          showAllOption={false}
+        />
       }
     >
       <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
@@ -754,7 +760,7 @@ function AppointmentRow(props: {
   updateQuery: (filter: FilterState) => void;
   resultsPerPage: number;
   slot: string | null;
-  status: AppointmentStatus;
+  status?: string;
   date_from: string | null;
   date_to: string | null;
   canViewAppointments: boolean;
@@ -789,7 +795,7 @@ function AppointmentRow(props: {
         user: props.practitioners ?? undefined,
         date_after: props.date_from,
         date_before: props.date_to,
-        tags: props.tags,
+        tags: props.tags?.join(","),
         tags_behavior: props.tags_behavior,
         limit: props.resultsPerPage,
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
@@ -804,30 +810,33 @@ function AppointmentRow(props: {
 
   const appointments = data?.results ?? [];
 
+  const statusTabValue =
+    getStatusGroups(t)
+      .find((g) =>
+        g.statuses.includes((props.status ?? "booked") as AppointmentStatus),
+      )
+      ?.statuses.join(",") ??
+    props.status ??
+    "booked";
+
   return (
     <div className="overflow-x-auto">
       <div className="hidden md:flex">
-        <Tabs
-          value={props.status ?? "booked"}
-          className="overflow-x-auto"
-          onValueChange={(value) => props.updateQuery({ status: value })}
-        >
-          <TabsList>
-            {getStatusGroups(t).map((group) => {
-              return (
-                <TabsTrigger key={group.label} value={group.statuses.join(",")}>
-                  {group.label}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-        </Tabs>
+        <FilterTabs
+          value={statusTabValue}
+          onValueChange={(v) => props.updateQuery({ status: v })}
+          options={getStatusGroups(t).map((group) => ({
+            value: group.statuses.join(","),
+            label: group.labelKey,
+          }))}
+          showAllOption={false}
+        />
       </div>
 
       {/* Status Filter - Mobile */}
       <div className="md:hidden">
         <Select
-          value={props.status || "booked"}
+          value={statusTabValue}
           onValueChange={(value) => props.updateQuery({ status: value })}
         >
           <SelectTrigger className="h-8 w-40">
