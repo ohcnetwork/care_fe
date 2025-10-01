@@ -60,30 +60,34 @@ export function LocationNav() {
               url: `${baseUrl}/inventory`,
             },
             {
-              header: t("internal_transfers"),
-              name: t("to_receive"),
+              header: t("orders"),
+              headerIcon: <CareIcon icon="l-box" className="text-gray-400" />,
+              name: t("my_orders"),
               url: `${baseUrl}/internal_transfers/to_receive`,
             },
             {
-              name: t("received"),
-              url: `${baseUrl}/internal_transfers/received`,
-            },
-            {
-              name: t("to_dispatch"),
+              name: t("incoming_orders"),
               url: `${baseUrl}/internal_transfers/to_dispatch`,
             },
+
             {
-              name: t("dispatched"),
+              header: t("deliveries"),
+              headerIcon: <CareIcon icon="l-box" className="text-gray-400" />,
+              name: t("incoming_deliveries"),
               url: `${baseUrl}/internal_transfers/dispatched`,
             },
             {
+              name: t("outgoing_deliveries"),
+              url: `${baseUrl}/internal_transfers/received`,
+            },
+            {
               header: t("external_supply"),
-              // headerIcon: <CareIcon icon="l-box" className="text-gray-400" />,
-              name: t("request_orders"),
+              headerIcon: <CareIcon icon="l-box" className="text-gray-400" />,
+              name: t("purchase_orders"),
               url: `${baseUrl}/external_supply/request_orders`,
             },
             {
-              name: t("inward_entry"),
+              name: t("purchase_deliveries"),
               url: `${baseUrl}/external_supply/delivery_orders`,
             },
           ],
