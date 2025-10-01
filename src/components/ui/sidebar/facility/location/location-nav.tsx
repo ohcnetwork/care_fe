@@ -62,7 +62,7 @@ export function LocationNav() {
             {
               header: t("orders"),
               headerIcon: <CareIcon icon="l-box" className="text-gray-400" />,
-              name: t("my_orders"),
+              name: t("outgoing_orders"),
               url: `${baseUrl}/internal_transfers/to_receive`,
             },
             {
