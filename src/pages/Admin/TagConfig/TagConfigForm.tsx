@@ -29,8 +29,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
 import {
@@ -40,6 +38,9 @@ import {
   TagStatus,
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { isAppleDevice } from "@/Utils/utils";
 
 interface TagConfigFormProps {
   configId?: string;
@@ -215,7 +216,7 @@ export default function TagConfigForm({
                   placeholder={t("enter_display_name")}
                   {...field}
                   disabled={isLoading}
-                  autoFocus
+                  autoFocus={!isAppleDevice}
                 />
               </FormControl>
               <FormMessage />
@@ -441,7 +442,7 @@ export default function TagConfigForm({
 
         <div
           className={cn(
-            !isMobile && "justify-end space-x-2 hidden sm:flex",
+            !isMobile && "flex justify-end space-x-2",
             isMobile && "absolute top-8 right-4 z-10",
           )}
         >
