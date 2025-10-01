@@ -1,12 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, MoreVertical } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
+import { Link } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import Page from "@/components/Common/Page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -16,26 +18,26 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import Page from "@/components/Common/Page";
-import { AddItemsForm } from "./AddItemsForm";
+import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
 
 import DeliveryOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/DeliveryOrderTable";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
+import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { AddItemsForm } from "./AddItemsForm";
+
 import {
   REQUEST_ORDER_PRIORITY_COLORS,
   REQUEST_ORDER_STATUS_COLORS,
   RequestOrderStatus,
 } from "@/types/inventory/requestOrder/requestOrder";
 import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
-import { SUPPLY_DELIVERY_STATUS_COLORS } from "@/types/inventory/supplyDelivery/supplyDelivery";
+import { SupplyDeliveryStatus } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { SUPPLY_REQUEST_STATUS_COLORS } from "@/types/inventory/supplyRequest/supplyRequest";
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatDate } from "date-fns";
-import { Link } from "raviger";
 
 interface Props {
   facilityId: string;
@@ -52,6 +54,8 @@ export function RequestOrderShow({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [selectedProductKnowledge, setSelectedProductKnowledge] =
+    useState<ProductKnowledgeBase>();
 
   const { data: requestOrder, isLoading } = useQuery({
     queryKey: ["requestOrders", requestOrderId],
@@ -75,25 +79,39 @@ export function RequestOrderShow({
     },
   );
 
-  const { data: supplyDeliveries, isLoading: isLoadingSupplyDeliveries } =
-    useQuery({
-      queryKey: ["supplyDeliveries", requestOrderId],
-      queryFn: query(supplyDeliveryApi.request_orders, {
+  const { data: deliveryOrders, isLoading: isLoadingDeliveryOrders } = useQuery(
+    {
+      queryKey: ["deliveryOrders", requestOrderId],
+      queryFn: query(supplyDeliveryApi.deliveryOrders, {
         queryParams: {
           request_order: requestOrderId,
+          status: [SupplyDeliveryStatus.completed],
         },
       }),
       enabled: !!requestOrderId,
-    });
+    },
+  );
 
   // Query for all supply deliveries related to this request order
   const { data: allSupplyDeliveries, isLoading: isLoadingAllSupplyDeliveries } =
     useQuery({
-      queryKey: ["allSupplyDeliveries", requestOrderId],
+      queryKey: [
+        "allSupplyDeliveries",
+        requestOrderId,
+        selectedProductKnowledge?.id,
+      ],
       queryFn: query(supplyDeliveryApi.listSupplyDelivery, {
         queryParams: {
           facility: facilityId,
           request_order: requestOrderId,
+          ...(internal
+            ? {
+                supplied_inventory_item_product_knowledge:
+                  selectedProductKnowledge?.id,
+              }
+            : {
+                supplied_item_product_knowledge: selectedProductKnowledge?.id,
+              }),
         },
       }),
       enabled: !!requestOrderId,
@@ -284,10 +302,10 @@ export function RequestOrderShow({
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-green-500"></div>
                       {t("supply_deliveries")}
-                      {supplyDeliveries?.results &&
-                        supplyDeliveries.results.length > 0 && (
+                      {deliveryOrders?.results &&
+                        deliveryOrders.results.length > 0 && (
                           <Badge variant="secondary" className="ml-1 text-xs">
-                            {supplyDeliveries.results.length}
+                            {deliveryOrders.results.length}
                           </Badge>
                         )}
                     </div>
@@ -406,7 +424,7 @@ export function RequestOrderShow({
               </TabsContent>
 
               <TabsContent value="supply-deliveries" className="p-6">
-                {isLoadingSupplyDeliveries ? (
+                {isLoadingDeliveryOrders ? (
                   <div className="space-y-4">
                     <div className="animate-pulse">
                       <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
@@ -420,10 +438,10 @@ export function RequestOrderShow({
                       </div>
                     </div>
                   </div>
-                ) : supplyDeliveries?.results &&
-                  supplyDeliveries.results.length > 0 ? (
+                ) : deliveryOrders?.results &&
+                  deliveryOrders.results.length > 0 ? (
                   <DeliveryOrderTable
-                    deliveries={supplyDeliveries.results}
+                    deliveries={deliveryOrders.results}
                     isLoading={false}
                     facilityId={facilityId}
                     locationId={requestOrder?.destination.id || ""}
@@ -459,134 +477,49 @@ export function RequestOrderShow({
                       </div>
                     </div>
                   </div>
-                ) : allSupplyDeliveries?.results &&
-                  allSupplyDeliveries.results.length > 0 ? (
-                  <div className="space-y-4">
-                    <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
-                      <Table>
-                        <TableHeader className="bg-gray-50">
-                          <TableRow>
-                            <TableHead className="font-semibold text-gray-700 w-12">
-                              <Checkbox className="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500" />
-                            </TableHead>
-                            <TableHead className="font-semibold text-gray-700">
-                              {t("item")}
-                            </TableHead>
-                            <TableHead className="font-semibold text-gray-700">
-                              {t("quantity")}
-                            </TableHead>
-                            <TableHead className="font-semibold text-gray-700">
-                              {t("date")}
-                            </TableHead>
-                            <TableHead className="font-semibold text-gray-700">
-                              {t("condition")}
-                            </TableHead>
-                            <TableHead className="font-semibold text-gray-700">
-                              {t("status")}
-                            </TableHead>
-                            <TableHead className="font-semibold text-gray-700 w-12">
-                              {t("action")}
-                            </TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {allSupplyDeliveries.results.map((delivery) => (
-                            <TableRow
-                              key={delivery.id}
-                              className="hover:bg-gray-50/50 border-b"
-                            >
-                              <TableCell>
-                                <Checkbox className="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500" />
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                <div className="space-y-1">
-                                  <div className="font-semibold text-gray-900">
-                                    {
-                                      delivery.supplied_item?.product_knowledge
-                                        ?.name
-                                    }
-                                  </div>
-                                  <div className="text-xs text-gray-500">
-                                    <span className="text-xs text-gray-500 border-r pr-1">
-                                      {
-                                        delivery.supplied_item?.batch
-                                          ?.lot_number
-                                      }
-                                    </span>
-                                    <span className="text-xs text-gray-500 pl-1">
-                                      Exp:{" "}
-                                    </span>
-
-                                    {delivery.supplied_item?.expiration_date &&
-                                      formatDate(
-                                        new Date(
-                                          delivery.supplied_item.expiration_date,
-                                        ),
-                                        "dd MMM yyyy",
-                                      )}
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <span className="font-semibold text-gray-900">
-                                  {delivery.supplied_item_quantity}
-                                </span>
-                              </TableCell>
-                              <TableCell>
-                                <span className="text-sm text-gray-600">
-                                  {delivery.created_date &&
-                                    formatDate(
-                                      new Date(delivery.created_date),
-                                      "dd MMM yyyy",
-                                    )}
-                                </span>
-                              </TableCell>
-                              <TableCell>
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-green-100 text-green-800 border-green-200"
-                                >
-                                  {t("normal")}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge
-                                  variant={
-                                    SUPPLY_DELIVERY_STATUS_COLORS[
-                                      delivery.status
-                                    ]
-                                  }
-                                  className="font-medium"
-                                >
-                                  {t(delivery.status)}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 w-8 p-0"
-                                >
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                      <div className="w-6 h-6 bg-gray-300 rounded"></div>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-end">
+                      <div>
+                        <ProductKnowledgeSelect
+                          value={selectedProductKnowledge}
+                          onChange={(value) => {
+                            setSelectedProductKnowledge(value);
+                          }}
+                          placeholder={t("filter_by_product")}
+                        />
+                      </div>
+                      {selectedProductKnowledge && (
+                        <Button
+                          variant="ghost"
+                          onClick={() => {
+                            setSelectedProductKnowledge(undefined);
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                          {t("clear")}
+                        </Button>
+                      )}
                     </div>
-                    <p className="text-gray-500 font-medium">
-                      {t("no_deliveries_found")}
-                    </p>
-                    <p className="text-gray-400 text-sm mt-1">
-                      {t("deliveries_will_appear_here")}
-                    </p>
+                    {allSupplyDeliveries?.results &&
+                    allSupplyDeliveries.results.length > 0 ? (
+                      <SupplyDeliveryTable
+                        deliveries={allSupplyDeliveries.results}
+                        internal={internal}
+                      />
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                          <div className="w-6 h-6 bg-gray-300 rounded"></div>
+                        </div>
+                        <p className="text-gray-500 font-medium">
+                          {t("no_deliveries_found")}
+                        </p>
+                        <p className="text-gray-400 text-sm mt-1">
+                          {t("deliveries_will_appear_here")}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </TabsContent>

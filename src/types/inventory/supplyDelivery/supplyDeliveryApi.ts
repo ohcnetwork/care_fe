@@ -44,8 +44,8 @@ export default {
     TRes: Type<SupplyDeliveryBase>(),
     TBody: Type<SupplyDeliveryUpdate>(),
   },
-  request_orders: {
-    path: "/api/v1/supply_delivery/request_orders/",
+  deliveryOrders: {
+    path: "/api/v1/supply_delivery/delivery_orders/",
     method: HttpMethod.GET,
     TQueryParams: Type<{ request_order: string }>(),
     TRes: Type<PaginatedResponse<DeliveryOrderRetrieve>>(),

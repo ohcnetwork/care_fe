@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { formatDate } from "date-fns";
 import { ArrowLeft, MoreVertical, X } from "lucide-react";
 import { Link, useQueryParams } from "raviger";
 import { useState } from "react";
@@ -7,14 +6,10 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
-import useFilters from "@/hooks/useFilters";
-import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
-import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
-
+import Page from "@/components/Common/Page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +19,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -31,28 +32,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-import Page from "@/components/Common/Page";
+import useFilters from "@/hooks/useFilters";
 import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
-
-import { MonetaryDisplay } from "@/components/ui/monetary-display";
-import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
+import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
   DeliveryOrderStatus,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
+import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
-  SUPPLY_DELIVERY_CONDITION_COLORS,
-  SUPPLY_DELIVERY_STATUS_COLORS,
   SupplyDeliveryCondition,
   SupplyDeliveryStatus,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
@@ -83,7 +73,10 @@ export function DeliveryOrderShow({
     status: SupplyDeliveryStatus.completed,
     condition: SupplyDeliveryCondition.normal,
   });
+  const [showAllDeliveries, setShowAllDeliveries] = useState(false);
   const [selectedProductKnowledge, setSelectedProductKnowledge] =
+    useState<ProductKnowledgeBase>();
+  const [selectedProductKnowledgeDrawer, setSelectedProductKnowledgeDrawer] =
     useState<ProductKnowledgeBase>();
   const {
     qParams: filterParams,
@@ -104,6 +97,18 @@ export function DeliveryOrderShow({
       },
     }),
   });
+
+  const { data: requestOrders } = useQuery({
+    queryKey: ["requestOrders", deliveryOrderId],
+    queryFn: query(supplyRequestApi.requestOrders, {
+      queryParams: {
+        delivery_order: deliveryOrderId,
+      },
+    }),
+    enabled: !!deliveryOrderId,
+  });
+
+  const requestOrder = requestOrders?.results[0];
 
   const isRequester = locationId === deliveryOrder?.destination.id;
 
@@ -146,6 +151,32 @@ export function DeliveryOrderShow({
       enabled: !!qParams.supplyOrder,
     },
   );
+
+  // Query for all supply deliveries related to this delivery order
+  const { data: allSupplyDeliveries, isLoading: isLoadingAllSupplyDeliveries } =
+    useQuery({
+      queryKey: [
+        "allSupplyDeliveries",
+        requestOrder?.id,
+        selectedProductKnowledgeDrawer?.id,
+      ],
+      queryFn: query(supplyDeliveryApi.listSupplyDelivery, {
+        queryParams: {
+          facility: facilityId,
+          request_order: requestOrder?.id,
+          ...(internal
+            ? {
+                supplied_inventory_item_product_knowledge:
+                  selectedProductKnowledgeDrawer?.id,
+              }
+            : {
+                supplied_item_product_knowledge:
+                  selectedProductKnowledgeDrawer?.id,
+              }),
+        },
+      }),
+      enabled: !!deliveryOrderId && showAllDeliveries,
+    });
 
   const { mutate: upsertSupplyDeliveries, isPending: isUpsertingDeliveries } =
     useMutation({
@@ -334,6 +365,13 @@ export function DeliveryOrderShow({
             {t("back")}
           </Button>
           <div className="flex items-center gap-2">
+            {requestOrder && (
+              <Button variant="outline" asChild>
+                <Link href={`../request_orders/${requestOrder.id}`}>
+                  {t("view_request_order")}
+                </Link>
+              </Button>
+            )}
             <Button variant="outline" asChild>
               <Link href={`${deliveryOrderId}/edit`}>{t("edit")}</Link>
             </Button>
@@ -442,53 +480,66 @@ export function DeliveryOrderShow({
                 )}
               </div>
 
-              {deliveryOrder.status === DeliveryOrderStatus.pending &&
-                isRequester && (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={handleConfirmUpdateStock}
-                      className="h-10"
-                      disabled={
-                        isUpdating ||
-                        isUpsertingDeliveries ||
-                        selectedDeliveries.length === 0
-                      }
-                    >
-                      {isUpsertingDeliveries
-                        ? t("updating")
-                        : t("confirm_update_stock")}
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="h-10">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={handleMarkAsAbandoned}
-                          disabled={
-                            isUpdating ||
-                            isUpsertingDeliveries ||
-                            selectedDeliveries.length === 0
-                          }
-                        >
-                          {t("mark_as_abandoned")}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={handleMarkAsDamaged}
-                          disabled={
-                            isUpdating ||
-                            isUpsertingDeliveries ||
-                            selectedDeliveries.length === 0
-                          }
-                        >
-                          {t("mark_as_damaged")}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                )}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAllDeliveries(true)}
+                >
+                  {t("view_all_deliveries")}
+                </Button>
+
+                {deliveryOrder.status === DeliveryOrderStatus.pending &&
+                  isRequester && (
+                    <>
+                      <Button
+                        onClick={handleConfirmUpdateStock}
+                        className="h-10"
+                        disabled={
+                          isUpdating ||
+                          isUpsertingDeliveries ||
+                          selectedDeliveries.length === 0
+                        }
+                      >
+                        {isUpsertingDeliveries
+                          ? t("updating")
+                          : t("confirm_update_stock")}
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-10"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={handleMarkAsAbandoned}
+                            disabled={
+                              isUpdating ||
+                              isUpsertingDeliveries ||
+                              selectedDeliveries.length === 0
+                            }
+                          >
+                            {t("mark_as_abandoned")}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={handleMarkAsDamaged}
+                            disabled={
+                              isUpdating ||
+                              isUpsertingDeliveries ||
+                              selectedDeliveries.length === 0
+                            }
+                          >
+                            {t("mark_as_damaged")}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </>
+                  )}
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -507,217 +558,53 @@ export function DeliveryOrderShow({
                 {supplyDeliveries?.results &&
                   supplyDeliveries.results.length > 0 && (
                     <div className="space-y-4">
-                      <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
-                        <Table className="rounded-lg border shadow-sm w-full bg-white">
-                          <TableHeader className="bg-gray-100">
-                            <TableRow className="border-b">
-                              {deliveryOrder.status ===
-                                DeliveryOrderStatus.pending &&
-                                isRequester && (
-                                  <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                                    <Checkbox
-                                      checked={
-                                        selectedDeliveries.length ===
-                                          supplyDeliveries?.results.filter(
-                                            (d) =>
-                                              d.status ===
-                                              SupplyDeliveryStatus.in_progress,
-                                          ).length &&
-                                        selectedDeliveries.length > 0
-                                      }
-                                      disabled={
-                                        supplyDeliveries?.results.filter(
-                                          (d) =>
-                                            d.status ===
-                                            SupplyDeliveryStatus.in_progress,
-                                        ).length === 0
-                                      }
-                                      onCheckedChange={(checked) => {
-                                        if (checked) {
-                                          setSelectedDeliveries(
-                                            supplyDeliveries?.results
-                                              .filter(
-                                                (d) =>
-                                                  d.status ===
-                                                  SupplyDeliveryStatus.in_progress,
-                                              )
-                                              .map((d) => d.id) || [],
-                                          );
-                                        } else {
-                                          setSelectedDeliveries([]);
-                                        }
-                                      }}
-                                    />
-                                  </TableHead>
-                                )}
-                              <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                                {t("item")}
-                              </TableHead>
-                              <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                                {t("requested_qty")}
-                              </TableHead>
-                              <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                                {t("received_qty")}
-                              </TableHead>
-                              <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                                {t("received_date")}
-                              </TableHead>
-                              <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                                {t("base")}
-                              </TableHead>
-                              <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                                {t("tax")}
-                              </TableHead>
-                              <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                                {t("disc")}
-                              </TableHead>
-                              <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                                {t("status")}
-                              </TableHead>
-                              <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-                                {t("condition")}
-                              </TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody className="bg-white">
-                            {supplyDeliveries.results.map((supplyDelivery) => (
-                              <TableRow
-                                key={supplyDelivery.id}
-                                className="border-b hover:bg-gray-50"
-                              >
-                                {deliveryOrder.status ===
-                                  DeliveryOrderStatus.pending &&
-                                  isRequester && (
-                                    <TableCell className="border-x p-3 text-gray-950">
-                                      <Checkbox
-                                        checked={selectedDeliveries.includes(
-                                          supplyDelivery.id,
-                                        )}
-                                        disabled={
-                                          supplyDelivery.status !==
-                                          SupplyDeliveryStatus.in_progress
-                                        }
-                                        onCheckedChange={(checked) => {
-                                          if (checked) {
-                                            setSelectedDeliveries([
-                                              ...selectedDeliveries,
-                                              supplyDelivery.id,
-                                            ]);
-                                          } else {
-                                            setSelectedDeliveries(
-                                              selectedDeliveries.filter(
-                                                (id) =>
-                                                  id !== supplyDelivery.id,
-                                              ),
-                                            );
-                                          }
-                                        }}
-                                      />
-                                    </TableCell>
-                                  )}
-                                <TableCell className="border-x p-3 text-gray-950">
-                                  <Link
-                                    href={`/external_supply/deliveries/${supplyDelivery.id}`}
-                                  >
-                                    <div className="font-medium">
-                                      {supplyDelivery.supplied_item
-                                        ?.product_knowledge?.name ||
-                                        supplyDelivery.supplied_inventory_item
-                                          ?.product?.product_knowledge?.name}
-                                    </div>
-                                  </Link>
-                                </TableCell>
-                                <TableCell className="border-x p-3 text-gray-950">
-                                  {supplyDelivery.supply_request?.quantity}
-                                </TableCell>
-                                <TableCell className="border-x p-3 text-gray-950">
-                                  {supplyDelivery.supplied_item_quantity}
-                                </TableCell>
-                                <TableCell className="border-x p-3 text-gray-950">
-                                  {supplyDelivery.created_date &&
-                                    formatDate(
-                                      new Date(supplyDelivery.created_date),
-                                      "dd/MM/yyyy",
-                                    )}
-                                </TableCell>
-                                <TableCell className="border-x p-3 text-gray-950">
-                                  <MonetaryDisplay
-                                    amount={
-                                      supplyDelivery.supplied_inventory_item?.product.charge_item_definition.price_components.filter(
-                                        (c) =>
-                                          c.monetary_component_type ===
-                                          MonetaryComponentType.base,
-                                      )[0].amount
-                                    }
-                                  />
-                                </TableCell>
-                                <TableCell className="border-x p-3 text-gray-950">
-                                  <MonetaryDisplay
-                                    amount={String(
-                                      supplyDelivery.supplied_inventory_item?.product.charge_item_definition.price_components
-                                        .filter(
-                                          (c) =>
-                                            c.monetary_component_type ===
-                                            MonetaryComponentType.tax,
-                                        )
-                                        .reduce(
-                                          (acc, curr) =>
-                                            acc + Number(curr.amount || 0),
-                                          0,
-                                        ),
-                                    )}
-                                    hideCurrency
-                                  />
-                                </TableCell>
-                                <TableCell className="border-x p-3 text-gray-950">
-                                  <MonetaryDisplay
-                                    amount={String(
-                                      supplyDelivery.supplied_inventory_item?.product.charge_item_definition.price_components
-                                        .filter(
-                                          (c) =>
-                                            c.monetary_component_type ===
-                                            MonetaryComponentType.discount,
-                                        )
-                                        .reduce(
-                                          (acc, curr) =>
-                                            acc + Number(curr.amount || 0),
-                                          0,
-                                        ),
-                                    )}
-                                    hideCurrency
-                                  />
-                                </TableCell>
-                                <TableCell className="border-x p-3 text-gray-950">
-                                  <Badge
-                                    variant={
-                                      SUPPLY_DELIVERY_STATUS_COLORS[
-                                        supplyDelivery.status
-                                      ]
-                                    }
-                                  >
-                                    {t(supplyDelivery.status)}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="border-x p-3 text-gray-950">
-                                  {supplyDelivery.supplied_item_condition && (
-                                    <Badge
-                                      variant={
-                                        SUPPLY_DELIVERY_CONDITION_COLORS[
-                                          supplyDelivery.supplied_item_condition
-                                        ] as "secondary" | "destructive"
-                                      }
-                                    >
-                                      {t(
-                                        supplyDelivery.supplied_item_condition,
-                                      )}
-                                    </Badge>
-                                  )}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
+                      <SupplyDeliveryTable
+                        deliveries={supplyDeliveries.results}
+                        showCheckbox={
+                          deliveryOrder.status ===
+                            DeliveryOrderStatus.pending && isRequester
+                        }
+                        selectedDeliveries={selectedDeliveries}
+                        onDeliverySelect={(deliveryId, checked) => {
+                          if (checked) {
+                            setSelectedDeliveries([
+                              ...selectedDeliveries,
+                              deliveryId,
+                            ]);
+                          } else {
+                            setSelectedDeliveries(
+                              selectedDeliveries.filter(
+                                (id) => id !== deliveryId,
+                              ),
+                            );
+                          }
+                        }}
+                        onSelectAll={(checked) => {
+                          if (checked) {
+                            setSelectedDeliveries(
+                              supplyDeliveries.results
+                                .filter(
+                                  (d) =>
+                                    d.status ===
+                                    SupplyDeliveryStatus.in_progress,
+                                )
+                                .map((d) => d.id),
+                            );
+                          } else {
+                            setSelectedDeliveries([]);
+                          }
+                        }}
+                        internal={internal}
+                        onDeliveryClick={(delivery) => {
+                          setShowAllDeliveries(true);
+                          setSelectedProductKnowledgeDrawer(
+                            internal
+                              ? delivery.supplied_inventory_item?.product
+                                  ?.product_knowledge
+                              : delivery.supplied_item?.product_knowledge,
+                          );
+                        }}
+                      />
                       {supplyDeliveries && (
                         <Pagination totalCount={supplyDeliveries.count} />
                       )}
@@ -739,6 +626,58 @@ export function DeliveryOrderShow({
             )}
           </CardContent>
         </Card>
+
+        <Drawer open={showAllDeliveries} onOpenChange={setShowAllDeliveries}>
+          <DrawerContent className="max-w-7xl mx-auto px-4 sm:px-16 pb-10 ">
+            <DrawerHeader>
+              <DrawerTitle>{t("all_deliveries")}</DrawerTitle>
+            </DrawerHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-end">
+                <div>
+                  <ProductKnowledgeSelect
+                    value={selectedProductKnowledgeDrawer}
+                    onChange={(value) => {
+                      setSelectedProductKnowledgeDrawer(value);
+                    }}
+                    placeholder={t("filter_by_product")}
+                  />
+                </div>
+                {selectedProductKnowledgeDrawer && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setSelectedProductKnowledgeDrawer(undefined);
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                    {t("clear")}
+                  </Button>
+                )}
+              </div>
+              {isLoadingAllSupplyDeliveries ? (
+                <div className="space-y-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : allSupplyDeliveries?.results &&
+                allSupplyDeliveries.results.length > 0 ? (
+                <SupplyDeliveryTable
+                  deliveries={allSupplyDeliveries.results}
+                  internal={internal}
+                />
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">{t("no_deliveries_found")}</p>
+                </div>
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
 
         <Dialog
           open={confirmDialog.open}
