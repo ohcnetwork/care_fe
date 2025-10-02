@@ -13,37 +13,39 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import Loading from "@/components/Common/Loading";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { PlugConfig } from "@/types/plugConfig";
+import { useTranslation } from "react-i18next";
 
 export function PlugConfigList() {
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ["list-configs"],
     queryFn: query(routes.plugConfig.listPlugConfigs),
   });
 
   if (isLoading) {
-    return <Loading />;
+    return <TableSkeleton count={5} />;
   }
 
   return (
     <div className="p-4">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Plug Configs</h1>
+        <h1 className="text-2xl font-bold">{t("plug_configs")}</h1>
         <Button onClick={() => navigate("/apps/plug-configs/new")}>
           <CareIcon icon="l-plus" className="mr-2" />
-          Add New Config
+          {t("add_new_config")}
         </Button>
       </div>
 
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Slug</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>{t("slug")}</TableHead>
+            <TableHead>{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

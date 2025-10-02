@@ -18,6 +18,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { getCurrencySymbol } from "@/components/ui/monetary-display";
 import { getConditionValue } from "@/types/base/condition/condition";
 import {
   MonetaryComponent,
@@ -92,7 +93,8 @@ export function ChargeItemDefinitionDetail({
         <div className="text-right">
           {component.amount ? (
             <p className="font-medium">
-              {/* TODO: Internationalize currency symbol */}₹{component.amount}
+              {getCurrencySymbol()}
+              {component.amount}
             </p>
           ) : component.factor ? (
             <p className="font-medium">{component.factor}%</p>
@@ -202,7 +204,6 @@ export function ChargeItemDefinitionDetail({
               </Alert>
             }
             confirmText={isDeleting ? t("deleting") : t("confirm")}
-            cancelText={t("cancel")}
             onConfirm={handleDelete}
             variant="destructive"
             disabled={isDeleting}

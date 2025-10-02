@@ -477,11 +477,7 @@ export function PaymentReconciliationSheet({
             </div>
 
             <SheetFooter>
-              <Button
-                type="submit"
-                disabled={isPending}
-                data-shortcut-id="submit-action"
-              >
+              <Button type="submit" disabled={isPending}>
                 {isPending ? (
                   <>
                     <CareIcon
@@ -493,7 +489,7 @@ export function PaymentReconciliationSheet({
                 ) : (
                   t("record_payment")
                 )}
-                <ShortcutBadge actionId="submit-action" className="bg-white" />
+                <ShortcutBadge actionId="submit-action" />
               </Button>
             </SheetFooter>
           </form>
