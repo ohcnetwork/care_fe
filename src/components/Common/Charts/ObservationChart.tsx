@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   CartesianGrid,
@@ -14,6 +15,7 @@ import {
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Card } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Popover,
   PopoverContent,
@@ -28,7 +30,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Avatar } from "@/components/Common/Avatar";
 
@@ -105,6 +106,8 @@ const formatChartDate = (
   };
 };
 
+type ObservationTab = "graph" | "data" | "history";
+
 export const ObservationVisualizer = ({
   patientId,
   codeGroups,
@@ -114,6 +117,13 @@ export const ObservationVisualizer = ({
   canAccess,
 }: ObservationVisualizerProps) => {
   const { t } = useTranslation();
+  const [activeTabs, setActiveTabs] = useState<Record<number, ObservationTab>>(
+    {},
+  );
+  const getActiveTab = (index: number) => activeTabs[index] ?? "graph";
+  const handleActiveTabChange = (index: number, value: ObservationTab) => {
+    setActiveTabs((prev) => ({ ...prev, [index]: value }));
+  };
 
   // Flatten all codes for a single API request
   const allCodes = codeGroups.flatMap((group) => group.codes);
@@ -239,56 +249,66 @@ export const ObservationVisualizer = ({
     };
   });
 
+  const tabOptions = [
+    { value: "graph", label: "graph" },
+    { value: "data", label: "recent_data" },
+    { value: "history", label: "full_history" },
+  ];
   return (
     <div
       className="grid gap-4"
       style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
     >
-      {processedDataByGroup.map((group, groupIndex) => (
-        <Card key={groupIndex} className="p-4">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <h3 className="text-sm font-medium">{group.title}</h3>
-              <Popover>
-                <PopoverTrigger className="!px-0">
-                  <CareIcon
-                    icon="l-info-circle"
-                    className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer"
-                  />
-                </PopoverTrigger>
-                <PopoverContent
-                  className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"
-                  side="bottom"
-                  align="start"
-                  sideOffset={4}
-                  collisionPadding={16}
-                >
-                  <div className="space-y-2">
-                    <div className="font-medium">Observations:</div>
-                    {group.codes.map((code) => (
-                      <div key={code.code} className="text-xs">
-                        {code.display} ({code.code})
-                      </div>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-          <Tabs defaultValue="graph" className="w-full">
-            <TabsList className="flex w-full">
-              <TabsTrigger className="flex-1" value="graph">
-                {t("graph")}
-              </TabsTrigger>
-              <TabsTrigger className="flex-1" value="data">
-                {t("recent_data")}
-              </TabsTrigger>
-              <TabsTrigger className="flex-1" value="history">
-                {t("full_history")}
-              </TabsTrigger>
-            </TabsList>
+      {processedDataByGroup.map((group, groupIndex) => {
+        const currentTab = getActiveTab(groupIndex);
 
-            <TabsContent value="graph">
+        return (
+          <Card key={groupIndex} className="p-4">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <h3 className="text-sm font-medium">{group.title}</h3>
+                <Popover>
+                  <PopoverTrigger className="!px-0">
+                    <CareIcon
+                      icon="l-info-circle"
+                      className="size-4 text-gray-500 hover:text-gray-700 cursor-pointer"
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="max-w-fit w-[calc(100vw-2rem)] sm:max-w-fit sm:w-auto break-words"
+                    side="bottom"
+                    align="start"
+                    sideOffset={4}
+                    collisionPadding={16}
+                  >
+                    <div className="space-y-2">
+                      <div className="font-medium">Observations:</div>
+                      {group.codes.map((code) => (
+                        <div key={code.code} className="text-xs">
+                          {code.display} ({code.code})
+                        </div>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <FilterTabs
+                value={currentTab}
+                onValueChange={(value) =>
+                  handleActiveTabChange(groupIndex, value as ObservationTab)
+                }
+                options={tabOptions}
+                variant="underline"
+                showAllOption={false}
+                maxVisibleTabs={3}
+                showMoreDropdown={false}
+              />
+            </div>
+
+            {currentTab === "graph" && (
               <div style={{ height: `${height}px` }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
@@ -343,17 +363,16 @@ export const ObservationVisualizer = ({
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-            </TabsContent>
-
-            <TabsContent value="data">
+            )}
+            {currentTab === "data" && (
               <div className="max-h-[400px] overflow-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Time</TableHead>
-                      <TableHead>Values</TableHead>
-                      <TableHead>Entered By</TableHead>
-                      <TableHead>Notes</TableHead>
+                      <TableHead>{t("time")}</TableHead>
+                      <TableHead>{t("values")}</TableHead>
+                      <TableHead>{t("entered_by")}</TableHead>
+                      <TableHead>{t("notes")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -426,18 +445,17 @@ export const ObservationVisualizer = ({
                   </TableBody>
                 </Table>
               </div>
-            </TabsContent>
-
-            <TabsContent value="history">
+            )}
+            {currentTab === "history" && (
               <ObservationHistoryTable
                 patientId={patientId}
                 encounterId={encounterId}
                 codes={group.codes}
               />
-            </TabsContent>
-          </Tabs>
-        </Card>
-      ))}
+            )}
+          </Card>
+        );
+      })}
     </div>
   );
 };

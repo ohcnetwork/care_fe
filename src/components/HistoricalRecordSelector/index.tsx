@@ -11,6 +11,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Sheet,
   SheetContent,
@@ -26,7 +27,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { PaginatedResponse } from "@/Utils/request/types";
 
@@ -355,19 +355,18 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
             </SheetTitle>
           </SheetHeader>
           {structuredTypes.length > 1 && (
-            <Tabs
+            <FilterTabs
               value={activeType}
               onValueChange={handleTabChange}
-              className="w-full"
-            >
-              <TabsList className="w-full">
-                {structuredTypes.map(({ type }) => (
-                  <TabsTrigger key={type} value={type} className="flex-1">
-                    {type}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+              options={structuredTypes.map((st) => ({
+                value: st.type,
+                label: st.type,
+              }))}
+              variant="background"
+              className="w-full mb-2"
+              showAllOption={false}
+              maxVisibleTabs={structuredTypes.length}
+            />
           )}
         </div>
 

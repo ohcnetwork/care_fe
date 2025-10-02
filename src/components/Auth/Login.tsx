@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import CircularProgress from "@/components/Common/CircularProgress";
+import LanguageSelectorLogin from "@/components/Common/LanguageSelectorLogin";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import {
   InputOTP,
@@ -29,10 +32,6 @@ import {
 import { PasswordInput } from "@/components/ui/input-password";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import CircularProgress from "@/components/Common/CircularProgress";
-import LanguageSelectorLogin from "@/components/Common/LanguageSelectorLogin";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
 
@@ -40,11 +39,11 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
+import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
 import authApi from "@/types/auth/authApi";
-import { TokenData } from "@/types/otp/otp";
-import otpApi from "@/types/otp/otpApi";
+import { TokenData } from "@/types/auth/otp";
 
 import { AuthHero } from "./AuthHero";
 
@@ -93,6 +92,14 @@ const Login = (props: LoginProps) => {
   const { forgot } = props;
   const [params, setQueryParams] = useQueryParams();
   const { mode } = params;
+  const loginMode = (mode as LoginMode | undefined) ?? "staff";
+  useEffect(() => {
+    const desired =
+      disablePatientLogin && loginMode === "patient" ? "staff" : loginMode;
+    if (!mode || mode !== desired) {
+      setQueryParams({ mode: desired as LoginMode }, { replace: false });
+    }
+  }, [mode, loginMode, setQueryParams, disablePatientLogin]);
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
@@ -104,30 +111,25 @@ const Login = (props: LoginProps) => {
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string>("");
   const [otpValidationError, setOtpValidationError] = useState<string>("");
-  const [resendOtpCountdown, setResendOtpCountdown] =
-    useState(resendOtpTimeout);
+  const [resendOtpCountdown, setResendOtpCountdown] = useState<number>(
+    resendOtpTimeout ?? 60,
+  );
 
   // Timer Function for resend OTP
   useEffect(() => {
-    if (resendOtpCountdown <= 0) {
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setResendOtpCountdown((prevTime) => prevTime - 1);
-    }, 1000);
-
+    if (!Number.isFinite(resendOtpCountdown) || resendOtpCountdown <= 0) return;
+    const timer = setInterval(() => setResendOtpCountdown((t) => t - 1), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [resendOtpCountdown]);
 
   // Remember the last login mode
   useEffect(() => {
-    localStorage.setItem(LocalStorageKeys.loginPreference, mode);
-  }, [mode]);
+    localStorage.setItem(LocalStorageKeys.loginPreference, loginMode);
+  }, [loginMode]);
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
-    mutationFn: mutate(otpApi.send),
+    mutationFn: mutate(routes.otp.sendOtp),
     onSuccess: () => {
       setIsOtpSent(true);
       setOtpError("");
@@ -147,7 +149,9 @@ const Login = (props: LoginProps) => {
   // Verify OTP Mutation
   const { mutate: verifyOtp, isPending: verifyOtpPending } = useMutation({
     mutationFn: async (data: OtpLoginData) => {
-      const response = await mutate(otpApi.login, { silent: true })(data);
+      const response = await mutate(routes.otp.loginByOtp, { silent: true })(
+        data,
+      );
       if ("errors" in response) {
         throw response;
       }
@@ -183,7 +187,7 @@ const Login = (props: LoginProps) => {
         errorMessage = error.message;
       }
       setOtpValidationError(errorMessage);
-      toast.error(errorMessage);
+      toast.error(t(errorMessage));
     },
   });
 
@@ -296,7 +300,7 @@ const Login = (props: LoginProps) => {
 
     if (!isOtpSent) {
       sendOtp({ phone_number: phone });
-      setResendOtpCountdown(resendOtpTimeout);
+      setResendOtpCountdown(resendOtpTimeout ?? 60);
     } else {
       verifyOtp({ phone_number: phone, otp });
     }
@@ -365,21 +369,144 @@ const Login = (props: LoginProps) => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {disablePatientLogin ? (
-                  <>
-                    {/* Staff Login */}
-                    {!forgotPassword ? (
-                      <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="flex w-full">
+                  <FilterTabs
+                    value={loginMode}
+                    onValueChange={(value) => {
+                      if (disablePatientLogin && value === "patient") return;
+                      setQueryParams(
+                        { mode: value as LoginMode },
+                        { replace: false },
+                      );
+                      if (value === "staff") {
+                        resetPatientLogin();
+                      } else {
+                        setForgotPassword(false);
+                      }
+                    }}
+                    options={
+                      disablePatientLogin
+                        ? [{ value: "staff", label: "staff_login" }]
+                        : [
+                            { value: "staff", label: "staff_login" },
+                            { value: "patient", label: "patient_login" },
+                          ]
+                    }
+                    variant="background"
+                    className="flex-1 mb-2"
+                    showAllOption={false}
+                  />
+                </div>
+
+                {/* Staff Login */}
+                {loginMode === "staff" &&
+                  (!forgotPassword ? (
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="username">{t("username")}</Label>
+                        <Input
+                          id="username"
+                          name="username"
+                          type="text"
+                          data-cy="username"
+                          autoComplete="username"
+                          value={form.username}
+                          onChange={handleChange}
+                          className={cn(
+                            errors.username &&
+                              "border-red-500 focus-visible:ring-red-500",
+                          )}
+                        />
+                        {errors.username && (
+                          <p className="text-sm text-red-500">
+                            {t(errors.username)}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="password">{t("password")}</Label>
+                        <PasswordInput
+                          id="password"
+                          name="password"
+                          data-cy="password"
+                          autoComplete="current-password"
+                          value={form.password}
+                          onChange={handleChange}
+                          className={cn(
+                            errors.password &&
+                              "border-red-500 focus-visible:ring-red-500",
+                          )}
+                        />
+                        {errors.password && (
+                          <p className="text-sm text-red-500">
+                            {t(errors.password)}
+                          </p>
+                        )}
+                      </div>
+
+                      {isCaptchaEnabled && reCaptchaSiteKey && (
+                        <div className="py-4">
+                          <ReCaptcha
+                            sitekey={reCaptchaSiteKey}
+                            onChange={onCaptchaChange}
+                          />
+                        </div>
+                      )}
+
+                      <Button
+                        variant="link"
+                        type="button"
+                        onClick={() => setForgotPassword(true)}
+                        className="px-0"
+                      >
+                        {t("forget_password")}
+                      </Button>
+
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        variant="primary"
+                        data-cy="submit"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <CircularProgress className="text-white" />
+                        ) : (
+                          t("login")
+                        )}
+                      </Button>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleForgetSubmit} className="space-y-4">
+                      <Button
+                        variant="link"
+                        type="button"
+                        onClick={() => setForgotPassword(false)}
+                        className="px-0 mb-4 flex items-center gap-2"
+                      >
+                        <CareIcon icon="l-arrow-left" className="text-lg" />
+                        <span>{t("back_to_login")}</span>
+                      </Button>
+
+                      <div className="space-y-4">
+                        <div>
+                          <h2 className="text-2xl font-bold text-gray-900">
+                            {t("forget_password")}
+                          </h2>
+                          <p className="text-sm text-gray-500 mt-2">
+                            {t("forget_password_instruction")}
+                          </p>
+                        </div>
+
                         <div className="space-y-2">
                           <Label htmlFor="username">{t("username")}</Label>
                           <Input
-                            id="username"
+                            id="forgot_username"
                             name="username"
                             type="text"
-                            data-cy="username"
-                            autoComplete="username"
                             value={form.username}
                             onChange={handleChange}
+                            placeholder={t("enter_your_username")}
                             className={cn(
                               errors.username &&
                                 "border-red-500 focus-visible:ring-red-500",
@@ -434,366 +561,137 @@ const Login = (props: LoginProps) => {
                           type="submit"
                           className="w-full"
                           variant="primary"
-                          data-cy="submit"
                           disabled={isLoading}
                         >
                           {isLoading ? (
                             <CircularProgress className="text-white" />
                           ) : (
-                            t("login")
+                            t("send_reset_link")
                           )}
                         </Button>
-                      </form>
-                    ) : (
-                      <form onSubmit={handleForgetSubmit} className="space-y-4">
-                        <Button
-                          variant="link"
-                          type="button"
-                          onClick={() => setForgotPassword(false)}
-                          className="px-0 mb-4 flex items-center gap-2"
-                        >
-                          <CareIcon icon="l-arrow-left" className="text-lg" />
-                          <span>{t("back_to_login")}</span>
-                        </Button>
+                      </div>
+                    </form>
+                  ))}
 
-                        <div className="space-y-4">
-                          <div>
-                            <h2 className="text-2xl font-bold text-gray-900">
-                              {t("forget_password")}
-                            </h2>
-                            <p className="text-sm text-gray-500 mt-2">
-                              {t("forget_password_instruction")}
-                            </p>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="forgot_username">
-                              {t("username")}
-                            </Label>
-                            <Input
-                              id="forgot_username"
-                              name="username"
-                              type="text"
-                              value={form.username}
-                              onChange={handleChange}
-                              placeholder={t("enter_your_username")}
-                              className={cn(
-                                errors.username &&
-                                  "border-red-500 focus-visible:ring-red-500",
-                              )}
-                            />
-                            {errors.username && (
-                              <p className="text-sm text-red-500">
-                                {t(errors.username)}
-                              </p>
-                            )}
-                          </div>
-
-                          <Button
-                            type="submit"
-                            className="w-full"
-                            variant="primary"
-                            disabled={isLoading}
-                          >
-                            {isLoading ? (
-                              <CircularProgress className="text-white" />
-                            ) : (
-                              t("send_reset_link")
-                            )}
-                          </Button>
-                        </div>
-                      </form>
-                    )}
-                  </>
-                ) : (
-                  <Tabs
-                    value={mode === "patient" ? "patient" : "staff"}
-                    onValueChange={(value) => {
-                      setQueryParams({ mode: value as LoginMode });
-                      if (value === "staff") {
-                        resetPatientLogin();
-                      } else {
-                        setForgotPassword(false);
-                      }
-                    }}
-                  >
-                    <TabsList className="flex w-full">
-                      <TabsTrigger className="flex-1" value="staff">
-                        {t("staff_login")}
-                      </TabsTrigger>
-                      {!disablePatientLogin && (
-                        <TabsTrigger className="flex-1" value="patient">
-                          {t("patient_login")}
-                        </TabsTrigger>
+                {/* Patient Login */}
+                {loginMode === "patient" && !disablePatientLogin && (
+                  <form onSubmit={handlePatientLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">{t("phone_number")}</Label>
+                      <PhoneInput
+                        id="phone"
+                        name="phone"
+                        value={phone}
+                        onChange={(value) => {
+                          setPhone(value ?? "");
+                          setOtpError("");
+                          setOtpValidationError("");
+                        }}
+                        disabled={isOtpSent}
+                        placeholder={t("enter_phone_number")}
+                      />
+                      {otpError && (
+                        <p className="text-sm text-red-500">{t(otpError)}</p>
                       )}
-                    </TabsList>
+                    </div>
 
-                    {/* Staff Login */}
-                    <TabsContent value="staff">
-                      {!forgotPassword ? (
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="username">{t("username")}</Label>
-                            <Input
-                              id="username"
-                              name="username"
-                              type="text"
-                              data-cy="username"
-                              autoComplete="username"
-                              value={form.username}
-                              onChange={handleChange}
-                              className={cn(
-                                errors.username &&
-                                  "border-red-500 focus-visible:ring-red-500",
-                              )}
-                            />
-                            {errors.username && (
-                              <p className="text-sm text-red-500">
-                                {t(errors.username)}
-                              </p>
-                            )}
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="password">{t("password")}</Label>
-                            <PasswordInput
-                              id="password"
-                              name="password"
-                              data-cy="password"
-                              autoComplete="current-password"
-                              value={form.password}
-                              onChange={handleChange}
-                              className={cn(
-                                errors.password &&
-                                  "border-red-500 focus-visible:ring-red-500",
-                              )}
-                            />
-                            {errors.password && (
-                              <p className="text-sm text-red-500">
-                                {t(errors.password)}
-                              </p>
-                            )}
-                          </div>
-
-                          {isCaptchaEnabled && reCaptchaSiteKey && (
-                            <div className="py-4">
-                              <ReCaptcha
-                                sitekey={reCaptchaSiteKey}
-                                onChange={onCaptchaChange}
-                              />
-                            </div>
-                          )}
-
-                          <Button
-                            variant="link"
-                            type="button"
-                            onClick={() => setForgotPassword(true)}
-                            className="px-0"
-                          >
-                            {t("forget_password")}
-                          </Button>
-
-                          <Button
-                            type="submit"
-                            className="w-full"
-                            variant="primary"
-                            data-cy="submit"
-                            disabled={isLoading}
-                          >
-                            {isLoading ? (
-                              <CircularProgress className="text-white" />
-                            ) : (
-                              t("login")
-                            )}
-                          </Button>
-                        </form>
-                      ) : (
-                        <form
-                          onSubmit={handleForgetSubmit}
-                          className="space-y-4"
-                        >
-                          <Button
-                            variant="link"
-                            type="button"
-                            onClick={() => setForgotPassword(false)}
-                            className="px-0 mb-4 flex items-center gap-2"
-                          >
-                            <CareIcon icon="l-arrow-left" className="text-lg" />
-                            <span>{t("back_to_login")}</span>
-                          </Button>
-
-                          <div className="space-y-4">
-                            <div>
-                              <h2 className="text-2xl font-bold text-gray-900">
-                                {t("forget_password")}
-                              </h2>
-                              <p className="text-sm text-gray-500 mt-2">
-                                {t("forget_password_instruction")}
-                              </p>
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label htmlFor="forgot_username">
-                                {t("username")}
-                              </Label>
-                              <Input
-                                id="forgot_username"
-                                name="username"
-                                type="text"
-                                value={form.username}
-                                onChange={handleChange}
-                                placeholder={t("enter_your_username")}
-                                className={cn(
-                                  errors.username &&
-                                    "border-red-500 focus-visible:ring-red-500",
-                                )}
-                              />
-                              {errors.username && (
-                                <p className="text-sm text-red-500">
-                                  {t(errors.username)}
-                                </p>
-                              )}
-                            </div>
-
-                            <Button
-                              type="submit"
-                              className="w-full"
-                              variant="primary"
-                              disabled={isLoading}
-                            >
-                              {isLoading ? (
-                                <CircularProgress className="text-white" />
-                              ) : (
-                                t("send_reset_link")
-                              )}
-                            </Button>
-                          </div>
-                        </form>
-                      )}
-                    </TabsContent>
-
-                    {/* Patient Login */}
-                    <TabsContent value="patient">
-                      <form onSubmit={handlePatientLogin} className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">{t("phone_number")}</Label>
-                          <PhoneInput
-                            id="phone"
-                            name="phone"
-                            value={phone}
+                    {isOtpSent && (
+                      <div className="space-y-2">
+                        <Label htmlFor="otp" className="mb-4">
+                          {t("enter_otp")}
+                        </Label>
+                        <div className="flex justify-center">
+                          <InputOTP
+                            value={otp}
+                            maxLength={5}
+                            pattern={REGEXP_ONLY_DIGITS}
+                            autoComplete="one-time-code"
+                            autoFocus
                             onChange={(value) => {
-                              setPhone(value ?? "");
+                              setOtp(value);
+                              setOtpValidationError("");
+                            }}
+                          >
+                            <InputOTPGroup>
+                              {[...Array(5)].map((_, index) => (
+                                <InputOTPSlot
+                                  key={index}
+                                  index={index}
+                                  className={cn(
+                                    "size-10",
+                                    otpValidationError &&
+                                      "border-red-500 focus-visible:ring-red-500",
+                                  )}
+                                />
+                              ))}
+                            </InputOTPGroup>
+                          </InputOTP>
+                        </div>
+                        {otpValidationError && (
+                          <p className="text-sm text-red-500 text-center">
+                            {t(otpValidationError)}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      variant="primary"
+                      disabled={
+                        isLoading ||
+                        !isValidPhoneNumber(phone) ||
+                        (isOtpSent && otp.length !== 5)
+                      }
+                    >
+                      {isLoading ? (
+                        <CircularProgress className="text-white" />
+                      ) : isOtpSent ? (
+                        t("verify_otp")
+                      ) : (
+                        t("send_otp")
+                      )}
+                    </Button>
+                    {isOtpSent && (
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        {resendOtpCountdown <= 0 ? (
+                          <Button
+                            variant="link"
+                            type="button"
+                            className="h-auto p-0"
+                            onClick={() => {
+                              sendOtp({ phone_number: phone });
+                              setResendOtpCountdown(resendOtpTimeout ?? 60);
+                            }}
+                          >
+                            {t("resend_otp")}
+                          </Button>
+                        ) : (
+                          <p className="text-sm text-gray-500">
+                            {t("resend_otp_timer", {
+                              time: resendOtpCountdown,
+                            })}
+                          </p>
+                        )}
+                        <div className="flex items-center text-sm">
+                          <Button
+                            variant="link"
+                            type="button"
+                            className="h-auto p-0 text-primary-600"
+                            onClick={() => {
+                              setIsOtpSent(false);
+                              setOtp("");
                               setOtpError("");
                               setOtpValidationError("");
                             }}
-                            disabled={isOtpSent}
-                            placeholder={t("enter_phone_number")}
-                          />
-                          {otpError && (
-                            <p className="text-sm text-red-500">
-                              {t(otpError)}
-                            </p>
-                          )}
+                          >
+                            {t("change_phone_number")}
+                          </Button>
                         </div>
-
-                        {isOtpSent && (
-                          <div className="space-y-2">
-                            <Label htmlFor="otp" className="mb-4">
-                              {t("enter_otp")}
-                            </Label>
-                            <div className="flex justify-center">
-                              <InputOTP
-                                value={otp}
-                                maxLength={5}
-                                pattern={REGEXP_ONLY_DIGITS}
-                                autoComplete="one-time-code"
-                                autoFocus
-                                onChange={(value) => {
-                                  setOtp(value);
-                                  setOtpValidationError("");
-                                }}
-                              >
-                                <InputOTPGroup>
-                                  {[...Array(5)].map((_, index) => (
-                                    <InputOTPSlot
-                                      key={index}
-                                      index={index}
-                                      className={cn(
-                                        "size-10",
-                                        otpValidationError &&
-                                          "border-red-500 focus-visible:ring-red-500",
-                                      )}
-                                    />
-                                  ))}
-                                </InputOTPGroup>
-                              </InputOTP>
-                            </div>
-                            {otpValidationError && (
-                              <p className="text-sm text-red-500 text-center">
-                                {t(otpValidationError)}
-                              </p>
-                            )}
-                          </div>
-                        )}
-
-                        <Button
-                          type="submit"
-                          className="w-full"
-                          variant="primary"
-                          disabled={
-                            isLoading ||
-                            !isValidPhoneNumber(phone) ||
-                            (isOtpSent && otp.length !== 5)
-                          }
-                        >
-                          {isLoading ? (
-                            <CircularProgress className="text-white" />
-                          ) : isOtpSent ? (
-                            t("verify_otp")
-                          ) : (
-                            t("send_otp")
-                          )}
-                        </Button>
-                        {isOtpSent && (
-                          <div className="flex flex-col items-center gap-2 text-center">
-                            {resendOtpCountdown <= 0 ? (
-                              <Button
-                                variant="link"
-                                type="button"
-                                className="h-auto p-0"
-                                onClick={() => {
-                                  sendOtp({ phone_number: phone });
-                                  setResendOtpCountdown(resendOtpTimeout);
-                                }}
-                              >
-                                {t("resend_otp")}
-                              </Button>
-                            ) : (
-                              <p className="text-sm text-gray-500">
-                                {t("resend_otp_timer", {
-                                  time: resendOtpCountdown,
-                                })}
-                              </p>
-                            )}
-                            <div className="flex items-center text-sm">
-                              <Button
-                                variant="link"
-                                type="button"
-                                className="h-auto p-0 text-primary-600"
-                                onClick={() => {
-                                  setIsOtpSent(false);
-                                  setOtp("");
-                                  setOtpError("");
-                                  setOtpValidationError("");
-                                }}
-                              >
-                                {t("change_phone_number")}
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </form>
-                    </TabsContent>
-                  </Tabs>
+                      </div>
+                    )}
+                  </form>
                 )}
               </CardContent>
             </Card>

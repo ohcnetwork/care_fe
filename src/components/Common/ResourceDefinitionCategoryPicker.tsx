@@ -31,13 +31,13 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -245,12 +245,17 @@ export function ResourceDefinitionCategoryPicker<T>({
     [categoriesResponse?.results],
   );
 
+  // Keep raw API results and mapped display definitions separate
+  const rawDefinitions = useMemo(
+    () => (definitionsResponse?.results || []) as T[],
+    [definitionsResponse?.results],
+  );
+
   const definitions = useMemo(() => {
-    const results = definitionsResponse?.results || [];
     return mapper
-      ? results.map(mapper)
-      : (results as BaseCategoryPickerDefinition[]);
-  }, [definitionsResponse?.results, mapper]);
+      ? rawDefinitions.map(mapper)
+      : (rawDefinitions as unknown as BaseCategoryPickerDefinition[]);
+  }, [rawDefinitions, mapper]);
 
   const favorites = useMemo(() => {
     if (!enableFavorites || !favoritesResponse) return [];
@@ -263,6 +268,28 @@ export function ResourceDefinitionCategoryPicker<T>({
       ? favoritesArray.map(mapper)
       : (favoritesArray as BaseCategoryPickerDefinition[]);
   }, [favoritesResponse, mapper, enableFavorites]);
+
+  // Map slug -> original T across defs/favorites/recent so selection can return T
+  const rawBySlug = useMemo(() => {
+    // Prefer full definitions over (potentially sparse) favorites/recent
+    const allRaw = [
+      ...(Array.isArray(favoritesResponse)
+        ? (favoritesResponse as T[])
+        : (favoritesResponse as unknown as { results?: T[] })?.results || []),
+      ...(Array.isArray(recentResponse)
+        ? (recentResponse as T[])
+        : (recentResponse as unknown as { results?: T[] })?.results || []),
+      ...((definitionsResponse?.results || []) as T[]),
+    ] as T[];
+
+    const entries = allRaw.map((item) => {
+      const def = mapper
+        ? mapper(item)
+        : (item as unknown as BaseCategoryPickerDefinition);
+      return [def.slug, item] as const;
+    });
+    return new Map<string, T>(entries);
+  }, [definitionsResponse?.results, favoritesResponse, recentResponse, mapper]);
 
   const recentlyUsed = useMemo(() => {
     if (!enableFavorites || !recentResponse) return [];
@@ -315,6 +342,8 @@ export function ResourceDefinitionCategoryPicker<T>({
   });
 
   const handleDefinitionSelect = (definition: BaseCategoryPickerDefinition) => {
+    const original = (rawBySlug.get(definition.slug) ??
+      (definition as unknown)) as T;
     if (enableFavorites && favoritesConfig) {
       addToRecentMutation.mutate(definition.slug);
     }
@@ -333,10 +362,10 @@ export function ResourceDefinitionCategoryPicker<T>({
           ) as T[],
         );
       } else {
-        onValueChange([...currentValues, definition] as T[]);
+        onValueChange([...currentValues, original] as T[]);
       }
     } else {
-      onValueChange(definition as T);
+      onValueChange(original as T);
       setOpen(false);
       resetSearch();
     }
@@ -779,6 +808,48 @@ export function ResourceDefinitionCategoryPicker<T>({
     </Command>
   );
 
+  const tabOptions = [
+    { value: "search", label: "search" },
+    { value: "favorites", label: "favorites" },
+  ];
+
+  const renderFavoritesContent = () => (
+    <div className="flex flex-col h-full">
+      <div className="px-4 py-2 border-b flex-shrink-0">
+        <FilterTabs
+          value={favSubTab}
+          onValueChange={setFavSubTab}
+          options={[
+            {
+              value: "recent",
+              label: "recent",
+              icon: <Clock className="h-4 w-4" />,
+            },
+            {
+              value: "favorites",
+              label: "favorites",
+              icon:
+                favorites.length > 0 ? (
+                  <Badge variant="secondary">{favorites.length}</Badge>
+                ) : undefined,
+            },
+          ]}
+          variant="underline"
+          className="w-full"
+          showAllOption={false}
+        />
+      </div>
+      <div className="flex-1 min-h-0 overflow-hidden">
+        {favSubTab === "recent" && (
+          <div className="h-full mt-0">{renderRecentItems()}</div>
+        )}
+        {favSubTab === "favorites" && (
+          <div className="h-full mt-0">{renderFavoriteItems()}</div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-2">
       {isMobile ? (
@@ -865,33 +936,30 @@ export function ResourceDefinitionCategoryPicker<T>({
             </div>
 
             {enableFavorites ? (
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="flex flex-col flex-1 min-h-0"
-              >
-                <div className="px-4 py-2 border-b flex-shrink-0">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="search">{t("search")}</TabsTrigger>
-                    <TabsTrigger value="recent">{t("recent")}</TabsTrigger>
-                    <TabsTrigger value="favorites">
-                      {t("favorites")} ({favorites.length})
-                    </TabsTrigger>
-                  </TabsList>
+              <div className="flex flex-col flex-1 min-h-0">
+                <div className="px-4 py-3 border-b flex-shrink-0">
+                  <FilterTabs
+                    value={activeTab}
+                    onValueChange={setActiveTab}
+                    options={tabOptions}
+                    variant="underline"
+                    className="w-full"
+                    maxVisibleTabs={2}
+                    showAllOption={false}
+                    data-cy="rcp-mobile-main-tabs"
+                  />
                 </div>
-
                 <div className="flex-1 min-h-0 overflow-hidden">
-                  <TabsContent value="search" className="h-full mt-0" autoFocus>
-                    {renderMainContent()}
-                  </TabsContent>
-                  <TabsContent value="recent" className="h-full mt-0">
-                    {renderRecentItems()}
-                  </TabsContent>
-                  <TabsContent value="favorites" className="h-full mt-0">
-                    {renderFavoriteItems()}
-                  </TabsContent>
+                  {activeTab === "search" && (
+                    <div className="h-full mt-0">{renderMainContent()}</div>
+                  )}
+                  {activeTab === "favorites" && (
+                    <div className="h-full mt-0">
+                      {renderFavoritesContent()}
+                    </div>
+                  )}
                 </div>
-              </Tabs>
+              </div>
             ) : (
               <div className="flex-1 min-h-0">{renderMainContent()}</div>
             )}
@@ -938,7 +1006,7 @@ export function ResourceDefinitionCategoryPicker<T>({
 
           <PopoverContent
             className={cn(
-              "p-0 shadow-lg border-0 -w-[var(--radix-popover-trigger-width)] sm:max-w-[80vw]",
+              "p-0 shadow-lg border-0 min-w-[var(--radix-popover-trigger-width)] sm:max-w-[80vw]",
               enableFavorites ? "md:max-w-[70vw]" : "min-w-[420px]",
             )}
             align="start"
@@ -984,14 +1052,31 @@ export function ResourceDefinitionCategoryPicker<T>({
               {enableFavorites && (
                 <div className="max-w-72 w-full border-l border-gray-200">
                   <div className="px-4 py-1 border-b bg-gray-50">
-                    <Tabs value={favSubTab} onValueChange={setFavSubTab}>
-                      <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="recent">{t("recent")}</TabsTrigger>
-                        <TabsTrigger value="favorites">
-                          {t("favorites")} ({favorites.length})
-                        </TabsTrigger>
-                      </TabsList>
-                    </Tabs>
+                    <FilterTabs
+                      value={favSubTab}
+                      onValueChange={setFavSubTab}
+                      options={[
+                        {
+                          value: "recent",
+                          label: "recent",
+                          icon: <Clock className="h-4 w-4" />,
+                        },
+                        {
+                          value: "favorites",
+                          label: "favorites",
+                          icon:
+                            favorites.length > 0 ? (
+                              <Badge variant="secondary">
+                                {favorites.length}
+                              </Badge>
+                            ) : undefined,
+                        },
+                      ]}
+                      className="flex"
+                      variant="underline"
+                      showAllOption={false}
+                      maxVisibleTabs={2}
+                    />
                   </div>
 
                   <div className="overflow-auto min-h-0 max-h-[40vh]">
