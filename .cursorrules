@@ -42,8 +42,8 @@ This is a healthcare management system for TeleICU & hospital capacity administr
 
 ## Healthcare Data & API Guidelines
 
-- CARE uses TanStack Query for data fetching with query and mutate utilities (/Utils/request/README.md)
-- APIs are defined in the api.tsx files within type directories
+- CARE uses TanStack Query for data fetching with query and mutate utilities (src/Utils/request/README.md)
+- APIs are defined in *.Api.ts files under src/types/ directories
 - Use zod validation for all medical data inputs
 - Implement audit logging for medical data access
 - Handle PHI (Protected Health Information) with appropriate security measures
