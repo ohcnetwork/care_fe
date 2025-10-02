@@ -80,7 +80,7 @@ export function PaymentReconciliationShow({
       pathParams: { facilityId, paymentReconciliationId },
     }),
     onSuccess: () => {
-      toast.success(t("payment_cancelled"));
+      toast.success(t("payment_status_updated"));
       queryClient.invalidateQueries({
         queryKey: ["paymentReconciliation", paymentReconciliationId],
       });
