@@ -15,6 +15,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -24,7 +25,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -255,28 +255,30 @@ export function QuestionnaireList() {
 
         <div className="mt-8 mb-4">
           <div className="w-full overflow-x-auto pb-1">
-            <Tabs
-              defaultValue="active"
+            <FilterTabs
               value={qParams.status || "active"}
               onValueChange={(value) => updateQuery({ status: value })}
-            >
-              <div className="min-w-full sm:min-w-[50%] md:min-w-[40%]">
-                <TabsList className="flex w-full">
-                  <TabsTrigger value="active" className="flex-1">
-                    <FileCheckIcon className="size-4" />
-                    {t("active")}
-                  </TabsTrigger>
-                  <TabsTrigger value="draft" className="flex-1">
-                    <NotepadTextDashedIcon className="size-4" />
-                    {t("draft")}
-                  </TabsTrigger>
-                  <TabsTrigger value="retired" className="flex-1">
-                    <ArchiveIcon className="size-4" />
-                    {t("retired")}
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-            </Tabs>
+              options={[
+                {
+                  value: "active",
+                  label: "active",
+                  icon: <FileCheckIcon className="size-4" />,
+                },
+                {
+                  value: "draft",
+                  label: "draft",
+                  icon: <NotepadTextDashedIcon className="size-4" />,
+                },
+                {
+                  value: "retired",
+                  label: "retired",
+                  icon: <ArchiveIcon className="size-4" />,
+                },
+              ]}
+              variant="background"
+              className="min-w-full sm:min-w-[50%] md:min-w-[40%]"
+              showAllOption={false}
+            />
           </div>
         </div>
 

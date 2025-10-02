@@ -15,7 +15,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
@@ -200,22 +200,21 @@ export default function ValueSetSearchContent({
     <Command filter={() => 1} className="rounded-t-3xl">
       <div className="py-3 px-3 border-b border-gray-200 flex justify-between items-center">
         {title && <h3 className="text-base font-semibold">{title}</h3>}
-        <Tabs
-          value={activeTab.toString()}
-          onValueChange={(value) => {
-            setActiveTab(Number(value));
-          }}
-          className="md:hidden"
-        >
-          <TabsList className="flex w-full">
-            <TabsTrigger value={"0"} className="flex-1">
-              {t("search")}
-            </TabsTrigger>
-            <TabsTrigger value={"1"} className="flex-1">
-              {t("starred")}
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="md:hidden" data-cy="valueset-tabs-mobile">
+          <div className="flex w-full">
+            <FilterTabs
+              value={activeTab.toString()}
+              onValueChange={(value) => setActiveTab(Number(value))}
+              options={[
+                { value: "0", label: "search" },
+                { value: "1", label: "starred" },
+              ]}
+              className="flex-1"
+              variant="background"
+              showAllOption={false}
+            />
+          </div>
+        </div>
       </div>
       <div className="border-b border-gray-200">
         <CommandInput

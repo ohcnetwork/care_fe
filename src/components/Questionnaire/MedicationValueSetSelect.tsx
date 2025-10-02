@@ -15,12 +15,12 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ValueSetSearchContent from "@/components/Questionnaire/ValueSetSearchContent";
 
@@ -94,19 +94,31 @@ export default function MedicationValueSetSelect({
     enabled: !!facilityId && !search,
   });
 
+  const MIN_SEARCH_LEN = 3;
+
   const { data: productKnowledge, isFetching: isProductLoading } = useQuery({
-    queryKey: ["productKnowledge", "medication", currentCategory, search],
+    queryKey: [
+      "productKnowledge",
+      facilityId,
+      "medication",
+      currentCategory,
+      search,
+    ],
     queryFn: query.debounced(productKnowledgeApi.listProductKnowledge, {
       queryParams: {
         facility: facilityId,
         limit: 100,
         offset: 0,
-        name: search,
+        name: search.length >= MIN_SEARCH_LEN ? search : undefined,
         product_type: "medication",
         category: search ? undefined : currentCategory,
         status: ProductKnowledgeStatus.active,
       },
     }),
+    enabled:
+      !!facilityId &&
+      // allow browsing (no search) OR valid long-enough search
+      (search.length === 0 || search.length >= MIN_SEARCH_LEN),
   });
 
   useEffect(() => {
@@ -174,141 +186,143 @@ export default function MedicationValueSetSelect({
   };
 
   const renderTabContent = () => (
-    <Tabs
-      value={activeTab}
-      onValueChange={(value: string) =>
-        setActiveTab(value as "product" | "valueset")
-      }
-      className="w-full"
-    >
-      <div className="flex items-center border-b">
-        <TabsList className="h-10 w-full px-2">
-          <TabsTrigger value="product" className="flex-1">
-            {t("in_stock")}
-          </TabsTrigger>
-          <TabsTrigger value="valueset" className="flex-1">
-            {t("medication_list")}
-          </TabsTrigger>
-        </TabsList>
-      </div>
-      <TabsContent value="product" className="p-0">
-        <Command className="rounded-lg" filter={() => 1}>
-          <CommandInput
-            placeholder={t("search_products")}
-            onValueChange={(value) => {
-              if (value && currentCategory) {
-                setCurrentCategory(undefined);
-                setBreadcrumbs([]);
-              }
-              setSearch(value);
-            }}
-            value={search}
-            className="border-none ring-0 text-base md:text-sm"
-            autoFocus
-          />
-
-          {/* Breadcrumbs navigation */}
-          {breadcrumbs.length > 0 && (
-            <div className="px-4 py-2 border-b bg-gray-100">
-              <div className="flex items-center gap-1 truncate text-xs">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleBackToRoot}
-                  className="h-6 px-2 text-xs hover:bg-white"
-                >
-                  <Home className="size-3 mr-1" />
-                  {t("root")}
-                </Button>
-                {breadcrumbs.map((breadcrumb, index) => (
-                  <div key={breadcrumb.slug} className="flex items-center">
-                    <ChevronRight className="size-3 mx-1 text-gray-500" />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleBreadcrumbClick(index)}
-                      className="h-6 px-2 text-xs hover:bg-white truncate max-w-[150px]"
-                    >
-                      {breadcrumb.title}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <CommandList className="max-h-[300px] overflow-auto">
-            <CommandEmpty>
-              {search.length < 3 ? (
-                <p className="p-4 text-sm text-gray-500">
-                  {t("min_char_length_error", { min_length: 3 })}
-                </p>
-              ) : isProductLoading || isCategoriesLoading ? (
-                <p className="p-4 text-sm text-gray-500">{t("searching")}</p>
-              ) : (
-                <p className="p-4 text-sm text-gray-500">
-                  {t("no_results_found")}
-                </p>
-              )}
-            </CommandEmpty>
-
-            {!search && (
-              <>
-                {/* Categories */}
-                {categories?.results && categories.results.length > 0 && (
-                  <CommandGroup heading={t("category")}>
-                    {categories.results.map((category) => (
-                      <CommandItem
-                        key={category.id}
-                        value={category.title}
-                        onSelect={() =>
-                          handleCategorySelect(category.slug, category.title)
-                        }
-                        className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50"
-                      >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <FolderOpen className="size-5 text-gray-500" />
-                          <div className="min-w-0 flex-1">
-                            <div className="font-medium text-sm truncate">
-                              {category.title}
-                            </div>
-                            {category.description && (
-                              <div className="text-xs text-gray-500 truncate">
-                                {category.description}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <ChevronRight className="size-4 text-gray-500" />
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                )}
-                {/* Products in the current category */}
-                {currentCategory && renderProductItems()}
-              </>
-            )}
-            {/* Search Results */}
-            {search && renderProductItems()}
-          </CommandList>
-        </Command>
-      </TabsContent>
-
-      <TabsContent value="valueset" className="p-0">
-        <ValueSetSearchContent
-          system="system-medication"
-          onSelect={(selected) => {
-            onSelect(selected);
-            setOpen(false);
-          }}
-          searchPostFix=" clinical drug"
-          title={title}
-          search={search}
-          onSearchChange={setSearch}
-          placeholder={placeholder}
+    <div>
+      <div className="w-full">
+        <FilterTabs
+          value={activeTab}
+          onValueChange={(value: string) =>
+            setActiveTab(value as "product" | "valueset")
+          }
+          options={[
+            { value: "product", label: "in_stock" },
+            { value: "valueset", label: "medication_list" },
+          ]}
+          variant="underline"
+          className="flex items-center border-b"
+          showAllOption={false}
         />
-      </TabsContent>
-    </Tabs>
+      </div>
+      {activeTab === "product" && (
+        <div className="p-0">
+          <Command className="rounded-lg" filter={() => 1}>
+            <CommandInput
+              placeholder={t("search_products")}
+              onValueChange={(value) => {
+                if (value && currentCategory) {
+                  setCurrentCategory(undefined);
+                  setBreadcrumbs([]);
+                }
+                setSearch(value);
+              }}
+              value={search}
+              className="border-none ring-0 text-base md:text-sm"
+              autoFocus
+            />
+
+            {/* Breadcrumbs navigation */}
+            {breadcrumbs.length > 0 && (
+              <div className="px-4 py-2 border-b bg-gray-100">
+                <div className="flex items-center gap-1 truncate text-xs">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleBackToRoot}
+                    className="h-6 px-2 text-xs hover:bg-white"
+                  >
+                    <Home className="size-3 mr-1" />
+                    {t("root")}
+                  </Button>
+                  {breadcrumbs.map((breadcrumb, index) => (
+                    <div key={breadcrumb.slug} className="flex items-center">
+                      <ChevronRight className="size-3 mx-1 text-gray-500" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleBreadcrumbClick(index)}
+                        className="h-6 px-2 text-xs hover:bg-white truncate max-w-[150px]"
+                      >
+                        {breadcrumb.title}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <CommandList className="max-h-[300px] overflow-auto">
+              <CommandEmpty aria-live="polite">
+                {search.length < MIN_SEARCH_LEN ? (
+                  <p className="p-4 text-sm text-gray-500">
+                    {t("min_char_length_error", { min_length: MIN_SEARCH_LEN })}
+                  </p>
+                ) : isProductLoading || isCategoriesLoading ? (
+                  <p className="p-4 text-sm text-gray-500">{t("searching")}</p>
+                ) : (
+                  <p className="p-4 text-sm text-gray-500">
+                    {t("no_results_found")}
+                  </p>
+                )}
+              </CommandEmpty>
+
+              {!search && (
+                <>
+                  {/* Categories */}
+                  {categories?.results && categories.results.length > 0 && (
+                    <CommandGroup heading={t("category")}>
+                      {categories.results.map((category) => (
+                        <CommandItem
+                          key={category.id}
+                          value={category.title}
+                          onSelect={() =>
+                            handleCategorySelect(category.slug, category.title)
+                          }
+                          className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50"
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <FolderOpen className="size-5 text-gray-500" />
+                            <div className="min-w-0 flex-1">
+                              <div className="font-medium text-sm truncate">
+                                {category.title}
+                              </div>
+                              {category.description && (
+                                <div className="text-xs text-gray-500 truncate">
+                                  {category.description}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <ChevronRight className="size-4 text-gray-500" />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )}
+                  {/* Products in the current category */}
+                  {currentCategory && renderProductItems()}
+                </>
+              )}
+              {/* Search Results */}
+              {search.length >= MIN_SEARCH_LEN && renderProductItems()}
+            </CommandList>
+          </Command>
+        </div>
+      )}
+
+      {activeTab === "valueset" && (
+        <div className="p-0">
+          <ValueSetSearchContent
+            system="system-medication"
+            onSelect={(selected) => {
+              onSelect(selected);
+              setOpen(false);
+            }}
+            searchPostFix=" clinical drug"
+            title={title}
+            search={search}
+            onSearchChange={setSearch}
+          />
+        </div>
+      )}
+    </div>
   );
 
   if (isMobile && !hideTrigger) {
