@@ -991,9 +991,13 @@ function ProductKnowledgeFormContent({
                 type="button"
                 variant="outline"
                 onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
-                  )
+                  isEditMode
+                    ? navigate(
+                        `/facility/${facilityId}/settings/product_knowledge/${slug}`,
+                      )
+                    : navigate(
+                        `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
+                      )
                 }
               >
                 {t("cancel")}

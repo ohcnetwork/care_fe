@@ -172,7 +172,7 @@ function ProductKnowledgeTableRow({
                   size="sm"
                   onClick={() =>
                     navigate(
-                      `/facility/${facilityId}/settings/product_knowledge/${product.slug}`,
+                      `/facility/${facilityId}/settings/product_knowledge/${product.slug}/edit`,
                     )
                   }
                 >
