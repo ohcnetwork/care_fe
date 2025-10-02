@@ -29,14 +29,14 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
-import {
-  RESOURCE_CATEGORY_CHOICES,
-  RESOURCE_STATUS_CHOICES,
-} from "@/common/constants";
+import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
-import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+import {
+  getResourceRequestCategoryEnum,
+  ResourceRequest,
+} from "@/types/resourceRequest/resourceRequest";
 
 const COMPLETED = ["completed", "rejected", "cancelled"];
 const ACTIVE = RESOURCE_STATUS_CHOICES.map((o) => o.text).filter(
@@ -273,11 +273,9 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         <Badge variant="destructive">{t("emergency")}</Badge>
                       )}
                       <Badge variant="secondary">
-                        {
-                          RESOURCE_CATEGORY_CHOICES.find(
-                            (o) => o.id === resource.category,
-                          )?.text
-                        }
+                        {t(
+                          `resource_request_category__${getResourceRequestCategoryEnum(resource.category)}`,
+                        )}
                       </Badge>
                     </div>
                     <div className="flex flex-row gap-2">
