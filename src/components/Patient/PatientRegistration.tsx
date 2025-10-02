@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import DateField from "@/components/ui/date-field";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import {
   Form,
   FormControl,
@@ -33,7 +34,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAppHistory from "@/hooks/useAppHistory";
@@ -547,12 +547,16 @@ const PatientBasicsContent = ({
             <FormItem className="md:col-span-4">
               <FormLabel aria-required>{t("date_of_birth_or_age")}</FormLabel>
               <div className="flex gap-1 items-start">
-                <Tabs value={field.value} onValueChange={field.onChange}>
-                  <TabsList className="mt-0.25">
-                    <TabsTrigger value="dob">{t("date")}</TabsTrigger>
-                    <TabsTrigger value="age">{t("age")}</TabsTrigger>
-                  </TabsList>
-                </Tabs>
+                <FilterTabs
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  options={[
+                    { value: "dob", label: "date" },
+                    { value: "age", label: "age" },
+                  ]}
+                  variant="background"
+                  showAllOption={false}
+                />
                 {field.value === "dob" && (
                   <FormField
                     control={form.control}

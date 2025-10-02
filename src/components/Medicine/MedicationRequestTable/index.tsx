@@ -1,19 +1,28 @@
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
 import { DispenseHistory } from "@/components/Medicine/MedicationRequestTable/DispenseHistory";
-import PrescriptionListSelector from "@/components/Medicine/PrescriptionListSelector";
+import PrescriptionList from "@/components/Medicine/PrescriptionList";
 import PrescriptionView from "@/components/Medicine/PrescriptionView";
 import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
 
+import query from "@/Utils/request/query";
 import { Button } from "@/components/ui/button";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { PlusIcon, ReceiptTextIcon } from "lucide-react";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import {
+  ClipboardList,
+  History,
+  Plus as PlusIcon,
+  ReceiptText as ReceiptTextIcon,
+  Syringe,
+} from "lucide-react";
 import { Link } from "raviger";
 
 interface EmptyStateProps {
@@ -65,115 +74,141 @@ export default function MedicationRequestTable() {
   const [selectedPrescriptionId, setSelectedPrescriptionId] = useState<
     string | undefined
   >();
+  const [activeTab, setActiveTab] = useState("prescriptions");
+
+  useQuery({
+    queryKey: ["medication_requests_active", patientId, encounterId],
+    queryFn: query(medicationRequestApi.list, {
+      pathParams: { patientId: patientId },
+      queryParams: {
+        encounter: encounterId,
+        limit: 100,
+        status: ["active", "on_hold", "draft", "unknown"].join(","),
+        facility: facilityId,
+      },
+    }),
+    enabled: !!patientId && canAccess,
+  });
+
+  const tabOptions = [
+    {
+      value: "prescriptions",
+      label: "prescriptions",
+      icon: <ReceiptTextIcon className="size-4" />,
+    },
+    {
+      value: "ongoing",
+      label: "medication_statements",
+      icon: <ClipboardList className="size-4" />,
+    },
+    {
+      value: "administration",
+      label: "medicine_administration",
+      icon: <Syringe className="size-4" />,
+    },
+    {
+      value: "dispense_history",
+      label: "dispense_history",
+      icon: <History className="size-4" />,
+    },
+  ];
 
   return (
-    <div className="space-y-2 h-full">
-      <Tabs defaultValue="prescriptions" className="h-full">
+    <div className="space-y-2">
+      <div className="rounded-lg">
         <ScrollArea className="w-full">
-          <TabsList>
-            <TabsTrigger
-              value="prescriptions"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("prescriptions")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="ongoing"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("medication_statements")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="administration"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("medicine_administration")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="dispense_history"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("dispense_history")}
-            </TabsTrigger>
-          </TabsList>
+          <FilterTabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            options={tabOptions}
+            variant="background"
+            className="w-fit"
+            showAllOption={false}
+            maxVisibleTabs={4}
+          />
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
 
-        <TabsContent
-          value="prescriptions"
-          className="flex-1 flex flex-col overflow-hidden"
-        >
-          <div className="flex flex-1 flex-col lg:flex-row w-full gap-1 h-full">
-            <PrescriptionListSelector
-              patientId={patientId}
-              encounterId={encounterId}
-              facilityId={facilityId}
-              selectedPrescriptionId={selectedPrescriptionId}
-              onSelectPrescription={(prescription) => {
-                setSelectedPrescriptionId(prescription?.id);
-              }}
-            />
-
-            {selectedPrescriptionId ? (
-              <div className="flex-1 w-full h-full overflow-auto">
-                <PrescriptionView
+        {activeTab === "prescriptions" && (
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-[300px_1fr] gap-4">
+              <div>
+                <PrescriptionList
                   patientId={patientId}
-                  prescriptionId={selectedPrescriptionId}
-                  canWrite={canWrite}
-                  facilityId={facilityId}
                   encounterId={encounterId}
+                  facilityId={facilityId}
+                  selectedPrescriptionId={selectedPrescriptionId}
+                  onSelectPrescription={(prescription) => {
+                    setSelectedPrescriptionId(prescription?.id);
+                  }}
                 />
               </div>
-            ) : (
-              <div className="w-full flex-1 h-full flex items-center justify-center">
-                <div className="flex flex-col items-center">
-                  <ReceiptTextIcon className="text-gray-500" />
-                  <h3 className="font-medium">{t("no_prescriptions_found")}</h3>
-                  {canWrite && (
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="text-gray-950 hover:text-gray-700 h-9 mt-2"
-                      data-cy="edit-prescription"
-                    >
-                      <Link href={`questionnaire/medication_request`}>
-                        <PlusIcon className="mr-2 size-4" />
-                        {t("create_prescription")}
-                      </Link>
-                    </Button>
-                  )}
+              {selectedPrescriptionId && (
+                <div>
+                  <PrescriptionView
+                    patientId={patientId}
+                    prescriptionId={selectedPrescriptionId}
+                    canWrite={canWrite}
+                    facilityId={facilityId}
+                    encounterId={encounterId}
+                  />
+                </div>
+              )}
+            </div>
+            {!selectedPrescriptionId && (
+              <div className="flex w-full items-center justify-center">
+                <div className="flex items-center justify-center gap-2 pt-16 text-center">
+                  <div className="rounded-full bg-secondary/10 flex flex-col items-center justify-center gap-2">
+                    <ReceiptTextIcon className="text-gray-500" />
+                    <h3 className="font-medium">
+                      {t("no_prescriptions_found")}
+                    </h3>
+                    {canWrite && (
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="text-gray-950 hover:text-gray-700 h-9 mt-2"
+                        data-cy="create-prescription"
+                      >
+                        <Link href={`questionnaire/medication_request`}>
+                          <PlusIcon className="mr-2 size-4" />
+                          {t("create_prescription")}
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
           </div>
-        </TabsContent>
+        )}
 
-        <TabsContent value="ongoing">
+        {activeTab === "ongoing" && (
           <MedicationStatementList
             patientId={patientId}
             canAccess={canAccess}
             encounterId={encounterId}
           />
-        </TabsContent>
+        )}
 
-        <TabsContent value="administration">
+        {activeTab === "administration" && (
           <AdministrationTab
             patientId={patientId}
             encounterId={encounterId}
             canWrite={canWrite}
             canAccess={canAccess}
           />
-        </TabsContent>
+        )}
 
-        <TabsContent value="dispense_history">
+        {activeTab === "dispense_history" && (
           <DispenseHistory
             patientId={patientId}
             encounterId={encounterId}
             canAccess={canAccess}
             facilityId={facilityId}
           />
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   );
 }
