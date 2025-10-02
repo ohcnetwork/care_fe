@@ -11,7 +11,7 @@ import {
   CancelledAppointmentStatuses,
   formatScheduleResourceName,
   PastAppointmentStatuses,
-  UpcomingAppointmentStatuses, // Add this
+  UpcomingAppointmentStatuses,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
