@@ -24,8 +24,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import Loading from "@/components/Common/Loading";
 import SearchInput from "@/components/Common/SearchInput";
+import TableSkeleton from "@/components/Common/TableSkeleton";
 
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
@@ -195,9 +195,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                 {!!identifierSearch.config && !!identifierSearch.value && (
                   <>
                     {isFetching || !patientList ? (
-                      <div className="flex items-center justify-center h-[200px]">
-                        <Loading />
-                      </div>
+                      <TableSkeleton rows={8} />
                     ) : !patientList.results.length ? (
                       <div>
                         <div className="flex flex-col items-center justify-center py-10 text-center">
