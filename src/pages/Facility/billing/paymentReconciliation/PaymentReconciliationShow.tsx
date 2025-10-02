@@ -85,9 +85,6 @@ export function PaymentReconciliationShow({
         queryKey: ["paymentReconciliation", paymentReconciliationId],
       });
     },
-    onError: () => {
-      toast.error(t("failed_to_cancel_payment"));
-    },
   });
 
   if (isLoading) {
