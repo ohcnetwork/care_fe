@@ -42,12 +42,6 @@ import {
 } from "@/types/tokens/tokenCategory/tokenCategory";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  resource_type: z.nativeEnum(SchedulableResourceType),
-  shorthand: z.string().min(1, "Shorthand is required"),
-});
-
 export default function TokenCategoryForm({
   facilityId,
   tokenCategoryId,
@@ -137,6 +131,16 @@ export function TokenCategoryFormContent({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(tokenCategoryId);
+
+  const formSchema = z.object({
+    name: z.string().trim().min(1, t("field_required")),
+    resource_type: z.nativeEnum(SchedulableResourceType),
+    shorthand: z
+      .string()
+      .trim()
+      .min(1, t("field_required"))
+      .max(5, t("maximum_characters_allowed", { count: 5 })),
+  });
 
   const form = useForm({
     resolver: zodResolver(formSchema),

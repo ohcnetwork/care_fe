@@ -640,7 +640,7 @@ export function ConditionComponent({
         return (
           <Input
             type="number"
-            placeholder="Value"
+            placeholder={t("enter_value")}
             value={currentValue}
             onChange={(e) => handleSetValue(e.target.value, index)}
             className="w-fit"
@@ -656,7 +656,7 @@ export function ConditionComponent({
           <div className="flex flex-col sm:flex-row gap-2">
             <Input
               type="number"
-              placeholder="Min"
+              placeholder={t("enter_min_value")}
               className="w-full sm:w-32"
               value={currentRange.min || ""}
               onChange={(e) =>
@@ -671,7 +671,7 @@ export function ConditionComponent({
             />
             <Input
               type="number"
-              placeholder="Max"
+              placeholder={t("enter_max_value")}
               className="w-full sm:w-32"
               value={currentRange.max || ""}
               onChange={(e) =>
@@ -692,7 +692,7 @@ export function ConditionComponent({
         return (
           <Input
             type="text"
-            placeholder="Enter comma-separated values"
+            placeholder={t("enter_comma_separated_values")}
             value={currentValues.join(", ")}
             onChange={(e) => {
               const valuesArray = e.target.value
@@ -751,7 +751,7 @@ export function ConditionComponent({
                       onValueChange={(value) => handleSetMetric(value, index)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a metric" />
+                        <SelectValue placeholder={t("select_a_metric")} />
                       </SelectTrigger>
                       <SelectContent>
                         {metrics?.map((metric: Metrics) => (
@@ -772,7 +772,7 @@ export function ConditionComponent({
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select an operation" />
+                        <SelectValue placeholder={t("select_an_operation")} />
                       </SelectTrigger>
                       <SelectContent>
                         {metric.allowed_operations.map(
@@ -846,13 +846,13 @@ function InterpretationComponent({
         />
       </div>
       <div className="flex flex-col gap-2 flex-1">
-        <FormLabel className="text-sm">{t("color")}</FormLabel>
+        <FormLabel className="text-sm">{t("colour")}</FormLabel>
         <Select
           value={interpretation.color}
           onValueChange={(value) => handleColorChange(value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select a color" />
+            <SelectValue placeholder={t("select_a_colour")} />
           </SelectTrigger>
           <SelectContent>
             {Object.entries(COLOR_OPTIONS).map(([key, value]) => (
@@ -1073,7 +1073,7 @@ function CustomValueSetInterpretationComponent({
             onValueChange={(value) => handleSetValueset(value, index)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a value set" />
+              <SelectValue placeholder={t("select_a_value_set")} />
             </SelectTrigger>
             <SelectContent>
               {valuesets?.results?.map((valueset) => (

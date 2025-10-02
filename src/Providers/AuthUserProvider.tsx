@@ -19,7 +19,7 @@ import {
   MfaAuthenticationToken,
 } from "@/types/auth/auth";
 import authApi from "@/types/auth/authApi";
-import { TokenData } from "@/types/auth/otp";
+import { TokenData } from "@/types/otp/otp";
 import userApi from "@/types/user/userApi";
 
 interface Props {
