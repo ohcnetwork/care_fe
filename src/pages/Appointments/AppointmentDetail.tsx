@@ -11,18 +11,13 @@ import {
   PersonIcon,
   PlusCircledIcon,
 } from "@radix-ui/react-icons";
-<<<<<<< HEAD
+
 import {
   onlineManager,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { addDays, differenceInYears, format, isBefore } from "date-fns";
-import { BanIcon, EyeIcon, Loader2, PrinterIcon } from "lucide-react";
-import { navigate } from "raviger";
-=======
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, format, isBefore } from "date-fns";
 import {
   BanIcon,
@@ -37,7 +32,7 @@ import {
   X,
 } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
->>>>>>> upstream/develop
+
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -83,15 +78,6 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-<<<<<<< HEAD
-import {
-  queueCancelAppointmentRecord,
-  queueRescheduleOfflineRecord,
-  queueUpdateAppointmentRecordOffline,
-} from "@/components/Appointment/offlineQueue";
-import { ClickableAddress } from "@/components/Common/ClickableAddress";
-=======
->>>>>>> upstream/develop
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
@@ -104,24 +90,6 @@ import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
 import { getPermissions } from "@/common/Permissions";
 
-<<<<<<< HEAD
-import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
-import {
-  handleOfflineRecordSuccess,
-  isOfflineId,
-} from "@/OfflineSupport/offlineWriteHelpers";
-import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { HTTPError } from "@/Utils/request/types";
-import {
-  formatName,
-  getReadableDuration,
-  saveElementAsImage,
-  stringifyNestedObject,
-} from "@/Utils/utils";
-=======
->>>>>>> upstream/develop
 import { usePermissions } from "@/context/PermissionContext";
 import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
@@ -134,24 +102,17 @@ import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityRead } from "@/types/facility/facility";
 import {
   Appointment,
-<<<<<<< HEAD
+  APPOINTMENT_STATUS_COLORS,
   AppointmentCancelRequest,
   AppointmentFinalStatuses,
   AppointmentRead,
   AppointmentRescheduleRequest,
-  AppointmentUpdateRequest,
-  TokenSlot,
-} from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApi";
-import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
-=======
-  APPOINTMENT_STATUS_COLORS,
-  AppointmentFinalStatuses,
-  AppointmentRead,
   AppointmentStatus,
   AppointmentUpdateRequest,
   formatScheduleResourceName,
   SchedulableResourceType,
+  ScheduleResource,
+  TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
@@ -161,8 +122,12 @@ import {
   getReadableDuration,
   stringifyNestedObject,
 } from "@/Utils/utils";
->>>>>>> upstream/develop
 
+import {
+  queueCancelAppointmentRecord,
+  queueRescheduleOfflineRecord,
+  queueUpdateAppointmentRecordOffline,
+} from "@/components/Appointment/offlineQueue";
 import { Avatar } from "@/components/Common/Avatar";
 import BackButton from "@/components/Common/BackButton";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
@@ -171,11 +136,15 @@ import {
   ScheduleResourceFormState,
   ScheduleResourceSelector,
 } from "@/components/Schedule/ResourceSelector";
+import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
+import { CurrentUserRead } from "@/types/user/user";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { HTTPError } from "@/Utils/request/types";
 
 interface Props {
   appointmentId: string;
@@ -187,15 +156,14 @@ export default function AppointmentDetail(props: Props) {
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
   const { hasPermission } = usePermissions();
   const { goBack } = useAppHistory();
-<<<<<<< HEAD
+
   const { offlineEntryId } = useOfflineEntry();
 
   const db = new AppCacheDB();
   const authUser = useAuthUser();
-=======
+
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
->>>>>>> upstream/develop
 
   useShortcutSubContext("facility:appointment:detail&facility:billing:invoice");
 
@@ -218,18 +186,17 @@ export default function AppointmentDetail(props: Props) {
     enabled: canViewAppointments && !!facility,
   });
 
-<<<<<<< HEAD
-  const redirectToPatientPage = () => {
-    navigate(`/facility/${facility?.id}/patients/verify`, {
-      query: {
-        phone_number: patient.phone_number,
-        year_of_birth: patient.year_of_birth,
-        partial_id: !isOfflineId(patient.id)
-          ? patient.id.slice(0, 5)
-          : patient.id,
-      },
-    });
-  };
+  // const redirectToPatientPage = () => {
+  //   navigate(`/facility/${facility?.id}/patients/verify`, {
+  //     query: {
+  //       phone_number: patient.phone_number,
+  //       year_of_birth: patient.year_of_birth,
+  //       partial_id: !isOfflineId(patient.id)
+  //         ? patient.id.slice(0, 5)
+  //         : patient.id,
+  //     },
+  //   });
+  // };
 
   const handleAppointmentUpdateOfflineQueue = async (
     appointmentRequestData: AppointmentUpdateRequest,
@@ -248,9 +215,9 @@ export default function AppointmentDetail(props: Props) {
       db,
       onSuccess: (_appointmentId, _normalizedAppointment) => {
         toast.success(t("appointment_updated_successfully"));
-        if (appointmentRequestData.status === "in_consultation") {
-          redirectToPatientPage();
-        }
+        // if (appointmentRequestData.status === "in_consultation") {
+        //   redirectToPatientPage();
+        // }
       },
       onError: (error) => {
         console.error("Failed to queue status update:", error);
@@ -259,8 +226,6 @@ export default function AppointmentDetail(props: Props) {
     });
   };
 
-=======
->>>>>>> upstream/develop
   useEffect(() => {
     // Don't redirect while facility is still loading
     if (isFacilityLoading) {
@@ -413,20 +378,14 @@ export default function AppointmentDetail(props: Props) {
                   <AppointmentActions
                     facilityId={facilityId}
                     appointment={appointment}
-<<<<<<< HEAD
                     handleUpdateAppointment={handleUpdateAppointment}
-                    onViewPatient={redirectToPatientPage}
-                    canCreateAppointment={canCreateAppointment}
-                    offlineEntryId={offlineEntryId}
-                    isUpdating={isUpdating}
-                    db={db}
-                    authUser={authUser}
-=======
-                    updateAppointment={updateAppointment}
                     canWriteAppointment={canWriteAppointment}
                     isUpdating={isUpdating}
                     canCheckIn={canCheckIn}
                     currentStatus={currentStatus}
+                    offlineEntryId={offlineEntryId}
+                    db={db}
+                    authUser={authUser}
                   />
                 </div>
               )
@@ -455,7 +414,6 @@ export default function AppointmentDetail(props: Props) {
                     appointment={appointment}
                     token={appointment.token}
                     facility={facility}
->>>>>>> upstream/develop
                   />
                 </div>
               </>
@@ -618,7 +576,7 @@ export default function AppointmentDetail(props: Props) {
                         actionId="start-consultation"
                         data-shortcut-id="start-consultation"
                         onClick={() => {
-                          updateAppointment({
+                          handleUpdateAppointment({
                             status: AppointmentStatus.IN_CONSULTATION,
                             note: appointment.note,
                           });
@@ -643,7 +601,7 @@ export default function AppointmentDetail(props: Props) {
                           />
                         }
                         onSuccess={() => {
-                          updateAppointment({
+                          handleUpdateAppointment({
                             status: AppointmentStatus.IN_CONSULTATION,
                             note: appointment.note,
                           });
@@ -702,31 +660,6 @@ const AppointmentDetailsContent = ({
   const { t } = useTranslation();
 
   return (
-<<<<<<< HEAD
-    <div className="container md:p-6 max-w-3xl space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <span className="mr-3 inline-block mb-2">
-              {t("schedule_information")}
-            </span>
-            <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
-              {t(appointment.status)}
-            </Badge>
-            {appointment.is_updated_offline === true && <PendingSyncBadge />}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center space-x-4 text-sm">
-            <CalendarIcon className="size-5 text-gray-600" />
-            <div>
-              <p className="font-medium">
-                {format(appointment.token_slot.start_datetime, "MMMM d, yyyy")}
-              </p>
-              <p className="text-gray-600">
-                {appointment.token_slot.availability.name}
-              </p>
-=======
     <div className="container max-w-3xl space-y-6 mt-6">
       <ChargeItemsSection
         facilityId={facility.id}
@@ -763,7 +696,6 @@ const AppointmentDetailsContent = ({
                   {appointment.token_slot.availability.name}
                 </p>
               </div>
->>>>>>> upstream/develop
             </div>
             <div className="flex space-x-2 text-sm">
               <ClockIcon className="size-4 text-gray-500" />
@@ -926,89 +858,76 @@ const AppointmentDetailsContent = ({
 interface AppointmentActionsProps {
   facilityId: string;
   appointment: AppointmentRead;
-<<<<<<< HEAD
+
   handleUpdateAppointment: (data: AppointmentUpdateRequest) => void;
-  onViewPatient: () => void;
-  canCreateAppointment: boolean;
+  canWriteAppointment: boolean;
+
+  isUpdating: boolean;
+  canCheckIn: boolean;
+  currentStatus: AppointmentStatus;
   offlineEntryId?: string;
 
   authUser: CurrentUserRead;
   db: AppCacheDB;
-
-=======
-  updateAppointment: (data: AppointmentUpdateRequest) => void;
-  canWriteAppointment: boolean;
->>>>>>> upstream/develop
-  isUpdating: boolean;
-  canCheckIn: boolean;
-  currentStatus: AppointmentStatus;
 }
 
 const AppointmentActions = ({
   facilityId,
   appointment,
-<<<<<<< HEAD
   handleUpdateAppointment,
-  onViewPatient,
-  canCreateAppointment,
-  offlineEntryId,
-  authUser,
-  db,
-=======
-  updateAppointment,
   canWriteAppointment,
->>>>>>> upstream/develop
   isUpdating,
   canCheckIn,
   currentStatus,
+  authUser,
+  db,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-<<<<<<< HEAD
-  const [selectedMonthOffline, setSelectedMonthOffline] = useState(new Date());
-  const [selectedDateOffline, setSelectedDateOffline] = useState(new Date());
-=======
+  // <<<<<<< HEAD
+  //   const [selectedMonthOffline, setSelectedMonthOffline] = useState(new Date());
+  //   const [selectedDateOffline, setSelectedDateOffline] = useState(new Date());
+  // =======
 
   const [selectedResource, setSelectedResource] =
     useState<ScheduleResourceFormState>(appointment);
->>>>>>> upstream/develop
+  // >>>>>>> upstream/develop
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
   const [newNote, setNewVisitReason] = useState(appointment.note);
   const [oldNote, setRescheduleReason] = useState(appointment.note);
-<<<<<<< HEAD
-  const [selectedPractitioner, setSelectedPractitioner] =
-    useState<UserReadMinimal>(appointment.user);
-=======
+  // <<<<<<< HEAD
+  //   const [selectedPractitioner, setSelectedPractitioner] =
+  //     useState<UserReadMinimal>(appointment.user);
+  // =======
 
->>>>>>> upstream/develop
+  // >>>>>>> upstream/develop
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
   const [OfflineSelectedSlot, setOfflineSelectedSlot] = useState<
     TokenSlot | undefined
   >();
-  const [offlineEntry, setOfflineEntry] = useState<OfflineWritesEntry | null>(
-    null,
-  );
+
+  const { offlineEntryId, offlineEntry } = useOfflineEntry();
 
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [note, setNote] = useState(appointment.note);
 
-  useEffect(() => {
-    if (offlineEntryId) {
-      const loadOfflineEntry = async () => {
-        try {
-          const entry = await db.OfflineWrites.get(offlineEntryId);
-          if (entry && entry.normalizedData) {
-            setOfflineEntry(entry);
-          }
-        } catch (error) {
-          console.error("Error loading offline entry:", error);
-        }
-      };
-      loadOfflineEntry();
-    }
-  }, [offlineEntryId, db]);
+  // useEffect(() => {
+  //   if (offlineEntryId) {
+  //     const loadOfflineEntry = async () => {
+  //       try {
+  //         const entry = await db.OfflineWrites.get(offlineEntryId);
+  //         if (entry && entry.normalizedData) {
+  //           setOfflineEntry(entry);
+  //         }
+  //       } catch (error) {
+  //         console.error("Error loading offline entry:", error);
+  //       }
+  //     };
+  //     loadOfflineEntry();
+  //   }
+  // }, [offlineEntryId, db]);
 
   useEffect(() => {
     if (offlineEntry?.type === "reschedule_appointment") {
@@ -1031,8 +950,16 @@ const AppointmentActions = ({
         setNewVisitReason(payload.new_booking_note);
       }
 
-      if (normalizedData.user) {
-        setSelectedPractitioner(normalizedData.user);
+      if (payload.new_slot) {
+        setSelectedSlotId(payload.new_slot);
+        setSelectedDate(new Date(normalizedData.token_slot.start_datetime));
+      }
+
+      if (normalizedData.booked_by) {
+        setSelectedResource({
+          resource: normalizedData.booked_by,
+          resource_type: SchedulableResourceType.Practitioner,
+        });
       }
 
       if (normalizedData.token_slot) {
@@ -1045,11 +972,16 @@ const AppointmentActions = ({
   const handleAppointmentCancelOfflineQueue = async (
     appointmentRequestData: AppointmentCancelRequest,
   ) => {
+    const status: AppointmentStatus =
+      appointmentRequestData.reason === "cancelled"
+        ? AppointmentStatus.CANCELLED
+        : AppointmentStatus.ENTERED_IN_ERROR;
+
     await queueCancelAppointmentRecord({
       cancelAppointmentData: appointmentRequestData,
       appointment,
       authUser,
-      status: appointmentRequestData.reason,
+      status: status,
       facilityId,
       queryClient,
       t,
@@ -1111,18 +1043,24 @@ const AppointmentActions = ({
   const handleAppointmentRescheduleOfflineQueue = async (
     appointmentRequestData: AppointmentRescheduleRequest,
   ) => {
+    const slotMonth = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      1,
+    );
+
     await queueRescheduleOfflineRecord({
       rescheduleAppointmentData: appointmentRequestData,
       selectedSlot: OfflineSelectedSlot,
-      selectedPracticioner: selectedPractitioner,
+      selectedResource: selectedResource as ScheduleResource,
       authUser,
       appointment,
       db,
       facilityId,
       queryClient,
       t,
-      selectedDateOffline,
-      selectedMonthOffline,
+      selectedDate,
+      slotMonth,
       onSuccess: (_appointmentId, _normalizedAppointment) => {
         toast.success(t("appointment_rescheduled"));
         setIsRescheduleOpen(false);
@@ -1200,7 +1138,7 @@ const AppointmentActions = ({
             disabled={!canCheckIn}
             variant="primary"
             onClick={() =>
-              updateAppointment({
+              handleUpdateAppointment({
                 status: AppointmentStatus.CHECKED_IN,
                 note: appointment.note,
               })
@@ -1212,405 +1150,6 @@ const AppointmentActions = ({
             {t("check_in")}
             <ShortcutBadge actionId="check-in-action" className="bg-gray-200" />
           </Button>
-<<<<<<< HEAD
-
-          {/* Check In - Only for booked appointments */}
-          {currentStatus === "booked" && (
-            <Button
-              disabled={!canCheckIn}
-              variant="primary"
-              onClick={() =>
-                handleUpdateAppointment({
-                  status: "checked_in",
-                  note: appointment.note,
-                })
-              }
-              size="lg"
-              className="w-full justify-start h-12"
-            >
-              <EnterIcon className="size-4 mr-3" />
-              {t("check_in")}
-            </Button>
-          )}
-
-          {/* Start Consultation - For booked and checked in appointments */}
-          {["booked", "checked_in"].includes(currentStatus) &&
-            (appointment.associated_encounter?.id ? (
-              // When encounter exists: set status to in_consultation and redirect
-              <Button
-                disabled={!canCheckIn}
-                variant={currentStatus === "checked_in" ? "primary" : "outline"}
-                size="lg"
-                className="w-full justify-start h-12"
-                onClick={() => {
-                  handleUpdateAppointment({
-                    status: "in_consultation",
-                    note: appointment.note,
-                  });
-                  navigate(
-                    `/facility/${facilityId}/patient/${appointment.patient.id}/encounter/${appointment.associated_encounter!.id}/updates`,
-                  );
-                }}
-              >
-                <PlusCircledIcon className="size-4 mr-3" />
-                {t("start_consultation")}
-              </Button>
-            ) : (
-              // When no encounter exists: create encounter and set status to in_consultation
-              <CreateEncounterForm
-                patientId={appointment.patient.id}
-                facilityId={facilityId}
-                patientName={appointment.patient.name}
-                appointment={appointment.id}
-                trigger={
-                  <Button
-                    disabled={!canCheckIn}
-                    variant={
-                      currentStatus === "checked_in" ? "primary" : "outline"
-                    }
-                    size="lg"
-                    className="w-full justify-start h-12"
-                  >
-                    <PlusCircledIcon className="size-4 mr-3" />
-                    {t("start_consultation")}
-                  </Button>
-                }
-                onSuccess={() => {
-                  handleUpdateAppointment({
-                    status: "in_consultation",
-                    note: appointment.note,
-                  });
-                }}
-              />
-            ))}
-
-          {/* Mark as Fulfilled - For in consultation */}
-          {currentStatus === "in_consultation" && (
-            <Button
-              variant="primary"
-              onClick={() =>
-                handleUpdateAppointment({
-                  status: "fulfilled",
-                  note: appointment.note,
-                })
-              }
-              size="lg"
-              className="w-full justify-start h-12"
-            >
-              <CheckCircledIcon className="size-4 mr-3" />
-              {t("mark_as_fulfilled")}
-            </Button>
-          )}
-        </div>
-
-        {/* Secondary Actions */}
-        {canCreateAppointment && (
-          <div className="space-y-3">
-            <Separator />
-
-            {/* Reschedule */}
-            <AlertDialog
-              open={isRescheduleReasonOpen}
-              onOpenChange={setIsRescheduleReasonOpen}
-            >
-              <AlertDialogTrigger asChild>
-                {appointment.status !== "in_consultation" && (
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full justify-start h-12"
-                  >
-                    <CalendarIcon className="size-4 mr-3" />
-                    {t("reschedule")}
-                  </Button>
-                )}
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    {t("reschedule_appointment")}
-                  </AlertDialogTitle>
-                  <Label>{t("note")}</Label>
-                  <Textarea
-                    value={oldNote}
-                    onChange={(e) => setRescheduleReason(e.target.value)}
-                  />
-                  <AlertDialogDescription>
-                    <Alert variant="destructive">
-                      <AlertTitle>{t("warning")}</AlertTitle>
-                      <AlertDescription>
-                        {t("reschedule_appointment_warning")}
-                      </AlertDescription>
-                    </Alert>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel
-                    onClick={() => setIsRescheduleReasonOpen(false)}
-                  >
-                    {t("cancel")}
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => {
-                      setIsRescheduleReasonOpen(false);
-                      setIsRescheduleOpen(true);
-                    }}
-                    disabled={!oldNote.trim()}
-                  >
-                    {t("continue")}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-
-            <Sheet open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
-              <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
-                </SheetHeader>
-
-                <div className="mt-6">
-                  <div className="text-sm">
-                    <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-                      <Label className="font-medium">{t("tags")}</Label>
-                      <TagAssignmentSheet
-                        entityType="appointment"
-                        entityId={appointment.id}
-                        facilityId={facilityId}
-                        currentTags={appointment.tags}
-                        onUpdate={() => {
-                          queryClient.invalidateQueries({
-                            queryKey: ["appointment", appointment.id],
-                          });
-                        }}
-                        canWrite={true}
-                      />
-                    </div>
-                    {appointment.tags?.length > 0 ? (
-                      <p className="text-gray-600 flex flex-wrap gap-1">
-                        {appointment.tags.map((tag) => (
-                          <Badge key={tag.id} variant="secondary">
-                            {tag.parent ? `${tag.parent.display}: ` : ""}
-                            {tag.display}
-                          </Badge>
-                        ))}
-                      </p>
-                    ) : (
-                      <p className="text-gray-600 md:-mt-2">
-                        {t("no_tags_assigned")}
-                      </p>
-                    )}
-                  </div>
-                  <Label className="mb-2 aria-required mt-8">{t("note")}</Label>
-                  <Textarea
-                    placeholder={t("appointment_note")}
-                    value={newNote}
-                    onChange={(e) => setNewVisitReason(e.target.value)}
-                  />
-                  <div className="my-4">
-                    <Label className="mb-2">{t("select_practitioner")}</Label>
-                    <PractitionerSelector
-                      facilityId={facilityId}
-                      selected={selectedPractitioner}
-                      onSelect={(user) => user && setSelectedPractitioner(user)}
-                    />
-                  </div>
-                  <AppointmentSlotPicker
-                    facilityId={facilityId}
-                    resourceId={selectedPractitioner?.id}
-                    selectedSlotId={selectedSlotId}
-                    onSlotSelect={setSelectedSlotId}
-                    currentAppointment={appointment}
-                    setOfflineSelectedSlot={setOfflineSelectedSlot}
-                    setSelectedMonthOffline={setSelectedMonthOffline}
-                    setSelectedDateOffline={setSelectedDateOffline}
-                  />
-
-                  <div className="flex justify-end gap-2 mt-6">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setIsRescheduleOpen(false);
-                        setSelectedSlotId(undefined);
-                      }}
-                    >
-                      {t("cancel")}
-                    </Button>
-                    <Button
-                      variant="default"
-                      disabled={!selectedSlotId || isRescheduling}
-                      onClick={() => {
-                        if (selectedSlotId) {
-                          handleRescheduleSubmit({
-                            new_slot: selectedSlotId,
-                            previous_booking_note: oldNote,
-                            new_booking_note: newNote,
-                            tags: appointment.tags.map((tag) => tag.id),
-                          });
-                        }
-                      }}
-                    >
-                      {isRescheduling ? t("rescheduling") : t("reschedule")}
-                    </Button>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            {/* Mark as No Show */}
-            {["booked", "checked_in"].includes(currentStatus) && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full justify-start h-12"
-                  >
-                    <EyeNoneIcon className="size-4 mr-3" />
-                    {t("mark_as_noshow")}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("mark_as_noshow")}</AlertDialogTitle>
-                    <Label>{t("note")}</Label>
-                    <Textarea
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                    />
-                    <AlertDialogDescription>
-                      <Alert variant="destructive">
-                        <AlertTitle>{t("warning")}</AlertTitle>
-                        <AlertDescription>
-                          {t("mark_as_noshow_warning")}
-                        </AlertDescription>
-                      </Alert>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() =>
-                        handleUpdateAppointment({
-                          status: "noshow",
-                          note: note,
-                        })
-                      }
-                      className={cn(buttonVariants({ variant: "destructive" }))}
-                      disabled={!note.trim()}
-                    >
-                      {isUpdating ? (
-                        <Loader2 className="size-4 animate-spin mr-2" />
-                      ) : (
-                        t("confirm")
-                      )}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
-
-            {/* Cancel Appointment */}
-            {appointment.status !== "in_consultation" && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full justify-start h-12"
-                  >
-                    <BanIcon className="size-4 mr-3" />
-                    {t("cancel_appointment")}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {t("cancel_appointment")}
-                    </AlertDialogTitle>
-                    <Label>{t("note")}</Label>
-                    <Textarea
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                    />
-                    <AlertDialogDescription>
-                      <Alert variant="destructive">
-                        <AlertTitle>{t("warning")}</AlertTitle>
-                        <AlertDescription>
-                          {t("cancel_appointment_warning")}
-                        </AlertDescription>
-                      </Alert>
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() =>
-                        handleAppointmentCancel({
-                          reason: "cancelled",
-                          note: note,
-                        })
-                      }
-                      className={cn(buttonVariants({ variant: "destructive" }))}
-                      disabled={!note.trim()}
-                    >
-                      {isCancelling ? (
-                        <Loader2 className="size-4 animate-spin mr-2" />
-                      ) : (
-                        t("confirm")
-                      )}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
-
-            {/* Mark as Entered in Error */}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full justify-start h-12"
-                >
-                  <BanIcon className="size-4 mr-3" />
-                  {t("mark_as_entered_in_error")}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    {t("mark_as_entered_in_error")}
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    <Alert variant="destructive" className="mt-4">
-                      <AlertTitle>{t("warning")}</AlertTitle>
-                      <AlertDescription>
-                        {t("entered_in_error_warning")}
-                      </AlertDescription>
-                    </Alert>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() =>
-                      handleAppointmentCancel({ reason: "entered_in_error" })
-                    }
-                    className={cn(buttonVariants({ variant: "destructive" }))}
-                  >
-                    {isCancelling ? (
-                      <Loader2 className="size-4 animate-spin mr-2" />
-                    ) : (
-                      t("confirm")
-                    )}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-=======
->>>>>>> upstream/develop
         )}
 
         {/* Actions Menu */}
@@ -1627,7 +1166,7 @@ const AppointmentActions = ({
             {currentStatus === AppointmentStatus.IN_CONSULTATION && (
               <DropdownMenuItem
                 onClick={() =>
-                  updateAppointment({
+                  handleUpdateAppointment({
                     status: AppointmentStatus.FULFILLED,
                     note: appointment.note,
                   })
@@ -1779,6 +1318,7 @@ const AppointmentActions = ({
                               resourceType={selectedResource.resource_type}
                               selectedSlotId={selectedSlotId}
                               onSlotSelect={setSelectedSlotId}
+                              onSlotDetailsChange={setOfflineSelectedSlot}
                               currentAppointment={appointment}
                             />
                           </div>
@@ -1798,7 +1338,7 @@ const AppointmentActions = ({
                               disabled={!selectedSlotId || isRescheduling}
                               onClick={() => {
                                 if (selectedSlotId) {
-                                  rescheduleAppointment({
+                                  handleRescheduleSubmit({
                                     new_slot: selectedSlotId,
                                     previous_booking_note: oldNote,
                                     new_booking_note: newNote,
@@ -1853,7 +1393,7 @@ const AppointmentActions = ({
                         <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() =>
-                            updateAppointment({
+                            handleUpdateAppointment({
                               status: AppointmentStatus.NO_SHOW,
                               note: note,
                             })
@@ -1906,7 +1446,7 @@ const AppointmentActions = ({
                         <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() =>
-                            cancelAppointment({
+                            handleAppointmentCancel({
                               reason: "cancelled",
                               note: note,
                             })
@@ -1953,7 +1493,9 @@ const AppointmentActions = ({
                       <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() =>
-                          cancelAppointment({ reason: "entered_in_error" })
+                          handleAppointmentCancel({
+                            reason: "entered_in_error",
+                          })
                         }
                         className={cn(
                           buttonVariants({ variant: "destructive" }),

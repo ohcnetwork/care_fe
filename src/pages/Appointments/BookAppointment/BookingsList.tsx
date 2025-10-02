@@ -318,6 +318,8 @@ export const BookingListContent = ({
       })({ signal });
       return response;
     },
+    meta: { persist: true },
+    networkMode: "online",
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       const currentOffset = allPages.length * 15;

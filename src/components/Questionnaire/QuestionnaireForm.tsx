@@ -30,13 +30,15 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { HTTPError } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
-import { BatchRequestBody } from "@/types/base/batch/batch";
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
 import { MedicationRequestCreate } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/file";
 import {
-  BatchSubmissionResult,
   DetailedValidationError,
   QuestionValidationError,
   ValidationErrorResponse,
@@ -506,13 +508,13 @@ export function QuestionnaireForm({
   };
 
   const { mutate: submitBatch, isPending } = useMutation<
-    { results: BatchSubmissionResult[] },
+    BatchRequestResponse,
     HTTPError,
     BatchRequestBody
   >({
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     networkMode: "always",
-    onSuccess: async (response: { results: BatchSubmissionResult[] }) => {
+    onSuccess: async (response) => {
       if (editMode && offlineEntry) {
         await handleOfflineRecordSuccess(offlineEntry.id, response);
       }

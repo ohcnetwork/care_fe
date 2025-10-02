@@ -39,6 +39,8 @@ export default function PatientHomeEncounters({
       },
       silent: true,
     }),
+    networkMode: "online",
+    meta: { persist: true },
     enabled: !!patientId && canListEncounters,
   });
 

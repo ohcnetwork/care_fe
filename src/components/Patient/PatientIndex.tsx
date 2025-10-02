@@ -1,5 +1,5 @@
 import { onlineManager, useQuery } from "@tanstack/react-query";
-import { navigate, useQueryParams } from "raviger";
+import { navigate } from "raviger";
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -53,8 +53,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [partialOfflinePatients, setPartialOfflinePatients] = useState<
     PartialPatientModel[] | []
   >([]);
-
-  
 
   const shortcuts = useShortcuts();
   useShortcutSubContext();

@@ -3,7 +3,6 @@ import { AlertCircle, SquareActivity, Stethoscope, Ticket } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
-
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -32,7 +31,6 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
 
-
 export default function VerifyPatient() {
   useShortcutSubContext("facility:patient:home");
   const { t } = useTranslation();
@@ -44,8 +42,6 @@ export default function VerifyPatient() {
   const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
 
-
-
   const isTab = useBreakpoints({ default: true, lg: false });
 
   const { canWriteAppointment, canCreateEncounter, canListEncounters } =
@@ -54,8 +50,6 @@ export default function VerifyPatient() {
   // For now, using canWriteAppointment as a proxy for token creation permission
   // This can be updated when specific token permissions are available
   const canCreateToken = canWriteAppointment;
-
-
 
   const {
     data: patientData,
@@ -71,10 +65,17 @@ export default function VerifyPatient() {
     enabled: !!(phone_number && year_of_birth && partial_id),
   });
 
-  queryClient.setQueryData(
-    ["patient", patientData?.id],
-    patientData ?? null,
-  );
+  // useEffect(() => {
+  //   queryClient.prefetchQuery({
+  //     queryKey: ["patient", patientData?.id],
+  //     queryFn: () =>
+  //       query(patientApi.getPatient, {
+  //         pathParams: { id: patientData?.id || "" },
+  //       }),
+  //     meta: { persist: true },
+  //     networkMode: "online",
+  //   });
+  // }, [patientData?.id, queryClient]);
 
   if (isVerifyingPatient || !facility) {
     return (

@@ -72,7 +72,7 @@ const queryClient = new QueryClient({
         toast.warning(i18next.t("you_are_offline"));
       }
       onlineManager.setOnline(false);
-      await restorePersistedCache(queryClient);
+      // await restorePersistedCache(queryClient);
     },
   }),
   mutationCache: new MutationCache({
@@ -86,7 +86,7 @@ const queryClient = new QueryClient({
         toast.warning(i18next.t("you_are_offline"));
       }
       onlineManager.setOnline(false);
-      await restorePersistedCache(queryClient);
+      // await restorePersistedCache(queryClient);
     },
     onSuccess: async () => {
       if (!onlineManager.isOnline()) {

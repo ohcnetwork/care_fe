@@ -37,9 +37,10 @@ import {
 } from "@/types/resourceRequest/resourceRequest";
 import {
   AppointmentCreateRequest,
-  AppointmentNonCancelledStatus,
   AppointmentRead,
+  AppointmentStatus,
   AvailabilityHeatmapResponse,
+  ScheduleResource,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import { CurrentUserRead, UserBase, UserReadMinimal } from "@/types/user/user";
@@ -324,6 +325,7 @@ export const normalizeOfflineEncounterRecord = (
     location_history: [],
     permissions: permissions ?? [],
     care_team: [],
+    appointment: null,
     discharge_summary_advice: payload?.discharge_summary_advice ?? undefined,
     is_updated_offline: true,
     tags: selectedTags ?? [],
@@ -409,16 +411,18 @@ export const normalizedAppointmentRecord = (
   selectedTokenSlot: TokenSlot,
   patientData: PatientRead,
   bookedBy: CurrentUserRead | null,
-  status: AppointmentNonCancelledStatus,
-  practitioner: UserReadMinimal,
+  status: AppointmentStatus,
+  resource: ScheduleResource,
   facility: FacilityBareMinimum,
   selectedTags: TagConfig[],
 ): AppointmentRead => {
   const payload = entry.payload as AppointmentCreateRequest;
   const nowIso = new Date(entry.clientTimestamp).toISOString();
+
   return {
     id: entry.id,
     token_slot: selectedTokenSlot,
+    token: null,
     patient: patientData ?? null,
     booked_on: nowIso,
     booked_by: bookedBy
@@ -428,13 +432,11 @@ export const normalizedAppointmentRecord = (
           profile_picture_url: bookedBy.profile_picture_url ?? "",
           mfa_enabled: false,
           deleted: false,
-          phone_number: bookedBy.phone_number,
-          gender: bookedBy.gender,
         }
       : null,
     status: status,
     note: payload?.note,
-    user: practitioner,
+    ...resource,
     facility: facility,
     is_updated_offline: true,
     modified_date: nowIso,
@@ -445,8 +447,6 @@ export const normalizedAppointmentRecord = (
           profile_picture_url: bookedBy.profile_picture_url ?? "",
           mfa_enabled: false,
           deleted: false,
-          phone_number: bookedBy.phone_number,
-          gender: bookedBy.gender,
         }
       : null,
     created_by: bookedBy
@@ -456,8 +456,6 @@ export const normalizedAppointmentRecord = (
           profile_picture_url: bookedBy.profile_picture_url ?? "",
           mfa_enabled: false,
           deleted: false,
-          phone_number: bookedBy.phone_number,
-          gender: bookedBy.gender,
         }
       : null,
 
@@ -468,7 +466,7 @@ export const normalizedAppointmentRecord = (
 export const updateSlotCacheAfterOfflineAppointment = ({
   queryClient,
   selectedSlot,
-  selectedPracticioner,
+  selectedResource,
   facilityId,
   action,
   selectedDate,
@@ -479,7 +477,7 @@ export const updateSlotCacheAfterOfflineAppointment = ({
 }: {
   queryClient: QueryClient;
   selectedSlot?: TokenSlot;
-  selectedPracticioner: UserBase;
+  selectedResource: ScheduleResource;
   facilityId: string;
   action: "booked" | "rescheduled" | "cancel" | "mark_as_entered_in_error";
   selectedDate?: Date;
@@ -495,14 +493,14 @@ export const updateSlotCacheAfterOfflineAppointment = ({
     return {
       availabilityHeatmapKey: [
         "availabilityHeatmap",
-        selectedPracticioner.id,
+        selectedResource.resource.id,
         fromDate,
         toDate,
       ],
       slotQueryKey: [
         "slots",
         facilityId,
-        selectedPracticioner.id,
+        selectedResource.resource.id,
         dateQueryString(date),
       ],
       dateKey: dateQueryString(date),
@@ -680,6 +678,17 @@ export const updateActiveEncounterList = ({
       ["encounters", patientID, "active"],
       UpdatedActiveEncounterList,
     );
+
+    const CompletedEncouterList = queryClient.getQueryData<
+      PaginatedResponse<EncounterRead>
+    >(["encounters", patientID, "completed"]);
+
+    const newList = addEncounterToList(
+      CompletedEncouterList,
+      normalizeEncounter,
+    );
+
+    queryClient.setQueryData(["encounters", patientID, "completed"], newList);
   }
 };
 

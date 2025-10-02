@@ -75,6 +75,8 @@ export const PatientHome = (props: {
     patientData?.permissions ?? [],
   );
 
+  console.log("Patient Data:", canWriteAppointment, patientData);
+
   if (isLoading) {
     return <Loading />;
   }

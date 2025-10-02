@@ -15,7 +15,7 @@ import {
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface AppointmentDateSelectionProps {
   facilityId: string;
@@ -36,9 +36,6 @@ export const AppointmentDateSelection = ({
 }: AppointmentDateSelectionProps) => {
   const { t } = useTranslation();
   const [selectedMonth, setSelectedMonth] = useState(new Date());
-
-
-
 
   return (
     <div className="flex flex-col gap-3 md:min-w-121 lg:w-full">

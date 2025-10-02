@@ -91,13 +91,16 @@ const normalizeAndSetQueryData = async ({
   });
 
   queryClient.setQueryData(["patient", normalizePatient.id], normalizePatient);
+
   const { phone_number, year_of_birth } = normalizePatient;
   const partial_id = normalizePatient.id.startsWith("offline-")
     ? `offline-${normalizePatient.id.slice(8, 13)}`
     : normalizePatient.id.slice(0, 5);
 
+  const yearOfBirthStr = String(year_of_birth);
+
   queryClient.setQueryData(
-    ["patient-verify", phone_number, year_of_birth, partial_id],
+    ["patient-verify", phone_number, yearOfBirthStr, partial_id],
     normalizePatient,
   );
 

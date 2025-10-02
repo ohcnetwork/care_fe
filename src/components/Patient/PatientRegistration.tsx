@@ -39,8 +39,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAppHistory from "@/hooks/useAppHistory";
 
-
-
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
 import { PLUGIN_Component } from "@/PluginEngine";
@@ -61,16 +59,33 @@ import {
   queuePatientUpdateOffline,
 } from "./offlineQueue";
 
+import useAuthUser from "@/hooks/useAuthUser";
+import { useOfflineEntry } from "@/hooks/useOfflineEntry";
+import { tzAwareDateTime } from "@/lib/validators";
+import OfflinePatientWarningDialog from "@/OfflineSupport/OfflinePatientCreateWarning";
+import {
+  getYearOfBirth,
+  handleOfflineRecordSuccess,
+} from "@/OfflineSupport/offlineWriteHelpers";
 import organizationApi from "@/types/organization/organizationApi";
-import { PatientIdentifier, PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import {
+  PatientIdentifier,
+  PatientIdentifierConfig,
+} from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { HTTPError } from "@/Utils/request/types";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { onlineManager, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  onlineManager,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { format, isBefore, isFuture, subYears } from "date-fns";
 import { TFunction } from "i18next";
 import { isValidPhoneNumber } from "libphonenumber-js";
@@ -81,12 +96,6 @@ import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
-import { useOfflineEntry } from "@/hooks/useOfflineEntry";
-import useAuthUser from "@/hooks/useAuthUser";
-import { HTTPError } from "@/Utils/request/types";
-import { getYearOfBirth, handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
-import OfflinePatientWarningDialog from "@/OfflineSupport/OfflinePatientCreateWarning";
-import { tzAwareDateTime } from "@/lib/validators";
 
 export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   useShortcutSubContext();
@@ -95,24 +104,21 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   const { facility, facilityId } = useCurrentFacility();
   const [{ phone_number }] = useQueryParams();
 
-
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
     useState(!!patientId);
 
-     const [navTarget, setNavTarget] = useState<
+  const [navTarget, setNavTarget] = useState<
     "back" | { to: string; options?: any } | null
   >(null);
   const { offlineEntryId, offlineEntry, isLoadingOfflineEntry } =
     useOfflineEntry();
   const user = useAuthUser();
-    const [
+  const [
     userConfirmedOfflineDuplicateRisk,
     setUserConfirmedOfflineDuplicateRisk,
   ] = useState(false);
   const [selectedOrganization, setSelectedOrganization] =
     useState<Organization | null>(null);
-
-
 
   const [suppressOfflineDuplicateWarning, setSuppressOfflineDuplicateWarning] =
     useState(!!patientId);
@@ -120,7 +126,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
 
   const quickRegistration =
     careConfig.patientRegistration.minimalPatientRegistration;
-
 
   const form = useForm({
     resolver: zodResolver(getFormSchema(t)),
@@ -146,6 +151,8 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     queryFn: query(patientApi.getPatient, {
       pathParams: { id: patientId || "" },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!patientId,
   });
 
@@ -156,6 +163,8 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     queryFn: query(organizationApi.get, {
       pathParams: { id: defaultGeoOrgId },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!defaultGeoOrgId,
   });
 
@@ -167,18 +176,22 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     if (!patientId && defaultGeoOrgId && !defaultGeoOrg) {
       return;
     }
-  const patientData = (
-        offlineEntryId ? offlineEntry?.normalizedData : patientQuery.data
-      ) as PatientRead | undefined;
+    const patientData = (
+      offlineEntryId ? offlineEntry?.normalizedData : patientQuery.data
+    ) as PatientRead | undefined;
 
-       if (patientData) {
-        setSelectedOrganization(
-          patientData.geo_organization as unknown as Organization,
-        );
-
+    if (patientData) {
+      setSelectedOrganization(
+        patientData.geo_organization as unknown as Organization,
+      );
+    }
     // Default values for new patient
     if (!patientData) {
-      const getValue = ({ id }: { id: string }) => ({ config: id, value: "" });
+      const getValue = ({ id }: { id: string }) => ({
+        config: id,
+        value: "",
+      });
+
       form.setValue(
         "required_identifiers",
         getRequiredIdentifierConfigs(facility).map(getValue),
@@ -205,8 +218,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
         value: identifier?.value,
       };
     };
-
-
 
     // Reset the form with the patient data
     form.reset({
@@ -246,7 +257,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  } ,[patientQuery.data, facility, defaultGeoOrg ,offlineEntry]);
+  }, [patientQuery.data, facility, defaultGeoOrg, offlineEntry]);
 
   const phoneNumber = form.watch("phone_number");
   const patientPhoneSearch = useQuery({
@@ -254,6 +265,8 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     queryFn: query.debounced(patientApi.searchPatient, {
       body: { phone_number: phoneNumber },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: isValidPhoneNumber(phoneNumber),
   });
 
@@ -289,6 +302,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
         (patientRequestData as PatientCreate).identifiers,
       );
 
+      const selectedTags: TagConfig[] = [];
       await queueNewPatientOffline({
         createPatientData: patientRequestData as PatientCreate,
         identifiers: fullIdentifiers,
@@ -311,7 +325,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
                 phone_number: (patientRequestData as PatientCreate)
                   .phone_number,
                 year_of_birth: yob,
-                partial_id: patientId,
+                partial_id: `offline-${patientId.slice(8, 13)}`,
               },
             },
           });
@@ -353,13 +367,11 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     }
   };
 
-
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation<
     PatientRead,
     HTTPError,
     PatientCreate
   >({
-
     mutationFn: mutate(patientApi.addPatient),
     onSuccess: async (resp: PatientRead) => {
       if (offlineEntryId) {
@@ -393,10 +405,11 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     },
   });
 
-
-
-  const { mutate: updatePatient, isPending: isUpdatingPatient } = useMutation<PatientRead, HTTPError, PatientUpdate>({
-
+  const { mutate: updatePatient, isPending: isUpdatingPatient } = useMutation<
+    PatientRead,
+    HTTPError,
+    PatientUpdate
+  >({
     mutationFn: mutate(patientApi.updatePatient, {
       pathParams: { id: patientId || "" },
     }),
@@ -424,10 +437,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     },
   });
 
- 
-
   const isPending = isCreatingPatient || isUpdatingPatient;
-
 
   const showDuplicate =
     onlineManager.isOnline() &&
@@ -435,7 +445,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     !!duplicatePatients?.length &&
     !!isValidPhoneNumber(phoneNumber) &&
     !suppressDuplicateWarning;
-
 
   const showOfflineDuplicateWarningDialog =
     !onlineManager.isOnline() &&
@@ -458,7 +467,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   // TODO: Use useBlocker hook after switching to tanstack router
   // https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking#how-do-i-use-navigation-blocking
 
-
   useNavigationPrompt(
     !navTarget && form.formState.isDirty && !isPending && !showDuplicate,
     t("unsaved_changes"),
@@ -471,7 +479,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     return <Loading />;
   }
 
-  function onSubmit(values: z.infer<ReturnType<typeof getFormSchema>>) {
+  async function onSubmit(values: z.infer<ReturnType<typeof getFormSchema>>) {
     if (!facility) {
       return;
     }
@@ -507,21 +515,18 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     };
 
     if (!patientId) {
-
       const createPatientData: PatientCreate = {
-            ...basePayload,
+        ...basePayload,
         facility: facilityId,
         tags: values.tags,
+      };
 
-         }
-
-       if (!onlineManager.isOnline()) {        
-        await handleOfflineQueue(createPatientData, false);
+      if (!onlineManager.isOnline()) {
+        await handleOfflineQueue(createPatientData, true);
         return;
       }
       createPatient(createPatientData);
     } else {
-
       if (!onlineManager.isOnline()) {
         await handleOfflineQueue(basePayload, false);
         return;
@@ -608,6 +613,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
             <div className="w-full border-t border-gray-200 py-6 mt-6">
               <div className="max-w-2xl mx-auto flex justify-end">
                 <Button
+                  type="submit"
                   variant="primary_gradient"
                   data-shortcut-id="submit-action"
                   // TODO: disable button if basic info not fille
@@ -642,7 +648,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
         />
       )}
 
-       {showOfflineDuplicateWarningDialog && (
+      {showOfflineDuplicateWarningDialog && (
         <OfflinePatientWarningDialog
           open={showOfflineDuplicateWarningDialog}
           onOpenChange={(open) => {
@@ -659,8 +665,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
           setChecked={setUserConfirmedOfflineDuplicateRisk}
         />
       )}
-
-
     </Page>
   );
 };
@@ -840,14 +844,12 @@ const PatientBasicsContent = ({
                             placeholder={t("age")}
                             min={1}
                             max={120}
-
                             value={field.value ?? ""}
                             onChange={(e) => {
                               field.onChange(
                                 e.target.value ? Number(e.target.value) : null,
                               );
                             }}
-
                           />
                         </FormControl>
                         <FormMessage />
@@ -871,7 +873,6 @@ const PatientBasicsContent = ({
                 onValueChange={field.onChange}
                 defaultValue={field.value}
               >
-
                 <FormControl>
                   <SelectTrigger ref={field.ref}>
                     <SelectValue placeholder={t("select_blood_group")} />
@@ -889,7 +890,6 @@ const PatientBasicsContent = ({
             </FormItem>
           )}
         />
-
       </div>
 
       {facility &&
@@ -938,9 +938,7 @@ const PatientBasicsContent = ({
           )}
         />
       )}
-
     </>
-
   );
 };
 

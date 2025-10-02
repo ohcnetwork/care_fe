@@ -19,16 +19,15 @@ import { FacilityRead } from "@/types/facility/facility";
 import {
   Appointment,
   AppointmentCancelRequest,
-  AppointmentCancelledStatus,
   AppointmentCreateRequest,
-  AppointmentNonCancelledStatus,
   AppointmentRescheduleRequest,
+  AppointmentStatus,
   AppointmentUpdateRequest,
+  ScheduleResource,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
-import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
-import { ScheduleResourceFormState } from "../Schedule/ResourceSelector";
+import { CurrentUserRead } from "@/types/user/user";
 
 interface NormalizeAndSetQueryDataParams {
   entry: any;
@@ -36,8 +35,8 @@ interface NormalizeAndSetQueryDataParams {
   queryClient: QueryClient;
   authUser: CurrentUserRead;
   selectedSlot: TokenSlot | undefined;
-  selectedPracticioner: UserReadMinimal | null;
-  status: AppointmentNonCancelledStatus;
+  selectedResource: ScheduleResource;
+  status: AppointmentStatus;
   selectedTags: TagConfig[];
   facilityId: string;
   patientId: string;
@@ -46,9 +45,9 @@ interface NormalizeAndSetQueryDataParams {
 interface QueueAppointmentRecordOfflineParams {
   createAppointmentData: AppointmentCreateRequest;
   selectedSlot: TokenSlot | undefined;
-  selectedResource: ScheduleResourceFormState;
+  selectedResource: ScheduleResource;
   authUser: CurrentUserRead;
-  status: AppointmentNonCancelledStatus;
+  status: AppointmentStatus;
   facilityId: string;
   patientId: string;
   selectedSlotId: string | undefined;
@@ -68,15 +67,15 @@ interface QueueAppointmentRecordOfflineParams {
 interface QueueRescheduleOfflineRecordParams {
   rescheduleAppointmentData: AppointmentRescheduleRequest;
   selectedSlot: TokenSlot | undefined;
-  selectedPracticioner: UserReadMinimal;
+  selectedResource: ScheduleResource;
   authUser: CurrentUserRead;
   appointment: Appointment;
   db: AppCacheDB;
   facilityId: string;
   queryClient: QueryClient;
   t: (key: string) => string;
-  selectedDateOffline: Date;
-  selectedMonthOffline: Date;
+  selectedDate: Date;
+  slotMonth: Date;
   onSuccess?: (
     appointmentId: string,
     normalizedAppointment: Appointment,
@@ -90,11 +89,11 @@ interface NormalizeAndSetQueryDataForRescheduleParams {
   queryClient: QueryClient;
   authUser: CurrentUserRead;
   selectedSlot: TokenSlot | undefined;
-  selectedPracticioner: UserReadMinimal;
+  selectedResource: ScheduleResource;
   rescheduleAppointmentData: AppointmentRescheduleRequest;
   facilityId: string;
-  selectedDateOffline: Date;
-  selectedMonthOffline: Date;
+  selectedDate: Date;
+  slotMonth: Date;
   db: AppCacheDB;
 }
 
@@ -102,7 +101,7 @@ interface QueueUpdateAppointmentRecordOfflineParams {
   updateAppointmentData: AppointmentUpdateRequest;
   appointment: Appointment;
   authUser: CurrentUserRead;
-  status: AppointmentNonCancelledStatus;
+  status: AppointmentStatus;
   facilityId: string;
   queryClient: QueryClient;
   t: (key: string) => string;
@@ -118,7 +117,7 @@ interface QueueCancelAppointmentRecordParams {
   cancelAppointmentData: AppointmentCancelRequest;
   appointment: Appointment;
   authUser: CurrentUserRead;
-  status: AppointmentCancelledStatus;
+  status: AppointmentStatus;
   facilityId: string;
   queryClient: QueryClient;
   t: (key: string) => string;
@@ -136,18 +135,18 @@ const normalizeAndSetQueryDataForNewAppointment = async ({
   queryClient,
   authUser,
   selectedSlot,
-  selectedPracticioner,
+  selectedResource,
   status,
   selectedTags,
   facilityId,
   patientId,
-  selectedDateOffline,
-  selectedMonthOffline,
+  selectedDate,
+  slotMonth,
 }: NormalizeAndSetQueryDataParams & {
-  selectedDateOffline: Date;
-  selectedMonthOffline: Date;
+  selectedDate: Date;
+  slotMonth: Date;
 }): Promise<Appointment> => {
-  if (!selectedSlot || !selectedPracticioner) {
+  if (!selectedSlot || !selectedResource) {
     throw new Error("Missing required data for appointment normalization");
   }
 
@@ -167,7 +166,7 @@ const normalizeAndSetQueryDataForNewAppointment = async ({
     patientData,
     authUser,
     status,
-    selectedPracticioner,
+    selectedResource,
     FacilityBareMinimumData,
     selectedTags,
   );
@@ -185,10 +184,10 @@ const normalizeAndSetQueryDataForNewAppointment = async ({
   updateSlotCacheAfterOfflineAppointment({
     queryClient: queryClient,
     selectedSlot: selectedSlot,
-    selectedPracticioner: selectedPracticioner,
+    selectedResource: selectedResource,
     facilityId: facilityId,
-    selectedDate: selectedDateOffline,
-    selectedMonth: selectedMonthOffline,
+    selectedDate: selectedDate,
+    selectedMonth: slotMonth,
     action: "booked",
   });
 
@@ -221,22 +220,22 @@ const normalizeAndSetQueryDataForReschedule = async ({
   queryClient,
   authUser,
   selectedSlot,
-  selectedPracticioner,
+  selectedResource,
   rescheduleAppointmentData: _rescheduleAppointmentData,
   facilityId: _facilityId,
-  selectedDateOffline,
-  selectedMonthOffline,
+  selectedDate,
+  slotMonth,
   db,
 }: NormalizeAndSetQueryDataForRescheduleParams): Promise<Appointment> => {
-  if (!selectedSlot || !selectedPracticioner) {
-    throw new Error("Missing required data for appointment rescheduling");
+  if (!selectedSlot) {
+    throw new Error("Missing required data for appointment normalization");
   }
 
   const updatedAppointment: Appointment = {
     ...appointment,
     token_slot: selectedSlot,
-    user: selectedPracticioner,
-    status: "booked" as AppointmentNonCancelledStatus,
+
+    status: "booked" as AppointmentStatus,
     booked_on: new Date().toISOString(),
     booked_by: {
       ...normalizeUserBase(authUser),
@@ -276,10 +275,10 @@ const normalizeAndSetQueryDataForReschedule = async ({
   updateSlotCacheAfterOfflineAppointment({
     queryClient: queryClient,
     selectedSlot: selectedSlot,
-    selectedPracticioner: selectedPracticioner,
+    selectedResource: selectedResource,
     facilityId: appointment.facility.id,
-    selectedDate: selectedDateOffline,
-    selectedMonth: selectedMonthOffline,
+    selectedDate: selectedDate,
+    selectedMonth: slotMonth,
     action: "rescheduled",
     previousSlot: appointment.token_slot,
     previousDate: new Date(appointment.token_slot.start_datetime),
@@ -305,7 +304,7 @@ const normalizeAndSetQueryDataForUpdate = async ({
   appointment: Appointment;
   queryClient: QueryClient;
   authUser: CurrentUserRead;
-  status: AppointmentNonCancelledStatus;
+  status: AppointmentStatus;
   facilityId: string;
   db: AppCacheDB;
 }): Promise<Appointment> => {
@@ -361,7 +360,7 @@ const normalizeAndSetQueryDataForCancel = async ({
   appointment: Appointment;
   queryClient: QueryClient;
   authUser: CurrentUserRead;
-  status: AppointmentCancelledStatus;
+  status: AppointmentStatus;
   facilityId: string;
   db: AppCacheDB;
   prevTokenSlot: TokenSlot;
@@ -404,9 +403,13 @@ const normalizeAndSetQueryDataForCancel = async ({
   }
 
   // Update slot cache
+  const scheduleResource = {
+    resource: appointment.resource,
+    resource_type: appointment.resource_type,
+  };
   updateSlotCacheAfterOfflineAppointment({
     queryClient: queryClient,
-    selectedPracticioner: appointment.user,
+    selectedResource: scheduleResource as ScheduleResource,
     facilityId: appointment.facility.id,
     action: "cancel",
     previousSlot: prevTokenSlot,
@@ -439,7 +442,7 @@ export const queueNewAppointmentOffline = async ({
     toast.error(t("slot_is_not_selected"));
     return;
   }
-  if (!selectedPracticioner) {
+  if (!selectedResource) {
     toast.error(t("practicioner_is_not_selected"));
     return;
   }
@@ -488,13 +491,13 @@ export const queueNewAppointmentOffline = async ({
         queryClient,
         authUser,
         selectedSlot,
-        selectedPracticioner,
+        selectedResource,
         status,
         selectedTags,
         facilityId,
         patientId,
-        selectedDateOffline,
-        selectedMonthOffline,
+        selectedDate,
+        slotMonth,
       });
 
     // Call success callback with the generated ID and normalized appointment
@@ -508,15 +511,15 @@ export const queueNewAppointmentOffline = async ({
 export const queueRescheduleOfflineRecord = async ({
   rescheduleAppointmentData,
   selectedSlot,
-  selectedPracticioner,
+  selectedResource,
   authUser,
   appointment,
   db,
   facilityId,
   queryClient,
   t,
-  selectedDateOffline,
-  selectedMonthOffline,
+  selectedDate,
+  slotMonth,
   onSuccess,
   onError,
 }: QueueRescheduleOfflineRecordParams): Promise<void> => {
@@ -525,7 +528,7 @@ export const queueRescheduleOfflineRecord = async ({
     onError?.(error);
     return;
   }
-  if (!selectedPracticioner) {
+  if (!selectedResource) {
     const error = new Error(t("practicioner_is_not_selected"));
     onError?.(error);
     return;
@@ -602,11 +605,11 @@ export const queueRescheduleOfflineRecord = async ({
           queryClient,
           authUser,
           selectedSlot,
-          selectedPracticioner,
+          selectedResource,
           rescheduleAppointmentData,
           facilityId,
-          selectedDateOffline,
-          selectedMonthOffline,
+          selectedDate,
+          slotMonth,
           db,
         },
       );

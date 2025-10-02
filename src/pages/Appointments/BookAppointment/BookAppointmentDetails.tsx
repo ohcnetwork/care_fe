@@ -28,7 +28,9 @@ import {
   Appointment,
   AppointmentCreateRequest,
   AppointmentRead,
+  AppointmentStatus,
   SchedulableResourceType,
+  ScheduleResource,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import { AppointmentDateSelection } from "./AppointmentDateSelection";
@@ -100,16 +102,21 @@ export const BookAppointmentDetails = ({
   const handleOfflineQueue = async (
     appointmentRequestData: AppointmentCreateRequest,
   ) => {
-    const status = "booked";
+    const status = AppointmentStatus.BOOKED;
     const slotMonth = new Date(
       selectedDate.getFullYear(),
       selectedDate.getMonth(),
       1,
     );
+    if (!selectedResource) {
+      toast.error(t("missing_required_data_offline_booking"));
+      return;
+    }
+
     await queueNewAppointmentOffline({
       createAppointmentData: appointmentRequestData,
       selectedSlot: OfflineSelectedSlot,
-      selectedResource,
+      selectedResource: selectedResource as ScheduleResource,
       authUser,
       status,
       facilityId,

@@ -98,7 +98,6 @@ export const useAvailabilityHeatmap = ({
     meta: { persist: true },
     networkMode: "online",
     enabled: !!resourceId,
-
   });
 };
 
