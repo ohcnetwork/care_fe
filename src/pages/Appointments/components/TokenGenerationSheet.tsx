@@ -27,10 +27,7 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 import { TokenGenerate } from "@/types/tokens/token/token";
 import { TokenCategoryRead } from "@/types/tokens/tokenCategory/tokenCategory";
 import tokenCategoryApis from "@/types/tokens/tokenCategory/tokenCategoryApi";
-import {
-  KeyboardShortcutBadge,
-  ShortcutBadge,
-} from "@/Utils/keyboardShortcutComponents";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -183,16 +180,14 @@ export function TokenGenerationSheet({
                   variant="outline"
                   onClick={() => handleOpenChange(false)}
                   className="flex-1"
-                  data-shortcut-id="cancel-action"
                 >
-                  <KeyboardShortcutBadge shortcut="esc" />
+                  <ShortcutBadge actionId="cancel-action" />
                   {t("cancel")}
                 </Button>
                 <Button
                   onClick={handleGenerateToken}
                   disabled={!selectedCategory || isGenerating}
                   className="flex-1"
-                  data-shortcut-id="submit-action"
                 >
                   {isGenerating ? (
                     <>
@@ -202,10 +197,7 @@ export function TokenGenerationSheet({
                   ) : (
                     <>
                       {t("generate_token")}
-                      <ShortcutBadge
-                        actionId="submit-action"
-                        className="bg-gray-200"
-                      />
+                      <ShortcutBadge actionId="submit-action" />
                     </>
                   )}
                 </Button>

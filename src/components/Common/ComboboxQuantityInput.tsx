@@ -23,6 +23,7 @@ import {
   DosageQuantity,
 } from "@/types/emr/medicationRequest/medicationRequest";
 import { QuantitySpec } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   quantity?: DosageQuantity | QuantitySpec | null;
@@ -47,6 +48,7 @@ export function ComboboxQuantityInput({
   const [inputValue, setInputValue] = React.useState(
     quantity?.value?.toString() || "",
   );
+  const { t } = useTranslation();
   const [selectedUnit, setSelectedUnit] = React.useState(quantity?.unit);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [activeIndex, setActiveIndex] = React.useState<number>(-1);
@@ -146,7 +148,7 @@ export function ComboboxQuantityInput({
         >
           <Command>
             <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandEmpty>{t("no_results_found")}</CommandEmpty>
               <CommandGroup>
                 {units.map((unit, index) => (
                   <CommandItem

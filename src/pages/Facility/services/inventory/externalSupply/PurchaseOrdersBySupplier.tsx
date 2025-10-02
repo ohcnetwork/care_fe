@@ -148,7 +148,7 @@ export default function PurchaseOrdersBySupplier({
                 <span className="text-sm">{t("po_number")}</span>
               </p>
               <p className="text-gray-500 flex flex-row items-end gap-1">
-                <span className="text-black"> #Po-Supplier</span>
+                <span className="text-black"> #{t("po_supplier")}</span>
                 <span className="text-gray-500 text-xs font-normal mb-1">
                   ({purchaseOrders.length} {t("items")})
                 </span>

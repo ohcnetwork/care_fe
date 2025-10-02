@@ -13,7 +13,10 @@ export class PatientPrescription {
   }
   clickEditPrescription() {
     cy.intercept("GET", "**/medication/request/**").as("getMedications");
-    cy.verifyAndClickElement('[data-cy="edit-prescription"]', /Add|Edit/);
+    cy.verifyAndClickElement(
+      '[data-cy="edit-prescription"]',
+      /Add|Edit|Create Prescription/,
+    );
     cy.wait("@getMedications").its("response.statusCode").should("eq", 200);
     return this;
   }
@@ -29,7 +32,9 @@ export class PatientPrescription {
     const { medicineName, dosage, frequency, instructions, notes } = details;
 
     if (medicineName) {
-      cy.get("button").contains("Add Medication").click();
+      cy.get("button")
+        .contains(/Add Medication|Add another Medication/)
+        .click();
       cy.get("button").contains("Medication List").click();
       cy.typeAndSelectOption(
         "input[data-slot='command-input']",
@@ -80,6 +85,9 @@ export class PatientPrescription {
   }
   verifyMedication(details: MedicationDetails) {
     const { medicineName, dosage, frequency, instructions, notes } = details;
+    cy.get('[data-cy="medications-table"]', { timeout: 10000 }).should(
+      "be.visible",
+    );
     cy.verifyContentPresence('[data-cy="medications-table"]', [
       medicineName,
       dosage,

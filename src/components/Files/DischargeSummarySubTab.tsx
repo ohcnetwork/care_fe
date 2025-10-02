@@ -84,16 +84,11 @@ export const DischargeTab = ({
       }),
       onSuccess: (response) => {
         toast.success(response.detail);
-        refetch();
       },
     });
 
-  const {
-    data: files,
-    isLoading: filesLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["discharge_files", encounter.id, qParams],
+  const { data: files, isLoading: filesLoading } = useQuery({
+    queryKey: ["files", "discharge_files", encounter.id, qParams],
     queryFn: query.debounced(fileApi.list, {
       queryParams: {
         file_type: type,
@@ -112,8 +107,6 @@ export const DischargeTab = ({
 
   const fileManager = useFileManager({
     type: type,
-    onArchive: refetch,
-    onEdit: refetch,
     uploadedFiles:
       files?.results
         .filter((file) => !file.is_archived)
@@ -130,9 +123,6 @@ export const DischargeTab = ({
     multiple: true,
     allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     allowNameFallback: false,
-    onUpload: () => {
-      refetch();
-    },
     compress: false,
   });
   useEffect(() => {
@@ -613,10 +603,7 @@ export const DischargeTab = ({
             className="min-w-24 sm:min-w-28"
             onClick={async () => {
               await queryClient.invalidateQueries({
-                queryKey: ["discharge_files"],
-              });
-              await queryClient.invalidateQueries({
-                queryKey: ["files"],
+                queryKey: ["files", "discharge_files", encounter.id, qParams],
               });
               toast.success(t("refreshed"));
             }}

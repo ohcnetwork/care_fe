@@ -114,7 +114,6 @@ export default function VerifyPatient() {
                         icon={<SquareActivity className="text-orange-500" />}
                         title={t("create_encounter")}
                         actionId="create-encounter"
-                        data-shortcut-id="create-encounter"
                       />
                     }
                   />
@@ -129,7 +128,6 @@ export default function VerifyPatient() {
                         icon={<Stethoscope className="text-purple-500" />}
                         title={t("schedule_appointment")}
                         actionId="schedule-appointment"
-                        data-shortcut-id="schedule-appointment"
                       />
                     }
                   />
@@ -144,7 +142,6 @@ export default function VerifyPatient() {
                         icon={<Ticket className="text-gray-500" />}
                         title={t("generate_token")}
                         actionId="generate-token"
-                        data-shortcut-id="generate-token"
                       />
                     }
                   />
