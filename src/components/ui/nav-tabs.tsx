@@ -1,8 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,16 +8,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import PageTitle from "@/components/Common/PageHeadTitle";
+import { FilterTabs } from "@/components/ui/filter-tabs"; // <-- Add this import
 
-import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { entriesOf, keysOf } from "@/Utils/utils";
 
 interface NavTabDefinition {
   label: string;
   component: React.ReactNode;
+  icon?: React.ReactNode; // Optional: support icons in tabs
   shortcutId?: string;
 }
 
@@ -31,6 +29,7 @@ interface Props<TabKey extends string> {
   tabTriggerClassName?: string;
   showMoreAfterIndex?: number;
   tabContentClassName?: string;
+  className?: string;
 }
 
 const getTabsToShowAndShowMore = <TabKey extends string>(
@@ -40,12 +39,24 @@ const getTabsToShowAndShowMore = <TabKey extends string>(
 ) => {
   selectedTab ??= allTabKeys[0];
 
-  if (showMoreAfterIndex == null || allTabKeys.length <= showMoreAfterIndex) {
+  const cap =
+    showMoreAfterIndex == null
+      ? allTabKeys.length
+      : Math.max(0, showMoreAfterIndex);
+
+  if (cap === 0) {
+    return {
+      visibleTabs: [selectedTab],
+      showMoreTabs: allTabKeys.filter((k) => k !== selectedTab),
+    };
+  }
+
+  if (allTabKeys.length <= cap) {
     return { visibleTabs: allTabKeys, showMoreTabs: [] };
   }
 
-  const visibleTabs = allTabKeys.slice(0, showMoreAfterIndex);
-  const showMoreTabs = allTabKeys.slice(showMoreAfterIndex);
+  const visibleTabs = allTabKeys.slice(0, cap);
+  const showMoreTabs = allTabKeys.slice(cap);
 
   if (visibleTabs.includes(selectedTab)) {
     return { visibleTabs, showMoreTabs };
@@ -66,10 +77,8 @@ export const NavTabs = <TabKey extends string>({
   onTabChange,
   tabContentClassName,
   setPageTitle = true,
-  tabTriggerClassName,
   showMoreAfterIndex,
-  ...props
-}: Props<TabKey> & React.ComponentProps<typeof Tabs>) => {
+}: Props<TabKey>) => {
   const { t } = useTranslation();
 
   const allTabKeys = keysOf(tabs);
@@ -79,29 +88,25 @@ export const NavTabs = <TabKey extends string>({
     showMoreAfterIndex,
   );
 
+  // Prepare options for FilterTabs, supporting icons if present
+  const filterTabOptions = visibleTabs.map((key) => ({
+    value: key,
+    label: tabs[key].label,
+    icon: tabs[key].icon,
+  }));
+
   return (
-    <Tabs
-      {...props}
-      value={currentTab ?? allTabKeys[0]}
-      onValueChange={(tab) => onTabChange(tab as TabKey)}
-    >
-      <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-        {visibleTabs.map((option) => (
-          <TabsTrigger
-            key={option}
-            value={option}
-            className={cn(
-              "border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none",
-              tabTriggerClassName,
-            )}
-            onClick={() => onTabChange(option)}
-          >
-            {tabs[option].label}
-            {tabs[option].shortcutId && (
-              <ShortcutBadge actionId={tabs[option].shortcutId}></ShortcutBadge>
-            )}
-          </TabsTrigger>
-        ))}
+    <>
+      <div className="w-full">
+        <FilterTabs
+          value={currentTab ?? allTabKeys[0]}
+          onValueChange={(tab) => onTabChange(tab as TabKey)}
+          options={filterTabOptions}
+          variant="underline"
+          className="w-full"
+          showAllOption={false}
+          maxVisibleTabs={showMoreAfterIndex ?? visibleTabs.length}
+        />
         {showMoreTabs.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -120,19 +125,28 @@ export const NavTabs = <TabKey extends string>({
                   onClick={() => onTabChange(option)}
                   className="text-gray-950 font-medium text-sm"
                 >
-                  {tabs[option].label}
+                  {tabs[option].icon && (
+                    <span className="mr-2">{tabs[option].icon}</span>
+                  )}
+                  {t(tabs[option].label)}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-      </TabsList>
+      </div>
+      {setPageTitle && (
+        <PageTitle title={t(tabs[currentTab ?? allTabKeys[0]].label)} />
+      )}
       {entriesOf(tabs).map(([key, tab]) => (
-        <TabsContent key={key} value={key} className={tabContentClassName}>
-          {setPageTitle && <PageTitle title={tab.label} />}
+        <div
+          key={key}
+          hidden={key !== (currentTab ?? allTabKeys[0])}
+          className={tabContentClassName}
+        >
           {tab.component}
-        </TabsContent>
+        </div>
       ))}
-    </Tabs>
+    </>
   );
 };
