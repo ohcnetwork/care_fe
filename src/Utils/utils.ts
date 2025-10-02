@@ -93,30 +93,9 @@ export const dateTimeQueryString = (date: DateLike, isEndDate = false) => {
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/**
- * Referred from: https://stackoverflow.com/a/9039885/7887936
- * @returns `true` if device is iOS, else `false`
- */
-function _isAppleDevice() {
-  if (navigator.platform.includes("Mac")) return true;
-  return (
-    [
-      "iPad Simulator",
-      "iPhone Simulator",
-      "iPod Simulator",
-      "iPad",
-      "iPhone",
-      "iPod",
-    ].includes(navigator.platform) ||
-    // iPad on iOS 13 detection
-    (navigator.userAgent.includes("Mac") && "ontouchend" in document)
-  );
-}
-
-/**
- * `true` if device is an Apple device, else `false`
- */
-export const isAppleDevice = _isAppleDevice();
+export const isAppleDevice =
+  /iPhone|iPad|iPod|Mac/i.test(navigator.userAgent) ||
+  (navigator.userAgent.includes("Mac") && "ontouchend" in document);
 
 function hasTouch() {
   try {

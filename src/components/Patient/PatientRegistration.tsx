@@ -615,15 +615,11 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
                 <Button
                   type="submit"
                   variant="primary_gradient"
-                  data-shortcut-id="submit-action"
                   // TODO: disable button if basic info not fille
                 >
                   <CheckIcon />
                   {patientId ? t("update") : t("register_patient")}
-                  <ShortcutBadge
-                    actionId="submit-action"
-                    className="bg-gray-200"
-                  />
+                  <ShortcutBadge actionId="submit-action" />
                 </Button>
               </div>
             </div>

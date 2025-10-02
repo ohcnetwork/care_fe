@@ -15,8 +15,6 @@ import * as z from "zod";
 
 import { cn } from "@/lib/utils";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -79,7 +77,6 @@ interface Props {
   patientId: string;
   facilityId: string;
   patientName: string;
-  hasReachedEncounterLimitOffline?: boolean;
   appointment?: string;
   offlineEntryId?: string;
 
@@ -94,7 +91,6 @@ export default function CreateEncounterForm({
   patientId,
   facilityId,
   patientName,
-  hasReachedEncounterLimitOffline,
   appointment,
   offlineEntryId,
 
@@ -513,15 +509,6 @@ export default function CreateEncounterForm({
               />
             </div>
 
-            {!onlineManager.isOnline() &&
-              hasReachedEncounterLimitOffline === true && (
-                <Alert variant="destructive" className="flex items-start gap-3">
-                  <AlertDescription>
-                    {t("offline_encounter_limit_reached")}
-                  </AlertDescription>
-                </Alert>
-              )}
-
             <div className="flex justify-end mt-6 space-x-2">
               <Button
                 type="button"
@@ -530,28 +517,18 @@ export default function CreateEncounterForm({
                   form.reset();
                 }}
                 className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
-                data-shortcut-id={isOpen ? "cancel-action" : undefined}
               >
                 {t("cancel")}
-                <ShortcutBadge actionId="cancel-action" alwaysShow />
+                <ShortcutBadge actionId="cancel-action" />
               </Button>
               <Button
                 data-cy="create-encounter-button"
                 type="submit"
-                disabled={
-                  isPending ||
-                  !form.watch("organizations").length ||
-                  (!onlineManager.isOnline() &&
-                    hasReachedEncounterLimitOffline === true)
-                }
+                disabled={isPending || !form.watch("organizations").length}
                 data-shortcut-id={isOpen ? "submit-action" : undefined}
               >
                 {isPending ? t("creating") : t("create_encounter")}
-                <ShortcutBadge
-                  actionId="submit-action"
-                  alwaysShow
-                  className="bg-white"
-                />
+                <ShortcutBadge actionId="submit-action" className="bg-white" />
               </Button>
             </div>
           </form>

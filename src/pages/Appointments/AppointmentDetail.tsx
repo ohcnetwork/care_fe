@@ -165,7 +165,7 @@ export default function AppointmentDetail(props: Props) {
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
 
-  useShortcutSubContext("facility:appointment:detail&facility:billing:invoice");
+  useShortcutSubContext("facility:appointment");
 
   const { canViewAppointments, canWriteAppointment } = getPermissions(
     hasPermission,
@@ -444,10 +444,7 @@ export default function AppointmentDetail(props: Props) {
                         >
                           <PlusCircledIcon className="size-4 mr-2" />
                           {t("generate_token")}
-                          <ShortcutBadge
-                            actionId="generate-token"
-                            className="bg-gray-200"
-                          />
+                          <ShortcutBadge actionId="generate-token" />
                         </Button>
                       }
                       onSuccess={() => {
@@ -574,7 +571,6 @@ export default function AppointmentDetail(props: Props) {
                         icon={<PlusSquare className="text-primary-500" />}
                         title={t("start_consultation")}
                         actionId="start-consultation"
-                        data-shortcut-id="start-consultation"
                         onClick={() => {
                           handleUpdateAppointment({
                             status: AppointmentStatus.IN_CONSULTATION,
@@ -597,7 +593,6 @@ export default function AppointmentDetail(props: Props) {
                             icon={<PlusSquare className="text-primary-500" />}
                             title={t("start_consultation")}
                             actionId="start-consultation"
-                            data-shortcut-id="start-consultation"
                           />
                         }
                         onSuccess={() => {
@@ -621,7 +616,6 @@ export default function AppointmentDetail(props: Props) {
                           icon={<SquareActivity className="text-orange-500" />}
                           title={t("create_encounter")}
                           actionId="create-encounter"
-                          data-shortcut-id="create-encounter"
                         />
                       }
                       onSuccess={() => {
@@ -637,7 +631,6 @@ export default function AppointmentDetail(props: Props) {
                     icon={<PrinterIcon className="size-4" />}
                     title={t("print_appointment")}
                     actionId="print-appointment"
-                    data-shortcut-id="print-appointment"
                     href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
                   />
                 </div>
@@ -1148,7 +1141,7 @@ const AppointmentActions = ({
           >
             <EnterIcon className="size-4" />
             {t("check_in")}
-            <ShortcutBadge actionId="check-in-action" className="bg-gray-200" />
+            <ShortcutBadge actionId="check-in-action" />
           </Button>
         )}
 
@@ -1162,20 +1155,17 @@ const AppointmentActions = ({
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
 
-            {/* Mark as Fulfilled - For in consultation */}
-            {currentStatus === AppointmentStatus.IN_CONSULTATION && (
-              <DropdownMenuItem
-                onClick={() =>
-                  handleUpdateAppointment({
-                    status: AppointmentStatus.FULFILLED,
-                    note: appointment.note,
-                  })
-                }
-              >
-                <CheckCircledIcon className="size-4 mr-2" />
-                {t("mark_as_fulfilled")}
-              </DropdownMenuItem>
-            )}
+            <DropdownMenuItem
+              onClick={() =>
+                handleUpdateAppointment({
+                  status: AppointmentStatus.FULFILLED,
+                  note: appointment.note,
+                })
+              }
+            >
+              <CheckCircledIcon className="size-4 mr-2" />
+              {t("mark_as_fulfilled")}
+            </DropdownMenuItem>
 
             {/* Secondary Actions */}
             {canWriteAppointment && (
