@@ -1,20 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Check } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 
@@ -23,12 +12,10 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
-import {
-  REQUEST_ORDER_PRIORITY_COLORS,
-  RequestOrderPriority,
-} from "@/types/inventory/requestOrder/requestOrder";
+import { RequestOrderPriority } from "@/types/inventory/requestOrder/requestOrder";
 import query from "@/Utils/request/query";
 
+import { FilterSelect } from "@/components/ui/filter-select";
 import RequestOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/RequestOrderTable";
 import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -71,7 +58,6 @@ export function RequestOrderList({
     limit: 14,
     disableCache: true,
   });
-  const [priorityPopoverOpen, setPriorityPopoverOpen] = useState(false);
 
   const handleTabChange = (value: string) => {
     setQueryParams({
@@ -122,59 +108,17 @@ export function RequestOrderList({
         className="w-[250px]"
       />
 
-      <Popover open={priorityPopoverOpen} onOpenChange={setPriorityPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            className="gap-2 font-medium"
-          >
-            <BarChart3 className="size-4" />
-            <span>{t("filter_by_priority")}</span>
-            {qParams.priority && (
-              <Badge
-                variant={
-                  REQUEST_ORDER_PRIORITY_COLORS[
-                    qParams.priority as RequestOrderPriority
-                  ]
-                }
-                className="ml-2"
-              >
-                {t(qParams.priority)}
-              </Badge>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0" align="start">
-          <Command>
-            <CommandGroup>
-              {Object.values(RequestOrderPriority).map((priority) => (
-                <CommandItem
-                  key={priority}
-                  value={priority}
-                  onSelect={() => {
-                    updateQuery({
-                      priority:
-                        qParams.priority === priority ? undefined : priority,
-                    });
-                    setPriorityPopoverOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      qParams.priority === priority
-                        ? "opacity-100"
-                        : "opacity-0",
-                    )}
-                  />
-                  {t(priority)}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      <div className="w-full sm:w-auto">
+        <FilterSelect
+          value={qParams.priority || ""}
+          onValueChange={(value) => updateQuery({ priority: value })}
+          options={Object.values(RequestOrderPriority)}
+          label={t("priority")}
+          onClear={() => updateQuery({ priority: undefined })}
+          className="w-full sm:w-auto h-9"
+          placeholder={t("filter_by_priority")}
+        />
+      </div>
     </div>
   );
 
