@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.config.{js,ts,mts,json}"
+applyTo: "**/*.config.{js,mjs,cjs,ts,mts,cts,json,yml,yaml}"
 ---
 
 # Configuration Files Instructions
