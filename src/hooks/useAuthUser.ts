@@ -5,7 +5,7 @@ import {
   LoginResponse,
   MfaLoginRequest,
 } from "@/types/auth/auth";
-import { TokenData } from "@/types/auth/otp";
+import { TokenData } from "@/types/otp/otp";
 import { CurrentUserRead } from "@/types/user/user";
 
 interface AuthContextType {

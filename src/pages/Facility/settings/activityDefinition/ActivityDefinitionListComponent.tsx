@@ -276,11 +276,13 @@ export function ActivityDefinitionList({
             {/* classification Filter */}
             <div className="w-full sm:w-auto">
               <FilterSelect
-                value={qParams.category || ""}
-                onValueChange={(value) => updateQuery({ category: value })}
+                value={qParams.classification || ""}
+                onValueChange={(value) =>
+                  updateQuery({ classification: value })
+                }
                 options={Object.values(Classification)}
                 label={t("category")}
-                onClear={() => updateQuery({ category: undefined })}
+                onClear={() => updateQuery({ classification: undefined })}
               />
             </div>
           </div>
@@ -323,7 +325,12 @@ export function ActivityDefinitionList({
           <TableSkeleton count={5} />
         ) : activityDefinitions.length === 0 ? (
           <EmptyState
-            icon="l-clipboard-alt"
+            icon={
+              <CareIcon
+                icon="l-clipboard-alt"
+                className="text-primary size-6"
+              />
+            }
             title={t("no_activity_definitions_found")}
             description={t("no_activity_definitions_in_category")}
           />

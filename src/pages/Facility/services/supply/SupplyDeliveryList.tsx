@@ -99,7 +99,7 @@ export default function SupplyDeliveryList({
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(SupplyDeliveryStatus)}
-                  label="status"
+                  label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>

@@ -6,7 +6,10 @@ import {
   MonetaryComponent,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
-import { MRP_CODE } from "@/types/billing/chargeItem/chargeItem";
+import {
+  MRP_CODE,
+  PURCHASE_PRICE_CODE,
+} from "@/types/billing/chargeItem/chargeItem";
 
 interface ChargeItemPriceSummaryProps {
   priceComponents: MonetaryComponent[];
@@ -29,6 +32,12 @@ export default function ChargeItemPriceDisplay({
       c.code?.code === MRP_CODE,
   );
 
+  const purchasePriceComponents = priceComponents.filter(
+    (c) =>
+      c.monetary_component_type === MonetaryComponentType.informational &&
+      c.code?.code === PURCHASE_PRICE_CODE,
+  );
+
   const taxComponents = priceComponents.filter(
     (c) => c.monetary_component_type === MonetaryComponentType.tax,
   );
@@ -41,6 +50,7 @@ export default function ChargeItemPriceDisplay({
 
   const baseAmount = baseComponents[0]?.amount || 0;
   const mrpAmount = mrpComponents[0]?.amount || undefined;
+  const purchasePriceAmount = purchasePriceComponents[0]?.amount || undefined;
 
   const renderComponentValue = (
     component: MonetaryComponent,
@@ -122,6 +132,13 @@ export default function ChargeItemPriceDisplay({
           <div className="flex justify-between text-gray-500">
             <span>{t("mrp")}</span>
             <MonetaryDisplay amount={mrpAmount} />
+          </div>
+        )}
+
+        {purchasePriceAmount && (
+          <div className="flex justify-between text-gray-500">
+            <span>{t("purchase_price")}</span>
+            <MonetaryDisplay amount={purchasePriceAmount} />
           </div>
         )}
       </div>

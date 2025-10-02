@@ -259,7 +259,7 @@ export default function TagConfigForm({
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
-                disabled={isLoading || isEditing}
+                disabled={isLoading || isEditing || isCreatingChild}
               >
                 <FormControl>
                   <SelectTrigger ref={field.ref}>
@@ -367,6 +367,11 @@ export default function TagConfigForm({
                     onChange={(value: string[] | null) => {
                       field.onChange(value?.[0] || null);
                     }}
+                    currentOrganizations={
+                      existingConfig?.facility_organization
+                        ? [existingConfig.facility_organization]
+                        : []
+                    }
                     singleSelection={true}
                     optional={true}
                   />
@@ -388,6 +393,11 @@ export default function TagConfigForm({
                     onChange={(value: string[] | null) => {
                       field.onChange(value?.[0] || null);
                     }}
+                    currentOrganizations={
+                      existingConfig?.organization
+                        ? [existingConfig.organization]
+                        : []
+                    }
                     singleSelection={true}
                     optional={true}
                   />

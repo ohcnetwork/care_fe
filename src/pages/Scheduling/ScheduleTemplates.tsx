@@ -10,7 +10,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 
-import Loading from "@/components/Common/Loading";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import ScheduleChargeItemDefinitionSelector from "@/pages/Scheduling/components/ScheduleChargeItemDefinitionSelector";
 
 import mutate from "@/Utils/request/mutate";
@@ -46,7 +46,7 @@ export default function ScheduleTemplates({
 }: Props) {
   const { t } = useTranslation();
   if (items == null) {
-    return <Loading />;
+    return <TableSkeleton count={3} />;
   }
 
   if (items.length === 0) {

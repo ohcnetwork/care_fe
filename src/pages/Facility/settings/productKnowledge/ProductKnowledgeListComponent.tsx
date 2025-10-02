@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -167,16 +167,10 @@ function ProductKnowledgeTableRow({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/settings/product_knowledge/${product.slug}`,
-                    )
-                  }
-                >
-                  <CareIcon icon="l-edit" className="h-4 w-4" />
+                <Button asChild variant="ghost" size="sm">
+                  <Link href={`/product_knowledge/${product.slug}/edit`}>
+                    <CareIcon icon="l-edit" className="h-4 w-4" />
+                  </Link>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -327,7 +321,9 @@ export function ProductKnowledgeList({
           <TableSkeleton count={5} />
         ) : products.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
             title={t("no_product_knowledge_found")}
             description={t("no_products_in_category")}
           />

@@ -94,11 +94,7 @@ export const FilesPage = ({
       ? canViewClinicalData || canViewEncounter
       : canViewClinicalData;
 
-  const {
-    data: files,
-    isLoading: filesLoading,
-    refetch,
-  } = useQuery({
+  const { data: files, isLoading: filesLoading } = useQuery({
     queryKey: ["files", type, associatingId, qParams],
     queryFn: query.debounced(fileApi.list, {
       queryParams: {
@@ -121,8 +117,6 @@ export const FilesPage = ({
 
   const fileManager = useFileManager({
     type: type,
-    onArchive: refetch,
-    onEdit: refetch,
     uploadedFiles:
       files?.results
         .filter((file) => !file.is_archived)
@@ -139,9 +133,6 @@ export const FilesPage = ({
     multiple: true,
     allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     allowNameFallback: false,
-    onUpload: () => {
-      refetch();
-    },
     compress: false,
   });
 

@@ -3,20 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
@@ -28,6 +15,7 @@ import {
 } from "@/components/ui/sheet";
 
 import { Avatar } from "@/components/Common/Avatar";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { RoleSelect } from "@/components/Common/RoleSelect";
 import { UserStatusIndicator } from "@/components/Users/UserListAndCard";
 
@@ -56,6 +44,7 @@ export default function EditUserRoleSheet({
   const [open, setOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<RoleBase>();
   const [showEditUserSheet, setShowEditUserSheet] = useState(false);
+  const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   const authUser = useAuthUser();
   const { t } = useTranslation();
 
@@ -187,35 +176,14 @@ export default function EditUserRoleSheet({
                 {t("update_role")}
               </Button>
 
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="w-full">
-                    {t("remove_user")}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {t("remove_user_organization")}
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t("remove_user_warn", {
-                        firstName: userRole.user.first_name,
-                        lastName: userRole.user.last_name,
-                      })}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => removeRole()}
-                      className={cn(buttonVariants({ variant: "destructive" }))}
-                    >
-                      {t("remove")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <Button
+                variant="destructive"
+                className="w-full"
+                onClick={() => setShowRemoveDialog(true)}
+                data-cy="remove-user"
+              >
+                {t("remove_user")}
+              </Button>
 
               {canEditUser && (
                 <Button
@@ -231,6 +199,18 @@ export default function EditUserRoleSheet({
           </div>
         </SheetContent>
       </Sheet>
+      <ConfirmActionDialog
+        open={showRemoveDialog}
+        onOpenChange={setShowRemoveDialog}
+        title={t("remove_user_organization")}
+        description={t("remove_user_warn", {
+          firstName: userRole.user.first_name,
+          lastName: userRole.user.last_name,
+        })}
+        onConfirm={() => removeRole()}
+        variant="destructive"
+        confirmText={t("remove")}
+      />
     </>
   );
 }
