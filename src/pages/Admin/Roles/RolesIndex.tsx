@@ -41,9 +41,11 @@ import roleApi from "@/types/emr/role/roleApi";
 function RoleCard({
   role,
   onEdit,
+  onClone,
 }: {
   role: RoleRead;
   onEdit: (role: RoleRead) => void;
+  onClone: (role: RoleRead) => void;
 }) {
   const { t } = useTranslation();
   return (
@@ -58,15 +60,26 @@ function RoleCard({
               >
                 {role.name}
               </h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEdit(role)}
-                className="shrink-0 w-full sm:w-auto"
-              >
-                <CareIcon icon="l-edit" className="size-4" />
-                {t("edit")}
-              </Button>
+              <div className="flex gap-2 shrink-0 w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onClone(role)}
+                  className="shrink-0 w-full sm:w-auto"
+                >
+                  <CareIcon icon="l-copy" className="size-4" />
+                  {t("clone")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit(role)}
+                  className="shrink-0 w-full sm:w-auto"
+                >
+                  <CareIcon icon="l-edit" className="size-4" />
+                  {t("edit")}
+                </Button>
+              </div>
             </div>
             {role.description && (
               <div className="text-sm text-gray-600 mb-3">
@@ -104,6 +117,7 @@ export default function RolesIndex() {
   });
 
   const [selectedRole, setSelectedRole] = React.useState<RoleRead | null>(null);
+  const [mode, setMode] = React.useState<"add" | "edit" | "clone">("add");
 
   const { data: rolesResponse, isLoading: rolesLoading } = useQuery({
     queryKey: ["roles", qParams],
@@ -121,14 +135,27 @@ export default function RolesIndex() {
 
   const handleEdit = (role: RoleRead) => {
     setSelectedRole(role);
+    setMode("edit");
+  };
+
+  const handleClone = (role: RoleRead) => {
+    // Create a new role object without the ID to trigger create mode
+    setSelectedRole({
+      ...role,
+      id: "",
+      name: `${role.name} (Copy)`,
+    });
+    setMode("clone");
   };
 
   const handleAdd = () => {
     setSelectedRole(null);
+    setMode("add");
   };
 
   const handleSheetClose = () => {
     setSelectedRole(null);
+    setMode("add");
   };
 
   return (
@@ -136,7 +163,7 @@ export default function RolesIndex() {
       <div className="container mx-auto">
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-gray-700">{t("roles")}</h1>
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-gray-600 text-sm">
                 {t("manage_roles_and_permissions")}
@@ -160,7 +187,7 @@ export default function RolesIndex() {
               }}
             >
               <SheetTrigger asChild>
-                <Button onClick={handleAdd}>
+                <Button onClick={handleAdd} className="w-full md:w-auto">
                   <CareIcon icon="l-plus" />
                   {t("add_role")}
                 </Button>
@@ -168,9 +195,11 @@ export default function RolesIndex() {
               <SheetContent>
                 <SheetHeader>
                   <SheetTitle>
-                    {selectedRole && selectedRole.id
+                    {mode === "edit"
                       ? t("edit_role")
-                      : t("add_role")}
+                      : mode === "clone"
+                        ? t("clone_role")
+                        : t("add_role")}
                   </SheetTitle>
                 </SheetHeader>
                 <div className="mt-6 overflow-auto pr-2">
@@ -218,11 +247,14 @@ export default function RolesIndex() {
           <>
             {/* Mobile Card View */}
             <div className="flex flex-col gap-4 md:hidden">
-              {roles
-                .filter((role) => !role.is_archived)
-                .map((role: RoleRead) => (
-                  <RoleCard key={role.id} role={role} onEdit={handleEdit} />
-                ))}
+              {roles.map((role: RoleRead) => (
+                <RoleCard
+                  key={role.id}
+                  role={role}
+                  onEdit={handleEdit}
+                  onClone={handleClone}
+                />
+              ))}
             </div>
             {/* Desktop Table View */}
             <div className="hidden md:block">
@@ -270,6 +302,15 @@ export default function RolesIndex() {
                             </div>
                           </TableCell>
                           <TableCell>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleClone(role)}
+                            >
+                              <CareIcon icon="l-copy" className="size-4" />
+                              {t("clone")}
+                            </Button>
                             <Button
                               variant="outline"
                               size="sm"
@@ -278,9 +319,10 @@ export default function RolesIndex() {
                               <CareIcon icon="l-edit" className="size-4" />
                               {t("edit")}
                             </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </div>
