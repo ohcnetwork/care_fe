@@ -302,27 +302,27 @@ export default function RolesIndex() {
                             </div>
                           </TableCell>
                           <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleClone(role)}
-                            >
-                              <CareIcon icon="l-copy" className="size-4" />
-                              {t("clone")}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEdit(role)}
-                            >
-                              <CareIcon icon="l-edit" className="size-4" />
-                              {t("edit")}
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleClone(role)}
+                              >
+                                <CareIcon icon="l-copy" className="size-4" />
+                                {t("clone")}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEdit(role)}
+                              >
+                                <CareIcon icon="l-edit" className="size-4" />
+                                {t("edit")}
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </div>
