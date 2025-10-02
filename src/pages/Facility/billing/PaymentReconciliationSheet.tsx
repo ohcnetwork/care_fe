@@ -43,6 +43,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
+import { LocationPicker } from "@/components/Location/LocationPicker";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
@@ -55,6 +56,7 @@ import {
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { LocationList } from "@/types/location/location";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
@@ -102,6 +104,7 @@ const formSchema = z
     note: z.string().optional(),
     account: z.string(),
     is_credit_note: z.boolean().optional(),
+    location: z.string().optional(),
   })
   .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
     message: t("tender_amount_cannot_be_less_than_payment_amount"),
@@ -121,6 +124,10 @@ export function PaymentReconciliationSheet({
   const queryClient = useQueryClient();
   const [tenderAmount, setTenderAmount] = useState<string>("0");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
+  // Add state for the location selector
+  const [selectedLocationObject, setSelectedLocationObject] = useState<
+    LocationList | undefined
+  >();
   useShortcutSubContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -143,6 +150,7 @@ export function PaymentReconciliationSheet({
       note: "",
       account: accountId,
       is_credit_note: isCreditNote,
+      location: "",
     },
   });
 
@@ -224,6 +232,7 @@ export function PaymentReconciliationSheet({
       tendered_amount: Number(data.tendered_amount).toFixed(2),
       returned_amount: Number(data.returned_amount).toFixed(2),
       is_credit_note: isCreditNote,
+      location: data.location,
     };
     submitPayment(submissionData);
   });
@@ -306,6 +315,28 @@ export function PaymentReconciliationSheet({
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("location")}</FormLabel>
+                    <FormControl>
+                      <LocationPicker
+                        facilityId={facilityId}
+                        value={selectedLocationObject}
+                        onValueChange={(location) => {
+                          setSelectedLocationObject(location || undefined);
+                          field.onChange(location?.id || undefined);
+                        }}
+                        placeholder={t("select_location")}
+                        className="w-full border-gray-300"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
