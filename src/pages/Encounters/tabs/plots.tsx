@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FilterTabs } from "@/components/ui/filter-tabs";
 
 import {
   ObservationPlotConfig,
@@ -49,24 +49,26 @@ export const EncounterPlotsTab = () => {
 
   return (
     <div className="mt-2">
-      <Tabs
-        value={currentTabId}
-        onValueChange={(value) =>
-          setQParams({ plot: value }, { overwrite: false })
-        }
-      >
-        <div className="overflow-x-scroll w-full">
-          <TabsList>
-            {data.map((tab) => (
-              <TabsTrigger key={tab.id} value={tab.id}>
-                {tab.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
+      <div className="overflow-x-scroll w-full">
+        <FilterTabs
+          value={currentTabId}
+          onValueChange={(value) =>
+            setQParams({ plot: value }, { overwrite: false })
+          }
+          options={data.map((tab) => ({
+            value: tab.id,
+            label: tab.name,
+          }))}
+          variant="underline"
+          className="min-w-max"
+          showAllOption={false}
+          maxVisibleTabs={6}
+        />
+      </div>
 
-        {data.map((tab) => (
-          <TabsContent key={tab.id} value={tab.id}>
+      {data.map((tab) =>
+        tab.id === currentTabId ? (
+          <div key={tab.id}>
             <ObservationVisualizer
               patientId={patientId}
               encounterId={encounterId}
@@ -74,9 +76,9 @@ export const EncounterPlotsTab = () => {
               gridCols={plotColumns}
               canAccess={canAccess}
             />
-          </TabsContent>
-        ))}
-      </Tabs>
+          </div>
+        ) : null,
+      )}
     </div>
   );
 };

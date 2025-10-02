@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { FilterTabs } from "@/components/ui/filter-tabs";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -8,7 +10,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
@@ -32,6 +33,21 @@ export const OverviewSidebarSheet = ({
 }) => {
   const { t } = useTranslation();
   const { canWriteSelectedEncounter: canEdit } = useEncounter();
+  const [activeTab, setActiveTab] = useState("details");
+
+  // Build tab options dynamically based on permissions
+  const tabOptions = [
+    { value: "details", label: "details" },
+    ...(canEdit ? [{ value: "actions", label: "actions" }] : []),
+    { value: "reports", label: "reports" },
+  ];
+
+  useEffect(() => {
+    if (!canEdit && activeTab === "actions") {
+      setActiveTab("details");
+    }
+  }, [canEdit, activeTab]);
+
   return (
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
@@ -47,22 +63,19 @@ export const OverviewSidebarSheet = ({
           </SheetTitle>
           <Separator className="my-2" />
         </SheetHeader>
-        <Tabs defaultValue="details" className="p-2 rounded-lg">
-          <TabsList className="w-full bg-gray-100 justify-between inset-shadow-sm pt-px pb-0.5 px-0.5">
-            <TabsTrigger value="details" className="w-full">
-              <span className="text-black">{t("details")}</span>
-            </TabsTrigger>
-            {canEdit && (
-              <TabsTrigger value="actions" className="w-full">
-                <span className="text-black">{t("actions")}</span>
-              </TabsTrigger>
-            )}
-            <TabsTrigger value="reports" className="w-full">
-              <span className="text-black">{t("reports")}</span>
-            </TabsTrigger>
-          </TabsList>
 
-          <TabsContent value="details">
+        <div className="p-2 rounded-lg">
+          <FilterTabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            options={tabOptions}
+            variant="background"
+            className="w-full bg-gray-100 justify-between mb-4"
+            showAllOption={false}
+            maxVisibleTabs={3}
+          />
+
+          {activeTab === "details" && (
             <div className="flex flex-col gap-4">
               <EncounterDetails />
               <EncounterTags />
@@ -75,16 +88,12 @@ export const OverviewSidebarSheet = ({
               <DischargeDetails />
               <AuditLogs />
             </div>
-          </TabsContent>
+          )}
 
-          <TabsContent value="actions">
-            <SummaryPanelActionsTab />
-          </TabsContent>
+          {activeTab === "actions" && canEdit && <SummaryPanelActionsTab />}
 
-          <TabsContent value="reports">
-            <SummaryPanelReportsTab />
-          </TabsContent>
-        </Tabs>
+          {activeTab === "reports" && <SummaryPanelReportsTab />}
+        </div>
       </SheetContent>
     </Sheet>
   );
