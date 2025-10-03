@@ -412,7 +412,7 @@ export function ValueSetForm({
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
-                    form.setValue("slug", generateSlug(e.target.value), {
+                    form.setValue("slug", generateSlug(e.target.value, 25), {
                       shouldValidate: true,
                       shouldDirty: false,
                     });
