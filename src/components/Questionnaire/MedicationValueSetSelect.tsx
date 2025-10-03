@@ -344,7 +344,7 @@ export default function MedicationValueSetSelect({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 px-2 text-xs hover:bg-white truncate max-w-[150px] truncate"
+                    className="h-6 px-2 text-xs hover:bg-white truncate max-w-[150px]"
                   >
                     {breadcrumb.title}
                   </Button>
