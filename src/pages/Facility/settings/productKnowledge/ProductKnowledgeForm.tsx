@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, X } from "lucide-react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -987,16 +987,16 @@ function ProductKnowledgeFormContent({
             </div>
 
             <div className="mt-6 flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
-                  )
-                }
-              >
-                {t("cancel")}
+              <Button type="button" variant="outline" asChild>
+                <Link
+                  href={
+                    isEditMode
+                      ? `/product_knowledge/${slug}`
+                      : `/product_knowledge/categories/${categorySlug}`
+                  }
+                >
+                  {t("cancel")}
+                </Link>
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending ? t("saving") : t("save")}
