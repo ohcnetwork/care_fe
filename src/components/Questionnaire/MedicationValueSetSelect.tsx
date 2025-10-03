@@ -1,6 +1,6 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, FolderOpen, Home } from "lucide-react";
+import { ChevronRight, FolderOpen, Home, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -134,6 +134,14 @@ export default function MedicationValueSetSelect({
     }
   }, [open]);
 
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    if (activeTab === "product" && value && currentCategory) {
+      setCurrentCategory(undefined);
+      setBreadcrumbs([]);
+    }
+  };
+
   const handleCategorySelect = (
     categorySlug: string,
     categoryTitle: string,
@@ -168,7 +176,7 @@ export default function MedicationValueSetSelect({
     <MedicationValueSetSelectTabContent
       activeTab={activeTab}
       search={search}
-      onSearchChange={setSearch}
+      onSearchChange={handleSearchChange}
       categories={categories?.results || []}
       products={productKnowledge?.results || []}
       currentCategory={currentCategory}
@@ -217,7 +225,7 @@ export default function MedicationValueSetSelect({
             <DrawerTitle className="sr-only">
               {title || t("select_medication")}
             </DrawerTitle>
-            <MedicationValueSetBreadcrumbs
+            <CategoryBreadcrumbs
               breadcrumbs={breadcrumbs}
               activeTab={activeTab}
               onBackToRoot={handleBackToRoot}
@@ -237,7 +245,7 @@ export default function MedicationValueSetSelect({
           activeTab={activeTab}
           onChange={setActiveTab}
         />
-        <MedicationValueSetBreadcrumbs
+        <CategoryBreadcrumbs
           breadcrumbs={breadcrumbs}
           activeTab={activeTab}
           onBackToRoot={handleBackToRoot}
@@ -270,7 +278,7 @@ export default function MedicationValueSetSelect({
           activeTab={activeTab}
           onChange={setActiveTab}
         />
-        <MedicationValueSetBreadcrumbs
+        <CategoryBreadcrumbs
           breadcrumbs={breadcrumbs}
           activeTab={activeTab}
           onBackToRoot={handleBackToRoot}
@@ -307,22 +315,20 @@ function MedicationValueSetSelectTabs({
   );
 }
 
-interface MedicationValueSetBreadcrumbsProps {
-  breadcrumbs: Array<{ slug: string; title: string }>;
-  activeTab: TabType;
-  onBackToRoot: () => void;
-  onBreadcrumbClick: (index: number) => void;
-}
-
-function MedicationValueSetBreadcrumbs({
+function CategoryBreadcrumbs({
   breadcrumbs,
   activeTab,
   onBackToRoot,
   onBreadcrumbClick,
-}: MedicationValueSetBreadcrumbsProps) {
+}: {
+  breadcrumbs: Array<{ slug: string; title: string }>;
+  activeTab: TabType;
+  onBackToRoot: () => void;
+  onBreadcrumbClick: (index: number) => void;
+}) {
   const { t } = useTranslation();
 
-  if (breadcrumbs.length === 0 || activeTab !== "product") {
+  if (breadcrumbs.length < 1 || activeTab !== "product") {
     return null;
   }
 
@@ -371,7 +377,7 @@ function MedicationValueSetBreadcrumbs({
   );
 }
 
-function Group({
+function MedicationCommandGroup({
   title,
   items,
   onCategorySelect,
@@ -389,7 +395,7 @@ function Group({
   return (
     <CommandGroup heading={t(title)}>
       {items.map((item) => (
-        <Item
+        <MedicationCommandItem
           key={item.id}
           item={item}
           onCategorySelect={onCategorySelect}
@@ -400,7 +406,7 @@ function Group({
   );
 }
 
-function Item({
+function MedicationCommandItem({
   item,
   onCategorySelect,
   onProductSelect,
@@ -409,7 +415,6 @@ function Item({
   onCategorySelect?: (slug: string, title: string) => void;
   onProductSelect?: (product: ProductKnowledgeBase) => void;
 }) {
-  const { t } = useTranslation();
   const isCategory = "title" in item;
   const handleSelect = () => {
     if (isCategory) {
@@ -418,9 +423,11 @@ function Item({
       onProductSelect?.(item);
     }
   };
+
   return (
     <CommandItem
-      value={t(isCategory ? item.title : item.name)}
+      key={item.id}
+      value={isCategory ? item.title : item.name}
       onSelect={handleSelect}
       className="cursor-pointer p-3 hover:bg-gray-50"
     >
@@ -494,7 +501,7 @@ export function MedicationValueSetSelectTabContent({
       >
         <TabsContent value="product">
           <Command className="rounded-lg" filter={() => 1}>
-            <div className="bg-white z-10 w-full fixed">
+            <div className="bg-white z-10 w-full fixed mb-4">
               <CommandInput
                 placeholder={t("search_products")}
                 onValueChange={onSearchChange}
@@ -504,14 +511,17 @@ export function MedicationValueSetSelectTabContent({
               />
             </div>
 
-            <CommandList className="flex-1 p-0 overflow-y-auto">
-              <CommandEmpty>
+            <CommandList className="flex-1 mt-7 overflow-y-auto">
+              <CommandEmpty className="h-75 flex justify-center items-center py-6 text-gray-500">
                 {search.length < 3 ? (
                   <p className="p-4 text-sm text-gray-500">
                     {t("min_char_length_error", { min_length: 3 })}
                   </p>
                 ) : isProductLoading || isCategoriesLoading ? (
-                  <p className="p-4 text-sm text-gray-500">{t("searching")}</p>
+                  <p className="flex items-center justify-center p-4 text-sm text-gray-500">
+                    <Loader2 className="size-5 animate-spin mr-2" />
+                    {t("searching")}
+                  </p>
                 ) : (
                   <p className="p-4 text-sm text-gray-500">
                     {t("no_results_found")}
@@ -521,14 +531,14 @@ export function MedicationValueSetSelectTabContent({
 
               {!search && (
                 <>
-                  <Group
+                  <MedicationCommandGroup
                     title={t("category")}
                     items={categories}
                     onCategorySelect={onCategorySelect}
                   />
 
                   {currentCategory && (
-                    <Group
+                    <MedicationCommandGroup
                       title={t("products")}
                       items={products}
                       onProductSelect={(product) => {
@@ -541,7 +551,7 @@ export function MedicationValueSetSelectTabContent({
               )}
 
               {search && (
-                <Group
+                <MedicationCommandGroup
                   title={t("products")}
                   items={products}
                   onProductSelect={(product) => {
@@ -557,7 +567,10 @@ export function MedicationValueSetSelectTabContent({
         <TabsContent value="valueset" className="p-0 overflow-y-auto">
           <ValueSetSearchContent
             system="system-medication"
-            onSelect={onValueSetSelect}
+            onSelect={(value) => {
+              onValueSetSelect(value);
+              onOpenChange(false);
+            }}
             searchPostFix=" clinical drug"
             title={title}
             search={search}
