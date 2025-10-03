@@ -273,7 +273,7 @@ export function ProductFormContent({
         queryKey: ["product", productId],
       });
       toast.success(t("product_updated_successfully"));
-      navigate(`/facility/${facilityId}/settings/product`);
+      navigate(`/facility/${facilityId}/settings/product/${productId}`);
     },
   });
 
