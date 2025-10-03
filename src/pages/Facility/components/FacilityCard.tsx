@@ -10,6 +10,7 @@ import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 
 import { FeatureBadge } from "@/pages/Facility/Utils";
 import { FacilityPublicRead, FacilityRead } from "@/types/facility/facility";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   facility: FacilityRead | FacilityPublicRead;
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function FacilityCard({ facility, className }: Props) {
+  const { t } = useTranslation();
   return (
     <Card className={cn("overflow-hidden bg-white", className)}>
       <div className="flex flex-col h-full">
@@ -60,7 +62,9 @@ export function FacilityCard({ facility, className }: Props) {
         <div className="mt-auto border-t border-gray-100 bg-gray-50 p-4">
           <div className="flex justify-end">
             <Button variant="outline" asChild>
-              <Link href={`/facility/${facility.id}`}>View Facility</Link>
+              <Link href={`/facility/${facility.id}`}>
+                {t("view_facility")}
+              </Link>
             </Button>
           </div>
         </div>

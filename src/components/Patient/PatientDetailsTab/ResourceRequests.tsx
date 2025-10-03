@@ -15,13 +15,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
-
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
-import { RESOURCE_REQUEST_STATUS_COLORS } from "@/types/resourceRequest/resourceRequest";
+import {
+  getResourceRequestCategoryEnum,
+  RESOURCE_REQUEST_STATUS_COLORS,
+} from "@/types/resourceRequest/resourceRequest";
 
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { PatientProps } from ".";
 
 export const ResourceRequests = (props: PatientProps) => {
@@ -62,67 +64,69 @@ export const ResourceRequests = (props: PatientProps) => {
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white">
-        <Table data-cy="resource-requests-table">
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("resource_type")}</TableHead>
-              <TableHead className="capitalize">{t("title")}</TableHead>
-              <TableHead>{t("status")}</TableHead>
-              <TableHead>{t("created_on")}</TableHead>
-              <TableHead>{t("modified_on")}</TableHead>
-              <TableHead className="text-right">{t("actions")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
+        {loading ? (
+          <TableSkeleton count={5} />
+        ) : (
+          <Table data-cy="resource-requests-table">
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">
-                  {t("loading")}
-                </TableCell>
+                <TableHead>{t("resource_type")}</TableHead>
+                <TableHead className="capitalize">{t("title")}</TableHead>
+                <TableHead>{t("status")}</TableHead>
+                <TableHead>{t("created_on")}</TableHead>
+                <TableHead>{t("modified_on")}</TableHead>
+                <TableHead className="text-right">{t("actions")}</TableHead>
               </TableRow>
-            ) : resourceRequests?.results?.length ? (
-              resourceRequests.results.map((request, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">
-                    {RESOURCE_CATEGORY_CHOICES.find(
-                      (item) => item.id === request.category,
-                    )?.text || "--"}
-                  </TableCell>
-                  <TableCell>{request.title}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        RESOURCE_REQUEST_STATUS_COLORS[
-                          request.status as keyof typeof RESOURCE_REQUEST_STATUS_COLORS
-                        ]
-                      }
-                    >
-                      {t(`resource_status__${request.status}`)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{formatDateTime(request.created_date)}</TableCell>
-                  <TableCell>{formatDateTime(request.modified_date)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link
-                        href={`/facility/${request.origin_facility.id}/resource/${request.id}`}
+            </TableHeader>
+            <TableBody>
+              {resourceRequests?.results?.length ? (
+                resourceRequests.results.map((request, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">
+                      {t(
+                        `resource_request_category__${getResourceRequestCategoryEnum(request.category)}`,
+                      )}
+                    </TableCell>
+                    <TableCell>{request.title}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          RESOURCE_REQUEST_STATUS_COLORS[
+                            request.status as keyof typeof RESOURCE_REQUEST_STATUS_COLORS
+                          ]
+                        }
                       >
-                        <CareIcon icon="l-eye" className="mr-2" />
-                        {t("view")}
-                      </Link>
-                    </Button>
+                        {t(`resource_status__${request.status}`)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {formatDateTime(request.created_date)}
+                    </TableCell>
+                    <TableCell>
+                      {formatDateTime(request.modified_date)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link
+                          href={`/facility/${request.origin_facility.id}/resource/${request.id}`}
+                        >
+                          <CareIcon icon="l-eye" className="mr-2" />
+                          {t("view")}
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-4">
+                    {t("no_resource_requests_found")}
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">
-                  {t("no_resource_requests_found")}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        )}
       </div>
     </div>
   );
