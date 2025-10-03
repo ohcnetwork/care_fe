@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -35,7 +36,6 @@ import {
 } from "@/types/valueset/valueset";
 
 import { generateSlug } from "@/Utils/utils";
-import { useEffect } from "react";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
 
@@ -384,22 +384,22 @@ export function ValueSetForm({
     },
   });
 
-  useEffect(() => {
-    const sub = form.watch((value, info) => {
-      const changed = info?.name as keyof typeof value | undefined;
-      if (!changed) return;
+  //  useEffect(() => {
+  //   const sub = form.watch((value, info) => {
+  //     const changed = info?.name as keyof typeof value | undefined;
+  //     if (!changed) return;
 
-      if (changed === "name") {
-        const base = (value.name ?? "") as string;
-        const next = generateSlug(base);
-        form.setValue("slug", next, {
-          shouldValidate: true,
-          shouldDirty: false,
-        });
-      }
-    });
-    return () => sub.unsubscribe();
-  }, [form]);
+  //     if (changed === "name") {
+  //       const base = (value.name ?? "") as string;
+  //       const next = generateSlug(base);
+  //       form.setValue("slug", next, {
+  //         shouldValidate: true,
+  //         shouldDirty: false,
+  //       });
+  //     }
+  //   });
+  //   return () => sub.unsubscribe();
+  // }, [form]);
 
   return (
     <Form {...form}>
@@ -425,7 +425,16 @@ export function ValueSetForm({
             <FormItem>
               <FormLabel aria-required>{t("name")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    form.setValue("slug", generateSlug(e.target.value), {
+                      shouldValidate: true,
+                      shouldDirty: false,
+                    });
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

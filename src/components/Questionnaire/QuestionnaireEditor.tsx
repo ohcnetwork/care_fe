@@ -50,6 +50,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -485,8 +486,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     },
     mode: "onChange",
   });
-
-  generateSlug(form.watch("title"), 25);
 
   const { isDirty } = form.formState;
 
@@ -1122,7 +1121,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           name="slug"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>{t("slug")}</FormLabel>
+                              <FormLabel>
+                                {t("slug")}{" "}
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {t("unique_url_for_questionnaire")}
+                                </p>
+                              </FormLabel>
                               <FormControl>
                                 <Input
                                   placeholder="unique-identifier-for-questionnaire"
@@ -1136,9 +1140,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 />
                               </FormControl>
                               <FormMessage />
-                              <p className="text-sm text-gray-500 mt-1">
-                                {t("unique_url_for_questionnaire")}
-                              </p>
+
+                              <FormDescription>
+                                {t("slug_format_message")}
+                              </FormDescription>
                             </FormItem>
                           )}
                         />
