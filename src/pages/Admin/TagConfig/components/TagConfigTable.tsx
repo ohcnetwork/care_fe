@@ -60,7 +60,7 @@ function TagConfigCard({
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card>
       <CardContent className="p-6">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="flex-1">
