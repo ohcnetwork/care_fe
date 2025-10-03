@@ -205,7 +205,12 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                             {t("no_patient_record_found")}
                           </h3>
                           <p className="text-sm text-gray-500 mb-6">
-                            {t("no_patient_record_text")}
+                            {getNoRecordsMessage(
+                              t,
+                              identifierSearch,
+                              facility?.patient_instance_identifier_configs ||
+                                [],
+                            )}
                           </p>
                           <AddPatientButton
                             facilityId={facilityId}
@@ -349,6 +354,27 @@ const getPhoneNumberConfig = (identifierConfigs: PatientIdentifierConfig[]) => {
   return identifierConfigs.find(
     (c) => c.config.system === PHONE_NUMBER_CONFIG_SYSTEM,
   );
+};
+
+const getNoRecordsMessage = (
+  t: TFunction,
+  identifierSearch: { config?: string; value?: string },
+  identifierConfigs: PatientIdentifierConfig[],
+) => {
+  // Find the search config to get the display name
+  const searchConfig = identifierConfigs.find(
+    (c) => c.id === identifierSearch.config,
+  );
+
+  if (!searchConfig) {
+    return t("no_patient_record_text");
+  }
+
+  // Get the lowercase version of the identifier name (e.g., "phone number", "name", "patient ID")
+  const identifierName = searchConfig.config.display.toLowerCase();
+
+  // Return the message with the identifier name replaced
+  return `No existing records found with this ${identifierName}. Would you like to register a new patient?`;
 };
 
 const getPhoneNumberFromIdentifierSearch = (
