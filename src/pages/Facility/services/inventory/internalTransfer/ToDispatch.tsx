@@ -55,7 +55,7 @@ export default function ToDispatch({ facilityId, locationId }: Props) {
             {location?.name} ({t("internal_transfers")})
           </p>
 
-          <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
                 {t("to_dispatch")}
