@@ -261,12 +261,16 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
           break;
         case "created_date":
           if (
+            filterValue &&
             typeof filterValue === "object" &&
             "from" in filterValue &&
             "to" in filterValue
           ) {
             setDateFrom(filterValue.from as Date);
             setDateTo(filterValue.to as Date);
+          } else {
+            setDateFrom(undefined);
+            setDateTo(undefined);
           }
           break;
       }
