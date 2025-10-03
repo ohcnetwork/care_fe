@@ -14,11 +14,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import PageTitle from "@/components/Common/PageHeadTitle";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { entriesOf, keysOf } from "@/Utils/utils";
 
 interface NavTabDefinition {
   label: string;
   component: React.ReactNode;
+  shortcutId?: string;
 }
 
 interface Props<TabKey extends string> {
@@ -92,8 +94,12 @@ export const NavTabs = <TabKey extends string>({
               "border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none",
               tabTriggerClassName,
             )}
+            onClick={() => onTabChange(option)}
           >
             {tabs[option].label}
+            {tabs[option].shortcutId && (
+              <ShortcutBadge actionId={tabs[option].shortcutId}></ShortcutBadge>
+            )}
           </TabsTrigger>
         ))}
         {showMoreTabs.length > 0 && (

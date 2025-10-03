@@ -63,6 +63,7 @@ export function SelectedFilterBar({
   onFilterChange,
   onOperationChange,
   selectedBarClassName,
+  facilityId,
 }: {
   selectedFilterKey: string;
   selectedFilters: Record<string, FilterState>;
@@ -73,6 +74,7 @@ export function SelectedFilterBar({
   onFilterChange: (filterKey: string, values: FilterValues) => void;
   onOperationChange: (filterKey: string, operation: string) => void;
   selectedBarClassName?: string;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const { filter, selected, selectedOperation, availableOperations } =
@@ -110,19 +112,22 @@ export function SelectedFilterBar({
         <div className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 whitespace-nowrap">
           {filter.renderSelected?.(selected, filter, onFilterChange)}
         </div>
-        <Button
-          variant="ghost"
-          onClick={clearFilter}
-          className="px-3 py-2 hover:bg-gray-50"
-        >
-          <X className="h-5 w-5 text-gray-600" />
-        </Button>
+        {!filter?.disableClear && (
+          <Button
+            variant="ghost"
+            onClick={clearFilter}
+            className="px-3 py-2 hover:bg-gray-50"
+          >
+            <X className="h-5 w-5 text-gray-600" />
+          </Button>
+        )}
       </div>
       <DropdownMenuContent className="w-[320px] p-0" align="start">
         <FilterRenderer
           activeFilter={filter.key}
           selectedFilters={selectedFilters}
           onFilterChange={onFilterChange}
+          facilityId={facilityId}
         />
       </DropdownMenuContent>
     </DropdownMenu>

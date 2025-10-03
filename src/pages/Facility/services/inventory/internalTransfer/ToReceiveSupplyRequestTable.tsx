@@ -32,6 +32,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
 import { makeUrl } from "@/Utils/request/utils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
@@ -223,7 +224,7 @@ export default function ToReceiveSupplyRequestTable({
         <TableSkeleton count={5} />
       ) : !requests.length ? (
         <EmptyState
-          icon="l-box"
+          icon={<CareIcon icon="l-box" className="text-primary size-6" />}
           title={t("no_requests_found")}
           description={t("no_requests_found_description")}
         />

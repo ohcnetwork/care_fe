@@ -27,7 +27,6 @@ import Page from "@/components/Common/Page";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { ProductSearch } from "@/pages/Facility/services/inventory/ProductSearch";
 import { SupplierSelect } from "@/pages/Facility/services/inventory/SupplierSelect";
@@ -35,6 +34,7 @@ import { ProductRead } from "@/types/inventory/product/product";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
   SupplyDeliveryCreate,
+  SupplyDeliveryRead,
   SupplyDeliveryStatus,
   SupplyDeliveryType,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
@@ -42,6 +42,11 @@ import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryAp
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 import { Organization } from "@/types/organization/organization";
 
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
+import batchApi from "@/types/base/batch/batchApi";
 import { ProductKnowledgeSelect } from "./ProductKnowledgeSelect";
 import { ReceiveStockTable } from "./ReceiveStockTable";
 import { SupplyRequestSelect } from "./SupplyRequestSelect";
@@ -97,12 +102,19 @@ export function ReceiveStock({
     },
   });
 
-  const batchRequest = useMutation({
-    mutationFn: mutate(routes.batchRequest),
-    onSuccess: () => {
+  const batchRequest = useMutation<
+    BatchRequestResponse,
+    Error,
+    BatchRequestBody
+  >({
+    mutationFn: mutate(batchApi.batchRequest),
+    onSuccess: (response) => {
+      // Get the last delivery from response
+      const lastDelivery = response.results[response.results.length - 1]
+        ?.data as SupplyDeliveryRead;
       toast.success(t("stock_received"));
       form.reset();
-      navigate("/external_supply/inward_entry");
+      navigate(`/external_supply/deliveries/${lastDelivery?.id}`);
     },
     onError: () => {
       toast.error(t("error_receiving_stock"));
@@ -123,7 +135,7 @@ export function ReceiveStock({
             destination: locationId,
             supplied_item: entry.supplied_item?.id,
             supplied_item_quantity: entry.supplied_item_quantity,
-            status: SupplyDeliveryStatus.completed,
+            status: SupplyDeliveryStatus.in_progress,
             supplied_item_type: SupplyDeliveryType.product,
           } satisfies SupplyDeliveryCreate,
         })),

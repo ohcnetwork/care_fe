@@ -75,10 +75,14 @@ function PatientIdentifierConfigCard({
               </p>
             )}
           </div>
-          <Button variant="outline" size="sm" onClick={() => onEdit(config)}>
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("edit")}
-          </Button>
+          {config.config.auto_maintained ? (
+            <Badge>{t("auto_maintained")}</Badge>
+          ) : (
+            <Button variant="outline" size="sm" onClick={() => onEdit(config)}>
+              <CareIcon icon="l-edit" className="size-4" />
+              {t("edit")}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -161,6 +165,7 @@ export default function PatientIdentifierConfigList({
                       unique: false,
                       regex: "",
                       display: "",
+                      auto_maintained: false,
                       retrieve_config: {
                         retrieve_with_dob: false,
                         retrieve_with_year_of_birth: false,
@@ -243,7 +248,9 @@ export default function PatientIdentifierConfigList({
           </>
         ) : configs.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
             title={t("no_configs_found")}
             description={t("adjust_config_filters")}
           />
@@ -292,14 +299,18 @@ export default function PatientIdentifierConfigList({
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(config)}
-                          >
-                            <CareIcon icon="l-edit" className="size-4" />
-                            {t("edit")}
-                          </Button>
+                          {config.config.auto_maintained ? (
+                            <Badge>{t("auto_maintained")}</Badge>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEdit(config)}
+                            >
+                              <CareIcon icon="l-edit" className="size-4" />
+                              {t("edit")}
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}

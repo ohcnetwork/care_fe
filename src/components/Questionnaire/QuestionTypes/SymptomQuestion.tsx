@@ -349,6 +349,7 @@ const SymptomRow = React.memo(function SymptomRow({
             }
             onChange={handleDateChange}
             disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+            blockDate={(date) => date > new Date()}
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </div>
@@ -494,6 +495,7 @@ const SymptomRow = React.memo(function SymptomRow({
                     }
                     onChange={handleDateChange}
                     disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+                    blockDate={(date) => date > new Date()}
                     buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
                   />
                 </div>
@@ -564,6 +566,7 @@ const SymptomRow = React.memo(function SymptomRow({
             }
             onChange={handleDateChange}
             disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+            blockDate={(date) => date > new Date()}
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>

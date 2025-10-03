@@ -1,11 +1,12 @@
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { ScheduleHome } from "@/components/Schedule/ScheduleHome";
+import AppointmentDetail from "@/pages/Appointments/AppointmentDetail";
 import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
 import PrintAppointments from "@/pages/Appointments/components/PrintAppointments";
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
-import { useRoutes } from "raviger";
+import { Redirect, useRoutes } from "raviger";
 import HealthcareServiceShow from "./HealthcareServiceShow";
 
 interface ServiceLayoutProps {
@@ -34,6 +35,11 @@ const getRoutes = (facilityId: string, serviceId: string) => ({
       resourceId={serviceId}
     />
   ),
+  "/appointments/:appointmentId": ({
+    appointmentId,
+  }: {
+    appointmentId: string;
+  }) => <AppointmentDetail appointmentId={appointmentId} />,
   "/appointments/print": () => (
     <PrintAppointments
       facilityId={facilityId}
@@ -48,6 +54,11 @@ const getRoutes = (facilityId: string, serviceId: string) => ({
       facilityId={facilityId}
       resourceType={SchedulableResourceType.HealthcareService}
       resourceId={serviceId}
+    />
+  ),
+  "/queues/:queueId": ({ queueId }: { queueId: string }) => (
+    <Redirect
+      to={`/facility/${facilityId}/services/${serviceId}/queues/${queueId}/ongoing`}
     />
   ),
   "/queues/:queueId/ongoing": ({ queueId }: { queueId: string }) => (
