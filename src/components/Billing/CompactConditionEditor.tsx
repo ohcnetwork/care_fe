@@ -12,12 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { MultiFilterStyleTagSelector } from "@/components/Tags/TagAssignmentSheet";
 import {
   Condition,
   ConditionOperation,
   getConditionValue,
   Metrics,
 } from "@/types/base/condition/condition";
+import { TagResource } from "@/types/emr/tagConfig/tagConfig";
 
 interface CompactConditionEditorProps {
   conditions: Condition[];
@@ -96,6 +98,24 @@ export function CompactConditionEditor({
   const selectedMetric = availableMetrics.find(
     (m) => m.name === newCondition.metric,
   );
+
+  // Determine if the selected metric is for tags and which resource type
+  const getTagResourceForMetric = (metricName: string): TagResource | null => {
+    if (metricName === "patient_tags" || metricName.includes("patient_tag")) {
+      return TagResource.PATIENT;
+    }
+    if (
+      metricName === "encounter_tags" ||
+      metricName.includes("encounter_tag")
+    ) {
+      return TagResource.ENCOUNTER;
+    }
+    return null;
+  };
+
+  const tagResource = selectedMetric
+    ? getTagResourceForMetric(selectedMetric.name)
+    : null;
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -221,6 +241,27 @@ export function CompactConditionEditor({
                     })
                   }
                 />
+              </div>
+            ) : tagResource ? (
+              <div className="w-full">
+                <MultiFilterStyleTagSelector
+                  selected={[]} // Start with empty selection for new conditions
+                  onChange={(tags) => {
+                    setNewCondition({
+                      ...newCondition,
+                      value: tags.map((tag) => tag.id),
+                    });
+                  }}
+                  resource={tagResource}
+                  className="w-full"
+                />
+                {newCondition.value &&
+                  (newCondition.value as string[]).length > 0 && (
+                    <div className="mt-1 text-xs text-gray-500">
+                      {t("selected")}:{" "}
+                      {(newCondition.value as string[]).join(", ")}
+                    </div>
+                  )}
               </div>
             ) : (
               <Input
