@@ -63,6 +63,7 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   useEffect(() => {
     if (open) {
       setSelected("");
+      setSearch("");
     }
   }, [open]);
 
