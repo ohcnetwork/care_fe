@@ -186,7 +186,6 @@ export default function MedicationValueSetSelect({
       onProductSelect={onProductSelect}
       onValueSetSelect={onSelect}
       title={title}
-      placeholder={placeholder}
       onChange={setActiveTab}
       onOpenChange={setOpen}
     />
@@ -378,12 +377,10 @@ function CategoryBreadcrumbs({
 }
 
 function MedicationCommandGroup({
-  title,
   items,
   onCategorySelect,
   onProductSelect,
 }: {
-  title: string;
   items: ProductKnowledgeBase[] | ResourceCategoryRead[];
   onCategorySelect?: (slug: string, title: string) => void;
   onProductSelect?: (product: ProductKnowledgeBase) => void;
@@ -393,7 +390,7 @@ function MedicationCommandGroup({
     return null;
   }
   return (
-    <CommandGroup heading={t(title)}>
+    <CommandGroup heading={onCategorySelect ? t("category") : t("products")}>
       {items.map((item) => (
         <MedicationCommandItem
           key={item.id}
@@ -466,7 +463,6 @@ interface MedicationValueSetSelectTabContentProps {
   onProductSelect: (product: ProductKnowledgeBase) => void;
   onValueSetSelect: (selected: Code) => void;
   title?: string;
-  placeholder?: string;
   onChange: (value: TabType) => void;
   onOpenChange: (value: boolean) => void;
 }
@@ -484,7 +480,6 @@ export function MedicationValueSetSelectTabContent({
   onProductSelect,
   onValueSetSelect,
   title,
-  placeholder,
   onChange,
   onOpenChange,
 }: MedicationValueSetSelectTabContentProps) {
@@ -532,14 +527,12 @@ export function MedicationValueSetSelectTabContent({
               {!search && (
                 <>
                   <MedicationCommandGroup
-                    title={t("category")}
                     items={categories}
                     onCategorySelect={onCategorySelect}
                   />
 
                   {currentCategory && (
                     <MedicationCommandGroup
-                      title={t("products")}
                       items={products}
                       onProductSelect={(product) => {
                         onProductSelect(product);
@@ -552,7 +545,6 @@ export function MedicationValueSetSelectTabContent({
 
               {search && (
                 <MedicationCommandGroup
-                  title={t("products")}
                   items={products}
                   onProductSelect={(product) => {
                     onProductSelect(product);
@@ -575,7 +567,7 @@ export function MedicationValueSetSelectTabContent({
             title={title}
             search={search}
             onSearchChange={onSearchChange}
-            placeholder={placeholder}
+            placeholder={t("search_medications")}
           />
         </TabsContent>
       </Tabs>
