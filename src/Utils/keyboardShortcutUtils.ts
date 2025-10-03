@@ -64,6 +64,9 @@ interface ShortcutConfig {
 /**
  * Generic hook to get shortcut display strings for any context
  *
+ * @deprecated Use `useShortcutDisplay` from `@/context/ShortcutContext` instead.
+ * This hook is now integrated with the ShortcutContext and automatically uses the current context hierarchy.
+ *
  * @param contexts Optional array of contexts to search for shortcuts. If not provided, searches all contexts.
  * @param dynamicResolver Optional function to resolve dynamic shortcuts (e.g., questionnaires)
  * @returns Function to get display string for an action ID

@@ -467,7 +467,6 @@ export default function ServiceRequestShow({
           </div>
 
           <ServiceRequestDetails
-            facilityId={facilityId}
             request={request}
             activityDefinition={activityDefinition}
           />
@@ -480,7 +479,7 @@ export default function ServiceRequestShow({
               sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/services_requests/${serviceRequestId}`}
               locationId={locationId}
               patientId={request.encounter.patient.id}
-              disableEdit={disableEdit}
+              viewOnly={disableEdit}
             />
           </div>
 

@@ -95,7 +95,7 @@ describe("Observation basic workflow", () => {
     cy.get("button").contains("Add Definition").click();
     const testData = generateObservationDefinitionFields();
     cy.typeIntoField('input[name="title"]', testData.title);
-    cy.clearAndTypeIntoField('input[name="slug"]', testData.slug);
+    cy.clearAndTypeIntoField('input[name="slug_value"]', testData.slug);
     cy.typeIntoField('textarea[name="description"]', testData.description);
     cy.clickAndSelectOptionV2("Category", testData.category);
     cy.clickAndSelectOptionV2("Data Type", testData.dataType);

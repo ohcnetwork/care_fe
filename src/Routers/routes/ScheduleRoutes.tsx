@@ -1,9 +1,9 @@
 import { AppRoutes } from "@/Routers/AppRouter";
 import AppointmentDetail from "@/pages/Appointments/AppointmentDetail";
+import AppointmentPrint from "@/pages/Appointments/AppointmentPrint";
 import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
 import { PrintAppointments } from "@/pages/Appointments/components/PrintAppointments";
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
-import ManageToken from "@/pages/Facility/queues/ManageToken";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { Redirect } from "raviger";
@@ -21,6 +21,8 @@ const ScheduleRoutes: AppRoutes = {
   "/facility/:facilityId/patient/:patientId/appointments/:appointmentId": ({
     appointmentId,
   }) => <AppointmentDetail appointmentId={appointmentId} />,
+  "/facility/:facilityId/patient/:patientId/appointments/:appointmentId/print":
+    ({ appointmentId }) => <AppointmentPrint appointmentId={appointmentId} />,
 
   "/facility/:facilityId/queues": ({ facilityId }) => (
     <QueuesIndex
@@ -29,17 +31,17 @@ const ScheduleRoutes: AppRoutes = {
     />
   ),
 
-  "/facility/:facilityId/queues/:queueId/practitioner/:practitionerId": ({
+  "/facility/:facilityId/practitioner/:practitionerId/queues/:queueId": ({
     facilityId,
     practitionerId,
     queueId,
   }) => (
     <Redirect
-      to={`/facility/${facilityId}/queues/${queueId}/practitioner/${practitionerId}/ongoing`}
+      to={`/facility/${facilityId}/practitioner/${practitionerId}/queues/${queueId}/ongoing`}
     />
   ),
 
-  "/facility/:facilityId/queues/:queueId/practitioner/:practitionerId/ongoing":
+  "/facility/:facilityId/practitioner/:practitionerId/queues/:queueId/ongoing":
     ({ facilityId, practitionerId, queueId }) => (
       <ManageQueuePage
         facilityId={facilityId}
@@ -49,7 +51,7 @@ const ScheduleRoutes: AppRoutes = {
         tab="ongoing"
       />
     ),
-  "/facility/:facilityId/queues/:queueId/practitioner/:practitionerId/completed":
+  "/facility/:facilityId/practitioner/:practitionerId/queues/:queueId/completed":
     ({ facilityId, practitionerId, queueId }) => (
       <ManageQueuePage
         facilityId={facilityId}
@@ -59,14 +61,6 @@ const ScheduleRoutes: AppRoutes = {
         tab="completed"
       />
     ),
-  // Routes for Token Show Page
-  "/facility/:facilityId/queues/:queueId/tokens/:tokenId": ({
-    facilityId,
-    tokenId,
-    queueId,
-  }) => (
-    <ManageToken facilityId={facilityId} tokenId={tokenId} queueId={queueId} />
-  ),
 };
 
 export default ScheduleRoutes;

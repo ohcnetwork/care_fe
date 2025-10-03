@@ -75,10 +75,9 @@ export function MultiFilterStyleTagSelector({
     queryFn: query(tagConfigApi.list, {
       queryParams: {
         resource,
-        parent_is_null: true,
         status: "active",
         ordering: "priority",
-        ...(search ? { search } : {}),
+        ...(search ? { display: search } : { parent_is_null: true }),
         ...(facilityId ? { facility: facilityId } : {}),
       },
     }),
