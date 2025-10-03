@@ -376,7 +376,6 @@ export const PractitionerSelector = ({
                               variant="outline"
                               size="xs"
                               onClick={handleClearAll}
-                              className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
                             >
                               {t("clear_all")}
                             </Button>
