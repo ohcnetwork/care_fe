@@ -152,7 +152,7 @@ export default function AdminOrganizationFormSheet({
             {t("edit")}
           </Button>
         ) : (
-          <Button>
+          <Button className="w-full md:w-auto">
             <CareIcon icon="l-plus" className="mr-2 size-4" />
             {t("add_organization")}
           </Button>

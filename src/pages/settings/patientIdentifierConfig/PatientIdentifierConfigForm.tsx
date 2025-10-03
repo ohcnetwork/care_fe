@@ -160,12 +160,7 @@ export default function PatientIdentifierConfigForm({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit, (errors) => {
-          console.log(errors);
-        })}
-        className="space-y-8"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         {isLoading ? (
           <div className="flex justify-center items-center h-full">
             <Loader className="w-4 h-4 animate-spin" />
@@ -190,7 +185,7 @@ export default function PatientIdentifierConfigForm({
                           onValueChange={field.onChange}
                           value={field.value}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder={t("select_use")} />
                           </SelectTrigger>
                           <SelectContent>
@@ -527,13 +522,12 @@ export default function PatientIdentifierConfigForm({
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("status")}</FormLabel>
                       <FormControl>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="mt-2" ref={field.ref}>
                             <SelectValue placeholder={t("select_status")} />
                           </SelectTrigger>
                           <SelectContent>

@@ -1,6 +1,5 @@
 import { t } from "i18next";
-import { ExternalLink, InfoIcon } from "lucide-react";
-import { navigate } from "raviger";
+import { InfoIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -14,36 +13,44 @@ import {
 
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 
-import { useCurrentLocationSilently } from "@/pages/Facility/locations/utils/useCurrentLocation";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { Button } from "@/components/ui/button";
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   CHARGE_ITEM_STATUS_COLORS,
   ChargeItemRead,
+  ChargeItemServiceResource,
 } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
-
+import { Link } from "raviger";
 interface ChargeItemCardProps {
   chargeItem: ChargeItemRead;
-  serviceRequestId: string;
+  serviceResourceId: string;
+  serviceResourceType: ChargeItemServiceResource;
+  locationId?: string;
+  patientId?: string;
 }
 
 export function ChargeItemCard({
   chargeItem,
-  serviceRequestId,
+  serviceResourceId,
+  serviceResourceType,
+  locationId,
+  patientId,
 }: ChargeItemCardProps) {
   const isPaid = chargeItem.paid_invoice?.status === InvoiceStatus.balanced;
   const { facilityId } = useCurrentFacility();
-  const { locationId } = useCurrentLocationSilently();
   const invoiceUrl = chargeItem.paid_invoice
-    ? `/facility/${facilityId}/billing/invoices/${chargeItem.paid_invoice.id}?sourceUrl=/facility/${facilityId}/${locationId ? `locations/${locationId}/` : ""}services_requests/${serviceRequestId}`
+    ? `/facility/${facilityId}/billing/invoices/${chargeItem.paid_invoice.id}?sourceUrl=/facility/${facilityId}/${locationId ? `locations/${locationId}/` : ""}${patientId ? `patient/${patientId}/` : ""}${serviceResourceType === ChargeItemServiceResource.service_request ? "service_requests/" : "appointments/"}${serviceResourceId}`
     : null;
 
   return (
-    <Card className="p-3 sm:p-4 space-y-3 sm:space-y-4">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-0">
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-row sm:items-center gap-2 sm:gap-2 text-sm text-gray-600">
-            <span className="text-base sm:text-base text-gray-950 font-medium truncate">
+    <Card className="py-1 px-2 space-y-3 sm:space-y-4 bg-gray-50 rounded-sm shadow-none">
+      <div className="flex flex-col md:flex-row sm:justify-between  gap-3 sm:gap-0">
+        <div className="flex flex-row min-w-0">
+          <div className="flex flex-row items-center gap-2 sm:gap-2 text-sm text-gray-600">
+            <span className="text-sm text-gray-950 font-medium truncate">
               {chargeItem.title}
             </span>
             <div className="flex items-center gap-2">
@@ -52,13 +59,19 @@ export function ChargeItemCard({
                   {t("x")} {chargeItem.quantity}
                 </span>
               )}
-              <Badge variant={CHARGE_ITEM_STATUS_COLORS[chargeItem.status]}>
-                {t(chargeItem.status)}
-              </Badge>
             </div>
           </div>
-          <div className="font-semibold flex items-center mt-1">
-            <span>₹{chargeItem.total_price}</span>
+        </div>
+        <div
+          className={cn(
+            "items-center cursor-pointer flex flex-row gap-2 sm:gap-1",
+            !invoiceUrl && "pointer-events-none",
+          )}
+        >
+          <div className="font-semibold text-sm flex items-center">
+            <span className="items-center">
+              <MonetaryDisplay amount={chargeItem.total_price} />
+            </span>
             {chargeItem.total_price_components?.length > 0 && (
               <Popover>
                 <PopoverTrigger>
@@ -72,25 +85,21 @@ export function ChargeItemCard({
               </Popover>
             )}
           </div>
-        </div>
-        <div className="flex flex-row sm:flex-col sm:items-end gap-2 sm:gap-1">
-          <div className="text-sm text-gray-600 sm:text-right">
-            {t("payment_status")}:
-          </div>
-          <div
-            onClick={() => {
-              invoiceUrl && navigate(invoiceUrl);
-            }}
-            className={cn(
-              "inline-flex items-center cursor-pointer",
-              !invoiceUrl && "pointer-events-none",
-            )}
-          >
-            <Badge variant={isPaid ? "green" : "destructive"}>
-              {isPaid ? t("paid") : t("unpaid")}
+          {invoiceUrl ? (
+            <Button asChild variant="outline" size="xs">
+              <Link href={invoiceUrl}>
+                {t("invoice")}
+                <CareIcon icon="l-external-link-alt" className="size-6" />
+              </Link>
+            </Button>
+          ) : (
+            <Badge variant={CHARGE_ITEM_STATUS_COLORS[chargeItem.status]}>
+              {t(chargeItem.status)}
             </Badge>
-            {invoiceUrl && <ExternalLink className="size-4 ml-1" />}
-          </div>
+          )}
+          <Badge variant={isPaid ? "green" : "destructive"}>
+            {isPaid ? t("paid") : t("unpaid")}
+          </Badge>
         </div>
       </div>
     </Card>
