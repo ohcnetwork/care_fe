@@ -53,11 +53,14 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
     valueset.compose?.include?.flatMap((include) => include.concept || []) ||
     [];
 
+  let previousSearch = "";
+
   let finalResults: typeof searchResults | typeof defaultConcepts = [];
   if (!selected) {
     finalResults = defaultConcepts;
   } else if (selected && !isFetching) {
     finalResults = searchResults.filter((o) => o.code === selected);
+    previousSearch = search;
   }
 
   useEffect(() => {
@@ -89,7 +92,10 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
             )}
             value={selected}
             onChange={setSelected}
-            onSearch={setSearch}
+            onSearch={(v) => {
+              setSearch(v);
+              setSelected(previousSearch);
+            }}
             placeholder={t("search_concept")}
             noOptionsMessage={
               searchQuery && !isFetching
@@ -97,7 +103,7 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
                 : t("searching")
             }
           />
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 space-y-4 max-h-[80vh] overflow-y-auto">
             {finalResults.length > 0 ? (
               finalResults.map((item) => (
                 <div
@@ -106,7 +112,7 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
                 >
                   <h3 className="text-lg font-medium">{item.display}</h3>
                   <p className="text-sm text-gray-600">
-                    <strong>CODE:</strong> {item.code}
+                    <strong>{t("code")}:</strong> {item.code}
                   </p>
                 </div>
               ))
