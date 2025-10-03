@@ -102,7 +102,7 @@ import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 
-import { useAutoSlug } from "@/hooks/useAutoSlug";
+import { generateSlug } from "@/Utils/utils";
 import { CodingEditor } from "./CodingEditor";
 import { QuestionActions } from "./QuestionActions";
 import { QuestionnaireForm } from "./QuestionnaireForm";
@@ -486,7 +486,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     mode: "onChange",
   });
 
-  useAutoSlug(form, id ? { id } : undefined);
+  generateSlug(form.watch("title"), 25);
 
   const { isDirty } = form.formState;
 
@@ -611,10 +611,23 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     field: keyof QuestionnaireDetail,
     value: QuestionnaireDetail[keyof QuestionnaireDetail],
   ) => {
-    form.setValue(field as "title" | "description" | "slug", value, {
+    let finalValue = value;
+    if (field === "slug" && typeof value === "string") {
+      finalValue = value.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    }
+
+    form.setValue(field as "title" | "description" | "slug", finalValue, {
       shouldValidate: true,
       shouldDirty: true,
     });
+
+    if (field === "title") {
+      const next = generateSlug((value as string) || "", 25);
+      form.setValue("slug", next, {
+        shouldValidate: true,
+        shouldDirty: false,
+      });
+    }
   };
 
   const updateQuestions = (newQuestions: Question[]) => {

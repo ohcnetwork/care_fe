@@ -34,7 +34,8 @@ import {
   ValuesetFormType,
 } from "@/types/valueset/valueset";
 
-import { useAutoSlug } from "@/hooks/useAutoSlug";
+import { generateSlug } from "@/Utils/utils";
+import { useEffect } from "react";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
 
@@ -382,7 +383,23 @@ export function ValueSetForm({
       },
     },
   });
-  useAutoSlug(form, initialData);
+
+  useEffect(() => {
+    const sub = form.watch((value, info) => {
+      const changed = info?.name as keyof typeof value | undefined;
+      if (!changed) return;
+
+      if (changed === "name") {
+        const base = (value.name ?? "") as string;
+        const next = generateSlug(base);
+        form.setValue("slug", next, {
+          shouldValidate: true,
+          shouldDirty: false,
+        });
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [form]);
 
   return (
     <Form {...form}>
@@ -423,9 +440,18 @@ export function ValueSetForm({
             <FormItem>
               <FormLabel aria-required>{t("slug")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    const sanitizedValue = e.target.value
+                      .toLowerCase()
+                      .replace(/[^a-z0-9_-]/g, "");
+                    field.onChange(sanitizedValue);
+                  }}
+                />
               </FormControl>
               <FormMessage />
+              <FormDescription>{t("slug_format_message")}</FormDescription>
             </FormItem>
           )}
         />
