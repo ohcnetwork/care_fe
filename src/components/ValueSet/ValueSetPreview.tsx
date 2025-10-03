@@ -47,20 +47,17 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
     enabled: open,
   });
 
-  const rawResults = searchQuery?.results || [];
+  const searchResults = searchQuery?.results || [];
 
   const defaultConcepts =
     valueset.compose?.include?.flatMap((include) => include.concept || []) ||
     [];
 
-  const matched = selected ? rawResults.filter((o) => o.code === selected) : [];
-  let detailsToShow: any[] = [];
-  if (matched.length) {
-    detailsToShow = matched;
-  } else if (!selected) {
-    detailsToShow = rawResults.length ? rawResults : defaultConcepts;
-  } else if (selected && isFetching) {
-    detailsToShow = defaultConcepts;
+  let finalResults: typeof searchResults | typeof defaultConcepts = [];
+  if (!selected) {
+    finalResults = defaultConcepts;
+  } else if (selected && !isFetching) {
+    finalResults = searchResults.filter((o) => o.code === selected);
   }
 
   useEffect(() => {
@@ -90,12 +87,8 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
               })) ?? [],
             )}
             value={selected}
-            freeInput={true}
             onChange={setSelected}
-            onSearch={(val) => {
-              setSearch(val);
-              setSelected("");
-            }}
+            onSearch={setSearch}
             placeholder={t("search_concept")}
             noOptionsMessage={
               searchQuery && !isFetching
@@ -104,8 +97,8 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
             }
           />
           <div className="mt-6 space-y-4">
-            {detailsToShow.length > 0 ? (
-              detailsToShow.map((item) => (
+            {finalResults.length > 0 ? (
+              finalResults.map((item) => (
                 <div
                   key={item.code}
                   className="border rounded-lg p-4 bg-white shadow-sm"
