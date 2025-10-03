@@ -8,6 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+
 import FilterHeader from "./filterHeader";
 import useMultiFilterNavigationShortcuts from "./utils/useMultiFilterNavigationShortcuts";
 import useMultiFilterSearch from "./utils/useMultiFilterSearch";
@@ -150,6 +152,17 @@ function FilterOptionsList({
             }
           }}
         >
+          {/* ENHANCED ICON RENDERING - THIS IS THE KEY FIX */}
+          {option.icon && (
+            <div className="flex-shrink-0">
+              {typeof option.icon === "string" ? (
+                <CareIcon icon={option.icon as IconName} className="h-4 w-4" />
+              ) : (
+                option.icon
+              )}
+            </div>
+          )}
+
           {mode === "single" ? (
             <RadioGroup
               id={`${option.value}-${index}`}
@@ -181,22 +194,38 @@ function FilterOptionsList({
   );
 }
 
+// ENHANCED GENERIC SELECTED BADGE WITH ICON SUPPORT
 export const GenericSelectedBadge = ({
   selectedValue,
   selectedLength,
   className,
+  icon, // NEW ICON PROP
 }: {
   selectedValue: string;
   selectedLength: number;
   className?: string;
+  icon?: string | React.ReactNode; // NEW ICON SUPPORT
 }) => {
   const { t } = useTranslation();
   return (
     <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
       <Badge
         variant="outline"
-        className={cn("text-xs whitespace-nowrap", className)}
+        className={cn(
+          "flex items-center gap-1 text-xs whitespace-nowrap",
+          className,
+        )}
       >
+        {/* RENDER ICON IN BADGE - THIS IS THE KEY FIX */}
+        {icon && (
+          <span className="flex-shrink-0">
+            {typeof icon === "string" ? (
+              <CareIcon icon={icon as IconName} className="h-3 w-3" />
+            ) : (
+              icon
+            )}
+          </span>
+        )}
         {t(selectedValue)}
       </Badge>
       {selectedLength > 1 && (

@@ -33,6 +33,7 @@ interface MultiFilterProps {
   facilityId?: string;
   disabled?: boolean;
 }
+
 export default function MultiFilter({
   selectedFilters,
   onFilterChange,
@@ -189,6 +190,7 @@ export default function MultiFilter({
     </div>
   );
 }
+
 function FilterList({
   handleFilterSelect,
   selectedFilters,
@@ -242,7 +244,12 @@ function FilterList({
             onFocus={() => setFocusItemIndex(index)}
           >
             <div className="flex items-center gap-2">
-              <span className="border border-dotted border-gray-600 rounded w-3 h-3 mb-0.5"></span>
+              {/* ENHANCED FILTER ICON RENDERING */}
+              {filter.icon ? (
+                <span className="flex-shrink-0">{filter.icon}</span>
+              ) : (
+                <span className="border border-dotted border-gray-600 rounded w-3 h-3 mb-0.5"></span>
+              )}
               <span className="text-sm">{t(filter.label)}</span>
             </div>
             <div className="flex items-center gap-2">

@@ -19,6 +19,7 @@ export const COLOR_PALETTE = [
   "bg-emerald-100 border-emerald-300",
   "bg-violet-100 border-violet-300",
 ] as const;
+
 export const getColorForOption = (index: number) => {
   return COLOR_PALETTE[index % COLOR_PALETTE.length];
 };
@@ -27,7 +28,7 @@ export interface FilterOption {
   value: string;
   label: string;
   color?: string;
-  icon?: string;
+  icon?: string | React.ReactNode; // Updated to support both string and React components
 }
 
 export type FilterValues = string[] | TagConfig[] | FilterDateRange;
@@ -37,6 +38,7 @@ export type FilterMode = "single" | "multi";
 export type DateFilterMeta = {
   presetOptions?: DateRangeOption[];
 };
+
 export type TagFilterMeta = {
   resource: TagResource;
 };
@@ -164,6 +166,7 @@ export function createFilterConfig(
     operationKey,
     disableClear,
   };
+
   switch (type) {
     case "date":
       return {
