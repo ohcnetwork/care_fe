@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/drawer";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
+import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import {
   ProductKnowledgeBase,
@@ -63,6 +64,8 @@ interface Props {
   mobileTrigger?: React.ReactNode;
 }
 
+type TabType = "product" | "valueset";
+
 export default function MedicationValueSetSelect({
   onSelect,
   onProductSelect,
@@ -77,7 +80,7 @@ export default function MedicationValueSetSelect({
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacilitySilently();
   const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"product" | "valueset">("product");
+  const [activeTab, setActiveTab] = useState<TabType>("product");
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
 
@@ -161,200 +164,25 @@ export default function MedicationValueSetSelect({
     setSearch("");
   };
 
-  const renderProductItems = () => {
-    if (!productKnowledge?.results || productKnowledge.results.length === 0) {
-      return null;
-    }
-
-    return (
-      <CommandGroup heading={t("products")}>
-        {productKnowledge.results.map((product) => (
-          <CommandItem
-            key={product.id}
-            value={product.name}
-            onSelect={() => {
-              onProductSelect(product);
-              setOpen(false);
-            }}
-            className="cursor-pointer p-3 hover:bg-gray-50"
-          >
-            <div className="flex flex-col">
-              <span className="font-medium">{product.name}</span>
-            </div>
-          </CommandItem>
-        ))}
-      </CommandGroup>
-    );
-  };
-
-  const renderTabs = () => (
-    <Tabs
-      value={activeTab}
-      onValueChange={(value: string) =>
-        setActiveTab(value as "product" | "valueset")
-      }
-    >
-      <TabsList className="flex w-full">
-        <TabsTrigger value="product" className="flex-1">
-          {t("in_stock")}
-        </TabsTrigger>
-        <TabsTrigger value="valueset" className="flex-1">
-          {t("medication_list")}
-        </TabsTrigger>
-      </TabsList>
-    </Tabs>
+  const tabContent = (
+    <MedicationValueSetSelectTabContent
+      activeTab={activeTab}
+      search={search}
+      onSearchChange={setSearch}
+      categories={categories?.results || []}
+      products={productKnowledge?.results || []}
+      currentCategory={currentCategory}
+      isProductLoading={isProductLoading}
+      isCategoriesLoading={isCategoriesLoading}
+      onCategorySelect={handleCategorySelect}
+      onProductSelect={onProductSelect}
+      onValueSetSelect={onSelect}
+      title={title}
+      placeholder={placeholder}
+      onChange={setActiveTab}
+      onOpenChange={setOpen}
+    />
   );
-
-  const renderCommand = (children: React.ReactNode) => (
-    <Command className="rounded-lg" filter={() => 1}>
-      {activeTab === "product" && (
-        <CommandInput
-          placeholder={t("search_products")}
-          onValueChange={(value) => {
-            if (value && currentCategory) {
-              setCurrentCategory(undefined);
-              setBreadcrumbs([]);
-            }
-            setSearch(value);
-          }}
-          value={search}
-          className="border-none ring-0 text-base md:text-sm"
-          autoFocus={!isAppleDevice}
-        />
-      )}
-      {children}
-    </Command>
-  );
-
-  const renderTabContent = () => (
-    <div className="flex-1 overflow-y-auto">
-      <Tabs
-        value={activeTab}
-        onValueChange={(value: string) =>
-          setActiveTab(value as "product" | "valueset")
-        }
-        className="w-full p-0"
-      >
-        <TabsContent value="product" className="p-0 overflow-y-auto">
-          <CommandList>
-            <CommandEmpty>
-              {search.length < 3 ? (
-                <p className="p-4 text-sm text-gray-500">
-                  {t("min_char_length_error", { min_length: 3 })}
-                </p>
-              ) : isProductLoading || isCategoriesLoading ? (
-                <p className="p-4 text-sm text-gray-500">{t("searching")}</p>
-              ) : (
-                <p className="p-4 text-sm text-gray-500">
-                  {t("no_results_found")}
-                </p>
-              )}
-            </CommandEmpty>
-
-            {!search && (
-              <>
-                {/* Categories */}
-                {categories?.results && categories.results.length > 0 && (
-                  <CommandGroup heading={t("category")}>
-                    {categories.results.map((category) => (
-                      <CommandItem
-                        key={category.id}
-                        value={category.title}
-                        onSelect={() =>
-                          handleCategorySelect(category.slug, category.title)
-                        }
-                        className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50"
-                      >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <FolderOpen className="size-5 text-gray-500" />
-                          <div className="min-w-0 flex-1">
-                            <div className="font-medium text-sm truncate">
-                              {category.title}
-                            </div>
-                            {category.description && (
-                              <div className="text-xs text-gray-500 truncate">
-                                {category.description}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <ChevronRight className="size-4 text-gray-500" />
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                )}
-                {/* Products in the current category */}
-                {currentCategory && renderProductItems()}
-              </>
-            )}
-            {/* Search Results */}
-            {search && renderProductItems()}
-          </CommandList>
-        </TabsContent>
-
-        <TabsContent value="valueset" className="p-0 overflow-y-auto">
-          <ValueSetSearchContent
-            system="system-medication"
-            onSelect={(selected) => {
-              onSelect(selected);
-              setOpen(false);
-            }}
-            searchPostFix=" clinical drug"
-            title={title}
-            search={search}
-            onSearchChange={setSearch}
-            placeholder={placeholder}
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-
-  const renderBreadcrumbs = () =>
-    breadcrumbs.length > 0 &&
-    activeTab === "product" && (
-      <div className="px-4 py-2 border-b bg-gray-100 mt-1 overflow-hidden">
-        <Breadcrumb>
-          <BreadcrumbList className="text-xs flex-nowrap overflow-x-auto">
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                asChild
-                className="flex items-center hover:text-gray-900"
-                onClick={handleBackToRoot}
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-2 text-xs hover:bg-white"
-                >
-                  <Home className="size-3" />
-                  {t("root")}
-                </Button>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            {breadcrumbs.map((breadcrumb, index) => (
-              <BreadcrumbItem key={breadcrumb.slug}>
-                <BreadcrumbSeparator />
-                <BreadcrumbLink
-                  asChild
-                  className="hover:text-gray-900"
-                  onClick={() => handleBreadcrumbClick(index)}
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2 text-xs hover:bg-white truncate max-w-[150px]"
-                  >
-                    {breadcrumb.title}
-                  </Button>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            ))}
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
-    );
 
   if (isMobile && !hideTrigger) {
     return (
@@ -380,17 +208,23 @@ export default function MedicationValueSetSelect({
             </Button>
           )}
         </DrawerTrigger>
-        <DrawerContent className="min-h-[50vh] max-h-[85vh] px-0 pb-0 rounded-t-lg flex flex-col">
-          <DrawerHeader className="p-0 flex-shrink-0 mt-1.5">
-            {renderTabs()}
+        <DrawerContent className="max-h-[85vh] px-0 pb-0 rounded-t-lg">
+          <DrawerHeader className="p-0 mt-1.5">
+            <MedicationValueSetSelectTabs
+              activeTab={activeTab}
+              onChange={setActiveTab}
+            />
             <DrawerTitle className="sr-only">
               {title || t("select_medication")}
             </DrawerTitle>
-            {renderBreadcrumbs()}
+            <MedicationValueSetBreadcrumbs
+              breadcrumbs={breadcrumbs}
+              activeTab={activeTab}
+              onBackToRoot={handleBackToRoot}
+              onBreadcrumbClick={handleBreadcrumbClick}
+            />
           </DrawerHeader>
-          <div className="flex-1 overflow-y-auto">
-            {renderCommand(renderTabContent())}
-          </div>
+          <div className="flex-1 overflow-y-auto">{tabContent}</div>
         </DrawerContent>
       </Drawer>
     );
@@ -399,9 +233,17 @@ export default function MedicationValueSetSelect({
   if (hideTrigger) {
     return (
       <div className="w-full mt-1.5">
-        {renderTabs()}
-        {renderBreadcrumbs()}
-        {renderCommand(renderTabContent())}
+        <MedicationValueSetSelectTabs
+          activeTab={activeTab}
+          onChange={setActiveTab}
+        />
+        <MedicationValueSetBreadcrumbs
+          breadcrumbs={breadcrumbs}
+          activeTab={activeTab}
+          onBackToRoot={handleBackToRoot}
+          onBreadcrumbClick={handleBreadcrumbClick}
+        />
+        {tabContent}
       </div>
     );
   }
@@ -424,10 +266,306 @@ export default function MedicationValueSetSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[600px] p-0" align="start">
-        {renderTabs()}
-        {renderBreadcrumbs()}
-        {renderCommand(renderTabContent())}
+        <MedicationValueSetSelectTabs
+          activeTab={activeTab}
+          onChange={setActiveTab}
+        />
+        <MedicationValueSetBreadcrumbs
+          breadcrumbs={breadcrumbs}
+          activeTab={activeTab}
+          onBackToRoot={handleBackToRoot}
+          onBreadcrumbClick={handleBreadcrumbClick}
+        />
+        {tabContent}
       </PopoverContent>
     </Popover>
+  );
+}
+
+function MedicationValueSetSelectTabs({
+  activeTab,
+  onChange,
+}: {
+  activeTab: TabType;
+  onChange: (value: TabType) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Tabs
+      value={activeTab}
+      onValueChange={(value: string) => onChange(value as TabType)}
+    >
+      <TabsList className="flex w-full">
+        <TabsTrigger value="product" className="flex-1">
+          {t("in_stock")}
+        </TabsTrigger>
+        <TabsTrigger value="valueset" className="flex-1">
+          {t("medication_list")}
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
+  );
+}
+
+interface MedicationValueSetBreadcrumbsProps {
+  breadcrumbs: Array<{ slug: string; title: string }>;
+  activeTab: TabType;
+  onBackToRoot: () => void;
+  onBreadcrumbClick: (index: number) => void;
+}
+
+function MedicationValueSetBreadcrumbs({
+  breadcrumbs,
+  activeTab,
+  onBackToRoot,
+  onBreadcrumbClick,
+}: MedicationValueSetBreadcrumbsProps) {
+  const { t } = useTranslation();
+
+  if (breadcrumbs.length === 0 || activeTab !== "product") {
+    return null;
+  }
+
+  return (
+    <div className="p-1.5 border-b bg-gray-100 mt-0.5">
+      <Breadcrumb>
+        <BreadcrumbList className="text-xs flex-nowrap overflow-x-auto">
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              asChild
+              className="flex items-center hover:text-gray-900"
+              onClick={onBackToRoot}
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-xs hover:bg-white"
+              >
+                <Home className="size-3" />
+                {t("root")}
+              </Button>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+
+          {breadcrumbs.map((breadcrumb, index) => (
+            <BreadcrumbItem key={breadcrumb.slug}>
+              <BreadcrumbSeparator />
+              <BreadcrumbLink
+                asChild
+                className="hover:text-gray-900"
+                onClick={() => onBreadcrumbClick(index)}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs hover:bg-white truncate max-w-[150px]"
+                >
+                  {breadcrumb.title}
+                </Button>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
+    </div>
+  );
+}
+
+function Group({
+  title,
+  items,
+  onCategorySelect,
+  onProductSelect,
+}: {
+  title: string;
+  items: ProductKnowledgeBase[] | ResourceCategoryRead[];
+  onCategorySelect?: (slug: string, title: string) => void;
+  onProductSelect?: (product: ProductKnowledgeBase) => void;
+}) {
+  const { t } = useTranslation();
+  if (items.length === 0) {
+    return null;
+  }
+  return (
+    <CommandGroup heading={t(title)}>
+      {items.map((item) => (
+        <Item
+          key={item.id}
+          item={item}
+          onCategorySelect={onCategorySelect}
+          onProductSelect={onProductSelect}
+        />
+      ))}
+    </CommandGroup>
+  );
+}
+
+function Item({
+  item,
+  onCategorySelect,
+  onProductSelect,
+}: {
+  item: ProductKnowledgeBase | ResourceCategoryRead;
+  onCategorySelect?: (slug: string, title: string) => void;
+  onProductSelect?: (product: ProductKnowledgeBase) => void;
+}) {
+  const { t } = useTranslation();
+  const isCategory = "title" in item;
+  const handleSelect = () => {
+    if (isCategory) {
+      onCategorySelect?.(item.slug, item.title);
+    } else {
+      onProductSelect?.(item);
+    }
+  };
+  return (
+    <CommandItem
+      value={t(isCategory ? item.title : item.name)}
+      onSelect={handleSelect}
+      className="cursor-pointer p-3 hover:bg-gray-50"
+    >
+      {isCategory ? (
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <FolderOpen className="size-5 text-gray-500" />
+          <div className="min-w-0 flex-1">
+            <div className="font-medium text-sm truncate">{item.title}</div>
+            {item.description && (
+              <div className="text-xs text-gray-500 truncate">
+                {item.description}
+              </div>
+            )}
+          </div>
+          <ChevronRight className="size-4 text-gray-500" />
+        </div>
+      ) : (
+        <div className="flex flex-col">
+          <span className="font-medium">{item.name}</span>
+        </div>
+      )}
+    </CommandItem>
+  );
+}
+
+interface MedicationValueSetSelectTabContentProps {
+  activeTab: TabType;
+  search: string;
+  onSearchChange: (value: string) => void;
+  categories: ResourceCategoryRead[];
+  products: ProductKnowledgeBase[];
+  currentCategory?: string;
+  isProductLoading: boolean;
+  isCategoriesLoading: boolean;
+  onCategorySelect: (slug: string, title: string) => void;
+  onProductSelect: (product: ProductKnowledgeBase) => void;
+  onValueSetSelect: (selected: Code) => void;
+  title?: string;
+  placeholder?: string;
+  onChange: (value: TabType) => void;
+  onOpenChange: (value: boolean) => void;
+}
+
+export function MedicationValueSetSelectTabContent({
+  activeTab,
+  search,
+  onSearchChange,
+  categories,
+  products,
+  currentCategory,
+  isProductLoading,
+  isCategoriesLoading,
+  onCategorySelect,
+  onProductSelect,
+  onValueSetSelect,
+  title,
+  placeholder,
+  onChange,
+  onOpenChange,
+}: MedicationValueSetSelectTabContentProps) {
+  const { t } = useTranslation();
+
+  return (
+    <div>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value: string) => {
+          onChange(value as TabType);
+        }}
+        className="w-full p-0"
+      >
+        <TabsContent value="product">
+          <Command className="rounded-lg" filter={() => 1}>
+            <div className="bg-white z-10 w-full fixed">
+              <CommandInput
+                placeholder={t("search_products")}
+                onValueChange={onSearchChange}
+                value={search}
+                className="border-none ring-0 text-base md:text-sm"
+                autoFocus={!isAppleDevice}
+              />
+            </div>
+
+            <CommandList className="flex-1 p-0 overflow-y-auto">
+              <CommandEmpty>
+                {search.length < 3 ? (
+                  <p className="p-4 text-sm text-gray-500">
+                    {t("min_char_length_error", { min_length: 3 })}
+                  </p>
+                ) : isProductLoading || isCategoriesLoading ? (
+                  <p className="p-4 text-sm text-gray-500">{t("searching")}</p>
+                ) : (
+                  <p className="p-4 text-sm text-gray-500">
+                    {t("no_results_found")}
+                  </p>
+                )}
+              </CommandEmpty>
+
+              {!search && (
+                <>
+                  <Group
+                    title={t("category")}
+                    items={categories}
+                    onCategorySelect={onCategorySelect}
+                  />
+
+                  {currentCategory && (
+                    <Group
+                      title={t("products")}
+                      items={products}
+                      onProductSelect={(product) => {
+                        onProductSelect(product);
+                        onOpenChange(false);
+                      }}
+                    />
+                  )}
+                </>
+              )}
+
+              {search && (
+                <Group
+                  title={t("products")}
+                  items={products}
+                  onProductSelect={(product) => {
+                    onProductSelect(product);
+                    onOpenChange(false);
+                  }}
+                />
+              )}
+            </CommandList>
+          </Command>
+        </TabsContent>
+
+        <TabsContent value="valueset" className="p-0 overflow-y-auto">
+          <ValueSetSearchContent
+            system="system-medication"
+            onSelect={onValueSetSelect}
+            searchPostFix=" clinical drug"
+            title={title}
+            search={search}
+            onSearchChange={onSearchChange}
+            placeholder={placeholder}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
