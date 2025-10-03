@@ -6,6 +6,13 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -306,31 +313,46 @@ export default function MedicationValueSetSelect({
   const renderBreadcrumbs = () =>
     breadcrumbs.length > 0 &&
     activeTab === "product" && (
-      <div className="px-4 py-2 border-b bg-gray-100 mt-1">
-        <div className="flex items-center gap-1 truncate text-xs overflow-x-auto">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBackToRoot}
-            className="h-6 px-2 text-xs hover:bg-white"
-          >
-            <Home className="size-3 mr-1" />
-            {t("root")}
-          </Button>
-          {breadcrumbs.map((breadcrumb, index) => (
-            <div key={breadcrumb.slug} className="flex items-center">
-              <ChevronRight className="size-3 mx-1 text-gray-500" />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleBreadcrumbClick(index)}
-                className="h-6 px-2 text-xs hover:bg-white truncate max-w-[150px]"
+      <div className="px-4 py-2 border-b bg-gray-100 mt-1 overflow-hidden">
+        <Breadcrumb>
+          <BreadcrumbList className="text-xs flex-nowrap overflow-x-auto">
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                asChild
+                className="flex items-center hover:text-gray-900"
+                onClick={handleBackToRoot}
               >
-                {breadcrumb.title}
-              </Button>
-            </div>
-          ))}
-        </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs hover:bg-white"
+                >
+                  <Home className="size-3" />
+                  {t("root")}
+                </Button>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            {breadcrumbs.map((breadcrumb, index) => (
+              <BreadcrumbItem key={breadcrumb.slug}>
+                <BreadcrumbSeparator />
+                <BreadcrumbLink
+                  asChild
+                  className="hover:text-gray-900"
+                  onClick={() => handleBreadcrumbClick(index)}
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs hover:bg-white truncate max-w-[150px] truncate"
+                  >
+                    {breadcrumb.title}
+                  </Button>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
     );
 
