@@ -410,7 +410,7 @@ export default function EncounterHistorySelector() {
                 {t("past_encounters")}
               </DrawerTitle>
             </DrawerHeader>
-            <div className="overflow-y-auto pb-4">
+            <div className="overflow-y-auto pb-4 pr-2">
               <EncounterHistoryList onSelect={() => setIsOpen(false)} />
             </div>
           </DrawerContent>
