@@ -37,7 +37,7 @@ export function CompactConditionEditor({
   const [newCondition, setNewCondition] = useState<{
     metric: string;
     operation: ConditionOperation;
-    value: string | { min: number; max: number };
+    value: string | { min: number; max: number } | string[];
   }>({
     metric: "",
     operation: ConditionOperation.equality,
@@ -45,7 +45,19 @@ export function CompactConditionEditor({
   });
 
   const handleAddCondition = () => {
-    if (!newCondition.metric || !newCondition.value) return;
+    if (!newCondition.metric) return;
+    if (
+      newCondition.operation === ConditionOperation.intersects_any &&
+      (!newCondition.value || (newCondition.value as string[]).length === 0)
+    ) {
+      return;
+    }
+    if (
+      newCondition.operation !== ConditionOperation.intersects_any &&
+      !newCondition.value
+    ) {
+      return;
+    }
 
     let condition: Condition;
     if (newCondition.operation === ConditionOperation.equality) {
@@ -54,11 +66,17 @@ export function CompactConditionEditor({
         operation: ConditionOperation.equality,
         value: newCondition.value as string,
       };
-    } else {
+    } else if (newCondition.operation === ConditionOperation.in_range) {
       condition = {
         metric: newCondition.metric,
         operation: ConditionOperation.in_range,
         value: newCondition.value as { min: number; max: number },
+      };
+    } else {
+      condition = {
+        metric: newCondition.metric,
+        operation: ConditionOperation.intersects_any,
+        values: newCondition.value as string[],
       };
     }
 
@@ -137,12 +155,19 @@ export function CompactConditionEditor({
 
             <Select
               value={newCondition.operation}
-              onValueChange={(value) =>
+              onValueChange={(value) => {
+                const operation = value as ConditionOperation;
                 setNewCondition({
                   ...newCondition,
-                  operation: value as ConditionOperation,
-                })
-              }
+                  operation,
+                  value:
+                    operation === ConditionOperation.in_range
+                      ? { min: 0, max: 0 }
+                      : operation === ConditionOperation.intersects_any
+                        ? []
+                        : "",
+                });
+              }}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -164,7 +189,7 @@ export function CompactConditionEditor({
                 }
                 placeholder={t("value")}
               />
-            ) : (
+            ) : newCondition.operation === ConditionOperation.in_range ? (
               <div className="flex gap-1">
                 <Input
                   type="number"
@@ -197,6 +222,18 @@ export function CompactConditionEditor({
                   }
                 />
               </div>
+            ) : (
+              <Input
+                value={(newCondition.value as string[])?.join(", ") || ""}
+                onChange={(e) => {
+                  const values = e.target.value
+                    .split(",")
+                    .map((v) => v.trim())
+                    .filter((v) => v.length > 0);
+                  setNewCondition({ ...newCondition, value: values });
+                }}
+                placeholder={t("enter_comma_separated_values")}
+              />
             )}
           </div>
           <div className="flex gap-2">
