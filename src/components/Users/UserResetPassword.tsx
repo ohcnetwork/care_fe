@@ -44,12 +44,8 @@ export default function UserResetPassword({
         .string()
         .min(8, { message: t("invalid_password") })
         .regex(/\d/, { message: t("invalid_password") })
-        .regex(/[a-z]/, {
-          message: t("invalid_password"),
-        })
-        .regex(/[A-Z]/, {
-          message: t("invalid_password"),
-        }),
+        .regex(/[a-z]/, { message: t("invalid_password") })
+        .regex(/[A-Z]/, { message: t("invalid_password") }),
       new_password_2: z
         .string()
         .min(1, { message: t("please_enter_confirm_password") }),
@@ -65,29 +61,32 @@ export default function UserResetPassword({
 
   const form = useForm({
     resolver: zodResolver(PasswordSchema),
+    mode: "onChange", // real-time validation on each input change
     defaultValues: {
       old_password: "",
       new_password_1: "",
       new_password_2: "",
     },
   });
+
   const { mutate: updatePassword, isPending } = useMutation({
     mutationFn: mutate(authApi.updatePassword),
     onSuccess: () => {
       toast.success(t("password_updated"));
       form.reset();
+      setIsEditing(false);
     },
   });
 
   const handleSubmitPassword = async (
     formData: z.infer<typeof PasswordSchema>,
   ) => {
-    const form: UpdatePasswordForm = {
+    const formPayload: UpdatePasswordForm = {
       old_password: formData.old_password,
       username: userData.username,
       new_password: formData.new_password_1,
     };
-    updatePassword(form);
+    updatePassword(formPayload);
   };
 
   return (
@@ -122,9 +121,7 @@ export default function UserResetPassword({
                       <PasswordInput
                         {...field}
                         autoComplete="current-password"
-                        onChange={(e) => {
-                          field.onChange(e.target.value);
-                        }}
+                        onChange={(e) => field.onChange(e.target.value)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -143,9 +140,7 @@ export default function UserResetPassword({
                           <PasswordInput
                             {...field}
                             autoComplete="new-password"
-                            onChange={(e) => {
-                              field.onChange(e.target.value);
-                            }}
+                            onChange={(e) => field.onChange(e.target.value)}
                             onFocus={() => setIsPasswordFieldFocused(true)}
                             onBlur={() => setIsPasswordFieldFocused(false)}
                           />
@@ -201,9 +196,7 @@ export default function UserResetPassword({
                           <PasswordInput
                             {...field}
                             autoComplete="new-password"
-                            onChange={(e) => {
-                              field.onChange(e.target.value);
-                            }}
+                            onChange={(e) => field.onChange(e.target.value)}
                           />
                         </FormControl>
                         <FormMessage />
@@ -228,7 +221,7 @@ export default function UserResetPassword({
               </Button>
               <Button
                 type="submit"
-                disabled={!form.formState.isDirty || isPending}
+                disabled={!form.formState.isValid || isPending}
                 variant="primary"
               >
                 {isPending && (
