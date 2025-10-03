@@ -40,11 +40,11 @@ import { LocalStorageKeys } from "@/common/constants";
 
 import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
 import authApi from "@/types/auth/authApi";
-import { TokenData } from "@/types/auth/otp";
+import { TokenData } from "@/types/otp/otp";
+import otpApi from "@/types/otp/otpApi";
 
 import { AuthHero } from "./AuthHero";
 
@@ -127,7 +127,7 @@ const Login = (props: LoginProps) => {
 
   // Send OTP Mutation
   const { mutate: sendOtp, isPending: sendOtpPending } = useMutation({
-    mutationFn: mutate(routes.otp.sendOtp),
+    mutationFn: mutate(otpApi.send),
     onSuccess: () => {
       setIsOtpSent(true);
       setOtpError("");
@@ -147,9 +147,7 @@ const Login = (props: LoginProps) => {
   // Verify OTP Mutation
   const { mutate: verifyOtp, isPending: verifyOtpPending } = useMutation({
     mutationFn: async (data: OtpLoginData) => {
-      const response = await mutate(routes.otp.loginByOtp, { silent: true })(
-        data,
-      );
+      const response = await mutate(otpApi.login, { silent: true })(data);
       if ("errors" in response) {
         throw response;
       }
@@ -168,6 +166,7 @@ const Login = (props: LoginProps) => {
       }
     },
     onError: (error: any) => {
+      console.log(error);
       let errorMessage = "invalid_otp";
       if (
         error.cause &&
@@ -357,12 +356,12 @@ const Login = (props: LoginProps) => {
             <Card className="mx-4">
               <CardHeader className="space-y-1 px-4">
                 <CardTitle className="text-2xl font-bold">
-                  Welcome back
+                  {t("welcome_back")}
                 </CardTitle>
                 <CardDescription>
                   {disablePatientLogin
-                    ? "Sign in to your account to continue"
-                    : "Choose your login method to continue"}
+                    ? t("sign_in_to_your_account_to_continue")
+                    : t("choose_your_login_method_to_continue")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -372,7 +371,7 @@ const Login = (props: LoginProps) => {
                     {!forgotPassword ? (
                       <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="username">Username</Label>
+                          <Label htmlFor="username">{t("username")}</Label>
                           <Input
                             id="username"
                             name="username"
@@ -393,7 +392,7 @@ const Login = (props: LoginProps) => {
                           )}
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="password">Password</Label>
+                          <Label htmlFor="password">{t("password")}</Label>
                           <PasswordInput
                             id="password"
                             name="password"
@@ -468,14 +467,16 @@ const Login = (props: LoginProps) => {
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="forgot_username">Username</Label>
+                            <Label htmlFor="forgot_username">
+                              {t("username")}
+                            </Label>
                             <Input
                               id="forgot_username"
                               name="username"
                               type="text"
                               value={form.username}
                               onChange={handleChange}
-                              placeholder="Enter your username"
+                              placeholder={t("enter_your_username")}
                               className={cn(
                                 errors.username &&
                                   "border-red-500 focus-visible:ring-red-500",
@@ -532,7 +533,7 @@ const Login = (props: LoginProps) => {
                       {!forgotPassword ? (
                         <form onSubmit={handleSubmit} className="space-y-4">
                           <div className="space-y-2">
-                            <Label htmlFor="username">Username</Label>
+                            <Label htmlFor="username">{t("username")}</Label>
                             <Input
                               id="username"
                               name="username"
@@ -553,7 +554,7 @@ const Login = (props: LoginProps) => {
                             )}
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">{t("password")}</Label>
                             <PasswordInput
                               id="password"
                               name="password"
@@ -631,14 +632,16 @@ const Login = (props: LoginProps) => {
                             </div>
 
                             <div className="space-y-2">
-                              <Label htmlFor="forgot_username">Username</Label>
+                              <Label htmlFor="forgot_username">
+                                {t("username")}
+                              </Label>
                               <Input
                                 id="forgot_username"
                                 name="username"
                                 type="text"
                                 value={form.username}
                                 onChange={handleChange}
-                                placeholder="Enter your username"
+                                placeholder={t("enter_your_username")}
                                 className={cn(
                                   errors.username &&
                                     "border-red-500 focus-visible:ring-red-500",

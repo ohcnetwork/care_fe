@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/browser";
 import { Component, ErrorInfo, ReactNode } from "react";
+import { withTranslation, WithTranslation } from "react-i18next";
 
 interface Props {
   children: ReactNode;
@@ -10,7 +11,7 @@ interface State {
   hasError: boolean;
 }
 
-class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundary extends Component<Props & WithTranslation, State> {
   public state: State = {
     hasError: false,
   };
@@ -30,13 +31,14 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public render() {
+    const { t } = this.props;
     if (this.state.hasError) {
       // You can render any custom fallback UI
-      return this.props.fallback || <h1>Sorry.. there was an error</h1>;
+      return this.props.fallback || <h1>{t("error_boundary_message")}</h1>;
     }
 
     return this.props.children;
   }
 }
 
-export default ErrorBoundary;
+export default withTranslation()(ErrorBoundary);
