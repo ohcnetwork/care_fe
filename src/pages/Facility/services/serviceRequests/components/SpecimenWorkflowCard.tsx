@@ -71,8 +71,8 @@ import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
 import { ProcessSpecimen } from "@/pages/Facility/services/serviceRequests/components/ProcessSpecimen";
 import {
+  EDITABLE_SERVICE_REQUEST_STATUSES,
   ServiceRequestReadSpec,
-  Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
 import {
   ProcessingSpec,
@@ -119,6 +119,9 @@ export function SpecimenWorkflowCard({
   const collectedSpecimen = !isDraft ? specimen : undefined;
   const container = requirement.type_tested?.container;
   const hasCollected = !!collectedSpecimen;
+  const disableEdit = !EDITABLE_SERVICE_REQUEST_STATUSES.includes(
+    request.status,
+  );
 
   // --- Mutations (specific to the collected specimen) ---
   const { mutate: updateProcessing } = useMutation({
@@ -347,6 +350,7 @@ export function SpecimenWorkflowCard({
                               onClick={(e) => {
                                 e.stopPropagation();
                               }}
+                              disabled={disableEdit}
                             >
                               <Trash2 className="size-4 mr-2" />
                               {t("discard")}
@@ -444,7 +448,7 @@ export function SpecimenWorkflowCard({
                 <Button
                   onClick={onCollect}
                   variant="outline_primary"
-                  disabled={request.status === Status.completed}
+                  disabled={disableEdit}
                 >
                   <Plus className="size-4" />
                   {t("collect_specimen")}
@@ -759,6 +763,7 @@ export function SpecimenWorkflowCard({
                     onAddProcessing={handleAddProcessing}
                     onUpdateProcessing={handleUpdateProcessing}
                     diagnosticReports={request.diagnostic_reports ?? []}
+                    disableEdit={disableEdit}
                   />
                 </div>
               )}
