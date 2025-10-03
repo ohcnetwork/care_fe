@@ -384,23 +384,6 @@ export function ValueSetForm({
     },
   });
 
-  //  useEffect(() => {
-  //   const sub = form.watch((value, info) => {
-  //     const changed = info?.name as keyof typeof value | undefined;
-  //     if (!changed) return;
-
-  //     if (changed === "name") {
-  //       const base = (value.name ?? "") as string;
-  //       const next = generateSlug(base);
-  //       form.setValue("slug", next, {
-  //         shouldValidate: true,
-  //         shouldDirty: false,
-  //       });
-  //     }
-  //   });
-  //   return () => sub.unsubscribe();
-  // }, [form]);
-
   return (
     <Form {...form}>
       <div className="flex justify-end">
