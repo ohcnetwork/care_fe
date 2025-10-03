@@ -52,17 +52,22 @@ export default function MultiFilter({
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
   const { t } = useTranslation();
 
-  const totalSelectedCount = Object.values(selectedFilters).reduce(
+  const nonClearableFilterCount = Object.values(selectedFilters).reduce(
     (sum, filterState) => {
+      if (filterState.filter.disableClear) {
+        return sum;
+      }
       if (Array.isArray(filterState.selected)) {
-        return sum + filterState.selected.length;
+        if (filterState.selected.length === 0) {
+          return sum;
+        }
       }
       return sum + 1;
     },
     0,
   );
 
-  const hasAnyFilters = totalSelectedCount > 0;
+  const hasAnyFilters = nonClearableFilterCount > 0;
 
   const handleFilterSelect = (filterKey: string) => {
     setActiveFilter(filterKey);

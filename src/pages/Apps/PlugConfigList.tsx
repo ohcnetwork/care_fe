@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import Loading from "@/components/Common/Loading";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
@@ -28,7 +28,7 @@ export function PlugConfigList() {
   });
 
   if (isLoading) {
-    return <Loading />;
+    return <TableSkeleton count={5} />;
   }
 
   return (
