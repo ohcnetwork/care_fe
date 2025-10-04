@@ -155,6 +155,23 @@ export default function PatientIdentifierFilter({
     verifyPatient();
   };
 
+  const isPhoneNumberSearch = facility?.patient_instance_identifier_configs
+    ?.find((c) => c.id === searchType)
+    ?.config.display?.toLowerCase()
+    .includes("phone");
+
+  const handleSearchTermChange = (value: string) => {
+    let filteredValue = value;
+
+    if (isPhoneNumberSearch) {
+      filteredValue = value.replace(/[^0-9+\-() ]/g, "");
+    } else {
+      filteredValue = value.replace(/[^a-zA-Z\s\-']/g, "");
+    }
+
+    setSearchTerm(filteredValue);
+  };
+
   return (
     <>
       <div
@@ -195,8 +212,9 @@ export default function PatientIdentifierFilter({
                       : t("select_search_type")
                   }
                   value={searchTerm}
-                  onValueChange={setSearchTerm}
+                  onValueChange={handleSearchTermChange}
                   className="pl-8 pr-8 border-none focus:ring-0 focus:outline-none"
+                  inputMode={isPhoneNumberSearch ? "tel" : "text"}
                 />
                 {searchTerm && (
                   <Button
