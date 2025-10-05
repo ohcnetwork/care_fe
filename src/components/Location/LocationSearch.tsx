@@ -60,6 +60,8 @@ export function LocationSearch({
       pathParams: { facility_id: facilityId },
       queryParams: { mode, name: search, form },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: facilityId !== "preview",
   });
   const commandContent = (

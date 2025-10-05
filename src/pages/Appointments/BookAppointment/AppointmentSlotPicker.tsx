@@ -54,6 +54,8 @@ export function AppointmentSlotPicker({
         day: dateQueryString(selectedDate),
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!resourceId && !!selectedDate,
     select: (data: GetSlotsForDayResponse) => {
       if (currentAppointment) {

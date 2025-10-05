@@ -553,6 +553,8 @@ export default function QuestionnaireResponsesList({
 
   // Merge both online and offline data for unified rendering
   const responses = [...(data || []), ...(offlineResponses || [])];
+
+  console.log("responses", responses, data, offlineResponses);
   useEffect(() => {
     if (inView && hasNextPage) fetchNextPage();
   }, [inView, hasNextPage, fetchNextPage]);

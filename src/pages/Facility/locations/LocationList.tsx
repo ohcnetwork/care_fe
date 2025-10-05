@@ -38,6 +38,8 @@ export default function LocationList({
     queryFn: query(locationApi.get, {
       pathParams: { facility_id: facilityId, id: locationId },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!locationId,
   });
 

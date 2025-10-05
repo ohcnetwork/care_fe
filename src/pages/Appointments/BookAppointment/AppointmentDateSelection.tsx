@@ -113,6 +113,8 @@ const DateColumn = ({
         day: dateQueryString(new Date()),
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: !!resourceId,
     select: (data: GetSlotsForDayResponse) => {
       if (currentAppointment) {

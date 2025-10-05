@@ -25,6 +25,7 @@ import {
   AppointmentUpdateRequest,
   ScheduleResource,
   TokenSlot,
+  UpcomingAppointmentStatuses,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import { CurrentUserRead } from "@/types/user/user";
@@ -191,25 +192,46 @@ const normalizeAndSetQueryDataForNewAppointment = async ({
     action: "booked",
   });
 
-  const appointmentListKey = ["patient-appointments", patientId];
+  const appointmentListKey = [
+    "infinite-appointments",
+    patientId,
+    undefined,
+    UpcomingAppointmentStatuses,
+  ];
 
-  const prevAppointmentList =
-    queryClient.getQueryData<PaginatedResponse<Appointment>>(
-      appointmentListKey,
-    );
+  console.log("key is", appointmentListKey);
 
-  const updatedList: PaginatedResponse<Appointment> = prevAppointmentList
-    ? {
-        ...prevAppointmentList,
-        count: prevAppointmentList.count + 1,
-        results: [normalizeAppointment, ...prevAppointmentList.results],
-      }
-    : {
-        count: 1,
-        results: [normalizeAppointment],
+  queryClient.setQueryData(appointmentListKey, (prev: any) => {
+    if (!prev?.pages) {
+      return {
+        pages: [
+          {
+            count: 1,
+            results: [normalizeAppointment],
+          },
+        ],
+        pageParams: [0],
       };
+    }
 
-  queryClient.setQueryData(appointmentListKey, updatedList);
+    const updatedPages = prev.pages.map((page: any, index: number) => {
+      if (index === 0) {
+        return {
+          ...page,
+          results: [normalizeAppointment, ...page.results],
+          count: page.count + 1,
+        };
+      }
+      return page;
+    });
+
+    return {
+      ...prev,
+      pages: updatedPages,
+    };
+  });
+
+  console.log(queryClient.getQueryData(appointmentListKey));
 
   return normalizeAppointment;
 };
@@ -540,6 +562,12 @@ export const queueRescheduleOfflineRecord = async ({
     const rescheduleEntryExist = await db.OfflineWrites.get(rescheduleID);
     const createAppointmentExist = await db.OfflineWrites.get(appointment.id);
 
+    console.log(
+      "reschedule entry exist",
+      rescheduleEntryExist,
+      createAppointmentExist,
+    );
+    let finalUpdateEntry = null;
     if (
       createAppointmentExist &&
       createAppointmentExist.type === OfflineKeyMap.create_appointment
@@ -555,6 +583,7 @@ export const queueRescheduleOfflineRecord = async ({
         syncStatus: "pending" as const,
       };
 
+      finalUpdateEntry = updateEntry;
       await db.OfflineWrites.update(createAppointmentExist.id, updateEntry);
     } else if (
       rescheduleEntryExist &&
@@ -566,6 +595,7 @@ export const queueRescheduleOfflineRecord = async ({
         syncStatus: "pending" as const,
       };
 
+      finalUpdateEntry = updateEntry;
       await db.OfflineWrites.update(rescheduleEntryExist.id, updateEntry);
     } else {
       const offlineEntry: saveOfflineWriteData = {
@@ -598,25 +628,22 @@ export const queueRescheduleOfflineRecord = async ({
         return;
       }
 
-      const normalizedAppointment = await normalizeAndSetQueryDataForReschedule(
-        {
-          entry: saveResult.entry,
-          appointment,
-          queryClient,
-          authUser,
-          selectedSlot,
-          selectedResource,
-          rescheduleAppointmentData,
-          facilityId,
-          selectedDate,
-          slotMonth,
-          db,
-        },
-      );
-
-      // Call success callback
-      onSuccess?.(appointment.id, normalizedAppointment);
+      finalUpdateEntry = saveResult.entry;
     }
+
+    const normalizedAppointment = await normalizeAndSetQueryDataForReschedule({
+      entry: finalUpdateEntry,
+      appointment,
+      queryClient,
+      authUser,
+      selectedSlot,
+      selectedResource,
+      rescheduleAppointmentData,
+      facilityId,
+      selectedDate,
+      slotMonth,
+      db,
+    });
 
     const statusUpdateId = isOfflineId(appointment.id)
       ? `${appointment.id}-statusUpdate`
@@ -624,12 +651,17 @@ export const queueRescheduleOfflineRecord = async ({
 
     const existingStatusEntry = await db.OfflineWrites.get(statusUpdateId);
 
+    // Call success callback
+    onSuccess?.(appointment.id, normalizedAppointment);
+
     if (
       existingStatusEntry &&
       existingStatusEntry.type === OfflineKeyMap.update_appointment_status
     ) {
       await db.OfflineWrites.delete(statusUpdateId);
     }
+
+    console.log("Reschedule queued successfully");
   } catch (error) {
     const errorObj =
       error instanceof Error ? error : new Error("Unknown error occurred");

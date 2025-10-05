@@ -67,6 +67,8 @@ export const HealthcareServiceSelector = ({
         ...(searchValue && { name: searchValue }),
       },
     }),
+    meta: { persist: true },
+    networkMode: "online",
     enabled: open,
   });
 
