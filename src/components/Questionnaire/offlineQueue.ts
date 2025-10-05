@@ -17,6 +17,7 @@ import {
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { PatientRead } from "@/types/emr/patient/patient";
 
+import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import { CurrentUserRead } from "@/types/user/user";
 import {
   STRUCTURED_QUESTIONS,
@@ -32,6 +33,7 @@ interface QueueQuestionnaireBatchRequestParams {
   facilityId: string;
   t: (key: string, params?: any) => string;
   db: AppCacheDB;
+  filledQuestionnaires: QuestionnaireDetail[];
   onSuccess?: () => void;
   onError?: (error: any) => void;
 }
@@ -413,11 +415,15 @@ export const queueQuestionnairBatchrequest = async ({
   facilityId,
   t,
   db,
+  filledQuestionnaires,
   onSuccess,
   onError,
 }: QueueQuestionnaireBatchRequestParams) => {
   const parentID = encounterId ? encounterId : patientId;
-
+  console.log(
+    "offlineFilledQuestionnair in offlinequeue  : ",
+    filledQuestionnaires,
+  );
   try {
     const structuredQuestionnaires = questionnairPaylod.requests.filter(
       (
@@ -526,8 +532,8 @@ export const queueQuestionnairBatchrequest = async ({
       { requests: nonStructuredQuestionnaires },
       authUser,
       patientId,
+      filledQuestionnaires,
       encounterId,
-      encounterId ? "encounter" : "patient",
     );
 
     onSuccess?.();

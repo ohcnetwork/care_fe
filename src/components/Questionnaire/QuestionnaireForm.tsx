@@ -347,6 +347,8 @@ const initializeResponses = (
       q.questions.forEach(processQuestion);
     } else {
       let defaultValues: ResponseValue[] = [];
+      const existing = existingResponses?.find((er) => er.question_id === q.id);
+
       if (q.answer_option && q.answer_option.length > 0) {
         const defaultOptions: AnswerOption[] = q.answer_option.filter(
           (o) => o.initial_selected === true,
@@ -362,7 +364,10 @@ const initializeResponses = (
       responses.push({
         question_id: q.id,
         link_id: q.link_id,
-        values: defaultValues,
+        values: existing ? existing.values : defaultValues,
+        note: existing ? existing.note : undefined,
+        body_site: existing ? existing.body_site : undefined,
+        method: existing ? existing.method : undefined,
         structured_type: q.structured_type ?? null,
       });
     }
@@ -455,6 +460,7 @@ export function QuestionnaireForm({
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const queryClient = useQueryClient();
+
   const { offlineEntryId, offlineEntry, isLoadingOfflineEntry } =
     useOfflineEntry();
   const [isDirty, setIsDirty] = useState(false);
@@ -489,6 +495,10 @@ export function QuestionnaireForm({
       return;
     }
 
+    const filledQuestionnaires = questionnaireForms.map(
+      (form) => form.questionnaire,
+    );
+
     await queueQuestionnairBatchrequest({
       questionnairPaylod: BatchRequestBodyData,
       queryClient,
@@ -498,6 +508,7 @@ export function QuestionnaireForm({
       facilityId,
       t,
       db,
+      filledQuestionnaires: filledQuestionnaires,
       onSuccess: () => {
         setServerErrors(undefined);
         toast.success(t("questionnaire_submitted_successfully"));
@@ -955,6 +966,7 @@ export function QuestionnaireForm({
           response.values.length > 0 &&
           response.values?.[0]?.value !== "",
       );
+
       if (validResponses.length > 0) {
         requests.push({
           url: `/api/v1/questionnaire/${form.questionnaire.slug}/submit/`,

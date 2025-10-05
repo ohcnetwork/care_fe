@@ -49,10 +49,6 @@ import { AppCacheDB, OfflineWritesEntry } from "./AppcacheDB";
 import { OfflineKey } from "./offlineKeys";
 import { markWriteStatus, processDependentWrites } from "./writeQueue";
 
-interface QuestionnaireListResponse {
-  results: QuestionnaireDetail[];
-  count: number;
-}
 type BatchRequestItem = BatchRequestBody["requests"][number];
 export type SaveOfflineWriteResult =
   | { success: true; entry: OfflineWritesEntry }
@@ -694,12 +690,12 @@ export const updateActiveEncounterList = ({
 
 export const normalizedQuestionnairRequest = (
   questionnair: BatchRequestItem,
-  allQuestionnairsList: QuestionnaireListResponse,
+  allQuestionnairsList: QuestionnaireDetail[],
   authUser: CurrentUserRead,
   patientID: string,
   encounterID?: string,
 ): QuestionnaireResponse => {
-  const questionnaireMeta = allQuestionnairsList.results.find(
+  const questionnaireMeta = allQuestionnairsList.find(
     (q) => q.id === questionnair.reference_id,
   );
 
@@ -1255,34 +1251,31 @@ export const cacheNonStructuredQuestionnairResponse = (
   questionnairpaylod: BatchRequestBody,
   authUser: CurrentUserRead,
   patientID: string,
+  filledQuestionnaires: QuestionnaireDetail[],
   encounterID?: string,
-  subjectType?: string,
 ) => {
-  const allQuestionnairsList =
-    queryClient.getQueryData<QuestionnaireListResponse>([
-      "questionnaires",
-      "list",
-      "",
-      subjectType,
-    ]);
-
-  if (!allQuestionnairsList) return;
-
   const normalizedQuestionnairResponse: QuestionnaireResponse[] =
     questionnairpaylod.requests.map((questionnair) =>
       normalizedQuestionnairRequest(
         questionnair,
-        allQuestionnairsList,
+        filledQuestionnaires,
         authUser,
         patientID,
         encounterID,
       ),
     );
 
+  console.log(" offline questionnaire : ", filledQuestionnaires);
+
   queryClient.setQueryDefaults(["offlineCreatedQuestionnaireResponses"], {
     meta: { persist: true },
     networkMode: "online",
   });
+
+  console.log(
+    "Storing offline questionnaire responses in cache : ",
+    normalizedQuestionnairResponse,
+  );
 
   queryClient.setQueryData<QuestionnaireResponse[]>(
     ["offlineCreatedQuestionnaireResponses", encounterID ?? patientID],

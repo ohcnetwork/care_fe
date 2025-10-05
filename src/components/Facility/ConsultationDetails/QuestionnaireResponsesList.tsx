@@ -1,6 +1,10 @@
 import { PaginatedResponse } from "@/Utils/request/types";
 import { cn } from "@/lib/utils";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  onlineManager,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
 import { t } from "i18next";
 import { Printer } from "lucide-react";
 import { Link } from "raviger";
@@ -549,12 +553,23 @@ export default function QuestionnaireResponsesList({
       },
       select: (data) => data?.pages.flatMap((p) => p.results) || [],
       enabled: canAccess,
+      meta: { persist: true },
+      networkMode: "online",
     });
 
   // Merge both online and offline data for unified rendering
-  const responses = [...(data || []), ...(offlineResponses || [])];
+  const responses = onlineManager.isOnline()
+    ? data || []
+    : [...(data || []), ...(offlineResponses || [])];
 
-  console.log("responses", responses, data, offlineResponses);
+  console.log(
+    "responses",
+    responses,
+    "data: ",
+    data,
+    "offline : ",
+    offlineResponses,
+  );
   useEffect(() => {
     if (inView && hasNextPage) fetchNextPage();
   }, [inView, hasNextPage, fetchNextPage]);
