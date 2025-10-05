@@ -2,15 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  formatPhoneNumberIntl,
-  isValidPhoneNumber,
-} from "react-phone-number-input";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
-
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,97 +30,48 @@ import SearchInput from "@/components/Common/SearchInput";
 import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcuts, useShortcutSubContext } from "@/context/ShortcutContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
   getPartialId,
   PartialPatientModel,
   PatientRead,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { FacilityRead } from "@/types/facility/facility";
+import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { TFunction } from "i18next";
+
+const PHONE_NUMBER_CONFIG_SYSTEM =
+  "system.care.ohc.network/patient-phone-number";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
-  const [{ phone_number: phoneNumber = "" }, setPhoneNumberQuery] =
-    useQueryParams();
-  const shortcuts = useShortcuts();
-  useShortcutSubContext();
+  useShortcutSubContext("patient:search:-global");
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<
     PartialPatientModel | PatientRead | null
   >(null);
+  const shortcuts = useShortcuts();
+  const [qParams] = useQueryParams();
   const [verificationOpen, setVerificationOpen] = useState(false);
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
 
   const { facility } = useCurrentFacility();
 
-  // Enable shortcuts to work when this search component is active
-  useEffect(() => {
-    shortcuts.setIgnoreInputFields(true);
-    return () => shortcuts.setIgnoreInputFields(false);
-  }, [shortcuts]);
-
   const { canCreatePatient } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],
   );
 
-  const handleCreatePatient = useCallback(() => {
-    const queryParams = phoneNumber ? { phone_number: phoneNumber } : {};
-
-    navigate(`/facility/${facilityId}/patient/create`, {
-      query: queryParams,
-    });
-  }, [facilityId, phoneNumber]);
-
-  function AddPatientButton({ outline }: { outline?: boolean }) {
-    return (
-      <Button
-        variant={outline ? "outline" : "primary_gradient"}
-        className={cn("gap-3 group")}
-        onClick={handleCreatePatient}
-        data-cy="create-new-patient-button"
-        data-shortcut-id="submit-action"
-      >
-        <CareIcon icon="l-plus" className="size-4" />
-        {t("add_new_patient")}
-        <ShortcutBadge actionId="submit-action" className="bg-white" />
-      </Button>
-    );
-  }
-
-  // Build search options
-  const identifierOptions =
-    facility?.patient_instance_identifier_configs?.map((c) => ({
-      key: c.id,
-      type: "text" as const,
-      placeholder: t("search_by_identifier", { name: c.config.display }),
-      value: "",
-      display: c.config.display,
-    })) || [];
-
-  const searchOptions = [
-    {
-      key: "phone_number",
-      type: "phone" as const,
-      placeholder: t("search_by_phone_number"),
-      value: phoneNumber,
-      display: t("phone_number"),
-    },
-    {
-      key: "encounter",
-      type: "text" as const,
-      placeholder: t("search_encounters"),
-      value: "",
-      display: t("encounter"),
-    },
-    ...identifierOptions,
-  ];
+  useEffect(() => {
+    shortcuts.setIgnoreInputFields(true);
+    return () => shortcuts.setIgnoreInputFields(false);
+  }, [shortcuts]);
 
   // Track identifier search state
   const [identifierSearch, setIdentifierSearch] = useState<{
@@ -135,59 +79,21 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     value?: string;
   }>({});
 
-  // Track encounter search state
-  const [encounterSearch, setEncounterSearch] = useState<string>("");
+  const handleSearch = useCallback((key: string, value: string) => {
+    setIdentifierSearch({ config: key, value });
+  }, []);
 
-  const handleSearch = useCallback(
-    (key: string, value: string) => {
-      if (key === "phone_number") {
-        setPhoneNumberQuery({
-          phone_number:
-            isValidPhoneNumber(value) || value === "" ? value : null,
-        });
-        setIdentifierSearch({});
-        setEncounterSearch("");
-      } else if (key === "encounter") {
-        setPhoneNumberQuery({ phone_number: "" });
-        setIdentifierSearch({});
-        setEncounterSearch(value);
-      } else {
-        setPhoneNumberQuery({ phone_number: "" });
-        setEncounterSearch("");
-        setIdentifierSearch({ config: key, value });
-      }
-    },
-    [setPhoneNumberQuery],
-  );
-
-  const { data: patientList, isFetching: isPatientFetching } = useQuery({
-    queryKey: ["patient-search", facilityId, phoneNumber, identifierSearch],
+  const { data: patientList, isFetching } = useQuery({
+    queryKey: ["patient-search", facilityId, identifierSearch],
     queryFn: query.debounced(patientApi.searchPatient, {
-      body: phoneNumber
-        ? { phone_number: phoneNumber }
-        : identifierSearch.config && identifierSearch.value
-          ? { config: identifierSearch.config, value: identifierSearch.value }
-          : {},
-    }),
-    enabled:
-      (!!isValidPhoneNumber(phoneNumber) && !!phoneNumber) ||
-      (!!identifierSearch.config && !!identifierSearch.value),
-  });
-
-  // Encounter search query
-  const { data: encounterList, isFetching: isEncounterFetching } = useQuery({
-    queryKey: ["encounter-search", facilityId, encounterSearch],
-    queryFn: query.debounced(encounterApi.list, {
-      queryParams: {
-        facility: facilityId,
-        name: encounterSearch || undefined,
-        limit: 10,
+      body: {
+        config: identifierSearch.config,
+        value: identifierSearch.value,
+        page_size: 20,
       },
     }),
-    enabled: !!encounterSearch,
+    enabled: !!(identifierSearch.config && identifierSearch.value),
   });
-
-  const isFetching = isPatientFetching || isEncounterFetching;
 
   const handlePatientSelect = (index: number) => {
     const patient = patientList?.results[index];
@@ -201,6 +107,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     } else if ("year_of_birth" in patient) {
       navigate(`/facility/${facilityId}/patients/verify`, {
         query: {
+          config: identifierSearch.config,
+          value: identifierSearch.value,
           phone_number: patient.phone_number,
           year_of_birth: patient.year_of_birth.toString(),
           partial_id: patient.id.slice(0, 5),
@@ -209,15 +117,27 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     }
   };
 
-  const handleEncounterSelect = (encounter: EncounterRead) => {
-    navigate(`/facility/${facilityId}/patients/verify`, {
-      query: {
-        phone_number: encounter.patient.phone_number,
-        year_of_birth: encounter.patient.year_of_birth.toString(),
-        partial_id: encounter.patient.id.slice(0, 5),
-      },
-    });
-  };
+  useEffect(() => {
+    shortcuts.setIgnoreInputFields(true);
+    return () => shortcuts.setIgnoreInputFields(false);
+  }, [shortcuts]);
+
+  useEffect(() => {
+    if (!facility) {
+      return;
+    }
+
+    const phoneNumberConfig = getPhoneNumberConfig(
+      facility.patient_instance_identifier_configs,
+    );
+
+    if (qParams.phone_number && phoneNumberConfig) {
+      setIdentifierSearch({
+        config: phoneNumberConfig.id,
+        value: qParams.phone_number,
+      });
+    }
+  }, [qParams.phone_number, facility]);
 
   const handleVerify = () => {
     if (!selectedPatient || !yearOfBirth || yearOfBirth.length !== 4) {
@@ -227,6 +147,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
     navigate(`/facility/${facilityId}/patients/verify`, {
       query: {
+        config: identifierSearch.config,
+        value: identifierSearch.value,
         phone_number: selectedPatient.phone_number,
         year_of_birth: yearOfBirth,
         partial_id: getPartialId(selectedPatient),
@@ -239,7 +161,13 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       <div className="container max-w-5xl mx-auto py-6">
         {canCreatePatient && (
           <div className="flex justify-center md:justify-end">
-            <AddPatientButton />
+            <AddPatientButton
+              facilityId={facilityId}
+              identifierConfigs={
+                facility?.patient_instance_identifier_configs || []
+              }
+              identifierSearch={identifierSearch}
+            />
           </div>
         )}
         <div className="space-y-6 mt-6">
@@ -257,88 +185,20 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           <div>
             <div className="space-y-6">
               <SearchInput
-                data-cy="patient-search"
-                options={searchOptions}
+                options={getSearchOptions(t, identifierSearch, facility)}
                 onSearch={handleSearch}
                 className="w-full"
                 autoFocus
               />
 
               <div className="min-h-[200px]" id="patient-search-results">
-                {(!!phoneNumber ||
-                  (!!identifierSearch.config && !!identifierSearch.value) ||
-                  !!encounterSearch) && (
+                {!!identifierSearch.config && !!identifierSearch.value && (
                   <>
-                    {isFetching ? (
+                    {isFetching || !patientList ? (
                       <div className="flex items-center justify-center h-[200px]">
                         <Loading />
                       </div>
-                    ) : encounterSearch ? (
-                      // Encounter search results
-                      !encounterList?.results.length ? (
-                        <div>
-                          <div className="flex flex-col items-center justify-center py-10 text-center">
-                            <h3 className="text-lg font-semibold">
-                              {t("no_encounters_found")}
-                            </h3>
-                            <p className="text-sm text-gray-500 mb-6">
-                              {t("no_encounters_found")}
-                            </p>
-                            <AddPatientButton outline />
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="rounded-lg border border-gray-200">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead className="w-[300px]">
-                                  {t("patient_name")}
-                                </TableHead>
-                                <TableHead>{t("phone_number")}</TableHead>
-                                <TableHead>{t("gender")}</TableHead>
-                                <TableHead>{t("encounter_date")}</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {encounterList.results.map((encounter) => (
-                                <TableRow
-                                  key={encounter.id}
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    handleEncounterSelect(encounter)
-                                  }
-                                >
-                                  <TableCell className="font-medium">
-                                    {encounter.patient.name}
-                                  </TableCell>
-                                  <TableCell>
-                                    {formatPhoneNumberIntl(
-                                      encounter.patient.phone_number,
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    {
-                                      GENDER_TYPES.find(
-                                        (g) =>
-                                          g.id === encounter.patient.gender,
-                                      )?.text
-                                    }
-                                  </TableCell>
-                                  <TableCell>
-                                    {encounter.period.start
-                                      ? new Date(
-                                          encounter.period.start,
-                                        ).toLocaleDateString()
-                                      : "-"}
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      )
-                    ) : !patientList?.results.length ? (
+                    ) : !patientList.results.length ? (
                       <div>
                         <div className="flex flex-col items-center justify-center py-10 text-center">
                           <h3 className="text-lg font-semibold">
@@ -347,7 +207,15 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                           <p className="text-sm text-gray-500 mb-6">
                             {t("no_patient_record_text")}
                           </p>
-                          <AddPatientButton outline />
+                          <AddPatientButton
+                            facilityId={facilityId}
+                            outline
+                            identifierConfigs={
+                              facility?.patient_instance_identifier_configs ||
+                              []
+                            }
+                            identifierSearch={identifierSearch}
+                          />
                         </div>
                       </div>
                     ) : (
@@ -409,7 +277,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
               type="text"
               placeholder={`${t("year_of_birth")} (YYYY)`}
               value={yearOfBirth}
-              data-cy="year-of-birth-input"
               onChange={(e) => {
                 const value = e.target.value;
                 if (/^\d{0,4}$/.test(value)) {
@@ -427,20 +294,107 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             <Button
               variant="outline"
               onClick={() => setVerificationOpen(false)}
-              data-cy="cancel-verification-button"
             >
               {t("cancel")}
             </Button>
-            <Button
-              className="mb-2"
-              onClick={handleVerify}
-              data-cy="confirm-verification-button"
-            >
+            <Button className="mb-2" onClick={handleVerify}>
               {t("verify")}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+const getSearchOptions = (
+  t: TFunction,
+  searchIdentifier: { config?: string; value?: string },
+  facility?: FacilityRead,
+) => {
+  if (!facility) {
+    return [];
+  }
+
+  const { patient_instance_identifier_configs: configs } = facility;
+
+  // Phone number configs first, followed by auto-maintained configs, and then non-auto-maintained configs
+  return [
+    // Phone number configs
+    ...configs.filter(
+      ({ config }) =>
+        config.auto_maintained && config.system === PHONE_NUMBER_CONFIG_SYSTEM,
+    ),
+    // Auto-maintained configs but not phone number configs
+    ...configs.filter(
+      ({ config }) =>
+        config.auto_maintained && config.system !== PHONE_NUMBER_CONFIG_SYSTEM,
+    ),
+    // Non-auto-maintained configs
+    ...configs.filter((c) => !c.config.auto_maintained),
+  ].map((c) => ({
+    key: c.id,
+    type:
+      c.config.system === PHONE_NUMBER_CONFIG_SYSTEM
+        ? ("phone" as const)
+        : ("text" as const),
+    placeholder: t("search_by_identifier", { name: c.config.display }),
+    value:
+      searchIdentifier.config === c.id ? (searchIdentifier.value ?? "") : "",
+    display: c.config.display,
+  }));
+};
+
+const getPhoneNumberConfig = (identifierConfigs: PatientIdentifierConfig[]) => {
+  return identifierConfigs.find(
+    (c) => c.config.system === PHONE_NUMBER_CONFIG_SYSTEM,
+  );
+};
+
+const getPhoneNumberFromIdentifierSearch = (
+  identifierConfigs: PatientIdentifierConfig[],
+  identifierSearch: { config?: string; value?: string },
+) => {
+  const phoneNumberConfig = getPhoneNumberConfig(identifierConfigs);
+
+  if (phoneNumberConfig && identifierSearch.config === phoneNumberConfig.id) {
+    return identifierSearch.value;
+  }
+
+  return undefined;
+};
+
+function AddPatientButton({
+  facilityId,
+  outline,
+  identifierConfigs,
+  identifierSearch,
+}: {
+  facilityId: string;
+  outline?: boolean;
+  identifierConfigs: PatientIdentifierConfig[];
+  identifierSearch?: { config?: string; value?: string };
+}) {
+  const { t } = useTranslation();
+
+  const phoneNumber =
+    identifierSearch &&
+    getPhoneNumberFromIdentifierSearch(identifierConfigs, identifierSearch);
+
+  return (
+    <Button
+      variant={outline ? "outline" : "primary_gradient"}
+      className="gap-3 group"
+      onClick={() =>
+        navigate(`/facility/${facilityId}/patient/create`, {
+          query: phoneNumber ? { phone_number: phoneNumber } : undefined,
+        })
+      }
+      data-shortcut-id="submit-action"
+    >
+      <CareIcon icon="l-plus" className="size-4" />
+      {t("add_new_patient")}
+      <ShortcutBadge actionId="submit-action" className="bg-white" />
+    </Button>
   );
 }

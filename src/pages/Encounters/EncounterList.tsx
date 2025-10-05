@@ -26,13 +26,15 @@ import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
 import useFilters from "@/hooks/useFilters";
 
-import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { EncounterClass, EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
 import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
+import careConfig from "@careConfig";
+import { subDays } from "date-fns";
 
 interface EncounterListProps {
   encounters?: EncounterRead[];
@@ -167,10 +169,19 @@ export function EncounterList({
     // Set default date range if no dates are present
     if (!created_date_after && !created_date_before) {
       const today = new Date();
-      updateQuery({
-        created_date_after: dateQueryString(today),
-        created_date_before: dateQueryString(today),
-      });
+      const defaultDays = careConfig.encounterDateFilter;
+      if (defaultDays === 0) {
+        // Today only
+        updateQuery({
+          created_date_after: dateQueryString(today),
+          created_date_before: dateQueryString(today),
+        });
+      } else {
+        updateQuery({
+          created_date_after: dateQueryString(subDays(today, defaultDays)),
+          created_date_before: dateQueryString(today),
+        });
+      }
     }
   }, [created_date_after, created_date_before, updateQuery]);
 
@@ -178,7 +189,7 @@ export function EncounterList({
     encounterStatusFilter("status"),
     encounterPriorityFilter("priority"),
     tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
-    dateFilter("created_date", t("date"), longDateRangeOptions),
+    dateFilter("created_date", t("date"), longDateRangeOptions, true),
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
@@ -251,7 +262,7 @@ export function EncounterList({
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <PatientEncounterOrIdentifierFilter
+                <PatientIdentifierFilter
                   onSelect={(patientId) =>
                     updateQuery({ patient_filter: patientId })
                   }

@@ -65,7 +65,7 @@ export const SummaryPanelActionsTab = () => {
 
         {selectedEncounter && (
           <PLUGIN_Component
-            __name="PatientInfoCardActions"
+            __name="EncounterActions"
             encounter={selectedEncounter}
             className={cn(
               buttonVariants({ variant: "outline" }),
