@@ -418,7 +418,7 @@ export default function EncounterHistorySelector() {
         </Drawer>
       </div>
       <div className="hidden lg:block pr-3">
-        <RailPanel defaultOpen>
+        <RailPanel>
           <ScrollArea className="h-[calc(100vh-9rem)] pr-3">
             <EncounterHistoryList />
           </ScrollArea>

@@ -4,32 +4,12 @@ import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
-type RailPanelProps = {
-  defaultOpen?: boolean;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+interface RailPanelProps {
   className?: string;
   children: React.ReactNode;
-};
-export default function RailPanel({
-  defaultOpen = true,
-  open: openProp,
-  onOpenChange,
-  className,
-  children,
-}: RailPanelProps) {
-  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
-  const controlled = typeof openProp === "boolean";
-  const open = controlled ? (openProp as boolean) : uncontrolledOpen;
-
-  const setOpen = (val: boolean) => {
-    if (controlled) {
-      onOpenChange?.(val);
-    } else {
-      setUncontrolledOpen(val);
-      onOpenChange?.(val);
-    }
-  };
+}
+export default function RailPanel({ className, children }: RailPanelProps) {
+  const [open, setOpen] = useState(true);
 
   return (
     <div className="relative flex">
