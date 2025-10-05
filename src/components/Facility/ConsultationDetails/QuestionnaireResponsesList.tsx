@@ -454,6 +454,7 @@ export function ResponseCard({
   item,
   onTitleClick,
   showTitle = true,
+  isPrintPreview = false,
 }: {
   item: QuestionnaireResponse;
   isPrintPreview?: boolean;
@@ -467,7 +468,16 @@ export function ResponseCard({
       ? properCase(structuredType.replace(/_/g, " "))
       : item.questionnaire?.title || "";
 
-  return (
+  return isPrintPreview ? (
+    <Card className="shadow-none rounded-xl border border-gray-200">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl font-medium">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ResponseCardContent item={item} />
+      </CardContent>
+    </Card>
+  ) : (
     <Card className="shadow-none border rounded-lg">
       <CardHeader className="flex flex-row items-center pb-2">
         {showTitle && (
