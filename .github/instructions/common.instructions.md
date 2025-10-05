@@ -12,14 +12,12 @@ applyTo: "src/common/**/*.{ts,tsx}"
 - Emergency override permissions for critical care situations
 
 ### Application Constants (`constants.tsx`)  
-- Core application configuration and medical standards
-- `RESULTS_PER_PAGE_LIMIT` for medical record pagination
-- `LocalStorageKeys` for secure medical data storage
-- Medical unit constants and reference values
+- Core application configuration
+- `RESULTS_PER_PAGE_LIMIT` for API pagination
+- `LocalStorageKeys` for secure browser storage
 
 ### Validation Utilities (`validation.tsx`)
-- Medical data validation schemas using `zod`
-- Clinical data validation (vital signs, medication dosages)
+- Form validation schemas using `zod`
 - Healthcare system password and identifier validation
 
 ## Implementation Patterns
@@ -36,7 +34,7 @@ export const canAccessPatientData = (user: UserRead, patientId: string) => {
 };
 ```
 
-### Clinical Data Validation
+### Form Validation
 ```typescript
 // Vital signs validation example
 export const validateVitalSigns = (vitals: VitalSigns) => {
@@ -51,17 +49,3 @@ export const validateVitalSigns = (vitals: VitalSigns) => {
   return schema.safeParse(vitals);
 };
 ```
-
-## Security & Compliance
-
-### PHI Protection Requirements
-- Never log sensitive medical information in error messages
-- Use encrypted storage for temporary medical data
-- Implement data masking for unauthorized users
-- Handle HIPAA compliance in all data operations
-
-### Audit Trail Implementation
-- Log all medical record access and modifications
-- Track medication administration and critical events
-- Maintain user action history for compliance audits
-- Record facility access and security events

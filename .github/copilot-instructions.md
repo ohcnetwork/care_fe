@@ -36,25 +36,11 @@ Healthcare applications must meet enhanced accessibility standards:
 - High contrast support: Visibility in various clinical lighting conditions
 - Focus management: Clear focus indicators for complex medical workflows
 
-### Performance
-Critical performance requirements for healthcare environments:
-- Sub-100ms response times: Essential for emergency medical workflows
-- Optimized bundle sizes: Consider slow hospital network infrastructure
-- Memory efficiency: Long-running applications in clinical settings
-- Offline resilience: Core functionality must work without network connectivity
-
-### Security & Privacy
-Healthcare data requires stringent security measures:
-- Data encryption: All medical data must be encrypted in transit and at rest
-- HIPAA compliance: Follow healthcare privacy regulations
-- Audit trails: Log all medical data access and modifications
-- Role-based access: Implement proper medical role permissions
-
 ### Internationalization
 Multi-language support for global healthcare deployment:
-- Medical terminology: Accurate translation of clinical terms
-- Cultural considerations: Adapt UI patterns for different healthcare systems
-- RTL support: Right-to-left language compatibility
+- i18n Strings: All literal strings must use i18next
+- Language files: English Locale files are in `public/locale/en.json`
+- Locale files for Non-English languages should not be edited directly, Managed via Crowdin,
 - Date/time formats: Localized formatting for medical timestamps
 
 ## Path-Specific Instructions
@@ -67,10 +53,9 @@ Specialized guidance automatically applied based on file paths:
 - `pages.instructions.md` - Page component architecture and routing patterns
 - `hooks.instructions.md` - Custom React hooks for healthcare workflows
 - `common.instructions.md` - Core utilities, permissions, and validation
-- `lib.instructions.md` - Library functions and medical calculations
+- `lib.instructions.md` - Library functions
 - `providers.instructions.md` - Context providers and state management
 - `context.instructions.md` - React context definitions and patterns
-- `integrations.instructions.md` - Third-party service and medical system integrations
 - `config-files.instructions.md` - Build configuration and development setup
 
 Refer to specific instruction files in `.github/instructions/` for detailed guidance on each domain.
@@ -83,7 +68,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - Prettier: Consistent code formatting across the healthcare application
 - Component patterns: Follow established patterns in existing codebase
 
-### Medical Data Handling
+### Data Handling
 - Type safety: Strict typing for all medical data structures and API interfaces
 - Validation: Use zod schemas for runtime validation of medical data
 - Error handling: Comprehensive error boundaries and user-friendly error messages
@@ -125,7 +110,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - Testing requires local backend: Follow [CARE backend setup docs](https://github.com/ohcnetwork/care#self-hosting)
 - Environment setup for testing:
   ```env
-  REACT_CARE_API_URL=http://127.0.0.1:9000
+  REACT_CARE_API_URL=https://care-api.do.ohc.network
   ```
 
 ## Validation
@@ -138,14 +123,14 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
   4. `npm run preview` -- verify production build works
   5. Test basic UI functionality (login page, navigation)
 
-### Build Time Expectations
-- npm install (with --ignore-scripts): ~16 seconds
-- npm run postinstall: ~3 seconds  
-- npm run setup: ~1 second
-- npm run build: ~2 minutes 11 seconds -- NEVER CANCEL, Set timeout to 180+ seconds
-- npm run lint: ~1 minute 25 seconds -- Set timeout to 120+ seconds
-- npm run format: ~19 seconds
-- npm run dev: ~5 seconds to start server
+  ### Build Time Expectations
+  - npm install (with --ignore-scripts): up to 30 seconds
+  - npm run postinstall: up to 8 seconds  
+  - npm run setup: up to 3 seconds
+  - npm run build: up to 3 minutes (NEVER CANCEL, Set timeout to 180+ seconds; may take longer on slower machines)
+  - npm run lint: up to 2 minutes (Set timeout to 120+ seconds; allow extra time on low-resource environments)
+  - npm run format: up to 40 seconds
+  - npm run dev: up to 12 seconds to start server (depends on system performance)
 
 ### Required Validation Steps
 - Always run `npm run format` and `npm run lint` before committing changes
@@ -157,7 +142,8 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 ### Additional Dependencies
 - @tanstack/react-query for API state management
-- raviger for routing (note: uses deprecated `routes` API)
+- react-query is 
+- raviger for routing
 - i18next for internationalization
 - date-fns for date handling
 - zod for schema validation
@@ -232,11 +218,6 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - Audit vulnerabilities with `npm audit`
 
 ## Resources
-
-### Healthcare Standards
-- [FHIR (Fast Healthcare Interoperability Resources)](https://hl7.org/fhir/) - Healthcare data exchange standards
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/) - Web accessibility for medical applications
-- [HIPAA Compliance](https://www.hhs.gov/hipaa/index.html) - Healthcare privacy and security requirements
 
 ### Technical Documentation
 - [React 19 Documentation](https://react.dev/) - Latest React features and patterns

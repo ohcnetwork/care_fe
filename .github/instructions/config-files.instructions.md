@@ -24,12 +24,11 @@ applyTo: "**/*.config.{js,mjs,cjs,ts,mts,cts,json,yml,yaml}"
 
 ### Environment Configuration
 - Use environment variables for runtime configuration
-- Keep sensitive data in environment variables, not config files
-- Document all required environment variables
+- Document all environment variables
 - Provide sensible defaults where possible
 
 ### Build Optimization
-- Configure code splitting and lazy loading
+- Configure code splitting and lazy loading where applicable
 - Optimize bundle size with proper tree shaking
 - Set up proper caching strategies
 - Configure PWA settings appropriately
@@ -49,11 +48,8 @@ applyTo: "**/*.config.{js,mjs,cjs,ts,mts,cts,json,yml,yaml}"
 ### Security Considerations
 - Avoid committing sensitive configuration values
 - Use environment variables for API endpoints
-- Configure Content Security Policy appropriately
-- Set up proper CORS configuration
 
 ### Performance Monitoring
 - Configure bundle analysis tools
 - Set up performance budgets
-- Monitor build times and optimization
 - Track bundle size changes over time

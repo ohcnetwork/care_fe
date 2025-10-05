@@ -4,10 +4,8 @@ applyTo: "src/Providers/**/*.{ts,tsx}"
 
 # Provider Components Instructions
 
-## Healthcare Provider Architecture
-
-### Core Providers
-- AuthUserProvider: Healthcare staff authentication and role management
+## Core Providers
+- AuthUserProvider: Authenticated user and role management
 - PatientUserProvider: Patient authentication for public appointment booking
 - HistoryAPIProvider: Navigation history for clinical workflows
 
@@ -39,15 +37,9 @@ export const AuthUserProvider = ({ children }: { children: React.ReactNode }) =>
 - Handle loading, error, and success states consistently
 - Implement proper cleanup and memory management
 
-### Healthcare Compliance
-- Log all medical data access for HIPAA compliance
-- Implement audit trails for sensitive operations
-- Handle PHI with proper encryption and security
-- Support emergency override scenarios for critical care
-
 ### Error Handling
 - Provide fallback UI for provider failures
-- Log errors appropriately without exposing PHI
+- Log errors appropriately without exposing PII
 - Handle network failures gracefully
 - Implement retry logic for critical operations
 
