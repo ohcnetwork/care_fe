@@ -37,12 +37,20 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 const createSubQueueFormSchema = z.object({
-  name: z.string().min(1, "Service point name is required"),
+  name: z
+    .string()
+    .min(1, "Service point name is required")
+    .trim()
+    .refine((val) => val.length > 0, "Service point name cannot be empty"),
   status: z.nativeEnum(TokenSubQueueStatus),
 });
 
 const editSubQueueFormSchema = z.object({
-  name: z.string().min(1, "Service point name is required"),
+  name: z
+    .string()
+    .min(1, "Service point name is required")
+    .trim()
+    .refine((val) => val.length > 0, "Service point name cannot be empty"),
   status: z.nativeEnum(TokenSubQueueStatus),
 });
 

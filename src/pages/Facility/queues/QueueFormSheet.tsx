@@ -35,14 +35,22 @@ import { dateQueryString } from "@/Utils/utils";
 import dayjs from "dayjs";
 
 const createQueueFormSchema = z.object({
-  name: z.string().min(1, "Queue name is required"),
+  name: z
+    .string()
+    .min(1, "Queue name is required")
+    .trim()
+    .refine((val) => val.length > 0, "Queue name cannot be empty"),
   date: z.date({
     required_error: "Date is required",
   }),
 });
 
 const editQueueFormSchema = z.object({
-  name: z.string().min(1, "Queue name is required"),
+  name: z
+    .string()
+    .min(1, "Queue name is required")
+    .trim()
+    .refine((val) => val.length > 0, "Queue name cannot be empty"),
 });
 
 type CreateQueueFormData = z.infer<typeof createQueueFormSchema>;
