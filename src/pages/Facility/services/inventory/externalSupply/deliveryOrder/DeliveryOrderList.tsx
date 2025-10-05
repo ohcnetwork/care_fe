@@ -53,8 +53,7 @@ export function DeliveryOrderList({
           },
         ]
     : ([
-        { value: "draft", label: "draft" },
-        { value: "pending", label: "pending" },
+        { value: "draft,pending", label: "requested" },
         {
           value: "completed,abandoned,entered_in_error",
           label: "completed",
@@ -132,7 +131,7 @@ export function DeliveryOrderList({
               {internal ? t("delivery") : t("inward_entry")}
             </h1>
           </div>
-          {!isRequester && (
+          {(!isRequester || !internal) && (
             <div className="flex items-center gap-2">
               <Button
                 variant="primary"

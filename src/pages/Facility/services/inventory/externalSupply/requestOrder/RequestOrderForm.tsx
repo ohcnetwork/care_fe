@@ -38,6 +38,7 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import useAppHistory from "@/hooks/useAppHistory";
 
 import Autocomplete from "@/components/ui/autocomplete";
+import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import {
   RequestOrderCategory,
   RequestOrderIntent,
@@ -105,9 +106,13 @@ export default function RequestOrderForm({
 
   const title = isEditMode ? t("edit_order") : t("create_order");
 
-  const returnPath = `/facility/${facilityId}/locations/${locationId}/${
-    internal ? "internal_transfers" : "external_supply"
-  }/request_orders`;
+  const returnPath = getInventoryBasePath(
+    facilityId,
+    locationId,
+    internal,
+    true,
+    true,
+  );
 
   const queryClient = useQueryClient();
   const [supplierSearchQuery, setSupplierSearchQuery] = useState("");
@@ -197,7 +202,7 @@ export default function RequestOrderForm({
     onSuccess: (requestOrder: RequestOrderRetrieve) => {
       queryClient.invalidateQueries({ queryKey: ["requestOrders"] });
       toast.success(t("order_created"));
-      navigate(returnPath + "/" + requestOrder.id);
+      navigate(returnPath + requestOrder.id);
     },
   });
 
@@ -211,7 +216,7 @@ export default function RequestOrderForm({
     onSuccess: (requestOrder: RequestOrderRetrieve) => {
       queryClient.invalidateQueries({ queryKey: ["requestOrders"] });
       toast.success(t("order_updated"));
-      navigate(returnPath + "/" + requestOrder.id);
+      navigate(returnPath + requestOrder.id);
     },
   });
 
@@ -536,7 +541,14 @@ export default function RequestOrderForm({
             </Card>
 
             <div className="flex justify-end space-x-3">
-              <Button variant="outline" onClick={() => navigate(returnPath)}>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  navigate(
+                    requestOrderId ? returnPath + requestOrderId : returnPath,
+                  )
+                }
+              >
                 {t("cancel")}
                 <ShortcutBadge actionId="cancel-action" />
               </Button>
