@@ -59,6 +59,7 @@ npm run playwright:test:ui
 ```
 
 This mode allows you to:
+
 - See test execution in real-time
 - Debug tests interactively
 - Time-travel through test steps
@@ -127,6 +128,7 @@ npm run playwright:show-report
 ```
 
 The report includes:
+
 - Test results and statistics
 - Screenshots of failures
 - Videos of test runs
@@ -135,6 +137,7 @@ The report includes:
 ### Test Artifacts
 
 Test artifacts are stored in:
+
 - `test-results/` - Screenshots, videos, and traces
 - `playwright-report/` - HTML report files
 
@@ -209,15 +212,15 @@ test("login as admin", async ({ page }) => {
 
 ## Common Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run playwright:test` | Run all tests headlessly |
-| `npm run playwright:test:ui` | Run tests in UI mode |
+| Command                          | Description                    |
+| -------------------------------- | ------------------------------ |
+| `npm run playwright:test`        | Run all tests headlessly       |
+| `npm run playwright:test:ui`     | Run tests in UI mode           |
 | `npm run playwright:test:headed` | Run tests with visible browser |
-| `npm run playwright:show-report` | View HTML report |
-| `npm run playwright:install` | Install browsers |
-| `npx playwright test --debug` | Debug tests |
-| `npx playwright codegen` | Generate test code |
+| `npm run playwright:show-report` | View HTML report               |
+| `npm run playwright:install`     | Install browsers               |
+| `npx playwright test --debug`    | Debug tests                    |
+| `npx playwright codegen`         | Generate test code             |
 
 ## Troubleshooting
 
@@ -232,6 +235,7 @@ npm run playwright:install
 ### Tests Timeout
 
 If tests timeout, ensure:
+
 1. Backend server is running
 2. Frontend dev server is running (`npm run dev`)
 3. Network connectivity is working
@@ -239,12 +243,14 @@ If tests timeout, ensure:
 ### Port Conflicts
 
 If port 4000 is in use, either:
+
 1. Stop the process using port 4000
 2. Update `baseURL` in `playwright.config.ts`
 
 ## CI/CD Integration
 
 The project includes a GitHub Actions workflow (`.github/workflows/playwright.yaml`) that:
+
 - Runs on pull requests to `develop` and `production` branches
 - Installs dependencies and browsers
 - Builds the application
