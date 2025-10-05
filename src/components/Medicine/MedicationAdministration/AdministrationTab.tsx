@@ -150,7 +150,7 @@ const MedicationBadges: React.FC<MedicationBadgesProps> = ({ medication }) => {
   return (
     <div className="flex flex-wrap gap-2 mt-1">
       <Badge variant="blue" className="text-xs">
-        {medication.dosage_instruction[0]?.route?.display || "Oral"}
+        {medication.dosage_instruction[0]?.route?.display || t("oral")}
       </Badge>
       {medication.dosage_instruction[0]?.as_needed_boolean && (
         <Badge variant="pink" className="text-xs">

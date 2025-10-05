@@ -172,7 +172,7 @@ export function AllergyList({
 
   return (
     <EncounterAccordionLayout
-      title="allergies"
+      title={t("allergies")}
       readOnly={readOnly}
       className={className}
       editLink={!readOnly ? "questionnaire/allergy_intolerance" : undefined}
