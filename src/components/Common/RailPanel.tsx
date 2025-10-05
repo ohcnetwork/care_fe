@@ -14,7 +14,7 @@ export default function RailPanel({ className, children }: RailPanelProps) {
   return (
     <div className="relative flex">
       <motion.div
-        initial={{ width: 0, opacity: 0 }}
+        initial={{ width: "auto", opacity: 1 }}
         animate={{ width: open ? "auto" : 0, opacity: open ? 1 : 0 }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
         layout
