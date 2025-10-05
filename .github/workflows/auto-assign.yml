@@ -1,7 +1,7 @@
 name: Assign Labels
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, converted_to_draft, ready_for_review, closed]
 
 permissions:
@@ -51,15 +51,16 @@ jobs:
               }
             }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
 
-          echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
-          echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'TEAM_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'REVIEW_REQUESTED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Review requested") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'DONE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Done") | .id' project_data.json) >> $GITHUB_ENV
+          echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> "$GITHUB_ENV"
+          echo "STATUS_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .id' project_data.json)" >> "$GITHUB_ENV"
+          echo "TEAM_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Team\") | .id' project_data.json)" >> "$GITHUB_ENV"
+          echo "REVIEW_REQUESTED_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .options[] | select(.name==\"Review requested\") | .id' project_data.json)" >> "$GITHUB_ENV"
+          echo "DONE_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .options[] | select(.name==\"Done\") | .id' project_data.json)" >> "$GITHUB_ENV"
 
       - name: Assign PR
         uses: actions/github-script@v8
         with:
+          github-token: ${{ steps.generate-token.outputs.token }}
           script: |
             const { data: pr } = await github.rest.pulls.get({
               owner: context.repo.owner,
@@ -135,7 +136,9 @@ jobs:
                   issue_number: context.issue.number,
                   name: 'needs review'
                 });
-              } catch {}
+              } catch (error) {
+                console.warn("Failed to remove label 'needs review':", error.message);
+              }
 
               try {
                 await github.rest.issues.removeLabel({
@@ -144,7 +147,9 @@ jobs:
                   issue_number: context.issue.number,
                   name: 'needs testing'
                 });
-              } catch {}
+              } catch (error) {
+                console.warn("Failed to remove label 'needs testing':", error.message);
+              }
 
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
@@ -160,7 +165,9 @@ jobs:
                   issue_number: context.issue.number,
                   name: 'work in progress'
                 });
-              } catch {}
+              } catch (error) {
+                console.warn("Failed to remove label 'work in progress':", error.message);
+              }
 
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
