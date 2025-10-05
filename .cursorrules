@@ -9,67 +9,62 @@ This is a healthcare management system for TeleICU & hospital capacity administr
 - Write concise, technical TypeScript code with accurate examples
 - Use functional and declarative programming patterns; avoid classes
 - Prefer iteration and modularization over code duplication
-- Use descriptive variable names with auxiliary verbs (e.g., isPatientActive, hasEmergencyStatus)
-- Implement HIPAA-compliant data handling practices
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
 
 ## Naming Conventions
 
 - Use lowercase with dashes for directories (e.g., patient-management/, facility-overview/)
 - Favor named exports for components
-- Use PascalCase for components (PatientOverview, MedicationList)
-- Use camelCase for functions and variables (fetchPatientData, isEmergencyCase)
+- Use PascalCase for components (PatientOverview, FacilityList)  
+- Use camelCase for functions and variables (fetchData, isLoading)
 
 ## TypeScript Usage
 
-- Use TypeScript for all code; prefer interfaces over types for medical data structures
-- Avoid enums; use maps instead (except for medical constants like BloodGroupChoices)
+- Use TypeScript for all code; prefer interfaces over types for data structures
+- Avoid enums; use maps instead
 - Use functional components with TypeScript interfaces
-- Strict typing for all medical data and API interfaces
+- Strict typing for all data and API interfaces
 
 ## Syntax and Formatting
 
 - Use the "function" keyword for pure functions
 - Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements
 - Use declarative JSX
-- Handle medical data with proper null checks and error boundaries
+- Handle data with proper null checks and error boundaries
 
 ## UI and Styling
 
 - Use Shadcn UI, Radix, and Tailwind for components and styling
-- Use CAREUI for healthcare-specific components (Calendar, medical forms)
+- Use CAREUI for custom components (Calendar, forms)
 - Implement responsive design with Tailwind CSS; use a mobile-first approach
-- Follow medical color conventions (red=critical, yellow=warning, green=stable)
 
-## Healthcare Data & API Guidelines
+## Data & API Guidelines
 
 - CARE uses TanStack Query for data fetching with query and mutate utilities (src/Utils/request/README.md)
 - APIs are defined in *.Api.ts files under src/types/ directories
-- Use zod validation for all medical data inputs
-- Implement audit logging for medical data access
-- Handle PHI (Protected Health Information) with appropriate security measures
+- Use zod validation for all data inputs
+- Handle data with appropriate security measures
 
 ## Routing & Navigation
 
-- Use raviger for healthcare workflow routing
-- Organize routes by medical domains (Patient/, Facility/, Medication/)
-- Implement proper navigation history for clinical workflows
+- Use raviger for routing
+- Organize routes by domains (Patient/, Facility/, etc.)
+- Implement proper navigation history
 
 ## Internationalization
 
-- Add and reuse proper translations in en.json for medical terminology
-- Use consistent medical term translations across components
-- Support healthcare-specific date/time formatting
+- Add and reuse proper translations in en.json
+- Use consistent term translations across components
+- Support date/time formatting
 
-## Healthcare Standards
+## Standards
 
-- HIPAA compliance and PHI protection in all data handling
-- WCAG 2.1 AA accessibility for medical environments
-- Sub-100ms response times for emergency workflows
-- Proper error boundaries for critical medical data
+- WCAG 2.1 AA accessibility compliance
+- Proper error boundaries for critical data
 
 ## Testing Guidelines
 
-For Cypress testing guidelines, refer to cypress/docs/*.md for healthcare workflow testing patterns.
+For Cypress testing guidelines, refer to cypress/docs/*.md for testing patterns.
 
 ## Reference
 

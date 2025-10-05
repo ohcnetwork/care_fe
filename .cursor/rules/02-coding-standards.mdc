@@ -14,8 +14,8 @@ alwaysApply: false
 
 ## Components Structure
 - One component per file
-- Descriptive naming: `PatientOverview.tsx`, `MedicationList.tsx`
-- Organize by feature: Patient/, Facility/, Medication/
+- Descriptive naming: `PatientOverview.tsx`, `FacilityList.tsx`
+- Organize by feature: Patient/, Facility/, etc.
 - WCAG 2.1 AA accessibility compliance
 - Proper error boundaries
 
@@ -33,8 +33,8 @@ alwaysApply: false
 
 ## File Naming
 - kebab-case directories: `patient-management/`
-- PascalCase components: `PatientVitals.tsx`
-- Camel case hooks: `usePatientData.ts`
+- PascalCase components: `PatientList.tsx`
+- Camel case hooks: `useData.ts`
 
 ## Testing
 - Cypress E2E for critical workflows

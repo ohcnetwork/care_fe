@@ -5,7 +5,7 @@ alwaysApply: false
 ---
 # Project Structure
 
-CARE frontend follows healthcare-focused modular architecture for medical workflows.
+CARE frontend follows modular architecture.
 
 ## Main Entry Points
 - [src/index.tsx](mdc:src/index.tsx) - Application bootstrap

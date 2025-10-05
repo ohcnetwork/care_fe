@@ -4,11 +4,10 @@ This file provides guidance for AI coding agents working with the CARE frontend 
 
 ## Complete Instructions System
 
-This repository uses a comprehensive healthcare-focused instructions system:
+This repository uses a comprehensive instructions system:
 
 - Main Instructions: Complete project overview and workflows (`.github/copilot-instructions.md`)
-- Path-Specific Instructions: Context-aware guidance for specific file types (`.github/instructions/*.instructions.md`)
-- Agent Environment: Pre-configured development environment (`.github/workflows/copilot-setup-steps.yml`)
+- Agent Environment: Pre-configured development environment
 
 For detailed project context, build instructions, and architecture information, refer to `.github/copilot-instructions.md`.
 
@@ -16,10 +15,9 @@ For detailed project context, build instructions, and architecture information, 
 
 CARE is a Digital Public Good for TeleICU & Decentralised Administration of Healthcare Capacity. This React + TypeScript application manages:
 
-- Patient Management: EMR, medical records, consultation workflows
+- Patient Management: Patient records, consultation workflows
 - Facility Management: Bed allocation, staff assignments, resource tracking
-- Medical Workflows: Prescription management, diagnostic procedures, emergency protocols
-- Compliance: PHI protection, audit trails, HIPAA compliance
+- Resource Management: Equipment, supplies, and availability tracking
 
 ## Build/Lint/Test Commands
 
@@ -28,14 +26,13 @@ npm run dev          # Start development server on http://localhost:4000
 npm run build        # Build for production (~2 minutes)
 npm run lint         # Run ESLint (~85 seconds)
 npm run format       # Format code with Prettier
-npm run cypress:open # Open Cypress UI for workflow testing
+npm run cypress:open # Open Cypress UI for testing
 ```
 
 ## Code Style Standards
 
-- TypeScript: Strict mode for data safety, healthcare-specific type definitions
-- Components: Feature-based organization (Patient/, Facility/, Medication/)
+- TypeScript: Strict mode for data safety, type definitions
+- Components: Feature-based organization (Patient/, Facility/, etc.)
 - State Management: @tanstack/react-query for server data, React hooks for UI state
 - UI System: shadcn/ui for standard components, CAREUI for custom components
 - Testing: Cypress E2E testing for critical workflows
-- Security: PHI protection, audit logging, compliance patterns
