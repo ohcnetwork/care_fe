@@ -79,11 +79,6 @@ jobs:
         env:
           JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
-      - name: Wait for backend to be ready
-        run: |
-          timeout 300 bash -c 'until curl -f http://localhost:9000/api/v1/health/; do sleep 5; done'
-          echo "Backend is ready!"
-
   # Build and test execution
   test:
     if: github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
