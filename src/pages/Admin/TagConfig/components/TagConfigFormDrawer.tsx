@@ -59,7 +59,7 @@ export default function TagConfigFormDrawer({
     }
   };
 
-  const renderContent = () => (
+  return (
     <>
       {isMobile ? (
         <Drawer
@@ -104,6 +104,4 @@ export default function TagConfigFormDrawer({
       )}
     </>
   );
-
-  return renderContent();
 }
