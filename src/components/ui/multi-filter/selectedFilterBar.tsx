@@ -89,7 +89,7 @@ export function SelectedFilterBar({
     >
       <div
         className={cn(
-          "flex items-center bg-white rounded-md border border-gray-200 w-auto justify-between",
+          "flex items-center bg-white rounded-md border border-gray-200 w-fit",
           selectedBarClassName,
         )}
       >

@@ -350,12 +350,16 @@ export const SelectedDateBadge = ({
           <span>{t(isRangeSelected.label)}</span>
         ) : selected.from && selected.to && !isSameDate ? (
           <span>
-            {[selected.from, selected.to].map((date, index) => (
-              <span key={date.toISOString() + index}>
-                {index > 0 && "-"}
-                <span>{format(date, "d MMM")}</span>
-              </span>
-            ))}
+            {(() => {
+              const needsYear =
+                selected.from.getFullYear() !== selected.to.getFullYear();
+              return [selected.from, selected.to].map((date, index) => (
+                <span key={date.toISOString() + index}>
+                  {index > 0 && " - "}
+                  <span>{format(date, needsYear ? "d MMM yy" : "d MMM")}</span>
+                </span>
+              ));
+            })()}
           </span>
         ) : presentDate ? (
           <span>{format(presentDate, "d MMM yyyy")}</span>
