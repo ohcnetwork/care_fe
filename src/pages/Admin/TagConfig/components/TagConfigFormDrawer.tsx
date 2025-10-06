@@ -25,7 +25,7 @@ interface TagConfigFormDrawerProps {
   parentId?: string;
   facilityId?: string;
   onSuccess?: () => void;
-  trigger?: React.ReactNode;
+  trigger: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -67,7 +67,7 @@ export default function TagConfigFormDrawer({
           onOpenChange={onOpenChange}
           repositionInputs={!isAppleDevice}
         >
-          {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
+          <DrawerTrigger asChild>{trigger}</DrawerTrigger>
           <DrawerContent className="min-h-[65vh] max-h-[100vh]">
             <DrawerHeader className="flex flex-row items-center justify-between">
               <DrawerTitle className="text-xl font-semibold">
