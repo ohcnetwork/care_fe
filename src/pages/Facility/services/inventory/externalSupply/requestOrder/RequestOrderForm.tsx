@@ -56,10 +56,13 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 
-const createRequestOrderFormSchema = (internal: boolean) =>
+const createRequestOrderFormSchema = (
+  t: (key: string) => string,
+  internal: boolean,
+) =>
   z.object({
     status: z.nativeEnum(RequestOrderStatus),
-    name: z.string().min(1, "Name is required"),
+    name: z.string().min(1, t("name_is_required")),
     note: z.string().optional(),
     intent: z.nativeEnum(RequestOrderIntent),
     category: z.nativeEnum(RequestOrderCategory),
@@ -67,11 +70,11 @@ const createRequestOrderFormSchema = (internal: boolean) =>
     reason: z.nativeEnum(RequestOrderReason),
     supplier: internal
       ? z.string().optional()
-      : z.string().min(1, "Supplier is required"),
+      : z.string().min(1, t("supplier_required")),
     origin: internal
-      ? z.string().min(1, "Origin location is required")
+      ? z.string().min(1, t("origin_required"))
       : z.string().optional(),
-    destination: z.string().min(1, "Destination is required"),
+    destination: z.string().min(1, t("destination_required")),
   });
 
 type FormValues = z.infer<ReturnType<typeof createRequestOrderFormSchema>>;
@@ -161,7 +164,7 @@ export default function RequestOrderForm({
     })) || [];
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(createRequestOrderFormSchema(internal)),
+    resolver: zodResolver(createRequestOrderFormSchema(t, internal)),
     defaultValues: {
       status: RequestOrderStatus.draft,
       name: "",
@@ -265,15 +268,16 @@ export default function RequestOrderForm({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <Card className="p-0  bg-gray-50">
               <CardContent className="space-y-4 p-4 rounded-md">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid sm:grid-cols-2 gap-4 items-start">
                   <FormField
                     control={form.control}
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("name")} *</FormLabel>
+                        <FormLabel>{t("name")}</FormLabel>
                         <FormControl>
                           <Input
+                            className="h-9"
                             placeholder={t("enter_order_name")}
                             {...field}
                           />
@@ -289,7 +293,7 @@ export default function RequestOrderForm({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          {internal ? t("deliver_from") : t("vendor")} *
+                          {internal ? t("deliver_from") : t("vendor")}
                         </FormLabel>
                         <FormControl>
                           <Autocomplete
@@ -334,13 +338,14 @@ export default function RequestOrderForm({
                   name="note"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t("note")}</FormLabel>
+                      <FormLabel>
+                        {t("note")}
+                        <span className="text-gray-500 text-sm italic">
+                          ({t("optional")})
+                        </span>
+                      </FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder={t("enter_notes_optional")}
-                          rows={3}
-                          {...field}
-                        />
+                        <Textarea rows={3} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -542,6 +547,7 @@ export default function RequestOrderForm({
 
             <div className="flex justify-end space-x-3">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() =>
                   navigate(
