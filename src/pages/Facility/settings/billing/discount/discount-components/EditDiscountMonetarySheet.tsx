@@ -57,6 +57,9 @@ export function EditDiscountMonetarySheet({
             defaultValues={component}
             onSubmit={(data) => {
               if (!facility) {
+                console.warn(
+                  "Unable to update discount component without facility",
+                );
                 return;
               }
 

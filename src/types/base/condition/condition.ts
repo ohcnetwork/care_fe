@@ -4,6 +4,7 @@ export enum ConditionOperation {
   equality = "equality",
   in_range = "in_range",
   intersects_any = "intersects_any",
+  has_tag = "has_tag",
 }
 
 export interface ConditionBase {
@@ -13,6 +14,10 @@ export interface ConditionBase {
 export interface ConditionOperationInRangeValue {
   min: number;
   max: number;
+}
+
+export interface ConditionOperationIntersectsAnyValue {
+  values: string[];
 }
 
 export type Condition = ConditionBase &
@@ -26,8 +31,10 @@ export type Condition = ConditionBase &
         value: ConditionOperationInRangeValue;
       }
     | {
-        operation: ConditionOperation.intersects_any;
-        values: string[];
+        operation:
+          | ConditionOperation.intersects_any
+          | ConditionOperation.has_tag;
+        value: ConditionOperationIntersectsAnyValue;
       }
   );
 
@@ -64,7 +71,16 @@ export const conditionSchema = z.discriminatedUnion("operation", [
   z.object({
     metric: z.string().min(1, "Metric is required"),
     operation: z.literal(ConditionOperation.intersects_any),
-    values: z.array(z.string().min(1, "Values are required")),
+    value: z.object({
+      values: z.array(z.string().min(1, "Values are required")),
+    }),
+  }),
+  z.object({
+    metric: z.string().min(1, "Metric is required"),
+    operation: z.literal(ConditionOperation.has_tag),
+    value: z.object({
+      values: z.array(z.string().min(1, "Values are required")),
+    }),
   }),
 ]) as z.ZodType<Condition>;
 
@@ -75,7 +91,7 @@ export const getConditionValue = (condition: Condition) => {
     case ConditionOperation.in_range:
       return `${condition.value.min} - ${condition.value.max}`;
     case ConditionOperation.intersects_any:
-      return condition.values;
+      return condition.value.values;
   }
 };
 export const getConditionOperationSummary = (
@@ -88,6 +104,6 @@ export const getConditionOperationSummary = (
     case ConditionOperation.in_range:
       return `${conditionName} is in range ${condition.value.min} to ${condition.value.max}`;
     case ConditionOperation.intersects_any:
-      return `${conditionName} intersects any of ${condition.values.join(", ")}`;
+      return `${conditionName} intersects any of ${condition.value.values.join(", ")}`;
   }
 };

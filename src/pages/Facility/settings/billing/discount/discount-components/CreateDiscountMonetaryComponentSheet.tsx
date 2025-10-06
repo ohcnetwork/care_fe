@@ -50,6 +50,9 @@ export function CreateDiscountMonetaryComponentSheet() {
           <DiscountMonetaryComponentForm
             onSubmit={(data) => {
               if (!facility) {
+                console.warn(
+                  "Unable to create discount component without facility",
+                );
                 return;
               }
 

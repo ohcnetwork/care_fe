@@ -12,14 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { MultiFilterStyleTagSelector } from "@/components/Tags/TagAssignmentSheet";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import {
   Condition,
   ConditionOperation,
   getConditionValue,
   Metrics,
 } from "@/types/base/condition/condition";
-import { TagResource } from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 
 interface CompactConditionEditorProps {
   conditions: Condition[];
@@ -74,12 +74,21 @@ export function CompactConditionEditor({
         operation: ConditionOperation.in_range,
         value: newCondition.value as { min: number; max: number },
       };
-    } else {
+    } else if (newCondition.operation === ConditionOperation.intersects_any) {
       condition = {
         metric: newCondition.metric,
         operation: ConditionOperation.intersects_any,
-        values: newCondition.value as string[],
+        value: { values: newCondition.value as string[] },
       };
+    } else if (newCondition.operation === ConditionOperation.has_tag) {
+      condition = {
+        metric: newCondition.metric,
+        operation: ConditionOperation.has_tag,
+        value: { values: newCondition.value as string[] },
+      };
+    } else {
+      console.warn("Unsupported operation:", newCondition.operation);
+      return;
     }
 
     onChange([...conditions, condition]);
@@ -244,9 +253,9 @@ export function CompactConditionEditor({
               </div>
             ) : tagResource ? (
               <div className="w-full">
-                <MultiFilterStyleTagSelector
+                <TagSelectorPopover
                   selected={[]} // Start with empty selection for new conditions
-                  onChange={(tags) => {
+                  onChange={(tags: TagConfig[]) => {
                     setNewCondition({
                       ...newCondition,
                       value: tags.map((tag) => tag.id),
