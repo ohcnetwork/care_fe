@@ -102,15 +102,14 @@ export function SupplyDeliveryTable({
             <TableRow key={delivery.id} className="border-b hover:bg-gray-50">
               {showCheckbox && (
                 <TableCell className="border-x p-3 text-gray-950">
-                  <Checkbox
-                    checked={selectedDeliveries.includes(delivery.id)}
-                    disabled={
-                      delivery.status !== SupplyDeliveryStatus.in_progress
-                    }
-                    onCheckedChange={(checked) => {
-                      onDeliverySelect?.(delivery.id, !!checked);
-                    }}
-                  />
+                  {delivery.status === SupplyDeliveryStatus.in_progress && (
+                    <Checkbox
+                      checked={selectedDeliveries.includes(delivery.id)}
+                      onCheckedChange={(checked) => {
+                        onDeliverySelect?.(delivery.id, !!checked);
+                      }}
+                    />
+                  )}
                 </TableCell>
               )}
               <TableCell

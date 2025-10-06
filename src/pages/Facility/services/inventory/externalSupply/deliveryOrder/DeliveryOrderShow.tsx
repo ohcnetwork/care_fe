@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import BackButton from "@/components/Common/BackButton";
 import Page from "@/components/Common/Page";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +32,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import useFilters from "@/hooks/useFilters";
 import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
@@ -80,14 +78,6 @@ export function DeliveryOrderShow({
     useState<ProductKnowledgeBase>();
   const [selectedProductKnowledgeDrawer, setSelectedProductKnowledgeDrawer] =
     useState<ProductKnowledgeBase>();
-  const {
-    qParams: filterParams,
-    updateQuery,
-    resultsPerPage,
-  } = useFilters({
-    limit: RESULTS_PER_PAGE_LIMIT,
-    disableCache: true,
-  });
 
   const { data: deliveryOrder, isLoading } = useQuery({
     queryKey: ["deliveryOrders", deliveryOrderId],
@@ -106,15 +96,12 @@ export function DeliveryOrderShow({
       queryKey: [
         "supplyDeliveries",
         deliveryOrderId,
-        filterParams,
         selectedProductKnowledge?.id,
       ],
       queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
         queryParams: {
           order: deliveryOrderId,
           facility: facilityId,
-          limit: resultsPerPage,
-          offset: ((filterParams.page ?? 1) - 1) * resultsPerPage,
           ...(internal
             ? {
                 supplied_inventory_item_product_knowledge:
@@ -481,7 +468,6 @@ export function DeliveryOrderShow({
                     value={selectedProductKnowledge}
                     onChange={(value) => {
                       setSelectedProductKnowledge(value);
-                      updateQuery({ page: 1 }); // Reset to first page when filter changes
                     }}
                     placeholder={t("filter_by_product")}
                   />
