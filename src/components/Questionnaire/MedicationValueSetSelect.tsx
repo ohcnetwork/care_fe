@@ -507,7 +507,7 @@ export function MedicationValueSetSelectTabContent({
             </div>
 
             <CommandList className="flex-1 mt-7 overflow-y-auto">
-              <CommandEmpty className="h-75 flex justify-center items-center py-6 text-gray-500">
+              <CommandEmpty className="h-72 flex justify-center items-center py-6 text-gray-500">
                 {search.length < 3 ? (
                   <p className="p-4 text-sm text-gray-500">
                     {t("min_char_length_error", { min_length: 3 })}

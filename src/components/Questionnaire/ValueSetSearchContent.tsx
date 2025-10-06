@@ -220,7 +220,7 @@ export default function ValueSetSearchContent({
         />
       </div>
       {searchQuery.isFetching ? (
-        <div className="h-75 flex justify-center items-center py-6 text-gray-500">
+        <div className="h-72 flex justify-center items-center py-6 text-gray-500">
           <Loader2 className="h-5 w-5 animate-spin mr-2" />
           {t("searching")}
         </div>
