@@ -103,7 +103,7 @@ export function DeviceSearch({
       pathParams: { facility_id: facilityId },
       queryParams: { search_text: search },
     }),
-    enabled: open && facilityId !== "preview",
+    enabled: facilityId !== "preview",
   });
   const devices = data?.results;
 
