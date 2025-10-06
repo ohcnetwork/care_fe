@@ -21,6 +21,14 @@ import {
 } from "@/components/ui/sheet";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import useBreakpoints from "@/hooks/useBreakpoints";
 
 type RequirementItem = {
   value: string;
@@ -90,7 +98,9 @@ function SmallSelectedItemCard({
 }) {
   return (
     <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5">
-      <span className="text-sm font-medium">{title}</span>
+      <span className="text-sm font-medium text-nowrap truncate max-w-[100px] sm:max-w-none">
+        {title}
+      </span>
       <Button
         onClick={(e) => {
           e.preventDefault();
@@ -103,6 +113,180 @@ function SmallSelectedItemCard({
         <X className="size-3" />
       </Button>
     </div>
+  );
+}
+
+function TriggerButton({
+  isOpen,
+  value,
+  placeholder,
+}: {
+  isOpen: boolean;
+  value: RequirementItem[];
+  placeholder: string;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      role="combobox"
+      aria-expanded={isOpen}
+      className="w-full justify-between"
+    >
+      <div className="flex items-center gap-2 truncate">
+        {value.length === 0 ? (
+          <span>{placeholder}</span>
+        ) : (
+          <span className="flex items-center gap-2">
+            <span className="font-medium">{value.length}</span>
+            {t("items_selected")}
+          </span>
+        )}
+      </div>
+      <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
+    </Button>
+  );
+}
+
+interface RequirementsContentProps {
+  value: RequirementItem[];
+  options: RequirementItem[];
+  isLoading: boolean;
+  onSearch?: (query: string) => void;
+  customSelector?: React.ReactNode;
+  canCreate?: boolean;
+  isCreateSheetOpen: boolean;
+  setIsCreateSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  createForm?: (onSuccess: () => void) => React.ReactNode;
+  allowDuplicate?: boolean;
+  removeItem: (index: number) => void;
+  addOption: (option: RequirementItem) => void;
+}
+
+function RequirementsContent({
+  value,
+  options,
+  isLoading,
+  onSearch,
+  customSelector,
+  canCreate,
+  isCreateSheetOpen,
+  setIsCreateSheetOpen,
+  createForm,
+  allowDuplicate = false,
+  removeItem,
+  addOption,
+}: RequirementsContentProps) {
+  const { t } = useTranslation();
+
+  if (customSelector) {
+    return <div className="overflow-y-auto">{customSelector}</div>;
+  }
+
+  return (
+    <Command className="overflow-y-auto" filter={() => 1}>
+      {value.length > 0 && (
+        <div className="flex flex-nowrap sm:flex-wrap border-b gap-1.5 px-3 py-2 overflow-x-auto">
+          {value.map((item, index) => (
+            <SmallSelectedItemCard
+              key={`${item.value}-${index}`}
+              title={item.label}
+              onRemove={() => removeItem(index)}
+            />
+          ))}
+        </div>
+      )}
+      {canCreate && (
+        <div className="px-4 py-2 border-b">
+          <Sheet open={isCreateSheetOpen} onOpenChange={setIsCreateSheetOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2"
+                onClick={() => setIsCreateSheetOpen(true)}
+              >
+                <Plus className="size-4" />
+                {t("create_new")}
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="flex h-full w-full flex-col overflow-y-auto md:max-w-[600px] lg:max-w-[800px]"
+            >
+              <div className="flex-1 overflow-y-auto py-6">
+                {createForm?.(() => setIsCreateSheetOpen(false))}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      )}
+      <CommandInput
+        placeholder={t("search")}
+        onValueChange={onSearch}
+        className="border-0 focus:ring-0"
+      />
+      {isLoading ? (
+        <div className="p-4">
+          <FormSkeleton rows={3} />
+        </div>
+      ) : (
+        <CommandEmpty className="text-center font-medium">
+          <Card className="flex flex-col items-center justify-center p-8 text-center border-none shadow-none ">
+            <div className="rounded-full bg-primary/10 p-3 mb-2">
+              <Search className="size-4 text-primary" />
+            </div>
+            <p className="text-sm sm:text-base font-medium text-gray-500">
+              {t("no_results_found")}
+            </p>
+          </Card>
+        </CommandEmpty>
+      )}
+      <CommandGroup className="overflow-y-auto p-0">
+        <ScrollArea className="h-[calc(100vh-300px)]">
+          {isLoading ? (
+            <div className="p-4">
+              <FormSkeleton rows={5} />
+            </div>
+          ) : (
+            <div className="p-2">
+              {options.map((option) => {
+                const isSelected = value.some(
+                  (item) => item.value === option.value,
+                );
+                const showPlusButton = allowDuplicate || !isSelected;
+
+                return (
+                  <CommandItem
+                    key={option.value}
+                    value={option.label}
+                    onSelect={() => addOption(option)}
+                    className="mx-2 flex cursor-pointer items-center justify-between rounded-md px-2"
+                  >
+                    <span>{option.label}</span>
+                    {showPlusButton && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          addOption(option);
+                        }}
+                      >
+                        <Plus className="size-4" />
+                      </Button>
+                    )}
+                  </CommandItem>
+                );
+              })}
+            </div>
+          )}
+        </ScrollArea>
+      </CommandGroup>
+    </Command>
   );
 }
 
@@ -120,9 +304,9 @@ export default function RequirementsSelector({
   createForm,
   allowDuplicate = false,
 }: RequirementsSelectorProps) {
-  const { t } = useTranslation();
   const [isOpen, setIsOpen] = React.useState(false);
   const [isCreateSheetOpen, setIsCreateSheetOpen] = React.useState(false);
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const addOption = (option: RequirementItem) => {
     if (!allowDuplicate && !customSelector) {
@@ -140,28 +324,65 @@ export default function RequirementsSelector({
     onChange(newValue);
   };
 
-  return (
+  return isMobile ? (
+    <Drawer open={isOpen} onOpenChange={setIsOpen}>
+      <div className="flex flex-col gap-3">
+        <DrawerTrigger>
+          <TriggerButton
+            isOpen={isOpen}
+            value={value}
+            placeholder={placeholder}
+          />
+        </DrawerTrigger>
+
+        {value.length > 0 && (
+          <div className="flex flex-col gap-2">
+            {value.map((item, index) => (
+              <SelectedItemCard
+                key={`${item.value}-${index}`}
+                title={item.label}
+                details={item.details || []}
+                onRemove={() => removeItem(index)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <DrawerContent>
+        <div className="flex flex-col border-b px-3 py-2 mb-1.5">
+          <DrawerTitle className="text-lg font-semibold">{title}</DrawerTitle>
+          {description && (
+            <DrawerDescription className="mt-1.5 text-sm">
+              {description}
+            </DrawerDescription>
+          )}
+        </div>
+        <RequirementsContent
+          value={value}
+          options={options}
+          isLoading={isLoading}
+          onSearch={onSearch}
+          customSelector={customSelector}
+          canCreate={canCreate}
+          isCreateSheetOpen={isCreateSheetOpen}
+          setIsCreateSheetOpen={setIsCreateSheetOpen}
+          createForm={createForm}
+          allowDuplicate={allowDuplicate}
+          removeItem={removeItem}
+          addOption={addOption}
+        />
+      </DrawerContent>
+    </Drawer>
+  ) : (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex flex-col gap-3">
-        <SheetTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={isOpen}
-            className="w-full justify-between"
-          >
-            <div className="flex items-center gap-2 truncate">
-              {value.length === 0 ? (
-                <span>{placeholder}</span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <span className="font-medium">{value.length}</span>
-                  {t("items_selected")}
-                </span>
-              )}
-            </div>
-            <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
-          </Button>
+        <SheetTrigger>
+          <TriggerButton
+            isOpen={isOpen}
+            value={value}
+            placeholder={placeholder}
+          />
         </SheetTrigger>
 
         {value.length > 0 && (
@@ -190,117 +411,20 @@ export default function RequirementsSelector({
             </SheetDescription>
           )}
         </div>
-        {customSelector ? (
-          customSelector
-        ) : (
-          <Command
-            className="overflow-hidden rounded-none border-none"
-            filter={() => 1}
-          >
-            {value.length > 0 && (
-              <div className="flex flex-wrap gap-2 p-4 border-b">
-                {value.map((item, index) => (
-                  <SmallSelectedItemCard
-                    key={`${item.value}-${index}`}
-                    title={item.label}
-                    onRemove={() => removeItem(index)}
-                  />
-                ))}
-              </div>
-            )}
-            {canCreate && (
-              <div className="p-4 border-b">
-                <Sheet
-                  open={isCreateSheetOpen}
-                  onOpenChange={setIsCreateSheetOpen}
-                >
-                  <SheetTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start gap-2"
-                      onClick={() => setIsCreateSheetOpen(true)}
-                    >
-                      <Plus className="size-4" />
-                      {t("create_new")}
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent
-                    side="right"
-                    className="flex h-full w-full flex-col overflow-y-auto md:max-w-[600px] lg:max-w-[800px]"
-                  >
-                    <div className="flex-1 overflow-y-auto py-6">
-                      {createForm?.(() => setIsCreateSheetOpen(false))}
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              </div>
-            )}
-            <CommandInput
-              placeholder={t("search")}
-              onValueChange={onSearch}
-              className="border-0 focus:ring-0"
-            />
-            {isLoading ? (
-              <div className="p-4">
-                <FormSkeleton rows={3} />
-              </div>
-            ) : (
-              <CommandEmpty className="text-center font-medium">
-                <Card className="flex flex-col items-center justify-center p-8 text-center border-none shadow-none ">
-                  <div className="rounded-full bg-primary/10 p-3 mb-2">
-                    <Search className="size-4 text-primary" />
-                  </div>
-                  <p className="text-sm sm:text-base font-medium text-gray-500">
-                    {t("no_results_found")}
-                  </p>
-                </Card>
-              </CommandEmpty>
-            )}
-            <CommandGroup className="overflow-hidden p-0">
-              <ScrollArea className="h-[calc(100vh-300px)]">
-                {isLoading ? (
-                  <div className="p-4">
-                    <FormSkeleton rows={5} />
-                  </div>
-                ) : (
-                  <div className="p-2">
-                    {options.map((option) => {
-                      const isSelected = value.some(
-                        (item) => item.value === option.value,
-                      );
-                      const showPlusButton = allowDuplicate || !isSelected;
-
-                      return (
-                        <CommandItem
-                          key={option.value}
-                          value={option.label}
-                          onSelect={() => addOption(option)}
-                          className="mx-2 flex cursor-pointer items-center justify-between rounded-md px-2"
-                        >
-                          <span>{option.label}</span>
-                          {showPlusButton && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 w-8 p-0"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                addOption(option);
-                              }}
-                            >
-                              <Plus className="size-4" />
-                            </Button>
-                          )}
-                        </CommandItem>
-                      );
-                    })}
-                  </div>
-                )}
-              </ScrollArea>
-            </CommandGroup>
-          </Command>
-        )}
+        <RequirementsContent
+          value={value}
+          options={options}
+          isLoading={isLoading}
+          onSearch={onSearch}
+          customSelector={customSelector}
+          canCreate={canCreate}
+          isCreateSheetOpen={isCreateSheetOpen}
+          setIsCreateSheetOpen={setIsCreateSheetOpen}
+          createForm={createForm}
+          allowDuplicate={allowDuplicate}
+          removeItem={removeItem}
+          addOption={addOption}
+        />
       </SheetContent>
     </Sheet>
   );

@@ -299,7 +299,9 @@ function SelectedLocationPill({
 }) {
   return (
     <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5">
-      <span className="text-sm font-medium">{location.name}</span>
+      <span className="text-sm font-medium text-nowrap truncate max-w-[100px] sm:max-w-none">
+        {location.name}
+      </span>
       <Button
         onClick={(e) => {
           e.preventDefault();
@@ -527,20 +529,18 @@ export default function LocationMultiSelect({
   };
 
   return (
-    <div className="h-full flex flex-col gap-2 overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden">
       {value.length > 0 && (
         <>
-          <ScrollArea className="max-h-32">
-            <div className="flex flex-wrap gap-2 px-3">
-              {value.map((location) => (
-                <SelectedLocationPill
-                  key={location.id}
-                  location={location}
-                  onRemove={handleRemove}
-                />
-              ))}
-            </div>
-          </ScrollArea>
+          <div className="flex flex-nowrap sm:flex-wrap gap-2 px-3 overflow-x-auto px-1.5 py-1.5">
+            {value.map((location) => (
+              <SelectedLocationPill
+                key={location.id}
+                location={location}
+                onRemove={handleRemove}
+              />
+            ))}
+          </div>
           <div className="flex flex-col border-b py-1" />
         </>
       )}
