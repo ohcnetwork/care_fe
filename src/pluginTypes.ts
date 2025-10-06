@@ -55,6 +55,11 @@ export type PatientDetailsTabDemographyGeneralInfoComponentType = React.FC<{
   patientData: PatientRead;
 }>;
 
+export type PatientSearchComponentType = React.FC<{
+  facilityId: string;
+  state: UseFormReturn<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
@@ -65,6 +70,7 @@ export type SupportedPluginComponents = {
   FacilityHomeActions: FacilityHomeActionsComponentType;
   PatientRegistrationForm: PatientRegistrationFormComponentType;
   PatientDetailsTabDemographyGeneralInfo: PatientDetailsTabDemographyGeneralInfoComponentType;
+  PatientSearch: PatientSearchComponentType;
 };
 
 // Create a type for lazy-loaded components
