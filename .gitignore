@@ -60,9 +60,11 @@ cypress/downloads
 cypress/fixtures/token.json
 
 # Playwright
-playwright-report/
-playwright/.cache/
-test-results/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/tests/.auth/
 
 # Care Apps
 /apps/*

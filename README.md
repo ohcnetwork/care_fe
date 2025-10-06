@@ -156,7 +156,7 @@ npm run playwright:show-report    # View the HTML test report
 - Test results and artifacts are saved in `test-results/`
 - HTML reports are saved in `playwright-report/`
 
-For more details, see [playwright/README.md](playwright/README.md).
+For more details, see [tests/README.md](tests/README.md).
 
 ## 📖 Documentations
 
