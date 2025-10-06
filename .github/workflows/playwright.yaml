@@ -5,31 +5,167 @@ on:
     branches: [main, develop, production]
   pull_request:
     branches: [develop, production]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "package.json"
+      - "package-lock.json"
+      - "playwright.config.ts"
+      - ".github/workflows/playwright.yaml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
-    timeout-minutes: 60
+  # Check if tests should run based on file changes
+  changes:
+    if: github.repository == 'ohcnetwork/care_fe'
     runs-on: ubuntu-latest
+    outputs:
+      tests: ${{ steps.filter.outputs.tests }}
     steps:
       - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            tests:
+              - 'tests/**'
+              - 'src/**'
+              - 'package.json'
+              - 'playwright.config.ts'
+
+  # Backend setup (inspired by Cypress)
+  backend-setup:
+    if: github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
+    runs-on: ubuntu-latest
+    needs: changes
+    timeout-minutes: 20
+    env:
+      REACT_CARE_API_URL: http://localhost:9000
+      JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
+    steps:
+      - name: Checkout frontend 📥
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set backend branch
+        id: backend-branch
+        run: echo "branch=develop" >> $GITHUB_OUTPUT
+
+      - name: Checkout backend repository 📥
+        uses: actions/checkout@v4
+        with:
+          repository: ohcnetwork/care
+          path: care
+          ref: ${{ steps.backend-branch.outputs.branch }}
+          fetch-depth: 0
+
+      - name: Configure backend environment
+        run: |
+          cd care
+          echo "DISABLE_RATELIMIT=True" >> docker/.local.env
+          echo "JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\"" >> docker/.local.env
+          echo "MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500" >> docker/.local.env
+
+      - name: Start backend services 🐳
+        run: |
+          cd care
+          make docker_config_file=docker-compose.local.yaml up load-fixtures
+          cd ..
+        env:
+          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
+
+      - name: Wait for backend to be ready
+        run: |
+          timeout 300 bash -c 'until curl -f http://localhost:9000/api/v1/health/; do sleep 5; done'
+          echo "Backend is ready!"
+
+  # Build and test execution
+  test:
+    if: github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
+    needs: [changes, backend-setup]
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1/3, 2/3, 3/3]
+    steps:
+      - name: Checkout 📥
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: "npm"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright Browsers
+      - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Run Playwright tests
-        run: npx playwright test
+      - name: Build application
+        run: npm run build
 
-      - uses: actions/upload-artifact@v4
+      - name: Run Playwright tests
+        run: npx playwright test --shard=${{ matrix.shard }}
+        env:
+          NODE_ENV: production
+          REACT_CARE_API_URL: http://localhost:9000
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: playwright-results-${{ matrix.shard }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  # Combine results
+  report:
+    if: always() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
+    needs: [changes, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: playwright-results-*
+          path: all-results
+
+      - name: Upload final report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-final-report
+          path: all-results/
           retention-days: 30
+
+      - name: Comment PR with test results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🎭 Playwright test results are available in the artifacts. Check the "playwright-final-report" artifact for detailed results.`
+            });
