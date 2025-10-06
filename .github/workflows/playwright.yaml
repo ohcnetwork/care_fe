@@ -140,11 +140,10 @@ jobs:
       - name: Start backend services 🐳
         run: |
           cd care
-          make docker_config_file=docker-compose.local.yaml up &
-          BACKEND_PID=$!
-          echo "BACKEND_PID=$BACKEND_PID" >> $GITHUB_ENV
-        env:
-          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
+          make docker_config_file=docker-compose.local.yaml up load-fixtures
+          cd ..
+          env:
+            JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
       - name: Load backend fixtures
         run: |
