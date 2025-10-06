@@ -97,32 +97,32 @@ jobs:
 
     steps:
       - name: Checkout 📥
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set backend branch
-      id: backend-branch
-      run: echo "branch=develop" >> $GITHUB_OUTPUT
+      - name: Set backend branch
+        id: backend-branch
+        run: echo "branch=develop" >> $GITHUB_OUTPUT
 
-    - name: Checkout care 📥
-      uses: actions/checkout@v4
-      with:
-        repository: ohcnetwork/care
-        path: care
-        ref: ${{ steps.backend-branch.outputs.branch }}
-        fetch-depth: 0
+      - name: Checkout care 📥
+        uses: actions/checkout@v4
+        with:
+          repository: ohcnetwork/care
+          path: care
+          ref: ${{ steps.backend-branch.outputs.branch }}
+          fetch-depth: 0
 
-    - name: Start care docker containers 🐳
-      run: |
-        cd care
-        echo DISABLE_RATELIMIT=True >> docker/.local.env
-        echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
-        echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.local.env
-        make docker_config_file=docker-compose.local.yaml up load-fixtures
-        cd ..
-      env:
-        JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
+      - name: Start care docker containers 🐳
+        run: |
+          cd care
+          echo DISABLE_RATELIMIT=True >> docker/.local.env
+          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
+          echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.local.env
+          make docker_config_file=docker-compose.local.yaml up load-fixtures
+          cd ..
+        env:
+          JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
