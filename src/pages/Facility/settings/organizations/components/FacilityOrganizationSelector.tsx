@@ -45,7 +45,6 @@ export default function FacilityOrganizationSelector(
 ) {
   const { t } = useTranslation();
   const {
-    value,
     onChange,
     facilityId,
     currentOrganizations,
@@ -94,21 +93,6 @@ export default function FacilityOrganizationSelector(
       enabled: !!level.id,
     })),
   });
-
-  // Sync selectedOrganizations with value prop
-  useEffect(() => {
-    if (value?.length && currentOrganizations?.length) {
-      const matchingOrganizations = currentOrganizations.filter((org) =>
-        value.includes(org.id),
-      );
-
-      if (matchingOrganizations.length === value.length) {
-        setSelectedOrganizations(matchingOrganizations);
-      }
-    } else {
-      setSelectedOrganizations([]);
-    }
-  }, [value, currentOrganizations]);
 
   const handleSelect = (org: FacilityOrganizationRead) => {
     const isAlreadySelected = !!currentOrganizations?.find(
