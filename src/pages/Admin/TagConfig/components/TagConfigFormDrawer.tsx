@@ -12,6 +12,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -85,7 +86,7 @@ export default function TagConfigFormDrawer({
         </Drawer>
       ) : (
         <Sheet open={open} onOpenChange={onOpenChange}>
-          {trigger && trigger}
+          <SheetTrigger asChild>{trigger}</SheetTrigger>
           <SheetContent className="overflow-y-auto">
             <SheetHeader className="flex flex-row items-center justify-between">
               <SheetTitle>{title}</SheetTitle>

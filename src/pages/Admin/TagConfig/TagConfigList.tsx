@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -35,8 +35,6 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
     disableCache: true,
   });
 
-  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
-
   // TODO: Remove this once we have a default status (robo's PR)
   useEffect(() => {
     if (!qParams.status) {
@@ -70,18 +68,6 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
     }
   };
 
-  const handleAdd = () => {
-    setIsSheetOpen(true);
-  };
-
-  const handleSheetClose = () => {
-    setIsSheetOpen(false);
-  };
-
-  const handleSheetOpenChange = (open: boolean) => {
-    setIsSheetOpen(open);
-  };
-
   return (
     <Page title={t("tag_config")} hideTitleOnPage>
       <div className="container mx-auto">
@@ -98,11 +84,8 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
             <TagConfigFormDrawer
               title={t("add_tag_config")}
               facilityId={facilityId}
-              onSuccess={handleSheetClose}
-              open={isSheetOpen}
-              onOpenChange={handleSheetOpenChange}
               trigger={
-                <Button onClick={handleAdd}>
+                <Button>
                   <CareIcon icon="l-plus" className="mr-2" />
                   {t("add_tag_config")}
                 </Button>
