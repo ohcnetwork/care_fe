@@ -11,8 +11,8 @@ test.describe("Authenticated User Flow", () => {
     // Verify user is logged in
     // Adjust these selectors based on your actual application
     await expect(
-      page.getByRole("button", { name: /profile|user|account/i }).first(),
-    ).toBeVisible({ timeout: 10000 });
+      page.getByRole("heading", { name: /^Hey .+ 👋$/ }),
+    ).toBeVisible();
   });
 
   test("should be able to navigate to facilities", async ({ page }) => {

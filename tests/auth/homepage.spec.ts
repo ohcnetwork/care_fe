@@ -11,8 +11,10 @@ test.describe("Homepage", () => {
   test("should display main navigation", async ({ page }) => {
     await page.goto("/");
 
-    // Check for login link
-    await expect(page.getByRole("link", { name: /login/i })).toBeVisible();
+    // Check for login button
+    await expect(
+      page.getByRole("button", { name: /Log in as staff/i }),
+    ).toBeVisible();
   });
 
   test("should have facility search functionality", async ({ page }) => {

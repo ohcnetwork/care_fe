@@ -36,24 +36,22 @@ export default defineConfig({
   projects: [
     // Setup project
     { name: "setup", testMatch: /.*\.setup\.ts/ },
-
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
       dependencies: ["setup"],
     },
+    // {
+    //   name: "firefox",
+    //   use: { ...devices["Desktop Firefox"] },
+    //   dependencies: ["setup"],
+    // },
 
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-      dependencies: ["setup"],
-    },
-
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
-      dependencies: ["setup"],
-    },
+    // {
+    //   name: "webkit",
+    //   use: { ...devices["Desktop Safari"] },
+    //   dependencies: ["setup"],
+    // },
 
     /* Test against mobile viewports. */
     // {
@@ -77,9 +75,9 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer: {
+    command: "npm run start",
+    url: "http://localhost:4000",
+    reuseExistingServer: !process.env.CI,
+  },
 });

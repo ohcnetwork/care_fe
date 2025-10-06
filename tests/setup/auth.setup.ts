@@ -8,10 +8,8 @@ setup("authenticate", async ({ page }) => {
 
   // Fill in credentials
   // These should match the credentials from your local backend setup
-  await page
-    .getByRole("textbox", { name: /username/i })
-    .fill("devdistrictadmin");
-  await page.getByLabel(/password/i).fill("Coronasafe@123");
+  await page.getByRole("textbox", { name: /username/i }).fill("admin");
+  await page.getByLabel(/password/i).fill("admin");
 
   // Click login button
   await page.getByRole("button", { name: /login/i }).click();
@@ -23,10 +21,8 @@ setup("authenticate", async ({ page }) => {
   // Verify we're logged in by checking for user-specific elements
   // Adjust this selector based on your application
   await expect(
-    page.getByRole("button", { name: /profile|user|account/i }).first(),
-  ).toBeVisible({
-    timeout: 10000,
-  });
+    page.getByRole("heading", { name: /^Hey .+ 👋$/ }),
+  ).toBeVisible();
 
   // Save signed-in state to 'authFile'
   await page.context().storageState({ path: authFile });

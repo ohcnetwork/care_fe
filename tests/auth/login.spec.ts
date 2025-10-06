@@ -5,7 +5,7 @@ test.describe("Login", () => {
     await page.goto("/");
 
     // Navigate to login
-    await page.getByRole("link", { name: /login/i }).click();
+    await page.getByRole("button", { name: /log in as staff/i }).click();
 
     // Verify we're on the login page
     await expect(page).toHaveURL(/.*login/);
@@ -49,7 +49,7 @@ test.describe("Login", () => {
     await page.getByRole("button", { name: /login/i }).click();
 
     // Wait for error notification
-    await expect(page.getByText(/invalid username or password/i)).toBeVisible({
+    await expect(page.getByText(/no active account found/i)).toBeVisible({
       timeout: 10000,
     });
   });
