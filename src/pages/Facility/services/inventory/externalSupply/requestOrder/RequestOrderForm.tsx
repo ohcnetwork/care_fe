@@ -35,8 +35,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
-import useAppHistory from "@/hooks/useAppHistory";
-
+import BackButton from "@/components/Common/BackButton";
 import Autocomplete from "@/components/ui/autocomplete";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import {
@@ -93,7 +92,6 @@ export default function RequestOrderForm({
   requestOrderId,
 }: Props) {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
   const isEditMode = Boolean(requestOrderId);
 
   const { data: existingData, isFetching } = useQuery({
@@ -252,20 +250,16 @@ export default function RequestOrderForm({
   return (
     <Page title={title} hideTitleOnPage shortCutContext="facility:inventory">
       <div className="container mx-auto max-w-5xl">
-        <div className="mb-6 relative">
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute -right-2 -top-2"
-            onClick={() => goBack()}
-          >
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+          <BackButton variant="outline" size="icon">
             <X className="size-5" />
             <span className="sr-only">{t("close")}</span>
-          </Button>
-          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+          </BackButton>
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <input type="submit" hidden />
             <Card className="p-0  bg-gray-50">
               <CardContent className="space-y-4 p-4 rounded-md">
                 <div className="grid sm:grid-cols-2 gap-4 items-start">
@@ -280,11 +274,6 @@ export default function RequestOrderForm({
                             className="h-9"
                             placeholder={t("enter_order_name")}
                             {...field}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                              }
-                            }}
                           />
                         </FormControl>
                         <FormMessage />

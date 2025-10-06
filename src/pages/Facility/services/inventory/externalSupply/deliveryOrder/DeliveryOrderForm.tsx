@@ -296,6 +296,7 @@ export default function DeliveryOrderForm({
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <input type="submit" hidden />
             <Card className="p-0  bg-gray-50">
               <CardContent className="space-y-4 p-4 rounded-md">
                 <div className="grid sm:grid-cols-2 gap-4 items-start">
@@ -310,11 +311,6 @@ export default function DeliveryOrderForm({
                             className="h-9"
                             placeholder={t("enter_order_name")}
                             {...field}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                              }
-                            }}
                           />
                         </FormControl>
                         <FormMessage />
