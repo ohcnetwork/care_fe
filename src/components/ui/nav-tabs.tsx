@@ -103,7 +103,9 @@ export const NavTabs = <TabKey extends string>({
               <ShortcutBadge actionId={tabs[option].shortcutId}></ShortcutBadge>
             )}
             {enableIndexShortcut && (
-              <ShortcutBadge actionId={`tab-index-${index}`}></ShortcutBadge>
+              <ShortcutBadge
+                actionId={`tab-index-${index + 1}`}
+              ></ShortcutBadge>
             )}
           </TabsTrigger>
         ))}
