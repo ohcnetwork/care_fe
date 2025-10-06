@@ -280,6 +280,11 @@ export default function RequestOrderForm({
                             className="h-9"
                             placeholder={t("enter_order_name")}
                             {...field}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                              }
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
