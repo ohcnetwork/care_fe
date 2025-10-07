@@ -97,7 +97,7 @@ All strings must be encased in i18n translations. New translation strings must b
 
 To ensure the quality of our pull requests, we use a variety of tools:
 
-- **Automated E2E Testing:** We use Cypress for end-to-end testing to automatically verify the functionality and performance of our code.
+- **Automated E2E Testing:** We use Cypress and Playwright for end-to-end testing to automatically verify the functionality and performance of our code.
 - **Manual Real Device Testing:** We use BrowserStack to manually test our code on real devices, ensuring compatibility and functionality across different platforms and browsers.
 
 #### 🧪 Run cypress tests
@@ -133,6 +133,30 @@ npm run cypress:open       # To debug and run tests individually.
 
 - Failed test screenshots are saved in `cypress/screenshots`
 - All test videos are saved in `cypress/videos`
+
+#### 🎭 Run Playwright tests
+
+To run Playwright tests locally, follow the same backend setup steps as Cypress above.
+
+First, install Playwright browsers:
+
+```sh
+npm run playwright:install
+```
+
+Then run Playwright tests in one of the following modes:
+
+```sh
+npm run playwright:test           # Run all tests in headless mode
+npm run playwright:test:ui        # Run tests in interactive UI mode
+npm run playwright:test:headed    # Run tests in headed mode (visible browser)
+npm run playwright:show-report    # View the HTML test report
+```
+
+- Test results and artifacts are saved in `test-results/`
+- HTML reports are saved in `playwright-report/`
+
+For more details, see [tests/README.md](tests/README.md).
 
 ## 📖 Documentations
 
