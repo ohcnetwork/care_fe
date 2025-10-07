@@ -46,14 +46,14 @@ export function DeliveryOrderList({
           },
         ]
       : [
-          { value: "draft,pending", label: "requested" },
+          { value: "draft,pending", label: "created" },
           {
             value: "completed,abandoned,entered_in_error",
             label: "completed",
           },
         ]
     : ([
-        { value: "draft,pending", label: "requested" },
+        { value: "draft,pending", label: "created" },
         {
           value: "completed,abandoned,entered_in_error",
           label: "completed",
