@@ -204,9 +204,10 @@ export function LocationPicker({
       </PopoverTrigger>
 
       <PopoverContent
-        className="w-[420px] p-0 shadow-lg border-0 overflow-y-auto"
+        className="w-[var(--radix-popover-trigger-width)] min-w-[300px] max-w-[420px] p-0 shadow-lg border-0"
         align="start"
         sideOffset={4}
+        onWheel={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col">
           {/* Header with current location */}
@@ -312,7 +313,7 @@ export function LocationPicker({
                 )}
               </CommandEmpty>
 
-              <CommandGroup className="overflow-y-auto max-h-[300px]">
+              <CommandGroup>
                 {filteredLocations.map((location) => {
                   const Icon =
                     LocationTypeIcons[
