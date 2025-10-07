@@ -112,6 +112,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 import BackButton from "@/components/Common/BackButton";
+import { PatientDeceasedInfo } from "@/components/Patient/PatientHeader";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import {
@@ -288,6 +289,9 @@ export default function AppointmentDetail(props: Props) {
               )
             }
           />
+          <div className="mt-4">
+            <PatientDeceasedInfo patient={appointment.patient} />
+          </div>
         </div>
         <div
           className={cn(
