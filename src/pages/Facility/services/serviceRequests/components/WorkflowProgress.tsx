@@ -194,7 +194,7 @@ export function WorkflowProgress({
         </DrawerTrigger>
         <DrawerContent
           className={cn(
-            "p-0 overflow-y-auto",
+            "p-0",
             direction === "bottom" ? "h-[80vh]" : "h-screen max-w-md",
           )}
         >
