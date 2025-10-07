@@ -84,7 +84,7 @@ jobs:
 
             if (pr.user.type === 'Bot') return;
 
-            if (isClosed) {
+            if (isClosed && !isMerged) {
               try {
                 const { data: labels } = await github.rest.issues.listLabelsOnIssue({
                   owner: context.repo.owner,
