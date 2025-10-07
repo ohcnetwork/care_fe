@@ -69,7 +69,7 @@ export const EncounterOverviewTab = () => {
               codeGroups={vitalGroups}
             />
             <QuestionnaireResponsesList
-              encounter={encounter}
+              encounterId={encounterId}
               patientId={patientId}
               canAccess={canAccess}
             />

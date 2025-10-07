@@ -300,6 +300,7 @@ export default function Autocomplete({
           className="absolute right-1 top-1/2 -translate-y-1/2 p-0 hover:bg-transparent opacity-50 z-10"
           onClick={handleClear}
           title={t("clear")}
+          hidden={disabled}
         >
           <Cross2Icon className="size-3" />
           <span className="sr-only">{t("clear")}</span>
