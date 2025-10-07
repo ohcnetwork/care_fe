@@ -134,6 +134,8 @@ jobs:
 
             const itemId = addToProjectResult.addProjectV2ItemById.item.id;
 
+            core.exportVariable('PR_ITEM_ID', itemId);
+
             const statusFieldId = process.env.STATUS_FIELD_ID;
             let statusOptionId;
 
@@ -188,17 +190,27 @@ jobs:
 
             if (!isClosed) {
               if (isDraft) {
+                const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number
+                });
+                
+                const currentLabelNames = currentLabels.map(l => l.name);
                 const labelsToRemove = ['needs review', 'needs testing'];
+                
                 for (const label of labelsToRemove) {
-                  try {
-                    await github.rest.issues.removeLabel({
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      issue_number: context.issue.number,
-                      name: label
-                    });
-                  } catch (error) {
-                    console.warn(`Failed to remove label '${label}':`, error.message);
+                  if (currentLabelNames.includes(label)) {
+                    try {
+                      await github.rest.issues.removeLabel({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: context.issue.number,
+                        name: label
+                      });
+                    } catch (error) {
+                      console.warn(`Failed to remove label '${label}':`, error.message);
+                    }
                   }
                 }
 
@@ -209,24 +221,28 @@ jobs:
                   labels: ['work in progress']
                 });
               } else {
-                try {
-                  await github.rest.issues.removeLabel({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: context.issue.number,
-                    name: 'work in progress'
-                  });
-                } catch (error) {
-                  console.warn("Failed to remove label 'work in progress':", error.message);
-                }
-
-                const { data: existingLabels } = await github.rest.issues.listLabelsOnIssue({
+                const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: context.issue.number
                 });
+                
+                const currentLabelNames = currentLabels.map(l => l.name);
+                
+                if (currentLabelNames.includes('work in progress')) {
+                  try {
+                    await github.rest.issues.removeLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: context.issue.number,
+                      name: 'work in progress'
+                    });
+                  } catch (error) {
+                    console.warn("Failed to remove label 'work in progress':", error.message);
+                  }
+                }
 
-                const labelNames = existingLabels.map(label => label.name.toLowerCase());
+                const labelNames = currentLabelNames.map(label => label.toLowerCase());
                 const hasTested = labelNames.includes('tested');
                 const hasReviewed = labelNames.includes('reviewed');
 
@@ -271,35 +287,17 @@ jobs:
           fi
 
           if [[ "$FOUND_CORE" == "true" ]]; then
-            TEAM_OPTION_ID=${{ env.TEAM_CORE_OPTION_ID }}
+            TEAM_OPTION_ID=$TEAM_CORE_OPTION_ID
           elif [[ "$FOUND_INTERN" == "true" ]]; then
-            TEAM_OPTION_ID=${{ env.TEAM_INTERNS_OPTION_ID }}
+            TEAM_OPTION_ID=$TEAM_INTERNS_OPTION_ID
           elif [[ "$FOUND_CONTRIBUTOR" == "true" ]]; then
-            TEAM_OPTION_ID=${{ env.TEAM_COMMUNITY_OPTION_ID }}
+            TEAM_OPTION_ID=$TEAM_COMMUNITY_OPTION_ID
           else
             echo "No role found for author, skipping team assignment"
             exit 0
           fi
 
-          PR_NODE_ID=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.node_id')
-
-          ITEM_ID=$(gh api graphql -f query='
-            query($project: ID!, $pr: ID!) {
-              node(id: $project) {
-                ... on ProjectV2 {
-                  items(first: 100) {
-                    nodes {
-                      id
-                      content {
-                        ... on PullRequest {
-                          id
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }' -f project=$PROJECT_ID -f pr=$PR_NODE_ID --jq ".data.node.items.nodes[] | select(.content.id == \"$PR_NODE_ID\") | .id")
+          ITEM_ID=$PR_ITEM_ID
 
           if [[ -z "$ITEM_ID" ]]; then
             echo "Could not find project item for PR"
