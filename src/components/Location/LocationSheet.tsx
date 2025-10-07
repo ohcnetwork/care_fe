@@ -184,6 +184,7 @@ export function LocationSheet({
           name: searchTerm,
           parent: selectedLocation?.id,
           available: showAvailableOnly ? "true" : undefined,
+          status: "active",
           ...(!selectedLocation ? { mine: true } : {}),
         },
         signal,

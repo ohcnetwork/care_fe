@@ -17,7 +17,6 @@ import {
 
 import { ChargeItemDefinitionPicker } from "@/components/Common/ChargeItemDefinitionPicker";
 
-import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
 import { ResourceCategorySubType } from "@/types/base/resourceCategory/resourceCategory";
 import { ScheduleTemplate } from "@/types/scheduling/schedule";
 
@@ -38,7 +37,6 @@ export default function ScheduleChargeItemDefinitionSelector({
 }: ScheduleChargeItemDefinitionSelectorProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [isCreateSheetOpen, setIsCreateSheetOpen] = useState(false);
   const [selectedCSlug, setSelectedCSlug] = useState<string | undefined>(
     scheduleTemplate.charge_item_definition?.slug,
   );
@@ -100,37 +98,8 @@ export default function ScheduleChargeItemDefinitionSelector({
                     onValueChange={setSelectedCSlug}
                     placeholder={t("select_charge_item_definition")}
                     className="flex-1"
+                    showCreateButton={true}
                   />
-                  <Sheet
-                    open={isCreateSheetOpen}
-                    onOpenChange={setIsCreateSheetOpen}
-                  >
-                    <SheetTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full sm:w-auto"
-                      >
-                        {t("create_new")}
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent className="w-[90%] sm:max-w-2xl flex min-w-full flex-col bg-gray-100 sm:min-w-fit overflow-y-auto">
-                      <SheetHeader>
-                        <SheetTitle>
-                          {t("create_charge_item_definition")}
-                        </SheetTitle>
-                        <SheetDescription>
-                          {t("create_charge_item_definition_description")}
-                        </SheetDescription>
-                      </SheetHeader>
-                      <div className="mt-6">
-                        <ChargeItemDefinitionForm
-                          facilityId={facilityId}
-                          onSuccess={() => setIsCreateSheetOpen(false)}
-                        />
-                      </div>
-                    </SheetContent>
-                  </Sheet>
                 </div>
               </div>
 
@@ -159,37 +128,8 @@ export default function ScheduleChargeItemDefinitionSelector({
                     onValueChange={setReVisitCSlug}
                     placeholder={t("select_charge_item_definition")}
                     className="flex-1"
+                    showCreateButton={true}
                   />
-                  <Sheet
-                    open={isCreateSheetOpen}
-                    onOpenChange={setIsCreateSheetOpen}
-                  >
-                    <SheetTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full sm:w-auto"
-                      >
-                        {t("create_new")}
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent className="w-[90%] sm:max-w-2xl flex min-w-full flex-col bg-gray-100 sm:min-w-fit overflow-y-auto">
-                      <SheetHeader>
-                        <SheetTitle>
-                          {t("create_charge_item_definition")}
-                        </SheetTitle>
-                        <SheetDescription>
-                          {t("create_charge_item_definition_description")}
-                        </SheetDescription>
-                      </SheetHeader>
-                      <div className="mt-6">
-                        <ChargeItemDefinitionForm
-                          facilityId={facilityId}
-                          onSuccess={() => setIsCreateSheetOpen(false)}
-                        />
-                      </div>
-                    </SheetContent>
-                  </Sheet>
                 </div>
               </div>
             </div>

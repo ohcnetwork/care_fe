@@ -28,10 +28,9 @@ import Loading from "@/components/Common/Loading";
 import SearchInput from "@/components/Common/SearchInput";
 
 import { getPermissions } from "@/common/Permissions";
-import { GENDER_TYPES, GENDERS } from "@/common/constants";
+import { GENDER_TYPES } from "@/common/constants";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { PLUGIN_Component } from "@/PluginEngine";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
@@ -45,40 +44,10 @@ import {
 import patientApi from "@/types/emr/patient/patientApi";
 import { FacilityRead } from "@/types/facility/facility";
 import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { TFunction } from "i18next";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 const PHONE_NUMBER_CONFIG_SYSTEM =
   "system.care.ohc.network/patient-phone-number";
-
-const sharedStateSchema = z.object({
-  searchOptions: z.array(
-    z.object({
-      key: z.string(),
-      type: z.enum(["text", "phone"]),
-      placeholder: z.string(),
-      value: z.string(),
-      display: z.string(),
-      onSearch: z.function().args(z.string()).optional(),
-    }),
-  ),
-  patientList: z.object({
-    partial: z.boolean(),
-    results: z.array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        phone_number: z.string(),
-        gender: z.enum(GENDERS),
-        year_of_birth: z.number().optional(),
-        partial_id: z.string(),
-      }),
-    ),
-  }),
-  isFetching: z.boolean().nullable(),
-});
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
   useShortcutSubContext("patient:search:-global");
@@ -109,17 +78,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     config?: string;
     value?: string;
   }>({});
-  const sharedState = useForm<z.infer<typeof sharedStateSchema>>({
-    resolver: zodResolver(sharedStateSchema),
-    defaultValues: {
-      searchOptions: [],
-      patientList: {
-        partial: false,
-        results: [],
-      },
-      isFetching: null,
-    },
-  });
 
   const handleSearch = useCallback((key: string, value: string) => {
     setIdentifierSearch({ config: key, value });
@@ -137,29 +95,12 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     enabled: !!(identifierSearch.config && identifierSearch.value),
   });
 
-  useEffect(() => {
-    if (identifierSearch.config && identifierSearch.value) {
-      sharedState.setValue("patientList", {
-        partial: patientList?.partial ?? false,
-        results: (patientList?.results ?? []).map((p) => ({
-          id: p.id,
-          name: p.name,
-          phone_number: p.phone_number,
-          gender: p.gender,
-          year_of_birth: "year_of_birth" in p ? p.year_of_birth : undefined,
-          partial_id: p.id.slice(0, 5),
-        })),
-      });
-      sharedState.setValue("isFetching", isFetching);
-    }
-  }, [patientList, isFetching]);
-
   const handlePatientSelect = (index: number) => {
-    const patient = sharedState.getValues("patientList.results")[index];
+    const patient = patientList?.results[index];
     if (!patient) {
       return;
     }
-    if (sharedState.getValues("patientList.partial")) {
+    if (patientList && patientList.partial) {
       setSelectedPatient(patient);
       setVerificationOpen(true);
       setYearOfBirth("");
@@ -169,7 +110,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           config: identifierSearch.config,
           value: identifierSearch.value,
           phone_number: patient.phone_number,
-          year_of_birth: patient.year_of_birth?.toString(),
+          year_of_birth: patient.year_of_birth.toString(),
           partial_id: patient.id.slice(0, 5),
         },
       });
@@ -244,28 +185,20 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           <div>
             <div className="space-y-6">
               <SearchInput
-                options={[
-                  ...getSearchOptions(t, identifierSearch, facility),
-                  ...sharedState.watch("searchOptions"),
-                ]}
+                options={getSearchOptions(t, identifierSearch, facility)}
                 onSearch={handleSearch}
                 className="w-full"
                 autoFocus
               />
-              <PLUGIN_Component
-                __name="PatientSearch"
-                facilityId={facilityId}
-                state={sharedState}
-              />
 
               <div className="min-h-[200px]" id="patient-search-results">
-                {sharedState.watch("isFetching") !== null && (
+                {!!identifierSearch.config && !!identifierSearch.value && (
                   <>
-                    {sharedState.watch("isFetching") ? (
+                    {isFetching || !patientList ? (
                       <div className="flex items-center justify-center h-[200px]">
                         <Loading />
                       </div>
-                    ) : !sharedState.watch("patientList.results").length ? (
+                    ) : !patientList.results.length ? (
                       <div>
                         <div className="flex flex-col items-center justify-center py-10 text-center">
                           <h3 className="text-lg font-semibold">
@@ -298,31 +231,27 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {sharedState
-                              .watch("patientList.results")
-                              .map((patient, index) => (
-                                <TableRow
-                                  key={patient.id}
-                                  className="cursor-pointer"
-                                  onClick={() => handlePatientSelect(index)}
-                                >
-                                  <TableCell className="font-medium">
-                                    {patient.name}
-                                  </TableCell>
-                                  <TableCell>
-                                    {formatPhoneNumberIntl(
-                                      patient.phone_number,
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    {
-                                      GENDER_TYPES.find(
-                                        (g) => g.id === patient.gender,
-                                      )?.text
-                                    }
-                                  </TableCell>
-                                </TableRow>
-                              ))}
+                            {patientList.results.map((patient, index) => (
+                              <TableRow
+                                key={patient.id}
+                                className="cursor-pointer"
+                                onClick={() => handlePatientSelect(index)}
+                              >
+                                <TableCell className="font-medium">
+                                  {patient.name}
+                                </TableCell>
+                                <TableCell>
+                                  {formatPhoneNumberIntl(patient.phone_number)}
+                                </TableCell>
+                                <TableCell>
+                                  {
+                                    GENDER_TYPES.find(
+                                      (g) => g.id === patient.gender,
+                                    )?.text
+                                  }
+                                </TableCell>
+                              </TableRow>
+                            ))}
                           </TableBody>
                         </Table>
                       </div>
