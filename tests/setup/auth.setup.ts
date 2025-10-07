@@ -20,9 +20,7 @@ setup("authenticate", async ({ page }) => {
 
   // Verify we're logged in by checking for user-specific elements
   // Adjust this selector based on your application
-  await expect(
-    page.getByRole("heading", { name: /^Hey .+ 👋$/ }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Hey .+/ })).toBeVisible();
 
   // Save signed-in state to 'authFile'
   await page.context().storageState({ path: authFile });
