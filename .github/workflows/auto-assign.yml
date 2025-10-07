@@ -198,12 +198,16 @@ jobs:
                 console.warn("Failed to remove label 'work in progress':", error.message);
               }
 
-              if (!hasTested || !hasReviewed) {
+              const labelsToAdd = [];
+              if (!hasReviewed) labelsToAdd.push('needs review');
+              if (!hasTested) labelsToAdd.push('needs testing');
+
+              if (labelsToAdd.length > 0) {
                 await github.rest.issues.addLabels({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: context.issue.number,
-                  labels: ['needs review', 'needs testing']
+                  labels: labelsToAdd
                 });
               }
             }
