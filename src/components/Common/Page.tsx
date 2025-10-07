@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 
 import PageTitle, { PageTitleProps } from "@/components/Common/PageTitle";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 
 interface PageProps extends PageTitleProps {
   children: React.ReactNode | React.ReactNode[];
@@ -8,9 +9,12 @@ interface PageProps extends PageTitleProps {
   changePageMetadata?: boolean;
   className?: string;
   hideTitleOnPage?: boolean;
+  shortCutContext?: string;
 }
 
 export default function Page(props: PageProps) {
+  useShortcutSubContext(props.shortCutContext);
+
   return (
     <div className={cn("md:px-6 py-0", props.className)}>
       <div className="flex flex-col justify-between gap-2 px-3 md:flex-row md:items-center md:gap-6 md:px-0">
