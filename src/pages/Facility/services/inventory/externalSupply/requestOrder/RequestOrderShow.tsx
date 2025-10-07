@@ -218,7 +218,7 @@ export function RequestOrderShow({
                 <Link
                   href={`/${internal ? "internal_transfers" : "external_supply"}/delivery_orders/new?supplyOrder=${requestOrderId}`}
                 >
-                  {t("create_supply_delivery")}
+                  {t("create_delivery_order")}
                   <ShortcutBadge actionId="create-order" />
                 </Link>
               </Button>

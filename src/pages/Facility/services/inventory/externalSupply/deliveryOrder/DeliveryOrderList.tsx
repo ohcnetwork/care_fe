@@ -149,7 +149,7 @@ export function DeliveryOrderList({
                 }
               >
                 <CareIcon icon="l-plus" />
-                {t("create_order")}
+                {t("create_delivery")}
                 <ShortcutBadge actionId="create-order" />
               </Button>
             </div>
