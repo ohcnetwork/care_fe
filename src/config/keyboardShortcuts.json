@@ -2,7 +2,7 @@
   "global": [
     { "key": "p", "action": "print-button", "description": "Print", "when": "always" },
     { "key": "shift+?", "action": "show-shortcuts", "description": "Show Keyboard Shortcuts", "when": "always" },
-    { "key": "esc", "action": "cancel-action", "description": "Cancel Current Action", "when": "always" },
+    { "key": "escape", "action": "cancel-action", "description": "Cancel Current Action", "when": "always" },
     { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action", "when": "always" },
     { "key": "shift+arrowLeft", "action": "go-back", "description": "Go Back", "when": "always" },
     { "key": "enter", "action": "enter-action", "description": "Enter Current Action", "when": "always" },
