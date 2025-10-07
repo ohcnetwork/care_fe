@@ -1,0 +1,178 @@
+name: Assign Labels
+
+on:
+  pull_request_target:
+    types: [opened, converted_to_draft, ready_for_review, closed]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  assign-pr:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+
+      - name: Get project data
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          ORGANIZATION: ohcnetwork
+          PROJECT_NUMBER: 4
+        run: |
+          gh api graphql -f query='
+            query($org: String!, $number: Int!) {
+              organization(login: $org) {
+                projectV2(number: $number) {
+                  id
+                  fields(first: 20) {
+                    nodes {
+                      ... on ProjectV2Field {
+                        id
+                        name
+                      }
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
+
+          echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> "$GITHUB_ENV"
+          echo "STATUS_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .id' project_data.json)" >> "$GITHUB_ENV"
+          echo "TEAM_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Team\") | .id' project_data.json)" >> "$GITHUB_ENV"
+          echo "REVIEW_REQUESTED_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .options[] | select(.name==\"Review requested\") | .id' project_data.json)" >> "$GITHUB_ENV"
+          echo "DONE_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .options[] | select(.name==\"Done\") | .id' project_data.json)" >> "$GITHUB_ENV"
+
+      - name: Assign PR
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ steps.generate-token.outputs.token }}
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const author = pr.user.login;
+            const isDraft = pr.draft;
+            const isMerged = pr.merged;
+
+            if (pr.user.type === 'Bot') return;
+
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              assignees: [author]
+            });
+
+            const prNodeId = pr.node_id;
+            const projectId = process.env.PROJECT_ID;
+
+            const addToProjectQuery = `
+              mutation($project: ID!, $pr: ID!) {
+                addProjectV2ItemById(input: {projectId: $project, contentId: $pr}) {
+                  item { id }
+                }
+              }
+            `;
+
+            const addToProjectResult = await github.graphql(addToProjectQuery, {
+              project: projectId,
+              pr: prNodeId
+            });
+
+            const itemId = addToProjectResult.addProjectV2ItemById.item.id;
+
+            const statusFieldId = process.env.STATUS_FIELD_ID;
+            let statusOptionId;
+
+            if (isMerged) {
+              statusOptionId = process.env.DONE_OPTION_ID;
+            } else if (!isDraft) {
+              statusOptionId = process.env.REVIEW_REQUESTED_OPTION_ID;
+            }
+
+            if (statusOptionId) {
+              const updateStatusQuery = `
+                mutation($project: ID!, $item: ID!, $status_field: ID!, $status_value: String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $project
+                    itemId: $item
+                    fieldId: $status_field
+                    value: { singleSelectOptionId: $status_value }
+                  }) { projectV2Item { id } }
+                }
+              `;
+
+              await github.graphql(updateStatusQuery, {
+                project: projectId,
+                item: itemId,
+                status_field: statusFieldId,
+                status_value: statusOptionId
+              });
+            }
+
+            if (isDraft) {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  name: 'needs review'
+                });
+              } catch (error) {
+                console.warn("Failed to remove label 'needs review':", error.message);
+              }
+
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  name: 'needs testing'
+                });
+              } catch (error) {
+                console.warn("Failed to remove label 'needs testing':", error.message);
+              }
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['work in progress']
+              });
+            } else {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  name: 'work in progress'
+                });
+              } catch (error) {
+                console.warn("Failed to remove label 'work in progress':", error.message);
+              }
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['needs review', 'needs testing']
+              });
+            }
