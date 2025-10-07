@@ -68,7 +68,7 @@ interface ResourceCategoryPickerProps {
   resourceType: ResourceCategoryResourceType;
   resourceSubType?: ResourceCategorySubType;
   value?: string; // category slug
-  onValueChange: (categorySlug: string | undefined) => void;
+  onValueChange: (category: ResourceCategoryRead | undefined) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -154,7 +154,7 @@ export function ResourceCategoryPicker({
       resetSearch();
     } else {
       // Select leaf category
-      onValueChange(category.slug);
+      onValueChange(category);
       setOpen(false);
       resetSearch();
     }

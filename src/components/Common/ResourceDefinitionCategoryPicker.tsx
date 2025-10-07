@@ -119,6 +119,8 @@ interface ResourceDefinitionCategoryPickerProps<T> {
       };
     };
   };
+  ref?: React.Ref<HTMLButtonElement>;
+  hideClearButton?: boolean;
 }
 
 export function ResourceDefinitionCategoryPicker<T>({
@@ -136,6 +138,8 @@ export function ResourceDefinitionCategoryPicker<T>({
   mapper = (item: T) => item as BaseCategoryPickerDefinition,
   enableFavorites = false,
   favoritesConfig,
+  ref,
+  hideClearButton = false,
 }: ResourceDefinitionCategoryPickerProps<T>) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -793,14 +797,14 @@ export function ResourceDefinitionCategoryPicker<T>({
             setActiveTab("search");
           }}
         >
-          <div className="relative">
+          <div className="flex relative">
             <DrawerTrigger asChild>
               <Button
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
                 className={cn(
-                  "justify-between h-10 min-h-10 px-3 py-2 w-full shadow-xs border border-gray-300 font-medium",
+                  "justify-between px-3 py-2 w-full shadow-xs border border-gray-300 font-medium",
                   disabled && "opacity-50 cursor-not-allowed",
                   className,
                 )}
@@ -813,17 +817,15 @@ export function ResourceDefinitionCategoryPicker<T>({
                   className={cn(
                     "size-4 shrink-0 opacity-50 transition-transform duration-200",
                     open && "rotate-180",
-                    value && "hidden",
                   )}
                 />
               </Button>
             </DrawerTrigger>
-            {value && (
+            {value && !hideClearButton && (
               <Button
-                variant="ghost"
-                size="sm"
+                variant="outline"
                 onClick={handleClearSelection}
-                className="text-gray-500/50 hover:text-gray-700 bg-white absolute px-2 right-1 top-1/2 -translate-y-1/2"
+                className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300"
               >
                 <X />
                 <span className="sr-only">{t("clear_selection")}</span>
@@ -910,31 +912,43 @@ export function ResourceDefinitionCategoryPicker<T>({
           }}
           modal
         >
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className={cn(
-                "justify-between h-10 min-h-10 px-3 py-2 w-full shadow-xs",
-                "hover:bg-gray-50 hover:text-gray-900",
-                "transition-all duration-200",
-                disabled && "opacity-50 cursor-not-allowed",
-                className,
-              )}
-              disabled={disabled}
-            >
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                {getDisplayValue()}
-              </div>
-              <ChevronDown
+          <div className="flex relative">
+            <PopoverTrigger asChild ref={ref}>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
                 className={cn(
-                  "size-4 shrink-0 opacity-50 transition-transform duration-200",
-                  open && "rotate-180",
+                  "justify-between px-3 py-2 w-full shadow-xs border-gray-300",
+                  "hover:bg-gray-50 hover:text-gray-900",
+                  "transition-all duration-200",
+                  disabled && "opacity-50 cursor-not-allowed",
+                  className,
                 )}
-              />
-            </Button>
-          </PopoverTrigger>
+                disabled={disabled}
+              >
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  {getDisplayValue()}
+                </div>
+                <ChevronDown
+                  className={cn(
+                    "size-4 shrink-0 opacity-50 transition-transform duration-200",
+                    open && "rotate-180",
+                  )}
+                />
+              </Button>
+            </PopoverTrigger>
+            {value && !hideClearButton && (
+              <Button
+                variant="outline"
+                onClick={handleClearSelection}
+                className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300"
+              >
+                <X />
+                <span className="sr-only">{t("clear_selection")}</span>
+              </Button>
+            )}
+          </div>
 
           <PopoverContent
             className={cn(
