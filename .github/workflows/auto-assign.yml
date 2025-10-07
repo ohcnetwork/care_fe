@@ -52,12 +52,21 @@ jobs:
             }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
 
           echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> "$GITHUB_ENV"
-          echo "STATUS_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .id' project_data.json)" >> "$GITHUB_ENV"
-          echo "TEAM_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Team\") | .id' project_data.json)" >> "$GITHUB_ENV"
-          echo "REVIEW_REQUESTED_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .options[] | select(.name==\"Review requested\") | .id' project_data.json)" >> "$GITHUB_ENV"
-          echo "DONE_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .options[] | select(.name==\"Done\") | .id' project_data.json)" >> "$GITHUB_ENV"
 
-      - name: Assign PR
+          echo "STATUS_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .id' project_data.json)" >> "$GITHUB_ENV"
+          echo "TEAM_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .id' project_data.json)" >> "$GITHUB_ENV"
+          echo "SPRINT_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name=="Sprint") | .id' project_data.json)" >> "$GITHUB_ENV"
+
+          echo "REVIEW_REQUESTED_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Review requested") | .id' project_data.json)" >> "$GITHUB_ENV"
+          echo "DONE_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Done") | .id' project_data.json)" >> "$GITHUB_ENV"
+
+          echo "TEAM_CORE_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .options[] | select(.name=="Core") | .id' project_data.json)" >> "$GITHUB_ENV"
+          echo "TEAM_INTERNS_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .options[] | select(.name=="Interns") | .id' project_data.json)" >> "$GITHUB_ENV"
+          echo "TEAM_COMMUNITY_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .options[] | select(.name=="Community") | .id' project_data.json)" >> "$GITHUB_ENV"
+
+          echo "CURRENT_SPRINT_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name=="Sprint") | .options | sort_by(.name) | last | .id' project_data.json)" >> "$GITHUB_ENV"
+
+      - name: Manage PR labels and project status
         uses: actions/github-script@v8
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
@@ -71,8 +80,34 @@ jobs:
             const author = pr.user.login;
             const isDraft = pr.draft;
             const isMerged = pr.merged;
+            const isClosed = pr.state === 'closed';
 
             if (pr.user.type === 'Bot') return;
+
+            if (isClosed && !isMerged) {
+              try {
+                const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number
+                });
+
+                for (const label of labels) {
+                  try {
+                    await github.rest.issues.removeLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: context.issue.number,
+                      name: label.name
+                    });
+                  } catch (error) {
+                    console.warn(`Failed to remove label '${label.name}':`, error.message);
+                  }
+                }
+              } catch (error) {
+                console.warn("Failed to list or remove labels:", error.message);
+              }
+            }
 
             await github.rest.issues.addAssignees({
               owner: context.repo.owner,
@@ -104,7 +139,7 @@ jobs:
 
             if (isMerged) {
               statusOptionId = process.env.DONE_OPTION_ID;
-            } else if (!isDraft) {
+            } else if (!isDraft && !isClosed) {
               statusOptionId = process.env.REVIEW_REQUESTED_OPTION_ID;
             }
 
@@ -128,51 +163,161 @@ jobs:
               });
             }
 
-            if (isDraft) {
-              try {
-                await github.rest.issues.removeLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  name: 'needs review'
-                });
-              } catch (error) {
-                console.warn("Failed to remove label 'needs review':", error.message);
-              }
+            const sprintFieldId = process.env.SPRINT_FIELD_ID;
+            const currentSprintId = process.env.CURRENT_SPRINT_ID;
 
-              try {
-                await github.rest.issues.removeLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  name: 'needs testing'
-                });
-              } catch (error) {
-                console.warn("Failed to remove label 'needs testing':", error.message);
-              }
+            if (sprintFieldId && currentSprintId && !isClosed) {
+              const updateSprintQuery = `
+                mutation($project: ID!, $item: ID!, $sprint_field: ID!, $sprint_value: String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $project
+                    itemId: $item
+                    fieldId: $sprint_field
+                    value: { singleSelectOptionId: $sprint_value }
+                  }) { projectV2Item { id } }
+                }
+              `;
 
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                labels: ['work in progress']
-              });
-            } else {
-              try {
-                await github.rest.issues.removeLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  name: 'work in progress'
-                });
-              } catch (error) {
-                console.warn("Failed to remove label 'work in progress':", error.message);
-              }
-
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                labels: ['needs review', 'needs testing']
+              await github.graphql(updateSprintQuery, {
+                project: projectId,
+                item: itemId,
+                sprint_field: sprintFieldId,
+                sprint_value: currentSprintId
               });
             }
+
+            if (!isClosed) {
+              if (isDraft) {
+                const labelsToRemove = ['needs review', 'needs testing'];
+                for (const label of labelsToRemove) {
+                  try {
+                    await github.rest.issues.removeLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: context.issue.number,
+                      name: label
+                    });
+                  } catch (error) {
+                    console.warn(`Failed to remove label '${label}':`, error.message);
+                  }
+                }
+
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  labels: ['work in progress']
+                });
+              } else {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    name: 'work in progress'
+                  });
+                } catch (error) {
+                  console.warn("Failed to remove label 'work in progress':", error.message);
+                }
+
+                const { data: existingLabels } = await github.rest.issues.listLabelsOnIssue({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number
+                });
+
+                const labelNames = existingLabels.map(label => label.name.toLowerCase());
+                const hasTested = labelNames.includes('tested');
+                const hasReviewed = labelNames.includes('reviewed');
+
+                if (!(hasTested && hasReviewed)) {
+                  const labelsToAdd = [];
+                  if (!hasReviewed) labelsToAdd.push('needs review');
+                  if (!hasTested) labelsToAdd.push('needs testing');
+
+                  if (labelsToAdd.length > 0) {
+                    await github.rest.issues.addLabels({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: context.issue.number,
+                      labels: labelsToAdd
+                    });
+                  }
+                }
+              }
+            }
+
+      - name: Update team based on PR author role
+        if: github.event.action != 'closed'
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          PR_AUTHOR=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.user.login')
+
+          AUTHOR_DATA=$(curl -s "https://raw.githubusercontent.com/ohcnetwork/leaderboard-data/main/contributors/${PR_AUTHOR}.md")
+
+          FOUND_CORE=false
+          FOUND_INTERN=false
+          FOUND_CONTRIBUTOR=false
+
+          if echo "$AUTHOR_DATA" | grep -q "role: core"; then
+            FOUND_CORE=true
+          elif echo "$AUTHOR_DATA" | grep -q "role: intern"; then
+            FOUND_INTERN=true
+          elif echo "$AUTHOR_DATA" | grep -q "role: contributor"; then
+            FOUND_CONTRIBUTOR=true
+          fi
+
+          if [[ "$FOUND_CORE" == "true" ]]; then
+            TEAM_OPTION_ID=${{ env.TEAM_CORE_OPTION_ID }}
+          elif [[ "$FOUND_INTERN" == "true" ]]; then
+            TEAM_OPTION_ID=${{ env.TEAM_INTERNS_OPTION_ID }}
+          elif [[ "$FOUND_CONTRIBUTOR" == "true" ]]; then
+            TEAM_OPTION_ID=${{ env.TEAM_COMMUNITY_OPTION_ID }}
+          else
+            echo "No role found for author, skipping team assignment"
+            exit 0
+          fi
+
+          PR_NODE_ID=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.node_id')
+
+          ITEM_ID=$(gh api graphql -f query='
+            query($project: ID!, $pr: ID!) {
+              node(id: $project) {
+                ... on ProjectV2 {
+                  items(first: 100) {
+                    nodes {
+                      id
+                      content {
+                        ... on PullRequest {
+                          id
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f project=$PROJECT_ID -f pr=$PR_NODE_ID --jq ".data.node.items.nodes[] | select(.content.id == \"$PR_NODE_ID\") | .id")
+
+          if [[ -z "$ITEM_ID" ]]; then
+            echo "Could not find project item for PR"
+            exit 0
+          fi
+
+          gh api graphql -f query='
+            mutation($project: ID!, $item: ID!, $team_field: ID!, $team_value: String!) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $team_field
+                value: {
+                  singleSelectOptionId: $team_value
+                }
+              }) {
+                projectV2Item {
+                  id
+                }
+              }
+            }' -f project=$PROJECT_ID -f item=$ITEM_ID -f team_field=$TEAM_FIELD_ID -f team_value=$TEAM_OPTION_ID
