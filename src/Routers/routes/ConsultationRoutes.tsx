@@ -55,6 +55,7 @@ const consultationRoutes: AppRoutes = {
   }, {}),
   ...[
     "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:questionnaireResponseId/print",
+    "/facility/:facilityId/patient/:patientId/history/questionnaire_response/:questionnaireResponseId/print",
     "/organization/:organizationId/patient/:patientId/encounter/:encounterId/questionnaire_response/:questionnaireResponseId/print",
     "/facility/:facilityId/patient/:patientId/questionnaire_response/:questionnaireResponseId/print",
     "/organization/:organizationId/patient/:patientId/questionnaire_response/:questionnaireResponseId/print",

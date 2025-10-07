@@ -56,25 +56,28 @@ export default function PatientIdentifierConfigForm({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const formSchema = z.object({
-    config: z.object({
-      use: z.nativeEnum(PatientIdentifierUse),
-      description: z.string().trim().min(1, t("field_required")),
-      system: z.string().trim().min(1, t("field_required")),
-      required: z.boolean(),
-      unique: z.boolean(),
-      regex: z.string(),
-      display: z.string().trim().min(1, t("field_required")),
-      default_value: z.string().optional(),
-      retrieve_config: z.object({
-        retrieve_with_dob: z.boolean().optional(),
-        retrieve_with_year_of_birth: z.boolean().optional(),
-        retrieve_with_otp: z.boolean().optional(),
+  const getFormSchema = (isAutoMaintained: boolean) =>
+    z.object({
+      config: z.object({
+        use: z.nativeEnum(PatientIdentifierUse),
+        description: isAutoMaintained
+          ? z.string().trim().optional().nullable()
+          : z.string().trim().min(1, t("field_required")),
+        system: z.string().trim().min(1, t("field_required")),
+        required: z.boolean(),
+        unique: z.boolean(),
+        regex: z.string(),
+        display: z.string().trim().min(1, t("field_required")),
+        default_value: z.string().trim().optional().nullable(),
+        retrieve_config: z.object({
+          retrieve_with_dob: z.boolean().optional(),
+          retrieve_with_year_of_birth: z.boolean().optional(),
+          retrieve_with_otp: z.boolean().optional(),
+        }),
       }),
-    }),
-    status: z.nativeEnum(PatientIdentifierConfigStatus),
-    facility: z.string().optional().nullable(),
-  });
+      status: z.nativeEnum(PatientIdentifierConfigStatus),
+      facility: z.string().optional().nullable(),
+    });
 
   const { data: config, isLoading } = useQuery({
     queryKey: ["patientIdentifierConfig", configId, facilityId],
@@ -83,6 +86,9 @@ export default function PatientIdentifierConfigForm({
     }),
     enabled: !!configId,
   });
+
+  const isAutoMaintained = !!config && config.config.auto_maintained;
+  const formSchema = getFormSchema(isAutoMaintained);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -160,138 +166,151 @@ export default function PatientIdentifierConfigForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         {isLoading ? (
           <div className="flex justify-center items-center h-full">
             <Loader className="w-4 h-4 animate-spin" />
           </div>
         ) : (
           <>
-            {/* Identifier Details Section */}
-            <div>
-              <h2 className="text-lg font-semibold mb-2">
-                {t("identifier_details")}
-              </h2>
-              <FormDescription>{t("identifier_details_help")}</FormDescription>
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-                <FormField
-                  control={form.control}
-                  name="config.use"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("use")}</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger ref={field.ref}>
-                            <SelectValue placeholder={t("select_use")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.values(PatientIdentifierUse).map((use) => (
-                              <SelectItem key={use} value={use}>
-                                {t(use)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormDescription>{t("use_help")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="config.display"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("display")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder={t("eg_national_id_card")}
-                        />
-                      </FormControl>
-                      <FormDescription>{t("display_help")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="config.description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("description")}</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder={t("eg_national_id")} />
-                      </FormControl>
-                      <FormDescription>{t("description_help")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="config.system"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("system")}</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="https://example.org/identifier-system"
-                        />
-                      </FormControl>
-                      <FormDescription>{t("system_help")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="config.regex"
-                  render={({ field }) => {
-                    let regexError = "";
-                    try {
-                      if (field.value) new RegExp(field.value);
-                    } catch {
-                      regexError = t("invalid_regex");
-                    }
-                    return (
-                      <FormItem>
-                        <FormLabel>{t("regex")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder={t("eg_regex_pattern")}
-                          />
-                        </FormControl>
-                        <FormDescription>{t("regex_help")}</FormDescription>
-                        {(regexError ||
-                          form.formState.errors.config?.regex) && (
-                          <div className="text-xs text-red-500 mt-1">
-                            {regexError ||
-                              form.formState.errors.config?.regex?.message}
-                          </div>
-                        )}
-                      </FormItem>
-                    );
-                  }}
-                />
-              </div>
-            </div>
+            <div className="flex flex-col gap-4">
+              {/* Identifier Details Section */}
+              {!isAutoMaintained && (
+                <div>
+                  <h2 className="text-lg font-semibold mb-1">
+                    {t("identifier_details")}
+                  </h2>
+                  <FormDescription>
+                    {t("identifier_details_help")}
+                  </FormDescription>
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-1 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="config.use"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("use")}</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value}
+                            >
+                              <SelectTrigger ref={field.ref}>
+                                <SelectValue placeholder={t("select_use")} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Object.values(PatientIdentifierUse).map(
+                                  (use) => (
+                                    <SelectItem key={use} value={use}>
+                                      {t(use)}
+                                    </SelectItem>
+                                  ),
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormDescription>{t("use_help")}</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="config.display"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("display")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder={t("eg_national_id_card")}
+                            />
+                          </FormControl>
+                          <FormDescription>{t("display_help")}</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="config.description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("description")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              value={field.value || ""}
+                              placeholder={t("eg_national_id")}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            {t("description_help")}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="config.system"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("system")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="https://example.org/identifier-system"
+                            />
+                          </FormControl>
+                          <FormDescription>{t("system_help")}</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="config.regex"
+                      render={({ field }) => {
+                        let regexError = "";
+                        try {
+                          if (field.value) new RegExp(field.value);
+                        } catch {
+                          regexError = t("invalid_regex");
+                        }
+                        return (
+                          <FormItem>
+                            <FormLabel>{t("regex")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder={t("eg_regex_pattern")}
+                              />
+                            </FormControl>
+                            <FormDescription>{t("regex_help")}</FormDescription>
+                            {(regexError ||
+                              form.formState.errors.config?.regex) && (
+                              <div className="text-xs text-red-500 mt-1">
+                                {regexError ||
+                                  form.formState.errors.config?.regex?.message}
+                              </div>
+                            )}
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
 
-            {/* Retrieval Options Section */}
-            <div>
-              <h2 className="text-lg font-semibold mb-2">
-                {t("retrieval_options")}
-              </h2>
-              <FormDescription>{t("retrieval_options_help")}</FormDescription>
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-                {/* <FormField
+              {/* Retrieval Options Section */}
+              <div>
+                <h2 className="text-lg font-semibold mb-1">
+                  {t("retrieval_options")}
+                </h2>
+                <FormDescription>{t("retrieval_options_help")}</FormDescription>
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-1 gap-6">
+                  {/* <FormField
               control={form.control}
               name="config.retrieve_config.retrieve_with_dob"
               render={({ field }) => (
@@ -313,29 +332,29 @@ export default function PatientIdentifierConfigForm({
                 </FormItem>
               )}
             /> */}
-                <FormField
-                  control={form.control}
-                  name="config.retrieve_config.retrieve_with_year_of_birth"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col md:flex-row md:items-center justify-between rounded-lg border p-4 gap-2 md:gap-0">
-                      <div className="flex-1">
-                        <FormLabel className="text-base font-medium">
-                          {t("retrieve_with_year_of_birth")}
-                        </FormLabel>
-                        <FormDescription>
-                          {t("retrieve_with_year_of_birth_help")}
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                {/* <FormField
+                  <FormField
+                    control={form.control}
+                    name="config.retrieve_config.retrieve_with_year_of_birth"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col md:flex-row md:items-center justify-between rounded-lg border p-4 gap-2 md:gap-0">
+                        <div className="flex-1">
+                          <FormLabel className="text-base font-medium">
+                            {t("retrieve_with_year_of_birth")}
+                          </FormLabel>
+                          <FormDescription>
+                            {t("retrieve_with_year_of_birth_help")}
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  {/* <FormField
               control={form.control}
               name="config.retrieve_config.retrieve_with_otp"
               render={({ field }) => (
@@ -357,197 +376,217 @@ export default function PatientIdentifierConfigForm({
                 </FormItem>
               )}
             /> */}
-              </div>
-            </div>
-
-            {/* Validation & Uniqueness Section */}
-            <div>
-              <h2 className="text-lg font-semibold mb-2">
-                {t("validation_and_uniqueness")}
-              </h2>
-              <FormDescription>
-                {t("validation_and_uniqueness_help")}
-              </FormDescription>
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-                <FormField
-                  control={form.control}
-                  name="config.required"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col md:flex-row md:items-center justify-between rounded-lg border p-4 gap-2 md:gap-0">
-                      <div className="flex-1">
-                        <FormLabel className="text-base font-medium">
-                          {t("required")}
-                        </FormLabel>
-                        <FormDescription>{t("required_help")}</FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="config.unique"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col md:flex-row md:items-center justify-between rounded-lg border p-4 gap-2 md:gap-0">
-                      <div className="flex-1">
-                        <FormLabel className="text-base font-medium">
-                          {t("unique")}
-                        </FormLabel>
-                        <FormDescription>{t("unique_help")}</FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Serial Number Mode Selection */}
-            <div>
-              <h2 className="text-lg font-semibold mb-2">
-                {t("serial_number_mode")}
-              </h2>
-              <FormDescription>{t("serial_number_mode_help")}</FormDescription>
-              <RadioGroup
-                value={form.watch("config.default_value") ? "auto" : "user"}
-                onValueChange={(v) => {
-                  if (v === "user") {
-                    form.setValue("config.default_value", "");
-                  } else if (v === "auto") {
-                    form.setValue("config.default_value", "f'{patient_count}'");
-                  }
-                }}
-                className="flex flex-row gap-6 mt-2"
-              >
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="user" id="serial-user" />
-                  <label
-                    htmlFor="serial-user"
-                    className="text-sm cursor-pointer"
-                  >
-                    {t("serial_number_mode_user")}
-                  </label>
                 </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="auto" id="serial-auto" />
-                  <label
-                    htmlFor="serial-auto"
-                    className="text-sm cursor-pointer"
-                  >
-                    {t("serial_number_mode_auto")}
-                  </label>
-                </div>
-              </RadioGroup>
-            </div>
+              </div>
 
-            {/* Default Value Section - only show if auto-generated */}
-            {form.watch("config.default_value") && (
-              <div>
-                <h2 className="text-lg font-semibold mb-2">
-                  {t("default_value")}
-                </h2>
-                <FormField
-                  control={form.control}
-                  name="config.default_value"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("default_value_title")}</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder={t("eg_default_value")} />
-                      </FormControl>
-                      <div className="flex items-center gap-2">
-                        <FormDescription>
-                          {t("default_value_help")}
-                        </FormDescription>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <button
-                              type="button"
-                              aria-label="Help"
-                              className="text-muted-foreground hover:text-primary"
+              {/* Validation & Uniqueness Section */}
+              {!isAutoMaintained && (
+                <div>
+                  <h2 className="text-lg font-semibold mb-1">
+                    {t("validation_and_uniqueness")}
+                  </h2>
+                  <FormDescription>
+                    {t("validation_and_uniqueness_help")}
+                  </FormDescription>
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-1 gap-1">
+                    <FormField
+                      control={form.control}
+                      name="config.required"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col md:flex-row md:items-center justify-between rounded-lg border p-4 gap-2 md:gap-0">
+                          <div className="flex-1">
+                            <FormLabel className="text-base font-medium">
+                              {t("required")}
+                            </FormLabel>
+                            <FormDescription>
+                              {t("required_help")}
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="config.unique"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col md:flex-row md:items-center justify-between rounded-lg border p-4 gap-2 md:gap-0">
+                          <div className="flex-1">
+                            <FormLabel className="text-base font-medium">
+                              {t("unique")}
+                            </FormLabel>
+                            <FormDescription>
+                              {t("unique_help")}
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Serial Number Mode Selection */}
+              {!isAutoMaintained && (
+                <div>
+                  <h2 className="text-lg font-semibold mb-1">
+                    {t("serial_number_mode")}
+                  </h2>
+                  <FormDescription>
+                    {t("serial_number_mode_help")}
+                  </FormDescription>
+                  <RadioGroup
+                    value={form.watch("config.default_value") ? "auto" : "user"}
+                    onValueChange={(v) => {
+                      if (v === "user") {
+                        form.setValue("config.default_value", "");
+                      } else if (v === "auto") {
+                        form.setValue(
+                          "config.default_value",
+                          "f'{patient_count}'",
+                        );
+                      }
+                    }}
+                    className="flex flex-row gap-6 mt-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="user" id="serial-user" />
+                      <label
+                        htmlFor="serial-user"
+                        className="text-sm cursor-pointer"
+                      >
+                        {t("serial_number_mode_user")}
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="auto" id="serial-auto" />
+                      <label
+                        htmlFor="serial-auto"
+                        className="text-sm cursor-pointer"
+                      >
+                        {t("serial_number_mode_auto")}
+                      </label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              )}
+
+              {/* Default Value Section - only show if auto-generated */}
+              {form.watch("config.default_value") && (
+                <div>
+                  <h2 className="text-lg font-semibold mb-1">
+                    {t("default_value")}
+                  </h2>
+                  <FormField
+                    control={form.control}
+                    name="config.default_value"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("default_value_title")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ""}
+                            placeholder={t("eg_default_value")}
+                          />
+                        </FormControl>
+                        <div className="flex items-center gap-2">
+                          <FormDescription>
+                            {t("default_value_help")}
+                          </FormDescription>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <button
+                                type="button"
+                                aria-label="Help"
+                                className="text-muted-foreground hover:text-primary"
+                              >
+                                <Info className="w-4 h-4" />
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent align="start">
+                              <div className="font-semibold mb-1">
+                                {t("supported_variables")}
+                              </div>
+                              <ul className="list-disc list-inside mb-1">
+                                <li>
+                                  <code>{"{patient_count}"}</code>:{" "}
+                                  {t("patient_count_help")}
+                                </li>
+                                <li>
+                                  <code>{"{current_year_yy}"}</code>:{" "}
+                                  {t("current_year_yy_help")}
+                                </li>
+                                <li>
+                                  <code>{"{current_year_yyyy}"}</code>:{" "}
+                                  {t("current_year_yyyy_help")}
+                                </li>
+                              </ul>
+                              <div className="mb-1">{t("arithmetic_help")}</div>
+                              <div className="font-mono bg-background rounded px-2 py-1 inline-block">
+                                f'#Patient{"{patient_count} + 100"}
+                                {"{current_year_yy}"}'
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
+              {/* Status Section */}
+              {!isAutoMaintained && (
+                <div>
+                  <h2 className="text-lg font-semibold mb-1">{t("status")}</h2>
+                  <FormDescription>{t("status_help")}</FormDescription>
+                  <div className="max-w-xs">
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem className="mt-2">
+                          <FormLabel>{t("status")}</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value}
                             >
-                              <Info className="w-4 h-4" />
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent align="start">
-                            <div className="font-semibold mb-1">
-                              {t("supported_variables")}
-                            </div>
-                            <ul className="list-disc list-inside mb-1">
-                              <li>
-                                <code>{"{patient_count}"}</code>:{" "}
-                                {t("patient_count_help")}
-                              </li>
-                              <li>
-                                <code>{"{current_year_yy}"}</code>:{" "}
-                                {t("current_year_yy_help")}
-                              </li>
-                              <li>
-                                <code>{"{current_year_yyyy}"}</code>:{" "}
-                                {t("current_year_yyyy_help")}
-                              </li>
-                            </ul>
-                            <div className="mb-1">{t("arithmetic_help")}</div>
-                            <div className="font-mono bg-background rounded px-2 py-1 inline-block">
-                              f'#Patient{"{patient_count} + 100"}
-                              {"{current_year_yy}"}'
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
-
-            {/* Status Section */}
-            <div>
-              <h2 className="text-lg font-semibold mb-2">{t("status")}</h2>
-              <FormDescription>{t("status_help")}</FormDescription>
-              <div className="max-w-xs">
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger className="mt-2" ref={field.ref}>
-                            <SelectValue placeholder={t("select_status")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.values(PatientIdentifierConfigStatus).map(
-                              (status) => (
-                                <SelectItem key={status} value={status}>
-                                  {t(status)}
-                                </SelectItem>
-                              ),
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                              <SelectTrigger ref={field.ref}>
+                                <SelectValue placeholder={t("select_status")} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Object.values(
+                                  PatientIdentifierConfigStatus,
+                                ).map((status) => (
+                                  <SelectItem key={status} value={status}>
+                                    {t(status)}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
-
             <Button
               type="submit"
               className="w-full mt-6"

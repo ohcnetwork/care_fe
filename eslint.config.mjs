@@ -205,6 +205,17 @@ const config = [
     },
   },
 
+  // Playwright-specific rules
+  {
+    files: ["tests/**/*.ts", "playwright.config.ts"],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        project: "./tests/tsconfig.json",
+      },
+    },
+  },
+
   // Add prettier recommended config last
   eslintPluginPrettierRecommended,
 ];
