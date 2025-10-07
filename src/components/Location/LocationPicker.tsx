@@ -119,13 +119,7 @@ export function LocationPicker({
   const handleBreadcrumbClick = (index: number) => {
     const newBreadcrumbs = breadcrumbs.slice(0, index + 1);
     setBreadcrumbs(newBreadcrumbs);
-
-    if (index === -1) {
-      // Root level
-      setCurrentParent(undefined);
-    } else {
-      setCurrentParent(newBreadcrumbs[index].id);
-    }
+    setCurrentParent(newBreadcrumbs[index].id);
     resetSearch();
   };
 
@@ -137,7 +131,8 @@ export function LocationPicker({
 
   const handleClearSelection = () => {
     onValueChange(null);
-    setOpen(false);
+    setBreadcrumbs([]);
+    setCurrentParent(undefined);
     resetSearch();
   };
 
