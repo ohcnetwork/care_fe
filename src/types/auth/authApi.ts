@@ -10,6 +10,7 @@ import {
   PasswordRequest,
   PasswordResetResponse,
   ResetPasswordRequest,
+  TokenRefreshRequest,
   TotpSetupResponse,
   TotpVerifyRequest,
   UpdatePasswordRequest,
@@ -35,22 +36,23 @@ export default {
   tokenRefresh: {
     path: "/api/v1/auth/token/refresh/",
     method: HttpMethod.POST,
+    noAuth: true,
+    TBody: Type<TokenRefreshRequest>(),
     TRes: Type<JwtTokenObtainPair>(),
-    TBody: Type<{ refresh: JwtTokenObtainPair["refresh"] }>(),
   },
   updatePassword: {
     path: "/api/v1/password_change/",
     method: HttpMethod.PUT,
-    TRes: Type<PasswordResetResponse>(),
     TBody: Type<UpdatePasswordRequest>(),
+    TRes: Type<PasswordResetResponse>(),
   },
 
   forgotPassword: {
     path: "/api/v1/password_reset/",
     method: HttpMethod.POST,
     noAuth: true,
-    TRes: Type<PasswordResetResponse>(),
     TBody: Type<ForgotPasswordRequest>(),
+    TRes: Type<PasswordResetResponse>(),
   },
 
   checkResetToken: {

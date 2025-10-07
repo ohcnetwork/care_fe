@@ -412,7 +412,7 @@ export default function ReportBuilder({
   // TODO: Implement export functionality
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleExport = () => {
-    console.log("");
+    // Implementation pending
   };
 
   if (reportTemplateId && isTemplateLoading) {

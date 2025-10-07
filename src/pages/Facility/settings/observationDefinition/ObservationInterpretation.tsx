@@ -1575,7 +1575,7 @@ function CustomValueSetInterpretationComponent<
             onValueChange={(value) => handleSetValueset(value, index)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a value set" />
+              <SelectValue placeholder={t("select_a_value_set")} />
             </SelectTrigger>
             <SelectContent>
               {valuesets?.results?.map((valueset) => (

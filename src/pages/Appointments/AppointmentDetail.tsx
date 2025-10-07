@@ -137,7 +137,7 @@ export default function AppointmentDetail(props: Props) {
   const [params, setQueryParams] = useQueryParams();
   const { showSuccess } = params;
 
-  useShortcutSubContext("facility:appointment:detail&facility:billing:invoice");
+  useShortcutSubContext("facility:appointment");
 
   const { canViewAppointments, canWriteAppointment } = getPermissions(
     hasPermission,
@@ -186,7 +186,6 @@ export default function AppointmentDetail(props: Props) {
       pathParams: { facilityId, id: props.appointmentId },
     }),
     onSuccess: (_) => {
-      console.log("invalidating appointment", props.appointmentId);
       queryClient.invalidateQueries({
         queryKey: ["appointment", props.appointmentId],
       });
@@ -206,11 +205,11 @@ export default function AppointmentDetail(props: Props) {
   return (
     <Page title={t("appointment_details")} hideTitleOnPage>
       <div className="container mx-auto max-w-7xl mt-4">
-        <div className="flex items-center gap-2 space-y-4">
-          <BackButton>
+        <div className="flex gap-2 items-center mb-2">
+          <BackButton size="icon" variant="ghost">
             <ChevronLeft />
           </BackButton>
-          <h4 className="font-semibold text-gray-800 mb-2">
+          <h4 className="font-semibold text-gray-800">
             {t("appointment_details")}
           </h4>
         </div>
@@ -342,10 +341,7 @@ export default function AppointmentDetail(props: Props) {
                         >
                           <PlusCircledIcon className="size-4 mr-2" />
                           {t("generate_token")}
-                          <ShortcutBadge
-                            actionId="generate-token"
-                            className="bg-gray-200"
-                          />
+                          <ShortcutBadge actionId="generate-token" />
                         </Button>
                       }
                       onSuccess={() => {
@@ -458,9 +454,7 @@ export default function AppointmentDetail(props: Props) {
               </Card>
             )}
             {/* Lets only show encounter details if the appointment is not in a final status or if there is an encounter linked to the appointment */}
-            {![...AppointmentFinalStatuses, "noshow"].includes(
-              appointment.status,
-            ) && (
+            {![...AppointmentFinalStatuses].includes(appointment.status) && (
               <div>
                 <h3 className="text-base font-semibold mt-4">
                   {t("quick_actions")}
@@ -474,10 +468,9 @@ export default function AppointmentDetail(props: Props) {
                         icon={<PlusSquare className="text-primary-500" />}
                         title={t("start_consultation")}
                         actionId="start-consultation"
-                        data-shortcut-id="start-consultation"
                         onClick={() => {
                           updateAppointment({
-                            status: "in_consultation",
+                            status: AppointmentStatus.IN_CONSULTATION,
                             note: appointment.note,
                           });
                           navigate(
@@ -497,12 +490,11 @@ export default function AppointmentDetail(props: Props) {
                             icon={<PlusSquare className="text-primary-500" />}
                             title={t("start_consultation")}
                             actionId="start-consultation"
-                            data-shortcut-id="start-consultation"
                           />
                         }
                         onSuccess={() => {
                           updateAppointment({
-                            status: "in_consultation",
+                            status: AppointmentStatus.IN_CONSULTATION,
                             note: appointment.note,
                           });
                         }}
@@ -521,7 +513,6 @@ export default function AppointmentDetail(props: Props) {
                           icon={<SquareActivity className="text-orange-500" />}
                           title={t("create_encounter")}
                           actionId="create-encounter"
-                          data-shortcut-id="create-encounter"
                         />
                       }
                       onSuccess={() => {
@@ -537,7 +528,6 @@ export default function AppointmentDetail(props: Props) {
                     icon={<PrinterIcon className="size-4" />}
                     title={t("print_appointment")}
                     actionId="print-appointment"
-                    data-shortcut-id="print-appointment"
                     href={`/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}/print`}
                   />
                 </div>
@@ -830,13 +820,13 @@ const AppointmentActions = ({
       {/* Primary Actions */}
       <div className="flex items-center justify-between gap-2">
         {/* Check In - Only for booked appointments */}
-        {currentStatus && currentStatus === "booked" && (
+        {currentStatus && currentStatus === AppointmentStatus.BOOKED && (
           <Button
             disabled={!canCheckIn}
             variant="primary"
             onClick={() =>
               updateAppointment({
-                status: "checked_in",
+                status: AppointmentStatus.CHECKED_IN,
                 note: appointment.note,
               })
             }
@@ -845,7 +835,7 @@ const AppointmentActions = ({
           >
             <EnterIcon className="size-4" />
             {t("check_in")}
-            <ShortcutBadge actionId="check-in-action" className="bg-gray-200" />
+            <ShortcutBadge actionId="check-in-action" />
           </Button>
         )}
 
@@ -859,20 +849,17 @@ const AppointmentActions = ({
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
 
-            {/* Mark as Fulfilled - For in consultation */}
-            {currentStatus === "in_consultation" && (
-              <DropdownMenuItem
-                onClick={() =>
-                  updateAppointment({
-                    status: "fulfilled",
-                    note: appointment.note,
-                  })
-                }
-              >
-                <CheckCircledIcon className="size-4 mr-2" />
-                {t("mark_as_fulfilled")}
-              </DropdownMenuItem>
-            )}
+            <DropdownMenuItem
+              onClick={() =>
+                updateAppointment({
+                  status: AppointmentStatus.FULFILLED,
+                  note: appointment.note,
+                })
+              }
+            >
+              <CheckCircledIcon className="size-4 mr-2" />
+              {t("mark_as_fulfilled")}
+            </DropdownMenuItem>
 
             {/* Secondary Actions */}
             {canWriteAppointment && (
@@ -880,7 +867,7 @@ const AppointmentActions = ({
                 <DropdownMenuSeparator />
 
                 {/* Reschedule */}
-                {appointment.status !== "in_consultation" && (
+                {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
                   <>
                     <AlertDialog
                       open={isRescheduleReasonOpen}
@@ -1055,7 +1042,10 @@ const AppointmentActions = ({
                 )}
 
                 {/* Mark as No Show */}
-                {["booked", "checked_in"].includes(currentStatus) && (
+                {[
+                  AppointmentStatus.BOOKED,
+                  AppointmentStatus.CHECKED_IN,
+                ].includes(currentStatus) && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -1087,7 +1077,7 @@ const AppointmentActions = ({
                         <AlertDialogAction
                           onClick={() =>
                             updateAppointment({
-                              status: "noshow",
+                              status: AppointmentStatus.NO_SHOW,
                               note: note,
                             })
                           }
@@ -1108,7 +1098,7 @@ const AppointmentActions = ({
                 )}
 
                 {/* Cancel Appointment */}
-                {appointment.status !== "in_consultation" && (
+                {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>

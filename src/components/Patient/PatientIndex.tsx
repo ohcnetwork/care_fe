@@ -2,15 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  formatPhoneNumberIntl,
-  isValidPhoneNumber,
-} from "react-phone-number-input";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
-
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -35,8 +28,10 @@ import Loading from "@/components/Common/Loading";
 import SearchInput from "@/components/Common/SearchInput";
 
 import { getPermissions } from "@/common/Permissions";
-import { GENDER_TYPES } from "@/common/constants";
+import { GENDER_TYPES, GENDERS } from "@/common/constants";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { PLUGIN_Component } from "@/PluginEngine";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
@@ -48,129 +43,160 @@ import {
   PatientRead,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { FacilityRead } from "@/types/facility/facility";
+import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { TFunction } from "i18next";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+const PHONE_NUMBER_CONFIG_SYSTEM =
+  "system.care.ohc.network/patient-phone-number";
+
+const sharedStateSchema = z.object({
+  searchOptions: z.array(
+    z.object({
+      key: z.string(),
+      type: z.enum(["text", "phone"]),
+      placeholder: z.string(),
+      value: z.string(),
+      display: z.string(),
+      onSearch: z.function().args(z.string()).optional(),
+    }),
+  ),
+  patientList: z.object({
+    partial: z.boolean(),
+    results: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        phone_number: z.string(),
+        gender: z.enum(GENDERS),
+        year_of_birth: z.number().optional(),
+        partial_id: z.string(),
+      }),
+    ),
+  }),
+  isFetching: z.boolean().nullable(),
+});
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
-  const [{ phone_number: phoneNumber = "" }, setPhoneNumberQuery] =
-    useQueryParams();
-  const shortcuts = useShortcuts();
-  useShortcutSubContext();
+  useShortcutSubContext("patient:search:-global");
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<
     PartialPatientModel | PatientRead | null
   >(null);
+  const shortcuts = useShortcuts();
+  const [qParams] = useQueryParams();
   const [verificationOpen, setVerificationOpen] = useState(false);
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
 
   const { facility } = useCurrentFacility();
 
-  // Enable shortcuts to work when this search component is active
-  useEffect(() => {
-    shortcuts.setIgnoreInputFields(true);
-    return () => shortcuts.setIgnoreInputFields(false);
-  }, [shortcuts]);
-
   const { canCreatePatient } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],
   );
 
-  const handleCreatePatient = useCallback(() => {
-    const queryParams = phoneNumber ? { phone_number: phoneNumber } : {};
-
-    navigate(`/facility/${facilityId}/patient/create`, {
-      query: queryParams,
-    });
-  }, [facilityId, phoneNumber]);
-
-  function AddPatientButton({ outline }: { outline?: boolean }) {
-    return (
-      <Button
-        variant={outline ? "outline" : "primary_gradient"}
-        className={cn("gap-3 group")}
-        onClick={handleCreatePatient}
-        data-cy="create-new-patient-button"
-        data-shortcut-id="submit-action"
-      >
-        <CareIcon icon="l-plus" className="size-4" />
-        {t("add_new_patient")}
-        <ShortcutBadge actionId="submit-action" className="bg-white" />
-      </Button>
-    );
-  }
-
-  // Build search options
-  const identifierOptions =
-    facility?.patient_instance_identifier_configs?.map((c) => ({
-      key: c.id,
-      type: "text" as const,
-      placeholder: t("search_by_identifier", { name: c.config.display }),
-      value: "",
-      display: c.config.display,
-    })) || [];
-
-  const searchOptions = [
-    {
-      key: "phone_number",
-      type: "phone" as const,
-      placeholder: t("search_by_phone_number"),
-      value: phoneNumber,
-      display: t("phone_number"),
-    },
-    ...identifierOptions,
-  ];
+  useEffect(() => {
+    shortcuts.setIgnoreInputFields(true);
+    return () => shortcuts.setIgnoreInputFields(false);
+  }, [shortcuts]);
 
   // Track identifier search state
   const [identifierSearch, setIdentifierSearch] = useState<{
     config?: string;
     value?: string;
   }>({});
+  const sharedState = useForm<z.infer<typeof sharedStateSchema>>({
+    resolver: zodResolver(sharedStateSchema),
+    defaultValues: {
+      searchOptions: [],
+      patientList: {
+        partial: false,
+        results: [],
+      },
+      isFetching: null,
+    },
+  });
 
   const handleSearch = useCallback((key: string, value: string) => {
-    if (key === "phone_number") {
-      setPhoneNumberQuery({
-        phone_number: isValidPhoneNumber(value) || value === "" ? value : null,
-      });
-      setIdentifierSearch({});
-    } else {
-      setPhoneNumberQuery({ phone_number: "" });
-      setIdentifierSearch({ config: key, value });
-    }
+    setIdentifierSearch({ config: key, value });
   }, []);
 
   const { data: patientList, isFetching } = useQuery({
-    queryKey: ["patient-search", facilityId, phoneNumber, identifierSearch],
+    queryKey: ["patient-search", facilityId, identifierSearch],
     queryFn: query.debounced(patientApi.searchPatient, {
-      body: phoneNumber
-        ? { phone_number: phoneNumber }
-        : identifierSearch.config && identifierSearch.value
-          ? { config: identifierSearch.config, value: identifierSearch.value }
-          : {},
+      body: {
+        config: identifierSearch.config,
+        value: identifierSearch.value,
+        page_size: 20,
+      },
     }),
-    enabled:
-      (!!isValidPhoneNumber(phoneNumber) && !!phoneNumber) ||
-      (!!identifierSearch.config && !!identifierSearch.value),
+    enabled: !!(identifierSearch.config && identifierSearch.value),
   });
 
+  useEffect(() => {
+    if (identifierSearch.config && identifierSearch.value) {
+      sharedState.setValue("patientList", {
+        partial: patientList?.partial ?? false,
+        results: (patientList?.results ?? []).map((p) => ({
+          id: p.id,
+          name: p.name,
+          phone_number: p.phone_number,
+          gender: p.gender,
+          year_of_birth: "year_of_birth" in p ? p.year_of_birth : undefined,
+          partial_id: p.id.slice(0, 5),
+        })),
+      });
+      sharedState.setValue("isFetching", isFetching);
+    }
+  }, [patientList, isFetching]);
+
   const handlePatientSelect = (index: number) => {
-    const patient = patientList?.results[index];
+    const patient = sharedState.getValues("patientList.results")[index];
     if (!patient) {
       return;
     }
-    if (patientList && patientList.partial) {
+    if (sharedState.getValues("patientList.partial")) {
       setSelectedPatient(patient);
       setVerificationOpen(true);
       setYearOfBirth("");
     } else if ("year_of_birth" in patient) {
       navigate(`/facility/${facilityId}/patients/verify`, {
         query: {
+          config: identifierSearch.config,
+          value: identifierSearch.value,
           phone_number: patient.phone_number,
-          year_of_birth: patient.year_of_birth.toString(),
+          year_of_birth: patient.year_of_birth?.toString(),
           partial_id: patient.id.slice(0, 5),
         },
       });
     }
   };
+
+  useEffect(() => {
+    shortcuts.setIgnoreInputFields(true);
+    return () => shortcuts.setIgnoreInputFields(false);
+  }, [shortcuts]);
+
+  useEffect(() => {
+    if (!facility) {
+      return;
+    }
+
+    const phoneNumberConfig = getPhoneNumberConfig(
+      facility.patient_instance_identifier_configs,
+    );
+
+    if (qParams.phone_number && phoneNumberConfig) {
+      setIdentifierSearch({
+        config: phoneNumberConfig.id,
+        value: qParams.phone_number,
+      });
+    }
+  }, [qParams.phone_number, facility]);
 
   const handleVerify = () => {
     if (!selectedPatient || !yearOfBirth || yearOfBirth.length !== 4) {
@@ -180,6 +206,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
     navigate(`/facility/${facilityId}/patients/verify`, {
       query: {
+        config: identifierSearch.config,
+        value: identifierSearch.value,
         phone_number: selectedPatient.phone_number,
         year_of_birth: yearOfBirth,
         partial_id: getPartialId(selectedPatient),
@@ -192,7 +220,13 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       <div className="container max-w-5xl mx-auto py-6">
         {canCreatePatient && (
           <div className="flex justify-center md:justify-end">
-            <AddPatientButton />
+            <AddPatientButton
+              facilityId={facilityId}
+              identifierConfigs={
+                facility?.patient_instance_identifier_configs || []
+              }
+              identifierSearch={identifierSearch}
+            />
           </div>
         )}
         <div className="space-y-6 mt-6">
@@ -210,22 +244,28 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           <div>
             <div className="space-y-6">
               <SearchInput
-                data-cy="patient-search"
-                options={searchOptions}
+                options={[
+                  ...getSearchOptions(t, identifierSearch, facility),
+                  ...sharedState.watch("searchOptions"),
+                ]}
                 onSearch={handleSearch}
                 className="w-full"
                 autoFocus
               />
+              <PLUGIN_Component
+                __name="PatientSearch"
+                facilityId={facilityId}
+                state={sharedState}
+              />
 
               <div className="min-h-[200px]" id="patient-search-results">
-                {(!!phoneNumber ||
-                  (!!identifierSearch.config && !!identifierSearch.value)) && (
+                {sharedState.watch("isFetching") !== null && (
                   <>
-                    {isFetching || !patientList ? (
+                    {sharedState.watch("isFetching") ? (
                       <div className="flex items-center justify-center h-[200px]">
                         <Loading />
                       </div>
-                    ) : !patientList.results.length ? (
+                    ) : !sharedState.watch("patientList.results").length ? (
                       <div>
                         <div className="flex flex-col items-center justify-center py-10 text-center">
                           <h3 className="text-lg font-semibold">
@@ -234,7 +274,15 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                           <p className="text-sm text-gray-500 mb-6">
                             {t("no_patient_record_text")}
                           </p>
-                          <AddPatientButton outline />
+                          <AddPatientButton
+                            facilityId={facilityId}
+                            outline
+                            identifierConfigs={
+                              facility?.patient_instance_identifier_configs ||
+                              []
+                            }
+                            identifierSearch={identifierSearch}
+                          />
                         </div>
                       </div>
                     ) : (
@@ -250,27 +298,31 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {patientList.results.map((patient, index) => (
-                              <TableRow
-                                key={patient.id}
-                                className="cursor-pointer"
-                                onClick={() => handlePatientSelect(index)}
-                              >
-                                <TableCell className="font-medium">
-                                  {patient.name}
-                                </TableCell>
-                                <TableCell>
-                                  {formatPhoneNumberIntl(patient.phone_number)}
-                                </TableCell>
-                                <TableCell>
-                                  {
-                                    GENDER_TYPES.find(
-                                      (g) => g.id === patient.gender,
-                                    )?.text
-                                  }
-                                </TableCell>
-                              </TableRow>
-                            ))}
+                            {sharedState
+                              .watch("patientList.results")
+                              .map((patient, index) => (
+                                <TableRow
+                                  key={patient.id}
+                                  className="cursor-pointer"
+                                  onClick={() => handlePatientSelect(index)}
+                                >
+                                  <TableCell className="font-medium">
+                                    {patient.name}
+                                  </TableCell>
+                                  <TableCell>
+                                    {formatPhoneNumberIntl(
+                                      patient.phone_number,
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    {
+                                      GENDER_TYPES.find(
+                                        (g) => g.id === patient.gender,
+                                      )?.text
+                                    }
+                                  </TableCell>
+                                </TableRow>
+                              ))}
                           </TableBody>
                         </Table>
                       </div>
@@ -296,7 +348,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
               type="text"
               placeholder={`${t("year_of_birth")} (YYYY)`}
               value={yearOfBirth}
-              data-cy="year-of-birth-input"
               onChange={(e) => {
                 const value = e.target.value;
                 if (/^\d{0,4}$/.test(value)) {
@@ -314,20 +365,107 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             <Button
               variant="outline"
               onClick={() => setVerificationOpen(false)}
-              data-cy="cancel-verification-button"
             >
               {t("cancel")}
             </Button>
-            <Button
-              className="mb-2"
-              onClick={handleVerify}
-              data-cy="confirm-verification-button"
-            >
+            <Button className="mb-2" onClick={handleVerify}>
               {t("verify")}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+const getSearchOptions = (
+  t: TFunction,
+  searchIdentifier: { config?: string; value?: string },
+  facility?: FacilityRead,
+) => {
+  if (!facility) {
+    return [];
+  }
+
+  const { patient_instance_identifier_configs: configs } = facility;
+
+  // Phone number configs first, followed by auto-maintained configs, and then non-auto-maintained configs
+  return [
+    // Phone number configs
+    ...configs.filter(
+      ({ config }) =>
+        config.auto_maintained && config.system === PHONE_NUMBER_CONFIG_SYSTEM,
+    ),
+    // Auto-maintained configs but not phone number configs
+    ...configs.filter(
+      ({ config }) =>
+        config.auto_maintained && config.system !== PHONE_NUMBER_CONFIG_SYSTEM,
+    ),
+    // Non-auto-maintained configs
+    ...configs.filter((c) => !c.config.auto_maintained),
+  ].map((c) => ({
+    key: c.id,
+    type:
+      c.config.system === PHONE_NUMBER_CONFIG_SYSTEM
+        ? ("phone" as const)
+        : ("text" as const),
+    placeholder: t("search_by_identifier", { name: c.config.display }),
+    value:
+      searchIdentifier.config === c.id ? (searchIdentifier.value ?? "") : "",
+    display: c.config.display,
+  }));
+};
+
+const getPhoneNumberConfig = (identifierConfigs: PatientIdentifierConfig[]) => {
+  return identifierConfigs.find(
+    (c) => c.config.system === PHONE_NUMBER_CONFIG_SYSTEM,
+  );
+};
+
+const getPhoneNumberFromIdentifierSearch = (
+  identifierConfigs: PatientIdentifierConfig[],
+  identifierSearch: { config?: string; value?: string },
+) => {
+  const phoneNumberConfig = getPhoneNumberConfig(identifierConfigs);
+
+  if (phoneNumberConfig && identifierSearch.config === phoneNumberConfig.id) {
+    return identifierSearch.value;
+  }
+
+  return undefined;
+};
+
+function AddPatientButton({
+  facilityId,
+  outline,
+  identifierConfigs,
+  identifierSearch,
+}: {
+  facilityId: string;
+  outline?: boolean;
+  identifierConfigs: PatientIdentifierConfig[];
+  identifierSearch?: { config?: string; value?: string };
+}) {
+  const { t } = useTranslation();
+
+  const phoneNumber =
+    identifierSearch &&
+    getPhoneNumberFromIdentifierSearch(identifierConfigs, identifierSearch);
+
+  return (
+    <Button
+      variant={outline ? "outline" : "primary_gradient"}
+      className="gap-3 group"
+      onClick={() =>
+        navigate(`/facility/${facilityId}/patient/create`, {
+          query: phoneNumber ? { phone_number: phoneNumber } : undefined,
+        })
+      }
+      data-shortcut-id="submit-action"
+    >
+      <CareIcon icon="l-plus" className="size-4" />
+      {t("add_new_patient")}
+      <ShortcutBadge actionId="submit-action" className="bg-white" />
+    </Button>
   );
 }

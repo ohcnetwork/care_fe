@@ -41,6 +41,14 @@ export default function PrescriptionView({
     enabled: !!patientId && !!prescriptionId,
   });
 
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loading />
+      </div>
+    );
+  }
+
   if (!prescription) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
@@ -53,18 +61,10 @@ export default function PrescriptionView({
       </div>
     );
   }
-
-  if (isLoading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <Loading />
-      </div>
-    );
-  }
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between p-2">
-        <div>
+      <div className="flex items-center gap-2 flex-wrap justify-between px-2 my-2 w-full">
+        <div className="hidden lg:block">
           <h3 className="font-semibold text-lg">
             {formatDateTime(prescription.created_date, "DD/MM/YYYY hh:mm A")}
           </h3>
@@ -72,7 +72,7 @@ export default function PrescriptionView({
             {t("prescribed_by")}: {formatName(prescription.prescribed_by)}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap ">
           {canWrite && (
             <Button
               asChild
@@ -124,15 +124,20 @@ export default function PrescriptionView({
           )}
         </div>
       </div>
-      <div className="flex flex-col gap-4 px-4">
+      <div className="flex flex-col gap-4 px-2">
         <div className="flex items-center gap-2">
-          <CareIcon icon="l-search" className="text-lg text-gray-500" />
-          <Input
-            placeholder={t("search_medications")}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-gray-500"
-          />
+          <div className="relative flex-1">
+            <CareIcon
+              icon="l-search"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+            />
+            <Input
+              placeholder={t("search_medications")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-8"
+            />
+          </div>
           {searchQuery && (
             <Button
               variant="ghost"
