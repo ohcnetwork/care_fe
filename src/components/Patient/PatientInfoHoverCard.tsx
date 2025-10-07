@@ -1,8 +1,10 @@
 import { Avatar } from "@/components/Common/Avatar";
 import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import { formatPatientAddress } from "@/components/Patient/utils";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { formatPatientAge } from "@/Utils/utils";
 import { Phone } from "lucide-react";
 import { Link } from "raviger";
@@ -61,7 +63,7 @@ export const PatientInfoHoverCard = ({
           </Link>
         </Button>
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3 border-t border-gray-200 pt-4">
           {patient.instance_identifiers?.map((identifier) => (
             <div
@@ -118,6 +120,27 @@ export const PatientInfoHoverCard = ({
             </div>
           </div>
         </div>
+        {patient.instance_tags.length > 0 && (
+          <div className="flex items-start border-t border-gray-200 pt-2">
+            <div className="flex flex-col gap-1 text-sm font-medium w-full">
+              <span className="text-gray-700">{t("patient_tags")}:</span>
+              <div className="flex flex-wrap gap-2 text-sm whitespace-nowrap">
+                <>
+                  {patient.instance_tags.map((tag) => (
+                    <Badge
+                      key={tag.id}
+                      variant="secondary"
+                      className="capitalize"
+                      title={tag.description}
+                    >
+                      {getTagHierarchyDisplay(tag)}
+                    </Badge>
+                  ))}
+                </>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

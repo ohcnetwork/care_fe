@@ -135,7 +135,9 @@ const CriticalActionConfirmationDialog = ({
           </div>
         </AlertDialogHeader>
         <div className="space-y-3 text-sm text-black">
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogDescription asChild>
+            <div>{description}</div>
+          </AlertDialogDescription>
           <div>
             <span>
               <Trans

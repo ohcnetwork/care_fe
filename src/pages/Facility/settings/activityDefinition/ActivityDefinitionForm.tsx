@@ -612,7 +612,9 @@ function ActivityDefinitionFormContent({
                               ResourceCategoryResourceType.activity_definition
                             }
                             value={field.value}
-                            onValueChange={field.onChange}
+                            onValueChange={(category) =>
+                              field.onChange(category?.slug || "")
+                            }
                             placeholder={t("select_resource_category")}
                             className="w-full"
                           />
