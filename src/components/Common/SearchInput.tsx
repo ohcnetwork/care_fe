@@ -36,7 +36,6 @@ interface SearchOption {
   value: string;
   component?: React.ComponentType<HTMLDivElement>;
   display: string;
-  onSearch?: (value: string) => void;
 }
 
 interface SearchInputProps
@@ -101,34 +100,22 @@ const SearchInputFieldRenderer = ({
 
         // Only call onSearch if the phone number is valid
         if (isValid) {
-          if (selectedOption.onSearch) {
-            selectedOption.onSearch(phoneValue);
-          } else {
-            onSearch(selectedOption.key, phoneValue);
-          }
-        }
-      } else {
-        if (selectedOption.onSearch) {
-          selectedOption.onSearch(phoneValue);
-        } else {
           onSearch(selectedOption.key, phoneValue);
         }
+      } else {
+        onSearch(selectedOption.key, phoneValue);
       }
     },
-    [selectedOption.key, selectedOption.onSearch, onSearch, setSearchValue],
+    [selectedOption.key, onSearch, setSearchValue],
   );
 
   const handleTextChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value;
       setSearchValue(value);
-      if (selectedOption.onSearch) {
-        selectedOption.onSearch(value);
-      } else {
-        onSearch(selectedOption.key, value);
-      }
+      onSearch(selectedOption.key, value);
     },
-    [selectedOption.key, selectedOption.onSearch, onSearch, setSearchValue],
+    [selectedOption.key, onSearch, setSearchValue],
   );
 
   switch (selectedOption.type) {
@@ -214,11 +201,7 @@ export default function SearchInput({
 
       // Only call onSearch if there's a value to search
       if (option.value) {
-        if (option.onSearch) {
-          option.onSearch(option.value);
-        } else {
-          onSearch(option.key, option.value);
-        }
+        onSearch(option.key, option.value);
       }
       onFieldChange?.(safeOptions[index]);
     },
