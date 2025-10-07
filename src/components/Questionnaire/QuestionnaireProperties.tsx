@@ -26,7 +26,7 @@ import ManageQuestionnaireOrganizationsSheet, {
   OrgSelectorPopover,
 } from "./ManageQuestionnaireOrganizationsSheet";
 import ManageQuestionnaireTagsSheet, {
-  QuestionnaireTagSelectorPopover,
+  QuestionnaireTagSelector,
 } from "./ManageQuestionnaireTagsSheet";
 
 interface Organization {
@@ -317,7 +317,7 @@ function TagSelector({
         )}
       </div>
 
-      <QuestionnaireTagSelectorPopover
+      <QuestionnaireTagSelector
         title={t("select_tags")}
         selected={selection.selectedTags}
         onToggle={selection.onToggle}
