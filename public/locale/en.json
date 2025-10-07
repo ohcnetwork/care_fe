@@ -1775,7 +1775,7 @@
   "edit_offline_data_important": "Important: You can modify and save to overwrite the server data with your local changes.",
   "edit_offline_data_view_server": "To view the current server data, navigate to the original record.",
   "edit_offline_encounter": "Edit Offline Encounter",
-  "edit_offline_encounter_description": "Edit offline encounter for patient with phone number: {phoneNumber}",
+  "edit_offline_encounter_description": "Edit offline encounter for patient {{patientName}} with phone number: {{phoneNumber}}",
   "edit_offline_user_assignment": "Edit Offline User Assignment",
   "edit_offline_user_assignment_description": "Edit the offline user assignment for this patient",
   "edit_patient_identifier_config": "Edit patient identifier config",

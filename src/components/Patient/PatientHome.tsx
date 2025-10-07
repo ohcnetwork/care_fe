@@ -25,6 +25,7 @@ import {
   PatientHeader,
 } from "@/components/Patient/PatientHeader";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
 export const PatientHome = (props: {
@@ -36,6 +37,7 @@ export const PatientHome = (props: {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
+  const { offlineEntryId } = useOfflineEntry();
 
   queryClient.setQueryDefaults(["patientPermissions"], {
     meta: { persist: true },
@@ -101,6 +103,7 @@ export const PatientHome = (props: {
               trigger={
                 <Button variant="primary">{t("schedule_appointment")}</Button>
               }
+              defaultOpen={!!offlineEntryId}
             />
           )}
         </>

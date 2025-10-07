@@ -709,7 +709,11 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
               type="submit"
               variant="primary"
               disabled={
-                id ? isUpdatePending || !form.formState.isDirty : isPending
+                offlineEntryId
+                  ? false // Always enable if editing an offline entry
+                  : id
+                    ? isUpdatePending || !form.formState.isDirty
+                    : isPending
               }
             >
               {isPending && (

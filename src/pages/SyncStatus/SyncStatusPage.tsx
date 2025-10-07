@@ -1142,6 +1142,8 @@ const SyncStatusPage: React.FC<{ facilityId?: string }> = ({ facilityId }) => {
     useState<OfflineWritesEntry | null>(null);
   const [isEncounterFormOpen, setIsEncounterFormOpen] = useState(false);
 
+  console.log("selectedEncounterEntry", selectedEncounterEntry);
+
   const [deleteConfirmEntry, setDeleteConfirmEntry] =
     useState<OfflineWritesEntry | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);

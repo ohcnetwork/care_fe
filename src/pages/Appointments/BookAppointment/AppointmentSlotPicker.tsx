@@ -19,7 +19,6 @@ import {
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApi from "@/types/scheduling/scheduleApi";
-import { useEffect } from "react";
 
 interface AppointmentSlotPickerProps {
   facilityId: string;
@@ -43,7 +42,7 @@ export function AppointmentSlotPicker({
   resourceType,
 }: AppointmentSlotPickerProps) {
   const { t } = useTranslation();
-
+  console.log("Rendering AppointmentSlotPicker with slotid:", selectedSlotId);
   const slotsQuery = useQuery({
     queryKey: ["slots", facilityId, resourceId, dateQueryString(selectedDate)],
     queryFn: query(scheduleApi.slots.getSlotsForDay, {
@@ -79,10 +78,6 @@ export function AppointmentSlotPicker({
       }
     }
   };
-
-  useEffect(() => {
-    onSlotSelect(undefined);
-  }, [selectedDate]);
 
   const totalSlots = groupSlotsByAvailability(slotsQuery.data || []).flatMap(
     (group) => group.slots,
@@ -220,6 +215,8 @@ export const TokenSlotButton = ({
     start: slot.start_datetime,
     end: slot.end_datetime,
   });
+
+  console.log("Rendering slot:", slot.id, selectedSlotId);
 
   return (
     <Button

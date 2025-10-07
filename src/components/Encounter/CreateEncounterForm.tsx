@@ -107,6 +107,8 @@ export default function CreateEncounterForm({
   const { t } = useTranslation();
   useShortcutSubContext();
 
+  console.log("offlineEntryData : ", offlineEntryData);
+
   const [offlineSelectedOrganizations, setOfflineSelectedOrganizations] =
     useState<FacilityOrganizationRead[]>([]);
 
@@ -301,9 +303,11 @@ export default function CreateEncounterForm({
           <SheetDescription>
             {offlineEntryId ? (
               t("edit_offline_encounter_description", {
-                phoneNumber:
-                  (offlineEntryData?.normalizedData as any)?.patient
-                    ?.phone_number || patientId,
+                patientName:
+                  (offlineEntryData?.normalizedData as any)?.patient?.name ||
+                  "Unknown",
+                phoneNumber: (offlineEntryData?.normalizedData as any)?.patient
+                  ?.phone_number,
               })
             ) : (
               <Trans

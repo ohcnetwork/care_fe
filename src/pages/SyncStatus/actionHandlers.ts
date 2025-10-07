@@ -150,7 +150,7 @@ export const handleCreateandUpdateResourceRequestEdit = async (
       },
     });
   } else if (entry.type === "update_resource_request") {
-    navigate(`/facility/${facilityId}/resource/${entry.id}`, {
+    navigate(`/facility/${facilityId}/resource/${entry.id}/update`, {
       query: {
         offlineEntryId: entry.id,
       },
@@ -209,14 +209,11 @@ export const handleAppointmentEdit = async (
         return;
       }
 
-      navigate(
-        `/facility/${entry.facilityId}/patient/${patientId}/book-appointment`,
-        {
-          query: {
-            offlineEntryId: entry.id,
-          },
+      navigate(`/facility/${entry.facilityId}/patient/${patientId}`, {
+        query: {
+          offlineEntryId: entry.id,
         },
-      );
+      });
       break;
     }
 

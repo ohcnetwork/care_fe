@@ -38,6 +38,7 @@ export default function PrescriptionView({
       pathParams: { patientId, id: prescriptionId! },
       queryParams: { facility: facilityId },
     }),
+    meta: { persist: true },
     enabled: !!patientId && !!prescriptionId,
   });
 

@@ -303,6 +303,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       );
 
       const selectedTags: TagConfig[] = [];
+      console.log("selected org : ", selectedOrganization);
       await queueNewPatientOffline({
         createPatientData: patientRequestData as PatientCreate,
         identifiers: fullIdentifiers,
@@ -380,6 +381,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
         } catch (error) {
           console.error(`Error handling offline record success:`, error);
           // Don't block the success flow, just log the error
+          return;
         }
       }
 
@@ -484,6 +486,9 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       return;
     }
 
+    const selectedOrganization = values._selected_levels?.[0];
+    console.log("selected org on submit: ", selectedOrganization);
+
     const basePayload = {
       ...values,
 
@@ -513,6 +518,10 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
         facility,
       ),
     };
+
+    console.log("base payload: ", basePayload);
+
+    // Geo organization is mandatory for patient
 
     if (!patientId) {
       const createPatientData: PatientCreate = {
@@ -606,7 +615,10 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="px-1 flex flex-col gap-6">
-                  <AdditionalDetailsContent form={form} />
+                  <AdditionalDetailsContent
+                    form={form}
+                    setSelectedOrganization={setSelectedOrganization}
+                  />
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -940,8 +952,10 @@ const PatientBasicsContent = ({
 
 const AdditionalDetailsContent = ({
   form,
+  setSelectedOrganization,
 }: {
   form: UseFormReturn<z.infer<ReturnType<typeof getFormSchema>>>;
+  setSelectedOrganization?: (org: Organization | null) => void;
 }) => {
   const { t } = useTranslation();
   const { facility } = useCurrentFacility();
@@ -1059,6 +1073,7 @@ const AdditionalDetailsContent = ({
                   selected={form.watch("_selected_levels")}
                   value={form.watch("geo_organization")}
                   onChange={field.onChange}
+                  setSelectedOrganization={setSelectedOrganization}
                 />
               </FormControl>
               <FormMessage />

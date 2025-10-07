@@ -18,6 +18,7 @@ interface Props {
   facilityId?: string;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
+  defaultOpen?: boolean;
 }
 
 export default function BookAppointmentSheet({
@@ -25,8 +26,9 @@ export default function BookAppointmentSheet({
   facilityId,
   trigger,
   onSuccess,
+  defaultOpen = false,
 }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const { t } = useTranslation();
 
   return (

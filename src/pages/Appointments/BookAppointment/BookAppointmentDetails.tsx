@@ -19,6 +19,7 @@ import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import scheduleApi from "@/types/scheduling/scheduleApi";
 
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
+import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
 import { HTTPError } from "@/Utils/request/types";
 import { queueNewAppointmentOffline } from "@/components/Appointment/offlineQueue";
 import { ScheduleResourceFormState } from "@/components/Schedule/ResourceSelector";
@@ -89,12 +90,12 @@ export const BookAppointmentDetails = ({
       }
 
       if (normalizedData.token_slot) {
-        setOfflineSelectedSlot(normalizedData.token_slot);
-        setSelectedSlotId(normalizedData.token_slot.id);
-
         // Extract date from slot's start_datetime
         const slotDate = new Date(normalizedData.token_slot.start_datetime);
         setSelectedDate(slotDate);
+        console.log("Setting offline slot:", normalizedData.token_slot.id);
+        setOfflineSelectedSlot(normalizedData.token_slot);
+        setSelectedSlotId(normalizedData.token_slot.id);
       }
     }
   }, [offlineEntry, offlineEntryId]);
@@ -149,7 +150,16 @@ export const BookAppointmentDetails = ({
     mutationFn: mutate(scheduleApi.slots.createAppointment, {
       pathParams: { facilityId, slotId: selectedSlotId ?? "" },
     }),
-    onSuccess: (data: Appointment) => {
+    onSuccess: async (data: Appointment) => {
+      if (offlineEntryId) {
+        try {
+          await handleOfflineRecordSuccess(offlineEntryId, data);
+        } catch (error) {
+          console.error(`Error handling offline record success:`, error);
+          // Don't block the success flow, just log the error
+          return;
+        }
+      }
       toast.success(t("appointment_created_successfully"));
       onSuccess?.();
       navigate(
@@ -194,7 +204,7 @@ export const BookAppointmentDetails = ({
     setIsOpen(open);
     if (!open) {
       setCurrentStep(1);
-      setSelectedSlotId(undefined);
+      // setSelectedSlotId(undefined);
     }
   };
 
