@@ -75,7 +75,7 @@ function UserCommandContent({
       <CommandInput
         placeholder={t("search")}
         onValueChange={setSearch}
-        className="outline-hidden border-none ring-0 shadow-none"
+        className="outline-hidden border-none ring-0 shadow-none text-base"
       />
       <CommandList>
         <CommandEmpty>

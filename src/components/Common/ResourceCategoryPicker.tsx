@@ -334,7 +334,7 @@ export function ResourceCategoryPicker({
               placeholder={t("search_categories")}
               value={searchQuery}
               onValueChange={setSearchQuery}
-              className="pl-9 h-9 border-0 focus:ring-0"
+              className="pl-9 h-9 border-0 focus:ring-0 text-base"
             />
           </div>
         </div>

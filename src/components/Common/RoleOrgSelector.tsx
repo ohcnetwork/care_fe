@@ -162,7 +162,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
             placeholder={t("search_organizations")}
             onValueChange={setOrgSearchQuery}
             value={orgSearchQuery}
-            className="border-none focus:ring-0"
+            className="border-none focus:ring-0 text-base"
           />
         </div>
         <CommandList onWheel={(e) => e.stopPropagation()}>

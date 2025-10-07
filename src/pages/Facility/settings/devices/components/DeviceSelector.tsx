@@ -59,7 +59,7 @@ function DeviceCommandContent({
         placeholder={t("search_devices")}
         value={search}
         onValueChange={setSearch}
-        className="outline-hidden border-none ring-0 shadow-none"
+        className="outline-hidden border-none ring-0 shadow-none text-base"
         autoFocus={!isAppleDevice}
       />
       {isPending ? (

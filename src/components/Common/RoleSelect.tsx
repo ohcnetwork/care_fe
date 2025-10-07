@@ -65,7 +65,7 @@ function RoleCommandContent({
       <CommandInput
         placeholder={t("search_roles")}
         onValueChange={setSearchTerm}
-        className="outline-hidden border-none ring-0 shadow-none"
+        className="outline-hidden border-none ring-0 shadow-none text-base"
         autoFocus={!isAppleDevice}
       />
       <CommandList>

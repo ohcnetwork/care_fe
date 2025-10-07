@@ -229,7 +229,7 @@ export default function FacilityOrganizationSelector(
     );
   };
 
-  const renderOrganizationPopover = (className?: string) => {
+  const renderOrganizationCommand = (className?: string) => {
     return (
       <Command className={className}>
         <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-white z-10">
@@ -254,7 +254,7 @@ export default function FacilityOrganizationSelector(
             placeholder={t("search_organizations")}
             onValueChange={setFacilityOrgSearch}
             value={facilityOrgSearch}
-            className="border-none focus:ring-0"
+            className="border-none focus:ring-0 text-base"
           />
         </div>
         <CommandList onWheel={(e) => e.stopPropagation()}>
@@ -438,7 +438,7 @@ export default function FacilityOrganizationSelector(
                       </Button>
                     </DrawerTrigger>
                     <DrawerContent className="min-h-[50vh] max-h-[85vh]">
-                      {renderOrganizationPopover()}
+                      {renderOrganizationCommand()}
                     </DrawerContent>
                   </Drawer>
                 </>
@@ -465,7 +465,7 @@ export default function FacilityOrganizationSelector(
                     sideOffset={4}
                     className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
                   >
-                    {renderOrganizationPopover()}
+                    {renderOrganizationCommand()}
                   </PopoverContent>
                 </Popover>
               ))}

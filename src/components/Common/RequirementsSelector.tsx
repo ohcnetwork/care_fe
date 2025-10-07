@@ -116,40 +116,6 @@ function SmallSelectedItemCard({
   );
 }
 
-function TriggerButton({
-  isOpen,
-  value,
-  placeholder,
-}: {
-  isOpen: boolean;
-  value: RequirementItem[];
-  placeholder: string;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <Button
-      type="button"
-      variant="outline"
-      role="combobox"
-      aria-expanded={isOpen}
-      className="w-full justify-between"
-    >
-      <div className="flex items-center gap-2 truncate">
-        {value.length === 0 ? (
-          <span>{placeholder}</span>
-        ) : (
-          <span className="flex items-center gap-2">
-            <span className="font-medium">{value.length}</span>
-            {t("items_selected")}
-          </span>
-        )}
-      </div>
-      <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
-    </Button>
-  );
-}
-
 interface RequirementsContentProps {
   value: RequirementItem[];
   options: RequirementItem[];
@@ -225,7 +191,7 @@ function RequirementsContent({
       <CommandInput
         placeholder={t("search")}
         onValueChange={onSearch}
-        className="border-0 focus:ring-0"
+        className="border-0 focus:ring-0 text-base"
       />
       {isLoading ? (
         <div className="p-4">
@@ -307,6 +273,7 @@ export default function RequirementsSelector({
   const [isOpen, setIsOpen] = React.useState(false);
   const [isCreateSheetOpen, setIsCreateSheetOpen] = React.useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
+  const { t } = useTranslation();
 
   const addOption = (option: RequirementItem) => {
     if (!allowDuplicate && !customSelector) {
@@ -324,16 +291,32 @@ export default function RequirementsSelector({
     onChange(newValue);
   };
 
+  const renderTriggerButton = (
+    <Button
+      type="button"
+      variant="outline"
+      role="combobox"
+      aria-expanded={isOpen}
+      className="w-full justify-between"
+    >
+      <div className="flex items-center gap-2 truncate">
+        {value.length === 0 ? (
+          <span>{placeholder}</span>
+        ) : (
+          <span className="flex items-center gap-2">
+            <span className="font-medium">{value.length}</span>
+            {t("items_selected")}
+          </span>
+        )}
+      </div>
+      <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
+    </Button>
+  );
+
   return isMobile ? (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex flex-col gap-3">
-        <DrawerTrigger>
-          <TriggerButton
-            isOpen={isOpen}
-            value={value}
-            placeholder={placeholder}
-          />
-        </DrawerTrigger>
+        <DrawerTrigger asChild>{renderTriggerButton}</DrawerTrigger>
 
         {value.length > 0 && (
           <div className="flex flex-col gap-2">
@@ -377,13 +360,7 @@ export default function RequirementsSelector({
   ) : (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex flex-col gap-3">
-        <SheetTrigger>
-          <TriggerButton
-            isOpen={isOpen}
-            value={value}
-            placeholder={placeholder}
-          />
-        </SheetTrigger>
+        <SheetTrigger asChild>{renderTriggerButton}</SheetTrigger>
 
         {value.length > 0 && (
           <div className="flex flex-col gap-2">

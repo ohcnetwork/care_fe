@@ -66,7 +66,7 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
     <Command>
       <CommandInput
         placeholder={t("search_icons")}
-        className="border-0 focus:ring-0"
+        className="border-0 focus:ring-0 text-base"
       />
       <CommandEmpty>{t("no_icons_found")}</CommandEmpty>
       <CommandGroup className="max-h-[300px] overflow-auto">
