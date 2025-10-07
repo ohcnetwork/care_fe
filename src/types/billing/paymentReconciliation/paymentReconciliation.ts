@@ -90,5 +90,5 @@ export interface PaymentReconciliationRead extends PaymentReconciliationBase {
   target_invoice: InvoiceRead;
   account: AccountRead;
   is_credit_note: boolean;
-  location: LocationList;
+  location: LocationList | null;
 }
