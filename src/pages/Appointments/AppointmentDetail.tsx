@@ -682,7 +682,7 @@ const AppointmentDetailsContent = ({
             </div>
             <div className="flex flex-row items-start gap-2 text-sm">
               <DrawingPinIcon className="size-4 text-gray-500 mt-1" />
-              <div className="flex flex-col xl:flex-row xl:justify-between xl:items-end gap-2 w-full">
+              <div className="flex flex-col gap-2 w-full">
                 <div>
                   <p className="text-gray-600 break-words">
                     {formatPatientAddress(appointment.patient.address) || (
