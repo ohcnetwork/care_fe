@@ -468,21 +468,15 @@ export function ResponseCard({
       ? properCase(structuredType.replace(/_/g, " "))
       : item.questionnaire?.title || "";
 
-  return isPrintPreview ? (
-    <Card className="shadow-none rounded-xl border border-gray-200">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-medium">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponseCardContent item={item} />
-      </CardContent>
-    </Card>
-  ) : (
+  return (
     <Card className="shadow-none border rounded-lg">
       <CardHeader className="flex flex-row items-center pb-2">
         {showTitle && (
           <CardTitle
-            className="text-lg font-medium cursor-pointer hover:bg-gray-100 rounded px-1 -mx-1 transition-colors duration-200 p-2 pr-5"
+            className={cn(
+              "text-lg font-medium",
+              onTitleClick && "cursor-pointer hover:bg-gray-100 rounded p-2",
+            )}
             onClick={() => {
               if (item.questionnaire?.id && onTitleClick) {
                 onTitleClick(item.questionnaire.id);
@@ -492,9 +486,11 @@ export function ResponseCard({
             {title}
           </CardTitle>
         )}
-        <div className="ml-auto">
-          <PrintButton item={item} />
-        </div>
+        {!isPrintPreview && (
+          <div className="ml-auto">
+            <PrintButton item={item} />
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <ResponseCardContent item={item} />
