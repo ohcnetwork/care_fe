@@ -130,6 +130,8 @@ export function LocationSelectorDialog({
   const path = usePath();
   const subPath =
     path?.match(/\/facility\/[^/]+\/locations\/[^/]+\/(.*)/)?.[1] || "";
+  const uuidPattern =
+    /\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 
   const currentParentId = locationLevel.length
     ? locationLevel[locationLevel.length - 1].id
@@ -183,8 +185,9 @@ export function LocationSelectorDialog({
       } else if (navigateUrl) {
         navigate(navigateUrl(newLocation));
       } else {
+        const newSubPath = subPath.replace(uuidPattern, "");
         navigate(
-          `/facility/${facilityId}/locations/${newLocation.id}/${subPath}`,
+          `/facility/${facilityId}/locations/${newLocation.id}/${newSubPath}`,
         );
       }
     }
