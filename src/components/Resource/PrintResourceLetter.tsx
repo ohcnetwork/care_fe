@@ -96,7 +96,9 @@ export default function PrintResourceLetter({ id }: { id: string }) {
             <div>
               <div className="mb-20">
                 <div className="font-semibold">{t("requested_by")}:</div>
-                <div>{data.created_by && formatName(data.created_by)}</div>
+                <div>
+                  {data.created_by ? formatName(data.created_by) : "--"}
+                </div>
                 <div className="text-sm text-gray-600">
                   {formatDateTime(data.created_date)}
                 </div>
@@ -109,7 +111,9 @@ export default function PrintResourceLetter({ id }: { id: string }) {
                   <div className="font-semibold">
                     {t(`resource_request_status__${data.status}`)} {t("by")}:
                   </div>
-                  <div>{data.updated_by && formatName(data.updated_by)}</div>
+                  <div>
+                    {data.updated_by ? formatName(data.updated_by) : "--"}
+                  </div>
                   <div className="text-sm text-gray-600">
                     {formatDateTime(data.modified_date)}
                   </div>
