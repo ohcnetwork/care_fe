@@ -10,7 +10,6 @@ import { z } from "zod";
 
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -360,11 +359,10 @@ export function ProductFormContent({
                     <FormControl>
                       <ProductKnowledgeSelect
                         value={productKnowledgeData?.find(
-                          (pk) => pk.id === field.value,
+                          (pk) => pk.slug === field.value,
                         )}
-                        onChange={(selected) => field.onChange(selected.id)}
-                        className="border-gray-200 font-normal text-gray-700"
-                        enableFavorites
+                        onChange={(selected) => field.onChange(selected?.slug)}
+                        className="border-gray-300 font-normal text-gray-700"
                       />
                     </FormControl>
                     <FormDescription>
@@ -403,11 +401,19 @@ export function ProductFormContent({
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel aria-required>{t("expiration_date")}</FormLabel>
-                  <DatePicker
-                    date={field.value}
-                    onChange={field.onChange}
-                    className="w-full"
-                  />
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="date"
+                      value={
+                        field.value ? format(field.value, "yyyy-MM-dd") : ""
+                      }
+                      onChange={(e) => {
+                        field.onChange(new Date(e.target.value));
+                      }}
+                      className="w-full"
+                    />
+                  </FormControl>
                   <FormDescription>
                     {t("expiration_date_description")}
                   </FormDescription>
@@ -483,6 +489,7 @@ export function ProductFormContent({
                         <div className="mt-6">
                           <ChargeItemDefinitionForm
                             facilityId={facilityId}
+                            minimal={true}
                             onSuccess={(
                               chargeItemDefinition: ChargeItemDefinitionRead,
                             ) => {

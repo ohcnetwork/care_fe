@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Bed, Calendar, Users } from "lucide-react";
+import { Box, Calendar, Users } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -51,18 +51,18 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       visible: canViewSchedule,
     },
     {
-      title: t("bed_availability_dashboard"),
-      description: t("view_real_time_bed_status"),
-      icon: Bed,
-      href: `/facility/${facilityId}/bed-availability`,
-      visible: true, // Available to all facility users
-    },
-    {
       title: t("encounters"),
       description: t("manage_facility_users"),
       icon: Users,
       href: `/facility/${facilityId}/encounters/patients/${careConfig.defaultEncounterType || "all"}`,
       visible: canListEncounters,
+    },
+    {
+      title: t("services"),
+      description: t("view_services"),
+      icon: Box,
+      href: `/facility/${facilityId}/services`,
+      visible: true,
     },
   ];
 

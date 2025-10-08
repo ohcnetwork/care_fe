@@ -50,7 +50,7 @@ import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { cn } from "@/lib/utils";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import {
@@ -74,7 +74,7 @@ function MedicationTable({
   setMedicationToMarkComplete,
 }: MedicationTableProps) {
   const { t } = useTranslation();
-  useFacilityShortcuts("general");
+
   return (
     <div className="overflow-hidden rounded-md border-2 border-white shadow-md">
       <Table className="rounded-md">
@@ -210,7 +210,7 @@ export default function MedicationDispenseList({
 }: Props) {
   const { t } = useTranslation();
   const { locationId } = useCurrentLocation();
-
+  useShortcutSubContext("facility:pharmacy");
   const queryClient = useQueryClient();
   const [dispensedMedicationId, setDispensedMedicationId] = useState<
     string | null
@@ -371,7 +371,6 @@ export default function MedicationDispenseList({
               variant="outline"
               asChild
               className="w-full sm:w-auto border-gray-400 font-semibold"
-              data-shortcut-id="dispense-button"
             >
               <Link
                 href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`}
@@ -385,7 +384,6 @@ export default function MedicationDispenseList({
               variant="outline"
               className="w-full sm:w-auto border-gray-400 font-semibold"
               disabled={prescription.medications.length === 0}
-              data-shortcut-id="print-button"
               onClick={() =>
                 navigate(
                   `/facility/${facilityId}/patient/${patientId}/prescription/${prescriptionId}/print`,
@@ -403,7 +401,6 @@ export default function MedicationDispenseList({
                 )
               }
               className="w-full sm:w-auto"
-              data-shortcut-id="billing-action"
             >
               <ShortcutBadge actionId="billing-action" />
               {t("billing")}
@@ -416,7 +413,7 @@ export default function MedicationDispenseList({
         <EmptyState
           title={t("no_medications_found")}
           description={t("no_medications_found_description")}
-          icon="l-tablets"
+          icon={<CareIcon icon="l-tablets" className="text-primary size-6" />}
         />
       ) : (
         <div className="space-y-8">
@@ -536,7 +533,12 @@ export default function MedicationDispenseList({
                   <EmptyState
                     title={t("no_results")}
                     description={t("try_adjusting_your_filters")}
-                    icon="l-search"
+                    icon={
+                      <CareIcon
+                        icon="l-search"
+                        className="text-primary size-6"
+                      />
+                    }
                   />
                 )}
               </div>
@@ -562,7 +564,12 @@ export default function MedicationDispenseList({
                   <EmptyState
                     title={t("no_results")}
                     description={t("try_adjusting_your_filters")}
-                    icon="l-search"
+                    icon={
+                      <CareIcon
+                        icon="l-search"
+                        className="text-primary size-6"
+                      />
+                    }
                   />
                 )}
               </div>
@@ -618,8 +625,6 @@ export default function MedicationDispenseList({
           setMedicationToMarkComplete(null);
         }}
         confirmText={t("mark_as_already_given")}
-        cancelText={t("cancel")}
-        variant="primary"
       />
       <ConfirmActionDialog
         open={prescriptionToUpdate !== null}
