@@ -169,15 +169,17 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                     {inventory.product.batch?.lot_number || "-"}
                   </TableCell>
                   <TableCell>
-                    <MonetaryDisplay
-                      amount={
-                        inventory.product.charge_item_definition.price_components.find(
-                          (c) =>
-                            c.monetary_component_type ===
-                            MonetaryComponentType.base,
-                        )?.amount
-                      }
-                    />
+                    {inventory.product.charge_item_definition && (
+                      <MonetaryDisplay
+                        amount={
+                          inventory.product.charge_item_definition.price_components.find(
+                            (c) =>
+                              c.monetary_component_type ===
+                              MonetaryComponentType.base,
+                          )?.amount
+                        }
+                      />
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
