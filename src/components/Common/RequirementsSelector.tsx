@@ -152,7 +152,7 @@ function RequirementsContent({
   return (
     <Command filter={() => 1}>
       {value.length > 0 && (
-        <div className="flex flex-nowrap sm:flex-wrap border-b gap-2 p-1.5 overflow-x-auto flex-shrink-0">
+        <div className="flex flex-nowrap sm:flex-wrap border-b gap-2 p-1.5 overflow-x-auto flex-shrink-0 sm:max-h-32 mr-2">
           {value.map((item, index) => (
             <SmallSelectedItemCard
               key={`${item.value}-${index}`}
