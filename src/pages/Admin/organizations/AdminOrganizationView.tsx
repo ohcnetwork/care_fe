@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building, FolderOpen, Trash } from "lucide-react";
 import { Link, navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -64,6 +65,7 @@ function DeleteOrgDialog({
         queryKey: ["organization", "list", organizationType, parentId],
       });
       toast.success(t("organization_deleted_successfully"));
+      setShowDeleteDialog(false);
     },
     onError: () => {
       toast.error(t("something_went_wrong"));
@@ -75,44 +77,35 @@ function DeleteOrgDialog({
     : !org.has_children && org.org_type !== "govt";
 
   return (
-    <AlertDialog>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="icon" disabled={!canDelete}>
-              <Trash className="size-4" />
-            </Button>
-          </AlertDialogTrigger>
-        </TooltipTrigger>
-        <TooltipContent>{t("delete")}</TooltipContent>
-      </Tooltip>
-      <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
-        <AlertDialogHeader>
-          <AlertDialogTitle>
-            {t("remove_name", { name: org.name })}
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            {canDelete
-              ? t("are_you_sure_want_to_delete", {
-                  name: org.name,
-                })
-              : t("cannot_delete_organization_with_children")}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => deleteOrganization({})}
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span>
+          <Button
+            variant="ghost"
+            size="icon"
             disabled={!canDelete}
-            className={buttonVariants({
-              variant: "destructive",
-            })}
+            onClick={() => setShowDeleteDialog(true)}
           >
-            {t("remove")}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+            <Trash className="size-4" />
+          </Button>
+          <ConfirmActionDialog
+            open={showDeleteDialog}
+            onOpenChange={setShowDeleteDialog}
+            title={t("remove_name", { name: org.name })}
+            description={
+              canDelete
+                ? t("are_you_sure_want_to_delete", { name: org.name })
+                : t("cannot_delete_organization_with_children")
+            }
+            onConfirm={() => deleteOrganization()}
+            confirmText={t("remove")}
+            variant="destructive"
+            disabled={!canDelete}
+          />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{t("delete")}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -181,15 +174,6 @@ function OrganizationCard({
           )}
         </div>
       </CardContent>
-      <ConfirmActionDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        title={t("delete_organization")}
-        description={t("are_you_sure_want_to_delete", { name: org.name })}
-        onConfirm={() => deleteOrganization()}
-        confirmText={t("delete")}
-        variant="destructive"
-      />
     </Card>
   );
 }
@@ -276,7 +260,8 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
                       <TableRow
                         key={org.id}
                         onClick={
-                          org.org_type === "govt"
+                          org.org_type !== "role" &&
+                          org.org_type !== "product_supplier"
                             ? () =>
                                 navigate(
                                   `/admin/organizations/${organizationType}/${org.id}`,
