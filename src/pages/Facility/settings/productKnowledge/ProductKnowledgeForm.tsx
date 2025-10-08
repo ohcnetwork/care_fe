@@ -50,15 +50,6 @@ import {
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
-// Define a Code schema to match the API type
-const codeSchema = z.object({
-  code: z.string().min(1, "Code is required"),
-  display: z.string().min(1, "Display name is required"),
-  system: z.string().min(1, "System is required"),
-});
-
-
-
 export default function ProductKnowledgeForm({
   facilityId,
   slug,
@@ -72,52 +63,6 @@ export default function ProductKnowledgeForm({
 }) {
   const { t } = useTranslation();
   
-  const formSchemaWithTranslations = z.object({
-    name: z.string().min(1, t("field_required")),
-    slug_value: z
-      .string()
-      .min(1, t("field_required"))
-      .max(25, t("character_count_validation", { min: 1, max: 25 })),
-    product_type: z.nativeEnum(ProductKnowledgeType),
-    status: z.nativeEnum(ProductKnowledgeStatus),
-    alternate_identifier: z.string().trim().optional(),
-    category: z.string(),
-    code: codeSchema.nullable(),
-    base_unit: codeSchema.nullable(),
-    names: z
-      .array(
-        z.object({
-          name_type: z.nativeEnum(ProductNameTypes),
-          name: z.string().min(1, t("field_required")),
-        }),
-      )
-      .default([]),
-    storage_guidelines: z
-      .array(
-        z.object({
-          note: z.string().min(1, t("field_required")),
-          stability_duration: z
-            .object({
-              value: z.number().int().optional(),
-              unit: codeSchema,
-            })
-            .refine((data) => data.value !== undefined && data.value !== null),
-        }),
-      )
-      .default([]),
-    definitional: z
-      .object({
-        dosage_form: codeSchema.optional(),
-        intended_routes: z.array(codeSchema).default([]),
-      })
-      .nullable()
-      .optional()
-      .refine((data) => {
-        if (!data) return true; // definitional is optional
-        return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
-      }),
-  });
-
   const isEditMode = Boolean(slug);
 
   const { data: existingData, isFetching } = useQuery({
@@ -174,6 +119,60 @@ function ProductKnowledgeFormContent({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
+  
+  // Define a Code schema to match the API type with i18n
+  const codeSchema = z.object({
+    code: z.string().min(1, t("field_required")),
+    display: z.string().min(1, t("field_required")),
+    system: z.string().min(1, t("field_required")),
+  });
+  
+  const formSchemaWithTranslations = z.object({
+    name: z.string().min(1, t("field_required")),
+    slug_value: z
+      .string()
+      .min(1, t("field_required"))
+      .max(25, t("character_count_validation", { min: 1, max: 25 })),
+    product_type: z.nativeEnum(ProductKnowledgeType),
+    status: z.nativeEnum(ProductKnowledgeStatus),
+    alternate_identifier: z.string().trim().optional(),
+    category: z.string(),
+    code: codeSchema.nullable(),
+    base_unit: codeSchema.nullable(),
+    names: z
+      .array(
+        z.object({
+          name_type: z.nativeEnum(ProductNameTypes),
+          name: z.string().min(1, t("field_required")),
+        }),
+      )
+      .default([]),
+    storage_guidelines: z
+      .array(
+        z.object({
+          note: z.string().min(1, t("field_required")),
+          stability_duration: z
+            .object({
+              value: z.number().int().optional(),
+              unit: codeSchema,
+            })
+            .refine((data) => data.value !== undefined && data.value !== null),
+        }),
+      )
+      .default([]),
+    definitional: z
+      .object({
+        dosage_form: codeSchema.optional(),
+        intended_routes: z.array(codeSchema).default([]),
+      })
+      .nullable()
+      .optional()
+      .refine((data) => {
+        if (!data) return true; // definitional is optional
+        return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
+      }),
+  });
+  
   const queryClient = useQueryClient();
   const isEditMode = Boolean(slug);
 

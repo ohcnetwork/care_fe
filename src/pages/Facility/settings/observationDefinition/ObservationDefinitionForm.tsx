@@ -64,6 +64,60 @@ export default function ObservationDefinitionForm({
 }) {
   const { t } = useTranslation();
 
+  const isEditMode = Boolean(observationSlug);
+
+  const { data: existingData, isFetching } = useQuery({
+    queryKey: ["observationDefinitions", observationSlug],
+    queryFn: query(observationDefinitionApi.retrieveObservationDefinition, {
+      pathParams: {
+        observationSlug: observationSlug!,
+      },
+      queryParams: {
+        facility: facilityId,
+      },
+    }),
+    enabled: isEditMode,
+  });
+
+  if (isEditMode && isFetching) {
+    return (
+      <Page title={t("edit_observation_definition")} hideTitleOnPage>
+        <div className="container mx-auto max-w-3xl">
+          <div className="mb-6">
+            <h1 className="text-xl font-semibold text-gray-900">
+              {t("edit_observation_definition")}
+            </h1>
+          </div>
+          <FormSkeleton rows={10} />
+        </div>
+      </Page>
+    );
+  }
+
+  return (
+    <ObservationDefinitionFormContent
+      facilityId={facilityId}
+      observationSlug={observationSlug}
+      existingData={existingData}
+      onSuccess={onSuccess}
+    />
+  );
+}
+
+function ObservationDefinitionFormContent({
+  facilityId,
+  observationSlug,
+  existingData,
+  onSuccess = () =>
+    navigate(`/facility/${facilityId}/settings/observation_definitions`),
+}: {
+  facilityId: string;
+  observationSlug?: string;
+  existingData?: ObservationDefinitionReadSpec;
+  onSuccess?: () => void;
+}) {
+  const { t } = useTranslation();
+  
   const formSchemaWithTranslations = z.object({
     title: z.string().min(1, t("field_required")),
     slug_value: z
@@ -128,60 +182,7 @@ export default function ObservationDefinitionForm({
       .default([]),
     qualified_ranges: qualifiedRangeSchema,
   });
-
-  const isEditMode = Boolean(observationSlug);
-
-  const { data: existingData, isFetching } = useQuery({
-    queryKey: ["observationDefinitions", observationSlug],
-    queryFn: query(observationDefinitionApi.retrieveObservationDefinition, {
-      pathParams: {
-        observationSlug: observationSlug!,
-      },
-      queryParams: {
-        facility: facilityId,
-      },
-    }),
-    enabled: isEditMode,
-  });
-
-  if (isEditMode && isFetching) {
-    return (
-      <Page title={t("edit_observation_definition")} hideTitleOnPage>
-        <div className="container mx-auto max-w-3xl">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("edit_observation_definition")}
-            </h1>
-          </div>
-          <FormSkeleton rows={10} />
-        </div>
-      </Page>
-    );
-  }
-
-  return (
-    <ObservationDefinitionFormContent
-      facilityId={facilityId}
-      observationSlug={observationSlug}
-      existingData={existingData}
-      onSuccess={onSuccess}
-    />
-  );
-}
-
-function ObservationDefinitionFormContent({
-  facilityId,
-  observationSlug,
-  existingData,
-  onSuccess = () =>
-    navigate(`/facility/${facilityId}/settings/observation_definitions`),
-}: {
-  facilityId: string;
-  observationSlug?: string;
-  existingData?: ObservationDefinitionReadSpec;
-  onSuccess?: () => void;
-}) {
-  const { t } = useTranslation();
+  
   const queryClient = useQueryClient();
   const isEditMode = Boolean(observationSlug);
 

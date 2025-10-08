@@ -70,6 +70,61 @@ export default function ActivityDefinitionForm({
 }) {
   const { t } = useTranslation();
 
+  const isEditMode = Boolean(activityDefinitionSlug);
+
+  const { data: existingData, isFetching } = useQuery({
+    queryKey: ["activityDefinition", activityDefinitionSlug],
+    queryFn: query(activityDefinitionApi.retrieveActivityDefinition, {
+      pathParams: {
+        activityDefinitionSlug: activityDefinitionSlug!,
+        facilityId,
+      },
+    }),
+    enabled: isEditMode,
+  });
+
+  if (isEditMode && isFetching) {
+    return (
+      <Page title={t("edit_activity_definition")} hideTitleOnPage>
+        <div className="container mx-auto max-w-3xl">
+          <div className="mb-6">
+            <h1 className="text-xl font-semibold text-gray-900">
+              {t("edit_activity_definition")}
+            </h1>
+          </div>
+          <div className="flex items-center justify-center rounded-lg border border-gray-200 bg-white p-8">
+            <div className="text-center">
+              <div className="mb-2 text-sm text-gray-500">{t("loading")}</div>
+            </div>
+          </div>
+        </div>
+      </Page>
+    );
+  }
+
+  return (
+    <ActivityDefinitionFormContent
+      facilityId={facilityId}
+      activityDefinitionSlug={activityDefinitionSlug}
+      existingData={existingData}
+      categorySlug={categorySlug}
+    />
+  );
+}
+
+function ActivityDefinitionFormContent({
+  facilityId,
+  activityDefinitionSlug,
+  existingData,
+  categorySlug,
+}: {
+  facilityId: string;
+  activityDefinitionSlug?: string;
+  existingData?: ActivityDefinitionReadSpec;
+  categorySlug?: string;
+}) {
+  const { t } = useTranslation();
+  
   const formSchemaWithTranslations = z.object({
     title: z.string().min(1, t("field_required")),
     slug_value: z
@@ -161,61 +216,7 @@ export default function ActivityDefinitionForm({
       .default([]),
     category: z.string(),
   });
-
-  const isEditMode = Boolean(activityDefinitionSlug);
-
-  const { data: existingData, isFetching } = useQuery({
-    queryKey: ["activityDefinition", activityDefinitionSlug],
-    queryFn: query(activityDefinitionApi.retrieveActivityDefinition, {
-      pathParams: {
-        activityDefinitionSlug: activityDefinitionSlug!,
-        facilityId,
-      },
-    }),
-    enabled: isEditMode,
-  });
-
-  if (isEditMode && isFetching) {
-    return (
-      <Page title={t("edit_activity_definition")} hideTitleOnPage>
-        <div className="container mx-auto max-w-3xl">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {t("edit_activity_definition")}
-            </h1>
-          </div>
-          <div className="flex items-center justify-center rounded-lg border border-gray-200 bg-white p-8">
-            <div className="text-center">
-              <div className="mb-2 text-sm text-gray-500">{t("loading")}</div>
-            </div>
-          </div>
-        </div>
-      </Page>
-    );
-  }
-
-  return (
-    <ActivityDefinitionFormContent
-      facilityId={facilityId}
-      activityDefinitionSlug={activityDefinitionSlug}
-      existingData={existingData}
-      categorySlug={categorySlug}
-    />
-  );
-}
-
-function ActivityDefinitionFormContent({
-  facilityId,
-  activityDefinitionSlug,
-  existingData,
-  categorySlug,
-}: {
-  facilityId: string;
-  activityDefinitionSlug?: string;
-  existingData?: ActivityDefinitionReadSpec;
-  categorySlug?: string;
-}) {
-  const { t } = useTranslation();
+  
   const queryClient = useQueryClient();
   const isEditMode = Boolean(activityDefinitionSlug);
   const [specimenSearch, setSpecimenSearch] = React.useState("");

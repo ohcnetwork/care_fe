@@ -49,16 +49,6 @@ import {
 } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 
-const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug_value: z
-    .string()
-    .min(5, "Slug should have atleast 5 characters")
-    .max(25, "Slug should not exceed 25 characters"),
-  description: z.string().optional(),
-  resource_sub_type: z.nativeEnum(ResourceCategorySubType),
-});
-
 interface ResourceCategoryFormProps {
   facilityId: string;
   categorySlug?: string;
@@ -173,7 +163,7 @@ export function ResourceCategoryForm({
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: z.infer<typeof formSchemaWithTranslations>) => {
     const payload: ResourceCategoryCreate | ResourceCategoryUpdate = {
       title: values.title,
       slug_value: values.slug_value,
