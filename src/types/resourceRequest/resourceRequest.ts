@@ -71,7 +71,7 @@ export interface ResourceRequestBase {
 export interface ResourceRequestListRead extends ResourceRequestBase {
   id: string;
   origin_facility: FacilityRead;
-  assigned_facility: FacilityRead | undefined;
+  assigned_facility: FacilityRead | null;
   created_date: string;
   modified_date: string;
 }

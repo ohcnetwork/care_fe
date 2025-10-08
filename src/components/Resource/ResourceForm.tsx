@@ -73,10 +73,12 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const resourceFormSchema = z.object({
     status: z.nativeEnum(ResourceRequestStatus),
     category: z.nativeEnum(ResourceRequestCategory),
-    assigned_facility: z.object({
-      id: z.string(),
-      name: z.string(),
-    }),
+    assigned_facility: z
+      .object({
+        id: z.string(),
+        name: z.string(),
+      })
+      .nullable(),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
     reason: z
@@ -170,7 +172,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       status: data.status,
       category: data.category,
       origin_facility: String(facilityId),
-      assigned_facility: data.assigned_facility?.id,
+      assigned_facility: data.assigned_facility?.id || null,
       assigned_to: assignedToUser?.id || null,
       approving_facility: null,
       emergency: data.emergency === "true",
