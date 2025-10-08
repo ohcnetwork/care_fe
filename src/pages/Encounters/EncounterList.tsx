@@ -189,7 +189,7 @@ export function EncounterList({
     encounterStatusFilter("status"),
     encounterPriorityFilter("priority"),
     tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
-    dateFilter("created_date", t("date"), longDateRangeOptions),
+    dateFilter("created_date", t("date"), longDateRangeOptions, true),
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
