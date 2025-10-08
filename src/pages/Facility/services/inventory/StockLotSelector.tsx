@@ -143,7 +143,7 @@ export default function StockLotSelector({
                       <Badge>
                         <MonetaryDisplay
                           amount={
-                            selectedInventory?.product.charge_item_definition.price_components.find(
+                            selectedInventory?.product.charge_item_definition?.price_components?.find(
                               (c) =>
                                 c.monetary_component_type ===
                                 MonetaryComponentType.base,
@@ -229,7 +229,7 @@ export default function StockLotSelector({
                       <Badge>
                         <MonetaryDisplay
                           amount={
-                            inv.product.charge_item_definition.price_components.find(
+                            inv.product.charge_item_definition?.price_components.find(
                               (c) =>
                                 c.monetary_component_type ===
                                 MonetaryComponentType.base,

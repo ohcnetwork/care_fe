@@ -147,7 +147,7 @@ export function SupplyDeliveryTable({
               <TableCell className="border-x p-3 text-gray-950">
                 <MonetaryDisplay
                   amount={
-                    delivery.supplied_inventory_item?.product.charge_item_definition.price_components.filter(
+                    delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.filter(
                       (c) =>
                         c.monetary_component_type ===
                         MonetaryComponentType.base,
@@ -158,7 +158,7 @@ export function SupplyDeliveryTable({
               <TableCell className="border-x p-3 text-gray-950">
                 <MonetaryDisplay
                   amount={String(
-                    delivery.supplied_inventory_item?.product.charge_item_definition.price_components
+                    delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
                       .filter(
                         (c) =>
                           c.monetary_component_type ===
@@ -172,7 +172,7 @@ export function SupplyDeliveryTable({
               <TableCell className="border-x p-3 text-gray-950">
                 <MonetaryDisplay
                   amount={String(
-                    delivery.supplied_inventory_item?.product.charge_item_definition.price_components
+                    delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
                       .filter(
                         (c) =>
                           c.monetary_component_type ===
