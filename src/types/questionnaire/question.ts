@@ -113,7 +113,7 @@ export type EnableWhen = {
 export interface AnswerOption {
   value: string;
   display?: string;
-  initialSelected?: boolean;
+  initial_selected?: boolean;
   code?: Code;
 }
 

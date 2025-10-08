@@ -39,20 +39,17 @@ function formatSpecimenRequirements(
 }
 
 interface ServiceRequestDetailsProps {
-  facilityId: string;
   request: ServiceRequestReadSpec;
   activityDefinition: ActivityDefinitionReadSpec;
 }
 
 export function ServiceRequestDetails({
-  facilityId,
   request,
   activityDefinition,
 }: ServiceRequestDetailsProps) {
   const specimenRequirements = activityDefinition?.specimen_requirements ?? [];
   const observationRequirements =
     activityDefinition?.observation_result_requirements ?? [];
-  console.log(facilityId);
 
   return (
     <div className="bg-gray-100 rounded-lg border border-gray-200">
@@ -135,7 +132,7 @@ export function ServiceRequestDetails({
                 {t("requested by")}
               </div>
               <div className="font-semibold text-gray-700">
-                {request.created_by && formatName(request.created_by)}
+                {request.requester && formatName(request.requester)}
               </div>
             </div>
           </div>

@@ -1,6 +1,10 @@
 import { CountryCode } from "libphonenumber-js/types.cjs";
 
-import { EncounterClass } from "@/types/emr/encounter/encounter";
+import {
+  ENCOUNTER_CLASS,
+  EncounterClass,
+} from "@/types/emr/encounter/encounter";
+import { NonEmptyArray } from "@/Utils/types";
 
 const env = import.meta.env;
 
@@ -31,15 +35,10 @@ const careConfig = {
   apiUrl: env.REACT_CARE_API_URL,
   sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
   urls: {
-    dashboard: env.REACT_DASHBOARD_URL,
     github: env.REACT_GITHUB_URL || "https://github.com/ohcnetwork",
     ohcn: env.REACT_OHCN_URL || "https://ohc.network?ref=care",
   },
 
-  headerLogo: logo(env.REACT_HEADER_LOGO, {
-    light: "https://cdn.ohc.network/header_logo.png",
-    dark: "https://cdn.ohc.network/header_logo.png",
-  }),
   mainLogo: logo(env.REACT_MAIN_LOGO, {
     light: "/images/care_logo.svg",
     dark: "/images/care_logo.svg",
@@ -51,9 +50,14 @@ const careConfig = {
   availableLocales: (env.REACT_ALLOWED_LOCALES || "")
     .split(",")
     .map((l) => l.trim()),
+  encounterClasses: (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",") ??
+    ENCOUNTER_CLASS) as NonEmptyArray<EncounterClass>,
 
-  defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
-    "hh") as EncounterClass,
+  defaultEncounterType:
+    (env.REACT_DEFAULT_ENCOUNTER_TYPE as EncounterClass) ||
+    (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",").length === 1
+      ? (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",")[0] as EncounterClass)
+      : undefined),
 
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
@@ -67,8 +71,6 @@ const careConfig = {
       : 5 * 60e3,
   },
 
-  minEncounterDate: new Date(env.REACT_MIN_ENCOUNTER_DATE || "2020-01-01"),
-
   // Plugins related configs...
   sentry: {
     dsn:
@@ -76,6 +78,14 @@ const careConfig = {
       "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
     environment: env.REACT_SENTRY_ENVIRONMENT || "staging",
   },
+
+  /**
+   * Relative number of days to show in the encounters page by default.
+   * 0 means today.
+   */
+  encounterDateFilter: env.REACT_ENCOUNTER_DEFAULT_DATE_FILTER
+    ? parseInt(env.REACT_ENCOUNTER_DEFAULT_DATE_FILTER)
+    : 0,
 
   appointments: {
     /**
@@ -137,6 +147,11 @@ const careConfig = {
     ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)
     : 2,
 
+  /**
+   * Disable patient login if set to "true"
+   */
+  disablePatientLogin: boolean("REACT_DISABLE_PATIENT_LOGIN", false),
+
   patientRegistration: {
     /**
      * Minimum number of geo-organization levels the user must select
@@ -151,6 +166,8 @@ const careConfig = {
             1,
           )
         : undefined,
+
+    defaultGeoOrganization: env.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG,
 
     minimalPatientRegistration: boolean(
       "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",

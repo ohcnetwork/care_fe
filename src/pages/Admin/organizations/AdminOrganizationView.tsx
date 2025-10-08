@@ -6,19 +6,8 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,6 +25,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
@@ -63,6 +53,7 @@ function DeleteOrgDialog({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { mutate: deleteOrganization } = useMutation({
     mutationFn: mutate(organizationApi.delete, {
@@ -190,6 +181,15 @@ function OrganizationCard({
           )}
         </div>
       </CardContent>
+      <ConfirmActionDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={t("delete_organization")}
+        description={t("are_you_sure_want_to_delete", { name: org.name })}
+        onConfirm={() => deleteOrganization()}
+        confirmText={t("delete")}
+        variant="destructive"
+      />
     </Card>
   );
 }

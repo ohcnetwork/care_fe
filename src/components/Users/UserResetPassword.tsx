@@ -22,8 +22,8 @@ import { PasswordInput } from "@/components/ui/input-password";
 import { ValidationHelper } from "@/components/Users/UserFormValidations";
 import { UpdatePasswordForm } from "@/components/Users/models";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
+import authApi from "@/types/auth/authApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 export default function UserResetPassword({
@@ -71,8 +71,8 @@ export default function UserResetPassword({
       new_password_2: "",
     },
   });
-  const { mutate: resetPassword, isPending } = useMutation({
-    mutationFn: mutate(routes.updatePassword),
+  const { mutate: updatePassword, isPending } = useMutation({
+    mutationFn: mutate(authApi.updatePassword),
     onSuccess: () => {
       toast.success(t("password_updated"));
       form.reset();
@@ -87,7 +87,7 @@ export default function UserResetPassword({
       username: userData.username,
       new_password: formData.new_password_1,
     };
-    resetPassword(form);
+    updatePassword(form);
   };
 
   return (
@@ -121,6 +121,7 @@ export default function UserResetPassword({
                     <FormControl>
                       <PasswordInput
                         {...field}
+                        autoComplete="current-password"
                         onChange={(e) => {
                           field.onChange(e.target.value);
                         }}
@@ -141,6 +142,7 @@ export default function UserResetPassword({
                         <FormControl>
                           <PasswordInput
                             {...field}
+                            autoComplete="new-password"
                             onChange={(e) => {
                               field.onChange(e.target.value);
                             }}
@@ -198,6 +200,7 @@ export default function UserResetPassword({
                         <FormControl>
                           <PasswordInput
                             {...field}
+                            autoComplete="new-password"
                             onChange={(e) => {
                               field.onChange(e.target.value);
                             }}

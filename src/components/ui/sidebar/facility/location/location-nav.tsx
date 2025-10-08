@@ -6,6 +6,7 @@ import { NavMain } from "@/components/ui/sidebar/nav-main";
 
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { CalendarIcon, Logs } from "lucide-react";
 
 export function LocationNav() {
   const { t } = useTranslation();
@@ -51,33 +52,57 @@ export function LocationNav() {
         },
         {
           name: t("inventory"),
-          url: `${baseUrl}/inventory`,
+          url: `${baseUrl}/inventory/summary`,
           icon: <CareIcon icon="l-shop" />,
           children: [
             {
               name: t("items"),
-              url: `${baseUrl}/inventory`,
+              url: `${baseUrl}/inventory/summary`,
             },
             {
-              header: t("internal_transfers"),
-              name: t("to_receive"),
-              url: `${baseUrl}/internal_transfers/to_receive`,
+              header: t("orders"),
+              name: t("outgoing_orders"),
+              url: `${baseUrl}/inventory/internal/orders/outgoing`,
             },
             {
-              name: t("to_dispatch"),
-              url: `${baseUrl}/internal_transfers/to_dispatch`,
+              name: t("incoming_orders"),
+              url: `${baseUrl}/inventory/internal/orders/incoming`,
+            },
+
+            {
+              header: t("deliveries"),
+              name: t("outgoing_deliveries"),
+              url: `${baseUrl}/inventory/internal/deliveries/outgoing`,
+            },
+            {
+              name: t("incoming_deliveries"),
+              url: `${baseUrl}/inventory/internal/deliveries/incoming`,
             },
             {
               header: t("external_supply"),
-              // headerIcon: <CareIcon icon="l-box" className="text-gray-400" />,
               name: t("purchase_orders"),
-              url: `${baseUrl}/external_supply/purchase_orders`,
+              url: `${baseUrl}/inventory/external/orders/outgoing`,
             },
             {
-              name: t("inward_entry"),
-              url: `${baseUrl}/external_supply/inward_entry`,
+              name: t("purchase_deliveries"),
+              url: `${baseUrl}/inventory/external/deliveries/incoming`,
             },
           ],
+        },
+        {
+          name: t("schedule"),
+          url: `${baseUrl}/schedule`,
+          icon: <CalendarIcon />,
+        },
+        {
+          name: t("appointments"),
+          url: `${baseUrl}/appointments`,
+          icon: <CareIcon icon="d-calendar" />,
+        },
+        {
+          name: t("queues"),
+          url: `${baseUrl}/queues`,
+          icon: <Logs />,
         },
       ]}
     />

@@ -78,16 +78,9 @@ export const routes = {
 ### Basic Queries
 
 ```typescript
-// Using modern routes
 const { data } = useQuery({
   queryKey: ['users'],
   queryFn: query(userApi.list)
-});
-
-// Using legacy routes
-const { data } = useQuery({
-  queryKey: [routes.auth.me.path],
-  queryFn: query(routes.auth.me)
 });
 ```
 
@@ -114,17 +107,11 @@ const { data } = useQuery({
 ## Mutation Patterns
 
 ```typescript
-// Using modern routes
 const { mutate: createUser } = useMutation({
   mutationFn: mutate(userApi.create),
   onSuccess: () => {
     queryClient.invalidateQueries(["users"]);
   },
-});
-
-// Using legacy routes
-const { mutate: login } = useMutation({
-  mutationFn: mutate(routes.auth.login),
 });
 ```
 

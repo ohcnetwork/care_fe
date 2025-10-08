@@ -1,9 +1,6 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-import {
-  MedicationRequestRead,
-  MedicationRequestSummary,
-} from "@/types/emr/medicationRequest/medicationRequest";
+import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
 
 export default {
   list: {
@@ -20,10 +17,5 @@ export default {
     path: "/api/v1/patient/{patientId}/medication/request/{id}/",
     method: HttpMethod.PUT,
     TRes: Type<MedicationRequestRead>,
-  },
-  summary: {
-    path: "/api/v1/facility/{facilityId}/medication_request/summary/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<MedicationRequestSummary>>(),
   },
 };

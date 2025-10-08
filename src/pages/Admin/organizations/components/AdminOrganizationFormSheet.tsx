@@ -157,7 +157,10 @@ export default function AdminOrganizationFormSheet({
             <PenLine className="size-4" />
           </Button>
         ) : (
-          <Button disabled={organizationType === "govt"}>
+          <Button
+            className="w-full md:w-auto"
+            disabled={organizationType === "govt"}
+          >
             <CareIcon icon="l-plus" className="mr-2 size-4" />
             {t("add")} {t(`SYSTEM__org_type__${organizationType}`)}
           </Button>

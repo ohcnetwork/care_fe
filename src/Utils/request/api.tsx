@@ -1,13 +1,10 @@
-import { UpdatePasswordForm } from "@/components/Users/models";
-
 import { PaginatedResponse } from "@/Utils/request/types";
-import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
-import { MFAAuthenticationToken } from "@/types/auth/otp";
-import { BatchRequestBody } from "@/types/base/batch/batch";
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
-import { PatientRead } from "@/types/emr/patient/patient";
 import { PlugConfig } from "@/types/plugConfig";
-import { BatchSubmissionResult } from "@/types/questionnaire/batch";
 import {
   CommentModel,
   CreateResourceRequest,
@@ -22,18 +19,6 @@ import { UserReadMinimal } from "@/types/user/user";
  */
 export function Type<T>(): T {
   return {} as T;
-}
-
-export interface JwtTokenObtainPair {
-  access: string;
-  refresh: string;
-}
-
-export type LoginResponse = JwtTokenObtainPair | MFAAuthenticationToken;
-
-export interface LoginCredentials {
-  username: string;
-  password: string;
 }
 
 export enum HttpMethod {
@@ -60,66 +45,6 @@ export const API = <TResponse, TBody = undefined>(
  * @deprecated use object specific api instead
  */
 const routes = {
-  // Auth Endpoints
-  login: {
-    path: "/api/v1/auth/login/",
-    method: "POST",
-    noAuth: true,
-    TRes: Type<LoginResponse>(),
-    TBody: Type<LoginCredentials>(),
-  },
-
-  logout: {
-    path: "/api/v1/auth/logout/",
-    method: "POST",
-    TBody: Type<JwtTokenObtainPair>(),
-  },
-
-  token_refresh: {
-    path: "/api/v1/auth/token/refresh/",
-    method: "POST",
-    TRes: Type<JwtTokenObtainPair>(),
-    TBody: Type<{ refresh: JwtTokenObtainPair["refresh"] }>(),
-  },
-
-  checkResetToken: {
-    path: "/api/v1/password_reset/check/",
-    method: "POST",
-    noAuth: true,
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<{
-      token: string;
-    }>(),
-  },
-
-  resetPassword: {
-    path: "/api/v1/password_reset/confirm/",
-    method: "POST",
-    noAuth: true,
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<{
-      password: string;
-      confirm: string;
-    }>(),
-  },
-
-  forgotPassword: {
-    path: "/api/v1/password_reset/",
-    method: "POST",
-    noAuth: true,
-    TRes: Type<Record<string, never>>(),
-    TBody: Type<{
-      username: string;
-    }>(),
-  },
-
-  updatePassword: {
-    path: "/api/v1/password_change/",
-    method: "PUT",
-    TRes: Type<{ message: string }>(),
-    TBody: Type<UpdatePasswordForm>(),
-  },
-
   getScheduleAbleFacilityUser: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/{user_id}/",
     TRes: Type<UserReadMinimal>(),
@@ -178,7 +103,7 @@ const routes = {
     path: "/api/v1/batch_requests/",
     method: "POST",
     TRes: Type<{
-      results: BatchSubmissionResult[];
+      results: BatchRequestResponse[];
     }>(),
     TBody: Type<BatchRequestBody>(),
   },
@@ -211,48 +136,6 @@ const routes = {
       method: "DELETE",
       TRes: Type<Record<string, never>>(),
       TBody: Type<void>(),
-    },
-  },
-
-  // OTP Routes
-  otp: {
-    sendOtp: {
-      path: "/api/v1/otp/send/",
-      method: "POST",
-      TBody: Type<{ phone_number: string }>(),
-      TRes: Type<Record<string, never>>(),
-      auth: {
-        key: "Authorization",
-        value: "{OTP_API_KEY}",
-        type: "header",
-      },
-    },
-    loginByOtp: {
-      path: "/api/v1/otp/login/",
-      method: "POST",
-      TBody: Type<{ phone_number: string; otp: string }>(),
-      TRes: Type<{ access: string }>(),
-    },
-    getPatient: {
-      path: "/api/v1/otp/patient/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<PatientRead>>(),
-      auth: {
-        key: "Authorization",
-        value: "Bearer {token}",
-        type: "header",
-      },
-    },
-    createPatient: {
-      path: "/api/v1/otp/patient/",
-      method: "POST",
-      TBody: Type<Partial<AppointmentPatientRegister>>(),
-      TRes: Type<PatientRead>(),
-      auth: {
-        key: "Authorization",
-        value: "Bearer {token}",
-        type: "header",
-      },
     },
   },
 } as const;
