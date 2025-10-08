@@ -11,14 +11,7 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import {
@@ -28,6 +21,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 type RequirementItem = {
@@ -152,9 +150,9 @@ function RequirementsContent({
   }
 
   return (
-    <Command className="overflow-y-auto" filter={() => 1}>
+    <Command filter={() => 1}>
       {value.length > 0 && (
-        <div className="flex flex-nowrap sm:flex-wrap border-b gap-1.5 px-3 py-2 overflow-x-auto">
+        <div className="flex flex-nowrap sm:flex-wrap border-b gap-2 p-1.5 overflow-x-auto flex-shrink-0">
           {value.map((item, index) => (
             <SmallSelectedItemCard
               key={`${item.value}-${index}`}
@@ -191,7 +189,7 @@ function RequirementsContent({
       <CommandInput
         placeholder={t("search")}
         onValueChange={onSearch}
-        className="border-0 focus:ring-0 text-base"
+        className="border-0 focus:ring-0 text-base sm:text-sm"
       />
       {isLoading ? (
         <div className="p-4">
@@ -209,48 +207,46 @@ function RequirementsContent({
           </Card>
         </CommandEmpty>
       )}
-      <CommandGroup className="overflow-y-auto p-0">
-        <ScrollArea className="h-[calc(100vh-300px)]">
-          {isLoading ? (
-            <div className="p-4">
-              <FormSkeleton rows={5} />
-            </div>
-          ) : (
-            <div className="p-2">
-              {options.map((option) => {
-                const isSelected = value.some(
-                  (item) => item.value === option.value,
-                );
-                const showPlusButton = allowDuplicate || !isSelected;
+      <CommandGroup className="overflow-y-auto max-h-[55dvh] md:max-h-[50dvh] lg:max-h-[40dvh]">
+        {isLoading ? (
+          <div className="p-4">
+            <FormSkeleton rows={5} />
+          </div>
+        ) : (
+          <div className="p-2">
+            {options.map((option) => {
+              const isSelected = value.some(
+                (item) => item.value === option.value,
+              );
+              const showPlusButton = allowDuplicate || !isSelected;
 
-                return (
-                  <CommandItem
-                    key={option.value}
-                    value={option.label}
-                    onSelect={() => addOption(option)}
-                    className="mx-2 flex cursor-pointer items-center justify-between rounded-md px-2"
-                  >
-                    <span>{option.label}</span>
-                    {showPlusButton && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          addOption(option);
-                        }}
-                      >
-                        <Plus className="size-4" />
-                      </Button>
-                    )}
-                  </CommandItem>
-                );
-              })}
-            </div>
-          )}
-        </ScrollArea>
+              return (
+                <CommandItem
+                  key={option.value}
+                  value={option.label}
+                  onSelect={() => addOption(option)}
+                  className="mx-2 flex cursor-pointer items-center justify-between rounded-md px-2"
+                >
+                  <span>{option.label}</span>
+                  {showPlusButton && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        addOption(option);
+                      }}
+                    >
+                      <Plus className="size-4" />
+                    </Button>
+                  )}
+                </CommandItem>
+              );
+            })}
+          </div>
+        )}
       </CommandGroup>
     </Command>
   );
@@ -358,9 +354,9 @@ export default function RequirementsSelector({
       </DrawerContent>
     </Drawer>
   ) : (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex flex-col gap-3">
-        <SheetTrigger asChild>{renderTriggerButton}</SheetTrigger>
+        <PopoverTrigger asChild>{renderTriggerButton}</PopoverTrigger>
 
         {value.length > 0 && (
           <div className="flex flex-col gap-2">
@@ -376,17 +372,9 @@ export default function RequirementsSelector({
         )}
       </div>
 
-      <SheetContent
-        side="right"
-        className="flex h-full w-full flex-col p-0 md:max-w-[400px]"
-      >
-        <div className="flex flex-col border-b p-4">
-          <SheetTitle className="text-lg font-semibold">{title}</SheetTitle>
-          {description && (
-            <SheetDescription className="mt-1.5 text-sm">
-              {description}
-            </SheetDescription>
-          )}
+      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]">
+        <div className="flex flex-col border-b px-3 py-2 mb-1.5">
+          {description && <p className="mt-1.5 text-sm">{description}</p>}
         </div>
         <RequirementsContent
           value={value}
@@ -402,7 +390,7 @@ export default function RequirementsSelector({
           removeItem={removeItem}
           addOption={addOption}
         />
-      </SheetContent>
-    </Sheet>
+      </PopoverContent>
+    </Popover>
   );
 }
