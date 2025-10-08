@@ -126,7 +126,7 @@ function ActivityDefinitionFormContent({
   const { t } = useTranslation();
   
   const formSchemaWithTranslations = z.object({
-    title: z.string().min(1, t("field_required")),
+    title: z.string().min(1, t("title_is_required")),
     slug_value: z
       .string()
       .min(1, t("field_required"))
@@ -139,23 +139,23 @@ function ActivityDefinitionFormContent({
     kind: z.nativeEnum(Kind),
     healthcare_service: z.string().nullable(),
     code: z.object({
-      code: z.string().min(1, t("field_required")),
-      display: z.string().min(1, t("field_required")),
-      system: z.string().min(1, t("field_required")),
+      code: z.string().min(1, t("code_is_required")),
+      display: z.string().min(1, t("display_name_is_required")),
+      system: z.string().min(1, t("system_is_required")),
     }),
     body_site: z
       .object({
-        code: z.string().min(1, t("field_required")),
-        display: z.string().min(1, t("field_required")),
-        system: z.string().min(1, t("field_required")),
+        code: z.string().min(1, t("code_is_required")),
+        display: z.string().min(1, t("display_name_is_required")),
+        system: z.string().min(1, t("system_is_required")),
       })
       .nullable(),
     diagnostic_report_codes: z
       .array(
         z.object({
-          code: z.string().min(1, t("field_required")),
-          display: z.string().min(1, t("field_required")),
-          system: z.string().min(1, t("field_required")),
+          code: z.string().min(1, t("code_is_required")),
+          display: z.string().min(1, t("display_name_is_required")),
+          system: z.string().min(1, t("system_is_required")),
         }),
       )
       .default([]),

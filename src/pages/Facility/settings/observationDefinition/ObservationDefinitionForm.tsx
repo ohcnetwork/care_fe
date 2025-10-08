@@ -119,7 +119,7 @@ function ObservationDefinitionFormContent({
   const { t } = useTranslation();
   
   const formSchemaWithTranslations = z.object({
-    title: z.string().min(1, t("field_required")),
+    title: z.string().min(1, t("title_is_required")),
     slug_value: z
       .string()
       .min(1, t("field_required"))
@@ -129,29 +129,29 @@ function ObservationDefinitionFormContent({
     category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]]),
     permitted_data_type: z.nativeEnum(QuestionType),
     code: z.object({
-      code: z.string().min(1, t("field_required")),
-      display: z.string().min(1, t("field_required")),
-      system: z.string().min(1, t("field_required")),
+      code: z.string().min(1, t("code_is_required")),
+      display: z.string().min(1, t("display_name_is_required")),
+      system: z.string().min(1, t("system_is_required")),
     }),
     body_site: z
       .object({
-        code: z.string().min(1, t("field_required")),
-        display: z.string().min(1, t("field_required")),
-        system: z.string().min(1, t("field_required")),
+        code: z.string().min(1, t("code_is_required")),
+        display: z.string().min(1, t("display_name_is_required")),
+        system: z.string().min(1, t("system_is_required")),
       })
       .nullable(),
     method: z
       .object({
-        code: z.string().min(1, t("field_required")),
-        display: z.string().min(1, t("field_required")),
-        system: z.string().min(1, t("field_required")),
+        code: z.string().min(1, t("code_is_required")),
+        display: z.string().min(1, t("display_name_is_required")),
+        system: z.string().min(1, t("system_is_required")),
       })
       .nullable(),
     permitted_unit: z
       .object({
-        code: z.string().min(1, t("field_required")),
-        display: z.string().min(1, t("field_required")),
-        system: z.string().min(1, t("field_required")),
+        code: z.string().min(1, t("code_is_required")),
+        display: z.string().min(1, t("display_name_is_required")),
+        system: z.string().min(1, t("system_is_required")),
       })
       .nullable(),
     component: z

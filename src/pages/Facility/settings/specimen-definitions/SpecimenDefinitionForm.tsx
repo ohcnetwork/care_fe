@@ -104,7 +104,7 @@ export function SpecimenDefinitionForm({
   const { t } = useTranslation();
 
   const formSchemaWithTranslations = z.object({
-    title: z.string().min(1, t("field_required")),
+    title: z.string().min(1, t("title_is_required")),
     slug_value: z
       .string()
       .min(1, t("field_required"))

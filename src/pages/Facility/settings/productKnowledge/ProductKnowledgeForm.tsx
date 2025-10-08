@@ -122,9 +122,9 @@ function ProductKnowledgeFormContent({
   
   // Define a Code schema to match the API type with i18n
   const codeSchema = z.object({
-    code: z.string().min(1, t("field_required")),
-    display: z.string().min(1, t("field_required")),
-    system: z.string().min(1, t("field_required")),
+    code: z.string().min(1, t("code_is_required")),
+    display: z.string().min(1, t("display_name_is_required")),
+    system: z.string().min(1, t("system_is_required")),
   });
   
   const formSchemaWithTranslations = z.object({
