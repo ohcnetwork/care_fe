@@ -125,7 +125,7 @@ export function PaymentReconciliationSheet({
   const [tenderAmount, setTenderAmount] = useState<string>("0");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
 
-  const STORAGE_KEY = "recent-location";
+  const STORAGE_KEY = `recent_location_cache_${facilityId}`;
 
   const getCachedLocation = (): LocationList | undefined => {
     try {
@@ -346,10 +346,12 @@ export function PaymentReconciliationSheet({
                         onValueChange={(location) => {
                           setSelectedLocationObject(location || undefined);
                           field.onChange(location?.id || undefined);
-                          localStorage.setItem(
-                            STORAGE_KEY,
-                            JSON.stringify(location),
-                          );
+                          if (location) {
+                            localStorage.setItem(
+                              STORAGE_KEY,
+                              JSON.stringify(location),
+                            );
+                          }
                         }}
                         placeholder={t("select_location")}
                         className="w-full border-gray-300"
