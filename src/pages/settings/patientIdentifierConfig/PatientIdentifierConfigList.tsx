@@ -75,14 +75,10 @@ function PatientIdentifierConfigCard({
               </p>
             )}
           </div>
-          {config.config.auto_maintained ? (
-            <Badge>{t("auto_maintained")}</Badge>
-          ) : (
-            <Button variant="outline" size="sm" onClick={() => onEdit(config)}>
-              <CareIcon icon="l-edit" className="size-4" />
-              {t("edit")}
-            </Button>
-          )}
+          <Button variant="outline" size="sm" onClick={() => onEdit(config)}>
+            <CareIcon icon="l-edit" className="size-4" />
+            {t("edit")}
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -299,18 +295,14 @@ export default function PatientIdentifierConfigList({
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {config.config.auto_maintained ? (
-                            <Badge>{t("auto_maintained")}</Badge>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEdit(config)}
-                            >
-                              <CareIcon icon="l-edit" className="size-4" />
-                              {t("edit")}
-                            </Button>
-                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(config)}
+                          >
+                            <CareIcon icon="l-edit" className="size-4" />
+                            {t("edit")}
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
