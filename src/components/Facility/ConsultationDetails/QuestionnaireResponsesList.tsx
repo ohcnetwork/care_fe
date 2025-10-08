@@ -458,6 +458,7 @@ export function ResponseCard({
   item,
   onTitleClick,
   showTitle = true,
+  isPrintPreview = false,
 }: {
   item: QuestionnaireResponse;
   isPrintPreview?: boolean;
@@ -476,7 +477,10 @@ export function ResponseCard({
       <CardHeader className="flex flex-row items-center pb-2">
         {showTitle && (
           <CardTitle
-            className="text-lg font-medium cursor-pointer hover:bg-gray-100 rounded px-1 -mx-1 transition-colors duration-200 p-2 pr-5"
+            className={cn(
+              "text-lg font-medium",
+              onTitleClick && "cursor-pointer hover:bg-gray-100 rounded p-2",
+            )}
             onClick={() => {
               if (item.questionnaire?.id && onTitleClick) {
                 onTitleClick(item.questionnaire.id);
@@ -486,9 +490,11 @@ export function ResponseCard({
             {title}
           </CardTitle>
         )}
-        <div className="ml-auto">
-          <PrintButton item={item} />
-        </div>
+        {!isPrintPreview && (
+          <div className="ml-auto">
+            <PrintButton item={item} />
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <ResponseCardContent item={item} />
