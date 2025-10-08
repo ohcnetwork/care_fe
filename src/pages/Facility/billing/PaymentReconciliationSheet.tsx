@@ -124,10 +124,24 @@ export function PaymentReconciliationSheet({
   const queryClient = useQueryClient();
   const [tenderAmount, setTenderAmount] = useState<string>("0");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
-  // Add state for the location selector
+
+  const STORAGE_KEY = "recent-location";
+
+  const getCachedLocation = (): LocationList | undefined => {
+    try {
+      const cached = localStorage.getItem(STORAGE_KEY);
+      return cached ? JSON.parse(cached) : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
+  const cachedLocation = getCachedLocation();
+
   const [selectedLocationObject, setSelectedLocationObject] = useState<
     LocationList | undefined
-  >();
+  >(cachedLocation);
+
   useShortcutSubContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -150,7 +164,7 @@ export function PaymentReconciliationSheet({
       note: "",
       account: accountId,
       is_credit_note: isCreditNote,
-      location: "",
+      location: cachedLocation?.id || "",
     },
   });
 
@@ -332,6 +346,10 @@ export function PaymentReconciliationSheet({
                         onValueChange={(location) => {
                           setSelectedLocationObject(location || undefined);
                           field.onChange(location?.id || undefined);
+                          localStorage.setItem(
+                            STORAGE_KEY,
+                            JSON.stringify(location),
+                          );
                         }}
                         placeholder={t("select_location")}
                         className="w-full border-gray-300"
