@@ -52,8 +52,10 @@ jobs:
             }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
 
           echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> "$GITHUB_ENV"
+
           echo "STATUS_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .id' project_data.json)" >> "$GITHUB_ENV"
           echo "TEAM_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Team\") | .id' project_data.json)" >> "$GITHUB_ENV"
+
           echo "REVIEW_REQUESTED_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .options[] | select(.name==\"Review requested\") | .id' project_data.json)" >> "$GITHUB_ENV"
           echo "DONE_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .options[] | select(.name==\"Done\") | .id' project_data.json)" >> "$GITHUB_ENV"
 
@@ -71,8 +73,35 @@ jobs:
             const author = pr.user.login;
             const isDraft = pr.draft;
             const isMerged = pr.merged;
+            const isClosed = pr.state === 'closed';
 
             if (pr.user.type === 'Bot') return;
+
+            const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const labelNames = currentLabels.map(label => label.name.toLowerCase());
+            const hasTested = labelNames.includes('tested');
+            const hasReviewed = labelNames.includes('reviewed');
+
+            if (isClosed && !isMerged) {
+              for (const label of currentLabels) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    name: label.name
+                  });
+                } catch (error) {
+                  console.warn(`Failed to remove label '${label.name}':`, error.message);
+                }
+              }
+              return;
+            }
 
             await github.rest.issues.addAssignees({
               owner: context.repo.owner,
@@ -169,10 +198,16 @@ jobs:
                 console.warn("Failed to remove label 'work in progress':", error.message);
               }
 
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                labels: ['needs review', 'needs testing']
-              });
+              const labelsToAdd = [];
+              if (!hasReviewed) labelsToAdd.push('needs review');
+              if (!hasTested) labelsToAdd.push('needs testing');
+
+              if (labelsToAdd.length > 0) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  labels: labelsToAdd
+                });
+              }
             }
