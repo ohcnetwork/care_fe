@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   checklist:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Validate Checklist
         uses: actions/github-script@v7

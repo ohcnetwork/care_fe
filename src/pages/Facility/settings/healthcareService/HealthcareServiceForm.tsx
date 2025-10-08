@@ -188,7 +188,9 @@ function HealthcareServiceFormContent({
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["healthcareServices"] });
         toast.success(t("healthcare_service_updated_successfully"));
-        navigate(`/facility/${facilityId}/settings/healthcare_services`);
+        navigate(
+          `/facility/${facilityId}/settings/healthcare_services/${healthcareServiceId}`,
+        );
       },
     });
 
