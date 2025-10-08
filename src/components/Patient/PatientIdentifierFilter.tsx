@@ -275,7 +275,7 @@ export default function PatientIdentifierFilter({
           <Drawer open={open} onOpenChange={setOpen}>
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
             <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh]">
-              <div className="mt-3 pb-[env(safe-area-inset-bottom)] px-2">
+              <div className="mt-3 pb-[env(safe-area-inset-bottom)] px-2 overflow-y-auto flex-1">
                 {selectorContent}
               </div>
             </DrawerContent>
