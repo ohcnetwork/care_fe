@@ -141,6 +141,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   ref,
   hideClearButton = false,
 }: ResourceDefinitionCategoryPickerProps<T>) {
+  const shouldHideClearButton = allowMultiple || hideClearButton;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -325,7 +326,6 @@ export function ResourceDefinitionCategoryPicker<T>({
 
     if (allowMultiple) {
       const currentValues = Array.isArray(value) ? value : value ? [value] : [];
-
       const isSelected = currentValues.some(
         (v: T) => mapper!(v).slug === definition.slug,
       );
@@ -821,7 +821,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 />
               </Button>
             </DrawerTrigger>
-            {value && !hideClearButton && (
+            {value && !shouldHideClearButton && (
               <Button
                 variant="outline"
                 onClick={handleClearSelection}
@@ -938,7 +938,7 @@ export function ResourceDefinitionCategoryPicker<T>({
                 />
               </Button>
             </PopoverTrigger>
-            {value && !hideClearButton && (
+            {value && !shouldHideClearButton && (
               <Button
                 variant="outline"
                 onClick={handleClearSelection}
