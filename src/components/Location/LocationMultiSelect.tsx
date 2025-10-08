@@ -532,7 +532,7 @@ export default function LocationMultiSelect({
     <div className="h-full flex flex-col overflow-hidden">
       {value.length > 0 && (
         <>
-          <div className="flex flex-nowrap sm:flex-wrap gap-2 overflow-x-auto p-1.5">
+          <div className="flex flex-nowrap sm:flex-wrap gap-2 overflow-x-auto p-1.5 sm:max-h-32 mr-2">
             {value.map((location) => (
               <SelectedLocationPill
                 key={location.id}
