@@ -420,12 +420,6 @@ function ActivityDefinitionFormContent({
     }
   }
 
-  React.useEffect(() => {
-    console.log("form.getValues()", form.getValues());
-    //log errors on submit
-    console.log("form.formState.errors", form.formState.errors);
-  }, [form.getValues(), form.formState.errors]);
-
   return (
     <Page
       title={
