@@ -76,6 +76,7 @@ export function LocationPicker({
         parent: currentParent || "",
         mode: "kind",
         ordering: "sort_index",
+        status: "active",
         mine: true, // This ensures user access filtering
       },
     }),
