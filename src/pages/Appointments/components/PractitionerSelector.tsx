@@ -289,7 +289,7 @@ export const PractitionerSelector = ({
                   placeholder={t("search_departments_and_practitioners")}
                   value={searchQuery}
                   onValueChange={setSearchQuery}
-                  className="pl-1 border-0 focus:ring-0 text-base"
+                  className="pl-1 border-0 focus:ring-0 text-base sm:text-sm"
                 />
               </div>
             </div>

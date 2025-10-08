@@ -536,7 +536,7 @@ export function ChargeItemDefinitionPicker({
               }
               value={searchQuery}
               onValueChange={setSearchQuery}
-              className="pl-9 h-9 border-0 focus:ring-0 text-base"
+              className="pl-9 h-9 border-0 focus:ring-0 text-base sm:text-sm"
             />
           </div>
         </div>
@@ -751,7 +751,7 @@ export function ChargeItemDefinitionPicker({
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                   <CommandInput
                     placeholder={t("search_definitions")}
-                    className="pl-9 h-9 border-0 focus:ring-0"
+                    className="pl-9 h-9 border-0 focus:ring-0 text-base sm:text-sm"
                   />
                 </div>
               </div>

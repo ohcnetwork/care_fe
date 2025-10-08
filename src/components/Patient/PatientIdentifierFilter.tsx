@@ -191,7 +191,7 @@ export default function PatientIdentifierFilter({
           }
           value={searchTerm}
           onValueChange={setSearchTerm}
-          className="pl-8 pr-8 border-none focus:ring-0 focus:outline-none text-base"
+          className="pl-8 pr-8 border-none focus:ring-0 focus:outline-none text-base sm:text-sm"
         />
         {searchTerm && (
           <Button

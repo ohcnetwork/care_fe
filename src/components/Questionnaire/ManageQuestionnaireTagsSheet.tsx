@@ -100,7 +100,7 @@ export function QuestionnaireTagSelector({
         placeholder={t("search_tags")}
         value={searchQuery}
         onValueChange={onSearchChange}
-        className="outline-hidden border-none ring-0 shadow-none text-base"
+        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
       />
       <CommandList>
         <CommandEmpty>{t("no_tags_found")}</CommandEmpty>

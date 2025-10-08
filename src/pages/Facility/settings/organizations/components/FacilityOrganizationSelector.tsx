@@ -254,7 +254,7 @@ export default function FacilityOrganizationSelector(
             placeholder={t("search_organizations")}
             onValueChange={setFacilityOrgSearch}
             value={facilityOrgSearch}
-            className="border-none focus:ring-0 text-base"
+            className="border-none focus:ring-0 text-base sm:text-sm"
           />
         </div>
         <CommandList onWheel={(e) => e.stopPropagation()}>

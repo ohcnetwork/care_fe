@@ -97,7 +97,7 @@ export function OrgSelector({
         placeholder={t("search_organizations")}
         value={searchQuery}
         onValueChange={onSearchChange}
-        className="outline-hidden border-none ring-0 shadow-none text-base"
+        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
       />
       <CommandList>
         <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
