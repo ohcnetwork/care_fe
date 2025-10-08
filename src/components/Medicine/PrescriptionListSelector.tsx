@@ -42,7 +42,7 @@ export default function PrescriptionListSelector({
       pathParams: { patientId },
       queryParams: { encounter: encounterId, facility: facilityId },
     }),
-    meta :{persist : true},
+    meta: { persist: true },
     enabled: !!patientId && !!encounterId,
   });
 

@@ -11,9 +11,14 @@ import PrescriptionListSelector from "@/components/Medicine/PrescriptionListSele
 import PrescriptionView from "@/components/Medicine/PrescriptionView";
 import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
 
+import queryClient from "@/Utils/request/queryClient";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
 import { Button } from "@/components/ui/button";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { PlusIcon, ReceiptTextIcon } from "lucide-react";
+import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
+import { onlineManager } from "@tanstack/react-query";
+import { PencilIcon, PlusIcon, ReceiptTextIcon } from "lucide-react";
 import { Link } from "raviger";
 
 interface EmptyStateProps {
@@ -67,6 +72,13 @@ export default function MedicationRequestTable() {
     string | undefined
   >();
 
+  const patientMedications = queryClient.getQueryData<
+    PaginatedResponse<MedicationRequestRead>
+  >(["medication_requests", patientId, encounterId]);
+  console.log({ patientMedications }, "key : ", [
+    ["medication_requests", patientId, encounterId],
+  ]);
+
   return (
     <div className="space-y-2 h-full">
       <Tabs defaultValue="prescriptions" className="h-full">
@@ -104,49 +116,110 @@ export default function MedicationRequestTable() {
           value="prescriptions"
           className="flex-1 flex flex-col overflow-hidden"
         >
-          <div className="flex flex-1 flex-col lg:flex-row w-full gap-1 h-full">
-            <PrescriptionListSelector
-              patientId={patientId}
-              encounterId={encounterId}
-              facilityId={facilityId}
-              selectedPrescriptionId={selectedPrescriptionId}
-              onSelectPrescription={(prescription) => {
-                setSelectedPrescriptionId(prescription?.id);
-              }}
-            />
+          {onlineManager.isOnline() ? (
+            <div className="flex flex-1 flex-col lg:flex-row w-full gap-1 h-full">
+              <PrescriptionListSelector
+                patientId={patientId}
+                encounterId={encounterId}
+                facilityId={facilityId}
+                selectedPrescriptionId={selectedPrescriptionId}
+                onSelectPrescription={(prescription) => {
+                  setSelectedPrescriptionId(prescription?.id);
+                }}
+              />
 
-            {selectedPrescriptionId ? (
-              <div className="flex-1 w-full h-full overflow-auto">
-                <PrescriptionView
-                  patientId={patientId}
-                  prescriptionId={selectedPrescriptionId}
-                  canWrite={canWrite}
-                  facilityId={facilityId}
-                  encounterId={encounterId}
-                />
-              </div>
-            ) : (
-              <div className="w-full flex-1 h-full flex items-center justify-center">
-                <div className="flex flex-col items-center">
-                  <ReceiptTextIcon className="text-gray-500" />
-                  <h3 className="font-medium">{t("no_prescriptions_found")}</h3>
-                  {canWrite && (
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="text-gray-950 hover:text-gray-700 h-9 mt-2"
-                      data-cy="edit-prescription"
-                    >
-                      <Link href={`questionnaire/medication_request`}>
-                        <PlusIcon className="mr-2 size-4" />
-                        {t("create_prescription")}
-                      </Link>
-                    </Button>
-                  )}
+              {selectedPrescriptionId ? (
+                <div className="flex-1 w-full h-full overflow-auto">
+                  <PrescriptionView
+                    patientId={patientId}
+                    prescriptionId={selectedPrescriptionId}
+                    canWrite={canWrite}
+                    facilityId={facilityId}
+                    encounterId={encounterId}
+                  />
                 </div>
-              </div>
-            )}
-          </div>
+              ) : (
+                <div className="w-full flex-1 h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center">
+                    <ReceiptTextIcon className="text-gray-500" />
+                    <h3 className="font-medium">
+                      {t("no_prescriptions_found")}
+                    </h3>
+                    {canWrite && (
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="text-gray-950 hover:text-gray-700 h-9 mt-2"
+                        data-cy="edit-prescription"
+                      >
+                        <Link href={`questionnaire/medication_request`}>
+                          <PlusIcon className="mr-2 size-4" />
+                          {t("create_prescription")}
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-1 flex-col lg:flex-row w-full gap-1 h-full">
+              {patientMedications ? (
+                <div className="flex-1 w-full h-full overflow-auto">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 flex-wrap justify-between px-2 my-2 w-full">
+                      <div className="flex items-center gap-2 flex-wrap ">
+                        {canWrite && (
+                          <Button
+                            asChild
+                            variant="outline"
+                            size="sm"
+                            className="text-gray-950 hover:text-gray-700 h-9"
+                            data-cy="edit-prescription"
+                          >
+                            <Link href={`questionnaire/medication_request`}>
+                              <>
+                                <PencilIcon className="mr-2 size-4" />
+                                {t("edit")}
+                              </>
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-4 px-2">
+                      <MedicationsTable
+                        medications={patientMedications.results || []}
+                        showActiveOnly={false}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full flex-1 h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center">
+                    <ReceiptTextIcon className="text-gray-500" />
+                    <h3 className="font-medium">
+                      {t("no_prescriptions_found")}
+                    </h3>
+                    {canWrite && (
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="text-gray-950 hover:text-gray-700 h-9 mt-2"
+                        data-cy="edit-prescription"
+                      >
+                        <Link href={`questionnaire/medication_request`}>
+                          <PlusIcon className="mr-2 size-4" />
+                          {t("create_prescription")}
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="ongoing">
