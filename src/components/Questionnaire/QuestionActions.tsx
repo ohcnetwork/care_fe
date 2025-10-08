@@ -76,7 +76,7 @@ export function QuestionActions({
             onClick={() => setShowMoveDialog(true)}
             disabled={selectedQuestions.size === 0}
           >
-            <Move className="mr-2 h-4 w-4" />
+            <Move className="mr-2 size-4" />
             {t("move_questions")}
           </Button>
           <Button
@@ -85,7 +85,7 @@ export function QuestionActions({
             onClick={() => setShowRemoveDialog(true)}
             disabled={selectedQuestions.size === 0}
           >
-            <Trash2 className="mr-2 h-4 w-4" />
+            <Trash2 className="mr-2 size-4" />
             {t("remove_questions")}
           </Button>
         </CardContent>

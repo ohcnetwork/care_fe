@@ -63,7 +63,7 @@ function CategoryCard({
                     : "bg-blue-100 text-blue-600"
                 }`}
               >
-                <CareIcon icon="l-folder" className="h-4 w-4" />
+                <CareIcon icon="l-folder" className="size-4" />
               </div>
             </div>
 
@@ -80,7 +80,7 @@ function CategoryCard({
                 onEdit(category);
               }}
             >
-              <CareIcon icon="l-ellipsis-v" className="h-4 w-4" />
+              <CareIcon icon="l-ellipsis-v" className="size-4" />
             </Button>
           </div>
         </div>

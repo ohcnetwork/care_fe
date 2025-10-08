@@ -175,7 +175,7 @@ export function DiscountComponentSettings() {
                             }
                             disabled={isPending}
                           >
-                            <TrashIcon className="h-4 w-4 text-destructive" />
+                            <TrashIcon className="size-4 text-destructive" />
                           </Button>
                         </div>
                       )}

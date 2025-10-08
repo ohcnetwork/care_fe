@@ -39,7 +39,7 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
             <RadioGroupItem
               value={option.value.toString()}
               id={option.value}
-              className="h-4 w-4 border-2 border-gray-300 text-primary focus:ring-primary group-hover:border-primary-500"
+              className="size-4 border-2 border-gray-300 text-primary focus:ring-primary group-hover:border-primary-500"
             />
             <Label
               htmlFor={option.value}

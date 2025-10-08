@@ -212,7 +212,7 @@ function DateRangeOptions({
           onFocus={() => setFocusItemIndex(options.length)}
         >
           {t("custom_date_range")}
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="size-4" />
         </Button>
       </div>
       <NavigationHelper isActiveFilter={true} />

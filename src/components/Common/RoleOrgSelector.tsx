@@ -172,7 +172,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
           <CommandEmpty>
             {isLoadingAvailableOrganizations ? (
               <div className="flex items-center justify-center py-6">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                <Loader2 className="size-4 animate-spin text-gray-500" />
                 <span className="ml-2 text-sm text-gray-500">
                   {t("loading_organizations")}
                 </span>
@@ -200,7 +200,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                       {isSelected && (
                         <CareIcon
                           icon="l-check"
-                          className="ml-2 h-4 w-4 text-sky-600"
+                          className="ml-2 size-4 text-sky-600"
                         />
                       )}
                     </div>
@@ -228,7 +228,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                 data-cy="confirm-organization"
               >
                 <span>{t("already_selected")}</span>
-                <CareIcon icon="l-multiply" className="h-4 w-4" />
+                <CareIcon icon="l-multiply" className="size-4" />
               </Button>
             ) : (
               <Button
@@ -240,7 +240,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                 data-cy="confirm-organization"
               >
                 <span>{t("confirm")}</span>
-                <CareIcon icon="l-check" className="h-4 w-4" />
+                <CareIcon icon="l-check" className="size-4" />
               </Button>
             )}
           </div>
@@ -313,7 +313,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                             ? currentSelection.name
                             : t("select_organization")}
                         </span>
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
                       </Button>
                     </SheetTrigger>
                     <SheetContent className="p-0" side="bottom">
@@ -336,7 +336,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                           ? currentSelection.name
                           : t("select_organization")}
                       </span>
-                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent

@@ -1515,7 +1515,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                       size="sm"
                                                       className="p-1 h-6 w-6 rounded-full hover:bg-blue-100"
                                                     >
-                                                      <Info className="h-4 w-4" />
+                                                      <Info className="size-4" />
                                                       <span className="sr-only">
                                                         {t(
                                                           "substitution_details",
@@ -1914,7 +1914,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                   );
                                                 })()}
                                               </div>
-                                              <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0" />
+                                              <ChevronDownIcon className="ml-2 size-4 shrink-0" />
                                             </Button>
                                           </PopoverTrigger>
                                           <PopoverContent className="w-auto p-0">

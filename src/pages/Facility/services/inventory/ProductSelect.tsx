@@ -87,7 +87,7 @@ export default function ProductSelect({
       {/* Header section with both search and add button */}
       <div className="flex items-center gap-4 mb-2 bg-gray-100 rounded-md p-1">
         <div className="relative flex-1">
-          <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <input
             type="text"
             placeholder={t("search_product")}
@@ -201,7 +201,7 @@ export default function ProductSelect({
       className="w-full sm:w-[300px] justify-between"
     >
       <div className="flex items-center gap-2">
-        <SearchIcon className="h-4 w-4 text-gray-500" />
+        <SearchIcon className="size-4 text-gray-500" />
         <span className="truncate">
           {selectedProduct?.batch?.lot_number ||
             searchQuery ||
@@ -210,7 +210,7 @@ export default function ProductSelect({
       </div>
       <CareIcon
         icon="l-angle-down"
-        className={`ml-2 h-4 w-4 shrink-0 opacity-50 transition-transform ${
+        className={`ml-2 size-4 shrink-0 opacity-50 transition-transform ${
           selectorOpen ? "rotate-180" : ""
         }`}
       />

@@ -218,7 +218,7 @@ function CustomFieldsLayout({
                     setNewField({ label: "", value: "" });
                   }}
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="size-4 mr-2" />
                   {addButtonText}
                 </Button>
                 {items.length > 0 ? (
@@ -316,7 +316,7 @@ function CustomTextLayout({
                     setTextField("");
                   }}
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="size-4 mr-2" />
                   {addButtonText}
                 </Button>
                 {items.length > 0 ? (
@@ -703,7 +703,7 @@ function SectionItem({
                 className="cursor-grab"
                 onClick={(e) => e.preventDefault()}
               >
-                <GripVertical className="h-4 w-4" />
+                <GripVertical className="size-4" />
               </Button>
               <h3 className="text-lg font-semibold">
                 {t(SECTION_DISPLAY_NAMES[dataSource || ""] || "new_section")}
@@ -735,7 +735,7 @@ function SectionItem({
                   onClick={() => onMoveUp(index)}
                   disabled={index === 0}
                 >
-                  <ChevronUp className="h-4 w-4" />
+                  <ChevronUp className="size-4" />
                 </Button>
                 <Button
                   type="button"
@@ -744,7 +744,7 @@ function SectionItem({
                   onClick={() => onMoveDown(index)}
                   disabled={index === values.length - 1}
                 >
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="size-4" />
                 </Button>
                 <Button
                   type="button"
@@ -753,7 +753,7 @@ function SectionItem({
                   onClick={() => onRemove(index)}
                   className="text-destructive"
                 >
-                  <CareIcon icon="l-trash" className="h-4 w-4" />
+                  <CareIcon icon="l-trash" className="size-4" />
                 </Button>
               </div>
             </div>
@@ -887,7 +887,7 @@ export default function SectionBuilder({ form }: SectionBuilderProps) {
       </CardContent>
       <CardFooter>
         <Button type="button" onClick={addSection} size="sm" className="w-full">
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="size-4 mr-2" />
           {t("add_section")}
         </Button>
       </CardFooter>

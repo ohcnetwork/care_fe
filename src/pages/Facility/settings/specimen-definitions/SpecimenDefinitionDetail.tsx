@@ -99,7 +99,7 @@ export function SpecimenDefinitionDetail({
           className="text-destructive"
           size="sm"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="mr-2 size-4" />
           {t("back")}
         </Button>
         <div className="flex items-start justify-between p-2">
@@ -116,13 +116,13 @@ export function SpecimenDefinitionDetail({
                 size="sm"
                 onClick={() => setShowDeleteDialog(true)}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="size-4 mr-2" />
                 {t("delete")}
               </Button>
             )}
             <Link href={`/specimen_definitions/${specimenSlug}/edit`}>
               <Button variant="outline" size="sm">
-                <Pencil className="h-4 w-4 mr-2" />
+                <Pencil className="size-4 mr-2" />
                 {t("edit")}
               </Button>
             </Link>

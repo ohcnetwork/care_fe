@@ -227,7 +227,7 @@ export default function AppointmentDetail(props: Props) {
                   className="self-end"
                   aria-label={t("close")}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="size-4" />
                 </Button>
               </AlertTitle>
               <AlertDescription className="text-green-800">

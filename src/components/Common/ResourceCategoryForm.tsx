@@ -317,7 +317,7 @@ export function ResourceCategoryForm({
                 {isLoading && (
                   <CareIcon
                     icon="l-spinner"
-                    className="mr-2 h-4 w-4 animate-spin"
+                    className="mr-2 size-4 animate-spin"
                   />
                 )}
                 {isEditing ? t("update_category") : t("create_category")}

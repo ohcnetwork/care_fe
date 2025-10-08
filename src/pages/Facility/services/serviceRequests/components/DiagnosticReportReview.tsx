@@ -304,7 +304,7 @@ export function DiagnosticReportReview({
                         )
                       }
                     >
-                      <ExternalLink className="h-4 w-4" />
+                      <ExternalLink className="size-4" />
                       {t("view_report")}
                     </Button>
                   </div>

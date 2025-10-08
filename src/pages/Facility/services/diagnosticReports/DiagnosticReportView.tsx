@@ -92,7 +92,7 @@ export default function DiagnosticReportView({
             )
           }
         >
-          <Printer className="h-4 w-4 mr-2" />
+          <Printer className="size-4 mr-2" />
           {t("print")}
         </Button>
       </div>

@@ -122,7 +122,7 @@ export function SelectedFilterBar({
             onClick={clearFilter}
             className="flex border-l rounded-l-none border-gray-200 hover:bg-gray-50"
           >
-            <X className="h-5 w-5 text-gray-600" />
+            <X className="size-5 text-gray-600" />
           </Button>
         )}
       </div>

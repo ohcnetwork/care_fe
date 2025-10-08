@@ -221,7 +221,7 @@ export function CompactConditionEditor({
           className="text-blue-600 hover:text-blue-700"
           onClick={() => setIsAdding(true)}
         >
-          <Plus className="h-4 w-4 mr-1" />
+          <Plus className="size-4 mr-1" />
           {t("add_condition")}
         </Button>
       )}

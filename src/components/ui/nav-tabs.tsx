@@ -117,7 +117,7 @@ export const NavTabs = <TabKey extends string>({
                 className="text-gray-500 font-semibold hover:text-gray-900 hover:bg-transparent pb-2.5 px-2.5 rounded-none"
               >
                 {t("count_more", { count: showMoreTabs.length })}
-                <ChevronDown className="ml-1 h-4 w-4" />
+                <ChevronDown className="ml-1 size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

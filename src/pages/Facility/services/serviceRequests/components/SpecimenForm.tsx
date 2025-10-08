@@ -255,14 +255,14 @@ export function SpecimenForm({
                 value="generate"
                 className="flex-1 flex items-center justify-center gap-2"
               >
-                <QrCode className="h-4 w-4" />
+                <QrCode className="size-4" />
                 {t("generate_qr")}
               </TabsTrigger>
               <TabsTrigger
                 value="scan"
                 className="flex-1 flex items-center justify-center gap-2"
               >
-                <Scan className="h-4 w-4" />
+                <Scan className="size-4" />
                 {t("scan_existing")}
               </TabsTrigger>
             </TabsList>
@@ -314,7 +314,7 @@ export function SpecimenForm({
                   onClick={handleScanBarcode}
                   disabled={disableEdit}
                 >
-                  <Scan className="h-4 w-4" />
+                  <Scan className="size-4" />
                 </Button>
               </div>
             </TabsContent>
@@ -472,7 +472,7 @@ export function SpecimenForm({
             {specimenDefinition.type_tested?.container && (
               <div className="mt-4 rounded-lg border bg-gray-50 p-4">
                 <div className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-600">
-                  <Info className="h-4 w-4" />
+                  <Info className="size-4" />
                   {t("container_requirements")}
                 </div>
                 <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">

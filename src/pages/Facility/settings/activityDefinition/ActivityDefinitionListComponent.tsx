@@ -56,7 +56,7 @@ function ActivityDefinitionCard({
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
               <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
-                <CareIcon icon="l-clipboard-alt" className="h-5 w-5" />
+                <CareIcon icon="l-clipboard-alt" className="size-5" />
               </div>
             </div>
             <div className="flex-1 min-w-0">
@@ -94,7 +94,7 @@ function ActivityDefinitionCard({
                 )
               }
             >
-              <CareIcon icon="l-edit" className="h-4 w-4" />
+              <CareIcon icon="l-edit" className="size-4" />
               {t("see_details")}
             </Button>
           </div>
@@ -126,7 +126,7 @@ function ActivityDefinitionTableRow({
       >
         <div className="flex items-center space-x-3">
           <div className="p-1 rounded bg-gray-100 text-gray-600">
-            <CareIcon icon="l-clipboard-alt" className="h-4 w-4" />
+            <CareIcon icon="l-clipboard-alt" className="size-4" />
           </div>
           <div>
             <div className="font-medium text-gray-900">{definition.title}</div>
@@ -168,7 +168,7 @@ function ActivityDefinitionTableRow({
                     )
                   }
                 >
-                  <CareIcon icon="l-edit" className="h-4 w-4" />
+                  <CareIcon icon="l-edit" className="size-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -297,7 +297,7 @@ export function ActivityDefinitionList({
                 onClick={() => setViewMode("table")}
                 className="rounded-r-none"
               >
-                <CareIcon icon="l-table" className="h-4 w-4" />
+                <CareIcon icon="l-table" className="size-4" />
               </Button>
               <Button
                 variant={viewMode === "cards" ? "default" : "ghost"}
@@ -305,7 +305,7 @@ export function ActivityDefinitionList({
                 onClick={() => setViewMode("cards")}
                 className="rounded-l-none"
               >
-                <CareIcon icon="l-th-large" className="h-4 w-4" />
+                <CareIcon icon="l-th-large" className="size-4" />
               </Button>
             </div>
           </div>

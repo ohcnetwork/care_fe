@@ -129,7 +129,7 @@ export function ProductFormDrawer({
                 size="sm"
                 className="absolute right-4 top-4 h-6 w-6 p-0"
               >
-                <X className="h-4 w-4" />
+                <X className="size-4" />
               </Button>
             </DrawerClose>
             <DrawerTitle className="text-left">
@@ -279,13 +279,13 @@ export function ProductFormDrawer({
               <>
                 <CareIcon
                   icon="l-spinner"
-                  className="mr-2 h-4 w-4 animate-spin"
+                  className="mr-2 size-4 animate-spin"
                 />
                 {t("saving")}...
               </>
             ) : (
               <>
-                <CareIcon icon="l-check" className="mr-2 h-4 w-4" />
+                <CareIcon icon="l-check" className="mr-2 size-4" />
                 {t("confirm_add_lot")}
               </>
             )}

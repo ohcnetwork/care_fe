@@ -448,7 +448,7 @@ export function SpecimenDefinitionForm({
                         }
                         className="w-full"
                       >
-                        <PlusCircle className="mr-2 h-4 w-4" />
+                        <PlusCircle className="mr-2 size-4" />
                         {t("add")}
                       </Button>
                     </div>

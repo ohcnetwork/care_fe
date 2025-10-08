@@ -242,7 +242,7 @@ export default function LocationSettings({
                             onClick={handleAddLocation}
                             className="w-full sm:w-auto"
                           >
-                            <CareIcon icon="l-plus" className="h-4 w-4 mr-2" />
+                            <CareIcon icon="l-plus" className="size-4 mr-2" />
                             {t("add_location")}
                           </Button>
                         </div>

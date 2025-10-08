@@ -107,7 +107,7 @@ export function ProcessSpecimen({
       <div>
         <div className="flex-row items-center justify-between space-y-0 pb-2">
           <div className="text-sm font-medium flex items-center gap-1">
-            <Settings2 className="h-4 w-4" />
+            <Settings2 className="size-4" />
             {t("process_specimen")}
             <Badge variant="primary">{existingProcessing.length}</Badge>
           </div>
@@ -118,7 +118,7 @@ export function ProcessSpecimen({
               key={index}
               className="flex items-center gap-2 rounded-md bg-primary-100 border border-primary-300 px-3 py-2"
             >
-              <CircleCheckBig className="h-4 w-4 text-green-600" />
+              <CircleCheckBig className="size-4 text-green-600" />
               <div className="flex-1">
                 <div className="font-medium text-sm text-primary-950">
                   {process.method?.display || process.description}
@@ -160,7 +160,7 @@ export function ProcessSpecimen({
                 }
                 disabled={disableEdit}
               >
-                <Edit className="h-4 w-4" />
+                <Edit className="size-4" />
               </Button>
             </div>
           ))}

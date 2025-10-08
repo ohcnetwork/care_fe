@@ -153,7 +153,7 @@ export default function FacilityOrganizationSelector(
           onClick={() => setNavigationLevels([])}
           className="text-sm font-medium text-gray-700 hover:text-primary-600 cursor-pointer"
         >
-          <X className="h-4 w-4 text-gray-400 flex-shrink-0" />
+          <X className="size-4 text-gray-400 flex-shrink-0" />
         </button>
         {navigationLevels.map((org, index) => (
           <div key={org.id} className="flex items-center gap-2">
@@ -210,7 +210,7 @@ export default function FacilityOrganizationSelector(
             {isLoadingRoot ||
             organizationQueries[navigationLevels.length - 1]?.isLoading ? (
               <div className="flex items-center justify-center py-6">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                <Loader2 className="size-4 animate-spin text-gray-500" />
                 <span className="ml-2 text-sm text-gray-500">
                   {t("loading_organizations")}
                 </span>
@@ -241,12 +241,12 @@ export default function FacilityOrganizationSelector(
                       {isSelected && (
                         <CareIcon
                           icon="l-check"
-                          className="ml-2 h-4 w-4 text-sky-600"
+                          className="ml-2 size-4 text-sky-600"
                         />
                       )}
                     </div>
                     {org.has_children && (
-                      <ChevronRight className="h-4 w-4 opacity-50" />
+                      <ChevronRight className="size-4 opacity-50" />
                     )}
                   </CommandItem>
                 );
@@ -275,12 +275,12 @@ export default function FacilityOrganizationSelector(
                 {isDisabled ? (
                   <>
                     <span>{t("already_selected")}</span>
-                    <CareIcon icon="l-multiply" className="h-4 w-4" />
+                    <CareIcon icon="l-multiply" className="size-4" />
                   </>
                 ) : (
                   <>
                     <span>{t("confirm")}</span>
-                    <CareIcon icon="l-check" className="h-4 w-4" />
+                    <CareIcon icon="l-check" className="size-4" />
                   </>
                 )}
               </Button>
@@ -366,7 +366,7 @@ export default function FacilityOrganizationSelector(
                             ? currentSelection.name
                             : t("select_department")}
                         </span>
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
                       </Button>
                     </SheetTrigger>
                     <SheetContent className="p-0" side="bottom">
@@ -389,7 +389,7 @@ export default function FacilityOrganizationSelector(
                           ? currentSelection.name
                           : t("select_department")}
                       </span>
-                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <ChevronDown className="ml-2 size-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent

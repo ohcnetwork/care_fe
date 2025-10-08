@@ -328,7 +328,7 @@ export function AccountShow({
                             size="icon"
                             className="border-gray-400"
                           >
-                            <MoreVertical className="h-4 w-4" />
+                            <MoreVertical className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">

@@ -137,7 +137,7 @@ export function MultiQRCodePrintSheet({
               disabled={selectedSpecimens.size === 0}
               onClick={handlePrint}
             >
-              <CareIcon icon="l-print" className="mr-2 h-4 w-4" />
+              <CareIcon icon="l-print" className="mr-2 size-4" />
               {t("print_selected")}
             </Button>
           </div>

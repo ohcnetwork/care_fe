@@ -431,9 +431,9 @@ export function BedChargeItemsTable({
                                     onClick={() => toggleItemExpand(item.id)}
                                   >
                                     {isExpanded ? (
-                                      <ChevronUp className="h-4 w-4" />
+                                      <ChevronUp className="size-4" />
                                     ) : (
-                                      <ChevronDown className="h-4 w-4" />
+                                      <ChevronDown className="size-4" />
                                     )}
                                   </Button>
                                 </div>
@@ -485,7 +485,7 @@ export function BedChargeItemsTable({
                                       size="icon"
                                       className="h-8 w-8"
                                     >
-                                      <MoreHorizontal className="h-4 w-4" />
+                                      <MoreHorizontal className="size-4" />
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
@@ -505,7 +505,7 @@ export function BedChargeItemsTable({
                                             ?.click();
                                         }}
                                       >
-                                        <PencilIcon className="mr-2 h-4 w-4" />
+                                        <PencilIcon className="mr-2 size-4" />
                                         <span>{t("edit")}</span>
                                       </div>
                                     </DropdownMenuItem>

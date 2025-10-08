@@ -191,7 +191,7 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
+              <Upload className="size-5" />
               Import Locations from CSV
             </CardTitle>
             <CardDescription>
@@ -250,7 +250,7 @@ Main Building,building,Main hospital building,Reception,room,Main reception area
 
             {uploadError && (
               <Alert className="mt-4" variant="destructive">
-                <AlertCircle className="h-4 w-4" />
+                <AlertCircle className="size-4" />
                 <AlertDescription>{uploadError}</AlertDescription>
               </Alert>
             )}
@@ -354,7 +354,7 @@ const HierarchicalLocationPreview = ({
 
                 {/* Location Icon */}
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-600">
-                  <IconComponent className="h-4 w-4" />
+                  <IconComponent className="size-4" />
                 </div>
 
                 {/* Location Details */}

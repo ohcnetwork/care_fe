@@ -53,7 +53,7 @@ export function ChargeItemDefinitionDrawer({
                 size="sm"
                 className="absolute right-4 top-4 h-6 w-6 p-0"
               >
-                <X className="h-4 w-4" />
+                <X className="size-4" />
               </Button>
             </DrawerClose>
             <DrawerTitle className="text-left">

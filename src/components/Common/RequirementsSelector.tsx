@@ -97,7 +97,7 @@ function SmallSelectedItemCard({
           e.stopPropagation();
           onRemove();
         }}
-        className="h-5 w-5 rounded-full p-0"
+        className="size-5 rounded-full p-0"
         variant="ghost"
       >
         <X className="size-3" />

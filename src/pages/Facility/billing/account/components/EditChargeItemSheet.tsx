@@ -168,7 +168,7 @@ export function EditChargeItemSheet({
       <SheetTrigger asChild>
         {trigger || (
           <Button variant="ghost" size="icon">
-            <PencilIcon className="h-4 w-4" />
+            <PencilIcon className="size-4" />
           </Button>
         )}
       </SheetTrigger>

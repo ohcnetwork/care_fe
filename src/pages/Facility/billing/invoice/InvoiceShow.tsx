@@ -721,7 +721,7 @@ export function InvoiceShow({
                                   >
                                     <CareIcon
                                       icon="l-edit"
-                                      className="h-4 w-4"
+                                      className="size-4"
                                     />
                                   </Button>
                                   <Button
@@ -735,7 +735,7 @@ export function InvoiceShow({
                                   >
                                     <CareIcon
                                       icon="l-trash"
-                                      className="h-4 w-4"
+                                      className="size-4"
                                     />
                                   </Button>
                                 </div>

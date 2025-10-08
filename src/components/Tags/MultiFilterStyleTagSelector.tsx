@@ -171,7 +171,7 @@ export function MultiFilterStyleTagSelector({
               role="checkbox"
               aria-checked={isSelected(tag)}
               data-state={isSelected(tag) ? "checked" : "unchecked"}
-              className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
+              className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 size-4"
             >
               {isSelected(tag) && (
                 <span className="flex items-center justify-center text-current transition-none">
@@ -181,7 +181,7 @@ export function MultiFilterStyleTagSelector({
             </button>
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {tag.has_children ? (
-                <Component className="h-4 w-4 text-gray-600" />
+                <Component className="size-4 text-gray-600" />
               ) : (
                 <div className="h-3 w-3 rounded-full flex-shrink-0 border bg-blue-100 border-blue-300"></div>
               )}
@@ -193,7 +193,7 @@ export function MultiFilterStyleTagSelector({
               )}
             </div>
             {tag.has_children && (
-              <ArrowRight className="h-4 w-4 text-gray-400" />
+              <ArrowRight className="size-4 text-gray-400" />
             )}
           </div>
         ))}
@@ -275,7 +275,7 @@ export function MultiFilterStyleTagSelector({
                             role="checkbox"
                             aria-checked="true"
                             data-state="checked"
-                            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
+                            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 size-4"
                           >
                             <span className="flex items-center justify-center text-current transition-none">
                               <Check className="size-3.5" />
@@ -346,10 +346,10 @@ export function MultiFilterStyleTagSelector({
                     onClick={handleMobileBack}
                     className="p-1 h-8 w-8"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="size-4" />
                   </Button>
                   <DrawerTitle className="flex items-center gap-2">
-                    <Component className="h-4 w-4" />
+                    <Component className="size-4" />
                     {selectedGroup?.display}
                   </DrawerTitle>
                 </div>
@@ -376,7 +376,7 @@ export function MultiFilterStyleTagSelector({
                             data-state={
                               isSelected(childTag) ? "checked" : "unchecked"
                             }
-                            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
+                            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 size-4"
                           >
                             {isSelected(childTag) && (
                               <span className="flex items-center justify-center text-current transition-none">
@@ -415,7 +415,7 @@ export function MultiFilterStyleTagSelector({
               {/* Header */}
               <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200">
                 <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 hover:bg-gray-100 hover:text-gray-900 rounded-md text-xs h-6 w-6 p-0">
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="size-4" />
                 </button>
                 <span className="text-sm font-medium">
                   {t("tags", { count: selected.length })}
@@ -451,7 +451,7 @@ export function MultiFilterStyleTagSelector({
                             role="checkbox"
                             aria-checked="true"
                             data-state="checked"
-                            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
+                            className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 size-4"
                           >
                             <span className="flex items-center justify-center text-current transition-none">
                               <Check className="size-3.5" />
@@ -502,7 +502,7 @@ export function MultiFilterStyleTagSelector({
                                   <div className="focus:bg-gray-100 focus:text-gray-900 cursor-default rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-1">
                                     <div className="flex items-center gap-2 flex-1 justify-between">
                                       <div className="flex items-center gap-1">
-                                        <Component className="h-4 w-4 text-black/80" />
+                                        <Component className="size-4 text-black/80" />
                                         <span className="text-sm">
                                           {tag.display}
                                         </span>
@@ -545,7 +545,7 @@ export function MultiFilterStyleTagSelector({
                                               ? "checked"
                                               : "unchecked"
                                           }
-                                          className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
+                                          className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 size-4"
                                         >
                                           {isSelected(childTag) && (
                                             <span className="flex items-center justify-center text-current transition-none">
@@ -597,7 +597,7 @@ export function MultiFilterStyleTagSelector({
                                 data-state={
                                   isSelected(tag) ? "checked" : "unchecked"
                                 }
-                                className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-4 w-4"
+                                className="bg-white peer border-gray-200 data-[state=checked]:bg-primary-600 data-[state=checked]:text-primary-100 data-[state=checked]:border-primary-600 focus-visible:border-primary-600 focus-visible:ring-primary-500/50 size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 size-4"
                               >
                                 {isSelected(tag) && (
                                   <span className="flex items-center justify-center text-current transition-none">
@@ -635,13 +635,13 @@ export function MultiFilterStyleTagSelector({
               <div className="flex justify-between">
                 <div className="flex gap-1 my-2 mx-2">
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="size-4" />
                   </div>
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="size-4" />
                   </div>
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="size-4" />
                   </div>
                   <span className="text-xs text-gray-500 self-center">
                     {t("navigate")}
@@ -649,7 +649,7 @@ export function MultiFilterStyleTagSelector({
                 </div>
                 <div className="flex gap-1 my-2 mx-2">
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                    <div className="h-4 w-4" />
+                    <div className="size-4" />
                   </div>
                   <span className="text-xs text-gray-500 self-center">
                     {t("select")}

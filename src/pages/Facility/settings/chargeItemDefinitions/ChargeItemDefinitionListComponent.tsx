@@ -84,7 +84,7 @@ function ChargeItemCard({
                 )
               }
             >
-              <CareIcon icon="l-edit" className="h-4 w-4" />
+              <CareIcon icon="l-edit" className="size-4" />
               {t("see_details")}
             </Button>
           </div>
@@ -155,7 +155,7 @@ function ChargeItemTableRow({
                     )
                   }
                 >
-                  <CareIcon icon="l-edit" className="h-4 w-4" />
+                  <CareIcon icon="l-edit" className="size-4" />
                   {t("edit")}
                 </Button>
               </TooltipTrigger>
@@ -272,7 +272,7 @@ export function ChargeItemList({
                 onClick={() => setViewMode("table")}
                 className="rounded-r-none"
               >
-                <CareIcon icon="l-table" className="h-4 w-4" />
+                <CareIcon icon="l-table" className="size-4" />
               </Button>
               <Button
                 variant={viewMode === "cards" ? "default" : "ghost"}
@@ -280,7 +280,7 @@ export function ChargeItemList({
                 onClick={() => setViewMode("cards")}
                 className="rounded-l-none"
               >
-                <CareIcon icon="l-th-large" className="h-4 w-4" />
+                <CareIcon icon="l-th-large" className="size-4" />
               </Button>
             </div>
           </div>

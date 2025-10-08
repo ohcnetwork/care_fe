@@ -121,7 +121,7 @@ function LeftPanel({
                       setQueryParams({});
                       setSelectedQuestionnaireTitle("");
                     }}
-                    className="h-5 w-5 p-0 hover:bg-gray-100"
+                    className="size-5 p-0 hover:bg-gray-100"
                   >
                     <X className="size-4" />
                   </Button>

@@ -24,18 +24,18 @@ export default function NavigationHelper({
             <div className="flex gap-1 my-2 mx-2">
               {isActiveFilter && (
                 <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                  <CareIcon icon="l-arrow-left" className="h-4 w-4" />
+                  <CareIcon icon="l-arrow-left" className="size-4" />
                 </div>
               )}
               <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                <CareIcon icon="l-arrow-down" className="h-4 w-4" />
+                <CareIcon icon="l-arrow-down" className="size-4" />
               </div>
               <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                <CareIcon icon="l-arrow-up" className="h-4 w-4" />
+                <CareIcon icon="l-arrow-up" className="size-4" />
               </div>
               {!isActiveFilter && (
                 <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                  <CareIcon icon="l-arrow-right" className="h-4 w-4" />
+                  <CareIcon icon="l-arrow-right" className="size-4" />
                 </div>
               )}
               <span className="text-xs text-gray-500 self-center">
@@ -45,7 +45,7 @@ export default function NavigationHelper({
             {isActiveFilter ? (
               <div className="flex gap-1 my-2 mx-2">
                 <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                  <CareIcon icon="l-space-key" className="h-4 w-4" />
+                  <CareIcon icon="l-space-key" className="size-4" />
                 </div>
                 <span className="text-xs text-gray-500 self-center">
                   {t("select")}
@@ -54,7 +54,7 @@ export default function NavigationHelper({
             ) : (
               <div className="flex gap-1 my-2 mx-2">
                 <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                  <CareIcon icon="l-enter" className="h-4 w-4" />
+                  <CareIcon icon="l-enter" className="size-4" />
                 </div>
                 <span className="text-xs text-gray-500 self-center">
                   {t("open")}

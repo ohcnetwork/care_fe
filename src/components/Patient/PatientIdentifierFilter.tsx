@@ -178,7 +178,7 @@ export default function PatientIdentifierFilter({
               ) : (
                 placeholder || t("search_patients")
               )}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[320px] p-0 overflow-hidden rounded-lg">
@@ -206,7 +206,7 @@ export default function PatientIdentifierFilter({
                     onClick={() => setSearchTerm("")}
                     aria-label="Clear search input"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="size-4" />
                   </Button>
                 )}
               </div>
@@ -255,7 +255,7 @@ export default function PatientIdentifierFilter({
                       >
                         <Check
                           className={cn(
-                            "mr-2 h-4 w-4",
+                            "mr-2 size-4",
                             selectedPatient?.id === patient.id
                               ? "opacity-100"
                               : "opacity-0",

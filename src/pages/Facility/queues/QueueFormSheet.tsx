@@ -242,7 +242,7 @@ export default function QueueFormSheet({
               <Button type="submit" disabled={isPending} className="w-full">
                 {isPending ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                    <div className="animate-spin rounded-full size-4 border-b-2 border-white mr-2" />
                     {isEditMode ? t("updating") : t("creating")}
                   </>
                 ) : isEditMode ? (

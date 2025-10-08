@@ -390,7 +390,7 @@ export function ValueSetForm({
             valueset={form.watch()}
             trigger={
               <Button variant="outline_primary">
-                <CareIcon icon={"l-eye"} className="h-4 w-4" />
+                <CareIcon icon={"l-eye"} className="size-4" />
                 {t("valueset_preview")}
               </Button>
             }

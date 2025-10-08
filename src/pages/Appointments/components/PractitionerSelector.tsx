@@ -326,7 +326,7 @@ export const PractitionerSelector = ({
                 {/* Header */}
                 <div className="px-4 py-3 border-b bg-gray-50 rounded-t-md">
                   <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-gray-500" />
+                    <Building2 className="size-4 text-gray-500" />
                     <span className="text-sm font-medium text-gray-600">
                       {t("select_practitioners")}
                     </span>
@@ -444,7 +444,7 @@ export const PractitionerSelector = ({
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
                               {organization.has_children && (
-                                <ChevronRight className="h-4 w-4 text-gray-500" />
+                                <ChevronRight className="size-4 text-gray-500" />
                               )}
                             </div>
                           </CommandItem>
@@ -487,7 +487,7 @@ export const PractitionerSelector = ({
                                   </span>
                                 </div>
                                 {isSelected && (
-                                  <CheckIcon className="h-4 w-4 text-gray-700" />
+                                  <CheckIcon className="size-4 text-gray-700" />
                                 )}
                               </CommandItem>
                             );
@@ -512,9 +512,9 @@ export const PractitionerSelector = ({
                         onClick={handleBackNavigation}
                         className="h-6 w-6 p-0"
                       >
-                        <ArrowLeft className="h-4 w-4" />
+                        <ArrowLeft className="size-4" />
                       </Button>
-                      <Building2 className="h-4 w-4 text-gray-500" />
+                      <Building2 className="size-4 text-gray-500" />
                       <span className="text-sm font-medium text-gray-600">
                         {navigationStack.length > 0
                           ? navigationStack[navigationStack.length - 1].name
@@ -572,7 +572,7 @@ export const PractitionerSelector = ({
                             )}
                           </div>
                           {organization.has_children && (
-                            <ChevronRight className="h-4 w-4 text-gray-500" />
+                            <ChevronRight className="size-4 text-gray-500" />
                           )}
                         </div>
                       ))}
@@ -583,7 +583,7 @@ export const PractitionerSelector = ({
                       {isLoadingOrganizationUsers ? (
                         <div className="p-6 space-y-3">
                           <div className="flex items-center gap-3">
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="size-4 animate-spin" />
                             <div className="space-y-1 flex-1">
                               <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
                               <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse" />
@@ -639,7 +639,7 @@ export const PractitionerSelector = ({
                                   </span>
                                 </div>
                                 {isSelected && (
-                                  <CheckIcon className="h-4 w-4 text-gray-700" />
+                                  <CheckIcon className="size-4 text-gray-700" />
                                 )}
                               </div>
                             );

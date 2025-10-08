@@ -181,7 +181,7 @@ export default function AddChargeItemsBillingSheet({
                             onClick={() => handleRemoveItem(index)}
                             className="shrink-0"
                           >
-                            <Trash2Icon className="h-4 w-4" />
+                            <Trash2Icon className="size-4" />
                           </Button>
                         </div>
 
@@ -217,7 +217,7 @@ export default function AddChargeItemsBillingSheet({
                                 .price_components?.length > 0 && (
                                 <Popover>
                                   <PopoverTrigger>
-                                    <InfoIcon className="h-4 w-4 text-gray-700 cursor-pointer" />
+                                    <InfoIcon className="size-4 text-gray-700 cursor-pointer" />
                                   </PopoverTrigger>
                                   <PopoverContent
                                     side="right"

@@ -254,7 +254,7 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                 <div className="mt-6">
                   <h3 className="text-lg font-semibold mb-2">{t("note")}</h3>
                   <Alert className="bg-blue-50 border-blue-200 text-blue-500">
-                    <AlertCircle className="h-4 w-4" />
+                    <AlertCircle className="size-4" />
                     <AlertDescription className="whitespace-pre-wrap font-medium text-base">
                       {consent.note}
                     </AlertDescription>

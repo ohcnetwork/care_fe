@@ -97,9 +97,9 @@ function TreeViewItem({
       >
         <div className="flex items-center gap-2 flex-1">
           {isRootLevel ? (
-            <Component className="h-4 w-4 text-black/80" strokeWidth={1.25} />
+            <Component className="size-4 text-black/80" strokeWidth={1.25} />
           ) : (
-            <Checkbox checked={isSelected} className="h-4 w-4" />
+            <Checkbox checked={isSelected} className="size-4" />
           )}
           <div
             className={cn(
@@ -338,7 +338,7 @@ function TagFilterDropdown({
                 }}
                 className="flex items-center gap-2 px-2 py-1 cursor-pointer"
               >
-                <Checkbox checked={false} className="h-4 w-4" />
+                <Checkbox checked={false} className="size-4" />
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <div
                     className={cn(
@@ -433,7 +433,7 @@ function GroupSubmenu({
       >
         <div className="flex items-center gap-2 flex-1 justify-between">
           <div className="flex items-center gap-1">
-            <Component className="h-4 w-4 text-black/80" strokeWidth={1.25} />
+            <Component className="size-4 text-black/80" strokeWidth={1.25} />
             <span className="text-sm">{group.display}</span>
           </div>
           <Badge variant="secondary" className="text-xs p-0.5">
@@ -461,7 +461,7 @@ function GroupSubmenu({
                 }}
                 className="flex items-center gap-2 px-2 py-1 cursor-pointer"
               >
-                <Checkbox checked={isSelected} className="h-4 w-4" />
+                <Checkbox checked={isSelected} className="size-4" />
                 <div className="flex items-center gap-2 flex-1">
                   <div
                     className={cn(

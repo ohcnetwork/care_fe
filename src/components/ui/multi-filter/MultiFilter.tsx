@@ -249,7 +249,7 @@ function FilterList({
               {selected.length > 0 && (
                 <span className="text-xs text-gray-500">{selected.length}</span>
               )}
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="size-4" />
             </div>
           </DropdownMenuItem>
         );

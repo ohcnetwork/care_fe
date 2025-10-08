@@ -57,7 +57,7 @@ function ProductKnowledgeCard({
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
               <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
-                <CareIcon icon="l-folder" className="h-5 w-5" />
+                <CareIcon icon="l-folder" className="size-5" />
               </div>
             </div>
             <div className="flex-1 min-w-0">
@@ -101,7 +101,7 @@ function ProductKnowledgeCard({
                 )
               }
             >
-              <CareIcon icon="l-edit" className="h-4 w-4" />
+              <CareIcon icon="l-edit" className="size-4" />
               {t("see_details")}
             </Button>
           </div>
@@ -133,7 +133,7 @@ function ProductKnowledgeTableRow({
       >
         <div className="flex items-center space-x-3">
           <div className="p-1 rounded bg-gray-100 text-gray-600">
-            <CareIcon icon="l-folder" className="h-4 w-4" />
+            <CareIcon icon="l-folder" className="size-4" />
           </div>
           <div>
             <div className="font-medium text-gray-900">{product.name}</div>
@@ -169,7 +169,7 @@ function ProductKnowledgeTableRow({
               <TooltipTrigger asChild>
                 <Button asChild variant="ghost" size="sm">
                   <Link href={`/product_knowledge/${product.slug}/edit`}>
-                    <CareIcon icon="l-edit" className="h-4 w-4" />
+                    <CareIcon icon="l-edit" className="size-4" />
                   </Link>
                 </Button>
               </TooltipTrigger>
@@ -294,7 +294,7 @@ export function ProductKnowledgeList({
                 onClick={() => setViewMode("table")}
                 className="rounded-r-none"
               >
-                <CareIcon icon="l-table" className="h-4 w-4" />
+                <CareIcon icon="l-table" className="size-4" />
               </Button>
               <Button
                 variant={viewMode === "cards" ? "default" : "ghost"}
@@ -302,7 +302,7 @@ export function ProductKnowledgeList({
                 onClick={() => setViewMode("cards")}
                 className="rounded-l-none"
               >
-                <CareIcon icon="l-th-large" className="h-4 w-4" />
+                <CareIcon icon="l-th-large" className="size-4" />
               </Button>
             </div>
           </div>

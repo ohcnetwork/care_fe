@@ -232,7 +232,7 @@ export default function MoveQuestionDialog({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-5 w-5 rounded-full"
+                      className="size-5 rounded-full"
                       onClick={() => removeQuestionFromSelection(question.id)}
                       title={t("remove_from_selection")}
                     >

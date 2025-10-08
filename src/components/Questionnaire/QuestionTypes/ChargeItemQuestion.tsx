@@ -125,7 +125,7 @@ function ChargeItemForm({
               0 && (
               <Popover>
                 <PopoverTrigger>
-                  <InfoIcon className="h-4 w-4 text-gray-700 cursor-pointer" />
+                  <InfoIcon className="size-4 text-gray-700 cursor-pointer" />
                 </PopoverTrigger>
                 <PopoverContent side="right" className="p-0" align="start">
                   <ChargeItemPriceDisplay
@@ -143,7 +143,7 @@ function ChargeItemForm({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">
-              <MoreVertical className="h-4 w-4" />
+              <MoreVertical className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -152,7 +152,7 @@ function ChargeItemForm({
                 onSelect={() => onRemove()}
                 className="text-red-600"
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="size-4 mr-2" />
                 <span>{t("remove")}</span>
               </DropdownMenuItem>
             )}

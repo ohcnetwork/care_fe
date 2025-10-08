@@ -240,7 +240,7 @@ function ServiceRequestForm({
                 onClick={onRemove}
                 data-cy="remove-service-request"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="size-4" />
               </Button>
             )}
           </div>
@@ -360,10 +360,10 @@ function ServiceRequestForm({
                 disabled={disabled}
                 data-cy="remove-service-request"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="size-4" />
               </Button>
             )}
-            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+            <ChevronDown className="size-4 shrink-0 transition-transform duration-200" />
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent>

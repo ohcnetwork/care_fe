@@ -997,7 +997,7 @@ function ActivityDefinitionFormContent({
                                     );
                                   }}
                                 >
-                                  <Trash2Icon className="h-4 w-4" />
+                                  <Trash2Icon className="size-4" />
                                   <span className="sr-only">{t("remove")}</span>
                                 </Button>
                               </div>

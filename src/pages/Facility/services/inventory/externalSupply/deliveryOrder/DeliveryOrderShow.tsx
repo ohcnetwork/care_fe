@@ -547,7 +547,7 @@ export function DeliveryOrderShow({
                             size="icon"
                             className="h-10"
                           >
-                            <MoreVertical className="h-4 w-4" />
+                            <MoreVertical className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
