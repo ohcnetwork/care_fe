@@ -120,7 +120,7 @@ export const PatientInfoHoverCard = ({
             </div>
           </div>
         </div>
-        {patient.instance_tags.length > 0 && (
+        {patient.instance_tags?.length > 0 && (
           <div className="flex items-start border-t border-gray-200 pt-2">
             <div className="flex flex-col gap-1 text-sm font-medium w-full">
               <span className="text-gray-700">{t("patient_tags")}:</span>
