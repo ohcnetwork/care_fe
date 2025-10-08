@@ -92,10 +92,6 @@ export interface ResourceRequestCreate extends ResourceRequestBase {
   assigned_to: string | null;
 }
 
-export interface ResourceRequestUpdate extends ResourceRequestCreate {
-  id: string;
-}
-
 export interface CommentCreate {
   comment: string;
 }
