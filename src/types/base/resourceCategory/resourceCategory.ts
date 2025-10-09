@@ -15,12 +15,6 @@ export enum ResourceCategorySubType {
   other = "all:other",
 }
 
-// [charge_item_definition:location:bed_charges]
-// [charge_item_definition:schedule:practitioner]
-// [charge_item_definition:schedule:location]
-// [charge_item_definition:schedule:service]
-// [other]
-
 export type ResourceCategoryParent = {
   id: string;
   title: string;
