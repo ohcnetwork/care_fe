@@ -17,21 +17,21 @@ const numberAsString = z.string().refine((val) => !isNaN(parseInt(val)), {
   message: "Must be a valid number",
 });
 
-const logoSchemaString = z
-  .string()
-  .refine(
-    (val) => {
-      try {
-        JSON.parse(val);
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    {
-      message: "Logo must be a valid JSON string",
-    },
-  )
+const jsonAsStringSchema = z.string().refine(
+  (val) => {
+    try {
+      JSON.parse(val);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  {
+    message: "Not a valid JSON string",
+  },
+);
+
+const logoSchemaString = jsonAsStringSchema
   .transform((val) => JSON.parse(val))
   .pipe(logoSchema);
 
@@ -89,6 +89,7 @@ const envSchema = z
     REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED: numberAsString.optional(),
     REACT_DEFAULT_ENCOUNTER_TYPE: z.string().optional(),
     REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.string().uuid().optional(),
+    REACT_CUSTOM_SHORTCUTS: jsonAsStringSchema.optional(),
   })
   .superRefine(async (data, ctx) => {
     const allowedClasses =
