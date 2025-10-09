@@ -19,7 +19,7 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
       {options.map((option) => (
         <div
           className={cn(
-            "border rounded-md p-2 w-fit min-w-[3rem] cursor-pointer hover:border-primary-500 group text-left overflow-hidden",
+            "border rounded-md p-2 w-full sm:w-fit cursor-pointer hover:border-primary-500 group text-left overflow-hidden",
             props.value === option.value
               ? "bg-primary-100 border-primary-500"
               : "bg-white border-gray-300",
@@ -35,7 +35,7 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
             }
           }}
         >
-          <div className="flex items-center space-x-2 min-w-0">
+          <div className="flex items-center justify-center space-x-2 min-w-0">
             <RadioGroupItem
               value={option.value.toString()}
               id={option.value}
