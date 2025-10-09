@@ -167,7 +167,7 @@ const config = [
       ...i18nextPlugin.configs.recommended.rules,
       "i18next/no-literal-string": [
         dynamicRules({
-          error: isPreCommit,
+          error: isPreCommit || isProduction,
           warn: DEFAULT,
         }),
         {
@@ -201,6 +201,17 @@ const config = [
       parser: tsParser,
       parserOptions: {
         project: "./cypress/tsconfig.json",
+      },
+    },
+  },
+
+  // Playwright-specific rules
+  {
+    files: ["tests/**/*.ts", "playwright.config.ts"],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        project: "./tests/tsconfig.json",
       },
     },
   },

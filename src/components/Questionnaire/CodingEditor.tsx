@@ -93,7 +93,7 @@ export function CodingEditor({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center w-full justify-between">
-          <Label className="text-base font-medium">Coding Details</Label>
+          <Label className="text-base font-medium">{t("coding_details")}</Label>
           <Button
             variant="ghost"
             size="sm"

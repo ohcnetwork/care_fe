@@ -50,7 +50,7 @@ const PHONE_NUMBER_CONFIG_SYSTEM =
   "system.care.ohc.network/patient-phone-number";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
-  useShortcutSubContext("facility:patient:search:-global");
+  useShortcutSubContext("patient:search:-global");
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<
     PartialPatientModel | PatientRead | null
