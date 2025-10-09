@@ -155,29 +155,32 @@ export function DiscountMonetaryComponentForm({
                   control={form.control}
                   name="factor"
                   render={({ field }) => (
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.01"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseFloat(e.target.value)
-                                : null,
-                            )
-                          }
-                          value={field.value === null ? "" : field.value}
-                          className="pr-8"
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
-                          %
-                        </span>
-                      </div>
-                    </FormControl>
+                    <FormItem>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value
+                                  ? parseFloat(e.target.value)
+                                  : null,
+                              )
+                            }
+                            value={field.value === null ? "" : field.value}
+                            className="pr-8"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
+                            %
+                          </span>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
               ) : (
@@ -185,28 +188,27 @@ export function DiscountMonetaryComponentForm({
                   control={form.control}
                   name="amount"
                   render={({ field }) => (
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm">
-                          ₹
-                        </span>
-                        <Input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseFloat(e.target.value)
-                                : null,
-                            )
-                          }
-                          value={field.value === null ? "" : field.value}
-                          className="pl-8"
-                        />
-                      </div>
-                    </FormControl>
+                    <FormItem>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm">
+                            ₹
+                          </span>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(e.target.value || null)
+                            }
+                            value={field.value === null ? "" : field.value}
+                            className="pl-8"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
               )}
@@ -230,6 +232,7 @@ export function DiscountMonetaryComponentForm({
                       </SelectContent>
                     </Select>
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
