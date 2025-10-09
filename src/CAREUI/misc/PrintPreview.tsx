@@ -44,12 +44,7 @@ export default function PrintPreview(props: Props) {
                 {t("back")}
               </Button>
             )}
-            <Button
-              variant="primary"
-              disabled={props.disabled}
-              onClick={print}
-              data-shortcut-id="print-button"
-            >
+            <Button variant="primary" disabled={props.disabled} onClick={print}>
               <CareIcon icon="l-print" className="text-lg" />
               {t("print")}
               <ShortcutBadge actionId="print-button" className="bg-white" />

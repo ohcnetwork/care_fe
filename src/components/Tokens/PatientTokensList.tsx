@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/collapsible";
 import { DatePicker } from "@/components/ui/date-picker";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
 import { FacilityRead } from "@/types/facility/facility";
@@ -24,7 +24,7 @@ import {
 } from "@/types/tokens/token/token";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
+import { ChevronsDownUp, ChevronsUpDown, TicketIcon } from "lucide-react";
 
 interface PatientTokensListProps {
   patientId: string;
@@ -112,21 +112,12 @@ export default function PatientTokensList({
       </div>
 
       {tokens.length === 0 && (
-        <Card className="bg-white shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center justify-center text-center">
-              <div className="rounded-full bg-primary/10 p-3 mb-3">
-                <CareIcon icon="l-ticket" className="size-6 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-1">
-                {t("no_tokens_found")}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {t("no_tokens_found_description")}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <EmptyState
+          title={t("no_tokens_found")}
+          description={t("no_tokens_found_description")}
+          icon={<TicketIcon className="size-5 text-primary m-1" />}
+          className="lg:border-solid"
+        />
       )}
 
       {tokens.map((token) => {

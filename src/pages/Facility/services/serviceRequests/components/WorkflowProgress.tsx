@@ -16,6 +16,7 @@ import { formatName } from "@/Utils/utils";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { ServiceRequestReadSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { SpecimenRead } from "@/types/emr/specimen/specimen";
+import { useTranslation } from "react-i18next";
 
 interface TimelineEvent {
   title: string;
@@ -82,11 +83,12 @@ function TimelineNode({ event }: { event: TimelineEvent }) {
 }
 
 function WorkflowContent({ events }: { events: TimelineEvent[] }) {
+  const { t } = useTranslation();
   return (
     <>
       <div className="flex items-center gap-2 p-4 border-b">
         <CareIcon icon="l-clipboard-alt" className="size-5" />
-        <h2 className="text-lg font-semibold">Workflow Progress</h2>
+        <h2 className="text-lg font-semibold">{t("workflow_progress")}</h2>
       </div>
       <ScrollArea className="h-[calc(100vh-10rem)]">
         <div className="p-4 space-y-2">

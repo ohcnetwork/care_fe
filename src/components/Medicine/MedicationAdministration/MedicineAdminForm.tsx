@@ -221,7 +221,7 @@ export const MedicineAdminForm: React.FC<MedicineAdminFormProps> = ({
         <div>
           <Label className="text-xs text-gray-500">{t("route")}</Label>
           <p className="font-medium">
-            {medication.dosage_instruction[0]?.route?.display || "Oral"}
+            {medication.dosage_instruction[0]?.route?.display || t("oral")}
           </p>
         </div>
         <div>

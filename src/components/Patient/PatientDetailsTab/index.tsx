@@ -1,13 +1,13 @@
-import EncounterHistory from "@/components/Patient/PatientDetailsTab//EncounterHistory";
-import { HealthProfileSummary } from "@/components/Patient/PatientDetailsTab//HealthProfileSummary";
-import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
-
 import { HasPermissionFn, getPermissions } from "@/common/Permissions";
 
 import { PatientRead } from "@/types/emr/patient/patient";
 
+import { Demography } from "@/components/Patient/PatientDetailsTab/Demography";
+import EncounterHistory from "@/components/Patient/PatientDetailsTab/EncounterHistory";
+import { ClinicalHistory } from "./ClinicalHistory";
+
+import { BookingsList } from "@/pages/Appointments/BookAppointment/BookingsList";
 import { Accounts } from "./Accounts";
-import { Appointments } from "./Appointments";
 import { PatientFilesTab } from "./PatientFiles";
 import { PatientNotesTab } from "./PatientNotes";
 import { PatientUsers } from "./PatientUsers";
@@ -37,15 +37,11 @@ export const BASE_PATIENT_TABS: Tab[] = [
   },
   {
     route: "appointments",
-    component: Appointments,
+    component: BookingsList,
   },
   {
     route: "encounters",
     component: EncounterHistory,
-  },
-  {
-    route: "health-profile",
-    component: HealthProfileSummary,
   },
   {
     route: "updates",
@@ -71,6 +67,10 @@ export const BASE_PATIENT_TABS: Tab[] = [
     route: "accounts",
     component: Accounts,
   },
+  {
+    route: "clinical_history",
+    component: ClinicalHistory,
+  },
 ];
 
 export function getTabs(
@@ -92,10 +92,10 @@ export function getTabs(
         return { ...tab, visible: canViewAppointments };
       case "encounters":
         return { ...tab, visible: canListEncounters || canViewPatients };
-      case "health-profile":
-        return { ...tab, visible: canViewClinicalData };
       case "files":
         return { ...tab, visible: canViewEncounter || canViewClinicalData };
+      case "clinical_history":
+        return { ...tab, visible: canViewClinicalData };
       case "updates":
         return {
           ...tab,

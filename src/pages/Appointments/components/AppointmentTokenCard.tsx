@@ -9,6 +9,7 @@ import { formatPatientAge } from "@/Utils/utils";
 import { resourceTypeToResourcePathSlug } from "@/components/Schedule/useScheduleResource";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { formatSlotTimeRange } from "@/pages/Appointments/utils";
 import { FacilityRead } from "@/types/facility/facility";
@@ -38,6 +39,7 @@ const TokenCard = ({
 }: Props) => {
   const { t } = useTranslation();
   const isLargeScreen = useBreakpoints({ lg: true, default: false });
+  useShortcutSubContext();
 
   // Get patient from token or appointment
   const patient = token?.patient || appointment?.patient;
@@ -159,6 +161,7 @@ const TokenCard = ({
                 className="underline font-semibold text-base capitalize text-gray-950"
               >
                 <Link
+                  basePath="/"
                   href={`/facility/${facility.id}/${resourceTypeToResourcePathSlug[appointment.resource_type]}/${appointment.resource.id}/queues/${appointment.token?.queue.id}`}
                 >
                   {t("queue_board")}
