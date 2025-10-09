@@ -221,7 +221,12 @@ export default function Autocomplete({
               data-cy={dataCy}
               type="button"
             >
-              <span className={cn("overflow-hidden", selectedOption && showClearButton ? "pr-8" : "")}>
+              <span
+                className={cn(
+                  "overflow-hidden",
+                  selectedOption && showClearButton ? "pr-8" : "",
+                )}
+              >
                 {value
                   ? freeInput
                     ? inputValue || value
