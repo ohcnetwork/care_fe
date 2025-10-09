@@ -23,6 +23,7 @@ import query from "@/Utils/request/query";
 import { PRODUCT_STATUS_COLORS } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import { PRODUCT_KNOWLEDGE_TYPE_COLORS } from "@/types/inventory/productKnowledge/productKnowledge";
+import { Link } from "raviger";
 
 interface Props {
   facilityId: string;
@@ -206,17 +207,14 @@ export default function ProductView({ facilityId, productId }: Props) {
                       {product.charge_item_definition.slug}
                     </p>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/settings/charge_item_definitions/${product.charge_item_definition.slug}`,
-                      )
-                    }
-                  >
-                    <CareIcon icon="l-eye" className="mr-2 size-4" />
-                    {t("view_details")}
+                  <Button variant="outline" size="sm" asChild>
+                    <Link
+                      basePath="/"
+                      href={`/facility/${facilityId}/settings/charge_item_definitions/${product.charge_item_definition.slug}`}
+                    >
+                      <CareIcon icon="l-eye" className="mr-2 size-4" />
+                      {t("view_details")}
+                    </Link>
                   </Button>
                 </div>
               </div>
