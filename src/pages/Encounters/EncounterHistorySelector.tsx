@@ -24,13 +24,14 @@ import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
@@ -399,20 +400,21 @@ export default function EncounterHistorySelector() {
         <h2 className="px-2 mb-2 text-xs font-medium text-gray-600 uppercase">
           {t("chosen_encounter")}
         </h2>
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger className="w-full">
+        <Drawer open={isOpen} onOpenChange={setIsOpen}>
+          <DrawerTrigger className="w-full">
             <EncounterSheetTrigger />
-          </SheetTrigger>
-          <SheetContent
-            side="bottom"
-            className="max-h-[85vh] rounded-t-3xl overflow-y-auto mb-2"
-          >
-            <SheetHeader className="px-4 pb-2">
-              <SheetTitle>{t("past_encounters")}</SheetTitle>
-            </SheetHeader>
-            <EncounterHistoryList onSelect={() => setIsOpen(false)} />
-          </SheetContent>
-        </Sheet>
+          </DrawerTrigger>
+          <DrawerContent className="px-4">
+            <DrawerHeader className="py-1.5">
+              <DrawerTitle className="text-lg font-semibold">
+                {t("past_encounters")}
+              </DrawerTitle>
+            </DrawerHeader>
+            <div className="overflow-y-auto pb-4 pr-2">
+              <EncounterHistoryList onSelect={() => setIsOpen(false)} />
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
       <div className="hidden lg:block pr-3">
         <ScrollArea className="h-[calc(100vh-9rem)] pr-3">

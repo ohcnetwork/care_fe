@@ -274,6 +274,18 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       port: 4000,
       host: "0.0.0.0",
       allowedHosts: true,
+      watch: {
+        // Ignore test files from file watching to avoid unnecessary HMR triggers
+        ignored: [
+          "**/cypress/**",
+          "**/tests/**", 
+          "**/test/**",
+          "**/*.test.*",
+          "**/*.spec.*",
+          "**/playwright-report/**",
+          "**/test-results/**"
+        ]
+      },
       headers: {
         "Strict-Transport-Security":
           "max-age=31536000; includeSubDomains; preload",

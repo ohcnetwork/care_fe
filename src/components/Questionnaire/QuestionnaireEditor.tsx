@@ -2711,7 +2711,7 @@ function QuestionEditor({
                                 value={
                                   annotatedAnswerOptions.find(
                                     (o) => o.initial_selected,
-                                  )?.value || ""
+                                  )?.value
                                 }
                                 onValueChange={(selectedValue) => {
                                   const newOptions = annotatedAnswerOptions.map(
@@ -2731,7 +2731,7 @@ function QuestionEditor({
                                   >
                                     <div
                                       className={cn(
-                                        "grid grid-cols-12 items-center gap-3 rounded-md p-3 mb-2",
+                                        "grid grid-cols-12 items-center gap-3 rounded-md p-3",
                                         opt.initial_selected && "bg-gray-100",
                                       )}
                                     >
@@ -2740,6 +2740,10 @@ function QuestionEditor({
                                           value={opt.value}
                                           id={`default-choice-${question.id}-${idx}`}
                                           className="mt-1"
+                                          disabled={
+                                            !opt.value ||
+                                            opt.value.trim() === ""
+                                          }
                                         />
                                       </div>
                                       <OptionFields
@@ -2757,24 +2761,24 @@ function QuestionEditor({
                             )}
                           </div>
                         </div>
-
-                        <Button
-                          variant="outline"
-                          type="button"
-                          size="sm"
-                          onClick={() => {
-                            const newOption = { value: "" };
-                            const newOptions = annotatedAnswerOptions
-                              ? [...annotatedAnswerOptions, newOption]
-                              : [newOption];
-                            updateField("answer_option", newOptions);
-                          }}
-                        >
-                          <CareIcon icon="l-plus" className="size-4" />
-                          {t("add_option")}
-                        </Button>
                       </>
                     )}
+
+                    <Button
+                      variant="outline"
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        const newOption = { value: "" };
+                        const newOptions = annotatedAnswerOptions
+                          ? [...annotatedAnswerOptions, newOption]
+                          : [newOption];
+                        updateField("answer_option", newOptions);
+                      }}
+                    >
+                      <CareIcon icon="l-plus" className="size-4" />
+                      {t("add_option")}
+                    </Button>
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">
