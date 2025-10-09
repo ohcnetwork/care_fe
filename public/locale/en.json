@@ -840,6 +840,7 @@
   "bed_available_soon_discharged_message": "The patient in this bed is being discharged. This bed will be available soon.",
   "bed_capacity": "Bed Capacity",
   "bed_charge_items": "Bed Charge Items",
+  "bed_charges": "Bed Charges",
   "bed_count_validation_error": "Number of beds must be greater than 0",
   "bed_created_notification_one": "{{count}} Bed created successfully",
   "bed_created_notification_other": "{{count}} Beds created successfully",

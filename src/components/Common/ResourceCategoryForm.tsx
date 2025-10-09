@@ -282,7 +282,6 @@ export function ResourceCategoryForm({
                   <FormLabel>{t("resource_sub_type")}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <ResourceSubTypePicker
-                      facilityId={facilityId}
                       resourceType={resourceType}
                       onValueChange={field.onChange}
                     />
