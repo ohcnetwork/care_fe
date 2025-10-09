@@ -52,17 +52,22 @@ export default function MultiFilter({
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
   const { t } = useTranslation();
 
-  const totalSelectedCount = Object.values(selectedFilters).reduce(
+  const nonClearableFilterCount = Object.values(selectedFilters).reduce(
     (sum, filterState) => {
+      if (filterState.filter.disableClear) {
+        return sum;
+      }
       if (Array.isArray(filterState.selected)) {
-        return sum + filterState.selected.length;
+        if (filterState.selected.length === 0) {
+          return sum;
+        }
       }
       return sum + 1;
     },
     0,
   );
 
-  const hasAnyFilters = totalSelectedCount > 0;
+  const hasAnyFilters = nonClearableFilterCount > 0;
 
   const handleFilterSelect = (filterKey: string) => {
     setActiveFilter(filterKey);
@@ -102,13 +107,13 @@ export default function MultiFilter({
   );
 
   return (
-    <div className={cn("flex flex-col gap-2 px-1", className)}>
+    <div className={cn("flex flex-col gap-2", className)}>
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
             className={cn(
-              "justify-between h-10",
+              "justify-between font-semibold",
               hasAnyFilters && "border-blue-300 bg-blue-50",
               triggerButtonClassName,
             )}
@@ -170,14 +175,14 @@ export default function MultiFilter({
       })}
       {hasAnyFilters && (
         <Button
-          variant="link"
+          variant="ghost"
           onClick={handleClearAll}
           className={cn(
-            "text-sm text-gray-500 flex items-center gap-1 w-auto self-start",
+            "text-sm text-gray-950 underline items-center w-auto self-start",
             clearAllButtonClassName,
           )}
         >
-          <X className="h-2 w-2" />
+          <X strokeWidth={1.5} />
           {t("clear_all")}
         </Button>
       )}

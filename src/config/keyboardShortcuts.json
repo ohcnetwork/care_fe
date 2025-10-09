@@ -2,13 +2,22 @@
   "global": [
     { "key": "p", "action": "print-button", "description": "Print", "when": "always" },
     { "key": "shift+?", "action": "show-shortcuts", "description": "Show Keyboard Shortcuts", "when": "always" },
-    { "key": "esc", "action": "cancel-action", "description": "Cancel Current Action", "when": "always" },
+    { "key": "escape", "action": "cancel-action", "description": "Cancel Current Action", "when": "always" },
     { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action", "when": "always" },
     { "key": "shift+arrowLeft", "action": "go-back", "description": "Go Back", "when": "always" },
     { "key": "enter", "action": "enter-action", "description": "Enter Current Action", "when": "always" },
     { "key": "cmd+k", "action": "search-input-shortcut", "description": "Search Input", "when": "always" },
-    { "key": "e", "action": "edit-button", "description": "Edit", "when": "always" }
-    
+    { "key": "e", "action": "edit-button", "description": "Edit", "when": "always" },
+    { "key": "shift+1", "action": "tab-index-1", "description": "Switch to Tab 1", "when": "always" },
+    { "key": "shift+2", "action": "tab-index-2", "description": "Switch to Tab 2", "when": "always" },
+    { "key": "shift+3", "action": "tab-index-3", "description": "Switch to Tab 3", "when": "always" },
+    { "key": "shift+4", "action": "tab-index-4", "description": "Switch to Tab 4", "when": "always" },
+    { "key": "shift+5", "action": "tab-index-5", "description": "Switch to Tab 5", "when": "always" },
+    { "key": "shift+6", "action": "tab-index-6", "description": "Switch to Tab 6", "when": "always" },
+    { "key": "shift+7", "action": "tab-index-7", "description": "Switch to Tab 7", "when": "always" },
+    { "key": "shift+8", "action": "tab-index-8", "description": "Switch to Tab 8", "when": "always" },
+    { "key": "shift+9", "action": "tab-index-9", "description": "Switch to Tab 9", "when": "always" }
+
   ],
 
   "facility": [
@@ -24,7 +33,7 @@
     { "key": "h", "action": "patient-home", "description": "Go to Patient Home", "when": "always" }
   ],
 
-  "facility:patient:search": [
+  "patient:search": [
     { "key": "shift+?", "action": "show-shortcuts", "description": "Show Keyboard Shortcuts", "when": "always" },
     { "key": "shift+enter", "action": "submit-action", "description": "Submit Current Action", "when": "always" },
     { "key": "cmd+k", "action": "search-input-shortcut", "description": "Search Input", "when": "always" }
@@ -86,6 +95,18 @@
     { "key": "e", "action": "mark-payment-error", "description": "Mark as Entered in Error", "when": "always" },
     { "key": "p", "action": "print-payment-receipt", "description": "Print Receipt", "when": "always" },
     { "key": "v", "action": "view-invoice", "description": "View Invoice", "when": "always" }
+  ],
+  "facility:inventory": [
+    { "key": "c", "action": "create-order", "description": "Create Order", "when": "always" },
+    { "key": "a", "action": "add-item", "description": "Add Item", "when": "always" },
+    { "key": "e", "action": "edit-order", "description": "Edit Order", "when": "always" },
+    { "key": "d", "action": "all-deliveries", "description": "Print Order", "when": "always" },
+    { "key": "m", "action": "mark-as", "description": "Mark as Approved/Completed", "when": "always" },
+    { "key": "shift+a", "action": "select-all", "description": "Select All Deliveries", "when": "always" }
+
+  ],
+  "facility:inventory:delivery": [
+    { "key": "l", "action": "load-from-order", "description": "Load from Order", "when": "always" }
   ],
 
   "encounter": [

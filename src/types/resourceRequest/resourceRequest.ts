@@ -71,7 +71,7 @@ export interface ResourceRequestBase {
 export interface ResourceRequestListRead extends ResourceRequestBase {
   id: string;
   origin_facility: FacilityRead;
-  assigned_facility: FacilityRead | undefined;
+  assigned_facility: FacilityRead | null;
   created_date: string;
   modified_date: string;
 }
@@ -92,10 +92,6 @@ export interface ResourceRequestCreate extends ResourceRequestBase {
   assigned_to: string | null;
 }
 
-export interface ResourceRequestUpdate extends ResourceRequestCreate {
-  id: string;
-}
-
 export interface CommentCreate {
   comment: string;
 }
@@ -107,10 +103,11 @@ export interface CommentRead {
   comment: string;
 }
 
-export const getResourceRequestCategoryText = (category: string) => {
+// converting to lowercase as old data in db are in uppercase and new are in lowercase
+export const getResourceRequestCategoryEnum = (category: string) => {
   const categoryText = category.toLowerCase() as ResourceRequestCategory;
   if (valuesOf(ResourceRequestCategory).includes(categoryText)) {
-    return `resource_request_category__${categoryText}`;
+    return categoryText;
   }
-  return "other";
+  return ResourceRequestCategory.OTHER;
 };

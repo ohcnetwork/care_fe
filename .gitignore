@@ -59,6 +59,13 @@ bun.lockb
 cypress/downloads
 cypress/fixtures/token.json
 
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/tests/.auth/
+
 # Care Apps
 /apps/*
 src/pluginMap.ts
