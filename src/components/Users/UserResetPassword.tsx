@@ -40,7 +40,7 @@ export default function UserResetPassword({
       old_password: z
         .string()
         .min(1, { message: t("please_enter_current_password") }),
-      new_password_1: z
+      new_password: z
         .string()
         .min(8, { message: t("invalid_password") })
         .regex(/\d/, { message: t("invalid_password") })
@@ -50,25 +50,26 @@ export default function UserResetPassword({
         .regex(/[A-Z]/, {
           message: t("invalid_password"),
         }),
-      new_password_2: z
+      confirm_password: z
         .string()
         .min(1, { message: t("please_enter_confirm_password") }),
     })
-    .refine((values) => values.new_password_1 === values.new_password_2, {
+    .refine((values) => values.new_password === values.confirm_password, {
       message: t("password_mismatch"),
-      path: ["new_password_2"],
+      path: ["confirm_password"],
     })
-    .refine((values) => values.new_password_1 !== values.old_password, {
-      message: t("new_password_same_as_old"),
-      path: ["new_password_1"],
+    .refine((values) => values.new_password !== values.old_password, {
+      message: t("new_password_same_as_old_plain"),
+      path: ["new_password"],
     });
 
   const form = useForm({
+    mode: "onChange",
     resolver: zodResolver(PasswordSchema),
     defaultValues: {
       old_password: "",
-      new_password_1: "",
-      new_password_2: "",
+      new_password: "",
+      confirm_password: "",
     },
   });
   const { mutate: updatePassword, isPending } = useMutation({
@@ -85,7 +86,7 @@ export default function UserResetPassword({
     const form: UpdatePasswordForm = {
       old_password: formData.old_password,
       username: userData.username,
-      new_password: formData.new_password_1,
+      new_password: formData.new_password,
     };
     updatePassword(form);
   };
@@ -135,7 +136,7 @@ export default function UserResetPassword({
                 <div className="flex flex-col">
                   <FormField
                     control={form.control}
-                    name="new_password_1"
+                    name="new_password"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t("new_password")}</FormLabel>
@@ -193,7 +194,7 @@ export default function UserResetPassword({
                 <div className="flex flex-col">
                   <FormField
                     control={form.control}
-                    name="new_password_2"
+                    name="confirm_password"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t("new_password_confirmation")}</FormLabel>
@@ -228,7 +229,7 @@ export default function UserResetPassword({
               </Button>
               <Button
                 type="submit"
-                disabled={!form.formState.isDirty || isPending}
+                disabled={!form.formState.isValid || isPending}
                 variant="primary"
               >
                 {isPending && (
