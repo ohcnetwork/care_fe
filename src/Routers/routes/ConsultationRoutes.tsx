@@ -40,6 +40,8 @@ const consultationRoutes: AppRoutes = {
     "/facility/:facilityId/patient/:patientId/questionnaire/:questionnaireId/responses/print",
     "/organization/:organizationId/patient/:patientId/questionnaire/:questionnaireId/responses/print",
     "/patient/:patientId/questionnaire/:questionnaireId/responses/print",
+    "/facility/:facilityId/patient/:patientId/history/questionnaire/:questionnaireId/responses/print",
+    "/patient/:patientId/history/questionnaire/:questionnaireId/responses/print",
   ].reduce((acc: AppRoutes, path) => {
     acc[path] = ({ encounterId, patientId, questionnaireId, facilityId }) => {
       return (
@@ -56,6 +58,7 @@ const consultationRoutes: AppRoutes = {
   ...[
     "/facility/:facilityId/patient/:patientId/encounter/:encounterId/questionnaire_response/:questionnaireResponseId/print",
     "/facility/:facilityId/patient/:patientId/history/questionnaire_response/:questionnaireResponseId/print",
+    "/patient/:patientId/history/questionnaire_response/:questionnaireResponseId/print",
     "/organization/:organizationId/patient/:patientId/encounter/:encounterId/questionnaire_response/:questionnaireResponseId/print",
     "/facility/:facilityId/patient/:patientId/questionnaire_response/:questionnaireResponseId/print",
     "/organization/:organizationId/patient/:patientId/questionnaire_response/:questionnaireResponseId/print",
