@@ -111,6 +111,7 @@ export function LocationSelectorDialog({
   setOpen,
   navigateUrl,
   myLocations = false,
+  onLocationSelect,
 }: {
   facilityId: string;
   location: LocationList | undefined;
@@ -119,6 +120,7 @@ export function LocationSelectorDialog({
   setOpen: (open: boolean) => void;
   navigateUrl?: (location: LocationList) => string;
   myLocations?: boolean;
+  onLocationSelect?: (location: LocationList) => void;
 }) {
   const { t } = useTranslation();
   const [locationLevel, setLocationLevel] = useState<LocationList[]>([]);
@@ -149,7 +151,6 @@ export function LocationSelectorDialog({
         }),
         mode: "kind",
         ...(myLocations && !currentParentId && { mine: true }),
-        ordering: "sort_index",
         ...(searchValue && { name: searchValue }),
         limit: resultsPerPage,
         offset: (currentPage - 1) * resultsPerPage,
@@ -176,7 +177,9 @@ export function LocationSelectorDialog({
     setSearchValue("");
     setCurrentPage(1);
     if (newLocation.id !== oldLocationId) {
-      if (navigateUrl) {
+      if (onLocationSelect) {
+        onLocationSelect(newLocation);
+      } else if (navigateUrl) {
         navigate(navigateUrl(newLocation));
       } else {
         navigate(
@@ -316,9 +319,8 @@ export function LocationSelectorDialog({
               >
                 <span>{t("done")}</span>
                 <span className="flex text-xs items-center gap-1 p-1 shadow rounded-md bg-green-900">
-                  {t("shift_key")}
-                  {t("+")}
-                  <CareIcon icon="l-corner-down-left" />
+                  {t("shift_key")} +
+                  <CareIcon icon="l-corner-down-left" className="size-3" />
                 </span>
               </Button>
             </div>

@@ -111,7 +111,6 @@ export default function PatientIdentifierConfigList({
           offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
           display: qParams.display,
           status: qParams.status,
-          ordering: "-created_date",
         },
       },
     ),
@@ -161,6 +160,7 @@ export default function PatientIdentifierConfigList({
                       unique: false,
                       regex: "",
                       display: "",
+                      auto_maintained: false,
                       retrieve_config: {
                         retrieve_with_dob: false,
                         retrieve_with_year_of_birth: false,
@@ -243,7 +243,9 @@ export default function PatientIdentifierConfigList({
           </>
         ) : configs.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
             title={t("no_configs_found")}
             description={t("adjust_config_filters")}
           />

@@ -58,7 +58,6 @@ export function DiagnosisList({
             clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
             exclude_verification_status: "entered_in_error",
             ...(encounterId ? { encounter: encounterId } : {}),
-            ordering: "-created_date",
             limit: LIMIT,
             offset: String(pageParam),
           },
@@ -149,7 +148,7 @@ export function DiagnosisList({
 
   return (
     <EncounterAccordionLayout
-      title="diagnoses"
+      title={t("diagnoses")}
       readOnly={readOnly}
       className={className}
       editLink={!readOnly ? "questionnaire/diagnosis" : undefined}

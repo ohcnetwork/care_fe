@@ -2,6 +2,7 @@ import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { MedicationRequestDosageInstruction } from "@/types/emr/medicationRequest/medicationRequest";
 import { InventoryRead } from "@/types/inventory/product/inventory";
+import { LocationList } from "@/types/location/location";
 
 export enum MedicationDispenseStatus {
   preparation = "preparation",
@@ -175,10 +176,11 @@ export interface MedicationDispenseCreate
   extends Omit<MedicationDispenseBase, "id"> {
   encounter: string;
   location?: string;
-  authorizing_prescription: string | null;
+  authorizing_request: string | null;
   item: string;
   quantity: number;
   days_supply: number;
+  fully_dispensed: boolean;
 }
 
 export interface MedicationDispenseUpsert
@@ -190,6 +192,8 @@ export interface MedicationDispenseRead extends MedicationDispenseBase {
   item: InventoryRead;
   charge_item: ChargeItemRead;
   created_date: string;
+  location: LocationList;
+  quantity: number;
 }
 
 export interface MedicationDispenseSummary {

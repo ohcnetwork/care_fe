@@ -85,7 +85,7 @@ const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   clinical_status: "active",
   verification_status: "confirmed",
   category: "encounter_diagnosis",
-  onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+  onset: { onset_datetime: dateQueryString(new Date()) },
   dirty: true,
 };
 
@@ -193,7 +193,7 @@ function DiagnosisDetailsForm({
   return (
     <div className="flex flex-col gap-4">
       <div className="space-y-2">
-        <Label className="text-sm">{t("date")}</Label>
+        <Label className="text-sm">{t("onset_date")}</Label>
         <CombinedDatePicker
           value={
             diagnosis.onset?.onset_datetime
@@ -206,6 +206,7 @@ function DiagnosisDetailsForm({
             })
           }
           disabled={disabled || !!diagnosis.id}
+          blockDate={(date) => date > new Date()}
           buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
         />
       </div>
@@ -308,7 +309,7 @@ export function DiagnosisQuestion({
   );
   const [newDiagnosis, setNewDiagnosis] = useState<Partial<DiagnosisRequest>>({
     ...DIAGNOSIS_INITIAL_VALUE,
-    onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+    onset: { onset_datetime: dateQueryString(new Date()) },
   });
   const [showDiagnosisSelection, setShowDiagnosisSelection] = useState(false);
   const isMobile = useBreakpoints({ default: true, md: false });
@@ -394,7 +395,7 @@ export function DiagnosisQuestion({
     setShowDiagnosisSelection(false);
     setNewDiagnosis({
       ...DIAGNOSIS_INITIAL_VALUE,
-      onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+      onset: { onset_datetime: dateQueryString(new Date()) },
     });
   };
 
@@ -533,7 +534,6 @@ export function DiagnosisQuestion({
                   offset,
                   limit,
                   exclude_verification_status: "entered_in_error",
-                  ordering: "-created_date",
                   category: "encounter_diagnosis,chronic_condition",
                 },
               })({ signal: new AbortController().signal });
@@ -554,7 +554,7 @@ export function DiagnosisQuestion({
                 <TableRow className="bg-gray-50">
                   <TableHead className="w-[30%]">{t("diagnosis")}</TableHead>
                   <TableHead className="w-[15%] text-center">
-                    {t("date")}
+                    {t("onset_date")}
                   </TableHead>
                   <TableHead className="w-[15%] text-center">
                     {t("status")}
@@ -688,6 +688,7 @@ const DiagnosisTableRow = ({
               })
             }
             disabled={disabled || !!diagnosis.id}
+            blockDate={(date) => date > new Date()}
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>

@@ -52,7 +52,6 @@ export function SymptomsList({
           pathParams: { patientId },
           queryParams: {
             encounter: encounterId,
-            ordering: "-created_date",
             limit: LIMIT,
             offset: String(pageParam),
             exclude_verification_status: "entered_in_error",
@@ -144,7 +143,7 @@ export function SymptomsList({
 
   return (
     <EncounterAccordionLayout
-      title="symptoms"
+      title={t("symptoms")}
       readOnly={readOnly}
       className={className}
       editLink={!readOnly ? "questionnaire/symptom" : undefined}
