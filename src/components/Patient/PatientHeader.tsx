@@ -38,17 +38,21 @@ export function PatientHeader({
           disabled={isPatientPage}
         />
         <div className="flex flex-wrap xl:gap-5 gap-2">
-          {patient.instance_identifiers?.map((identifier) => (
-            <div
-              key={identifier.config.id}
-              className="flex flex-col gap-1 items-start md:hidden xl:flex"
-            >
-              <span className="text-xs text-gray-700 md:w-auto">
-                {identifier.config.config.display}:{" "}
-              </span>
-              <span className="text-sm font-semibold">{identifier.value}</span>
-            </div>
-          ))}
+          {patient.instance_identifiers
+            .filter(({ config }) => !config.config.auto_maintained)
+            .map((identifier) => (
+              <div
+                key={identifier.config.id}
+                className="flex flex-col gap-1 items-start md:hidden xl:flex"
+              >
+                <span className="text-xs text-gray-700 md:w-auto">
+                  {identifier.config.config.display}:{" "}
+                </span>
+                <span className="text-sm font-semibold">
+                  {identifier.value}
+                </span>
+              </div>
+            ))}
           {patient.instance_tags?.length > 0 && (
             <div className="flex flex-col gap-1 items-start">
               <span className="text-xs text-gray-700">
