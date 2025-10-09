@@ -11,6 +11,9 @@ export default {
     path: "/api/v1/facility/{facilityId}/specimen_definition/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<SpecimenDefinitionRead>>(),
+    defaultQueryParams: {
+      ordering: "-created_date",
+    },
   },
   retrieveSpecimenDefinition: {
     path: "/api/v1/facility/{facilityId}/specimen_definition/{specimenSlug}/",

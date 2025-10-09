@@ -109,7 +109,6 @@ export const FilesPage = ({
         ...(qParams.file !== "all" && {
           file_category: qParams.file,
         }),
-        ordering: "-modified_date",
       },
     }),
     enabled: canAccess,

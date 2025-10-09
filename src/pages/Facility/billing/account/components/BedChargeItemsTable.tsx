@@ -238,7 +238,6 @@ export function BedChargeItemsTable({
         service_resource: ChargeItemServiceResource.bed_association,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        ordering: "-created_date",
       },
     }),
   }) as {
