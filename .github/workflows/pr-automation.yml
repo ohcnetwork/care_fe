@@ -7,9 +7,9 @@ on:
     types: [submitted]
 
 permissions:
+  contents: read
   issues: write
   pull-requests: write
-  contents: read
 
 jobs:
   assign-pr:
@@ -262,11 +262,7 @@ jobs:
                       team_field: teamFieldId,
                       team_value: teamOptionId
                     });
-
-                    console.log(`Set team for PR author ${author} based on role`);
                   }
-                } else {
-                  console.log(`No contributor data found for ${author}`);
                 }
               } catch (error) {
                 console.warn(`Failed to fetch or process contributor data for ${author}:`, error.message);
