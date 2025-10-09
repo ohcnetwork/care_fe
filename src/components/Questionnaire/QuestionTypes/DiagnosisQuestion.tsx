@@ -206,6 +206,7 @@ function DiagnosisDetailsForm({
             })
           }
           disabled={disabled || !!diagnosis.id}
+          blockDate={(date) => date > new Date()}
           buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
         />
       </div>
@@ -688,6 +689,7 @@ const DiagnosisTableRow = ({
               })
             }
             disabled={disabled || !!diagnosis.id}
+            blockDate={(date) => date > new Date()}
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>

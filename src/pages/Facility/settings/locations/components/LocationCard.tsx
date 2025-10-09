@@ -110,7 +110,7 @@ export function LocationCard({
                 {t(`location_form__${location.form}`)}
               </p>
 
-              <div className="mt-2 flex flex-wrap gap-2 overflow-hidden">
+              <div className="mt-2 flex flex-wrap gap-2">
                 <Badge
                   variant={
                     location.status === "active" ? "primary" : "secondary"
