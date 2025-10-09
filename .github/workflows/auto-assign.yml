@@ -87,17 +87,13 @@ jobs:
             const reviewState = context.payload.review?.state;
             const isChangesRequested = isReviewEvent && reviewState === 'changes_requested';
 
-            const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number
-            });
-
-            const labelNames = currentLabels.map(label => label.name.toLowerCase());
-            const hasTested = labelNames.includes('tested');
-            const hasReviewed = labelNames.includes('reviewed');
-
             if (isClosed && !isMerged) {
+              const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number
+              });
+
               for (const label of currentLabels) {
                 try {
                   await github.rest.issues.removeLabel({
@@ -168,26 +164,18 @@ jobs:
             }
 
             if (isDraft) {
-              try {
-                await github.rest.issues.removeLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  name: 'needs review'
-                });
-              } catch (error) {
-                console.warn("Failed to remove label 'needs review':", error.message);
-              }
-
-              try {
-                await github.rest.issues.removeLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  name: 'needs testing'
-                });
-              } catch (error) {
-                console.warn("Failed to remove label 'needs testing':", error.message);
+              const labelsToRemove = ['needs review', 'needs testing'];
+              for (const labelName of labelsToRemove) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    name: labelName
+                  });
+                } catch (error) {
+                  console.warn(`Failed to remove label '${labelName}':`, error.message);
+                }
               }
 
               await github.rest.issues.addLabels({
@@ -208,41 +196,27 @@ jobs:
                 console.warn("Failed to remove label 'work in progress':", error.message);
               }
 
-              const labelsToAdd = [];
-              if (!hasReviewed) labelsToAdd.push('needs review');
-              if (!hasTested) labelsToAdd.push('needs testing');
-
-              if (labelsToAdd.length > 0) {
-                await github.rest.issues.addLabels({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  labels: labelsToAdd
-                });
-              }
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['needs review', 'needs testing']
+              });
             }
 
             if (isChangesRequested) {
-              try {
-                await github.rest.issues.removeLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  name: 'needs review'
-                });
-              } catch (error) {
-                console.warn("Failed to remove label 'needs review':", error.message);
-              }
-
-              try {
-                await github.rest.issues.removeLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  name: 'needs testing'
-                });
-              } catch (error) {
-                console.warn("Failed to remove label 'needs testing':", error.message);
+              const labelsToRemove = ['needs review', 'needs testing'];
+              for (const labelName of labelsToRemove) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    name: labelName
+                  });
+                } catch (error) {
+                  console.warn(`Failed to remove label '${labelName}':`, error.message);
+                }
               }
 
               await github.rest.issues.addLabels({
@@ -253,7 +227,7 @@ jobs:
               });
             }
 
-            if (!isReviewEvent && (context.payload.action === 'opened' || context.payload.action === 'ready_for_review') && !isDraft) {
+            if (!isReviewEvent && context.payload.action === 'opened' && !isDraft) {
               try {
                 const response = await fetch(`https://raw.githubusercontent.com/ohcnetwork/leaderboard-data/main/contributors/${author}.md`);
                 
