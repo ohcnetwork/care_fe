@@ -67,7 +67,7 @@ export default function GenericFilter({
   return (
     <div className="p-0">
       {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
-      <div className="p-3 max-h-[calc(100vh-28rem)] overflow-y-auto">
+      <div className="p-3 max-h-[30vh] overflow-y-auto">
         <Input
           placeholder="Search options..."
           value={search}
@@ -195,7 +195,7 @@ export const GenericSelectedBadge = ({
     <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
       <Badge
         variant="outline"
-        className={cn("text-xs whitespace-nowrap", className)}
+        className={cn("whitespace-nowrap rounded-sm", className)}
       >
         {t(selectedValue)}
       </Badge>

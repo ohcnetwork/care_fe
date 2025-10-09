@@ -112,6 +112,7 @@ import {
 
 import { Avatar } from "@/components/Common/Avatar";
 import BackButton from "@/components/Common/BackButton";
+import { PatientDeceasedInfo } from "@/components/Patient/PatientHeader";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import {
@@ -288,6 +289,9 @@ export default function AppointmentDetail(props: Props) {
               )
             }
           />
+          <div className="mt-4">
+            <PatientDeceasedInfo patient={appointment.patient} />
+          </div>
         </div>
         <div
           className={cn(
@@ -682,7 +686,7 @@ const AppointmentDetailsContent = ({
             </div>
             <div className="flex flex-row items-start gap-2 text-sm">
               <DrawingPinIcon className="size-4 text-gray-500 mt-1" />
-              <div className="flex flex-col xl:flex-row xl:justify-between xl:items-end gap-2 w-full">
+              <div className="flex flex-col gap-2 w-full">
                 <div>
                   <p className="text-gray-600 break-words">
                     {formatPatientAddress(appointment.patient.address) || (
