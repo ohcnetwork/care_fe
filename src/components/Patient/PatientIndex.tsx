@@ -205,7 +205,12 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                             {t("no_patient_record_found")}
                           </h3>
                           <p className="text-sm text-gray-500 mb-6">
-                            {t("no_patient_record_text")}
+                            {identifierSearch.config &&
+                            facility?.patient_instance_identifier_configs.find(
+                              (c) => c.id === identifierSearch.config,
+                            )?.config.system === PHONE_NUMBER_CONFIG_SYSTEM
+                              ? t("no_patient_found_with_phone")
+                              : t("no_patient_found_with_name")}
                           </p>
                           <AddPatientButton
                             facilityId={facilityId}
