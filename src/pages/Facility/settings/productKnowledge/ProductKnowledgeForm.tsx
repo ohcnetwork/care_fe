@@ -62,7 +62,7 @@ export default function ProductKnowledgeForm({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
-  
+
   const isEditMode = Boolean(slug);
 
   const { data: existingData, isFetching } = useQuery({
@@ -119,14 +119,14 @@ function ProductKnowledgeFormContent({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
-  
+
   // Define a Code schema to match the API type with i18n
   const codeSchema = z.object({
     code: z.string().min(1, t("code_is_required")),
     display: z.string().min(1, t("display_name_is_required")),
     system: z.string().min(1, t("system_is_required")),
   });
-  
+
   const formSchemaWithTranslations = z.object({
     name: z.string().min(1, t("field_required")),
     slug_value: z
@@ -172,7 +172,7 @@ function ProductKnowledgeFormContent({
         return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
       }),
   });
-  
+
   const queryClient = useQueryClient();
   const isEditMode = Boolean(slug);
 

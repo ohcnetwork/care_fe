@@ -57,8 +57,6 @@ import observationDefinitionApi from "@/types/emr/observationDefinition/observat
 import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 
-
-
 export default function ActivityDefinitionForm({
   facilityId,
   activityDefinitionSlug,
@@ -124,7 +122,7 @@ function ActivityDefinitionFormContent({
   categorySlug?: string;
 }) {
   const { t } = useTranslation();
-  
+
   const formSchemaWithTranslations = z.object({
     title: z.string().min(1, t("title_is_required")),
     slug_value: z
@@ -216,7 +214,7 @@ function ActivityDefinitionFormContent({
       .default([]),
     category: z.string(),
   });
-  
+
   const queryClient = useQueryClient();
   const isEditMode = Boolean(activityDefinitionSlug);
   const [specimenSearch, setSpecimenSearch] = React.useState("");

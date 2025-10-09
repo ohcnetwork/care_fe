@@ -51,8 +51,6 @@ import {
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { ObservationInterpretation } from "./ObservationInterpretation";
 
-
-
 export default function ObservationDefinitionForm({
   facilityId,
   observationSlug,
@@ -117,7 +115,7 @@ function ObservationDefinitionFormContent({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
-  
+
   const formSchemaWithTranslations = z.object({
     title: z.string().min(1, t("title_is_required")),
     slug_value: z
@@ -182,7 +180,7 @@ function ObservationDefinitionFormContent({
       .default([]),
     qualified_ranges: qualifiedRangeSchema,
   });
-  
+
   const queryClient = useQueryClient();
   const isEditMode = Boolean(observationSlug);
 
