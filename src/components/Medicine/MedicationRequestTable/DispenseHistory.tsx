@@ -48,7 +48,6 @@ export function DispenseHistory({
         encounter: encounterId,
         limit: 100,
         patient: patientId,
-        ordering: "-created_date",
       },
     }),
     enabled: !!patientId && canAccess,
