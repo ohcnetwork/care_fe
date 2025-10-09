@@ -35,19 +35,19 @@ type SubTree = Record<
   }
 >;
 
-const arrayOfObject = (root: SubTree, parent = ""): SubTypeNode[] => {
+const categorySubTypeArray = (root: SubTree, parent = ""): SubTypeNode[] => {
   return [
     ...Object.entries(root).map(([, { title, isLeaf, children }]) => {
       const key = parent ? [parent, title].join(":") : title;
       return {
         title: title,
         value: isLeaf ? (key as ResourceCategorySubType) : undefined,
-        children: arrayOfObject(children, key),
+        children: categorySubTypeArray(children, key),
       };
     }),
   ] satisfies SubTypeNode[];
 };
-const recursiveFunction = (subString: string, subTree: SubTree) => {
+const categorySubtypeObject = (subString: string, subTree: SubTree) => {
   const [rootElement, ...childElements] = subString.split(":");
   if (!rootElement) return;
   if (!(rootElement in subTree)) {
@@ -57,7 +57,7 @@ const recursiveFunction = (subString: string, subTree: SubTree) => {
       children: {},
     };
   }
-  recursiveFunction(childElements.join(":"), subTree[rootElement].children);
+  categorySubtypeObject(childElements.join(":"), subTree[rootElement].children);
 };
 
 function buildSubTypeTree(resourceType: ResourceCategoryResourceType) {
@@ -68,9 +68,9 @@ function buildSubTypeTree(resourceType: ResourceCategoryResourceType) {
     .map((ele) => ele.replace(`${resourceType}:`, "").replace("all:", ""));
   const rootTree: SubTree = {};
   for (let i = 0; i < releventCategories.length; i++) {
-    recursiveFunction(releventCategories[i], rootTree);
+    categorySubtypeObject(releventCategories[i], rootTree);
   }
-  return arrayOfObject(rootTree);
+  return categorySubTypeArray(rootTree);
 }
 
 export function ResourceSubTypePicker({
