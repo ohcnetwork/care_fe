@@ -225,17 +225,19 @@ export const SummaryPanelEncounterDetails = () => {
 
           <div className="flex flex-row gap-2">
             <div className="text-sm text-gray-950 font-semibold flex flex-wrap gap-6">
-              {patient?.instance_identifiers?.map((identifier) => (
-                <div
-                  key={identifier.config.id}
-                  className="flex flex-col items-start"
-                >
-                  <span className="text-gray-600 md:w-auto">
-                    {identifier.config.config.display}:{" "}
-                  </span>
-                  <span className="font-semibold">{identifier.value}</span>
-                </div>
-              ))}
+              {patient?.instance_identifiers
+                .filter(({ config }) => !config.config.auto_maintained)
+                .map((identifier) => (
+                  <div
+                    key={identifier.config.id}
+                    className="flex flex-col items-start"
+                  >
+                    <span className="text-gray-600 md:w-auto">
+                      {identifier.config.config.display}:{" "}
+                    </span>
+                    <span className="font-semibold">{identifier.value}</span>
+                  </div>
+                ))}
             </div>
           </div>
 
