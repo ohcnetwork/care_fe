@@ -58,6 +58,7 @@ import {
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import { LocationList } from "@/types/location/location";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import LocationCache from "@/Utils/LocationCache";
 import mutate from "@/Utils/request/mutate";
 
 interface PaymentReconciliationSheetProps {
@@ -124,24 +125,9 @@ export function PaymentReconciliationSheet({
   const queryClient = useQueryClient();
   const [tenderAmount, setTenderAmount] = useState<string>("0");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
-
-  const STORAGE_KEY = `recent_location_cache_${facilityId}`;
-
-  const getCachedLocation = (): LocationList | undefined => {
-    try {
-      const cached = localStorage.getItem(STORAGE_KEY);
-      return cached ? JSON.parse(cached) : undefined;
-    } catch {
-      return undefined;
-    }
-  };
-
-  const cachedLocation = getCachedLocation();
-
   const [selectedLocationObject, setSelectedLocationObject] = useState<
     LocationList | undefined
-  >(cachedLocation);
-
+  >(LocationCache.get(facilityId) || undefined);
   useShortcutSubContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -164,7 +150,7 @@ export function PaymentReconciliationSheet({
       note: "",
       account: accountId,
       is_credit_note: isCreditNote,
-      location: cachedLocation?.id || "",
+      location: selectedLocationObject?.id || "",
     },
   });
 
@@ -347,10 +333,7 @@ export function PaymentReconciliationSheet({
                           setSelectedLocationObject(location || undefined);
                           field.onChange(location?.id || undefined);
                           if (location) {
-                            localStorage.setItem(
-                              STORAGE_KEY,
-                              JSON.stringify(location),
-                            );
+                            LocationCache.set(location, facilityId);
                           }
                         }}
                         placeholder={t("select_location")}
