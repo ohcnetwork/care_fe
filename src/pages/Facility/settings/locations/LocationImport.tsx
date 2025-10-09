@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string */
 import { useMutation } from "@tanstack/react-query";
 import { AlertCircle, ChevronDown, ChevronRight, Upload } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -117,7 +118,6 @@ const processRowLocations = (data: string[][]) => {
   return locations;
 };
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 export default function LocationImport({ facilityId }: LocationImportProps) {
   const [processedLocations, setProcessedLocations] = useState<
     LocationImportT[]

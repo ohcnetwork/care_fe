@@ -53,7 +53,7 @@ function CustomDateRange({
         label={t("custom_date_range")}
         onBack={() => setView("options")}
       />
-      <div className="flex flex-col gap-2 p-0 pb-2 px-3 pt-2 max-h-[calc(100vh-30rem)] overflow-y-auto">
+      <div className="flex flex-col max-h-[30vh] overflow-y-auto">
         <Calendar
           mode="range"
           selected={{ from: dateFrom, to: dateTo }}
@@ -83,9 +83,9 @@ function CustomDateRange({
         <div className="my-2">
           <Separator orientation="horizontal" className="bg-gray-200 h-px" />
         </div>
-        <div className="flex flex-col gap-2 p-0 pb-2">
+        <div className="flex flex-col gap-2 p-3 pt-0">
           <div>
-            <label className="text-xs text-gray-600 mb-1 block capitalize">
+            <label className="text-sm text-gray-600 mb-1 block capitalize">
               {t("from")}
             </label>
             <Input
@@ -99,11 +99,11 @@ function CustomDateRange({
                 }
               }}
               placeholder={t("start_date")}
-              className="flex flex-col justify-between"
+              className="flex flex-col justify-between text-sm"
             />
           </div>
           <div>
-            <label className="text-xs text-gray-600 mb-1 block capitalize">
+            <label className="text-sm text-gray-600 mb-1 block capitalize">
               {t("to")}
             </label>
             <Input
@@ -117,12 +117,12 @@ function CustomDateRange({
                 }
               }}
               placeholder={t("end_date")}
-              className="flex flex-col justify-between"
+              className="flex flex-col justify-between text-sm"
             />
           </div>
         </div>
       </div>
-      <div className="px-3 pb-2">
+      <div className="px-3 p-2">
         <Button
           variant="primary"
           className="w-full justify-center"
@@ -183,7 +183,7 @@ function DateRangeOptions({
   return (
     <>
       {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
-      <div className="flex flex-col gap-1 px-2 pb-2 pt-2 max-h-[calc(100vh-30rem)] overflow-y-auto">
+      <div className="flex flex-col gap-1 p-2 max-h-[30vh] overflow-y-auto">
         {options.map((option, index) => (
           <Button
             key={index}
@@ -345,17 +345,21 @@ export const SelectedDateBadge = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className="text-xs">
+      <DropdownMenuTrigger asChild className="text-sm underline cursor-pointer">
         {isRangeSelected ? (
           <span>{t(isRangeSelected.label)}</span>
         ) : selected.from && selected.to && !isSameDate ? (
           <span>
-            {[selected.from, selected.to].map((date, index) => (
-              <span key={date.toISOString() + index}>
-                {index > 0 && "-"}
-                <span>{format(date, "d MMM yy")}</span>
-              </span>
-            ))}
+            {(() => {
+              const needsYear =
+                selected.from.getFullYear() !== selected.to.getFullYear();
+              return [selected.from, selected.to].map((date, index) => (
+                <span key={date.toISOString() + index}>
+                  {index > 0 && " - "}
+                  <span>{format(date, needsYear ? "d MMM yy" : "d MMM")}</span>
+                </span>
+              ));
+            })()}
           </span>
         ) : presentDate ? (
           <span>{format(presentDate, "d MMM yyyy")}</span>
