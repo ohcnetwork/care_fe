@@ -66,7 +66,6 @@ export default function PatientIdentifierFilter({
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [verificationOpen, setVerificationOpen] = useState(false);
 
-  // Set initial patient ID if provided
   useEffect(() => {
     if (patientId && !selectedPatient) {
       setSelectedPatient({ id: patientId } as PatientRead);
@@ -75,7 +74,6 @@ export default function PatientIdentifierFilter({
     }
   }, [patientId, selectedPatient]);
 
-  // Fetch patient details when patientId is provided
   const { data: patientDetails } = useQuery({
     queryKey: ["patient-details", patientId],
     queryFn: query(patientApi.getPatient, {
@@ -84,14 +82,12 @@ export default function PatientIdentifierFilter({
     enabled: !!patientId,
   });
 
-  // Update selectedPatient when patientDetails are fetched
   useEffect(() => {
     if (patientDetails) {
       setSelectedPatient(patientDetails);
     }
   }, [patientDetails]);
 
-  // Patient search query (for identifier-based search)
   const { data: patientList, isFetching: isPatientFetching } = useQuery({
     queryKey: ["patient-search", searchTerm, searchType],
     queryFn: query.debounced(patientApi.searchPatient, {
@@ -103,7 +99,6 @@ export default function PatientIdentifierFilter({
     enabled: !!searchType && !!searchTerm,
   });
 
-  // Patient verification query
   const { data: verifiedPatient, refetch: verifyPatient } = useQuery({
     queryKey: ["patient-verify", pendingPatient?.id, yearOfBirth],
     queryFn: query(patientApi.searchRetrieve, {
@@ -127,7 +122,6 @@ export default function PatientIdentifierFilter({
     [onSelect],
   );
 
-  // Handle successful verification
   useEffect(() => {
     if (verifiedPatient) {
       handleSelectPatient(verifiedPatient);
@@ -153,6 +147,28 @@ export default function PatientIdentifierFilter({
       return;
     }
     verifyPatient();
+  };
+
+  const getValidationMode = () => {
+    const config = facility?.patient_instance_identifier_configs?.find(
+      (c) => c.id === searchType,
+    );
+    const display = config?.config.display?.toLowerCase() || "";
+    if (display.includes("name")) return "letters";
+    if (display.includes("phone") || display.includes("mobile"))
+      return "digits";
+    return "none";
+  };
+
+  const handleSearchTermChange = (val: string) => {
+    const mode = getValidationMode();
+    if (mode === "letters") {
+      setSearchTerm(val.replace(/[^a-zA-Z ]/g, "")); // Letters and spaces only
+    } else if (mode === "digits") {
+      setSearchTerm(val.replace(/[^0-9]/g, "")); // Digits only
+    } else {
+      setSearchTerm(val);
+    }
   };
 
   return (
@@ -195,7 +211,7 @@ export default function PatientIdentifierFilter({
                       : t("select_search_type")
                   }
                   value={searchTerm}
-                  onValueChange={setSearchTerm}
+                  onValueChange={handleSearchTermChange}
                   className="pl-8 pr-8 border-none focus:ring-0 focus:outline-none"
                 />
                 {searchTerm && (
@@ -210,7 +226,6 @@ export default function PatientIdentifierFilter({
                   </Button>
                 )}
               </div>
-
               <div className="flex flex-wrap gap-1.5 p-2 border-t rounded-b-lg bg-gray-50 border-t-gray-100">
                 {facility?.patient_instance_identifier_configs?.map(
                   (config) => (
@@ -233,7 +248,6 @@ export default function PatientIdentifierFilter({
                   ),
                 )}
               </div>
-
               <CommandList>
                 {!searchType ? (
                   <CommandEmpty>{t("select_search_type")}</CommandEmpty>
@@ -286,7 +300,6 @@ export default function PatientIdentifierFilter({
           </Button>
         )}
       </div>
-
       <Dialog open={verificationOpen} onOpenChange={setVerificationOpen}>
         <DialogContent>
           <DialogHeader>
