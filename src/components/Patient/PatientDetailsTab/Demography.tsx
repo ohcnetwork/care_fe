@@ -20,7 +20,6 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import { formatPatientAge } from "@/Utils/utils";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { usePermissions } from "@/context/PermissionContext";
-import { TagResource } from "@/types/emr/tagConfig/tagConfig";
 import {
   Organization,
   OrganizationParent,
@@ -145,7 +144,7 @@ export const Demography = (props: PatientProps) => {
   const data: Data[] = [
     {
       id: "general-info",
-      allowEdit: canWritePatient,
+      allowEdit: canWritePatient && !!props.facilityId,
       details: [
         <PLUGIN_Component
           key="patient_details_tab__demography__general_info"
@@ -248,7 +247,7 @@ export const Demography = (props: PatientProps) => {
       allowEdit: canWritePatient,
       editComponent: (
         <TagAssignmentSheet
-          entityType={TagResource.PATIENT}
+          entityType="patient"
           entityId={patientId}
           currentTags={patientData.instance_tags}
           onUpdate={() => {

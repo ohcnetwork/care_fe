@@ -1,41 +1,40 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-
-import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
+  dateFilter,
   encounterPriorityFilter,
   encounterStatusFilter,
   tagFilter,
-} from "@/components/ui/multi-filter/filter-list";
-import MultiFilter from "@/components/ui/multi-filter/multi-filter";
+} from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  FilterDateRange,
+  longDateRangeOptions,
+} from "@/components/ui/multi-filter/utils/Utils";
 import { Separator } from "@/components/ui/separator";
 
 import Page from "@/components/Common/Page";
-import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
-import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 
 import useFilters from "@/hooks/useFilters";
 
-import query from "@/Utils/request/query";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { EncounterClass, EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import query from "@/Utils/request/query";
+import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
+import careConfig from "@careConfig";
+import { subDays } from "date-fns";
 
 interface EncounterListProps {
   encounters?: EncounterRead[];
@@ -47,6 +46,8 @@ const buildQueryParams = (
   facilityId: string,
   status?: string,
   priority?: string,
+  created_date_after?: string,
+  created_date_before?: string,
 ) => {
   const params: Record<string, string | undefined> = {};
   if (facilityId) {
@@ -59,6 +60,19 @@ const buildQueryParams = (
   }
   if (priority) {
     params.priority = priority;
+  }
+  if (created_date_after) {
+    // Convert date string to datetime for API call
+    params.created_date_after = dateTimeQueryString(
+      new Date(created_date_after),
+    );
+  }
+  if (created_date_before) {
+    // Convert date string to datetime for API call (end of day)
+    params.created_date_before = dateTimeQueryString(
+      new Date(created_date_before),
+      true,
+    );
   }
   return params;
 };
@@ -101,54 +115,28 @@ export function EncounterList({
     encounter_id,
     external_identifier,
     patient_filter,
+    created_date_after,
+    created_date_before,
   } = qParams;
-  const handleFieldChange = () => {
-    updateQuery({
-      status,
-      encounter_class: encounterClass,
-      priority,
-      name: undefined,
-      encounter_id: undefined,
-      external_identifier: undefined,
-      tags: qParams.tags,
-      patient_filter: undefined,
-    });
-  };
-
-  const handleSearch = useCallback(
-    (key: string, value: string) => {
-      updateQuery({
-        ...{
-          status,
-          encounter_class: encounterClass,
-          priority,
-          tags: qParams.tags,
-          patient: patient_filter,
-        },
-        [key]: value || undefined,
-      });
-    },
-    [
-      status,
-      encounterClass,
-      priority,
-      updateQuery,
-      qParams.tags,
-      patient_filter,
-    ],
-  );
 
   const { data: queryEncounters, isFetching } = useQuery({
     queryKey: ["encounters", facilityId, qParams, encounterClass],
     queryFn: query.debounced(encounterApi.list, {
       queryParams: {
-        ...buildQueryParams(facilityId, status, priority),
+        ...buildQueryParams(
+          facilityId,
+          status,
+          priority,
+          created_date_after,
+          created_date_before,
+        ),
         name,
         encounter_class: encounterClass,
         external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
+        tags_behavior: qParams.tags_behavior,
         patient: patient_filter,
       },
     }),
@@ -165,29 +153,6 @@ export function EncounterList({
     }),
     enabled: !!encounter_id,
   });
-  const searchOptions = [
-    {
-      key: "name",
-      type: "text" as const,
-      placeholder: t("search_by_patient_name"),
-      value: name || "",
-      display: t("name"),
-    },
-    {
-      key: "encounter_id",
-      type: "text" as const,
-      placeholder: t("search_by_encounter_id"),
-      value: encounter_id || "",
-      display: t("encounter_id"),
-    },
-    {
-      key: "external_identifier",
-      type: "text" as const,
-      placeholder: t("search_by_external_id"),
-      value: external_identifier || "",
-      display: t("external_identifier"),
-    },
-  ];
 
   const encounters =
     propEncounters ||
@@ -200,15 +165,58 @@ export function EncounterList({
     .map((query) => query.data)
     .filter(Boolean) as TagConfig[];
 
+  useEffect(() => {
+    // Set default date range if no dates are present
+    if (!created_date_after && !created_date_before) {
+      const today = new Date();
+      const defaultDays = careConfig.encounterDateFilter;
+      if (defaultDays === 0) {
+        // Today only
+        updateQuery({
+          created_date_after: dateQueryString(today),
+          created_date_before: dateQueryString(today),
+        });
+      } else {
+        updateQuery({
+          created_date_after: dateQueryString(subDays(today, defaultDays)),
+          created_date_before: dateQueryString(today),
+        });
+      }
+    }
+  }, [created_date_after, created_date_before, updateQuery]);
+
   const filters = [
     encounterStatusFilter("status"),
     encounterPriorityFilter("priority"),
     tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
+    dateFilter("created_date", t("date"), longDateRangeOptions, true),
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
-    if (query.tags) {
-      query.tags = (query.tags as TagConfig[]).map((tag) => tag.id);
+    for (const [key, value] of Object.entries(query)) {
+      switch (key) {
+        case "tags":
+          query.tags = (value as TagConfig[])?.map((tag) => tag.id).join(",");
+          break;
+        case "tags_behavior":
+          // tags_behavior is already handled by the filter system
+          break;
+        case "created_date":
+          {
+            const dateRange = value as FilterDateRange;
+            query = {
+              ...query,
+              created_date: undefined,
+              created_date_after: dateRange?.from
+                ? dateQueryString(dateRange?.from as Date)
+                : undefined,
+              created_date_before: dateRange?.to
+                ? dateQueryString(dateRange?.to as Date)
+                : undefined,
+            };
+          }
+          break;
+      }
     }
     updateQuery(query);
   };
@@ -222,6 +230,13 @@ export function EncounterList({
   } = useMultiFilterState(filters, onFilterUpdate, {
     ...qParams,
     tags: selectedTags,
+    created_date:
+      created_date_after || created_date_before
+        ? {
+            from: created_date_after ? new Date(created_date_after) : undefined,
+            to: created_date_before ? new Date(created_date_before) : undefined,
+          }
+        : undefined,
   });
 
   return (
@@ -247,48 +262,14 @@ export function EncounterList({
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      data-cy="search-encounter"
-                      variant="outline"
-                      className={cn(
-                        "min-w-32 justify-start text-gray-500 font-normal h-10 sm:w-auto w-full",
-                        (name || encounter_id || external_identifier) &&
-                          "bg-primary/10 text-primary font-medium hover:bg-primary/20",
-                      )}
-                    >
-                      <CareIcon icon="l-search" className="size-4" />
-                      {name || encounter_id || external_identifier ? (
-                        <span className="truncate">
-                          {name || encounter_id || external_identifier}
-                        </span>
-                      ) : (
-                        t("search")
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-[20rem] p-3 border-none"
-                    align="start"
-                    onEscapeKeyDown={(event) => event.preventDefault()}
-                  >
-                    <div className="space-y-4">
-                      <h4 className="font-medium leading-none">
-                        {t("search_encounters")}
-                      </h4>
-                      <SearchInput
-                        data-cy="encounter-search"
-                        options={searchOptions}
-                        onFieldChange={handleFieldChange}
-                        onSearch={handleSearch}
-                        className="w-full border-none shadow-none"
-                        autoFocus
-                      />
-                    </div>
-                  </PopoverContent>
-                </Popover>
-
+                <PatientIdentifierFilter
+                  onSelect={(patientId) =>
+                    updateQuery({ patient_filter: patientId })
+                  }
+                  placeholder={t("filter_by_identifier")}
+                  className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+                  patientId={qParams.patient_filter}
+                />
                 <MultiFilter
                   selectedFilters={selectedFilters}
                   onFilterChange={handleFilterChange}
@@ -298,14 +279,7 @@ export function EncounterList({
                   className="flex sm:flex-row flex-wrap sm:items-center"
                   triggerButtonClassName="self-start sm:self-center"
                   clearAllButtonClassName="self-center"
-                />
-                <PatientIdentifierFilter
-                  onSelect={(patientId) =>
-                    updateQuery({ patient_filter: patientId })
-                  }
-                  placeholder={t("filter_by_identifier")}
-                  className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
-                  patientId={qParams.patient_filter}
+                  facilityId={facilityId}
                 />
               </div>
             </div>

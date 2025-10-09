@@ -7,10 +7,8 @@ import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   HoverCard,
@@ -18,27 +16,25 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import {
+  dateFilter,
   encounterStatusFilter,
-  startedDateFilter,
   tagFilter,
-} from "@/components/ui/multi-filter/filter-list";
-import MultiFilter from "@/components/ui/multi-filter/multi-filter";
+} from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { dateTimeQueryString } from "@/Utils/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS_COLORS,
@@ -51,6 +47,9 @@ import {
   TagResource,
   getTagHierarchyDisplay,
 } from "@/types/emr/tagConfig/tagConfig";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { dateTimeQueryString } from "@/Utils/utils";
 
 interface EncounterCardProps {
   encounter: EncounterRead;
@@ -162,10 +161,10 @@ interface Props {
 const EncounterHistoryList = ({ onSelect }: Props) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
-  const [showFilters, setShowFilters] = useState(false);
 
   const [status, setStatus] = useState<string>();
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [tagsBehavior, setTagsBehavior] = useState<string>("any");
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
 
@@ -196,6 +195,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       patientId,
       status,
       selectedTagIds,
+      tagsBehavior,
       dateFrom,
       dateTo,
     ],
@@ -208,7 +208,10 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             ? { patient_filter: patientId, facility: facilityId }
             : { patient: patientId }),
           ...(status && { status }),
-          ...(selectedTagIds.length > 0 && { tags: selectedTagIds.join(",") }),
+          ...(selectedTagIds.length > 0 && {
+            tags: selectedTagIds.join(","),
+            tags_behavior: tagsBehavior,
+          }),
           ...(dateFrom && {
             created_date_after: dateTimeQueryString(dateFrom),
           }),
@@ -240,37 +243,45 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   }, [inView, hasNextPage, fetchNextPage]);
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
-    const [key, value] = Object.entries(query)[0];
-    const filterValue = value as
-      | string
-      | TagConfig[]
-      | { from: Date; to: Date };
-    switch (key) {
-      case "status":
-        setStatus(filterValue as string);
-        break;
-      case "tags":
-        setSelectedTagIds(
-          (filterValue as TagConfig[])?.map((tag) => tag.id) ?? [],
-        );
-        break;
-      case "created_date":
-        if (
-          typeof filterValue === "object" &&
-          "from" in filterValue &&
-          "to" in filterValue
-        ) {
-          setDateFrom(filterValue.from as Date);
-          setDateTo(filterValue.to as Date);
-        }
-        break;
+    for (const [key, value] of Object.entries(query)) {
+      const filterValue = value as
+        | string
+        | TagConfig[]
+        | { from: Date; to: Date };
+      switch (key) {
+        case "status":
+          setStatus(filterValue as string);
+          break;
+        case "tags":
+          setSelectedTagIds(
+            (filterValue as TagConfig[])?.map((tag) => tag.id) ?? [],
+          );
+          break;
+        case "tags_behavior":
+          setTagsBehavior(filterValue as string);
+          break;
+        case "created_date":
+          if (
+            filterValue &&
+            typeof filterValue === "object" &&
+            "from" in filterValue &&
+            "to" in filterValue
+          ) {
+            setDateFrom(filterValue.from as Date);
+            setDateTo(filterValue.to as Date);
+          } else {
+            setDateFrom(undefined);
+            setDateTo(undefined);
+          }
+          break;
+      }
     }
   };
 
   const filters = [
     encounterStatusFilter("status"),
     tagFilter("tags", TagResource.ENCOUNTER),
-    startedDateFilter("created_date"),
+    dateFilter("created_date"),
   ];
   const {
     selectedFilters,
@@ -307,15 +318,6 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             <h2 className="text-xs font-medium text-gray-600 uppercase">
               {t("other_encounters")}
             </h2>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowFilters(!showFilters)}
-              className={cn(showFilters && "bg-gray-100")}
-              title={t("toggle_filters")}
-            >
-              <CareIcon icon="l-filter" className="size-4" />
-            </Button>
           </div>
 
           {/* Filters */}
@@ -328,6 +330,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             onClearFilter={handleClearFilter}
             placeholder={t("filter")}
             triggerButtonClassName="self-start"
+            facilityId={facilityId}
           />
         </div>
 
@@ -397,20 +400,21 @@ export default function EncounterHistorySelector() {
         <h2 className="px-2 mb-2 text-xs font-medium text-gray-600 uppercase">
           {t("chosen_encounter")}
         </h2>
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger className="w-full">
+        <Drawer open={isOpen} onOpenChange={setIsOpen}>
+          <DrawerTrigger className="w-full">
             <EncounterSheetTrigger />
-          </SheetTrigger>
-          <SheetContent
-            side="bottom"
-            className="max-h-[85vh] rounded-t-3xl overflow-y-auto mb-2"
-          >
-            <SheetHeader className="px-4 pb-2">
-              <SheetTitle>{t("past_encounters")}</SheetTitle>
-            </SheetHeader>
-            <EncounterHistoryList onSelect={() => setIsOpen(false)} />
-          </SheetContent>
-        </Sheet>
+          </DrawerTrigger>
+          <DrawerContent className="px-4">
+            <DrawerHeader className="py-1.5">
+              <DrawerTitle className="text-lg font-semibold">
+                {t("past_encounters")}
+              </DrawerTitle>
+            </DrawerHeader>
+            <div className="overflow-y-auto pb-4 pr-2">
+              <EncounterHistoryList onSelect={() => setIsOpen(false)} />
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
       <div className="hidden lg:block pr-3">
         <ScrollArea className="h-[calc(100vh-9rem)] pr-3">

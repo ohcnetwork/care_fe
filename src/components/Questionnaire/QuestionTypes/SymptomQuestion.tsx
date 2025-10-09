@@ -85,7 +85,7 @@ const SYMPTOM_INITIAL_VALUE: Omit<SymptomRequest, "encounter"> = {
   verification_status: "confirmed",
   severity: "moderate",
   category: "problem_list_item",
-  onset: { onset_datetime: new Date().toISOString().split("T")[0] },
+  onset: { onset_datetime: dateQueryString(new Date()) },
 };
 
 function StatusSelect({
@@ -349,6 +349,7 @@ const SymptomRow = React.memo(function SymptomRow({
             }
             onChange={handleDateChange}
             disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+            blockDate={(date) => date > new Date()}
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </div>
@@ -494,6 +495,7 @@ const SymptomRow = React.memo(function SymptomRow({
                     }
                     onChange={handleDateChange}
                     disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+                    blockDate={(date) => date > new Date()}
                     buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
                   />
                 </div>
@@ -564,6 +566,7 @@ const SymptomRow = React.memo(function SymptomRow({
             }
             onChange={handleDateChange}
             disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+            blockDate={(date) => date > new Date()}
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>
@@ -855,7 +858,9 @@ export function SymptomQuestion({
                 <TableHeader>
                   <TableRow className="bg-gray-50">
                     <TableHead className="w-[40%]">{t("symptom")}</TableHead>
-                    <TableHead className="text-center">{t("date")}</TableHead>
+                    <TableHead className="text-center">
+                      {t("onset_date")}
+                    </TableHead>
                     <TableHead className="text-center">{t("status")}</TableHead>
                     <TableHead className="text-center">
                       {t("severity")}

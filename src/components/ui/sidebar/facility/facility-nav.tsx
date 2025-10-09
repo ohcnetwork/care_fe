@@ -13,6 +13,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import careConfig from "@careConfig";
+import { Logs } from "lucide-react";
 
 interface FacilityNavProps {
   selectedFacility: FacilityBareMinimum | null;
@@ -24,7 +25,7 @@ function generateFacilityLinks(
   permissions: {
     canViewAppointments: boolean;
     canListEncounters: boolean;
-    canCreateAppointment: boolean;
+    canWriteAppointment: boolean;
     canCreateEncounter: boolean;
     canViewEncounter: boolean;
   },
@@ -49,11 +50,17 @@ function generateFacilityLinks(
       visibility: permissions.canViewAppointments,
     },
     {
+      name: t("queues"),
+      url: `${baseUrl}/queues`,
+      icon: <Logs />,
+      visibility: permissions.canViewAppointments,
+    },
+    {
       name: t("patients"),
       url: `${baseUrl}/patients`,
       icon: <CareIcon icon="d-patient" />,
       visibility:
-        permissions.canCreateAppointment ||
+        permissions.canWriteAppointment ||
         permissions.canListEncounters ||
         permissions.canCreateEncounter,
       children: [
@@ -165,14 +172,18 @@ function generateFacilityLinks(
           name: t("product"),
           url: `${baseUrl}/settings/product`,
         },
+        {
+          name: t("token_category"),
+          url: `${baseUrl}/settings/token_category`,
+        },
         // {
         //   name: t("patient_identifier_config"),
         //   url: `${baseUrl}/settings/patient_identifier_config`,
         // },
-        // {
-        //   name: t("tag_config"),
-        //   url: `${baseUrl}/settings/tag_config`,
-        // },
+        {
+          name: t("tag_config"),
+          url: `${baseUrl}/settings/tag_config`,
+        },
         // {
         //   name: t("report_builder"),
         //   url: `${baseUrl}/settings/report_builder/`,
@@ -203,14 +214,14 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const {
     canViewAppointments,
     canListEncounters,
-    canCreateAppointment,
+    canWriteAppointment,
     canCreateEncounter,
     canViewEncounter,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
   const permissions = {
     canViewAppointments,
     canListEncounters,
-    canCreateAppointment,
+    canWriteAppointment,
     canCreateEncounter,
     canViewEncounter,
   };

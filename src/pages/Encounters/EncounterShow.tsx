@@ -29,6 +29,7 @@ import { EncounterMedicinesTab } from "@/pages/Encounters/tabs/medicines";
 import { EncounterObservationsTab } from "@/pages/Encounters/tabs/observations";
 import { EncounterOverviewTab } from "@/pages/Encounters/tabs/overview";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/plots";
+import { EncounterResponsesTab } from "@/pages/Encounters/tabs/responses";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
@@ -36,13 +37,15 @@ import { entriesOf } from "@/Utils/utils";
 
 import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { CommandShortcut } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import { PLUGIN_Component } from "@/PluginEngine";
 import {
   PatientDeceasedInfo,
   PatientHeader,
-} from "@/pages/Facility/services/serviceRequests/PatientHeader";
-import { PLUGIN_Component } from "@/PluginEngine";
+} from "@/components/Patient/PatientHeader";
+import { Button } from "@/components/ui/button";
+import { CommandShortcut } from "@/components/ui/command";
+import { AppointmentEncounterHeader } from "./AppointmentEncounterHeader";
 import { EncounterDiagnosticReportsTab } from "./tabs/diagnostic-reports";
 import { EncounterNotesTab } from "./tabs/notes";
 import { EncounterServiceRequestTab } from "./tabs/service-requests";
@@ -67,6 +70,7 @@ export const EncounterShow = (props: Props) => {
     patient,
     isPatientLoading,
     canWriteSelectedEncounter,
+    canWritePrimaryEncounter,
   } = useEncounter();
 
   useSidebarAutoCollapse({ restore: false });
@@ -135,6 +139,16 @@ export const EncounterShow = (props: Props) => {
       label: t(`ENCOUNTER_TAB__medicines`),
       component: <EncounterMedicinesTab />,
     },
+    responses: {
+      label: t(`ENCOUNTER_TAB__qnr_responses`),
+      component: (
+        <EncounterResponsesTab
+          patientId={patient?.id}
+          encounterId={selectedEncounter?.id}
+          canAccess={canAccess}
+        />
+      ),
+    },
     files: {
       label: t(`ENCOUNTER_TAB__files`),
       component: <EncounterFilesTab />,
@@ -183,6 +197,17 @@ export const EncounterShow = (props: Props) => {
       className="block md:px-1 -mt-4"
       hideTitleOnPage
     >
+      {primaryEncounter &&
+        primaryEncounter.appointment?.id &&
+        canWritePrimaryEncounter && (
+          <div className="flex items-center justify-center -mt-2 mb-2">
+            <AppointmentEncounterHeader
+              appointment={primaryEncounter.appointment}
+              encounter={primaryEncounter}
+            />
+          </div>
+        )}
+
       <div className="flex flex-col gap-2">
         <PatientHeader
           patient={patient}

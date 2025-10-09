@@ -1,25 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
-import { PencilIcon, PlusIcon } from "lucide-react";
-import { Link } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import Loading from "@/components/Common/Loading";
 import { AdministrationTab } from "@/components/Medicine/MedicationAdministration/AdministrationTab";
-import { MedicationsTable } from "@/components/Medicine/MedicationsTable";
+import { DispenseHistory } from "@/components/Medicine/MedicationRequestTable/DispenseHistory";
+import PrescriptionListSelector from "@/components/Medicine/PrescriptionListSelector";
+import PrescriptionView from "@/components/Medicine/PrescriptionView";
 import { MedicationStatementList } from "@/components/Patient/MedicationStatementList";
 
-import query from "@/Utils/request/query";
+import { Button } from "@/components/ui/button";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { MedicationRequestRead } from "@/types/emr/medicationRequest/medicationRequest";
-import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import { PlusIcon, ReceiptTextIcon } from "lucide-react";
+import { Link } from "raviger";
 
 interface EmptyStateProps {
   searching?: boolean;
@@ -67,207 +62,118 @@ export default function MedicationRequestTable() {
     canReadClinicalData: canAccess,
     facilityId,
   } = useEncounter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showStopped, setShowStopped] = useState(false);
-
-  const { data: activeMedications, isLoading: loadingActive } = useQuery({
-    queryKey: ["medication_requests_active", patientId, encounterId],
-    queryFn: query(medicationRequestApi.list, {
-      pathParams: { patientId: patientId },
-      queryParams: {
-        encounter: encounterId,
-        limit: 100,
-        status: ["active", "on_hold", "draft", "unknown"].join(","),
-        facility: facilityId,
-      },
-    }),
-    enabled: !!patientId && canAccess,
-  });
-
-  const { data: stoppedMedications, isLoading: loadingStopped } = useQuery({
-    queryKey: ["medication_requests_stopped", patientId, encounterId],
-    queryFn: query(medicationRequestApi.list, {
-      pathParams: { patientId: patientId },
-      queryParams: {
-        encounter: encounterId,
-        limit: 100,
-        facility: facilityId,
-        status: ["ended", "completed", "cancelled", "entered_in_error"].join(
-          ",",
-        ),
-      },
-    }),
-    enabled: !!patientId && canAccess,
-  });
-
-  const medications = showStopped
-    ? [
-        ...(activeMedications?.results || []),
-        ...(stoppedMedications?.results || []),
-      ]
-    : activeMedications?.results || [];
-
-  const displayedMedications = !searchQuery.trim()
-    ? medications
-    : [
-        ...(activeMedications?.results || []),
-        ...(stoppedMedications?.results || []),
-      ].filter((med: MedicationRequestRead) =>
-        med.medication?.display
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase().trim()),
-      );
-
-  const isLoading = loadingActive || loadingStopped;
+  const [selectedPrescriptionId, setSelectedPrescriptionId] = useState<
+    string | undefined
+  >();
 
   return (
-    <div className="space-y-2">
-      <div className="rounded-lg">
-        <Tabs defaultValue="prescriptions">
-          <ScrollArea className="w-full">
-            <TabsList className="w-fit">
-              <TabsTrigger
-                value="prescriptions"
-                className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-              >
-                {t("prescriptions")}
-              </TabsTrigger>
-              <TabsTrigger
-                value="ongoing"
-                className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-              >
-                {t("medication_statements")}
-              </TabsTrigger>
-              <TabsTrigger
-                value="administration"
-                className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-              >
-                {t("medicine_administration")}
-              </TabsTrigger>
-            </TabsList>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+    <div className="space-y-2 h-full">
+      <Tabs defaultValue="prescriptions" className="h-full">
+        <ScrollArea className="w-full">
+          <TabsList>
+            <TabsTrigger
+              value="prescriptions"
+              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            >
+              {t("prescriptions")}
+            </TabsTrigger>
+            <TabsTrigger
+              value="ongoing"
+              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            >
+              {t("medication_statements")}
+            </TabsTrigger>
+            <TabsTrigger
+              value="administration"
+              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            >
+              {t("medicine_administration")}
+            </TabsTrigger>
+            <TabsTrigger
+              value="dispense_history"
+              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+            >
+              {t("dispense_history")}
+            </TabsTrigger>
+          </TabsList>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
 
-          <TabsContent value="prescriptions">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between p-2 gap-2 flex-wrap">
-                <div className="flex items-center gap-2 flex-1">
-                  <CareIcon icon="l-search" className="text-lg text-gray-500" />
-                  <Input
-                    placeholder={t("search_medications")}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-gray-500"
-                  />
-                  {searchQuery && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-2 text-gray-500 hover:text-foreground"
-                      onClick={() => setSearchQuery("")}
-                    >
-                      <CareIcon icon="l-times" className="text-lg" />
-                    </Button>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
+        <TabsContent
+          value="prescriptions"
+          className="flex-1 flex flex-col overflow-hidden"
+        >
+          <div className="flex flex-1 flex-col lg:flex-row w-full gap-1 h-full">
+            <PrescriptionListSelector
+              patientId={patientId}
+              encounterId={encounterId}
+              facilityId={facilityId}
+              selectedPrescriptionId={selectedPrescriptionId}
+              onSelectPrescription={(prescription) => {
+                setSelectedPrescriptionId(prescription?.id);
+              }}
+            />
+
+            {selectedPrescriptionId ? (
+              <div className="flex-1 w-full h-full overflow-auto">
+                <PrescriptionView
+                  patientId={patientId}
+                  prescriptionId={selectedPrescriptionId}
+                  canWrite={canWrite}
+                  facilityId={facilityId}
+                  encounterId={encounterId}
+                />
+              </div>
+            ) : (
+              <div className="w-full flex-1 h-full flex items-center justify-center">
+                <div className="flex flex-col items-center">
+                  <ReceiptTextIcon className="text-gray-500" />
+                  <h3 className="font-medium">{t("no_prescriptions_found")}</h3>
                   {canWrite && (
                     <Button
                       asChild
                       variant="outline"
-                      size="sm"
-                      className="text-gray-950 hover:text-gray-700 h-9"
+                      className="text-gray-950 hover:text-gray-700 h-9 mt-2"
                       data-cy="edit-prescription"
                     >
                       <Link href={`questionnaire/medication_request`}>
-                        {!activeMedications?.results?.length ? (
-                          <>
-                            <PlusIcon className="mr-2 size-4" />
-                            {t("add")}
-                          </>
-                        ) : (
-                          <>
-                            <PencilIcon className="mr-2 size-4" />
-                            {t("edit")}
-                          </>
-                        )}
-                      </Link>
-                    </Button>
-                  )}
-                  {!!facilityId && (
-                    <Button
-                      variant="outline"
-                      disabled={!activeMedications?.results?.length}
-                      size="sm"
-                      className="text-gray-950 hover:text-gray-700 h-9"
-                    >
-                      <Link href={`../${encounterId}/prescriptions/print`}>
-                        <CareIcon icon="l-print" className="mr-2" />
-                        {t("print")}
+                        <PlusIcon className="mr-2 size-4" />
+                        {t("create_prescription")}
                       </Link>
                     </Button>
                   )}
                 </div>
               </div>
+            )}
+          </div>
+        </TabsContent>
 
-              {isLoading ? (
-                <div className="min-h-[200px] flex items-center justify-center">
-                  <Loading />
-                </div>
-              ) : !activeMedications?.results?.length &&
-                !stoppedMedications?.results?.length ? (
-                <EmptyState message={t("no_medications")} />
-              ) : searchQuery && !displayedMedications.length ? (
-                <EmptyState searching searchQuery={searchQuery} />
-              ) : (
-                <ScrollArea className="h-fit">
-                  <div className="min-w-[800px]">
-                    <div className="p-2">
-                      <MedicationsTable medications={displayedMedications} />
-                    </div>
-                    {!!stoppedMedications?.results?.length &&
-                      !searchQuery.trim() && (
-                        <div
-                          className="p-4 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
-                          onClick={() => setShowStopped(!showStopped)}
-                          data-cy="toggle-stopped-medications"
-                        >
-                          <CareIcon
-                            icon={showStopped ? "l-eye-slash" : "l-eye"}
-                            className="size-4"
-                          />
-                          <span className="text-sm underline">
-                            {showStopped ? t("hide") : t("show")}{" "}
-                            {`${stoppedMedications?.results?.length} ${t("stopped")}`}{" "}
-                            {t("prescriptions")}
-                          </span>
-                        </div>
-                      )}
-                  </div>
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
-              )}
-            </div>
-          </TabsContent>
+        <TabsContent value="ongoing">
+          <MedicationStatementList
+            patientId={patientId}
+            canAccess={canAccess}
+            encounterId={encounterId}
+          />
+        </TabsContent>
 
-          <TabsContent value="ongoing">
-            <MedicationStatementList
-              patientId={patientId}
-              canAccess={canAccess}
-              encounterId={encounterId}
-            />
-          </TabsContent>
+        <TabsContent value="administration">
+          <AdministrationTab
+            patientId={patientId}
+            encounterId={encounterId}
+            canWrite={canWrite}
+            canAccess={canAccess}
+          />
+        </TabsContent>
 
-          <TabsContent value="administration">
-            <AdministrationTab
-              patientId={patientId}
-              encounterId={encounterId}
-              canWrite={canWrite}
-              canAccess={canAccess}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
+        <TabsContent value="dispense_history">
+          <DispenseHistory
+            patientId={patientId}
+            encounterId={encounterId}
+            canAccess={canAccess}
+            facilityId={facilityId}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

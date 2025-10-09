@@ -30,6 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import type { BatchRequestResponse } from "@/types/base/batch/batch";
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
 import {
@@ -39,7 +40,6 @@ import {
   type Status,
 } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
-import type { BatchSubmissionResult } from "@/types/questionnaire/batch";
 
 interface Props {
   facilityId: string;
@@ -201,7 +201,7 @@ export default function LocationForm({
 
   const { mutate: submitBatch } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: (data: { results: BatchSubmissionResult[] }) => {
+    onSuccess: (data: BatchRequestResponse) => {
       toast.success(
         t("bed_created_notification", { count: data.results.length }),
       );

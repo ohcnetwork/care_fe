@@ -23,6 +23,7 @@ import query from "@/Utils/request/query";
 import { PRODUCT_STATUS_COLORS } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import { PRODUCT_KNOWLEDGE_TYPE_COLORS } from "@/types/inventory/productKnowledge/productKnowledge";
+import { Link } from "raviger";
 
 interface Props {
   facilityId: string;
@@ -88,7 +89,9 @@ export default function ProductView({ facilityId, productId }: Props) {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">Product ID: {product.id}</h1>
+              <h1 className="text-2xl font-bold">
+                {t("product")}: {product.id}
+              </h1>
               <Badge variant={PRODUCT_STATUS_COLORS[product.status]}>
                 {t(product.status)}
               </Badge>
@@ -172,7 +175,7 @@ export default function ProductView({ facilityId, productId }: Props) {
                   size="sm"
                   onClick={() =>
                     navigate(
-                      `/facility/${facilityId}/settings/product_knowledge/${product.product_knowledge.id}`,
+                      `/facility/${facilityId}/settings/product_knowledge/${product.product_knowledge.slug}`,
                     )
                   }
                 >
@@ -198,23 +201,20 @@ export default function ProductView({ facilityId, productId }: Props) {
                   <div className="space-y-2">
                     <h3 className="font-medium">
                       {product.charge_item_definition.title ||
-                        product.charge_item_definition.id}
+                        product.charge_item_definition.slug}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      {product.charge_item_definition.id}
+                      {product.charge_item_definition.slug}
                     </p>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/settings/charge_item_definitions/${product.charge_item_definition.id}`,
-                      )
-                    }
-                  >
-                    <CareIcon icon="l-eye" className="mr-2 size-4" />
-                    {t("view_details")}
+                  <Button variant="outline" size="sm" asChild>
+                    <Link
+                      basePath="/"
+                      href={`/facility/${facilityId}/settings/charge_item_definitions/${product.charge_item_definition.slug}`}
+                    >
+                      <CareIcon icon="l-eye" className="mr-2 size-4" />
+                      {t("view_details")}
+                    </Link>
                   </Button>
                 </div>
               </div>
