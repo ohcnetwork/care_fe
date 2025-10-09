@@ -12,7 +12,7 @@ export const ResponsesHistory = ({ patientId }: { patientId: string }) => {
           alt="diagnosis"
           className="size-9 bg-cyan-200 border border-cyan-400 rounded-md p-1.5"
         />
-        <h4 className="text-xl">{t("questionnaire_responses")}</h4>
+        <h4 className="text-xl">{t("responses")}</h4>
       </div>
       <EncounterResponsesTab patientId={patientId} />
     </div>

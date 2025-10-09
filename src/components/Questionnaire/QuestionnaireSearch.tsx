@@ -81,8 +81,8 @@ export function QuestionnaireSearch({
   const content = (
     <Command filter={() => 1}>
       <CommandInput
-        placeholder={t("search_questionnaires")}
-        className="outline-hidden border-none ring-0 shadow-none text-base"
+        placeholder={t("search_forms")}
+        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
         onValueChange={setSearch}
         autoFocus={!isAppleDevice}
       />
