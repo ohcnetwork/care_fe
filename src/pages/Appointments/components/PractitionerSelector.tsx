@@ -661,6 +661,8 @@ export const PractitionerSelector = ({
             setOpen(newOpen);
             if (!newOpen) {
               setSearchQuery("");
+              setCurrentOrganizationId(null);
+              setNavigationStack([]);
             }
           }}
           modal={true}
