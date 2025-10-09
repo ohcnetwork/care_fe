@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, X } from "lucide-react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -248,10 +248,13 @@ function ProductKnowledgeFormContent({
   const { mutate: createProductKnowledge, isPending: isCreating } = useMutation(
     {
       mutationFn: mutate(productKnowledgeApi.createProductKnowledge),
-      onSuccess: () => {
+      onSuccess: (productKnowledge: ProductKnowledgeBase) => {
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         toast.success(t("product_knowledge_created_successfully"));
         onSuccess();
+        navigate(
+          `/facility/${facilityId}/settings/product_knowledge/categories/${productKnowledge.category.slug}`,
+        );
       },
     },
   );
@@ -440,7 +443,9 @@ function ProductKnowledgeFormContent({
                               ResourceCategoryResourceType.product_knowledge
                             }
                             value={field.value}
-                            onValueChange={field.onChange}
+                            onValueChange={(category) =>
+                              field.onChange(category?.slug || "")
+                            }
                             placeholder={t("select_category")}
                             className="w-full"
                           />
@@ -472,7 +477,7 @@ function ProductKnowledgeFormContent({
                   </div>
 
                   <div>
-                    <FormLabel>{t("base_unit")}</FormLabel>
+                    <FormLabel aria-required>{t("base_unit")}</FormLabel>
                     <div className="mt-2">
                       <Select
                         value={form.watch("base_unit")?.code || ""}
@@ -786,8 +791,8 @@ function ProductKnowledgeFormContent({
                                         >
                                           <span>
                                             {t(`unit_${duration.code}`)}
-                                            <span className="text-sm ml-1">
-                                              {duration.code}
+                                            <span className="text-sm ml-1 text-gray-500">
+                                              ({duration.code})
                                             </span>
                                           </span>
                                         </SelectItem>
@@ -987,16 +992,16 @@ function ProductKnowledgeFormContent({
             </div>
 
             <div className="mt-6 flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
-                  )
-                }
-              >
-                {t("cancel")}
+              <Button type="button" variant="outline" asChild>
+                <Link
+                  href={
+                    isEditMode
+                      ? `/product_knowledge/${slug}`
+                      : `/product_knowledge/categories/${categorySlug}`
+                  }
+                >
+                  {t("cancel")}
+                </Link>
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending ? t("saving") : t("save")}

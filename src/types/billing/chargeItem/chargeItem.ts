@@ -106,3 +106,4 @@ export function extractChargeItemsFromBatchResponse(
 }
 
 export const MRP_CODE = "mrp";
+export const PURCHASE_PRICE_CODE = "purchase_price";
