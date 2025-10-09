@@ -3,7 +3,10 @@ import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PatientRead } from "@/types/emr/patient/patient";
+import {
+  filterOutSystemIdentifiers,
+  PatientRead,
+} from "@/types/emr/patient/patient";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { formatPatientAge } from "@/Utils/utils";
 import { Phone } from "lucide-react";
@@ -65,17 +68,19 @@ export const PatientInfoHoverCard = ({
       </div>
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3 border-t border-gray-200 pt-4">
-          {patient.instance_identifiers?.map((identifier) => (
-            <div
-              key={identifier.config.id}
-              className="flex flex-col gap-0.5 text-sm"
-            >
-              <span className="font-medium text-gray-700">
-                {identifier.config.config.display}:{" "}
-              </span>
-              <span className="font-semibold">{identifier.value}</span>
-            </div>
-          ))}
+          {filterOutSystemIdentifiers(patient.instance_identifiers || []).map(
+            (identifier) => (
+              <div
+                key={identifier.config.id}
+                className="flex flex-col gap-0.5 text-sm"
+              >
+                <span className="font-medium text-gray-700">
+                  {identifier.config.config.display}:{" "}
+                </span>
+                <span className="font-semibold">{identifier.value}</span>
+              </div>
+            ),
+          )}
           {patient.phone_number && (
             <div className="flex flex-col gap-1 text-sm font-medium">
               <span className="text-gray-700">{t("contact")}</span>

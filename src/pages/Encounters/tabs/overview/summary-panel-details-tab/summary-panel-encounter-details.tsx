@@ -23,6 +23,7 @@ import {
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 import { ENCOUNTER_PRIORITY_COLORS } from "@/types/emr/encounter/encounter";
+import { filterOutSystemIdentifiers } from "@/types/emr/patient/patient";
 
 export const SummaryPanelEncounterDetails = () => {
   const { t } = useTranslation();
@@ -225,7 +226,9 @@ export const SummaryPanelEncounterDetails = () => {
 
           <div className="flex flex-row gap-2">
             <div className="text-sm text-gray-950 font-semibold flex flex-wrap gap-6">
-              {patient?.instance_identifiers?.map((identifier) => (
+              {filterOutSystemIdentifiers(
+                patient?.instance_identifiers || [],
+              ).map((identifier) => (
                 <div
                   key={identifier.config.id}
                   className="flex flex-col items-start"

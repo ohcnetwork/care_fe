@@ -119,3 +119,9 @@ export interface PublicPatientCreate {
   pincode: number;
   geo_organization: string;
 }
+
+export function filterOutSystemIdentifiers(identifiers: PatientIdentifier[]) {
+  return identifiers.filter(
+    (identifier) => identifier.config.config.auto_maintained !== true,
+  );
+}
