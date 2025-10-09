@@ -420,12 +420,6 @@ function ActivityDefinitionFormContent({
     }
   }
 
-  React.useEffect(() => {
-    console.log("form.getValues()", form.getValues());
-    //log errors on submit
-    console.log("form.formState.errors", form.formState.errors);
-  }, [form.getValues(), form.formState.errors]);
-
   return (
     <Page
       title={
@@ -612,7 +606,9 @@ function ActivityDefinitionFormContent({
                               ResourceCategoryResourceType.activity_definition
                             }
                             value={field.value}
-                            onValueChange={field.onChange}
+                            onValueChange={(category) =>
+                              field.onChange(category?.slug || "")
+                            }
                             placeholder={t("select_resource_category")}
                             className="w-full"
                           />

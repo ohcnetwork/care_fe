@@ -159,9 +159,9 @@ export default function InvoicesData({
         <TableSkeleton count={3} />
       ) : !invoices?.length ? (
         <EmptyState
-          icon="l-file-alt"
+          icon={<CareIcon icon="l-file-alt" className="text-primary size-6" />}
           title={t("no_invoices")}
-          description={t("no_invoices_description")}
+          description={t("try_adjusting_your_filters_or_search")}
         />
       ) : (
         <div>

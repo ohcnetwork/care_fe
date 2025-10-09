@@ -333,7 +333,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
 
               {facilityData?.description && (
                 <Card>
-                  <CardContent className="mt-4">
+                  <CardContent className="mt-4 break-words">
                     <Markdown
                       content={facilityData.description}
                       className="text-sm"
