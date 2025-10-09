@@ -3,11 +3,13 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
+  Copy,
   FileText,
   Folder,
   FolderOpen,
   Home,
   Loader2,
+  Plus,
   Search,
   X,
 } from "lucide-react";
@@ -24,6 +26,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import {
   Popover,
   PopoverContent,
@@ -32,7 +35,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-import query from "@/Utils/request/query";
+import { ChargeItemDefinitionDrawer } from "@/components/Common/ChargeItemDefinitionDrawer";
 import {
   ResourceCategoryParent,
   ResourceCategoryRead,
@@ -42,6 +45,7 @@ import {
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import query from "@/Utils/request/query";
 
 /**
  * ChargeItemDefinitionPicker - A unified component for selecting charge item definitions with hierarchical category navigation
@@ -74,6 +78,9 @@ interface ChargeItemDefinitionPickerProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  showCreateButton?: boolean;
+  showCopyButton?: boolean;
+  categorySlug?: string;
 }
 
 interface CategoryBreadcrumb {
@@ -91,6 +98,9 @@ export function ChargeItemDefinitionPicker({
   placeholder,
   disabled = false,
   className,
+  showCreateButton = false,
+  showCopyButton = false,
+  categorySlug,
 }: ChargeItemDefinitionPickerProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -103,6 +113,12 @@ export function ChargeItemDefinitionPicker({
   >(undefined);
   const [viewMode, setViewMode] = useState<ViewMode>("categories");
   const [searchQuery, setSearchQuery] = useState("");
+  const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
+  const [copyDrawerOpen, setCopyDrawerOpen] = useState(false);
+  const [copySelectionOpen, setCopySelectionOpen] = useState(false);
+  const [selectedDefinitionForCopy, setSelectedDefinitionForCopy] = useState<
+    ChargeItemDefinitionRead | undefined
+  >(undefined);
 
   // Fetch categories for current level
   const {
@@ -156,6 +172,21 @@ export function ChargeItemDefinitionPicker({
     enabled: !!value,
   });
 
+  // Fetch all charge item definitions for copy selection
+  const { data: allDefinitionsResponse, isLoading: isLoadingAllDefinitions } =
+    useQuery({
+      queryKey: ["allChargeItemDefinitions", facilityId],
+      queryFn: query(chargeItemDefinitionApi.listChargeItemDefinition, {
+        pathParams: { facilityId },
+        queryParams: {
+          limit: 1000,
+          status: "active",
+          ordering: "title",
+        },
+      }),
+      enabled: copySelectionOpen,
+    });
+
   const categories = useMemo(
     () => categoriesResponse?.results || [],
     [categoriesResponse?.results],
@@ -164,6 +195,11 @@ export function ChargeItemDefinitionPicker({
   const definitions = useMemo(
     () => definitionsResponse?.results || [],
     [definitionsResponse?.results],
+  );
+
+  const allDefinitions = useMemo(
+    () => allDefinitionsResponse?.results || [],
+    [allDefinitionsResponse?.results],
   );
 
   // Filter categories based on search query
@@ -270,6 +306,29 @@ export function ChargeItemDefinitionPicker({
     onValueChange(undefined);
     setOpen(false);
     resetSearch();
+  };
+
+  const handleCreateSuccess = (
+    chargeItemDefinition: ChargeItemDefinitionRead,
+  ) => {
+    onValueChange(chargeItemDefinition.slug);
+    setCreateDrawerOpen(false);
+    setOpen(false);
+  };
+
+  const handleCopySuccess = (
+    chargeItemDefinition: ChargeItemDefinitionRead,
+  ) => {
+    onValueChange(chargeItemDefinition.slug);
+    setCopyDrawerOpen(false);
+    setOpen(false);
+  };
+
+  const handleCopyDefinitionSelect = (definition: ChargeItemDefinitionRead) => {
+    setCopySelectionOpen(false);
+    setCopyDrawerOpen(true);
+    // Store the selected definition for prefilling
+    setSelectedDefinitionForCopy(definition);
   };
 
   const getDisplayValue = () => {
@@ -408,6 +467,28 @@ export function ChargeItemDefinitionPicker({
                   >
                     <Folder className="h-3 w-3 mr-1" />
                     {t("back")}
+                  </Button>
+                )}
+                {showCreateButton && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCreateDrawerOpen(true)}
+                    className="h-9 px-2"
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    {t("create")}
+                  </Button>
+                )}
+                {showCopyButton && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCopySelectionOpen(true)}
+                    className="h-9 px-2"
+                  >
+                    <Copy className="h-3 w-3 mr-1" />
+                    {t("copy")}
                   </Button>
                 )}
                 {value && (
@@ -619,6 +700,115 @@ export function ChargeItemDefinitionPicker({
           </Command>
         </div>
       </PopoverContent>
+
+      <ChargeItemDefinitionDrawer
+        open={createDrawerOpen}
+        onOpenChange={setCreateDrawerOpen}
+        facilityId={facilityId}
+        categorySlug={categorySlug}
+        onSuccess={handleCreateSuccess}
+      />
+
+      {/* Copy Selection Drawer */}
+      <Drawer open={copySelectionOpen} onOpenChange={setCopySelectionOpen}>
+        <DrawerContent className="max-h-[85vh] flex flex-col">
+          <div className="px-4 py-4 flex-1 min-h-0 overflow-auto">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold">
+                {t("select_definition_to_copy")}
+              </h3>
+              <p className="text-sm text-gray-600">
+                {t("select_definition_to_copy_description")}
+              </p>
+            </div>
+
+            <Command className="border-0">
+              <div className="px-3 py-2 border-b">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <CommandInput
+                    placeholder={t("search_definitions")}
+                    className="pl-9 h-9 border-0 focus:ring-0"
+                  />
+                </div>
+              </div>
+
+              <CommandList className="max-h-[300px]">
+                <CommandEmpty>
+                  {isLoadingAllDefinitions ? (
+                    <div className="p-6 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-4 w-4 rounded" />
+                        <div className="space-y-1 flex-1">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-3 w-1/2" />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center text-gray-500">
+                      <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <div className="text-sm">{t("no_definitions_found")}</div>
+                    </div>
+                  )}
+                </CommandEmpty>
+
+                <CommandGroup>
+                  {allDefinitions.map((definition) => (
+                    <CommandItem
+                      key={definition.id}
+                      value={definition.title}
+                      onSelect={() => handleCopyDefinitionSelect(definition)}
+                      className="flex items-center justify-between px-3 py-3 cursor-pointer hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150 border-b border-gray-200 last:border-b-0"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="flex-shrink-0">
+                          <FileText className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-sm truncate">
+                            {definition.title}
+                          </div>
+                          {definition.description && (
+                            <div className="text-xs text-gray-500 truncate mt-0.5">
+                              {definition.description}
+                            </div>
+                          )}
+                          {definition.price_components?.[0] && (
+                            <div className="text-xs mt-0.5">
+                              {definition.price_components[0].amount}{" "}
+                              {definition.price_components[0].code?.code ||
+                                "INR"}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <Copy className="h-4 w-4 text-gray-500" />
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Copy Drawer with prefilled data */}
+      <ChargeItemDefinitionDrawer
+        open={copyDrawerOpen}
+        onOpenChange={(open) => {
+          setCopyDrawerOpen(open);
+          if (!open) {
+            setSelectedDefinitionForCopy(undefined);
+          }
+        }}
+        facilityId={facilityId}
+        categorySlug={categorySlug}
+        initialData={selectedDefinitionForCopy}
+        onSuccess={handleCopySuccess}
+      />
     </Popover>
   );
 }

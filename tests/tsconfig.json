@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "../",
+    "types": ["@playwright/test", "node"]
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/*.spec.ts",
+    "./**/*.setup.ts",
+    "../playwright.config.ts"
+  ]
+}
