@@ -149,7 +149,7 @@ export function DiagnosisList({
 
   return (
     <EncounterAccordionLayout
-      title="diagnoses"
+      title={t("diagnoses")}
       readOnly={readOnly}
       className={className}
       editLink={!readOnly ? "questionnaire/diagnosis" : undefined}

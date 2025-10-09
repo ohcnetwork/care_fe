@@ -42,25 +42,27 @@ export const encounterStatusFilter = (
       label: t(value),
       color: ENCOUNTER_STATUS_FILTER_COLORS[value],
     })),
-    undefined,
-    (selected: FilterValues) => {
-      const selectedStatus = selected as string[];
-      if (typeof selectedStatus[0] === "string") {
-        const option = selectedStatus[0];
-        const color = ENCOUNTER_STATUS_FILTER_COLORS[option as EncounterStatus];
-        return (
-          <GenericSelectedBadge
-            selectedValue={option}
-            selectedLength={selectedStatus.length}
-            className={color}
-          />
-        );
-      }
-      return <></>;
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedStatus = selected as string[];
+        if (typeof selectedStatus[0] === "string") {
+          const option = selectedStatus[0];
+          const color =
+            ENCOUNTER_STATUS_FILTER_COLORS[option as EncounterStatus];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedStatus.length}
+              className={color}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
+      icon: <CircleDashed className="w-4 h-4" />,
     },
-    () => customOperations || [{ label: "is" }],
-    mode,
-    <CircleDashed className="w-4 h-4" />,
   );
 export const encounterClassFilter = (
   key: string = "encounter_class",
@@ -76,24 +78,25 @@ export const encounterClassFilter = (
       label: t(`encounter_class__${value}`),
       color: ENCOUNTER_CLASS_FILTER_COLORS[value as EncounterClass],
     })),
-    undefined,
-    (selected: FilterValues) => {
-      const selectedClass = selected as string[];
-      if (typeof selectedClass[0] === "string") {
-        const option = selectedClass[0];
-        const color = ENCOUNTER_CLASS_FILTER_COLORS[option as EncounterClass];
-        return (
-          <GenericSelectedBadge
-            selectedValue={`encounter_class__${option}`}
-            selectedLength={selectedClass.length}
-            className={color}
-          />
-        );
-      }
-      return <></>;
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedClass = selected as string[];
+        if (typeof selectedClass[0] === "string") {
+          const option = selectedClass[0];
+          const color = ENCOUNTER_CLASS_FILTER_COLORS[option as EncounterClass];
+          return (
+            <GenericSelectedBadge
+              selectedValue={`encounter_class__${option}`}
+              selectedLength={selectedClass.length}
+              className={color}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
     },
-    () => customOperations || [{ label: "is" }],
-    mode,
   );
 
 export const encounterPriorityFilter = (
@@ -111,38 +114,35 @@ export const encounterPriorityFilter = (
       label: t(`encounter_priority__${value}`),
       color: ENCOUNTER_PRIORITY_FILTER_COLORS[value as EncounterPriority],
     })),
-    undefined,
-    (selected: FilterValues) => {
-      const selectedPriority = selected as string[];
-      if (typeof selectedPriority[0] === "string") {
-        const option = selectedPriority[0];
-        const color =
-          ENCOUNTER_PRIORITY_FILTER_COLORS[option as EncounterPriority];
-        return (
-          <GenericSelectedBadge
-            selectedValue={`encounter_priority__${option}`}
-            selectedLength={selectedPriority.length}
-            className={color}
-          />
-        );
-      }
-      return <></>;
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedPriority = selected as string[];
+        if (typeof selectedPriority[0] === "string") {
+          const option = selectedPriority[0];
+          const color =
+            ENCOUNTER_PRIORITY_FILTER_COLORS[option as EncounterPriority];
+          return (
+            <GenericSelectedBadge
+              selectedValue={`encounter_priority__${option}`}
+              selectedLength={selectedPriority.length}
+              className={color}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
     },
-    () => customOperations || [{ label: "is" }],
-    mode,
   );
 export const dateFilter = (
   key: string = "started_date",
   label?: string,
   dateRangeOptions?: DateRangeOption[],
+  disableClear?: boolean,
 ) =>
-  createFilterConfig(
-    key,
-    label || t("started_date"),
-    "date",
-    [],
-    undefined,
-    (
+  createFilterConfig(key, label || t("started_date"), "date", [], {
+    renderSelected: (
       selected: FilterValues,
       filter?: FilterConfig,
       onFilterChange?: (filterKey: string, values: FilterValues) => void,
@@ -155,11 +155,13 @@ export const dateFilter = (
         />
       );
     },
-    (selected: FilterValues) => getDateOperations(selected as FilterDateRange),
-    "single",
-    <CalendarFold className="w-4 h-4" />,
+    getOperations: (selected: FilterValues) =>
+      getDateOperations(selected as FilterDateRange),
+    mode: "single",
+    icon: <CalendarFold className="w-4 h-4" />,
     dateRangeOptions,
-  );
+    disableClear,
+  });
 export const tagFilter = (
   key: string = "tags",
   resource: TagResource = TagResource.ENCOUNTER,
@@ -171,21 +173,22 @@ export const tagFilter = (
     label ? t(label) : t("tags", { count: 2 }),
     "tag",
     [],
-    resource,
-    (selected: FilterValues) => {
-      return <SelectedTagBadge selected={selected as TagConfig[]} />;
+    {
+      resource: resource,
+      renderSelected: (selected: FilterValues) => {
+        return <SelectedTagBadge selected={selected as TagConfig[]} />;
+      },
+      getOperations: (selected: FilterValues) => {
+        const selectedTags = selected as TagConfig[];
+        if (selectedTags.length === 1)
+          return [{ label: "includes", value: "all" }];
+        return [
+          { label: "has_all_of", value: "all" },
+          { label: "has_any_of", value: "any" },
+        ];
+      },
+      mode,
+      icon: <Tag className="w-4 h-4" />,
+      operationKey: "tags_behavior",
     },
-    (selected: FilterValues) => {
-      const selectedTags = selected as TagConfig[];
-      if (selectedTags.length === 1)
-        return [{ label: "includes", value: "all" }];
-      return [
-        { label: "has_all_of", value: "all" },
-        { label: "has_any_of", value: "any" },
-      ];
-    },
-    mode,
-    <Tag className="w-4 h-4" />,
-    undefined,
-    "tags_behavior",
   );

@@ -110,6 +110,7 @@ export function LocationCard({ locationHistory, status }: LocationCardProps) {
                       </span>
                     </>
                   ) : (
+                    // eslint-disable-next-line i18next/no-literal-string
                     <span className="text-xs text-gray-500">-- : --</span>
                   )}
                 </div>
