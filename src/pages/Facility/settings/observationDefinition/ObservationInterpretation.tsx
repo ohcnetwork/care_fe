@@ -41,6 +41,8 @@ import {
   ConditionOperation,
   ConditionOperationInRangeValue,
   ConditionOperationSummary,
+  getConditionValue,
+  getDefaultCondition,
   Metrics,
 } from "@/types/base/condition/condition";
 import {
@@ -141,6 +143,19 @@ export function ObservationInterpretation<
       setShowTypeChangeWarning(true);
     } else {
       setSelectedInterpretationType(newType);
+      if (editedRange) {
+        const updatedRange = {
+          ...editedRange,
+          _interpretation_type: newType,
+          ranges:
+            newType === InterpretationType.ranges ? editedRange?.ranges : [],
+          valueset_interpretation:
+            newType === InterpretationType.valuesets
+              ? editedRange?.valueset_interpretation
+              : [],
+        };
+        setEditedRange(updatedRange);
+      }
     }
   };
 
@@ -240,6 +255,7 @@ export function ObservationInterpretation<
     handleSheetState(true);
     const rangeToEdit = { ...qualifiedRanges[index], id: index };
     setEditedRange(rangeToEdit);
+    setSelectedInterpretationType(rangeToEdit._interpretation_type);
 
     // Clear highlighting for this range when user starts editing
     if (recentlyChangedRanges.has(index)) {
@@ -269,8 +285,17 @@ export function ObservationInterpretation<
   const handleSaveInterpretation = async () => {
     if (editedRange && editedRange.id !== undefined) {
       const editingIndex = editedRange.id;
-      const newRanges = [...qualifiedRanges];
+      let newRanges = [...qualifiedRanges];
       newRanges[editingIndex] = editedRange;
+      newRanges = [
+        ...newRanges.map((r) => ({
+          ...r,
+          conditions: r.conditions.map((condition) => ({
+            ...condition,
+            _conditionType: `${condition.metric}_${condition.operation}`,
+          })),
+        })),
+      ];
       setQualifiedRanges(newRanges);
 
       form.setValue(name as any, newRanges as any);
@@ -570,6 +595,12 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
     onSave();
   };
 
+  const isDisabled =
+    (interpretationType === InterpretationType.ranges &&
+      editedRange.ranges.length === 0) ||
+    (interpretationType === InterpretationType.valuesets &&
+      (editedRange.valueset_interpretation || []).length === 0);
+
   return (
     <div>
       <div className="flex flex-col gap-3 mt-6 p-3 max-h-[calc(100vh-200px)] overflow-y-auto">
@@ -634,7 +665,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
         <Button type="button" variant="outline" onClick={onCancel}>
           {t("cancel")}
         </Button>
-        <Button type="button" onClick={handleSave}>
+        <Button type="button" onClick={handleSave} disabled={isDisabled}>
           {t("save")}
         </Button>
       </div>
@@ -653,11 +684,7 @@ export function RenderConditionInput({
   condition: Condition;
   index: number;
   handleSetValue: (
-    value:
-      | string
-      | ConditionOperationInRangeValue
-      | AgeOperationEqualityValue
-      | { values: string[] },
+    value: string | ConditionOperationInRangeValue | AgeOperationEqualityValue,
     index: number,
   ) => void;
   handleSetValueType: (value: string, index: number) => void;
@@ -668,9 +695,9 @@ export function RenderConditionInput({
   const operation = condition.operation;
   const value =
     "value" in condition ? condition.value : { min: undefined, max: undefined };
-  const tagIds = typeof value === "string" ? value : "";
+  const tagIds = typeof value === "string" ? value.split(",") : [];
   const tagQueries = useTagConfigs({
-    ids: [tagIds],
+    ids: tagIds,
     disabled: operation !== ConditionOperation.has_tag,
   });
   switch (condition.metric) {
@@ -684,7 +711,7 @@ export function RenderConditionInput({
               <FormItem>
                 <FormControl>
                   <Select
-                    value={field.value || ""}
+                    value={field.value}
                     onValueChange={(value) => {
                       handleSetValue(value, index);
                     }}
@@ -762,11 +789,14 @@ export function RenderConditionInput({
                     <Input
                       type="number"
                       placeholder={t("value")}
-                      value={field.value || ""}
+                      value={field.value}
                       onChange={(e) => {
                         handleSetValue(
                           {
-                            value: Number(e.target.value),
+                            value:
+                              e.target.value === ""
+                                ? undefined
+                                : Number(e.target.value),
                             value_type: currentValueType,
                           } as AgeOperationEqualityValue,
                           index,
@@ -799,12 +829,15 @@ export function RenderConditionInput({
                       type="number"
                       placeholder={t("min")}
                       className="w-full h-9"
-                      value={field.value || ""}
+                      value={field.value}
                       onChange={(e) => {
                         handleSetValue(
                           {
-                            min: Number(e.target.value),
-                            max: currentRange.max || 0,
+                            min:
+                              e.target.value === ""
+                                ? undefined
+                                : Number(e.target.value),
+                            max: currentRange.max,
                             value_type: currentRange.value_type || "years",
                           } as any,
                           index,
@@ -826,12 +859,15 @@ export function RenderConditionInput({
                       type="number"
                       placeholder={t("max")}
                       className="w-full h-9"
-                      value={field.value || ""}
+                      value={field.value}
                       onChange={(e) => {
                         handleSetValue(
                           {
-                            min: currentRange.min || 0,
-                            max: Number(e.target.value),
+                            min: currentRange.min,
+                            max:
+                              e.target.value === ""
+                                ? undefined
+                                : Number(e.target.value),
                             value_type: currentRange.value_type || "years",
                           } as any,
                           index,
@@ -861,7 +897,7 @@ export function RenderConditionInput({
                   <Input
                     type="text"
                     placeholder={t("value")}
-                    value={field.value || ""}
+                    value={field.value}
                     onChange={(e) => {
                       handleSetValue(e.target.value, index);
                     }}
@@ -890,12 +926,15 @@ export function RenderConditionInput({
                       type="number"
                       placeholder={t("min")}
                       className="w-full h-9"
-                      value={field.value || ""}
+                      value={field.value}
                       onChange={(e) => {
                         handleSetValue(
                           {
-                            min: Number(e.target.value),
-                            max: currentRange.max || 0,
+                            min:
+                              e.target.value === ""
+                                ? undefined
+                                : Number(e.target.value),
+                            max: currentRange.max,
                           },
                           index,
                         );
@@ -916,12 +955,15 @@ export function RenderConditionInput({
                       type="number"
                       placeholder={t("max")}
                       className="w-full h-9"
-                      value={field.value || ""}
+                      value={field.value}
                       onChange={(e) => {
                         handleSetValue(
                           {
-                            min: currentRange.min || 0,
-                            max: Number(e.target.value),
+                            min: currentRange.min,
+                            max:
+                              e.target.value === ""
+                                ? undefined
+                                : Number(e.target.value),
                           },
                           index,
                         );
@@ -945,7 +987,6 @@ export function RenderConditionInput({
             onChange={(tags) => {
               handleSetValue(tags.map((tag) => tag.id).join(","), index);
             }}
-            singleSelect={true}
           />
         );
       }
@@ -975,39 +1016,22 @@ export function ConditionComponent<
 
   useEffect(() => {
     if (metrics?.[0] && conditions.length === 0) {
-      const defaultCondition = getDefaultCondition();
+      const defaultCondition = getDefaultCondition(metrics);
       setConditions([defaultCondition]);
     }
   }, [metrics, conditions]);
 
   const handleSetMetric = (metric: string, index: number) => {
-    const newMetric = metrics?.find((m) => m.name === metric);
+    const newMetric = metrics?.find((m) => m.name === metric) || metrics?.[0];
     const firstOperation = newMetric
       ?.allowed_operations?.[0] as ConditionOperation;
+    const value = getConditionValue(newMetric?.name || "", firstOperation);
 
     const updatedCondition: Condition = {
       ...conditions[index],
       metric: newMetric?.name || "",
       operation: firstOperation,
-      value: undefined,
-      ...(firstOperation === ConditionOperation.equality &&
-        newMetric?.name !== "patient_age" && {
-          value: "",
-        }),
-      ...(firstOperation === ConditionOperation.equality &&
-        newMetric?.name === "patient_age" && {
-          value: { value: 0, value_type: "years" },
-        }),
-      ...(firstOperation === ConditionOperation.in_range && {
-        value: {
-          min: undefined,
-          max: undefined,
-          ...(newMetric?.name === "patient_age" && { value_type: "years" }),
-        },
-      }),
-      ...(firstOperation === ConditionOperation.intersects_any && {
-        values: [],
-      }),
+      value,
     } as Condition;
 
     setConditions(
@@ -1015,44 +1039,21 @@ export function ConditionComponent<
     );
   };
 
-  const getDefaultCondition = () => {
-    const firstOperation = metrics?.[0]
-      ?.allowed_operations?.[0] as ConditionOperation;
-    const metricName = metrics?.[0].name || "";
-    const newCondition: Condition = {
-      metric: metricName,
-      operation: firstOperation,
-      ...(firstOperation === ConditionOperation.equality &&
-        metricName !== "patient_age" && {
-          value: "",
-        }),
-      ...(firstOperation === ConditionOperation.equality &&
-        metricName === "patient_age" && {
-          value: { value: 0, value_type: "years" },
-        }),
-      ...(firstOperation === ConditionOperation.in_range && {
-        value: {
-          min: undefined,
-          max: undefined,
-          ...(metricName === "patient_age" && { value_type: "years" }),
-        },
-      }),
-      ...(firstOperation === ConditionOperation.intersects_any && {
-        values: [],
-      }),
-    } as Condition;
-    return newCondition;
-  };
-
   const handleAddCondition = () => {
-    const newCondition = getDefaultCondition();
+    if (!metrics?.[0]) return;
+    const newCondition = getDefaultCondition(metrics);
     setConditions([...conditions, newCondition]);
   };
 
   const handleSetOperation = (value: ConditionOperation, index: number) => {
     setConditions(
       conditions.map((c, i) =>
-        i === index ? ({ ...c, operation: value } as Condition) : c,
+        i === index
+          ? ({
+              ...c,
+              operation: value,
+            } as Condition)
+          : c,
       ),
     );
   };
@@ -1062,7 +1063,7 @@ export function ConditionComponent<
       | string
       | ConditionOperationInRangeValue
       | AgeOperationEqualityValue
-      | { values: string[] },
+      | string[],
     index: number,
   ) => {
     let updatedCondition = conditions[index];
@@ -1274,7 +1275,7 @@ function InterpretationComponent<
               <FormControl>
                 <Input
                   {...field}
-                  value={field.value || ""}
+                  value={field.value}
                   className="h-9"
                   onChange={(e) => handleDisplayChange(e.target.value)}
                 />
@@ -1287,7 +1288,7 @@ function InterpretationComponent<
       <div className="flex flex-col gap-2 flex-1">
         <FormLabel className="text-sm">{t("icon")}</FormLabel>
         <Input
-          value={interpretation.icon || ""}
+          value={interpretation.icon}
           onChange={(e) => handleIconChange(e.target.value)}
           className="h-9"
         />
@@ -1300,10 +1301,7 @@ function InterpretationComponent<
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Select
-                  value={field.value || ""}
-                  onValueChange={handleColorChange}
-                >
+                <Select value={field.value} onValueChange={handleColorChange}>
                   <SelectTrigger className="h-9">
                     <SelectValue placeholder={t("select_a_value")} />
                   </SelectTrigger>
@@ -1360,12 +1358,14 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
     );
   };
 
-  const handleSetMin = (value: number, index: number) => {
-    handleSetRange({ ...ranges[index], min: value }, index);
+  const handleSetMin = (value: string, index: number) => {
+    const parsedValue = value === "" ? undefined : Number(value);
+    handleSetRange({ ...ranges[index], min: parsedValue }, index);
   };
 
-  const handleSetMax = (value: number, index: number) => {
-    handleSetRange({ ...ranges[index], max: value }, index);
+  const handleSetMax = (value: string | number, index: number) => {
+    const parsedValue = value === "" ? undefined : Number(value);
+    handleSetRange({ ...ranges[index], max: parsedValue }, index);
   };
 
   const handleAddRange = () => {
@@ -1436,11 +1436,9 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
                         <Input
                           {...field}
                           type="number"
-                          value={field.value || ""}
+                          value={field.value}
                           className="h-9"
-                          onChange={(e) =>
-                            handleSetMin(Number(e.target.value), index)
-                          }
+                          onChange={(e) => handleSetMin(e.target.value, index)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -1459,11 +1457,9 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
                         <Input
                           {...field}
                           type="number"
-                          value={field.value || ""}
+                          value={field.value}
                           className="h-9"
-                          onChange={(e) =>
-                            handleSetMax(Number(e.target.value), index)
-                          }
+                          onChange={(e) => handleSetMax(e.target.value, index)}
                         />
                       </FormControl>
                       <FormMessage />

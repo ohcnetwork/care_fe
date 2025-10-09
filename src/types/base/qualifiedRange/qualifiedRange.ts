@@ -48,9 +48,18 @@ export const qualifiedRangeSchema = z.array(
         z
           .object({
             interpretation: interpretationSchema,
-            min: z.coerce.number().optional(),
-            max: z.coerce.number().optional(),
+            min: z.number().optional(),
+            max: z.number().optional(),
           })
+          .refine(
+            (data) => {
+              if (data.min !== undefined || data.max !== undefined) return true;
+            },
+            {
+              message: "Either min or max value is required",
+              path: ["min"],
+            },
+          )
           .refine(
             (data) => {
               // Only validate if both min and max exist
@@ -89,6 +98,7 @@ export const qualifiedRangeSchema = z.array(
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Ranges and value sets cannot be used together",
+          path: ["_interpretation_type"],
         });
       }
       if (
@@ -98,6 +108,7 @@ export const qualifiedRangeSchema = z.array(
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Ranges are required",
+          path: ["ranges"],
         });
       }
       if (
@@ -108,6 +119,7 @@ export const qualifiedRangeSchema = z.array(
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Value sets are required",
+          path: ["valueset_interpretation"],
         });
       }
     }),

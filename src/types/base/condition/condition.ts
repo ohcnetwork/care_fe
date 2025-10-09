@@ -1,3 +1,4 @@
+import { GENDERS } from "@/common/constants";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { useTranslation } from "react-i18next";
@@ -12,11 +13,12 @@ export enum ConditionOperation {
 
 export interface ConditionBase {
   metric: string;
+  _conditionType?: string;
 }
 
 export interface ConditionOperationInRangeValue {
-  min: number;
-  max: number;
+  min?: number;
+  max?: number;
 }
 
 export interface AgeOperationEqualityValue {
@@ -66,7 +68,7 @@ export interface Metrics {
   allowed_operations: ConditionOperation[];
 }
 
-export const conditionSchema = z.union([
+export const conditionSchema = z.discriminatedUnion("_conditionType", [
   z.object({
     metric: z.literal("patient_age"),
     operation: z.literal(ConditionOperation.equality),
@@ -74,6 +76,7 @@ export const conditionSchema = z.union([
       value: z.number().min(0, "Value must be >= 0"),
       value_type: z.enum(["years", "months", "days"]),
     }),
+    _conditionType: z.literal("patient_age_equality"),
   }),
   z.object({
     metric: z.literal("patient_age"),
@@ -86,42 +89,24 @@ export const conditionSchema = z.union([
       })
       .refine((data) => data.min <= data.max, {
         message: "Min value must be <= max value",
+        path: ["max"],
       }),
+    _conditionType: z.literal("patient_age_in_range"),
   }),
   z.object({
-    metric: z.string().min(1, "Metric is required"),
+    metric: z.literal("patient_gender"),
     operation: z.literal(ConditionOperation.equality),
-    value: z.string().min(1, "Value is required"),
+    value: z.enum(GENDERS),
+    _conditionType: z.literal("patient_gender_equality"),
   }),
   z.object({
-    metric: z.string().min(1, "Metric is required"),
-    operation: z.literal(ConditionOperation.in_range),
-    value: z
-      .object({
-        min: z.number().min(0, "Min value must be >= 0"),
-        max: z.number().min(0, "Max value must be >= 0"),
-      })
-      .refine((data) => data.min <= data.max, {
-        message: "Min value must be <= max value",
-      }),
-  }),
-  z.object({
-    metric: z.string().min(1, "Metric is required"),
+    metric: z.literal("encounter_tag"),
     operation: z.literal(ConditionOperation.has_tag),
     value: z.string().min(1, "Value is required"),
+    _conditionType: z.literal("encounter_tag_has_tag"),
   }),
 ]) as z.ZodType<Condition>;
 
-export const getConditionValue = (condition: Condition) => {
-  switch (condition.operation) {
-    case ConditionOperation.equality:
-      return `${condition.value} ${typeof condition.value === "object" && "value_type" in condition.value ? `${condition?.value.value_type}` : ""}`;
-    case ConditionOperation.in_range:
-      return `${condition.value.min} ${"value_type" in condition.value ? `${condition?.value.value_type}` : ""} - ${condition.value.max} ${typeof condition.value === "object" && "value_type" in condition.value ? `${condition?.value.value_type}` : ""}`;
-    case ConditionOperation.has_tag:
-      return condition.value;
-  }
-};
 export function ConditionOperationSummary({
   condition,
 }: {
@@ -129,9 +114,12 @@ export function ConditionOperationSummary({
 }) {
   const { t } = useTranslation();
   const conditionName = t(`observation_metric__${condition.metric}`);
+  const tagIds =
+    typeof condition.value === "string" ? condition.value.split(",") : [];
   const tags = useTagConfigs({
-    ids: typeof condition.value === "string" ? [condition.value] : [],
-    disabled: condition.operation !== ConditionOperation.has_tag,
+    ids: tagIds,
+    disabled:
+      condition.operation !== ConditionOperation.has_tag || tagIds.length === 0,
   })
     .map(({ data }) => data)
     .filter(Boolean) as TagConfig[];
@@ -162,3 +150,48 @@ export function ConditionOperationSummary({
     }
   }
 }
+
+export function getConditionValue(
+  metric: string,
+  operation: ConditionOperation,
+):
+  | string
+  | ConditionOperationInRangeValue
+  | AgeOperationEqualityValue
+  | AgeOperationInRangeValue {
+  let conditionValue = {};
+  switch (operation) {
+    case ConditionOperation.equality:
+      if (metric === "patient_age") {
+        conditionValue = { value: 0, value_type: "years" };
+        break;
+      }
+      conditionValue = "";
+      break;
+    case ConditionOperation.in_range:
+      conditionValue = { min: undefined, max: undefined };
+      if (metric === "patient_age") {
+        conditionValue = { ...conditionValue, value_type: "years" };
+      }
+      break;
+    case ConditionOperation.has_tag:
+      conditionValue = "";
+      break;
+  }
+  return conditionValue;
+}
+
+export const getDefaultCondition = (metrics: Metrics[]) => {
+  if (!metrics || metrics.length === 0) return {} as Condition;
+  const firstOperation = metrics?.[0]
+    ?.allowed_operations?.[0] as ConditionOperation;
+  const metricName = metrics?.[0].name || "";
+  const value = getConditionValue(metrics?.[0].name, firstOperation);
+  const newCondition: Condition = {
+    metric: metricName,
+    operation: firstOperation,
+    value: value as any,
+    _conditionType: `${metricName}_${firstOperation}`,
+  } as Condition;
+  return newCondition;
+};

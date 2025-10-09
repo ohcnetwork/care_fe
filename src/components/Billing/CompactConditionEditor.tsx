@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { GENDER_TYPES } from "@/common/constants";
@@ -20,13 +20,14 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 
 import {
-  AgeOperationEqualityValue,
   AgeOperationInRangeValue,
   Condition,
   ConditionOperation,
   ConditionOperationSummary,
-  Metrics,
   conditionSchema,
+  getConditionValue,
+  getDefaultCondition,
+  Metrics,
 } from "@/types/base/condition/condition";
 
 interface CompactConditionEditorProps {
@@ -34,6 +35,309 @@ interface CompactConditionEditorProps {
   availableMetrics: Metrics[];
   onChange: (conditions: Condition[]) => void;
   className?: string;
+}
+
+// Keep only TagSelector as a separate component since it needs to use a hook
+function TagSelector({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const tagIds = value || "";
+  const tagArray = tagIds ? tagIds.split(",") : [];
+
+  const tagQueries = useTagConfigs({
+    ids: tagArray,
+    disabled: !tagArray,
+  });
+
+  const selectedTags = tagQueries
+    .map(({ data }) => data)
+    .filter(Boolean) as TagConfig[];
+
+  const handleChange = (tags: TagConfig[]) => {
+    onChange(tags.map((tag) => tag.id).join(","));
+  };
+
+  return (
+    <TagSelectorPopover
+      selected={selectedTags}
+      resource={TagResource.ENCOUNTER}
+      onChange={handleChange}
+    />
+  );
+}
+
+function RenderInput({
+  metric,
+  operation,
+  form,
+}: {
+  metric: string;
+  operation: ConditionOperation;
+  form: UseFormReturn<Condition, unknown, Condition>;
+}) {
+  const { t } = useTranslation();
+  // For patient_gender with equality operation
+  if (
+    metric === "patient_gender" &&
+    operation === ConditionOperation.equality
+  ) {
+    return (
+      <FormField
+        control={form.control}
+        name="value"
+        render={({ field }) => (
+          <FormItem className="flex-1">
+            <FormControl>
+              <Select
+                value={field.value as string}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("select_gender")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {GENDER_TYPES.map((gender) => (
+                    <SelectItem key={gender.id} value={gender.id}>
+                      {t(`GENDER__${gender.id}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    );
+  }
+
+  // For patient_age with equality operation
+  if (metric === "patient_age" && operation === ConditionOperation.equality) {
+    return (
+      <div className="flex gap-1 justify-between">
+        <FormField
+          control={form.control}
+          name="value.value"
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder={t("value")}
+                  value={field.value}
+                  onChange={(e) => {
+                    const newValue = Number(e.target.value);
+                    field.onChange(newValue);
+                  }}
+                  className="grow-1"
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="value.value_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Select
+                  value={field.value || "years"}
+                  onValueChange={(value_type) => {
+                    field.onChange(value_type);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["years", "months", "days"].map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {t(type)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      </div>
+    );
+  }
+
+  // For patient_age with in_range operation
+  if (metric === "patient_age" && operation === ConditionOperation.in_range) {
+    return (
+      <>
+        <FormField
+          control={form.control}
+          name="value.min"
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder={t("min_value")}
+                  value={field.value}
+                  onChange={(e) => {
+                    const min = Number(e.target.value);
+                    field.onChange(min);
+                  }}
+                  className="grow-1"
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="value.max"
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder={t("max_value")}
+                  value={field.value}
+                  onChange={(e) => {
+                    const max = Number(e.target.value);
+                    field.onChange(max);
+                  }}
+                  className="grow-1"
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="value.value_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Select
+                  value={field.value || "years"}
+                  onValueChange={(value_type) => {
+                    field.onChange(value_type);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["years", "months", "days"].map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {t(type)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      </>
+    );
+  }
+
+  // For has_tag operation
+  if (operation === ConditionOperation.has_tag) {
+    return (
+      <FormField
+        control={form.control}
+        name="value"
+        render={({ field }) => (
+          <FormItem className="flex-1">
+            <FormControl>
+              <TagSelector
+                value={field.value as string}
+                onChange={(value) => {
+                  field.onChange(value);
+                }}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    );
+  }
+
+  // Default case for equality operation
+  if (operation === ConditionOperation.equality) {
+    return (
+      <FormField
+        control={form.control}
+        name="value"
+        render={({ field }) => (
+          <FormItem className="flex-1">
+            <FormControl>
+              <Input
+                value={field.value as string}
+                onChange={(e) => {
+                  field.onChange(e.target.value);
+                }}
+                placeholder={t("value")}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    );
+  }
+
+  // Default case for in_range operation
+  return (
+    <div className="flex gap-1">
+      <FormField
+        control={form.control}
+        name="value.min"
+        render={({ field }) => (
+          <FormItem className="flex-1">
+            <FormControl>
+              <Input
+                type="number"
+                placeholder={t("min_value")}
+                value={field.value}
+                onChange={(e) => {
+                  const min = Number(e.target.value);
+                  field.onChange(min);
+                }}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="value.max"
+        render={({ field }) => (
+          <FormItem className="flex-1">
+            <FormControl>
+              <Input
+                type="number"
+                placeholder={t("max_value")}
+                value={field.value}
+                onChange={(e) => {
+                  const max = Number(e.target.value);
+                  field.onChange(max);
+                }}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    </div>
+  );
 }
 
 export function CompactConditionEditor({
@@ -49,9 +353,7 @@ export function CompactConditionEditor({
   const form = useForm({
     resolver: zodResolver(conditionSchema),
     defaultValues: {
-      metric: "",
-      operation: ConditionOperation.equality,
-      value: "",
+      ...getDefaultCondition(availableMetrics),
     },
   });
 
@@ -61,46 +363,12 @@ export function CompactConditionEditor({
     const isValid = await form.trigger();
     if (!isValid) return;
 
-    const formValues = form.getValues();
-    let condition: Condition;
-
-    if (formValues.operation === ConditionOperation.equality) {
-      if (formValues.metric === "patient_age") {
-        condition = {
-          metric: formValues.metric,
-          operation: ConditionOperation.equality,
-          value: formValues.value as AgeOperationEqualityValue,
-        };
-      } else {
-        condition = {
-          metric: formValues.metric,
-          operation: ConditionOperation.equality,
-          value: formValues.value as string,
-        };
-      }
-    } else if (formValues.operation === ConditionOperation.in_range) {
-      if (formValues.metric === "patient_age") {
-        condition = {
-          metric: formValues.metric,
-          operation: ConditionOperation.in_range,
-          value: formValues.value as AgeOperationInRangeValue,
-        };
-      } else {
-        condition = {
-          metric: formValues.metric,
-          operation: ConditionOperation.in_range,
-          value: formValues.value as { min: number; max: number },
-        };
-      }
-    } else {
-      condition = {
-        metric: formValues.metric,
-        operation: formValues.operation,
-        value: formValues.value as string,
-      };
-    }
-
-    onChange([...conditions, condition]);
+    let updatedConditions = [...conditions, form.getValues()];
+    updatedConditions = updatedConditions.map((cond) => ({
+      ...cond,
+      _conditionType: `${cond.metric}_${cond.operation}`,
+    }));
+    onChange(updatedConditions);
 
     // Reset form
     form.reset({
@@ -128,334 +396,29 @@ export function CompactConditionEditor({
     // Set the metric
     form.setValue("metric", newMetric?.name || "");
 
-    // Set the operation
     form.setValue(
       "operation",
       firstOperation as
         | ConditionOperation.equality
-        | ConditionOperation.in_range
-        | ConditionOperation.has_tag,
+        | ConditionOperation.has_tag
+        | ConditionOperation.in_range,
     );
 
-    // Set minimal valid defaults based on operation type
     resetValue(firstOperation);
   };
 
   const resetValue = (op: ConditionOperation) => {
-    if (op === ConditionOperation.in_range) {
-      // For in_range, we need to set min/max as numbers to satisfy TypeScript
-      form.setValue("value", {
-        min: 0,
-        max: 0,
-        ...(metric === "patient_age" && { value_type: "years" }),
-      });
-    } else if (op === ConditionOperation.equality) {
-      if (metric === "patient_age") {
-        form.setValue("value", { value: 0, value_type: "years" });
-      } else {
-        form.setValue("value", "");
-      }
-    } else if (op === ConditionOperation.intersects_any) {
-      form.setValue("value", "");
-    } else if (op === ConditionOperation.has_tag) {
-      form.setValue("value", "");
+    const metric = form.getValues("metric");
+    const value = getConditionValue(metric, op);
+    if (op === ConditionOperation.in_range && metric === "patient_age") {
+      const { min, max, value_type } = value as AgeOperationInRangeValue;
+      form.setValue("value.min", min);
+      form.setValue("value.max", max);
+      form.setValue("value.value_type", value_type);
     } else {
-      form.resetField("value");
+      form.setValue("value", value);
     }
-  };
-
-  // Keep only TagSelector as a separate component since it needs to use a hook
-  function TagSelector({
-    value,
-    onChange,
-  }: {
-    value: string;
-    onChange: (value: string) => void;
-  }) {
-    const tagIds = value || "";
-
-    const tagQueries = useTagConfigs({
-      ids: tagIds ? [tagIds] : [],
-      disabled: !tagIds,
-    });
-
-    const selectedTags = tagQueries
-      .map(({ data }) => data)
-      .filter(Boolean) as TagConfig[];
-
-    const handleChange = (tags: TagConfig[]) => {
-      onChange(tags.map((tag) => tag.id).join(","));
-    };
-
-    return (
-      <TagSelectorPopover
-        selected={selectedTags}
-        resource={TagResource.ENCOUNTER}
-        onChange={handleChange}
-        singleSelect={true}
-      />
-    );
-  }
-
-  const renderInputBasedOnMetricAndOperation = () => {
-    // For patient_gender with equality operation
-    if (
-      metric === "patient_gender" &&
-      operation === ConditionOperation.equality
-    ) {
-      return (
-        <FormField
-          control={form.control}
-          name="value"
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormControl>
-                <Select
-                  value={field.value as string}
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("select_gender")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {GENDER_TYPES.map((gender) => (
-                      <SelectItem key={gender.id} value={gender.id}>
-                        {t(`GENDER__${gender.id}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      );
-    }
-
-    // For patient_age with equality operation
-    if (metric === "patient_age" && operation === ConditionOperation.equality) {
-      return (
-        <div className="flex gap-1 justify-between">
-          <FormField
-            control={form.control}
-            name="value.value"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder={t("value")}
-                    value={field.value || ""}
-                    onChange={(e) => {
-                      const newValue = Number(e.target.value);
-                      field.onChange(newValue);
-                    }}
-                    className="grow-1"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="value.value_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Select
-                    value={field.value || "years"}
-                    onValueChange={(value_type) => {
-                      field.onChange(value_type);
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {["years", "months", "days"].map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {t(type)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
-      );
-    }
-
-    // For patient_age with in_range operation
-    if (metric === "patient_age" && operation === ConditionOperation.in_range) {
-      return (
-        <>
-          <FormField
-            control={form.control}
-            name="value.min"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder={t("min_value")}
-                    value={field.value || ""}
-                    onChange={(e) => {
-                      const min = Number(e.target.value);
-                      field.onChange(min);
-                    }}
-                    className="grow-1"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="value.max"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder={t("max_value")}
-                    value={field.value || ""}
-                    onChange={(e) => {
-                      const max = Number(e.target.value);
-                      field.onChange(max);
-                    }}
-                    className="grow-1"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="value.value_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Select
-                    value={field.value || "years"}
-                    onValueChange={(value_type) => {
-                      field.onChange(value_type);
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {["years", "months", "days"].map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {t(type)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </>
-      );
-    }
-
-    // For has_tag operation
-    if (operation === ConditionOperation.has_tag) {
-      return (
-        <FormField
-          control={form.control}
-          name="value"
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormControl>
-                <TagSelector
-                  value={field.value as string}
-                  onChange={(value) => {
-                    field.onChange(value);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      );
-    }
-
-    // Default case for equality operation
-    if (operation === ConditionOperation.equality) {
-      return (
-        <FormField
-          control={form.control}
-          name="value"
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormControl>
-                <Input
-                  value={(field.value as string) || ""}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                  }}
-                  placeholder={t("value")}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      );
-    }
-
-    // Default case for in_range operation
-    return (
-      <div className="flex gap-1">
-        <FormField
-          control={form.control}
-          name="value.min"
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder={t("min_value")}
-                  value={field.value || ""}
-                  onChange={(e) => {
-                    const min = Number(e.target.value);
-                    field.onChange(min);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="value.max"
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder={t("max_value")}
-                  value={field.value || ""}
-                  onChange={(e) => {
-                    const max = Number(e.target.value);
-                    field.onChange(max);
-                  }}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </div>
-    );
+    form.setValue("_conditionType", `${metric}_${op}`);
   };
 
   return (
@@ -551,7 +514,7 @@ export function CompactConditionEditor({
                 )}
               />
 
-              {renderInputBasedOnMetricAndOperation()}
+              <RenderInput metric={metric} operation={operation} form={form} />
             </div>
             {/* Error Summary */}
             {Object.keys(form.formState.errors).length > 0 && (
@@ -563,6 +526,12 @@ export function CompactConditionEditor({
                     let errorMessage = "";
                     if (typeof error.message === "string") {
                       errorMessage = error.message;
+                    } else if (typeof error === "object") {
+                      Object.entries(error).forEach(([k, v]: [string, any]) => {
+                        if (v && typeof v.message === "string") {
+                          errorMessage += `${k} ${v.message} `;
+                        }
+                      });
                     }
 
                     return errorMessage ? (
