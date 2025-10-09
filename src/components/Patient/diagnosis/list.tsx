@@ -58,7 +58,6 @@ export function DiagnosisList({
             clinical_status: ACTIVE_DIAGNOSIS_CLINICAL_STATUS.join(","),
             exclude_verification_status: "entered_in_error",
             ...(encounterId ? { encounter: encounterId } : {}),
-            ordering: "-created_date",
             limit: LIMIT,
             offset: String(pageParam),
           },

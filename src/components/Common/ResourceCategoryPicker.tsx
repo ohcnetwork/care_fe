@@ -110,7 +110,6 @@ export function ResourceCategoryPicker({
         resource_type: resourceType,
         resource_sub_type: resourceSubType,
         parent: currentParent || "",
-        ordering: "title",
       },
     }),
   });

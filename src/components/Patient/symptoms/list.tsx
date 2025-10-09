@@ -52,7 +52,6 @@ export function SymptomsList({
           pathParams: { patientId },
           queryParams: {
             encounter: encounterId,
-            ordering: "-created_date",
             limit: LIMIT,
             offset: String(pageParam),
             exclude_verification_status: "entered_in_error",
