@@ -210,7 +210,8 @@ export function SpecimenDefinitionForm({
     onSubmit({
       ...data,
       patient_preparation:
-        data.patient_preparation?.filter((item) => item && item.code) || [],
+        data.patient_preparation?.filter((item: Code) => item && item.code) ||
+        [],
       type_tested: data.type_tested
         ? {
             ...data.type_tested,
