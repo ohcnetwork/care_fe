@@ -53,7 +53,7 @@ export function processCustomDashboardLinks(
       ...link,
       // Only replace placeholders in href, keep title and description as-is
       href: replacePlaceholders(link.href, context),
-      icon: link.icon ? iconMap[link.icon] : iconMap.Box, // Default to Box icon
+      icon: link.icon && iconMap[link.icon] ? iconMap[link.icon] : iconMap.Box, // Default to Box icon
       visible: link.visible !== false, // Default to true unless explicitly false
     }))
     .filter((link) => link.visible);
