@@ -213,7 +213,7 @@ export default function ValueSetSearchContent({
       <div className="border-b border-gray-200">
         <CommandInput
           placeholder={placeholder}
-          className="outline-hidden border-none ring-0 shadow-none text-base md:text-sm"
+          className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
           onValueChange={onSearchChange}
           value={search}
           autoFocus={!isAppleDevice}

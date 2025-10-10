@@ -500,7 +500,7 @@ export function MedicationValueSetSelectTabContent({
                 placeholder={t("search_products")}
                 onValueChange={onSearchChange}
                 value={search}
-                className="border-none ring-0 text-base md:text-sm"
+                className="border-none ring-0 text-base sm:text-sm"
                 autoFocus={!isAppleDevice}
               />
             </div>
