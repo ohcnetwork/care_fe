@@ -4,8 +4,8 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { Permission } from "@/types/emr/permission/permission";
@@ -44,6 +45,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { ref, inView } = useInView();
+  const [searchPermission, setSearchPermission] = useState("");
 
   const isEditMode = !!role?.id;
 
@@ -71,9 +73,10 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const hasPermissionSelected =
     watchedPermissions && watchedPermissions.length > 0;
 
-  const getQueryParams = (pageParam: number) => ({
+  const getQueryParams = (pageParam: number, name: string) => ({
     limit: String(PAGE_LIMIT),
     offset: String(pageParam),
+    name: name,
   });
 
   const {
@@ -83,10 +86,10 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
     isFetching,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["permissions"],
+    queryKey: ["permissions", searchPermission],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query.debounced(permissionApi.listPermissions, {
-        queryParams: getQueryParams(pageParam),
+        queryParams: getQueryParams(pageParam, searchPermission),
       })({ signal });
       return response;
     },
@@ -220,6 +223,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                   rows={3}
                   placeholder={t("enter_role_description")}
                   {...field}
+
                 />
               </FormControl>
               <FormMessage />
@@ -287,6 +291,18 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                 </Button>
               </div>
             </div>
+              <div className="relative">
+        <CareIcon
+          icon="l-search"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+       />
+      <Input
+         placeholder={t("search_permissions")}
+         value={searchPermission}
+         onChange={(e) => setSearchPermission(e.target.value)}
+         className="w-full pl-8"
+       />
+      </div>
           </CardHeader>
           <CardContent>
             <FormField
@@ -328,6 +344,11 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                     {(isFetching || isFetchingNextPage) && (
                       <div className="text-center text-sm">{t("loading")}</div>
                     )}
+                     {!isFetching && permissions.length === 0 && (
+              <div className="text-center text-sm">
+                {t("no_matching_permissions")}
+              </div>
+            )}
                   </div>
                   <FormMessage />
                 </FormItem>

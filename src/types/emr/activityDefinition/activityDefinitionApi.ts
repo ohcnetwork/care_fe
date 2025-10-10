@@ -11,6 +11,9 @@ export default {
     path: "/api/v1/facility/{facilityId}/activity_definition/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ActivityDefinitionReadSpec>>(),
+    defaultQueryParams: {
+      ordering: "-created_date",
+    },
   },
   retrieveActivityDefinition: {
     path: "/api/v1/facility/{facilityId}/activity_definition/{activityDefinitionSlug}/",

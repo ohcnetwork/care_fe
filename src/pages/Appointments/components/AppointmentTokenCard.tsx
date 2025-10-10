@@ -161,6 +161,7 @@ const TokenCard = ({
                 className="underline font-semibold text-base capitalize text-gray-950"
               >
                 <Link
+                  basePath="/"
                   href={`/facility/${facility.id}/${resourceTypeToResourcePathSlug[appointment.resource_type]}/${appointment.resource.id}/queues/${appointment.token?.queue.id}`}
                 >
                   {t("queue_board")}
