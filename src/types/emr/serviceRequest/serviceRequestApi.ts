@@ -13,6 +13,9 @@ export default {
     path: "/api/v1/facility/{facilityId}/service_request/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ServiceRequestReadSpec>>(),
+    defaultQueryParams: {
+      ordering: "-created_date",
+    },
   },
   retrieveServiceRequest: {
     path: "/api/v1/facility/{facilityId}/service_request/{serviceRequestId}/",

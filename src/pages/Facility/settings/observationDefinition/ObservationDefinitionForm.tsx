@@ -467,28 +467,32 @@ function ObservationDefinitionFormContent({
                     }}
                   />
 
-                  <FormItem className="flex flex-col">
-                    <FormLabel aria-required>{t("loinc_code")}</FormLabel>
-                    <div>
-                      <ValueSetSelect
-                        system="system-observation"
-                        value={form.watch("code")}
-                        placeholder={t("search_for_observation_codes")}
-                        onSelect={(code) => {
-                          form.setValue("code", {
-                            code: code.code,
-                            display: code.display,
-                            system: code.system,
-                          });
-                          form.clearErrors("code");
-                        }}
-                        showCode={true}
-                      />
-                      <FormMessage className="mt-2">
-                        {form.formState.errors.code?.message}
-                      </FormMessage>
-                    </div>
-                  </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel aria-required>{t("loinc_code")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            ref={field.ref}
+                            system="system-observation"
+                            value={field.value}
+                            placeholder={t("search_for_observation_codes")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
             </div>
@@ -526,56 +530,84 @@ function ObservationDefinitionFormContent({
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
-                  <FormItem className="flex flex-col">
-                    <FormLabel>{t("body_site")}</FormLabel>
-                    <ValueSetSelect
-                      system="system-body-site"
-                      value={form.watch("body_site")}
-                      placeholder={t("select_body_site")}
-                      onSelect={(code) => {
-                        form.setValue("body_site", {
-                          code: code.code,
-                          display: code.display,
-                          system: code.system,
-                        });
-                      }}
-                      showCode={true}
-                    />
-                  </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="body_site"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t("body_site")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            ref={field.ref}
+                            system="system-body-site"
+                            value={field.value}
+                            placeholder={t("select_body_site")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  <FormItem className="flex flex-col">
-                    <FormLabel>{t("method")}</FormLabel>
-                    <ValueSetSelect
-                      system="system-collection-method"
-                      value={form.watch("method")}
-                      placeholder={t("method_placeholder")}
-                      onSelect={(code) => {
-                        form.setValue("method", {
-                          code: code.code,
-                          display: code.display,
-                          system: code.system,
-                        });
-                      }}
-                      showCode={true}
-                    />
-                  </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="method"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t("method")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            {...field}
+                            system="system-collection-method"
+                            placeholder={t("method_placeholder")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  <FormItem className="flex flex-col">
-                    <FormLabel>{t("unit")}</FormLabel>
-                    <ValueSetSelect
-                      system="system-ucum-units"
-                      value={form.watch("permitted_unit")}
-                      placeholder={t("unit_placeholder")}
-                      onSelect={(code) => {
-                        form.setValue("permitted_unit", {
-                          code: code.code,
-                          display: code.display,
-                          system: code.system,
-                        });
-                      }}
-                      showCode={true}
-                    />
-                  </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="permitted_unit"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-1">
+                        <FormLabel>{t("unit")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            {...field}
+                            system="system-ucum-units"
+                            placeholder={t("unit_placeholder")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
             </div>
@@ -693,15 +725,15 @@ function ObservationDefinitionFormContent({
                             control={form.control}
                             name={`component.${index}.code`}
                             render={({ field }) => (
-                              <FormItem>
+                              <FormItem className="flex flex-col">
                                 <FormLabel aria-required>{t("code")}</FormLabel>
                                 <FormControl>
                                   <ValueSetSelect
+                                    {...field}
                                     system="system-observation"
                                     placeholder={t(
                                       "search_for_observation_codes",
                                     )}
-                                    value={field.value}
                                     showCode={true}
                                     onSelect={(code) => {
                                       field.onChange({
@@ -758,9 +790,9 @@ function ObservationDefinitionFormContent({
                                   </FormLabel>
                                   <FormControl>
                                     <ValueSetSelect
+                                      {...field}
                                       system="system-ucum-units"
                                       placeholder={t("search_for_units")}
-                                      value={field.value}
                                       showCode={true}
                                       onSelect={(code) => {
                                         field.onChange({

@@ -8,6 +8,9 @@ export default {
     path: "/api/v1/patient/{patientId}/diagnosis/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<Diagnosis>>(),
+    defaultQueryParams: {
+      ordering: "-created_date",
+    },
   },
   retrieveDiagnosis: {
     path: "/api/v1/patient/{patientId}/diagnosis/{diagnosisId}/",

@@ -66,7 +66,7 @@ export const PatientInfoHoverCard = ({
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3 border-t border-gray-200 pt-4">
           {patient.instance_identifiers
-            .filter(({ config }) => !config.config.auto_maintained)
+            ?.filter(({ config }) => !config.config.auto_maintained)
             .map((identifier) => (
               <div
                 key={identifier.config.id}
