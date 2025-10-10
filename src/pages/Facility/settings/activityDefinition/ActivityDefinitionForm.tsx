@@ -127,10 +127,10 @@ function ActivityDefinitionFormContent({
     title: z.string().min(1, t("title_is_required")),
     slug_value: z
       .string()
-      .min(1, t("field_required"))
+      .min(1, t("slug_is_required"))
       .max(25, t("character_count_validation", { min: 1, max: 25 })),
-    description: z.string().min(1, t("field_required")),
-    usage: z.string().min(1, t("field_required")),
+    description: z.string().min(1, t("description_is_required")),
+    usage: z.string().min(1, t("usage_is_required")),
     derived_from_uri: z.string().nullable(),
     status: z.nativeEnum(Status),
     classification: z.nativeEnum(Classification),

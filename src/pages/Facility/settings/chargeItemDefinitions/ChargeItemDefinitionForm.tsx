@@ -596,7 +596,7 @@ export function ChargeItemDefinitionForm({
         (val) => {
           return !val || /^https?:\/\/.+/.test(val);
         },
-        { message: t("field_required") },
+        { message: t("enter_valid_url") },
       ),
     price_components: z.array(priceComponentSchema).refine(
       (components) => {

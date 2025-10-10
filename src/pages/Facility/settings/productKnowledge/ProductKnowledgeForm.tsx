@@ -128,10 +128,10 @@ function ProductKnowledgeFormContent({
   });
 
   const formSchema = z.object({
-    name: z.string().min(1, t("field_required")),
+    name: z.string().min(1, t("name_is_required")),
     slug_value: z
       .string()
-      .min(1, t("field_required"))
+      .min(1, t("slug_is_required"))
       .max(25, t("character_count_validation", { min: 1, max: 25 })),
     product_type: z.nativeEnum(ProductKnowledgeType),
     status: z.nativeEnum(ProductKnowledgeStatus),
@@ -143,14 +143,14 @@ function ProductKnowledgeFormContent({
       .array(
         z.object({
           name_type: z.nativeEnum(ProductNameTypes),
-          name: z.string().min(1, t("field_required")),
+          name: z.string().min(1, t("name_is_required")),
         }),
       )
       .default([]),
     storage_guidelines: z
       .array(
         z.object({
-          note: z.string().min(1, t("field_required")),
+          note: z.string().min(1, t("note_is_required")),
           stability_duration: z
             .object({
               value: z.number().int().optional(),
