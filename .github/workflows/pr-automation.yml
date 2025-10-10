@@ -1,7 +1,7 @@
 name: Assign Labels
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, converted_to_draft, ready_for_review, closed]
   pull_request_review:
     types: [submitted]
