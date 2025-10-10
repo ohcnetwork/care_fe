@@ -52,52 +52,53 @@ import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowl
 
 // Define a Code schema to match the API type
 const codeSchema = z.object({
-  code: z.string().min(1, "Code is required"),
-  display: z.string().min(1, "Display name is required"),
-  system: z.string().min(1, "System is required"),
+  code: z.string().min(1, { message: "Code is required" }),
+  display: z.string().min(1, { message: "Display name is required" }),
+  system: z.string().min(1, { message: "System is required" }),
 });
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  slug_value: z.string().min(1, "Slug is required"),
+  name: z.string().min(1, { message: "Name is required" }),
+  slug_value: z.string().min(1, { message: "Slug is required" }),
   product_type: z.nativeEnum(ProductKnowledgeType),
   status: z.nativeEnum(ProductKnowledgeStatus),
   alternate_identifier: z.string().trim().optional(),
   category: z.string(),
   code: codeSchema.nullable(),
-  base_unit: codeSchema.nullable(),
+  base_unit: codeSchema.optional().refine((data) => data, {
+    message: "Base unit is required",
+  }),
   names: z
     .array(
       z.object({
         name_type: z.nativeEnum(ProductNameTypes),
-        name: z.string().min(1, "Name is required"),
+        name: z.string().min(1, { message: "Name is required" }),
       }),
     )
     .default([]),
   storage_guidelines: z
     .array(
       z.object({
-        note: z.string().min(1, "Note is required"),
+        note: z.string().min(1, { message: "Note is required" }),
         stability_duration: z
           .object({
             value: z.number().int().optional(),
             unit: codeSchema,
           })
-          .refine((data) => data.value !== undefined && data.value !== null),
+          .refine((data) => data.value !== undefined && data.value !== null, {
+            message: "Stability duration value is required",
+            path: ["value"],
+          }),
       }),
     )
     .default([]),
   definitional: z
     .object({
-      dosage_form: codeSchema.optional(),
+      dosage_form: codeSchema.optional().nullable(),
       intended_routes: z.array(codeSchema).default([]),
     })
     .nullable()
-    .optional()
-    .refine((data) => {
-      if (!data) return true; // definitional is optional
-      return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
-    }),
+    .optional(),
 });
 
 export default function ProductKnowledgeForm({
@@ -189,7 +190,9 @@ function ProductKnowledgeFormContent({
         alternate_identifier: existingData.alternate_identifier || "",
         category: existingData.category?.slug,
         code: existingData.code?.code ? existingData.code : null,
-        base_unit: existingData.base_unit?.code ? existingData.base_unit : null,
+        base_unit: existingData.base_unit?.code
+          ? existingData.base_unit
+          : undefined,
         names: existingData.names || [],
         storage_guidelines: existingData.storage_guidelines || [],
         definitional:
@@ -205,7 +208,7 @@ function ProductKnowledgeFormContent({
       names: [],
       storage_guidelines: [],
       code: null,
-      base_unit: null,
+      base_unit: undefined,
       definitional: null,
       status: ProductKnowledgeStatus.active,
       category: categorySlug,
@@ -471,32 +474,40 @@ function ProductKnowledgeFormContent({
                     </div>
                   </div>
 
-                  <div>
-                    <FormLabel>{t("base_unit")}</FormLabel>
-                    <div className="mt-2">
-                      <Select
-                        value={form.watch("base_unit")?.code || ""}
-                        onValueChange={(value) => {
-                          const selectedUnit = DOSAGE_UNITS_CODES.find(
-                            (unit) => unit.code === value,
-                          );
-                          if (selectedUnit)
-                            form.setValue("base_unit", selectedUnit);
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("select_base_unit")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {DOSAGE_UNITS_CODES.map((unit) => (
-                            <SelectItem key={unit.code} value={unit.code}>
-                              {unit.display}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="base_unit"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel aria-required>{t("base_unit")}</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value?.code || ""}
+                            onValueChange={(value) => {
+                              const selectedUnit = DOSAGE_UNITS_CODES.find(
+                                (unit) => unit.code === value,
+                              );
+                              field.onChange(selectedUnit);
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={t("select_base_unit")}
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {DOSAGE_UNITS_CODES.map((unit) => (
+                                <SelectItem key={unit.code} value={unit.code}>
+                                  {unit.display}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -733,11 +744,7 @@ function ProductKnowledgeFormContent({
                                       }
                                     />
                                   </FormControl>
-                                  <FormMessage>
-                                    {form.formState.errors.storage_guidelines?.[
-                                      index
-                                    ]?.stability_duration && t("required")}
-                                  </FormMessage>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
@@ -819,7 +826,7 @@ function ProductKnowledgeFormContent({
               </div>
             </div>
 
-            {/* Product Definition Section */}
+            {/* Product Definition Section - UPDATED */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -848,6 +855,7 @@ function ProductKnowledgeFormContent({
                       size="sm"
                       onClick={() =>
                         form.setValue("definitional", {
+                          dosage_form: null,
                           intended_routes: [],
                         })
                       }
@@ -860,19 +868,21 @@ function ProductKnowledgeFormContent({
 
                 {form.watch("definitional") ? (
                   <div className="space-y-4">
+                    {/* Dosage Form - Optional */}
                     <div>
                       <FormField
                         control={form.control}
                         name="definitional.dosage_form"
                         render={() => (
                           <FormItem className="flex flex-col">
-                            <FormLabel aria-required>
-                              {t("dosage_form")}
-                            </FormLabel>
+                            <FormLabel>{t("dosage_form")}</FormLabel>
                             <FormControl>
                               <ValueSetSelect
                                 system="system-medication-form-codes"
-                                value={form.watch("definitional.dosage_form")}
+                                value={
+                                  form.watch("definitional.dosage_form") ||
+                                  undefined
+                                }
                                 placeholder={t("dosage_form_placeholder")}
                                 onSelect={(code) => {
                                   form.setValue("definitional.dosage_form", {
@@ -884,14 +894,13 @@ function ProductKnowledgeFormContent({
                                 showCode={true}
                               />
                             </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
-                      <FormMessage>
-                        {form.formState.errors.definitional && t("required")}
-                      </FormMessage>
                     </div>
 
+                    {/* Intended Routes */}
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
@@ -950,13 +959,10 @@ function ProductKnowledgeFormContent({
                                           showCode={true}
                                         />
                                       </FormControl>
+                                      <FormMessage />
                                     </FormItem>
                                   )}
                                 />
-                                <FormMessage>
-                                  {form.formState.errors.definitional
-                                    ?.intended_routes?.[index] && t("required")}
-                                </FormMessage>
                               </div>
                               <Button
                                 type="button"
