@@ -247,7 +247,7 @@ export default function AddMultipleChargeItemsSheet({
                                   </PopoverTrigger>
                                   <PopoverContent
                                     side="right"
-                                    className="p-0"
+                                    className="p-2 max-w-xs break-words whitespace-pre-wrap"
                                     align="start"
                                   >
                                     <ChargeItemPriceDisplay
