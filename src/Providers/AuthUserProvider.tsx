@@ -132,9 +132,7 @@ export default function AuthUserProvider({
       localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
 
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-      if (location.pathname === "/2fa") {
-        navigate(getRedirectOr("/"));
-      }
+      navigate(getRedirectOr("/"));
     },
   });
 
