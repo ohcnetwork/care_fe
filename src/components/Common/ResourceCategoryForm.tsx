@@ -72,7 +72,7 @@ export function ResourceCategoryForm({
   const queryClient = useQueryClient();
   const isEditing = !!categorySlug;
 
-  const formSchemaWithTranslations = z.object({
+  const formSchema = z.object({
     title: z.string().min(1, t("title_is_required")),
     slug_value: z
       .string()
@@ -82,8 +82,8 @@ export function ResourceCategoryForm({
     resource_sub_type: z.nativeEnum(ResourceCategorySubType),
   });
 
-  const form = useForm<z.infer<typeof formSchemaWithTranslations>>({
-    resolver: zodResolver(formSchemaWithTranslations),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       slug_value: "",
@@ -163,7 +163,7 @@ export function ResourceCategoryForm({
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchemaWithTranslations>) => {
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
     const payload: ResourceCategoryCreate | ResourceCategoryUpdate = {
       title: values.title,
       slug_value: values.slug_value,

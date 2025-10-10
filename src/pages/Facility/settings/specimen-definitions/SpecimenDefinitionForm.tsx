@@ -103,7 +103,7 @@ export function SpecimenDefinitionForm({
 }: SpecimenDefinitionFormProps) {
   const { t } = useTranslation();
 
-  const formSchemaWithTranslations = z.object({
+  const formSchema = z.object({
     title: z.string().min(1, t("title_is_required")),
     slug_value: z
       .string()
@@ -123,8 +123,8 @@ export function SpecimenDefinitionForm({
 
   const { facilityId } = useCurrentFacility();
 
-  const form = useForm<z.infer<typeof formSchemaWithTranslations>>({
-    resolver: zodResolver(formSchemaWithTranslations),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       title: initialData?.title,
       slug_value: initialData?.slug_config.slug_value,

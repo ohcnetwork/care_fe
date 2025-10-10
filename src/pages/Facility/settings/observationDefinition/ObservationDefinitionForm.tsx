@@ -116,7 +116,7 @@ function ObservationDefinitionFormContent({
 }) {
   const { t } = useTranslation();
 
-  const formSchemaWithTranslations = z.object({
+  const formSchema = z.object({
     title: z.string().min(1, t("title_is_required")),
     slug_value: z
       .string()
@@ -185,7 +185,7 @@ function ObservationDefinitionFormContent({
   const isEditMode = Boolean(observationSlug);
 
   const form = useForm({
-    resolver: zodResolver(formSchemaWithTranslations),
+    resolver: zodResolver(formSchema),
     defaultValues:
       isEditMode && existingData
         ? {
@@ -274,7 +274,7 @@ function ObservationDefinitionFormContent({
 
   const isPending = isCreating || isUpdating;
 
-  function onSubmit(data: z.infer<typeof formSchemaWithTranslations>) {
+  function onSubmit(data: z.infer<typeof formSchema>) {
     if (isEditMode && observationSlug) {
       updateObservationDefinition(data as ObservationDefinitionUpdateSpec);
     } else {

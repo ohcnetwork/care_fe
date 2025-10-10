@@ -127,7 +127,7 @@ function ProductKnowledgeFormContent({
     system: z.string().min(1, t("system_is_required")),
   });
 
-  const formSchemaWithTranslations = z.object({
+  const formSchema = z.object({
     name: z.string().min(1, t("field_required")),
     slug_value: z
       .string()
@@ -218,7 +218,7 @@ function ProductKnowledgeFormContent({
   };
 
   const form = useForm({
-    resolver: zodResolver(formSchemaWithTranslations),
+    resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues(),
   });
 
@@ -289,7 +289,7 @@ function ProductKnowledgeFormContent({
 
   const isPending = isCreating || isUpdating;
 
-  function onSubmit(data: z.infer<typeof formSchemaWithTranslations>) {
+  function onSubmit(data: z.infer<typeof formSchema>) {
     // Convert null to undefined where needed to match API types
     const formattedData = {
       ...data,

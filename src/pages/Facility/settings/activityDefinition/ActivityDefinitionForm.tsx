@@ -123,7 +123,7 @@ function ActivityDefinitionFormContent({
 }) {
   const { t } = useTranslation();
 
-  const formSchemaWithTranslations = z.object({
+  const formSchema = z.object({
     title: z.string().min(1, t("title_is_required")),
     slug_value: z
       .string()
@@ -249,7 +249,7 @@ function ActivityDefinitionFormContent({
     });
 
   const form = useForm({
-    resolver: zodResolver(formSchemaWithTranslations),
+    resolver: zodResolver(formSchema),
     defaultValues:
       isEditMode && existingData
         ? {
@@ -398,7 +398,7 @@ function ActivityDefinitionFormContent({
 
   const isPending = isCreating || isUpdating;
 
-  function onSubmit(data: z.infer<typeof formSchemaWithTranslations>) {
+  function onSubmit(data: z.infer<typeof formSchema>) {
     const transformedData = {
       ...data,
       specimen_requirements: data.specimen_requirements.map(
