@@ -23,7 +23,9 @@ import {
   PatientDeceasedInfo,
   PatientHeader,
 } from "@/components/Patient/PatientHeader";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { cn } from "@/lib/utils";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
 export const PatientHome = (props: {
@@ -32,6 +34,7 @@ export const PatientHome = (props: {
   page: (typeof tabs)[0]["route"];
 }) => {
   const { facilityId, id, page } = props;
+  const { open: isSidebarOpen } = useSidebar();
 
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -86,7 +89,12 @@ export const PatientHome = (props: {
       }
     >
       <div
-        className="w-full max-w-full md:max-w-[calc(100vw-8rem)] mx-auto mt-3 overflow-y-auto"
+        className={cn(
+          "w-full mt-3 overflow-y-auto",
+          isSidebarOpen
+            ? "md:max-w-[calc(100vw-25rem)]"
+            : "md:max-w-[calc(100vw-8rem)]",
+        )}
         data-testid="patient-dashboard"
       >
         <div className="flex flex-col gap-2">
