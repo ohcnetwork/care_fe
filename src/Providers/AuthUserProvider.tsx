@@ -96,7 +96,15 @@ export default function AuthUserProvider({
       if (isMFAResponse(data)) {
         localStorage.setItem("mfa_temp_token", data.temp_token);
         const redirectURL = getRedirectURL();
-        navigate(redirectURL ? `/2fa?redirect=${redirectURL}` : "/2fa");
+        const directURL =
+          location.pathname !== "/login" ? window.location.href : null;
+        navigate(
+          redirectURL
+            ? `/2fa?redirect=${redirectURL}`
+            : directURL
+              ? `/2fa?redirect=${directURL}`
+              : "/2fa",
+        );
         return;
       }
 
@@ -124,8 +132,9 @@ export default function AuthUserProvider({
       localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
 
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-
-      navigate(getRedirectOr("/"));
+      if (location.pathname === "/2fa") {
+        navigate(getRedirectOr("/"));
+      }
     },
   });
 
