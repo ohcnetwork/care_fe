@@ -80,10 +80,7 @@ function ConceptFields({
         </Button>
       </div>
       {fields.map((field, index) => (
-        <div
-          key={field.id}
-          className="flex flex-col sm:flex-row gap-4 sm:items-start"
-        >
+        <div key={field.id} className="flex gap-4 items-start">
           <CodingField
             system={parentForm.watch(`compose.${type}.${nestIndex}.system`)}
             name={`compose.${type}.${nestIndex}.concept.${index}`}
@@ -96,7 +93,7 @@ function ConceptFields({
             size="icon"
             onClick={() => remove(index)}
             disabled={disabled}
-            className="self-end sm:self-auto"
+            className="mt-0 sm:mt-0"
           >
             <TrashIcon className="size-4" />
           </Button>
@@ -140,8 +137,8 @@ function FilterFields({
         </Button>
       </div>
       {fields.map((field, index) => (
-        <div key={field.id} className="space-y-4 sm:space-y-0">
-          <div className="flex flex-col sm:flex-row gap-4 sm:items-start">
+        <div key={field.id} className="flex gap-4 items-start">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-1">
             <FormField
               control={parentForm.control}
               name={`compose.${type}.${nestIndex}.filter.${index}.property`}
@@ -190,17 +187,16 @@ function FilterFields({
                 </FormItem>
               )}
             />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => remove(index)}
-              disabled={disabled}
-              className="self-end sm:self-auto mt-2 sm:mt-0"
-            >
-              <TrashIcon className="size-4" />
-            </Button>
           </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => remove(index)}
+            disabled={disabled}
+          >
+            <TrashIcon className="size-4" />
+          </Button>
         </div>
       ))}
     </div>
@@ -249,7 +245,7 @@ function RuleFields({
       <CardContent className="space-y-6 p-4 sm:p-6 pt-0">
         {fields.map((field, index) => (
           <div key={field.id} className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+            <div className="flex items-end gap-4">
               <FormField
                 control={form.control}
                 name={`compose.${type}.${index}.system`}
@@ -285,7 +281,6 @@ function RuleFields({
                 size="icon"
                 onClick={() => remove(index)}
                 disabled={disabled}
-                className="self-end sm:self-auto"
               >
                 <TrashIcon className="size-4" />
               </Button>
