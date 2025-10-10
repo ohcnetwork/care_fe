@@ -64,7 +64,6 @@ export default function LocationSettings({
       pathParams: { facility_id: facilityId },
       queryParams: {
         mode: "kind",
-        ordering: "sort_index",
         parent: "",
       },
     }),
@@ -99,7 +98,6 @@ export default function LocationSettings({
       pathParams: { facility_id: facilityId },
       queryParams: {
         limit: 1000,
-        ordering: "sort_index",
       },
     }),
     enabled: activeTab === "map",
