@@ -135,7 +135,6 @@ export function ChargeItemDefinitionPicker({
         resource_type: ResourceCategoryResourceType.charge_item_definition,
         resource_sub_type: resourceSubType,
         parent: currentParent || "",
-        ordering: "title",
       },
     }),
     enabled: viewMode === "categories",

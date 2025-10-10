@@ -53,7 +53,6 @@ function BaseLocationTreeNode({
       queryParams: {
         parent: location.id,
         mode: "kind",
-        ordering: "sort_index",
         limit: 100,
       },
     }),
@@ -354,7 +353,6 @@ export default function LocationMultiSelect({
       queryParams: {
         parent: "",
         mode: "kind",
-        ordering: "sort_index",
       },
     }),
   });

@@ -94,7 +94,6 @@ export const PractitionerSelector = ({
       pathParams: { facilityId },
       queryParams: {
         parent: "",
-        ordering: "name",
         active: true,
         limit: 100,
       },
@@ -157,7 +156,6 @@ export const PractitionerSelector = ({
       pathParams: { facilityId },
       queryParams: {
         parent: currentOrganizationId!,
-        ordering: "name",
         active: true,
       },
     }),

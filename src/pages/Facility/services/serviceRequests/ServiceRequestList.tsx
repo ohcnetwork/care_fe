@@ -182,6 +182,9 @@ export default function ServiceRequestList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
   const [isBarcodeOpen, setBarcodeOpen] = useState(false);
 
@@ -252,7 +255,6 @@ export default function ServiceRequestList({
         status: qParams.status,
         priority: qParams.priority,
         tags: qParams.tags,
-        ordering: "-created_date",
         patient: qParams.patient,
         tags_behavior: qParams.tags_behavior,
       },

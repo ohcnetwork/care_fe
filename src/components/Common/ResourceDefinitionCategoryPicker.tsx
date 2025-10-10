@@ -164,7 +164,6 @@ export function ResourceDefinitionCategoryPicker<T>({
         queryParams: {
           resource_type: resourceType,
           parent: currentParent || "",
-          ordering: "title",
         },
       }),
     },
