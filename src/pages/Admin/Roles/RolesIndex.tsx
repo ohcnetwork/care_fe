@@ -60,12 +60,12 @@ function RoleCard({
               >
                 {role.name}
               </h3>
-              <div className="flex gap-2 shrink-0 w-full sm:w-auto">
+              <div className="flex gap-2 flex-nowrap w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => onClone(role)}
-                  className="shrink-0 w-full sm:w-auto"
+                  className="w-full sm:w-auto"
                 >
                   <CareIcon icon="l-copy" className="size-4" />
                   {t("clone")}
@@ -74,7 +74,7 @@ function RoleCard({
                   variant="outline"
                   size="sm"
                   onClick={() => onEdit(role)}
-                  className="shrink-0 w-full sm:w-auto"
+                  className=" w-full sm:w-auto"
                 >
                   <CareIcon icon="l-edit" className="size-4" />
                   {t("edit")}
