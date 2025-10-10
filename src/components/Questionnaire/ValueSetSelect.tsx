@@ -1,5 +1,5 @@
 import { CaretSortIcon } from "@radix-ui/react-icons";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -23,12 +23,13 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import { Code } from "@/types/base/code/code";
 import { useTranslation } from "react-i18next";
 
+type ButtonProps = Omit<React.ComponentProps<typeof Button>, keyof Props>;
+
 interface Props {
   system: string;
   value?: Code | null;
   onSelect: (value: Code) => void;
   placeholder?: string;
-  disabled?: boolean;
   count?: number;
   searchPostFix?: string;
   hideTrigger?: boolean;
@@ -44,7 +45,6 @@ export default function ValueSetSelect({
   value,
   onSelect,
   placeholder = "Search...",
-  disabled,
   count = 10,
   searchPostFix = "",
   hideTrigger = false,
@@ -53,7 +53,8 @@ export default function ValueSetSelect({
   showCode = false,
   title,
   mobileTrigger,
-}: Props) {
+  ...props
+}: Props & ButtonProps) {
   const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -91,7 +92,7 @@ export default function ValueSetSelect({
                 "w-full flex justify-between h-auto whitespace-normal text-left font-normal border-gray-300 shadow-xs",
                 !value?.display && "text-gray-500 hover:bg-white",
               )}
-              disabled={disabled}
+              {...props}
             >
               <span>
                 {value?.display || placeholder}
@@ -162,7 +163,7 @@ export default function ValueSetSelect({
         onOpenChange={setInternalOpen}
         modal={true}
       >
-        <PopoverTrigger asChild disabled={disabled}>
+        <PopoverTrigger asChild>
           <Button
             type="button"
             variant="white"
@@ -171,7 +172,7 @@ export default function ValueSetSelect({
               "flex justify-between truncate font-normal border-gray-300 shadow-xs",
               !value?.display && "text-gray-500 hover:bg-white",
             )}
-            disabled={disabled}
+            {...props}
           >
             <span className="truncate">
               {value?.display || placeholder}
