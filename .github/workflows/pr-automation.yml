@@ -1,7 +1,7 @@
 name: Assign Labels
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, converted_to_draft, ready_for_review, closed]
   pull_request_review:
     types: [submitted]
@@ -54,7 +54,6 @@ jobs:
             }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
 
           echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> "$GITHUB_ENV"
-
           echo "STATUS_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .id' project_data.json)" >> "$GITHUB_ENV"
           echo "TEAM_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Team\") | .id' project_data.json)" >> "$GITHUB_ENV"
 
@@ -133,7 +132,6 @@ jobs:
             });
 
             const itemId = addToProjectResult.addProjectV2ItemById.item.id;
-
             const statusFieldId = process.env.STATUS_FIELD_ID;
             let statusOptionId;
 
@@ -265,6 +263,6 @@ jobs:
                   }
                 }
               } catch (error) {
-                console.warn(`Failed to fetch or process contributor data for ${author}:`, error.message);
+                console.warn(`Failed to fetch contributor data for '${author}':`, error.message);
               }
             }
