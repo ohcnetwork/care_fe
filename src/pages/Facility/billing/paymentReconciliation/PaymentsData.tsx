@@ -206,7 +206,9 @@ export default function PaymentsData({
         <TableSkeleton count={3} />
       ) : !payments?.length ? (
         <EmptyState
-          icon="l-credit-card"
+          icon={
+            <CareIcon icon="l-credit-card" className="text-primary size-6" />
+          }
           title={t("no_payments")}
           description={t("no_payments_description")}
         />

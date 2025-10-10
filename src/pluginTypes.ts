@@ -29,7 +29,12 @@ export type PatientHomeActionsComponentType = React.FC<{
   className?: string;
 }>;
 
-export type PatientInfoCardActionsComponentType = React.FC<{
+export type EncounterActionsComponentType = React.FC<{
+  encounter: EncounterRead;
+  className?: string;
+}>;
+
+export type PatientInfoCardQuickActionsComponentType = React.FC<{
   encounter: EncounterRead;
   className?: string;
 }>;
@@ -60,7 +65,8 @@ export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
   Scribe: ScribeComponentType;
   PatientHomeActions: PatientHomeActionsComponentType;
-  PatientInfoCardActions: PatientInfoCardActionsComponentType;
+  PatientInfoCardQuickActions: PatientInfoCardQuickActionsComponentType;
+  EncounterActions: EncounterActionsComponentType;
   PatientInfoCardMarkAsComplete: PatientInfoCardMarkAsCompleteComponentType;
   FacilityHomeActions: FacilityHomeActionsComponentType;
   PatientRegistrationForm: PatientRegistrationFormComponentType;

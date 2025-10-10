@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import React, { useEffect } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -39,16 +39,12 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
 
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
-
-  // TODO: Remove this once we have a default status (robo's PR)
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: "active" });
-    }
-  }, []);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["tagConfig", qParams, facilityId],

@@ -206,6 +206,7 @@ function DiagnosisDetailsForm({
             })
           }
           disabled={disabled || !!diagnosis.id}
+          blockDate={(date) => date > new Date()}
           buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
         />
       </div>
@@ -533,7 +534,6 @@ export function DiagnosisQuestion({
                   offset,
                   limit,
                   exclude_verification_status: "entered_in_error",
-                  ordering: "-created_date",
                   category: "encounter_diagnosis,chronic_condition",
                 },
               })({ signal: new AbortController().signal });
@@ -688,6 +688,7 @@ const DiagnosisTableRow = ({
               })
             }
             disabled={disabled || !!diagnosis.id}
+            blockDate={(date) => date > new Date()}
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>

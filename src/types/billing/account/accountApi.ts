@@ -13,6 +13,9 @@ export default {
     path: "/api/v1/facility/{facilityId}/account/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<AccountBase>>(),
+    defaultQueryParams: {
+      ordering: "-created_date",
+    },
   },
   retrieveAccount: {
     path: "/api/v1/facility/{facilityId}/account/{accountId}/",

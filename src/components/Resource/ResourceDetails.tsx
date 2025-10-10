@@ -13,14 +13,13 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import CommentSection from "@/components/Resource/ResourceCommentSection";
 
-import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
-
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
 import { formatPatientAddress } from "@/components/Patient/utils";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
+import { getResourceRequestCategoryEnum } from "@/types/resourceRequest/resourceRequest";
 
 function PatientCard({ patient }: { patient: PatientRead }) {
   const { t } = useTranslation();
@@ -177,9 +176,9 @@ export default function ResourceDetails({
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("category")}</p>
                 <p className="text-sm text-gray-500">
-                  {RESOURCE_CATEGORY_CHOICES.find(
-                    (item) => item.id === data.category,
-                  )?.text || "--"}
+                  {t(
+                    `resource_request_category__${getResourceRequestCategoryEnum(data.category)}`,
+                  )}
                 </p>
               </div>
               <div className="space-y-1">
