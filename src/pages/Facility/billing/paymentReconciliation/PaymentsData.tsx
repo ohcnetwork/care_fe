@@ -181,7 +181,7 @@ export default function PaymentsData({
               </SelectGroup>
             </SelectContent>
           </Select>
-          <div className="w-full sm:flex-shrink-0 sm:w-auto sm:min-w-[180px] sm:max-w-[250px]">
+          <div className="w-full sm:w-fit">
             <Select
               value={qParams.ordering}
               onValueChange={(value) => {
