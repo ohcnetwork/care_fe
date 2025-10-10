@@ -206,7 +206,7 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
                         availableOrganizations?.results.map((org) => (
                           <CommandItem
                             key={org.id}
-                            value={org.id}
+                            value={org.name}
                             onSelect={() => handleToggleOrganization(org.id)}
                             className="flex items-center justify-between pr-2"
                           >
