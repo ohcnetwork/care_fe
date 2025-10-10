@@ -39,7 +39,7 @@ export function PatientHeader({
         />
         <div className="flex flex-wrap xl:gap-5 gap-2">
           {patient.instance_identifiers
-            .filter(({ config }) => !config.config.auto_maintained)
+            ?.filter(({ config }) => !config.config.auto_maintained)
             .map((identifier) => (
               <div
                 key={identifier.config.id}
