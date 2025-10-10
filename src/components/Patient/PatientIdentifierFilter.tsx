@@ -75,6 +75,13 @@ export default function PatientIdentifierFilter({
     }
   }, [patientId, selectedPatient]);
 
+  // Set default search type to first identifier config
+  useEffect(() => {
+    if (facility?.patient_instance_identifier_configs?.length && !searchType) {
+      setSearchType(facility.patient_instance_identifier_configs[0].id);
+    }
+  }, [facility?.patient_instance_identifier_configs, searchType]);
+
   // Fetch patient details when patientId is provided
   const { data: patientDetails } = useQuery({
     queryKey: ["patient-details", patientId],
