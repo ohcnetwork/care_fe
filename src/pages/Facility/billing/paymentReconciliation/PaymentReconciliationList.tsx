@@ -29,7 +29,7 @@ export function PaymentReconciliationList({
     <Page title={t("payment_reconciliations")} hideTitleOnPage>
       <div
         className={cn(
-          "w-full  mt-3 overflow-y-auto",
+          "w-full mt-3 overflow-y-auto",
           isSidebarOpen
             ? "md:max-w-[calc(100vw-21.5rem)]"
             : "md:max-w-[calc(100vw-8rem)]",
