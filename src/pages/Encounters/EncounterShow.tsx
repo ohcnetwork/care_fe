@@ -1,26 +1,27 @@
-import { navigate } from "raviger";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
-
-import { NavTabs } from "@/components/ui/nav-tabs";
-
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
-import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-
-import useAppHistory from "@/hooks/useAppHistory";
-import useBreakpoints from "@/hooks/useBreakpoints";
-import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
+import {
+  PatientDeceasedInfo,
+  PatientHeader,
+} from "@/components/Patient/PatientHeader";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   useEncounterShortcutDisplays,
   useEncounterShortcuts,
 } from "@/hooks/useEncounterShortcuts";
-import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
+import { useEffect, useState } from "react";
 
 import { getPermissions } from "@/common/Permissions";
-
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
+import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { CommandShortcut } from "@/components/ui/command";
+import { NavTabs } from "@/components/ui/nav-tabs";
 import { usePermissions } from "@/context/PermissionContext";
+import useAppHistory from "@/hooks/useAppHistory";
+import useBreakpoints from "@/hooks/useBreakpoints";
+import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
+import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
+import { cn } from "@/lib/utils";
 import EncounterHistorySelector from "@/pages/Encounters/EncounterHistorySelector";
 import { EncounterConsentsTab } from "@/pages/Encounters/tabs/consents";
 import { EncounterDevicesTab } from "@/pages/Encounters/tabs/devices";
@@ -31,17 +32,13 @@ import { EncounterOverviewTab } from "@/pages/Encounters/tabs/overview";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/plots";
 import { EncounterResponsesTab } from "@/pages/Encounters/tabs/responses";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { PLUGIN_Component } from "@/PluginEngine";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
-
-import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
-import {
-  PatientDeceasedInfo,
-  PatientHeader,
-} from "@/components/Patient/PatientHeader";
-import { Button } from "@/components/ui/button";
-import { CommandShortcut } from "@/components/ui/command";
+import { navigate } from "raviger";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { AppointmentEncounterHeader } from "./AppointmentEncounterHeader";
 import { EncounterDiagnosticReportsTab } from "./tabs/diagnostic-reports";
 import { EncounterNotesTab } from "./tabs/notes";
@@ -212,25 +209,36 @@ export const EncounterShow = (props: Props) => {
           className="bg-white shadow-sm border-none rounded-sm"
           actions={
             <>
-              {canWriteSelectedEncounter && selectedEncounter && (
-                <div className="flex flex-col items-end justify-center gap-4">
-                  <EncounterCommandDialog
+              {selectedEncounter && (
+                <div className="flex max-md:flex-col items-end justify-center gap-4">
+                  <PLUGIN_Component
+                    __name="PatientInfoCardQuickActions"
                     encounter={selectedEncounter}
-                    open={actionsOpen}
-                    onOpenChange={setActionsOpen}
-                    trigger={
-                      <Button
-                        variant="primary_gradient"
-                        onClick={() => setActionsOpen(true)}
-                        className="text-base font-semibold rounded-md w-full"
-                      >
-                        {t("encounter_actions")}
-                        <CommandShortcut className="text-white hidden md:inline">
-                          {getShortcutDisplay("open-command-dialog")}
-                        </CommandShortcut>
-                      </Button>
-                    }
+                    className={cn(
+                      buttonVariants({ variant: "primary_gradient" }),
+                      "text-base font-semibold rounded-md w-full",
+                    )}
                   />
+
+                  {canWriteSelectedEncounter && (
+                    <EncounterCommandDialog
+                      encounter={selectedEncounter}
+                      open={actionsOpen}
+                      onOpenChange={setActionsOpen}
+                      trigger={
+                        <Button
+                          variant="primary_gradient"
+                          onClick={() => setActionsOpen(true)}
+                          className="text-base font-semibold rounded-md w-full"
+                        >
+                          {t("encounter_actions")}
+                          <CommandShortcut className="text-white hidden md:inline">
+                            {getShortcutDisplay("open-command-dialog")}
+                          </CommandShortcut>
+                        </Button>
+                      }
+                    />
+                  )}
                 </div>
               )}
             </>

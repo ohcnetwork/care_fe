@@ -457,24 +457,31 @@ function ProductKnowledgeFormContent({
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <FormLabel>{t("code")}</FormLabel>
-                    <div className="mt-2">
-                      <ValueSetSelect
-                        system="system-medication"
-                        value={form.watch("code")}
-                        placeholder={t("search_for_product_codes")}
-                        onSelect={(code) => {
-                          form.setValue("code", {
-                            code: code.code,
-                            display: code.display,
-                            system: code.system,
-                          });
-                        }}
-                        showCode={true}
-                      />
-                    </div>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t("code")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            {...field}
+                            system="system-medication"
+                            placeholder={t("search_for_product_codes")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <div>
                     <FormLabel aria-required>{t("base_unit")}</FormLabel>
