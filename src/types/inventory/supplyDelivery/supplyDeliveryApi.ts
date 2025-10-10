@@ -14,6 +14,9 @@ export default {
     path: "/api/v1/supply_delivery/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<SupplyDeliveryRead>>(),
+    defaultQueryParams: {
+      ordering: "-created_date",
+    },
   },
   retrieveSupplyDelivery: {
     path: "/api/v1/supply_delivery/{supplyDeliveryId}/",
