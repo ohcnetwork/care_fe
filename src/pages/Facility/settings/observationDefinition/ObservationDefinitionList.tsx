@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -96,14 +95,10 @@ export default function ObservationDefinitionList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
-
-  // TODO: Remove this once we have a default status (robo's PR)
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: "active" });
-    }
-  }, []);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["observationDefinitions", qParams],
@@ -117,7 +112,6 @@ export default function ObservationDefinitionList({
           title: qParams.search,
           status: qParams.status,
           category: qParams.category,
-          ordering: "-created_date",
         },
       },
     ),

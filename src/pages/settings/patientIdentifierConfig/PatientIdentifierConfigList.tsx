@@ -111,7 +111,6 @@ export default function PatientIdentifierConfigList({
           offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
           display: qParams.display,
           status: qParams.status,
-          ordering: "-created_date",
         },
       },
     ),

@@ -260,7 +260,11 @@ function PrintButton({ item }: { item: QuestionnaireResponse }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="link" size="xs">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hover:bg-transparent text-gray-500 hover:text-gray-500"
+        >
           <Printer className="size-4" />
         </Button>
       </DropdownMenuTrigger>
