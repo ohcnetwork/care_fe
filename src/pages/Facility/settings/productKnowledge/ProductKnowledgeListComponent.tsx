@@ -199,16 +199,12 @@ export function ProductKnowledgeList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
 
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
-
-  // TODO: Remove this once we have a default status (robo's PR)
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: "active" });
-    }
-  }, [qParams.status, updateQuery]);
 
   // Fetch product knowledge for current category
   const { data: productsResponse, isLoading: isLoadingProducts } = useQuery({
@@ -222,7 +218,6 @@ export function ProductKnowledgeList({
         name: qParams.search,
         product_type: qParams.product_type,
         status: qParams.status,
-        ordering: "-created_date",
       },
     }),
   });

@@ -226,7 +226,6 @@ export function ResourceCategoryList({
         queryParams: {
           resource_type: resourceType,
           parent: categorySlug || "",
-          ordering: "title",
           title: qParams.searchCategory,
           limit: resultsPerPage,
           offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
