@@ -197,16 +197,12 @@ export function ActivityDefinitionList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
 
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
-
-  // TODO: Remove this once we have a default status (robo's PR)
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: "active" });
-    }
-  }, [qParams.status, updateQuery]);
 
   // Fetch activity definitions for current category
   const {
@@ -223,7 +219,6 @@ export function ActivityDefinitionList({
         status: qParams.status,
         classification: qParams.classification,
         category: categorySlug,
-        ordering: "-created_date",
       },
     }),
   });

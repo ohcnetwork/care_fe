@@ -534,7 +534,6 @@ export function DiagnosisQuestion({
                   offset,
                   limit,
                   exclude_verification_status: "entered_in_error",
-                  ordering: "-created_date",
                   category: "encounter_diagnosis,chronic_condition",
                 },
               })({ signal: new AbortController().signal });

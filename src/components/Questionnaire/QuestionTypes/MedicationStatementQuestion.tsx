@@ -384,7 +384,6 @@ export function MedicationStatementQuestion({
                   offset,
                   status:
                     "active,on_hold,draft,unknown,ended,completed,cancelled",
-                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response as PaginatedResponse<MedicationRequestRead>;
@@ -428,7 +427,6 @@ export function MedicationStatementQuestion({
                   offset,
                   status:
                     "active,on_hold,completed,stopped,unknown,not_taken,intended",
-                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response as PaginatedResponse<MedicationStatementRead>;
