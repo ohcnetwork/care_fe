@@ -568,14 +568,6 @@ export default function QuestionnaireResponsesList({
     ? data || []
     : [...(data || []), ...(offlineResponses || [])];
 
-  console.log(
-    "responses",
-    responses,
-    "data: ",
-    data,
-    "offline : ",
-    offlineResponses,
-  );
   useEffect(() => {
     if (inView && hasNextPage) fetchNextPage();
   }, [inView, hasNextPage, fetchNextPage]);

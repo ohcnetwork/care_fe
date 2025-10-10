@@ -303,7 +303,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       );
 
       const selectedTags: TagConfig[] = [];
-      console.log("selected org : ", selectedOrganization);
+
       await queueNewPatientOffline({
         createPatientData: patientRequestData as PatientCreate,
         identifiers: fullIdentifiers,
@@ -487,7 +487,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     }
 
     const selectedOrganization = values._selected_levels?.[0];
-    console.log("selected org on submit: ", selectedOrganization);
 
     const basePayload = {
       ...values,
@@ -518,8 +517,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
         facility,
       ),
     };
-
-    console.log("base payload: ", basePayload);
 
     // Geo organization is mandatory for patient
 

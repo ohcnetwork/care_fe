@@ -199,8 +199,6 @@ const normalizeAndSetQueryDataForNewAppointment = async ({
     UpcomingAppointmentStatuses,
   ];
 
-  console.log("key is", appointmentListKey);
-
   queryClient.setQueryData(appointmentListKey, (prev: any) => {
     if (!prev?.pages) {
       return {
@@ -230,8 +228,6 @@ const normalizeAndSetQueryDataForNewAppointment = async ({
       pages: updatedPages,
     };
   });
-
-  console.log(queryClient.getQueryData(appointmentListKey));
 
   return normalizeAppointment;
 };
@@ -562,11 +558,6 @@ export const queueRescheduleOfflineRecord = async ({
     const rescheduleEntryExist = await db.OfflineWrites.get(rescheduleID);
     const createAppointmentExist = await db.OfflineWrites.get(appointment.id);
 
-    console.log(
-      "reschedule entry exist",
-      rescheduleEntryExist,
-      createAppointmentExist,
-    );
     let finalUpdateEntry = null;
     if (
       createAppointmentExist &&
@@ -660,8 +651,6 @@ export const queueRescheduleOfflineRecord = async ({
     ) {
       await db.OfflineWrites.delete(statusUpdateId);
     }
-
-    console.log("Reschedule queued successfully");
   } catch (error) {
     const errorObj =
       error instanceof Error ? error : new Error("Unknown error occurred");

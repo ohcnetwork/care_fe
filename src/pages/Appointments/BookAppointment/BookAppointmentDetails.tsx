@@ -93,7 +93,7 @@ export const BookAppointmentDetails = ({
         // Extract date from slot's start_datetime
         const slotDate = new Date(normalizedData.token_slot.start_datetime);
         setSelectedDate(slotDate);
-        console.log("Setting offline slot:", normalizedData.token_slot.id);
+
         setOfflineSelectedSlot(normalizedData.token_slot);
         setSelectedSlotId(normalizedData.token_slot.id);
       }

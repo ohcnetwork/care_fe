@@ -327,14 +327,6 @@ export const BookingListContent = ({
     },
   });
 
-  console.log("appointmentdata", appointmentsData);
-  console.log(" key at online lvel", [
-    "infinite-appointments",
-    patientId,
-    facilityId,
-    statuses,
-  ]);
-
   const appointments =
     appointmentsData?.pages.flatMap((page) => page.results) ?? [];
 

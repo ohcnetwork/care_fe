@@ -75,9 +75,6 @@ export default function MedicationRequestTable() {
   const patientMedications = queryClient.getQueryData<
     PaginatedResponse<MedicationRequestRead>
   >(["medication_requests", patientId, encounterId]);
-  console.log({ patientMedications }, "key : ", [
-    ["medication_requests", patientId, encounterId],
-  ]);
 
   return (
     <div className="space-y-2 h-full">

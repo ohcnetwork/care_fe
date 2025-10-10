@@ -33,6 +33,7 @@ interface QueueNewEncounterOfflineParams {
   selectedTags: any[];
   offlineSelectedOrganizations: any[];
   appointmentId?: string;
+  t: (key: string) => string;
   onSuccess?: (encounterId: string, normalizedEncounter: EncounterRead) => void;
   onError?: (error: Error) => void;
 }
@@ -230,6 +231,7 @@ export const queueNewEncounterOffline = async ({
   selectedTags,
   offlineSelectedOrganizations,
   appointmentId,
+  t,
   onSuccess,
   onError,
 }: QueueNewEncounterOfflineParams): Promise<string | null> => {
@@ -263,7 +265,9 @@ export const queueNewEncounterOffline = async ({
       patientId,
     ]);
     if (!patientData) {
-      const error = new Error("Patient cache missing");
+      const error = new Error(
+        t("encounter_created_patient_unavailable_offline"),
+      );
       onError?.(error);
       return null;
     }

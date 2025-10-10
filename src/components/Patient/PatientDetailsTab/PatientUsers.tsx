@@ -44,6 +44,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import { RoleBase } from "@/types/emr/role/role";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 
+import { navigate } from "raviger";
 import { PatientProps } from ".";
 import {
   queueAssignUserToPatient,
@@ -107,6 +108,14 @@ export function AddUserSheet({
     onSuccess: async (data) => {
       if (offlineEntryId) {
         await handleOfflineRecordSuccess(offlineEntryId, data);
+        // Remove offlineEntryId from URL
+        const url = new URL(window.location.href);
+        url.searchParams.delete("offlineEntryId");
+        navigate(url.pathname + url.search, { replace: true });
+
+        queryClient.invalidateQueries({
+          queryKey: ["patientUsers", patientId],
+        });
       }
       queryClient.invalidateQueries({
         queryKey: ["patientUsers", patientId],

@@ -107,8 +107,6 @@ export default function CreateEncounterForm({
   const { t } = useTranslation();
   useShortcutSubContext();
 
-  console.log("offlineEntryData : ", offlineEntryData);
-
   const [offlineSelectedOrganizations, setOfflineSelectedOrganizations] =
     useState<FacilityOrganizationRead[]>([]);
 
@@ -193,6 +191,7 @@ export default function CreateEncounterForm({
       selectedTags,
       offlineSelectedOrganizations,
       appointmentId: appointment,
+      t: t,
       onSuccess: (encounterId) => {
         toast.success(t("encounter_created_offline"));
         setIsOpen(false);
@@ -203,7 +202,7 @@ export default function CreateEncounterForm({
       },
       onError: (queueError) => {
         console.error("Error saving offline encounter:", queueError);
-        toast.error(t("offline_encounter_create_error"));
+        toast.error(queueError.message || t("error_saving_offline_encounter"));
       },
     });
   };

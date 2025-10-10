@@ -20,6 +20,7 @@ import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import patientApi from "@/types/emr/patient/patientApi";
 
+import { OfflineKeyMap } from "@/OfflineSupport/offlineKeys";
 import {
   PatientDeceasedInfo,
   PatientHeader,
@@ -37,7 +38,7 @@ export const PatientHome = (props: {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-  const { offlineEntryId } = useOfflineEntry();
+  const { offlineEntryId, offlineEntry } = useOfflineEntry();
 
   queryClient.setQueryDefaults(["patientPermissions"], {
     meta: { persist: true },
@@ -77,8 +78,6 @@ export const PatientHome = (props: {
     patientData?.permissions ?? [],
   );
 
-  console.log("Patient Data:", canWriteAppointment, patientData);
-
   if (isLoading) {
     return <Loading />;
   }
@@ -103,7 +102,10 @@ export const PatientHome = (props: {
               trigger={
                 <Button variant="primary">{t("schedule_appointment")}</Button>
               }
-              defaultOpen={!!offlineEntryId}
+              defaultOpen={
+                !!offlineEntryId &&
+                offlineEntry?.type == OfflineKeyMap.create_appointment
+              }
             />
           )}
         </>

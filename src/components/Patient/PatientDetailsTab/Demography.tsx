@@ -37,7 +37,6 @@ export const Demography = (props: PatientProps) => {
     patientData.permissions,
   );
 
-  console.log("patient permission", canWritePatient, patientData);
   const [activeSection, _setActiveSection] = useState<string | null>(null);
   const patientGender = GENDER_TYPES.find(
     (i) => i.id === patientData.gender,

@@ -162,16 +162,14 @@ const careConfig = {
     ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)
     : 2,
 
-
   queryGcTime,
   queryPersistMaxAge,
-  pingUrl: env.REACT_PING_URL || "https://care-api.do.ohc.network/ping/",
+  pingUrl: env.REACT_PING_URL || "https://careapi.ohc.network/ping/",
 
   /**
    * Disable patient login if set to "true"
    */
   disablePatientLogin: boolean("REACT_DISABLE_PATIENT_LOGIN", false),
-
 
   patientRegistration: {
     /**

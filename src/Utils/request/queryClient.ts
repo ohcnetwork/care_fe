@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import {
   MutationCache,
   QueryCache,
@@ -12,6 +11,7 @@ import { toast } from "sonner";
 import { createUserPersister } from "@/OfflineSupport/createUserPersister";
 import { handleHttpError } from "@/Utils/request/errorHandler";
 import { HTTPError } from "@/Utils/request/types";
+import careConfig from "@careConfig";
 
 interface QueryMeta extends Record<string, unknown> {
   persist?: boolean;
@@ -72,7 +72,7 @@ const queryClient = new QueryClient({
         toast.warning(i18next.t("you_are_offline"));
       }
       onlineManager.setOnline(false);
-      // await restorePersistedCache(queryClient);
+      await restorePersistedCache(queryClient);
     },
   }),
   mutationCache: new MutationCache({
@@ -86,14 +86,13 @@ const queryClient = new QueryClient({
         toast.warning(i18next.t("you_are_offline"));
       }
       onlineManager.setOnline(false);
-      // await restorePersistedCache(queryClient);
+      await restorePersistedCache(queryClient);
     },
     onSuccess: async () => {
       if (!onlineManager.isOnline()) {
         toast.success(i18next.t("welcome_back_you_are_online"));
       }
       onlineManager.setOnline(true);
-      await restorePersistedCache(queryClient);
     },
   }),
 });

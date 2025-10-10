@@ -52,6 +52,7 @@ const App = () => {
         persistOptions={{
           persister: userPersister,
           maxAge: careConfig.queryPersistMaxAge,
+          buster: localStorage.getItem("app-version") ?? "0.0.0",
           dehydrateOptions: {
             shouldDehydrateMutation: () => false,
             shouldDehydrateQuery: (query) =>

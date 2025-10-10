@@ -420,10 +420,7 @@ export const queueQuestionnairBatchrequest = async ({
   onError,
 }: QueueQuestionnaireBatchRequestParams) => {
   const parentID = encounterId ? encounterId : patientId;
-  console.log(
-    "offlineFilledQuestionnair in offlinequeue  : ",
-    filledQuestionnaires,
-  );
+
   try {
     const structuredQuestionnaires = questionnairPaylod.requests.filter(
       (

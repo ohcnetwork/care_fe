@@ -619,7 +619,6 @@ export default function AppointmentDetail(props: Props) {
                         />
                       }
                       onSuccess={() => {
-                        console.log("invalidating appointment", appointment.id);
                         queryClient.invalidateQueries({
                           queryKey: ["appointment", appointment.id],
                         });
@@ -1036,13 +1035,6 @@ const AppointmentActions = ({
   const handleAppointmentRescheduleOfflineQueue = async (
     appointmentRequestData: AppointmentRescheduleRequest,
   ) => {
-    console.log(
-      "Handling offline queue for reschedule",
-      appointmentRequestData,
-      selectedResource,
-      selectedSlotId,
-      OfflineSelectedSlot,
-    );
     const slotMonth = new Date(
       selectedDate.getFullYear(),
       selectedDate.getMonth(),
@@ -1115,7 +1107,6 @@ const AppointmentActions = ({
       return;
     }
 
-    console.log("Handling online reschedule", rescheduleAppointmentData);
     if (!onlineManager.isOnline()) {
       await handleAppointmentRescheduleOfflineQueue(rescheduleAppointmentData);
       return;

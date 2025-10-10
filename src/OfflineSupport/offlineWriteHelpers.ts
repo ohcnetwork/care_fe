@@ -1265,17 +1265,10 @@ export const cacheNonStructuredQuestionnairResponse = (
       ),
     );
 
-  console.log(" offline questionnaire : ", filledQuestionnaires);
-
   queryClient.setQueryDefaults(["offlineCreatedQuestionnaireResponses"], {
     meta: { persist: true },
     networkMode: "online",
   });
-
-  console.log(
-    "Storing offline questionnaire responses in cache : ",
-    normalizedQuestionnairResponse,
-  );
 
   queryClient.setQueryData<QuestionnaireResponse[]>(
     ["offlineCreatedQuestionnaireResponses", encounterID ?? patientID],
