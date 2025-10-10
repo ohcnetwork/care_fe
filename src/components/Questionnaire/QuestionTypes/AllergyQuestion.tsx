@@ -47,7 +47,7 @@ import {
 } from "@/components/ui/table";
 
 import { CATEGORY_ICONS } from "@/components/Patient/allergy/list";
-import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
+import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -843,7 +843,7 @@ export function AllergyQuestion({
       )}
 
       {isMobile ? (
-        <EntitySelectionSheet
+        <EntitySelectionDrawer
           open={!!newAllergyInSheet}
           onOpenChange={(open) => {
             if (!open) {
@@ -874,7 +874,7 @@ export function AllergyQuestion({
               onRemove={() => {}}
             />
           )}
-        </EntitySelectionSheet>
+        </EntitySelectionDrawer>
       ) : (
         <ValueSetSelect
           system="system-allergy-code"

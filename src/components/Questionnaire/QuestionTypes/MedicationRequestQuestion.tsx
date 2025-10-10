@@ -39,7 +39,7 @@ import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector"
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
-import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
+import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValueSetSelect";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -787,7 +787,7 @@ export function MedicationRequestQuestion({
       )}
 
       {!desktopLayout ? (
-        <EntitySelectionSheet
+        <EntitySelectionDrawer
           open={!!newMedicationInSheet}
           onOpenChange={(isOpen) => {
             if (!isOpen) {
@@ -805,7 +805,7 @@ export function MedicationRequestQuestion({
           enableProduct
         >
           {newMedicationSheetContent}
-        </EntitySelectionSheet>
+        </EntitySelectionDrawer>
       ) : (
         <div className="max-w-4xl" data-cy="add-medication-request">
           <MedicationValueSetSelect

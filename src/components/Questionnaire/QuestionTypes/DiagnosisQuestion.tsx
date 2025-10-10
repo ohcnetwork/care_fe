@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/table";
 
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
-import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
+import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -612,7 +612,7 @@ export function DiagnosisQuestion({
       )}
 
       {isMobile ? (
-        <EntitySelectionSheet
+        <EntitySelectionDrawer
           open={showDiagnosisSelection}
           onOpenChange={setShowDiagnosisSelection}
           system="system-condition-code"
@@ -629,7 +629,7 @@ export function DiagnosisQuestion({
             }
             disabled={disabled}
           />
-        </EntitySelectionSheet>
+        </EntitySelectionDrawer>
       ) : (
         <ValueSetSelect
           system="system-condition-code"

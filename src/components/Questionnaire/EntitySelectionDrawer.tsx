@@ -1,5 +1,5 @@
 /**
- * @file EntitySelectionSheet.tsx
+ * @file EntitySelectionDrawer.tsx
  *
  * This component provides a consistent mobile-friendly Drawer UI for selecting and configuring
  * medical entities like medications, allergies, symptoms, and diagnoses. It handles the common
@@ -34,7 +34,7 @@ import { isAppleDevice } from "@/Utils/utils";
 import MedicationValueSetSelect from "./MedicationValueSetSelect";
 import ValueSetSelect from "./ValueSetSelect";
 
-interface EntitySelectionSheetProps {
+interface EntitySelectionDrawerProps {
   /**
    * Whether the Drawer is open
    */
@@ -97,7 +97,7 @@ interface EntitySelectionSheetProps {
   enableProduct?: boolean;
 }
 
-export function EntitySelectionSheet({
+export function EntitySelectionDrawer({
   open,
   onOpenChange,
   system,
@@ -110,7 +110,7 @@ export function EntitySelectionSheet({
   children,
   placeholder,
   enableProduct = false,
-}: EntitySelectionSheetProps) {
+}: EntitySelectionDrawerProps) {
   const { t } = useTranslation();
   const [selectedEntity, setSelectedEntity] = useState<Code | null>(null);
 

@@ -32,7 +32,7 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
-import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
+import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -645,7 +645,7 @@ export function MedicationStatementQuestion({
           />
         </div>
       ) : (
-        <EntitySelectionSheet
+        <EntitySelectionDrawer
           open={!!newMedicationInSheet}
           onOpenChange={(open) => {
             if (!open) {
@@ -680,7 +680,7 @@ export function MedicationStatementQuestion({
               errors={errors}
             />
           )}
-        </EntitySelectionSheet>
+        </EntitySelectionDrawer>
       )}
     </div>
   );
