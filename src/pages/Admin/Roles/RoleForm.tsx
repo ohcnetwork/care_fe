@@ -4,8 +4,8 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
@@ -223,7 +223,6 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                   rows={3}
                   placeholder={t("enter_role_description")}
                   {...field}
-
                 />
               </FormControl>
               <FormMessage />
@@ -291,18 +290,18 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                 </Button>
               </div>
             </div>
-              <div className="relative">
-        <CareIcon
-          icon="l-search"
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
-       />
-      <Input
-         placeholder={t("search_permissions")}
-         value={searchPermission}
-         onChange={(e) => setSearchPermission(e.target.value)}
-         className="w-full pl-8"
-       />
-      </div>
+            <div className="relative">
+              <CareIcon
+                icon="l-search"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+              />
+              <Input
+                placeholder={t("search_permissions")}
+                value={searchPermission}
+                onChange={(e) => setSearchPermission(e.target.value)}
+                className="w-full pl-8"
+              />
+            </div>
           </CardHeader>
           <CardContent>
             <FormField
@@ -344,11 +343,11 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                     {(isFetching || isFetchingNextPage) && (
                       <div className="text-center text-sm">{t("loading")}</div>
                     )}
-                     {!isFetching && permissions.length === 0 && (
-              <div className="text-center text-sm">
-                {t("no_matching_permissions")}
-              </div>
-            )}
+                    {!isFetching && permissions.length === 0 && (
+                      <div className="text-center text-sm">
+                        {t("no_matching_permissions")}
+                      </div>
+                    )}
                   </div>
                   <FormMessage />
                 </FormItem>
