@@ -50,7 +50,6 @@ import {
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
-// Define a Code schema to match the API type
 const codeSchema = z.object({
   code: z.string().min(1, { message: "Code is required" }),
   display: z.string().min(1, { message: "Display name is required" }),
@@ -65,9 +64,7 @@ const formSchema = z.object({
   alternate_identifier: z.string().trim().optional(),
   category: z.string(),
   code: codeSchema.nullable(),
-  base_unit: codeSchema.optional().refine((data) => data, {
-    message: "Base unit is required",
-  }),
+  base_unit: codeSchema,
   names: z
     .array(
       z.object({
@@ -172,14 +169,12 @@ function ProductKnowledgeFormContent({
   const queryClient = useQueryClient();
   const isEditMode = Boolean(slug);
 
-  // Create default storage guidelines and units
   const defaultUnitCode: Code = {
     code: "d",
     display: "Day",
     system: "http://unitsofmeasure.org",
   };
 
-  // Handle form initialization with proper mapping of types
   const getDefaultValues = () => {
     if (isEditMode && existingData) {
       return {
@@ -192,7 +187,7 @@ function ProductKnowledgeFormContent({
         code: existingData.code?.code ? existingData.code : null,
         base_unit: existingData.base_unit?.code
           ? existingData.base_unit
-          : undefined,
+          : DOSAGE_UNITS_CODES[0],
         names: existingData.names || [],
         storage_guidelines: existingData.storage_guidelines || [],
         definitional:
@@ -208,7 +203,7 @@ function ProductKnowledgeFormContent({
       names: [],
       storage_guidelines: [],
       code: null,
-      base_unit: undefined,
+      base_unit: DOSAGE_UNITS_CODES[0],
       definitional: null,
       status: ProductKnowledgeStatus.active,
       category: categorySlug,
@@ -285,7 +280,6 @@ function ProductKnowledgeFormContent({
   const isPending = isCreating || isUpdating;
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    // Convert null to undefined where needed to match API types
     const formattedData = {
       ...data,
       code: data.code || undefined,
@@ -332,7 +326,6 @@ function ProductKnowledgeFormContent({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Basic Information Section */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
               <div className="space-y-4">
                 <div>
@@ -559,7 +552,6 @@ function ProductKnowledgeFormContent({
               </div>
             </div>
 
-            {/* Alternative Names Section */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -664,7 +656,6 @@ function ProductKnowledgeFormContent({
               </div>
             </div>
 
-            {/* Storage Guidelines Section */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -739,7 +730,7 @@ function ProductKnowledgeFormContent({
                                         field.onChange(
                                           e.target.value
                                             ? parseInt(e.target.value)
-                                            : "",
+                                            : undefined,
                                         )
                                       }
                                     />
@@ -793,7 +784,7 @@ function ProductKnowledgeFormContent({
                                         >
                                           <span>
                                             {t(`unit_${duration.code}`)}
-                                            <span className="text-sm ml-1 text-gray-500">
+                                            <span className="ml-1 text-sm text-gray-500">
                                               ({duration.code})
                                             </span>
                                           </span>
@@ -826,7 +817,6 @@ function ProductKnowledgeFormContent({
               </div>
             </div>
 
-            {/* Product Definition Section - UPDATED */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -868,7 +858,6 @@ function ProductKnowledgeFormContent({
 
                 {form.watch("definitional") ? (
                   <div className="space-y-4">
-                    {/* Dosage Form - Optional */}
                     <div>
                       <FormField
                         control={form.control}
@@ -900,7 +889,6 @@ function ProductKnowledgeFormContent({
                       />
                     </div>
 
-                    {/* Intended Routes */}
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
