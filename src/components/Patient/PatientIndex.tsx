@@ -55,6 +55,10 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const [selectedPatient, setSelectedPatient] = useState<
     PartialPatientModel | PatientRead | null
   >(null);
+  const [selectedOption, setSelectedOption] = useState<{
+    key: string;
+    display: string;
+  } | null>(null);
   const shortcuts = useShortcuts();
   const [qParams] = useQueryParams();
   const [verificationOpen, setVerificationOpen] = useState(false);
@@ -187,6 +191,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
               <SearchInput
                 options={getSearchOptions(t, identifierSearch, facility)}
                 onSearch={handleSearch}
+                setSelectedOption={(key, display) =>
+                  setSelectedOption({ key, display })
+                }
                 className="w-full"
                 autoFocus
               />
@@ -205,7 +212,11 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                             {t("no_patient_record_found")}
                           </h3>
                           <p className="text-sm text-gray-500 mb-6">
-                            {t("no_patient_record_text")}
+                            {selectedOption?.display == "Patient Phone Number"
+                              ? t("no_patient_record_with_phone")
+                              : selectedOption?.display == "Patient Name"
+                                ? t("no_patient_record_with_name")
+                                : t("no_patient_record_with_identifier")}
                           </p>
                           <AddPatientButton
                             facilityId={facilityId}

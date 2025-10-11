@@ -42,6 +42,7 @@ interface SearchInputProps
   extends Omit<React.ComponentProps<"input">, "onChange" | "value" | "ref"> {
   options: SearchOption[];
   onSearch: (key: string, value: string) => void;
+  setSelectedOption?: (key: string, display: string) => void;
   className?: string;
   inputClassName?: string;
   buttonClassName?: string;
@@ -159,6 +160,7 @@ const SearchInputFieldRenderer = ({
 export default function SearchInput({
   options,
   onSearch,
+  setSelectedOption,
   className,
   inputClassName,
   buttonClassName,
@@ -223,6 +225,10 @@ export default function SearchInput({
       setFocusedIndex(0);
     }
   }, [open]);
+
+  useEffect(() => {
+    setSelectedOption?.(selectedOption?.key, selectedOption?.display);
+  }, [selectedOption?.display]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
