@@ -91,12 +91,8 @@ export function AllergyList({
         return response as PaginatedResponse<AllergyIntolerance>;
       },
       meta: { persist: true },
-      networkMode: "online",
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        if (!lastPage || !allPages || typeof lastPage.count !== "number") {
-          return null;
-        }
         const currentOffset = allPages.length * LIMIT;
         return currentOffset < lastPage.count ? currentOffset : null;
       },

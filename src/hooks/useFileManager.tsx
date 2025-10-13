@@ -107,7 +107,6 @@ export default function useFileManager(
           pathParams: { fileId: file.id || "" },
         })({} as any),
       meta: { persist: true },
-      networkMode: "online",
     });
   };
 

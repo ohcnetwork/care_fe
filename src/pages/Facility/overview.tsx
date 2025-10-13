@@ -36,7 +36,6 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       pathParams: { facilityId },
     }),
     meta: { persist: true },
-    networkMode: "online",
   });
 
   const { canViewSchedule, canListEncounters } = getPermissions(

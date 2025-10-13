@@ -63,10 +63,9 @@ export function SymptomsList({
         return response as PaginatedResponse<Symptom>;
       },
       meta: { persist: true },
-      networkMode: "online",
+
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        if (!lastPage || !lastPage.count) return null;
         const currentOffset = allPages.length * LIMIT;
         return currentOffset < lastPage.count ? currentOffset : null;
       },

@@ -319,7 +319,6 @@ export const BookingListContent = ({
       return response;
     },
     meta: { persist: true },
-    networkMode: "online",
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       const currentOffset = allPages.length * 15;

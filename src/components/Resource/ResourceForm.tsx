@@ -128,7 +128,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       pathParams: { id: String(related_patient) },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!related_patient,
   });
 
@@ -138,7 +137,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       pathParams: { id: String(id) },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!id,
   });
 
@@ -205,7 +203,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     CreateResourceRequest
   >({
     mutationFn: mutate(routes.createResource),
-    networkMode: "always",
     onSuccess: async (data: ResourceRequest) => {
       if (offlineEntryId) {
         await handleOfflineRecordSuccess(offlineEntryId, data);
@@ -230,7 +227,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     mutationFn: mutate(routes.updateResource, {
       pathParams: { id: String(id) },
     }),
-    networkMode: "always",
     onSuccess: async (data: ResourceRequest) => {
       if (offlineEntryId) {
         await handleOfflineRecordSuccess(offlineEntryId, data);
@@ -339,7 +335,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
   });
 
   const facilityOptions = facilities?.results.map((facility) => ({

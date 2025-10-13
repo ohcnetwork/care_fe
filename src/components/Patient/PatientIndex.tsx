@@ -103,7 +103,6 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     }),
 
     meta: { persist: true },
-    networkMode: "online",
 
     enabled: !!(identifierSearch.config && identifierSearch.value),
   });

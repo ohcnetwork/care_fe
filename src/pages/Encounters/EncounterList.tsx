@@ -141,7 +141,6 @@ export function EncounterList({
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !propEncounters && !encounter_id,
   });
 
@@ -154,7 +153,6 @@ export function EncounterList({
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!encounter_id,
   });
 

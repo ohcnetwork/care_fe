@@ -71,7 +71,6 @@ export function MarkEncounterAsCompletedDialog(
     mutationFn: mutate(encounterApi.update, {
       pathParams: { id: encounter?.id || "" },
     }),
-    networkMode: "always",
     onSuccess: async (data) => {
       if (offlineEntryId) {
         await handleOfflineRecordSuccess(offlineEntryId, data);

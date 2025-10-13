@@ -97,7 +97,6 @@ export const PractitionerSelector = ({
     }),
 
     meta: { persist: true },
-    networkMode: "online",
     enabled: open,
   });
 
@@ -137,7 +136,6 @@ export const PractitionerSelector = ({
         }
       },
       meta: { persist: true },
-      networkMode: "online",
       enabled: !!currentOrganizationId,
     });
 
@@ -149,7 +147,6 @@ export const PractitionerSelector = ({
       queryParams: { limit: 10 },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: open && !!searchQuery && searchQuery.length > 0,
   });
 
@@ -164,7 +161,6 @@ export const PractitionerSelector = ({
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!currentOrganizationId,
   });
 

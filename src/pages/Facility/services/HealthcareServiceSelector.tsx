@@ -68,7 +68,6 @@ export const HealthcareServiceSelector = ({
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: open,
   });
 

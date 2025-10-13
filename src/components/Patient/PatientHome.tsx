@@ -70,7 +70,6 @@ export const PatientHome = (props: {
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!id,
   });
 

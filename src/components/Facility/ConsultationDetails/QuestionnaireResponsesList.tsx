@@ -564,7 +564,6 @@ export default function QuestionnaireResponsesList({
       select: (data) => data?.pages.flatMap((p) => p.results) || [],
       enabled: canAccess,
       meta: { persist: true },
-      networkMode: "online",
     });
 
   // Merge both online and offline data for unified rendering

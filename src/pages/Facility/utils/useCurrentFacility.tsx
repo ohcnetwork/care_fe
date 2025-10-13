@@ -29,7 +29,6 @@ export default function useCurrentFacility() {
       pathParams: { facilityId: facilityId ?? "" },
     }),
     meta: { persist: true },
-    networkMode: "online",
     staleTime: 1000 * 60 * 30, // cache for 30 minutes
   });
 

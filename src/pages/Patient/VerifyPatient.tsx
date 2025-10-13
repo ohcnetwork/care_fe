@@ -61,21 +61,8 @@ export default function VerifyPatient() {
       body: { phone_number, year_of_birth, partial_id },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!(phone_number && year_of_birth && partial_id),
   });
-
-  // useEffect(() => {
-  //   queryClient.prefetchQuery({
-  //     queryKey: ["patient", patientData?.id],
-  //     queryFn: () =>
-  //       query(patientApi.getPatient, {
-  //         pathParams: { id: patientData?.id || "" },
-  //       }),
-  //     meta: { persist: true },
-  //     networkMode: "online",
-  //   });
-  // }, [patientData?.id, queryClient]);
 
   if (isVerifyingPatient || !facility) {
     return (

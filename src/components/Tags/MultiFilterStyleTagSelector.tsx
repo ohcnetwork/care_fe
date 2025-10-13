@@ -81,7 +81,7 @@ export function MultiFilterStyleTagSelector({
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
+
     enabled: open || mobileDrawerOpen,
   });
 
@@ -102,7 +102,6 @@ export function MultiFilterStyleTagSelector({
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled:
       (open && !!groupPopoverOpen) || (childDrawerOpen && !!selectedGroup),
   });

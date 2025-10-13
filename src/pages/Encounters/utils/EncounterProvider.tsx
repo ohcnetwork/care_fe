@@ -95,7 +95,6 @@ export function EncounterProvider({
       silent: true,
     }),
     meta: { persist: true },
-    networkMode: "online",
   });
 
   const queryParams: QueryParamsObject<typeof encounterApi.get> = facilityId
@@ -110,7 +109,6 @@ export function EncounterProvider({
         queryParams: queryParams,
       }),
       meta: { persist: true },
-      networkMode: "online",
     });
 
   const { data: selectedEncounter, isLoading: isSelectedEncounterLoading } =
@@ -121,7 +119,6 @@ export function EncounterProvider({
         queryParams: queryParams,
       }),
       meta: { persist: true },
-      networkMode: "online",
     });
 
   const setSelectedEncounter = (encounterId: string | null) => {

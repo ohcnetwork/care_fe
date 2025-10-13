@@ -182,22 +182,9 @@ export default function AppointmentDetail(props: Props) {
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
 
     enabled: canViewAppointments && !!facility,
   });
-
-  // const redirectToPatientPage = () => {
-  //   navigate(`/facility/${facility?.id}/patients/verify`, {
-  //     query: {
-  //       phone_number: patient.phone_number,
-  //       year_of_birth: patient.year_of_birth,
-  //       partial_id: !isOfflineId(patient.id)
-  //         ? patient.id.slice(0, 5)
-  //         : patient.id,
-  //     },
-  //   });
-  // };
 
   const handleAppointmentUpdateOfflineQueue = async (
     appointmentRequestData: AppointmentUpdateRequest,
@@ -216,9 +203,6 @@ export default function AppointmentDetail(props: Props) {
       db,
       onSuccess: (_appointmentId, _normalizedAppointment) => {
         toast.success(t("appointment_updated_successfully"));
-        // if (appointmentRequestData.status === "in_consultation") {
-        //   redirectToPatientPage();
-        // }
       },
       onError: (error) => {
         console.error("Failed to queue status update:", error);
@@ -257,7 +241,6 @@ export default function AppointmentDetail(props: Props) {
     mutationFn: mutate(scheduleApis.appointments.update, {
       pathParams: { facilityId, id: props.appointmentId },
     }),
-    networkMode: "always",
 
     onSuccess: async (data) => {
       if (offlineEntryId) {
@@ -880,24 +863,13 @@ const AppointmentActions = ({
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  // <<<<<<< HEAD
-  //   const [selectedMonthOffline, setSelectedMonthOffline] = useState(new Date());
-  //   const [selectedDateOffline, setSelectedDateOffline] = useState(new Date());
-  // =======
 
   const [selectedResource, setSelectedResource] =
     useState<ScheduleResourceFormState>(appointment);
-  // >>>>>>> upstream/develop
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isRescheduleReasonOpen, setIsRescheduleReasonOpen] = useState(false);
   const [newNote, setNewVisitReason] = useState(appointment.note);
   const [oldNote, setRescheduleReason] = useState(appointment.note);
-  // <<<<<<< HEAD
-  //   const [selectedPractitioner, setSelectedPractitioner] =
-  //     useState<UserReadMinimal>(appointment.user);
-  // =======
-
-  // >>>>>>> upstream/develop
   const [selectedSlotId, setSelectedSlotId] = useState<string>();
   const [OfflineSelectedSlot, setOfflineSelectedSlot] = useState<
     TokenSlot | undefined
@@ -908,22 +880,6 @@ const AppointmentActions = ({
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [note, setNote] = useState(appointment.note);
-
-  // useEffect(() => {
-  //   if (offlineEntryId) {
-  //     const loadOfflineEntry = async () => {
-  //       try {
-  //         const entry = await db.OfflineWrites.get(offlineEntryId);
-  //         if (entry && entry.normalizedData) {
-  //           setOfflineEntry(entry);
-  //         }
-  //       } catch (error) {
-  //         console.error("Error loading offline entry:", error);
-  //       }
-  //     };
-  //     loadOfflineEntry();
-  //   }
-  // }, [offlineEntryId, db]);
 
   useEffect(() => {
     if (offlineEntry?.type === "reschedule_appointment") {
@@ -1078,7 +1034,6 @@ const AppointmentActions = ({
       mutationFn: mutate(scheduleApis.appointments.reschedule, {
         pathParams: { facilityId, id: appointment.id },
       }),
-      networkMode: "always",
       onSuccess: async (newAppointment: Appointment) => {
         if (offlineEntryId) {
           await handleOfflineRecordSuccess(offlineEntryId, newAppointment);

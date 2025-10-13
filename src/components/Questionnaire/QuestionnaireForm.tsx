@@ -486,7 +486,6 @@ export function QuestionnaireForm({
       pathParams: { id: questionnaireSlug ?? "" },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
   });
 
@@ -535,7 +534,6 @@ export function QuestionnaireForm({
     BatchRequestBody
   >({
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
-    networkMode: "always",
     onSuccess: async (response) => {
       if (editMode && offlineEntry) {
         await handleOfflineRecordSuccess(offlineEntry.id, response);

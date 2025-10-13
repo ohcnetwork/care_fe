@@ -96,7 +96,6 @@ export default function FacilityOrganizationSelector(
       },
     ),
     meta: { persist: true },
-    networkMode: "online",
   });
 
   useEffect(() => {
@@ -121,7 +120,6 @@ export default function FacilityOrganizationSelector(
         },
       }),
       meta: { persist: true },
-      networkMode: "online" as const,
       enabled: !!level.id,
     })),
   });

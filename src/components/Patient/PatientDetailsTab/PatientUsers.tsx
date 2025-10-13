@@ -334,7 +334,6 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
       pathParams: { patientId },
     }),
     meta: { persist: true },
-    networkMode: "online",
   });
 
   const { mutate: removeUser } = useMutation({
@@ -343,7 +342,6 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
         pathParams: { patientId },
         body: { user },
       })({ user }),
-    networkMode: "always",
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["patientUsers", patientId],

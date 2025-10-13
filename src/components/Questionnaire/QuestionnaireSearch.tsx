@@ -71,7 +71,6 @@ export function QuestionnaireSearch({
     }),
 
     meta: { persist: true },
-    networkMode: "online",
 
     enabled: isOpen,
   });

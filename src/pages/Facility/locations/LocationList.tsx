@@ -39,7 +39,6 @@ export default function LocationList({
       pathParams: { facility_id: facilityId, id: locationId },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!locationId,
   });
 

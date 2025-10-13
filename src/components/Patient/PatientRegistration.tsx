@@ -152,7 +152,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       pathParams: { id: patientId || "" },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!patientId,
   });
 
@@ -164,7 +163,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       pathParams: { id: defaultGeoOrgId },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!defaultGeoOrgId,
   });
 
@@ -266,7 +264,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       body: { phone_number: phoneNumber },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: isValidPhoneNumber(phoneNumber),
   });
 

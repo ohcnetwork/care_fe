@@ -52,7 +52,6 @@ const EncounterHistory = (props: PatientProps) => {
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: canViewPatients,
   });
 

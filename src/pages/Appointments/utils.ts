@@ -96,7 +96,6 @@ export const useAvailabilityHeatmap = ({
     queryFn,
 
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!resourceId,
   });
 };

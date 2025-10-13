@@ -44,7 +44,6 @@ export default function OrganizationView({ id, navOrganizationId }: Props) {
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
   });
 
   // Hack for the sidebar to work

@@ -70,7 +70,6 @@ export default function AuthUserProvider({
     enabled:
       !!localStorage.getItem(LocalStorageKeys.accessToken) && !!isChecked,
     meta: { persist: true },
-    networkMode: "online",
   });
 
   const setUser = useSetAtom(userAtom);
@@ -85,7 +84,6 @@ export default function AuthUserProvider({
       body: { refresh: refreshToken || "" },
     }),
     meta: { persist: true },
-    networkMode: "online",
     refetchIntervalInBackground: true,
     refetchInterval: careConfig.auth.tokenRefreshInterval,
     enabled: !!refreshToken && !!user && !!isChecked,

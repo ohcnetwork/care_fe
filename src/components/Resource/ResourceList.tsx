@@ -88,7 +88,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
           : { assigned_facility: facilityId }),
       },
     }),
-    networkMode: "online",
     meta: { persist: true },
   });
 

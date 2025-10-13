@@ -180,7 +180,6 @@ export function MedicationStatementQuestion({
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !isPreview,
   });
 

@@ -185,7 +185,6 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     }),
 
     meta: { persist: true },
-    networkMode: "online",
     enabled: practitionerFilterEnabled,
   });
 
@@ -250,7 +249,6 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: slotsFilterEnabled,
   });
 
@@ -531,7 +529,6 @@ function AppointmentColumn(props: {
       return response;
     },
     meta: { persist: true },
-    networkMode: "online",
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       const currentOffset = allPages.length * 10;
@@ -807,7 +804,6 @@ function AppointmentRow(props: {
     }),
 
     meta: { persist: true },
-    networkMode: "online",
 
     enabled: !!props.resourceIds.length && props.canViewAppointments,
   });

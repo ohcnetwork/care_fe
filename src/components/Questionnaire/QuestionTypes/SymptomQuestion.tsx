@@ -672,7 +672,6 @@ export function SymptomQuestion({
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !isPreview && !editMode,
   });
 

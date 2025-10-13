@@ -16,7 +16,6 @@ export default function useQuestionnaireOptions(slug: string) {
         silent: (res) => res.status === 404,
       }),
       meta: { persist: true },
-      networkMode: "online",
     }).data ?? { results: [] }
   );
 }

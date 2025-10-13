@@ -180,7 +180,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
       };
     },
     meta: { persist: true },
-    networkMode: "online",
+
     enabled: isOpen,
     staleTime: 0,
   });

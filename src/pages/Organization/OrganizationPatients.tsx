@@ -86,7 +86,6 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!id && !!organization,
   });
 

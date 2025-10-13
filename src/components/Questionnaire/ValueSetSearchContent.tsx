@@ -103,14 +103,12 @@ export default function ValueSetSearchContent({
       body: { count, search: search + searchPostFix },
     }),
     meta: { persist: true },
-    networkMode: "online",
   });
 
   const favouritesQuery = useQuery({
     queryKey: ["valueset", system, "favourites"],
     queryFn: query(valuesetRoutes.favourites, { pathParams: { slug: system } }),
     meta: { persist: true },
-    networkMode: "online",
   });
 
   const addFavouriteMutation = useMutation({
@@ -160,7 +158,6 @@ export default function ValueSetSearchContent({
       pathParams: { slug: system },
     }),
     meta: { persist: true },
-    networkMode: "online",
   });
 
   const addRecentMutation = useMutation({

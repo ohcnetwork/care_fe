@@ -114,7 +114,6 @@ const DateColumn = ({
       },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!resourceId,
     select: (data: GetSlotsForDayResponse) => {
       if (currentAppointment) {

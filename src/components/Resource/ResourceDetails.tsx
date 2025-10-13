@@ -121,7 +121,6 @@ export default function ResourceDetails({
       pathParams: { id },
     }),
     meta: { persist: true },
-    networkMode: "online",
   });
 
   if (isLoading || !data) {

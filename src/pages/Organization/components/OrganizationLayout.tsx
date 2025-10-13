@@ -65,7 +65,6 @@ export default function OrganizationLayout({
       pathParams: { id },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: !!id,
   });
 

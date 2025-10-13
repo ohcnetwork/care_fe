@@ -65,7 +65,6 @@ export function MedicationStatementList({
         return response as PaginatedResponse<MedicationStatementRead>;
       },
       meta: { persist: true },
-      networkMode: "online",
       enabled: canAccess,
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {

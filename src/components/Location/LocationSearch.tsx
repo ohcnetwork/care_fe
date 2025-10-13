@@ -61,7 +61,6 @@ export function LocationSearch({
       queryParams: { mode, name: search, form },
     }),
     meta: { persist: true },
-    networkMode: "online",
     enabled: facilityId !== "preview",
   });
   const commandContent = (
