@@ -1279,7 +1279,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {t("instructions")}
         </Label>
         {dosageInstruction?.as_needed_boolean ? (
-          <div className="space-y-2 p-1">
+          <div className="space-y-2">
             <ValueSetSelect
               system="system-as-needed-reason"
               value={dosageInstruction?.as_needed_for || null}
@@ -1300,15 +1300,13 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
             />
           </div>
         ) : (
-          <div className="p-1">
-            <InstructionsPopover
-              currentInstructions={currentInstructions}
-              removeInstruction={removeInstruction}
-              addInstruction={addInstruction}
-              isReadOnly={isReadOnly}
-              disabled={disabled}
-            />
-          </div>
+          <InstructionsPopover
+            currentInstructions={currentInstructions}
+            removeInstruction={removeInstruction}
+            addInstruction={addInstruction}
+            isReadOnly={isReadOnly}
+            disabled={disabled}
+          />
         )}
       </div>
       {/* Route */}

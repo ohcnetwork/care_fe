@@ -52,30 +52,41 @@ function InstructionContentSection({
   return (
     <div className="space-y-3">
       {currentInstructions.length > 0 && (
-        <div className="max-h-32 overflow-y-auto p-1">
-          <div className="flex flex-wrap gap-2 mb-1">
-            {currentInstructions.map((instruction) => (
-              <Badge
-                key={instruction.code}
-                variant="secondary"
-                className="flex items-center gap-1 break-words"
-              >
-                <span className="whitespace-normal">{instruction.display}</span>
-                {!isReadOnly && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="size-4 p-0 rounded-full"
-                    onClick={() => removeInstruction(instruction.code)}
-                    disabled={disabled}
-                  >
-                    <X className="size-3" />
-                    <span className="sr-only">{t("remove")}</span>
-                  </Button>
+        <div
+          className={cn(
+            "flex flex-nowrap overflow-x-auto p-2 sm:flex-wrap sm:max-h-32 sm:overflow-y-auto gap-2 mb-1",
+            isReadOnly &&
+              "max-h-auto overflow-y-auto flex-wrap overflow-x-hidden",
+          )}
+        >
+          {currentInstructions.map((instruction) => (
+            <Badge
+              key={instruction.code}
+              variant="secondary"
+              className="flex items-center gap-1 break-words"
+            >
+              <span
+                className={cn(
+                  "whitespace-nowrap",
+                  isReadOnly && "whitespace-normal",
                 )}
-              </Badge>
-            ))}
-          </div>
+              >
+                {instruction.display}
+              </span>
+              {!isReadOnly && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="size-4 p-0 rounded-full"
+                  onClick={() => removeInstruction(instruction.code)}
+                  disabled={disabled}
+                >
+                  <X className="size-3" />
+                  <span className="sr-only">{t("remove")}</span>
+                </Button>
+              )}
+            </Badge>
+          ))}
         </div>
       )}
 
