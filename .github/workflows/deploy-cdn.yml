@@ -1,0 +1,45 @@
+name: Deploy Care to S3 and CloudFront
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event_name == 'workflow_dispatch' && 'kerala-care' || github.ref_name }}
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 22
+
+    - name: Update .env file
+      run: |
+        echo "${{ vars.DEPLOYMENT_ENV_FILE }}" | base64 --decode > .env
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build the React app
+      run: npm run build
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Sync files to S3
+      run: |
+        aws s3 sync build/ s3://${{ secrets.FE_BUCKET_NAME }}/ --delete
+
+    - name: Invalidate CloudFront cache
+      run: |
+        aws cloudfront create-invalidation --distribution-id ${{ secrets.FE_DISTRIBUTION_ID }} --invalidation-batch "{\"Paths\":{\"Quantity\":1,\"Items\":[\"/*\"]},\"CallerReference\":\"$GITHUB_RUN_ID\"}"
