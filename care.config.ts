@@ -184,6 +184,10 @@ const careConfig = {
   customShortcuts: env.REACT_CUSTOM_SHORTCUTS
     ? JSON.parse(env.REACT_CUSTOM_SHORTCUTS)
     : [],
+  /**
+   * System identifier for patient phone number configuration
+   */
+  phoneNumberConfigSystem: "system.care.ohc.network/patient-phone-number",
 } as const;
 
 export default careConfig;
