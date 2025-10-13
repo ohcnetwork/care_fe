@@ -287,6 +287,8 @@ interface LocationMultiSelectProps {
   facilityId: string;
   value: LocationValue[];
   onChange: (value: LocationValue[]) => void;
+  onLocationSelect?: (locations: LocationList[]) => void;
+  singleSelect?: boolean;
 }
 
 function SelectedLocationPill({
@@ -333,6 +335,8 @@ export default function LocationMultiSelect({
   facilityId,
   value,
   onChange,
+  onLocationSelect,
+  singleSelect = false,
 }: LocationMultiSelectProps) {
   const { t } = useTranslation();
   const [expandedLocations, setExpandedLocations] = useState<Set<string>>(
@@ -450,14 +454,40 @@ export default function LocationMultiSelect({
     const location = locationsMap.get(locationId);
     if (!location) return;
 
-    const newValue = value.some((v) => v.id === locationId)
-      ? value.filter((v) => v.id !== locationId)
-      : [...value, { id: location.id, name: location.name }];
+    let newValue: LocationValue[];
+
+    if (singleSelect) {
+      // For single select: always replace with the clicked location
+      newValue = [{ id: location.id, name: location.name }];
+    } else {
+      // For multi select: toggle add/remove
+      newValue = value.some((v) => v.id === locationId)
+        ? value.filter((v) => v.id !== locationId)
+        : [...value, { id: location.id, name: location.name }];
+    }
+
     onChange(newValue);
+
+    // Call onLocationSelect with full LocationList objects
+    if (onLocationSelect) {
+      const fullLocations = newValue
+        .map((v) => locationsMap.get(v.id))
+        .filter((loc): loc is LocationList => loc !== undefined);
+      onLocationSelect(fullLocations);
+    }
   };
 
   const handleRemove = (locationId: string) => {
-    onChange(value.filter((v) => v.id !== locationId));
+    const newValue = value.filter((v) => v.id !== locationId);
+    onChange(newValue);
+
+    // Call onLocationSelect with updated full LocationList objects
+    if (onLocationSelect) {
+      const fullLocations = newValue
+        .map((v) => locationsMap.get(v.id))
+        .filter((loc): loc is LocationList => loc !== undefined);
+      onLocationSelect(fullLocations);
+    }
   };
 
   const renderContent = () => {

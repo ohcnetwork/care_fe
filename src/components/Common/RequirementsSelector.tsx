@@ -44,6 +44,7 @@ interface RequirementsSelectorProps {
   canCreate?: boolean;
   createForm?: (onSuccess: () => void) => React.ReactNode;
   allowDuplicate?: boolean;
+  singleSelect?: boolean;
 }
 
 function SelectedItemCard({
@@ -119,12 +120,32 @@ export default function RequirementsSelector({
   canCreate,
   createForm,
   allowDuplicate = false,
+  singleSelect = false,
 }: RequirementsSelectorProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = React.useState(false);
   const [isCreateSheetOpen, setIsCreateSheetOpen] = React.useState(false);
+  const prevValueRef = React.useRef(value);
+
+  // Close sheet when value changes in single select mode with custom selector
+  React.useEffect(() => {
+    if (singleSelect && customSelector && isOpen) {
+      if (
+        value.length > 0 &&
+        value[0]?.value !== prevValueRef.current[0]?.value
+      ) {
+        setIsOpen(false);
+      }
+    }
+    prevValueRef.current = value;
+  }, [value, singleSelect, customSelector, isOpen]);
 
   const addOption = (option: RequirementItem) => {
+    if (singleSelect) {
+      onChange([option]); // Replace with single item
+      setIsOpen(false); // Close sheet after single selection
+      return;
+    }
     if (!allowDuplicate && !customSelector) {
       const isDuplicate = value.some((item) => item.value === option.value);
       if (isDuplicate) {
@@ -153,6 +174,8 @@ export default function RequirementsSelector({
             <div className="flex items-center gap-2 truncate">
               {value.length === 0 ? (
                 <span>{placeholder}</span>
+              ) : singleSelect ? (
+                <span>{value[0]?.label}</span>
               ) : (
                 <span className="flex items-center gap-2">
                   <span className="font-medium">{value.length}</span>
@@ -164,7 +187,7 @@ export default function RequirementsSelector({
           </Button>
         </SheetTrigger>
 
-        {value.length > 0 && (
+        {value.length > 0 && !singleSelect && (
           <div className="flex flex-col gap-2">
             {value.map((item, index) => (
               <SelectedItemCard

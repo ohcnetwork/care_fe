@@ -43,7 +43,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import { LocationPicker } from "@/components/Location/LocationPicker";
+import RequirementsSelector from "@/components/Common/RequirementsSelector";
+import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
@@ -326,18 +327,60 @@ export function PaymentReconciliationSheet({
                   <FormItem>
                     <FormLabel>{t("location")}</FormLabel>
                     <FormControl>
-                      <LocationPicker
-                        facilityId={facilityId}
-                        value={selectedLocationObject}
-                        onValueChange={(location) => {
-                          setSelectedLocationObject(location || undefined);
-                          field.onChange(location?.id || undefined);
-                          if (location) {
-                            LocationCache.set(location, facilityId);
+                      <RequirementsSelector
+                        title={t("select_location")}
+                        description={t("choose_location_for_payment")}
+                        singleSelect={true}
+                        value={
+                          selectedLocationObject
+                            ? [
+                                {
+                                  value: selectedLocationObject.id,
+                                  label: selectedLocationObject.name,
+                                  details: [],
+                                },
+                              ]
+                            : []
+                        }
+                        onChange={(items) => {
+                          const item = items[0];
+                          if (!item) {
+                            setSelectedLocationObject(undefined);
+                            field.onChange(undefined);
                           }
                         }}
+                        options={[]}
+                        isLoading={false}
                         placeholder={t("select_location")}
-                        className="w-full border-gray-300"
+                        customSelector={
+                          <LocationMultiSelect
+                            facilityId={facilityId}
+                            singleSelect={true}
+                            value={
+                              selectedLocationObject
+                                ? [
+                                    {
+                                      id: selectedLocationObject.id,
+                                      name: selectedLocationObject.name,
+                                    },
+                                  ]
+                                : []
+                            }
+                            onChange={() => {}}
+                            onLocationSelect={(locations) => {
+                              const location =
+                                locations.length > 0 ? locations[0] : undefined;
+                              if (location) {
+                                setSelectedLocationObject(location);
+                                field.onChange(location.id);
+                                LocationCache.set(location, facilityId);
+                              } else {
+                                setSelectedLocationObject(undefined);
+                                field.onChange(undefined);
+                              }
+                            }}
+                          />
+                        }
                       />
                     </FormControl>
                     <FormMessage />
