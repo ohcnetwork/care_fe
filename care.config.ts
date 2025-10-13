@@ -182,14 +182,7 @@ const careConfig = {
    * Placeholders like {facilityId}, {userId} will be replaced at runtime
    */
   customShortcuts: env.REACT_CUSTOM_SHORTCUTS
-    ? (() => {
-        try {
-          return JSON.parse(env.REACT_CUSTOM_SHORTCUTS);
-        } catch {
-          console.warn("Invalid REACT_CUSTOM_SHORTCUTS format");
-          return [];
-        }
-      })()
+    ? JSON.parse(env.REACT_CUSTOM_SHORTCUTS)
     : [],
 } as const;
 
