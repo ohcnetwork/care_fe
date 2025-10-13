@@ -88,7 +88,6 @@ export default function MedicationValueSetSelect({
         resource_type: "product_knowledge",
         parent: currentCategory || "",
         title: search || undefined,
-        ordering: "title",
       },
     }),
     enabled: !!facilityId && !search,

@@ -116,7 +116,7 @@ export const Authenticate = () => {
           <div className="w-full max-w-[400px] space-y-6">
             <Card className="mx-4">
               <CardHeader className="space-y-1 px-4">
-                <CardTitle className="text-3xl font-bold w-15 text-black text-center">
+                <CardTitle className="text-3xl font-bold text-black text-center">
                   {t("authenticate_your_account")}
                 </CardTitle>
               </CardHeader>

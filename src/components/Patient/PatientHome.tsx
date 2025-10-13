@@ -25,8 +25,13 @@ import {
   PatientDeceasedInfo,
   PatientHeader,
 } from "@/components/Patient/PatientHeader";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+
 import { useOfflineEntry } from "@/hooks/useOfflineEntry";
+
+import { cn } from "@/lib/utils";
+
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
 export const PatientHome = (props: {
@@ -35,7 +40,11 @@ export const PatientHome = (props: {
   page: (typeof tabs)[0]["route"];
 }) => {
   const { facilityId, id, page } = props;
+
   const queryClient = useQueryClient();
+
+  const { open: isSidebarOpen } = useSidebar();
+
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const { offlineEntryId, offlineEntry } = useOfflineEntry();
@@ -111,7 +120,15 @@ export const PatientHome = (props: {
         </>
       }
     >
-      <div className="mt-3 overflow-y-auto" data-testid="patient-dashboard">
+      <div
+        className={cn(
+          "w-full mt-3 overflow-y-auto",
+          isSidebarOpen
+            ? "md:max-w-[calc(100vw-25rem)]"
+            : "md:max-w-[calc(100vw-8rem)]",
+        )}
+        data-testid="patient-dashboard"
+      >
         <div className="flex flex-col gap-2">
           <PatientHeader
             patient={patientData}
@@ -121,7 +138,6 @@ export const PatientHome = (props: {
           />
           <PatientDeceasedInfo patient={patientData} />
         </div>
-
         <div
           className="sticky top-0 z-9 mt-4 w-full border-b border-gray-200 bg-gray-50"
           role="navigation"

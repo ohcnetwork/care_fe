@@ -305,7 +305,6 @@ export default function DispensedMedicationList({
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: status ?? qParams.status,
         patient: patientId,
-        ordering: "-created_date",
       },
     }),
   });
