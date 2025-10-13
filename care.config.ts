@@ -174,6 +174,16 @@ const careConfig = {
       false,
     ),
   },
+
+  /**
+   * Custom shortcuts configuration from environment variables
+   * Format: JSON string with array of shortcut objects
+   * Each shortcut can have: title, description, href, icon (optional)
+   * Placeholders like {facilityId}, {userId} will be replaced at runtime
+   */
+  customShortcuts: env.REACT_CUSTOM_SHORTCUTS
+    ? JSON.parse(env.REACT_CUSTOM_SHORTCUTS)
+    : [],
 } as const;
 
 export default careConfig;
