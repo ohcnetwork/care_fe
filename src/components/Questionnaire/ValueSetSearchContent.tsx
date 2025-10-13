@@ -191,7 +191,7 @@ export default function ValueSetSearchContent({
 
   return (
     <Command filter={() => 1}>
-      <div className="py-3 px-3 border-b border-gray-200 flex justify-between items-center">
+      <div className="p-3 border-b border-gray-200 flex justify-between items-center md:hidden">
         {title && <h3 className="text-base font-semibold">{title}</h3>}
         <Tabs
           value={activeTab.toString()}
@@ -225,7 +225,7 @@ export default function ValueSetSearchContent({
           {t("searching")}
         </div>
       ) : (
-        <CommandList className="overflow-y-auto max-h-[55dvh] md:max-h-[50dvh] lg:max-h-[40dvh]">
+        <CommandList className="overflow-y-auto max-h-[55dvh] md:max-h-[35dvh] lg:max-h-[40dvh]">
           <CommandEmpty>
             {search.length < 3 ? (
               <p className="p-4 text-sm text-gray-500">
