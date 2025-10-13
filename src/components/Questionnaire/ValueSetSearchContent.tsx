@@ -225,7 +225,7 @@ export default function ValueSetSearchContent({
           {t("searching")}
         </div>
       ) : (
-        <CommandList className="overflow-y-auto">
+        <CommandList className="overflow-y-auto max-h-[55dvh] md:max-h-[50dvh] lg:max-h-[40dvh]">
           <CommandEmpty>
             {search.length < 3 ? (
               <p className="p-4 text-sm text-gray-500">
@@ -289,7 +289,7 @@ export default function ValueSetSearchContent({
                 "border-gray-200",
               )}
             >
-              <CommandGroup className="overflow-y-auto">
+              <CommandGroup>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-normal text-gray-700 p-1">
                     {t("starred")}

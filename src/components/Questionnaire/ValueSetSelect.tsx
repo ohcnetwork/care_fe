@@ -104,30 +104,28 @@ export default function ValueSetSelect({
             </Button>
           )}
         </DrawerTrigger>
-        <DrawerContent className="min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
+        <DrawerContent>
           <DrawerTitle className="sr-only">
             {title || t("select_value")}
           </DrawerTitle>
-          <div className="pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
-            <ValueSetSearchContent
-              system={system}
-              onSelect={(selected) => {
-                onSelect(selected);
-                if (closeOnSelect) {
-                  setInternalOpen(false);
-                } else {
-                  inputRef.current?.focus();
-                }
-              }}
-              placeholder={placeholder}
-              count={count}
-              searchPostFix={searchPostFix}
-              showCode={showCode}
-              search={search}
-              onSearchChange={setSearch}
-              title={title}
-            />
-          </div>
+          <ValueSetSearchContent
+            system={system}
+            onSelect={(selected) => {
+              onSelect(selected);
+              if (closeOnSelect) {
+                setInternalOpen(false);
+              } else {
+                inputRef.current?.focus();
+              }
+            }}
+            placeholder={placeholder}
+            count={count}
+            searchPostFix={searchPostFix}
+            showCode={showCode}
+            search={search}
+            onSearchChange={setSearch}
+            title={title}
+          />
         </DrawerContent>
       </Drawer>
     );
