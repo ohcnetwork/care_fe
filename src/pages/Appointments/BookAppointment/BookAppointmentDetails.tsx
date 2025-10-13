@@ -110,7 +110,6 @@ export const BookAppointmentDetails = ({
       1,
     );
     if (!selectedResource) {
-      toast.error(t("missing_required_data_offline_booking"));
       return;
     }
 
