@@ -470,6 +470,7 @@ export function QuestionnaireForm({
 
   const [serverErrors, setServerErrors] = useState<ServerValidationError[]>();
   const [activeQuestionnaireId, setActiveQuestionnaireId] = useState<string>();
+  const [isOfflineSubmitting, setIsOfflineSubmitting] = useState(false);
 
   const [activeGroupId, setActiveGroupId] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -513,6 +514,7 @@ export function QuestionnaireForm({
         setServerErrors(undefined);
         toast.success(t("questionnaire_submitted_successfully"));
         onSubmit?.();
+        setIsOfflineSubmitting(false);
       },
       onError: (error) => {
         console.error("Error while submit Questionnaire", error);
@@ -1027,6 +1029,7 @@ export function QuestionnaireForm({
     });
 
     if (!onlineManager.isOnline()) {
+      setIsOfflineSubmitting(true);
       await handleOfflineQueue({ requests });
       return;
     }
@@ -1237,7 +1240,7 @@ export function QuestionnaireForm({
                   disabled={isPending || hasErrors}
                   className="relative"
                 >
-                  {isPending ? (
+                  {isPending || isOfflineSubmitting ? (
                     <>
                       <span className="opacity-0">{t("submit")}</span>
                       <div className="absolute inset-0 flex items-center justify-center">

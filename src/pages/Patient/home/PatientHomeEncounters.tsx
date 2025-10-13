@@ -29,6 +29,7 @@ export default function PatientHomeEncounters({
   const [activeTab, setActiveTab] = useState("active");
   const [page, setPage] = useState(1);
   const limit = 15;
+  console.log(["encounters", patientId, activeTab, page, limit]);
   const { data: encounters, isLoading: encounterLoading } = useQuery({
     queryKey: ["encounters", patientId, activeTab, page, limit],
     queryFn: query(encounterApi.list, {
