@@ -48,11 +48,17 @@ export const PatientHome = (props: {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const { offlineEntryId, offlineEntry } = useOfflineEntry();
+  console.log(
+    offlineEntry,
+    !!offlineEntryId && offlineEntry?.type === OfflineKeyMap.create_appointment,
+  );
 
-  queryClient.setQueryDefaults(["patientPermissions"], {
-    meta: { persist: true },
-    networkMode: "online",
-  });
+  useEffect(() => {
+    queryClient.setQueryDefaults(["patientPermissions"], {
+      meta: { persist: true },
+      networkMode: "online",
+    });
+  }, [queryClient]);
 
   useShortcutSubContext();
 
@@ -113,7 +119,7 @@ export const PatientHome = (props: {
               }
               defaultOpen={
                 !!offlineEntryId &&
-                offlineEntry?.type == OfflineKeyMap.create_appointment
+                offlineEntry?.type === OfflineKeyMap.create_appointment
               }
             />
           )}

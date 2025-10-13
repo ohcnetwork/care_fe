@@ -486,8 +486,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       return;
     }
 
-    const selectedOrganization = values._selected_levels?.[0];
-
     const basePayload = {
       ...values,
 

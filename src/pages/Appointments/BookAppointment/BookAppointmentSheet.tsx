@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -30,6 +30,11 @@ export default function BookAppointmentSheet({
 }: Props) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const { t } = useTranslation();
+  useEffect(() => {
+    if (defaultOpen) {
+      setIsOpen(true);
+    }
+  }, [defaultOpen]);
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>

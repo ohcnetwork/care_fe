@@ -4,7 +4,10 @@ import { toast } from "sonner";
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { SyncManager } from "@/OfflineSupport/syncmanger";
 import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
-import { Appointment } from "@/types/scheduling/schedule";
+import {
+  Appointment,
+  AppointmentCreateRequest,
+} from "@/types/scheduling/schedule";
 import { UserBase } from "@/types/user/user";
 
 // Unified handler for structured questionnaire types (allergy, diagnosis, symptom, medication)
@@ -201,8 +204,8 @@ export const handleAppointmentEdit = async (
 ) => {
   switch (entry.type) {
     case "create_appointment": {
-      const normalizedData = entry.normalizedData as Appointment;
-      const patientId = normalizedData?.patient?.id;
+      const payload = entry.payload as AppointmentCreateRequest;
+      const patientId = payload.patient;
 
       if (!patientId) {
         toast.error(t("patient_info_not_found_offline"));
