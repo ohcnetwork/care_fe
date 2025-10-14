@@ -521,6 +521,7 @@ function AppointmentColumn(props: {
           date_before: props.date_to,
           patient: props.patient,
         },
+        silent: true,
       })({ signal });
       return response;
     },
