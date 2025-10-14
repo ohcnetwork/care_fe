@@ -3,11 +3,13 @@ name: Assign Labels
 on:
   pull_request_target:
     types: [opened, converted_to_draft, ready_for_review, closed]
+  pull_request_review:
+    types: [submitted]
 
 permissions:
+  contents: read
   issues: write
   pull-requests: write
-  contents: read
 
 jobs:
   assign-pr:
@@ -52,12 +54,15 @@ jobs:
             }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
 
           echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)" >> "$GITHUB_ENV"
-
           echo "STATUS_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .id' project_data.json)" >> "$GITHUB_ENV"
           echo "TEAM_FIELD_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Team\") | .id' project_data.json)" >> "$GITHUB_ENV"
 
           echo "REVIEW_REQUESTED_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .options[] | select(.name==\"Review requested\") | .id' project_data.json)" >> "$GITHUB_ENV"
           echo "DONE_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Status\") | .options[] | select(.name==\"Done\") | .id' project_data.json)" >> "$GITHUB_ENV"
+
+          echo "TEAM_CORE_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Team\") | .options[] | select(.name==\"Core\") | .id' project_data.json)" >> "$GITHUB_ENV"
+          echo "TEAM_INTERNS_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Team\") | .options[] | select(.name==\"Interns\") | .id' project_data.json)" >> "$GITHUB_ENV"
+          echo "TEAM_COMMUNITY_OPTION_ID=$(jq -r '.data.organization.projectV2.fields.nodes[] | select(.name==\"Team\") | .options[] | select(.name==\"Community\") | .id' project_data.json)" >> "$GITHUB_ENV"
 
       - name: Assign PR
         uses: actions/github-script@v8
@@ -77,17 +82,17 @@ jobs:
 
             if (pr.user.type === 'Bot') return;
 
-            const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number
-            });
-
-            const labelNames = currentLabels.map(label => label.name.toLowerCase());
-            const hasTested = labelNames.includes('tested');
-            const hasReviewed = labelNames.includes('reviewed');
+            const isReviewEvent = context.eventName === 'pull_request_review';
+            const reviewState = context.payload.review?.state;
+            const isChangesRequested = isReviewEvent && reviewState === 'changes_requested';
 
             if (isClosed && !isMerged) {
+              const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number
+              });
+
               for (const label of currentLabels) {
                 try {
                   await github.rest.issues.removeLabel({
@@ -127,7 +132,6 @@ jobs:
             });
 
             const itemId = addToProjectResult.addProjectV2ItemById.item.id;
-
             const statusFieldId = process.env.STATUS_FIELD_ID;
             let statusOptionId;
 
@@ -158,26 +162,18 @@ jobs:
             }
 
             if (isDraft) {
-              try {
-                await github.rest.issues.removeLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  name: 'needs review'
-                });
-              } catch (error) {
-                console.warn("Failed to remove label 'needs review':", error.message);
-              }
-
-              try {
-                await github.rest.issues.removeLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  name: 'needs testing'
-                });
-              } catch (error) {
-                console.warn("Failed to remove label 'needs testing':", error.message);
+              const labelsToRemove = ['needs review', 'needs testing'];
+              for (const labelName of labelsToRemove) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    name: labelName
+                  });
+                } catch (error) {
+                  console.warn(`Failed to remove label '${labelName}':`, error.message);
+                }
               }
 
               await github.rest.issues.addLabels({
@@ -198,16 +194,75 @@ jobs:
                 console.warn("Failed to remove label 'work in progress':", error.message);
               }
 
-              const labelsToAdd = [];
-              if (!hasReviewed) labelsToAdd.push('needs review');
-              if (!hasTested) labelsToAdd.push('needs testing');
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['needs review', 'needs testing']
+              });
+            }
 
-              if (labelsToAdd.length > 0) {
-                await github.rest.issues.addLabels({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  labels: labelsToAdd
-                });
+            if (isChangesRequested) {
+              const labelsToRemove = ['needs review', 'needs testing'];
+              for (const labelName of labelsToRemove) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    name: labelName
+                  });
+                } catch (error) {
+                  console.warn(`Failed to remove label '${labelName}':`, error.message);
+                }
+              }
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['changes requested']
+              });
+            }
+
+            if (!isReviewEvent && (context.payload.action === 'opened' || context.payload.action === 'ready_for_review')) {
+              try {
+                const response = await fetch(`https://raw.githubusercontent.com/ohcnetwork/leaderboard-data/main/contributors/${author}.md`);
+                
+                if (response.ok) {
+                  const authorData = await response.text();
+                  const teamFieldId = process.env.TEAM_FIELD_ID;
+                  let teamOptionId = null;
+
+                  if (authorData.includes('role: core')) {
+                    teamOptionId = process.env.TEAM_CORE_OPTION_ID;
+                  } else if (authorData.includes('role: intern')) {
+                    teamOptionId = process.env.TEAM_INTERNS_OPTION_ID;
+                  } else if (authorData.includes('role: contributor')) {
+                    teamOptionId = process.env.TEAM_COMMUNITY_OPTION_ID;
+                  }
+
+                  if (teamOptionId && teamFieldId && itemId) {
+                    const updateTeamQuery = `
+                      mutation($project: ID!, $item: ID!, $team_field: ID!, $team_value: String!) {
+                        updateProjectV2ItemFieldValue(input: {
+                          projectId: $project
+                          itemId: $item
+                          fieldId: $team_field
+                          value: { singleSelectOptionId: $team_value }
+                        }) { projectV2Item { id } }
+                      }
+                    `;
+
+                    await github.graphql(updateTeamQuery, {
+                      project: projectId,
+                      item: itemId,
+                      team_field: teamFieldId,
+                      team_value: teamOptionId
+                    });
+                  }
+                }
+              } catch (error) {
+                console.warn(`Failed to fetch contributor data for '${author}':`, error.message);
               }
             }
