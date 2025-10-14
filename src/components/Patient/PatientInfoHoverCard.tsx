@@ -36,7 +36,12 @@ export const PatientInfoHoverCard = ({
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="outline" className="text-gray-950" asChild>
+        <Button
+          variant="outline"
+          className="text-gray-950"
+          asChild
+          hidden={location.pathname.includes("/patients/verify")}
+        >
           <Link
             basePath="/"
             href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
