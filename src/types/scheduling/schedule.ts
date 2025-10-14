@@ -179,7 +179,8 @@ export const CancelledAppointmentStatuses = [
 
 export const AppointmentFinalStatuses = [
   ...CancelledAppointmentStatuses,
-  ...PastAppointmentStatuses,
+  AppointmentStatus.FULFILLED,
+  AppointmentStatus.NO_SHOW,
 ];
 
 export const APPOINTMENT_STATUS_COLORS = {
