@@ -105,6 +105,17 @@ export function ResourceCategoryForm({
     }
   }, [categoryData, form]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      form.reset({
+        title: "",
+        slug_value: "",
+        description: "",
+        resource_sub_type: ResourceCategorySubType.other,
+      });
+    }
+  }, [isOpen, form]);
+
   // Auto-generate slug from name when creating new category
   useEffect(() => {
     if (isEditing) return;
@@ -284,6 +295,7 @@ export function ResourceCategoryForm({
                     <ResourceSubTypePicker
                       resourceType={resourceType}
                       onValueChange={field.onChange}
+                      value={field.value}
                     />
                   </Select>
                   <FormDescription>

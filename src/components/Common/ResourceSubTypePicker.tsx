@@ -16,6 +16,7 @@ import {
 
 interface ResourceSubTypePickerProps {
   resourceType: ResourceCategoryResourceType;
+  value?: ResourceCategorySubType;
   onValueChange?: (value: ResourceCategorySubType) => void;
   className?: string;
 }
@@ -75,11 +76,23 @@ function buildSubTypeTree(resourceType: ResourceCategoryResourceType) {
 
 export function ResourceSubTypePicker({
   resourceType,
+  value,
   onValueChange,
   className,
 }: ResourceSubTypePickerProps) {
   const { t } = useTranslation();
   const [breadcrumbs, setBreadcrumbs] = useState<SubTypeNode[]>([]);
+
+  const getHierarchicalDisplay = (selectedValue?: ResourceCategorySubType) => {
+    if (!selectedValue) return null;
+
+    const cleanValue = selectedValue
+      .replace(`${resourceType}:`, "")
+      .replace("all:", "");
+
+    const parts = cleanValue.split(":");
+    return parts.map((part) => t(part)).join(" > ");
+  };
 
   const tree = useMemo(() => buildSubTypeTree(resourceType), [resourceType]);
   const currentNodes = useMemo(() => {
@@ -116,10 +129,14 @@ export function ResourceSubTypePicker({
       ? t("root")
       : breadcrumbs[breadcrumbs.length - 1]?.title || t("root");
 
+  const displayValue = getHierarchicalDisplay(value);
+
   return (
     <div className={cn("w-full", className)}>
       <SelectTrigger className="w-full justify-between">
-        <SelectValue placeholder={t("select_category")} />
+        <SelectValue placeholder={t("select_category")}>
+          {displayValue || t("select_category")}
+        </SelectValue>
       </SelectTrigger>
 
       <SelectContent className="p-0 min-w-[320px]">
