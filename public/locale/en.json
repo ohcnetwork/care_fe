@@ -2281,7 +2281,6 @@
   "filter_selected_count_one": "{{count}} filter selected",
   "filter_selected_count_other": "{{count}} filters selected",
   "filtered_by": "Filtered by",
-  "filtered_by_patient": "Filtered by Patient",
   "filtering_by": "Filtering by {{name}}",
   "filters": "Filters",
   "final": "Final",

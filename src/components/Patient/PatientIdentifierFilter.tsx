@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -11,7 +12,6 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -24,13 +24,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import query from "@/Utils/request/query";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getPartialId,
@@ -38,6 +38,8 @@ import {
   PatientRead,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import query from "@/Utils/request/query";
+import careConfig from "@careConfig";
 
 interface Props {
   onSelect: (patientId: string | undefined) => void;
@@ -75,10 +77,15 @@ export default function PatientIdentifierFilter({
     }
   }, [patientId, selectedPatient]);
 
-  // Set default search type to first identifier config
+  // Set default search type to first identifier config (prioritize phone number)
   useEffect(() => {
     if (facility?.patient_instance_identifier_configs?.length && !searchType) {
-      setSearchType(facility.patient_instance_identifier_configs[0].id);
+      const phoneConfig = facility.patient_instance_identifier_configs.find(
+        (c) => c.config.system === careConfig.phoneNumberConfigSystem,
+      );
+      setSearchType(
+        phoneConfig?.id || facility.patient_instance_identifier_configs[0].id,
+      );
     }
   }, [facility?.patient_instance_identifier_configs, searchType]);
 
@@ -98,6 +105,12 @@ export default function PatientIdentifierFilter({
     }
   }, [patientDetails]);
 
+  // Check if current search type is phone number
+  const isPhoneNumberConfig =
+    facility?.patient_instance_identifier_configs?.find(
+      (c) => c.id === searchType,
+    )?.config.system === careConfig.phoneNumberConfigSystem;
+
   // Patient search query (for identifier-based search)
   const { data: patientList, isFetching: isPatientFetching } = useQuery({
     queryKey: ["patient-search", searchTerm, searchType],
@@ -107,7 +120,10 @@ export default function PatientIdentifierFilter({
           ? { config: searchType, value: searchTerm, page_size: 20 }
           : {},
     }),
-    enabled: !!searchType && !!searchTerm,
+    enabled:
+      !!searchType &&
+      !!searchTerm &&
+      (!isPhoneNumberConfig || isValidPhoneNumber(searchTerm)),
   });
 
   // Patient verification query
@@ -180,7 +196,7 @@ export default function PatientIdentifierFilter({
             >
               {selectedPatient && !verificationOpen ? (
                 <span className="text-primary-500 text-sm">
-                  {t("filtered_by_patient")}: {selectedPatient.name}
+                  {selectedPatient.name}
                 </span>
               ) : (
                 placeholder || t("search_patients")
@@ -191,20 +207,38 @@ export default function PatientIdentifierFilter({
           <PopoverContent className="w-[320px] p-0 overflow-hidden rounded-lg">
             <Command shouldFilter={false}>
               <div className="relative flex items-center px-3 py-2">
-                <CommandInput
-                  placeholder={
-                    searchType
-                      ? t("search_by_identifier", {
-                          name: facility?.patient_instance_identifier_configs?.find(
-                            (c) => c.id === searchType,
-                          )?.config.display,
-                        })
-                      : t("select_search_type")
-                  }
-                  value={searchTerm}
-                  onValueChange={setSearchTerm}
-                  className="pl-8 pr-8 border-none focus:ring-0 focus:outline-none"
-                />
+                {isPhoneNumberConfig ? (
+                  <PhoneInput
+                    placeholder={
+                      searchType
+                        ? t("search_by_identifier", {
+                            name: facility?.patient_instance_identifier_configs?.find(
+                              (c) => c.id === searchType,
+                            )?.config.display,
+                          })
+                        : t("select_search_type")
+                    }
+                    value={searchTerm}
+                    onChange={(value) => setSearchTerm(value || "")}
+                    className="border-none focus:ring-0 focus:outline-none flex-1"
+                  />
+                ) : (
+                  <Input
+                    type="text"
+                    placeholder={
+                      searchType
+                        ? t("search_by_identifier", {
+                            name: facility?.patient_instance_identifier_configs?.find(
+                              (c) => c.id === searchType,
+                            )?.config.display,
+                          })
+                        : t("select_search_type")
+                    }
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="border-none focus:ring-0 focus:outline-none focus-visible:ring-0 shadow-none flex-1"
+                  />
+                )}
                 {searchTerm && (
                   <Button
                     variant="ghost"
@@ -219,26 +253,41 @@ export default function PatientIdentifierFilter({
               </div>
 
               <div className="flex flex-wrap gap-1.5 p-2 border-t rounded-b-lg bg-gray-50 border-t-gray-100">
-                {facility?.patient_instance_identifier_configs?.map(
-                  (config) => (
-                    <Button
-                      key={config.id}
-                      variant="outline"
-                      onClick={() => {
-                        setSearchType(config.id);
-                        setSearchTerm("");
-                      }}
-                      className={cn(
-                        "h-6 px-2 text-xs rounded-md",
-                        searchType === config.id
-                          ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200",
-                      )}
-                    >
-                      {config.config.display}
-                    </Button>
-                  ),
-                )}
+                {[
+                  // Phone number configs first
+                  ...(facility?.patient_instance_identifier_configs?.filter(
+                    (c) =>
+                      c.config.auto_maintained &&
+                      c.config.system === careConfig.phoneNumberConfigSystem,
+                  ) || []),
+                  // Auto-maintained configs but not phone number configs
+                  ...(facility?.patient_instance_identifier_configs?.filter(
+                    (c) =>
+                      c.config.auto_maintained &&
+                      c.config.system !== careConfig.phoneNumberConfigSystem,
+                  ) || []),
+                  // Non-auto-maintained configs
+                  ...(facility?.patient_instance_identifier_configs?.filter(
+                    (c) => !c.config.auto_maintained,
+                  ) || []),
+                ].map((config) => (
+                  <Button
+                    key={config.id}
+                    variant="outline"
+                    onClick={() => {
+                      setSearchType(config.id);
+                      setSearchTerm("");
+                    }}
+                    className={cn(
+                      "h-6 px-2 text-xs rounded-md",
+                      searchType === config.id
+                        ? "bg-primary-100 text-primary-700 hover:bg-primary-200 border-primary-400"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                    )}
+                  >
+                    {config.config.display}
+                  </Button>
+                ))}
               </div>
 
               <CommandList>
