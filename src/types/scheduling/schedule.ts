@@ -243,7 +243,6 @@ export type PublicAppointment = AppointmentBase & {
 export type AppointmentRead = Appointment & {
   tags: TagConfig[];
   updated_by: UserReadMinimal | null;
-  patient: PatientRead;
   created_by: UserReadMinimal;
   modified_date: string;
   associated_encounter?: EncounterRead;
