@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, X } from "lucide-react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -251,10 +251,13 @@ function ProductKnowledgeFormContent({
   const { mutate: createProductKnowledge, isPending: isCreating } = useMutation(
     {
       mutationFn: mutate(productKnowledgeApi.createProductKnowledge),
-      onSuccess: () => {
+      onSuccess: (productKnowledge: ProductKnowledgeBase) => {
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         toast.success(t("product_knowledge_created_successfully"));
         onSuccess();
+        navigate(
+          `/facility/${facilityId}/settings/product_knowledge/categories/${productKnowledge.category.slug}`,
+        );
       },
     },
   );
@@ -443,7 +446,9 @@ function ProductKnowledgeFormContent({
                               ResourceCategoryResourceType.product_knowledge
                             }
                             value={field.value}
-                            onValueChange={field.onChange}
+                            onValueChange={(category) =>
+                              field.onChange(category?.slug || "")
+                            }
                             placeholder={t("select_category")}
                             className="w-full"
                           />
@@ -455,59 +460,58 @@ function ProductKnowledgeFormContent({
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <FormLabel>{t("code")}</FormLabel>
-                    <div className="mt-2">
-                      <ValueSetSelect
-                        system="system-medication"
-                        value={form.watch("code")}
-                        placeholder={t("search_for_product_codes")}
-                        onSelect={(code) => {
-                          form.setValue("code", {
-                            code: code.code,
-                            display: code.display,
-                            system: code.system,
-                          });
-                        }}
-                        showCode={true}
-                      />
-                    </div>
-                  </div>
-
                   <FormField
                     control={form.control}
-                    name="base_unit"
+                    name="code"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel aria-required>{t("base_unit")}</FormLabel>
+                        <FormLabel>{t("code")}</FormLabel>
                         <FormControl>
-                          <Select
-                            value={field.value?.code || ""}
-                            onValueChange={(value) => {
-                              const selectedUnit = DOSAGE_UNITS_CODES.find(
-                                (unit) => unit.code === value,
-                              );
-                              field.onChange(selectedUnit);
+                          <ValueSetSelect
+                            {...field}
+                            system="system-medication"
+                            placeholder={t("search_for_product_codes")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
                             }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue
-                                placeholder={t("select_base_unit")}
-                              />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {DOSAGE_UNITS_CODES.map((unit) => (
-                                <SelectItem key={unit.code} value={unit.code}>
-                                  {unit.display}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            showCode={true}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  <div>
+                    <FormLabel aria-required>{t("base_unit")}</FormLabel>
+                    <div className="mt-2">
+                      <Select
+                        value={form.watch("base_unit")?.code || ""}
+                        onValueChange={(value) => {
+                          const selectedUnit = DOSAGE_UNITS_CODES.find(
+                            (unit) => unit.code === value,
+                          );
+                          if (selectedUnit)
+                            form.setValue("base_unit", selectedUnit);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("select_base_unit")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DOSAGE_UNITS_CODES.map((unit) => (
+                            <SelectItem key={unit.code} value={unit.code}>
+                              {unit.display}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -993,16 +997,16 @@ function ProductKnowledgeFormContent({
             </div>
 
             <div className="mt-6 flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
-                  )
-                }
-              >
-                {t("cancel")}
+              <Button type="button" variant="outline" asChild>
+                <Link
+                  href={
+                    isEditMode
+                      ? `/product_knowledge/${slug}`
+                      : `/product_knowledge/categories/${categorySlug}`
+                  }
+                >
+                  {t("cancel")}
+                </Link>
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending ? t("saving") : t("save")}
