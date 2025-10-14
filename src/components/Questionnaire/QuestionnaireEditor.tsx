@@ -50,6 +50,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -102,6 +103,7 @@ import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 
+import { generateSlug } from "@/Utils/utils";
 import { CodingEditor } from "./CodingEditor";
 import { QuestionActions } from "./QuestionActions";
 import { QuestionnaireForm } from "./QuestionnaireForm";
@@ -608,10 +610,23 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     field: keyof QuestionnaireDetail,
     value: QuestionnaireDetail[keyof QuestionnaireDetail],
   ) => {
-    form.setValue(field as "title" | "description" | "slug", value, {
+    let finalValue = value;
+    if (field === "slug" && typeof value === "string") {
+      finalValue = value.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    }
+
+    form.setValue(field as "title" | "description" | "slug", finalValue, {
       shouldValidate: true,
       shouldDirty: true,
     });
+
+    if (field === "title") {
+      const next = generateSlug((value as string) || "", 25);
+      form.setValue("slug", next, {
+        shouldValidate: true,
+        shouldDirty: false,
+      });
+    }
   };
 
   const updateQuestions = (newQuestions: Question[]) => {
@@ -1106,7 +1121,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           name="slug"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>{t("slug")}</FormLabel>
+                              <FormLabel>
+                                {t("slug")}{" "}
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {t("unique_url_for_questionnaire")}
+                                </p>
+                              </FormLabel>
                               <FormControl>
                                 <Input
                                   placeholder="unique-identifier-for-questionnaire"
@@ -1120,9 +1140,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 />
                               </FormControl>
                               <FormMessage />
-                              <p className="text-sm text-gray-500 mt-1">
-                                {t("unique_url_for_questionnaire")}
-                              </p>
+
+                              <FormDescription>
+                                {t("slug_format_message")}
+                              </FormDescription>
                             </FormItem>
                           )}
                         />
