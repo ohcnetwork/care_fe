@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-import { EmptyState } from "@/components/Medicine/MedicationRequestTable";
+import EmptyState from "@/components/Patient/Common/EmptyState";
 import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordionLayout";
 
 import query from "@/Utils/request/query";
@@ -24,6 +24,7 @@ interface SymptomsListProps {
   className?: string;
   readOnly?: boolean;
   showTimeline?: boolean;
+  showViewEncounter?: boolean;
 }
 
 interface GroupedSymptoms {
@@ -38,6 +39,7 @@ export function SymptomsList({
   className,
   readOnly = false,
   showTimeline = false,
+  showViewEncounter = true,
 }: SymptomsListProps) {
   const { t } = useTranslation();
 
@@ -76,7 +78,7 @@ export function SymptomsList({
     if (showTimeline) {
       return (
         <EmptyState
-          message={t("no_symptoms")}
+          title={t("no_symptoms")}
           description={t("no_symptoms_recorded_description")}
         />
       );
@@ -108,14 +110,17 @@ export function SymptomsList({
                     <div key={date} className="pb-6">
                       <div className="flex items-start gap-4">
                         <div className="flex flex-col items-center h-full">
-                          <div className="size-3 bg-cyan-300 ring-1 ring-cyan-700 rounded-full flex-shrink-0 -ml-1.5 mt-1"></div>
+                          <div className="size-3 bg-pink-300 ring-1 ring-pink-700 rounded-full flex-shrink-0 -ml-1.5 mt-1"></div>
                         </div>
 
                         <div className="space-y-3 overflow-auto w-full">
                           <h3 className="text-sm font-medium text-indigo-700">
                             {format(date, "dd MMMM, yyyy")}
                           </h3>
-                          <SymptomTable symptoms={symptoms} />
+                          <SymptomTable
+                            patientId={patientId}
+                            symptoms={symptoms}
+                          />
                         </div>
                       </div>
                     </div>
@@ -148,7 +153,12 @@ export function SymptomsList({
       className={className}
       editLink={!readOnly ? "questionnaire/symptom" : undefined}
       actionButton={
-        <Button variant="link" size="xs" asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          asChild
+          className="hover:bg-transparent text-gray-500 hover:text-gray-500"
+        >
           <Link
             href={
               facilityId
@@ -161,7 +171,11 @@ export function SymptomsList({
         </Button>
       }
     >
-      <SymptomTable symptoms={symptoms} />
+      <SymptomTable
+        symptoms={symptoms}
+        patientId={patientId}
+        showViewEncounter={showViewEncounter}
+      />
       {hasNextPage && (
         <div className="flex justify-center">
           <Button variant="ghost" size="xs" onClick={() => fetchNextPage()}>
