@@ -226,7 +226,7 @@ export const SummaryPanelEncounterDetails = () => {
           <div className="flex flex-row gap-2">
             <div className="text-sm text-gray-950 font-semibold flex flex-wrap gap-6">
               {patient?.instance_identifiers
-                .filter(({ config }) => !config.config.auto_maintained)
+                ?.filter(({ config }) => !config.config.auto_maintained)
                 .map((identifier) => (
                   <div
                     key={identifier.config.id}
