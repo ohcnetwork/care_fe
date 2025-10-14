@@ -91,5 +91,5 @@ export interface PaymentReconciliationRead extends PaymentReconciliationBase {
 }
 
 export interface PaymentReconciliationCancel {
-  reason: string;
+  reason: PaymentReconciliationStatus;
 }
