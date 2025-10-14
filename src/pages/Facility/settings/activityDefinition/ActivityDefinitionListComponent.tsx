@@ -52,7 +52,7 @@ function ActivityDefinitionCard({
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap flex-col md:flex-row items-start justify-between gap-1">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
               <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
@@ -71,7 +71,7 @@ function ActivityDefinitionCard({
                   {t(definition.classification)}
                 </Badge>
               </div>
-              <h3 className="font-medium text-gray-900 truncate">
+              <h3 className="font-medium text-gray-900 truncate text-lg">
                 {definition.title}
               </h3>
               {definition.description && (
@@ -84,18 +84,32 @@ function ActivityDefinitionCard({
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="ml-auto flex flex-wrap gap-2">
             <Button
               variant="outline"
               size="sm"
+              className="gap-1"
+              onClick={() =>
+                navigate(
+                  `/facility/${facilityId}/settings/activity_definitions/${definition.slug}/edit`,
+                )
+              }
+            >
+              <CareIcon icon="l-edit" className="size-5 text-sm" />
+              {t("edit")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1"
               onClick={() =>
                 navigate(
                   `/facility/${facilityId}/settings/activity_definitions/${definition.slug}`,
                 )
               }
             >
-              <CareIcon icon="l-edit" className="h-4 w-4" />
-              {t("see_details")}
+              <CareIcon icon="l-eye" className="size-5 text-xl" />
+              {t("view")}
             </Button>
           </div>
         </div>
@@ -115,15 +129,8 @@ function ActivityDefinitionTableRow({
   const { t } = useTranslation();
 
   return (
-    <TableRow className="hover:bg-gray-50 cursor-pointer">
-      <TableCell
-        className="font-medium cursor-pointer"
-        onClick={() =>
-          navigate(
-            `/facility/${facilityId}/settings/activity_definitions/${definition.slug}`,
-          )
-        }
-      >
+    <TableRow className="hover:bg-gray-50">
+      <TableCell className="font-medium">
         <div className="flex items-center space-x-3">
           <div className="p-1 rounded bg-gray-100 text-gray-600">
             <CareIcon icon="l-clipboard-alt" className="h-4 w-4" />
@@ -155,7 +162,27 @@ function ActivityDefinitionTableRow({
         {t(definition.kind)}
       </TableCell>
       <TableCell>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    navigate(
+                      `/facility/${facilityId}/settings/activity_definitions/${definition.slug}/edit`,
+                    )
+                  }
+                >
+                  <CareIcon icon="l-edit" className="size-5 text-sm" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("edit_activity_definition")}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -168,11 +195,11 @@ function ActivityDefinitionTableRow({
                     )
                   }
                 >
-                  <CareIcon icon="l-edit" className="h-4 w-4" />
+                  <CareIcon icon="l-eye" className="size-5 text-xl" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{t("edit_activity_definition")}</p>
+                <p>{t("view_activity_definition")}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

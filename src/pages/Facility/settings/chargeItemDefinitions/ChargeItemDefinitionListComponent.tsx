@@ -51,7 +51,7 @@ function ChargeItemCard({
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap flex-col md:flex-row items-start justify-between gap-1">
           <div className="flex items-start space-x-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-2 mb-1">
@@ -64,7 +64,7 @@ function ChargeItemCard({
                   {t(definition.status)}
                 </Badge>
               </div>
-              <h3 className="font-medium text-gray-900 truncate">
+              <h3 className="font-medium text-gray-900 truncate text-lg font-medium">
                 {definition.title}
               </h3>
               {definition.description && (
@@ -74,18 +74,32 @@ function ChargeItemCard({
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="ml-auto flex flex-wrap gap-2">
             <Button
               variant="outline"
               size="sm"
+              className="gap-1"
+              onClick={() =>
+                navigate(
+                  `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}/edit`,
+                )
+              }
+            >
+              <CareIcon icon="l-edit" className="size-5 text-sm" />
+              {t("edit")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1"
               onClick={() =>
                 navigate(
                   `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}`,
                 )
               }
             >
-              <CareIcon icon="l-edit" className="h-4 w-4" />
-              {t("see_details")}
+              <CareIcon icon="l-eye" className="size-5 text-xl" />
+              {t("view")}
             </Button>
           </div>
         </div>
@@ -105,15 +119,8 @@ function ChargeItemTableRow({
   const { t } = useTranslation();
 
   return (
-    <TableRow
-      className="hover:bg-gray-50 cursor-pointer"
-      onClick={() =>
-        navigate(
-          `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}`,
-        )
-      }
-    >
-      <TableCell className="font-medium cursor-pointer">
+    <TableRow className="hover:bg-gray-50">
+      <TableCell className="font-medium">
         <div className="flex items-center space-x-3">
           <div>
             <div className="font-medium text-gray-900">{definition.title}</div>
@@ -142,7 +149,27 @@ function ChargeItemTableRow({
           : t("no_price_components")}
       </TableCell>
       <TableCell>
-        <div className="flex items-center justify-center space-x-2">
+        <div className="flex items-center justify-center space-x-1">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={() =>
+                    navigate(
+                      `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}/edit`,
+                    )
+                  }
+                >
+                  <CareIcon icon="l-edit" className="size-5 text-sm" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("edit_charge_item")}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -155,12 +182,11 @@ function ChargeItemTableRow({
                     )
                   }
                 >
-                  <CareIcon icon="l-edit" className="h-4 w-4" />
-                  {t("edit")}
+                  <CareIcon icon="l-eye" className="size-5 text-xl" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{t("edit_charge_item")}</p>
+                <p>{t("view_charge_item")}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

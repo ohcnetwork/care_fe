@@ -35,6 +35,45 @@ import {
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 
+function SpecimenDefinitionActions({
+  definition,
+  facilityId,
+}: {
+  definition: SpecimenDefinitionRead;
+  facilityId: string;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() =>
+          navigate(
+            `/facility/${facilityId}/settings/specimen_definitions/${definition.slug}/edit`,
+          )
+        }
+      >
+        <CareIcon icon="l-edit" className="size-5 text-sm" />
+        {t("edit")}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() =>
+          navigate(
+            `/facility/${facilityId}/settings/specimen_definitions/${definition.slug}`,
+          )
+        }
+      >
+        <CareIcon icon="l-eye" className="size-5 text-xl" />
+        {t("view")}
+      </Button>
+    </>
+  );
+}
+
 function SpecimenDefinitionCard({
   definition,
   facilityId,
@@ -46,7 +85,7 @@ function SpecimenDefinitionCard({
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="mb-4 flex flex-wrap flex-col md:flex-row items-start justify-between gap-2">
           <div>
             <div className="mb-2 flex items-center gap-2">
               <Badge
@@ -60,18 +99,12 @@ function SpecimenDefinitionCard({
               {definition.description}
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/specimen_definitions/${definition.slug}`,
-              )
-            }
-          >
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("see_details")}
-          </Button>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <SpecimenDefinitionActions
+              definition={definition}
+              facilityId={facilityId}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -226,18 +259,12 @@ export function SpecimenDefinitionsList({
                           {definition.description}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              navigate(
-                                `/facility/${facilityId}/settings/specimen_definitions/${definition.slug}`,
-                              )
-                            }
-                          >
-                            <CareIcon icon="l-edit" className="size-4" />
-                            {t("see_details")}
-                          </Button>
+                          <div className="flex flex-wrap gap-2">
+                            <SpecimenDefinitionActions
+                              definition={definition}
+                              facilityId={facilityId}
+                            />
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

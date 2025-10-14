@@ -53,7 +53,7 @@ function ProductKnowledgeCard({
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
               <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
@@ -75,7 +75,7 @@ function ProductKnowledgeCard({
                   {t(product.status)}
                 </Badge>
               </div>
-              <h3 className="font-medium text-gray-900 truncate">
+              <h3 className="font-medium text-gray-900 truncate text-lg">
                 {product.name}
               </h3>
               {product.alternate_identifier && (
@@ -91,7 +91,19 @@ function ProductKnowledgeCard({
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap gap-2 ml-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                navigate(
+                  `/facility/${facilityId}/settings/product_knowledge/${product.slug}/edit`,
+                )
+              }
+            >
+              <CareIcon icon="l-edit" className="size-5 text-sm" />
+              {t("edit")}
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -101,8 +113,8 @@ function ProductKnowledgeCard({
                 )
               }
             >
-              <CareIcon icon="l-edit" className="h-4 w-4" />
-              {t("see_details")}
+              <CareIcon icon="l-eye" className="size-5 text-xl" />
+              {t("view")}
             </Button>
           </div>
         </div>
@@ -169,12 +181,26 @@ function ProductKnowledgeTableRow({
               <TooltipTrigger asChild>
                 <Button asChild variant="ghost" size="sm">
                   <Link href={`/product_knowledge/${product.slug}/edit`}>
-                    <CareIcon icon="l-edit" className="h-4 w-4" />
+                    <CareIcon icon="l-edit" className="size-5 text-sm" />
                   </Link>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{t("edit_product_knowledge")}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button asChild variant="ghost" size="sm">
+                  <Link href={`/product_knowledge/${product.slug}`}>
+                    <CareIcon icon="l-eye" className="size-5 text-xl" />
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("view_product_knowledge")}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
