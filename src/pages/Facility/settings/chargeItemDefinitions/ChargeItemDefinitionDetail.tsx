@@ -18,6 +18,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import BackButton from "@/components/Common/BackButton";
 import { getCurrencySymbol } from "@/components/ui/monetary-display";
 import { getConditionValue } from "@/types/base/condition/condition";
 import {
@@ -29,6 +30,7 @@ import {
   ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import { ArrowLeft } from "lucide-react";
 
 interface ChargeItemDefinitionDetailProps {
   facilityId: string;
@@ -143,12 +145,19 @@ export function ChargeItemDefinitionDetail({
   }
 
   return (
-    <Page title={chargeItemDefinition.title}>
-      <div className="container mx-auto">
+    <Page title={chargeItemDefinition.title} hideTitleOnPage={true}>
+      <div className="container mx-auto max-w-3xl space-y-6">
+        <BackButton>
+          <ArrowLeft />
+          {t("back")}
+        </BackButton>
         <div className="mb-4">
           <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
             <div>
               <div className="mt-2 flex items-center gap-2">
+                <h1 className="text-2xl font-bold">
+                  {chargeItemDefinition.title}
+                </h1>
                 <Badge
                   variant={
                     CHARGE_ITEM_DEFINITION_STATUS_COLORS[

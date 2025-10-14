@@ -117,7 +117,7 @@ export default function PatientSelect({
 
   if (!staffId) {
     toast.error(t("staff_not_found"));
-    navigate(`/facility/${facilityId}/`);
+    navigate(`/facility/${facilityId}`);
   } else if (!tokenData) {
     toast.error(t("phone_number_not_found"));
     navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);

@@ -6,6 +6,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   dateFilter,
   encounterPriorityFilter,
@@ -262,6 +263,14 @@ export function EncounterList({
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
+                <div>
+                  <Input
+                    type="text"
+                    placeholder={t("search")}
+                    value={name || ""}
+                    onChange={(e) => updateQuery({ name: e.target.value })}
+                  />
+                </div>
                 <PatientIdentifierFilter
                   onSelect={(patientId) =>
                     updateQuery({ patient_filter: patientId })
