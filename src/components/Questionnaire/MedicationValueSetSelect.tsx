@@ -214,7 +214,7 @@ export default function MedicationValueSetSelect({
             </Button>
           )}
         </DrawerTrigger>
-        <DrawerContent className="max-h-[85vh] px-0 pb-0 rounded-t-lg">
+        <DrawerContent className="min-h-[60vh] max-h-[85vh] px-0 pb-0 rounded-t-lg">
           <DrawerHeader className="p-0 mt-1.5">
             <MedicationValueSetSelectTabs
               activeTab={activeTab}
