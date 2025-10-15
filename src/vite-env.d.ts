@@ -31,12 +31,14 @@ interface ImportMetaEnv {
   readonly REACT_PING_URL?: string;
 
   readonly REACT_DISABLE_PATIENT_LOGIN?: string;
+  readonly REACT_CUSTOM_REMOTE_I18N_URL?: string;
 
   // Plugins related envs...
   readonly REACT_SENTRY_DSN?: string;
   readonly REACT_SENTRY_ENVIRONMENT?: string;
   readonly REACT_DEFAULT_COUNTRY?: string;
   readonly REACT_MAPS_FALLBACK_URL_TEMPLATE?: string;
+  readonly REACT_CUSTOM_SHORTCUTS?: string;
 }
 
 interface ImportMeta {

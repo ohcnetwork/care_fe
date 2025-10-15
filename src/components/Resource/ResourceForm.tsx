@@ -47,14 +47,12 @@ import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 import { useOfflineEntry } from "@/hooks/useOfflineEntry";
 
-import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
-
 import {
   handleOfflineRecordSuccess,
   isOfflineId,
   toFacilityRead,
 } from "@/OfflineSupport/offlineWriteHelpers";
-import routes from "@/Utils/request/api";
+
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -66,13 +64,14 @@ import patientApi from "@/types/emr/patient/patientApi";
 import { FacilityRead } from "@/types/facility/facility";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
-  CreateResourceRequest,
   getResourceRequestCategoryEnum,
-  RESOURCE_REQUEST_STATUSES,
-  ResourceRequest,
+  RESOURCE_REQUEST_STATUS_OPTIONS,
   ResourceRequestCategory,
-  UpdateResourceRequest,
+  ResourceRequestCreate,
+  ResourceRequestRead,
+  ResourceRequestStatus,
 } from "@/types/resourceRequest/resourceRequest";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 import {
@@ -100,12 +99,14 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const queryClient = useQueryClient();
 
   const resourceFormSchema = z.object({
-    status: z.enum(RESOURCE_REQUEST_STATUSES),
+    status: z.nativeEnum(ResourceRequestStatus),
     category: z.nativeEnum(ResourceRequestCategory),
-    assigned_facility: z.object({
-      id: z.string(),
-      name: z.string(),
-    }),
+    assigned_facility: z
+      .object({
+        id: z.string(),
+        name: z.string(),
+      })
+      .nullable(),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
     reason: z
@@ -133,8 +134,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const { data: resourceData } = useQuery({
     queryKey: ["resource_request", id],
-    queryFn: query(routes.getResourceDetails, {
-      pathParams: { id: String(id) },
+    queryFn: query(resourceRequestApi.get, {
+      pathParams: { resourceRequestId: String(id) },
     }),
     meta: { persist: true },
     enabled: !!id,
@@ -143,8 +144,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const form = useForm({
     resolver: zodResolver(resourceFormSchema),
     defaultValues: {
-      status: "pending",
-      assigned_facility: undefined,
+      status: ResourceRequestStatus.PENDING,
       assigned_to: "",
       emergency: "false" as const,
       title: "",
@@ -155,7 +155,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     },
   });
 
-  const mappedResourceFields = (resourceData: ResourceRequest) => {
+  const mappedResourceFields = (resourceData: ResourceRequestRead) => {
     form.reset({
       status: resourceData.status,
       category: getResourceRequestCategoryEnum(resourceData.category),
@@ -189,7 +189,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
         : resourceData;
 
       if (dataToUse) {
-        mappedResourceFields(dataToUse as ResourceRequest);
+        mappedResourceFields(dataToUse as ResourceRequestRead);
         return;
       }
     };
@@ -198,12 +198,12 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   }, [resourceData, offlineEntry, form]);
 
   const { mutate: createResource, isPending } = useMutation<
-    ResourceRequest,
+    ResourceRequestRead,
     HTTPError,
-    CreateResourceRequest
+    ResourceRequestCreate
   >({
-    mutationFn: mutate(routes.createResource),
-    onSuccess: async (data: ResourceRequest) => {
+    mutationFn: mutate(resourceRequestApi.create),
+    onSuccess: async (data: ResourceRequestRead) => {
       if (offlineEntryId) {
         await handleOfflineRecordSuccess(offlineEntryId, data);
       }
@@ -220,14 +220,14 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   });
 
   const { mutate: updateResource, isPending: isUpdatePending } = useMutation<
-    ResourceRequest,
+    ResourceRequestRead,
     HTTPError,
-    UpdateResourceRequest
+    ResourceRequestCreate
   >({
-    mutationFn: mutate(routes.updateResource, {
-      pathParams: { id: String(id) },
+    mutationFn: mutate(resourceRequestApi.update, {
+      pathParams: { resourceRequestId: String(id) },
     }),
-    onSuccess: async (data: ResourceRequest) => {
+    onSuccess: async (data: ResourceRequestRead) => {
       if (offlineEntryId) {
         await handleOfflineRecordSuccess(offlineEntryId, data);
       }
@@ -244,13 +244,13 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   });
 
   const handleOfflineQueue = async (
-    resourcePayload: CreateResourceRequest | UpdateResourceRequest,
+    resourcePayload: ResourceRequestCreate,
     isCreate: boolean,
   ) => {
     if (isCreate) {
       // Handle resource creation offline
       await queueNewResourceRequest({
-        resourcePayload: resourcePayload as CreateResourceRequest,
+        resourcePayload: resourcePayload as ResourceRequestCreate,
         userId: authUser.id,
         facilityId: String(facilityId),
         relatedPatient: related_patient,
@@ -271,7 +271,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     } else {
       // Handle resource update offline
       await queueUpdatedResourceRequest({
-        resourcePayload: resourcePayload as UpdateResourceRequest,
+        resourcePayload: resourcePayload as ResourceRequestCreate,
         resourceId: id!,
         userId: authUser.id,
         facilityId: String(facilityId),
@@ -298,7 +298,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       status: data.status,
       category: data.category,
       origin_facility: String(facilityId),
-      assigned_facility: data.assigned_facility?.id,
+      assigned_facility: data.assigned_facility?.id || null,
       assigned_to: assignedToUser?.id || null,
       approving_facility: null,
       emergency: data.emergency === "true",
@@ -312,10 +312,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
     if (id) {
       if (!onlineManager.isOnline()) {
-        handleOfflineQueue({ ...resourcePayload, id }, false);
+        handleOfflineQueue({ ...resourcePayload }, false);
         return;
       }
-      updateResource({ ...resourcePayload, id });
+      updateResource({ ...resourcePayload });
       return;
     } else {
       if (!onlineManager.isOnline()) {
@@ -507,9 +507,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {RESOURCE_STATUS_CHOICES.map((option, index) => (
-                          <SelectItem key={index} value={option.text}>
-                            {t(`resource_status__${option.text}`)}
+                        {RESOURCE_REQUEST_STATUS_OPTIONS.map((option) => (
+                          <SelectItem key={option.text} value={option.text}>
+                            {t(`resource_request_status__${option.text}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>

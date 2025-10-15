@@ -30,11 +30,7 @@ import { Organization } from "@/types/organization/organization";
 import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
-import {
-  CreateResourceRequest,
-  ResourceRequest,
-  UpdateResourceRequest,
-} from "@/types/resourceRequest/resourceRequest";
+
 import {
   AppointmentCreateRequest,
   AppointmentRead,
@@ -45,6 +41,10 @@ import {
 } from "@/types/scheduling/schedule";
 import { CurrentUserRead, UserBase, UserReadMinimal } from "@/types/user/user";
 
+import {
+  ResourceRequestCreate,
+  ResourceRequestRead,
+} from "@/types/resourceRequest/resourceRequest";
 import { AppCacheDB, OfflineWritesEntry } from "./AppcacheDB";
 import { OfflineKey } from "./offlineKeys";
 import { markWriteStatus, processDependentWrites } from "./writeQueue";
@@ -338,10 +338,8 @@ export const normaliZedResourcerequestRecord = (
   created_date?: string,
   modified_date?: string,
   approving_facility?: FacilityRead,
-): ResourceRequest => {
-  const payload = entry.payload as
-    | UpdateResourceRequest
-    | CreateResourceRequest;
+): ResourceRequestRead => {
+  const payload = entry.payload as ResourceRequestCreate;
 
   const nowIso = new Date(entry.clientTimestamp).toISOString();
   const originFacilityId = payload.origin_facility;
@@ -362,7 +360,7 @@ export const normaliZedResourcerequestRecord = (
 
   return {
     approving_facility: approving_facility ?? null,
-    assigned_facility: assigned_facility ?? undefined,
+    assigned_facility: assigned_facility ?? null,
     category: payload.category ?? "-",
     emergency: payload.emergency ?? null,
     id: entry?.id,
@@ -373,7 +371,6 @@ export const normaliZedResourcerequestRecord = (
       payload.referring_facility_contact_name ?? "unknown(offline)",
     referring_facility_contact_number:
       payload.referring_facility_contact_number ?? "unknown(offline)",
-    requested_quantity: 1,
     status: payload.status ?? "unknown(offline)",
     title: payload.title ?? "unknown(offline)",
     assigned_to: assignToUser ?? null,
@@ -398,7 +395,6 @@ export const normaliZedResourcerequestRecord = (
     created_date: created_date ? created_date : nowIso,
     modified_date: modified_date ? modified_date : nowIso,
     related_patient: patientData ?? null,
-    is_updated_offline: true,
   };
 };
 

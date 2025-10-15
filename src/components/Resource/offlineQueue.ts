@@ -7,19 +7,19 @@ import {
   saveOfflineWrite,
   saveOfflineWriteData,
 } from "@/OfflineSupport/offlineWriteHelpers";
-import routes from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
+
 import {
-  CreateResourceRequest,
-  ResourceRequest,
-  UpdateResourceRequest,
+  ResourceRequestCreate,
+  ResourceRequestRead,
 } from "@/types/resourceRequest/resourceRequest";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 
 interface QueueNewResourceRequestParams {
-  resourcePayload: CreateResourceRequest;
+  resourcePayload: ResourceRequestCreate;
   userId: string;
   facilityId: string;
   relatedPatient: string | undefined;
@@ -28,12 +28,15 @@ interface QueueNewResourceRequestParams {
   patientData: PatientRead | undefined;
   assignFacility: FacilityRead | undefined;
   assignedToUser: UserReadMinimal | undefined;
-  onSuccess?: (resourceId: string, normalizedResource: ResourceRequest) => void;
+  onSuccess?: (
+    resourceId: string,
+    normalizedResource: ResourceRequestRead,
+  ) => void;
   onError?: (error: Error) => void;
 }
 
 interface QueueUpdatedResourceRequestParams {
-  resourcePayload: UpdateResourceRequest;
+  resourcePayload: ResourceRequestCreate;
   resourceId: string;
   userId: string;
   facilityId: string;
@@ -42,8 +45,11 @@ interface QueueUpdatedResourceRequestParams {
   patientData: PatientRead | undefined;
   assignFacility: FacilityRead | undefined;
   assignedToUser: UserReadMinimal | undefined;
-  resourceData: ResourceRequest | undefined;
-  onSuccess?: (resourceId: string, normalizedResource: ResourceRequest) => void;
+  resourceData: ResourceRequestRead | undefined;
+  onSuccess?: (
+    resourceId: string,
+    normalizedResource: ResourceRequestRead,
+  ) => void;
   onError?: (error: Error) => void;
 }
 
@@ -106,7 +112,7 @@ const normalizeAndSetQueryData = async ({
   resourceId,
   relatedPatient,
   isCreate,
-}: NormalizeAndSetQueryDataParams): Promise<ResourceRequest> => {
+}: NormalizeAndSetQueryDataParams): Promise<ResourceRequestRead> => {
   const normalizedResource = normaliZedResourcerequestRecord(
     entry,
     patientData,
@@ -226,8 +232,8 @@ export const queueUpdatedResourceRequest = async ({
       const isCreate = entry.type === OfflineKeyMap.create_resource_request;
 
       const existingPayload = isCreate
-        ? (entry.payload as CreateResourceRequest)
-        : (entry.payload as UpdateResourceRequest);
+        ? (entry.payload as ResourceRequestCreate)
+        : (entry.payload as ResourceRequestCreate);
 
       // only assign if resourcePayload.related_patient is undefined/null,
       //  it will happen when updating un-synced resource req
@@ -235,10 +241,10 @@ export const queueUpdatedResourceRequest = async ({
         resourcePayload.related_patient = existingPayload.related_patient;
       }
 
-      let updatedPayload: CreateResourceRequest | UpdateResourceRequest;
+      let updatedPayload: ResourceRequestCreate | ResourceRequestCreate;
 
       if (isCreate) {
-        const { id: _id, ...rest } = resourcePayload; // remove id to match this of type `createresourcereuest`
+        const { ...rest } = resourcePayload; // remove id to match this of type `createresourcereuest`
         updatedPayload = {
           ...existingPayload,
           ...rest,
@@ -278,17 +284,14 @@ export const queueUpdatedResourceRequest = async ({
         userId: userId,
         facilityId: String(facilityId),
         mutationSyncRouteKey: OfflineKeyMap.update_resource_request,
-        mutationPathParams: { id: resourceId } satisfies PathParamsObject<
-          typeof routes.updateResource
-        >,
+        mutationPathParams: {
+          resourceRequestId: resourceId,
+        } satisfies PathParamsObject<typeof resourceRequestApi.update>,
         type: OfflineKeyMap.update_resource_request,
         resourceType: "resourceRequest",
         payload: resourcePayload,
         serverTimestamp: resourceData?.modified_date,
         useQueryRouteKey: "getResourceDetails",
-        useQueryPathParams: { id: resourceId } satisfies PathParamsObject<
-          typeof routes.getResourceDetails
-        >,
       };
 
       const saveResult = await saveOfflineWrite(offlineEntry);
