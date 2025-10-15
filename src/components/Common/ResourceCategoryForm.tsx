@@ -98,7 +98,7 @@ export function ResourceCategoryForm({
     enabled: isEditing && Boolean(categorySlug),
   });
 
-  // Reset form when category data loads
+  // Update form when category data loads
   useEffect(() => {
     if (categoryData) {
       form.reset({
@@ -110,7 +110,7 @@ export function ResourceCategoryForm({
     }
   }, [categoryData, form]);
 
-  // Auto-generate slug from title for new categories
+  // Auto-generate slug from name when creating new category
   useEffect(() => {
     if (isEditing) return;
 
@@ -324,7 +324,7 @@ export function ResourceCategoryForm({
               )}
             />
 
-            <div className="flex justify-end space-x-2 pt-4">
+            <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={handleClose}>
                 {t("cancel")}
               </Button>
