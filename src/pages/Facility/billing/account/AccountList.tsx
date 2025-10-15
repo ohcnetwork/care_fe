@@ -88,7 +88,6 @@ export function AccountList({
         name: qParams.search,
         status: qParams.status,
         billing_status: qParams.billing_status,
-        ordering: "-created_date",
       },
     }),
   });

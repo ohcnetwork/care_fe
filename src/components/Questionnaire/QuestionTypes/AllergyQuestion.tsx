@@ -47,7 +47,7 @@ import {
 } from "@/components/ui/table";
 
 import { CATEGORY_ICONS } from "@/components/Patient/allergy/list";
-import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
+import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -108,6 +108,7 @@ function CategorySelect({
   disabled?: boolean;
   hasId: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <Select
       value={category}
@@ -116,7 +117,7 @@ function CategorySelect({
     >
       <SelectTrigger className="h-9 w-full lg:h-8 lg:w-[2rem] lg:px-0 lg:[&>svg]:hidden lg:flex lg:items-center lg:justify-center">
         <SelectValue
-          placeholder="Cat"
+          placeholder={t("select_category")}
           className="lg:text-center lg:h-full lg:flex lg:items-center lg:justify-center lg:m-0 lg:p-0"
         >
           {category && (
@@ -224,6 +225,7 @@ function OccurrencePicker({
       value={lastOccurrence ? new Date(lastOccurrence) : undefined}
       onChange={onChange}
       disabled={disabled}
+      blockDate={(date) => date > new Date()}
       buttonClassName="h-9 mt-1 lg:h-8 lg:text-sm lg:px-2 lg:justify-start lg:font-normal lg:w-full lg:mt-0"
     />
   );
@@ -841,7 +843,7 @@ export function AllergyQuestion({
       )}
 
       {isMobile ? (
-        <EntitySelectionSheet
+        <EntitySelectionDrawer
           open={!!newAllergyInSheet}
           onOpenChange={(open) => {
             if (!open) {
@@ -855,26 +857,24 @@ export function AllergyQuestion({
           onConfirm={handleConfirmAllergy}
           placeholder={addAllergyPlaceholder}
         >
-          <div className="space-y-4 p-3">
-            {newAllergyInSheet && (
-              <AllergyItem
-                allergy={newAllergyInSheet}
-                disabled={disabled}
-                onUpdate={(updates) => {
-                  setNewAllergyInSheet((prev) =>
-                    prev
-                      ? {
-                          ...prev,
-                          ...updates,
-                        }
-                      : null,
-                  );
-                }}
-                onRemove={() => {}}
-              />
-            )}
-          </div>
-        </EntitySelectionSheet>
+          {newAllergyInSheet && (
+            <AllergyItem
+              allergy={newAllergyInSheet}
+              disabled={disabled}
+              onUpdate={(updates) => {
+                setNewAllergyInSheet((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        ...updates,
+                      }
+                    : null,
+                );
+              }}
+              onRemove={() => {}}
+            />
+          )}
+        </EntitySelectionDrawer>
       ) : (
         <ValueSetSelect
           system="system-allergy-code"

@@ -6,6 +6,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   dateFilter,
   encounterPriorityFilter,
@@ -33,6 +34,8 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import query from "@/Utils/request/query";
 import { dateQueryString, dateTimeQueryString } from "@/Utils/utils";
+import careConfig from "@careConfig";
+import { subDays } from "date-fns";
 
 interface EncounterListProps {
   encounters?: EncounterRead[];
@@ -167,10 +170,19 @@ export function EncounterList({
     // Set default date range if no dates are present
     if (!created_date_after && !created_date_before) {
       const today = new Date();
-      updateQuery({
-        created_date_after: dateQueryString(today),
-        created_date_before: dateQueryString(today),
-      });
+      const defaultDays = careConfig.encounterDateFilter;
+      if (defaultDays === 0) {
+        // Today only
+        updateQuery({
+          created_date_after: dateQueryString(today),
+          created_date_before: dateQueryString(today),
+        });
+      } else {
+        updateQuery({
+          created_date_after: dateQueryString(subDays(today, defaultDays)),
+          created_date_before: dateQueryString(today),
+        });
+      }
     }
   }, [created_date_after, created_date_before, updateQuery]);
 
@@ -178,7 +190,7 @@ export function EncounterList({
     encounterStatusFilter("status"),
     encounterPriorityFilter("priority"),
     tagFilter("tags", TagResource.ENCOUNTER, "multi", t("tags", { count: 2 })),
-    dateFilter("created_date", t("date"), longDateRangeOptions),
+    dateFilter("created_date", t("date"), longDateRangeOptions, true),
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
@@ -251,6 +263,14 @@ export function EncounterList({
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
+                <div>
+                  <Input
+                    type="text"
+                    placeholder={t("search")}
+                    value={name || ""}
+                    onChange={(e) => updateQuery({ name: e.target.value })}
+                  />
+                </div>
                 <PatientIdentifierFilter
                   onSelect={(patientId) =>
                     updateQuery({ patient_filter: patientId })
