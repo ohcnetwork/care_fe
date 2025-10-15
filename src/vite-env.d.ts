@@ -36,6 +36,7 @@ interface ImportMetaEnv {
   readonly REACT_SENTRY_ENVIRONMENT?: string;
   readonly REACT_DEFAULT_COUNTRY?: string;
   readonly REACT_MAPS_FALLBACK_URL_TEMPLATE?: string;
+  readonly REACT_CUSTOM_SHORTCUTS?: string;
 }
 
 interface ImportMeta {
