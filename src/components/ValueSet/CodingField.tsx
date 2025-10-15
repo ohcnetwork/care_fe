@@ -137,7 +137,7 @@ export const CodingField = ({
         onClick={isVerified ? undefined : handleVerify}
         disabled={isLookupPending || isVerified}
         className={cn(
-          "hidden sm:block shrink-0",
+          "hidden sm:flex shrink-0 items-start",
           isVerified
             ? "bg-transparent border-none shadow-none hover:bg-transparent hover:border-none hover:shadow-none"
             : "hover:border-gray-400 hover:bg-gray-100",
