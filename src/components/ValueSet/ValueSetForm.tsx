@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -36,6 +37,7 @@ import {
 } from "@/types/valueSet/valueSet";
 import { valuesOf } from "@/Utils/utils";
 
+import { generateSlug } from "@/Utils/utils";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
 
@@ -412,7 +414,16 @@ export function ValueSetForm({
             <FormItem>
               <FormLabel aria-required>{t("name")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    form.setValue("slug", generateSlug(e.target.value, 25), {
+                      shouldValidate: true,
+                      shouldDirty: false,
+                    });
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -427,9 +438,18 @@ export function ValueSetForm({
             <FormItem>
               <FormLabel aria-required>{t("slug")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    const sanitizedValue = e.target.value
+                      .toLowerCase()
+                      .replace(/[^a-z0-9_-]/g, "");
+                    field.onChange(sanitizedValue);
+                  }}
+                />
               </FormControl>
               <FormMessage />
+              <FormDescription>{t("slug_format_message")}</FormDescription>
             </FormItem>
           )}
         />

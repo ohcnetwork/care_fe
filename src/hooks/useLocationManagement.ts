@@ -54,7 +54,6 @@ export function useLocationManagement({
         limit: itemsPerPage + 2,
         name: searchQuery || undefined,
         mode: parentId ? undefined : "kind",
-        ordering: "sort_index",
       },
     }),
   });
