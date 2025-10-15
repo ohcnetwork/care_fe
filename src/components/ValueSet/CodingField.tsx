@@ -1,4 +1,4 @@
-import { CheckIcon, UpdateIcon } from "@radix-ui/react-icons";
+import { CheckIcon, TrashIcon, UpdateIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -23,6 +23,8 @@ type CodingFieldProps = {
   name: string;
   form: any;
   className?: string;
+  onRemove?: () => void;
+  removeDisabled?: boolean;
 };
 
 export const CodingField = ({
@@ -30,6 +32,8 @@ export const CodingField = ({
   name,
   form,
   className,
+  onRemove,
+  removeDisabled,
 }: CodingFieldProps) => {
   const { t } = useTranslation();
   const {
@@ -112,6 +116,18 @@ export const CodingField = ({
             />
           )}
         </Button>
+        {onRemove && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onRemove}
+            disabled={removeDisabled}
+            className="shrink-0 sm:hidden"
+          >
+            <TrashIcon className="size-4" />
+          </Button>
+        )}
       </div>
       <FormField
         control={form.control}
@@ -151,6 +167,18 @@ export const CodingField = ({
           />
         )}
       </Button>
+      {onRemove && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onRemove}
+          disabled={removeDisabled}
+          className="hidden sm:flex shrink-0 items-center"
+        >
+          <TrashIcon className="size-4" />
+        </Button>
+      )}
     </div>
   );
 };

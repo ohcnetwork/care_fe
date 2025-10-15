@@ -86,17 +86,9 @@ function ConceptFields({
             name={`compose.${type}.${nestIndex}.concept.${index}`}
             form={parentForm}
             className="flex-1"
+            onRemove={() => remove(index)}
+            removeDisabled={disabled}
           />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => remove(index)}
-            disabled={disabled}
-            className="mt-0 sm:mt-0"
-          >
-            <TrashIcon className="size-4" />
-          </Button>
         </div>
       ))}
     </div>
