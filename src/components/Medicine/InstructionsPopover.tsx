@@ -55,8 +55,7 @@ function InstructionContentSection({
         <div
           className={cn(
             "flex flex-nowrap overflow-x-auto p-2 sm:flex-wrap sm:max-h-32 sm:overflow-y-auto gap-2 mb-1",
-            isReadOnly &&
-              "max-h-auto overflow-y-auto flex-wrap overflow-x-hidden",
+            isReadOnly && "h-auto overflow-y-auto flex-wrap overflow-x-hidden",
           )}
         >
           {currentInstructions.map((instruction) => (
