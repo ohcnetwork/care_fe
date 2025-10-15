@@ -1,12 +1,11 @@
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import { OfflineWritesEntry } from "./AppcacheDB";
 import { markWriteStatus } from "./writeQueue";
-import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
 // queryMap: Used for conflict detection and fetching current server data.
 export const queryMap = {
