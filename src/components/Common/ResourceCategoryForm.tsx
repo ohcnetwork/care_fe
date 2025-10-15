@@ -77,7 +77,7 @@ export function ResourceCategoryForm({
 }: ResourceCategoryFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const isEditing = Boolean(categorySlug);
+  const isEditing = !!categorySlug;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -95,7 +95,7 @@ export function ResourceCategoryForm({
     queryFn: query(resourceCategoryApi.get, {
       pathParams: { facilityId, slug: categorySlug! },
     }),
-    enabled: isEditing && Boolean(categorySlug),
+    enabled: isEditing && !!categorySlug,
   });
 
   // Update form when category data loads
