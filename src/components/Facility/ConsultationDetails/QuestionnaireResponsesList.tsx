@@ -1,14 +1,3 @@
-import { PaginatedResponse } from "@/Utils/request/types";
-import { cn } from "@/lib/utils";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { t } from "i18next";
-import { Printer } from "lucide-react";
-import { Link } from "raviger";
-import React, { useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
-
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -22,15 +11,24 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { formatDateTime, formatName, properCase } from "@/Utils/utils";
+import React, { useEffect } from "react";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-
-import query from "@/Utils/request/query";
-import { formatDateTime, formatName, properCase } from "@/Utils/utils";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import patientApi from "@/types/emr/patient/patientApi";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { t } from "i18next";
+import { Printer } from "lucide-react";
+import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
 
 interface Props {
   encounterId?: string;
@@ -157,13 +155,13 @@ function QuestionGroup({
 
     return (
       <TableRow key={question.id} className="flex flex-col md:table-row">
-        <TableCell className="py-1 pl-0 align-top md:w-1/2">
+        <TableCell className="py-1 pl-0 align-top">
           <div className="text-sm text-gray-600 break-words whitespace-normal">
             {question.text}
           </div>
         </TableCell>
         <TableCell
-          className="py-1 pr-0 align-top md:w-1/2"
+          className="py-1 pr-0 align-top"
           colSpan={response.note ? 1 : 2}
         >
           <div className="text-sm font-medium break-words whitespace-pre-wrap">
@@ -332,13 +330,13 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
                         key={question.id}
                         className="flex flex-col md:table-row"
                       >
-                        <TableCell className="py-1 pl-0 align-top md:w-1/2">
+                        <TableCell className="py-1 pl-0 align-top">
                           <div className="text-sm text-gray-600 break-words whitespace-normal">
                             {question.text}
                           </div>
                         </TableCell>
                         <TableCell
-                          className="py-1 pr-0 align-top md:w-1/2"
+                          className="py-1 pr-0 align-top"
                           colSpan={response.note ? 1 : 2}
                         >
                           <div className="text-sm font-medium break-words whitespace-pre-wrap">
