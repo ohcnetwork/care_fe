@@ -3,7 +3,8 @@ import { toast } from "sonner";
 
 import { AppCacheDB, OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import { SyncManager } from "@/OfflineSupport/syncmanger";
-import { ResourceRequest } from "@/types/resourceRequest/resourceRequest";
+
+import { ResourceRequestRead } from "@/types/resourceRequest/resourceRequest";
 import {
   Appointment,
   AppointmentCreateRequest,
@@ -143,7 +144,7 @@ export const handleCreateandUpdateResourceRequestEdit = async (
   facilityId?: string,
 ) => {
   if (entry.type === "create_resource_request") {
-    const payload = entry.payload as ResourceRequest;
+    const payload = entry.payload as ResourceRequestRead;
     const relatedPatient = payload?.related_patient;
 
     navigate(`/facility/${facilityId}/resource/new`, {

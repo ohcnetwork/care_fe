@@ -6,12 +6,13 @@ import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import { OfflineWritesEntry } from "./AppcacheDB";
 import { markWriteStatus } from "./writeQueue";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
 // queryMap: Used for conflict detection and fetching current server data.
 export const queryMap = {
   getPatient: patientApi.getPatient,
   getEncounter: encounterApi.get,
-  getResourceDetails: routes.getResourceDetails,
+  getResourceDetails: resourceRequestApi.get,
   getAppointment: scheduleApis.appointments.retrieve,
 } as const;
 

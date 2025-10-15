@@ -1,7 +1,6 @@
 import { onlineManager } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import { ApiRoute, HTTPError } from "@/Utils/request/types";
 import batchApi from "@/types/base/batch/batchApi";
@@ -9,6 +8,7 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import { AppCacheDB } from "./AppcacheDB";
 import { detectAndMarkConflict } from "./conflictHandler";
 import { topologicalSort } from "./dependencyResolver";
@@ -26,8 +26,8 @@ export const mutationMap = {
   update_patient: patientApi.updatePatient,
   create_encounter: encounterApi.create,
   mark_encounter_as_complete: encounterApi.update,
-  create_resource_request: routes.createResource,
-  update_resource_request: routes.updateResource,
+  create_resource_request: resourceRequestApi.create,
+  update_resource_request: resourceRequestApi.update,
   assign_user_to_patient: patientApi.addUser,
   remove_user_from_patient: patientApi.removeUser,
   create_appointment: scheduleApis.slots.createAppointment,
