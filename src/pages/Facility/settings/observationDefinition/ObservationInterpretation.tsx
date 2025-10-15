@@ -993,7 +993,7 @@ function CustomValueSetInterpretationComponent({
   const { t } = useTranslation();
 
   const { data: valuesets } = useQuery({
-    queryKey: ["valusets"],
+    queryKey: ["valuesets"],
     queryFn: query(valueSetApi.list),
   });
 
