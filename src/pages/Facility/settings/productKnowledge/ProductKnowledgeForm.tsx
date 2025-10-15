@@ -57,49 +57,6 @@ const codeSchema = z.object({
   system: z.string().min(1, "System is required"),
 });
 
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  slug_value: z.string().min(1, "Slug is required"),
-  product_type: z.nativeEnum(ProductKnowledgeType),
-  status: z.nativeEnum(ProductKnowledgeStatus),
-  alternate_identifier: z.string().trim().optional(),
-  category: z.string(),
-  code: codeSchema.nullable(),
-  base_unit: codeSchema.nullable(),
-  names: z
-    .array(
-      z.object({
-        name_type: z.nativeEnum(ProductNameTypes),
-        name: z.string().min(1, "Name is required"),
-      }),
-    )
-    .default([]),
-  storage_guidelines: z
-    .array(
-      z.object({
-        note: z.string().min(1, "Note is required"),
-        stability_duration: z
-          .object({
-            value: z.number().int().optional(),
-            unit: codeSchema,
-          })
-          .refine((data) => data.value !== undefined && data.value !== null),
-      }),
-    )
-    .default([]),
-  definitional: z
-    .object({
-      dosage_form: codeSchema.optional(),
-      intended_routes: z.array(codeSchema).default([]),
-    })
-    .nullable()
-    .optional()
-    .refine((data) => {
-      if (!data) return true; // definitional is optional
-      return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
-    }),
-});
-
 export default function ProductKnowledgeForm({
   facilityId,
   slug,
@@ -171,6 +128,51 @@ function ProductKnowledgeFormContent({
   const queryClient = useQueryClient();
   const isEditMode = Boolean(slug);
 
+  const formSchema = z.object({
+    name: z.string().trim().min(1, "Name is required"),
+    slug_value: z.string().min(1, "Slug is required"),
+    product_type: z.nativeEnum(ProductKnowledgeType),
+    status: z.nativeEnum(ProductKnowledgeStatus),
+    alternate_identifier: z.string().trim().optional(),
+    category: z.string(),
+    code: codeSchema.nullable(),
+    base_unit: codeSchema.refine((data) => data.code && data.code !== "", {
+      message: t("field_required"),
+    }),
+    names: z
+      .array(
+        z.object({
+          name_type: z.nativeEnum(ProductNameTypes),
+          name: z.string().min(1, "Name is required"),
+        }),
+      )
+      .default([]),
+    storage_guidelines: z
+      .array(
+        z.object({
+          note: z.string().min(1, "Note is required"),
+          stability_duration: z
+            .object({
+              value: z.number().int().optional(),
+              unit: codeSchema,
+            })
+            .refine((data) => data.value !== undefined && data.value !== null),
+        }),
+      )
+      .default([]),
+    definitional: z
+      .object({
+        dosage_form: codeSchema.optional(),
+        intended_routes: z.array(codeSchema).default([]),
+      })
+      .nullable()
+      .optional()
+      .refine((data) => {
+        if (!data) return true; // definitional is optional
+        return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
+      }),
+  });
+
   // Create default storage guidelines and units
   const defaultUnitCode: Code = {
     code: "d",
@@ -189,7 +191,13 @@ function ProductKnowledgeFormContent({
         alternate_identifier: existingData.alternate_identifier || "",
         category: existingData.category?.slug,
         code: existingData.code?.code ? existingData.code : null,
-        base_unit: existingData.base_unit?.code ? existingData.base_unit : null,
+        base_unit: existingData.base_unit?.code
+          ? existingData.base_unit
+          : {
+              code: "",
+              display: "",
+              system: "",
+            },
         names: existingData.names || [],
         storage_guidelines: existingData.storage_guidelines || [],
         definitional:
@@ -201,11 +209,17 @@ function ProductKnowledgeFormContent({
     }
 
     return {
+      name: "",
+      slug_value: "",
       product_type: ProductKnowledgeType.medication,
       names: [],
       storage_guidelines: [],
       code: null,
-      base_unit: null,
+      base_unit: {
+        code: "",
+        display: "",
+        system: "",
+      },
       definitional: null,
       status: ProductKnowledgeStatus.active,
       category: categorySlug,
@@ -483,32 +497,42 @@ function ProductKnowledgeFormContent({
                     )}
                   />
 
-                  <div>
-                    <FormLabel aria-required>{t("base_unit")}</FormLabel>
-                    <div className="mt-2">
-                      <Select
-                        value={form.watch("base_unit")?.code || ""}
-                        onValueChange={(value) => {
-                          const selectedUnit = DOSAGE_UNITS_CODES.find(
-                            (unit) => unit.code === value,
-                          );
-                          if (selectedUnit)
-                            form.setValue("base_unit", selectedUnit);
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("select_base_unit")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {DOSAGE_UNITS_CODES.map((unit) => (
-                            <SelectItem key={unit.code} value={unit.code}>
-                              {unit.display}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="base_unit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel aria-required>{t("base_unit")}</FormLabel>
+                        <Select
+                          value={field.value?.code || ""}
+                          onValueChange={(value) => {
+                            const selectedUnit = DOSAGE_UNITS_CODES.find(
+                              (unit) => unit.code === value,
+                            );
+                            if (selectedUnit) {
+                              field.onChange(selectedUnit);
+                            }
+                          }}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={t("select_base_unit")}
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {DOSAGE_UNITS_CODES.map((unit) => (
+                              <SelectItem key={unit.code} value={unit.code}>
+                                {unit.display}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
