@@ -77,7 +77,7 @@ export function ResourceCategoryForm({
 }: ResourceCategoryFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const isEditing = !!categorySlug;
+  const isEditing = Boolean(categorySlug);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -95,10 +95,10 @@ export function ResourceCategoryForm({
     queryFn: query(resourceCategoryApi.get, {
       pathParams: { facilityId, slug: categorySlug! },
     }),
-    enabled: isEditing && !!categorySlug,
+    enabled: isEditing && Boolean(categorySlug),
   });
 
-  // Update form when category data loads
+  // Reset form when category data loads
   useEffect(() => {
     if (categoryData) {
       form.reset({
@@ -110,19 +110,31 @@ export function ResourceCategoryForm({
     }
   }, [categoryData, form]);
 
-  // Auto-generate slug from name when creating new category
+  // Auto-generate slug from title for new categories
   useEffect(() => {
     if (isEditing) return;
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || ""), {
-          shouldValidate: true,
-        });
+        form.setValue("slug_value", generateSlug(value.title || ""));
       }
     });
     return () => subscription.unsubscribe();
   }, [form, isEditing]);
+
+  // Reset form and clear errors when sheet closes
+  const handleClose = () => {
+    if (!isEditing) {
+      form.reset({
+        title: "",
+        slug_value: "",
+        description: "",
+        resource_sub_type: ResourceCategorySubType.other,
+      });
+      form.clearErrors();
+    }
+    onClose();
+  };
 
   const createMutation = useMutation({
     mutationFn: mutate(resourceCategoryApi.create, {
@@ -190,9 +202,9 @@ export function ResourceCategoryForm({
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="sm:max-w-md">
-        <SheetHeader>
+    <Sheet open={isOpen} onOpenChange={handleClose}>
+      <SheetContent className="flex flex-col sm:max-w-md overflow-y-auto">
+        <SheetHeader className="flex-shrink-0">
           <SheetTitle>
             {isEditing ? t("edit_category") : t("create_category")}
           </SheetTitle>
@@ -204,7 +216,10 @@ export function ResourceCategoryForm({
         </SheetHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="mt-1 space-y-6"
+          >
             <FormField
               control={form.control}
               name="title"
@@ -309,8 +324,8 @@ export function ResourceCategoryForm({
               )}
             />
 
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={onClose}>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button type="button" variant="outline" onClick={handleClose}>
                 {t("cancel")}
               </Button>
               <Button type="submit" disabled={isLoading}>
