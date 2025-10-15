@@ -76,7 +76,7 @@ export const AppointmentEncounterHeader = ({
 
   const { mutate: batchRequest, isPending: isBatchRequestPending } =
     useMutation({
-      mutationFn: mutate(batchApi.batchRequest),
+      mutationFn: mutate(batchApi.request),
       onSuccess: (results: BatchRequestResponse) => {
         queryClient.invalidateQueries({
           queryKey: ["encounter", encounter.id],

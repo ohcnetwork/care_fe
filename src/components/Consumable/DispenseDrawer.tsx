@@ -208,7 +208,7 @@ export default function DispenseDrawer({
   }, [productKnowledgeInventoriesMap, facilityId, currentLocation.id]);
 
   const { mutate: dispense, isPending } = useMutation({
-    mutationFn: mutate(batchApi.batchRequest),
+    mutationFn: mutate(batchApi.request),
     onSuccess: () => {
       toast.success(t("items_dispensed_successfully"));
       queryClient.invalidateQueries({
