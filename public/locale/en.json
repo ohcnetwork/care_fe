@@ -5579,15 +5579,5 @@
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞",
-  "title_is_required": "Title is required",
-  "code_is_required": "Code is required",
-  "display_name_is_required": "Display name is required",
-  "system_is_required": "System is required",
-  "slug_is_required": "Slug is required",
-  "description_is_required": "Description is required",
-  "usage_is_required": "Usage is required",
-  "name_is_required": "Name is required",
-  "note_is_required": "Note is required",
-  "enter_valid_url": "Please enter a valid URL"
+  "℞": "℞"
 }

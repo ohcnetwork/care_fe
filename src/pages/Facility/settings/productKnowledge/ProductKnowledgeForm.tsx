@@ -36,7 +36,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
-import { Code } from "@/types/base/code/code";
+import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import {
@@ -120,41 +120,34 @@ function ProductKnowledgeFormContent({
 }) {
   const { t } = useTranslation();
 
-  // Define a Code schema to match the API type with i18n
-  const codeSchema = z.object({
-    code: z.string().min(1, t("code_is_required")),
-    display: z.string().min(1, t("display_name_is_required")),
-    system: z.string().min(1, t("system_is_required")),
-  });
-
   const formSchema = z.object({
-    name: z.string().min(1, t("name_is_required")),
+    name: z.string().min(1, t("field_required")),
     slug_value: z
       .string()
-      .min(1, t("slug_is_required"))
+      .min(1, t("field_required"))
       .max(25, t("character_count_validation", { min: 1, max: 25 })),
     product_type: z.nativeEnum(ProductKnowledgeType),
     status: z.nativeEnum(ProductKnowledgeStatus),
     alternate_identifier: z.string().trim().optional(),
     category: z.string(),
-    code: codeSchema.nullable(),
-    base_unit: codeSchema.nullable(),
+    code: CodeSchema.nullable(),
+    base_unit: CodeSchema.nullable(),
     names: z
       .array(
         z.object({
           name_type: z.nativeEnum(ProductNameTypes),
-          name: z.string().min(1, t("name_is_required")),
+          name: z.string().min(1, t("field_required")),
         }),
       )
       .default([]),
     storage_guidelines: z
       .array(
         z.object({
-          note: z.string().min(1, t("note_is_required")),
+          note: z.string().min(1, t("field_required")),
           stability_duration: z
             .object({
               value: z.number().int().optional(),
-              unit: codeSchema,
+              unit: CodeSchema,
             })
             .refine((data) => data.value !== undefined && data.value !== null),
         }),
@@ -162,8 +155,8 @@ function ProductKnowledgeFormContent({
       .default([]),
     definitional: z
       .object({
-        dosage_form: codeSchema.optional(),
-        intended_routes: z.array(codeSchema).default([]),
+        dosage_form: CodeSchema.optional(),
+        intended_routes: z.array(CodeSchema).default([]),
       })
       .nullable()
       .optional()

@@ -104,16 +104,16 @@ export function SpecimenDefinitionForm({
   const { t } = useTranslation();
 
   const formSchema = z.object({
-    title: z.string().min(1, t("title_is_required")),
+    title: z.string().min(1, t("field_required")),
     slug_value: z
       .string()
-      .min(1, t("slug_is_required"))
+      .min(1, t("field_required"))
       .max(25, t("character_count_validation", { min: 1, max: 25 })),
     status: z.nativeEnum(SpecimenDefinitionStatus),
-    description: z.string().min(1, t("description_is_required")),
+    description: z.string().min(1, t("field_required")),
     derived_from_uri: z
       .string()
-      .url({ message: t("enter_valid_url") })
+      .url({ message: t("field_required") })
       .optional(),
     type_collected: CodeSchema,
     patient_preparation: z.array(CodeSchema).min(0),

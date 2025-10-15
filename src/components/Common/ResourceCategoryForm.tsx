@@ -73,7 +73,7 @@ export function ResourceCategoryForm({
   const isEditing = !!categorySlug;
 
   const formSchema = z.object({
-    title: z.string().min(1, t("title_is_required")),
+    title: z.string().min(1, t("field_required")),
     slug_value: z
       .string()
       .min(5, t("character_count_validation", { min: 5, max: 25 }))

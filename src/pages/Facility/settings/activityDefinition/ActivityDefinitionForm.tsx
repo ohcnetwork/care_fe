@@ -35,6 +35,7 @@ import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDe
 import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import { CodeSchema } from "@/types/base/code/code";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
 import mutate from "@/Utils/request/mutate";
@@ -124,39 +125,21 @@ function ActivityDefinitionFormContent({
   const { t } = useTranslation();
 
   const formSchema = z.object({
-    title: z.string().min(1, t("title_is_required")),
+    title: z.string().min(1, t("field_required")),
     slug_value: z
       .string()
-      .min(1, t("slug_is_required"))
+      .min(1, t("field_required"))
       .max(25, t("character_count_validation", { min: 1, max: 25 })),
-    description: z.string().min(1, t("description_is_required")),
-    usage: z.string().min(1, t("usage_is_required")),
+    description: z.string().min(1, t("field_required")),
+    usage: z.string().min(1, t("field_required")),
     derived_from_uri: z.string().nullable(),
     status: z.nativeEnum(Status),
     classification: z.nativeEnum(Classification),
     kind: z.nativeEnum(Kind),
     healthcare_service: z.string().nullable(),
-    code: z.object({
-      code: z.string().min(1, t("code_is_required")),
-      display: z.string().min(1, t("display_name_is_required")),
-      system: z.string().min(1, t("system_is_required")),
-    }),
-    body_site: z
-      .object({
-        code: z.string().min(1, t("code_is_required")),
-        display: z.string().min(1, t("display_name_is_required")),
-        system: z.string().min(1, t("system_is_required")),
-      })
-      .nullable(),
-    diagnostic_report_codes: z
-      .array(
-        z.object({
-          code: z.string().min(1, t("code_is_required")),
-          display: z.string().min(1, t("display_name_is_required")),
-          system: z.string().min(1, t("system_is_required")),
-        }),
-      )
-      .default([]),
+    code: CodeSchema,
+    body_site: CodeSchema.nullable(),
+    diagnostic_report_codes: z.array(CodeSchema).default([]),
     specimen_requirements: z
       .array(
         z.object({
