@@ -7,7 +7,7 @@ import { PatientRead } from "@/types/emr/patient/patient";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { formatPatientAge } from "@/Utils/utils";
 import { Phone } from "lucide-react";
-import { Link } from "raviger";
+import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 export const PatientInfoHoverCard = ({
@@ -36,25 +36,23 @@ export const PatientInfoHoverCard = ({
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          className="text-gray-950"
-          asChild
-          hidden={location.pathname.includes("/patients/verify")}
-        >
-          <Link
-            basePath="/"
-            href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
-              {
-                phone_number: patient.phone_number,
-                year_of_birth: patient.year_of_birth.toString(),
-                partial_id: patient.id.slice(0, 5),
-              },
-            ).toString()}`}
-          >
-            {t("patient_home")}
-          </Link>
-        </Button>
+        {!usePath()?.includes(`/facility/${facilityId}/patients/verify`) && (
+          <Button variant="outline" className="text-gray-950" asChild>
+            <Link
+              basePath="/"
+              href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                {
+                  phone_number: patient.phone_number,
+                  year_of_birth: patient.year_of_birth.toString(),
+                  partial_id: patient.id.slice(0, 5),
+                },
+              ).toString()}`}
+            >
+              {t("patient_home")}
+            </Link>
+          </Button>
+        )}
+
         <Button variant="outline" className="text-gray-950" asChild>
           <Link
             basePath="/"
