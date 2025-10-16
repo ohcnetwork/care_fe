@@ -55,6 +55,18 @@ jobs:
                           name
                         }
                       }
+                      ... on ProjectV2IterationField {
+                        id
+                        name
+                        configuration {
+                          iterations {
+                            id
+                            title
+                            startDate
+                            duration
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -64,6 +76,7 @@ jobs:
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
           echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .id' project_data.json) >> $GITHUB_ENV
           echo 'TEAM_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'SPRINT_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Sprint") | .id' project_data.json) >> $GITHUB_ENV
 
           echo 'IN_PROGRESS_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="In Progress") | .id' project_data.json) >> $GITHUB_ENV
           echo 'DONE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Done") | .id' project_data.json) >> $GITHUB_ENV
@@ -84,7 +97,7 @@ jobs:
                   id
                 }
               }
-            }' -f project=$PROJECT_ID -f pr=$PR_ID --jq '.data.addProjectV2ItemById.item.id' 2>&1 || true)"
+            }' -f project=$PROJECT_ID -f pr=$PR_ID --jq '.data.addProjectV2ItemById.item.id' 2>&1 || true )"
 
           if [[ -z "$item_id" || "$item_id" == "null" ]]; then
             item_id="$( gh api graphql -f query='
@@ -101,10 +114,43 @@ jobs:
                     }
                   }
                 }
-              }' -f project=$PROJECT_ID -f pr=$PR_ID --jq ".data.node.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id" | head -n 1)"
+              }' -f project=$PROJECT_ID -f pr=$PR_ID --jq ".data.node.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id" | head -n 1 )"
           fi
 
           echo 'ITEM_ID='$item_id >> $GITHUB_ENV
+
+      - name: Set Sprint to Current
+        if: github.event.action == 'opened'
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          current_date=$(date -u +%Y-%m-%d)
+
+          current_iteration_id=$(jq -r --arg current_date "$current_date" '
+            .data.organization.projectV2.fields.nodes[] |
+            select(.name=="Sprint") |
+            .configuration.iterations[] |
+            select(.startDate <= $current_date) |
+            .id
+          ' project_data.json | tail -n 1)
+
+          if [[ -n "$current_iteration_id" && "$current_iteration_id" != "null" ]]; then
+            gh api graphql -f query='
+              mutation($project: ID!, $item: ID!, $sprint_field: ID!, $iteration_id: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $project
+                  itemId: $item
+                  fieldId: $sprint_field
+                  value: {
+                    iterationId: $iteration_id
+                  }
+                }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }' -f project=$PROJECT_ID -f item=$ITEM_ID -f sprint_field=$SPRINT_FIELD_ID -f iteration_id="$current_iteration_id"
+          fi
 
       - name: Assign PR Author
         env:
