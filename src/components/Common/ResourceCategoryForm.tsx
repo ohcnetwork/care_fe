@@ -117,6 +117,7 @@ export function ResourceCategoryForm({
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
         form.setValue("slug_value", generateSlug(value.title || ""));
+        shouldValidate: true;
       }
     });
     return () => subscription.unsubscribe();
