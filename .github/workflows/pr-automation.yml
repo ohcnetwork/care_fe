@@ -232,7 +232,7 @@ jobs:
           fi
 
       - name: Handle Review Changes Requested
-        if: github.event.review.state == 'changes_requested'
+        if: github.event_name == 'pull_request_review' && github.event.review.state == 'changes_requested'
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
