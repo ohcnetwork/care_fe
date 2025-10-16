@@ -36,7 +36,13 @@ export const PatientInfoHoverCard = ({
         </div>
       </div>
       <div className="flex items-center gap-2">
-        {!usePath()?.includes(`/facility/${facilityId}/patients/verify`) && (
+        {!usePath()?.includes(
+          `/facility/${facilityId}/patients/verify?${new URLSearchParams({
+            phone_number: patient.phone_number,
+            year_of_birth: patient.year_of_birth.toString(),
+            partial_id: patient.id.slice(0, 5),
+          }).toString()}`,
+        ) && (
           <Button variant="outline" className="text-gray-950" asChild>
             <Link
               basePath="/"
