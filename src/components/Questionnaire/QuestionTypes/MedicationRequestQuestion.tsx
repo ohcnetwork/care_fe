@@ -39,7 +39,7 @@ import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector"
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
-import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
+import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValueSetSelect";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -413,7 +413,7 @@ export function MedicationRequestQuestion({
   };
 
   const newMedicationSheetContent = (
-    <div className="space-y-4 p-3">
+    <div className="space-y-3">
       {newMedicationInSheet && (
         <MedicationRequestGridRow
           medication={newMedicationInSheet}
@@ -787,7 +787,7 @@ export function MedicationRequestQuestion({
       )}
 
       {!desktopLayout ? (
-        <EntitySelectionSheet
+        <EntitySelectionDrawer
           open={!!newMedicationInSheet}
           onOpenChange={(isOpen) => {
             if (!isOpen) {
@@ -805,7 +805,7 @@ export function MedicationRequestQuestion({
           enableProduct
         >
           {newMedicationSheetContent}
-        </EntitySelectionSheet>
+        </EntitySelectionDrawer>
       ) : (
         <div className="max-w-4xl" data-cy="add-medication-request">
           <MedicationValueSetSelect
@@ -1217,7 +1217,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 dosageInstruction?.as_needed_boolean ||
                 isReadOnly
               }
-              className="h-9 text-sm"
+              className="h-9 text-base sm:text-sm"
             />
           )}
           <Select
@@ -1291,7 +1291,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
               }}
               disabled={disabled || isReadOnly}
             />
-
             <InstructionsPopover
               currentInstructions={currentInstructions}
               removeInstruction={removeInstruction}
@@ -1420,7 +1419,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onChange={(e) => onUpdate?.({ note: e.target.value })}
           placeholder={t("additional_notes")}
           disabled={disabled}
-          className="h-9 text-sm"
+          className="h-9 text-base sm:text-sm"
         />
       </div>
 
