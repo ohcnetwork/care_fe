@@ -159,8 +159,7 @@ jobs:
           AUTHOR: ${{ github.event.pull_request.user.login }}
           REPO: ${{ github.repository }}
         run: |
-          echo "Assigning PR #$PR_NUMBER to author: $AUTHOR"
-          gh pr edit $PR_NUMBER --add-assignee "$AUTHOR" --repo $REPO
+          gh pr edit $PR_NUMBER --add-assignee "$AUTHOR" --repo $REPO || echo "Unable to assign PR to author"
 
       - name: Update PR Status and Labels
         env:
