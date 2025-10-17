@@ -1,13 +1,13 @@
 /**
- * @file EntitySelectionSheet.tsx
+ * @file EntitySelectionDrawer.tsx
  *
- * This component provides a consistent mobile-friendly Sheet UI for selecting and configuring
+ * This component provides a consistent mobile-friendly Drawer UI for selecting and configuring
  * medical entities like medications, allergies, symptoms, and diagnoses. It handles the common
  * pattern of:
  *
  * 1. Displaying a search interface for finding entities using ValueSetSelect
  * 2. Allowing users to select an entity and configure its details
- * 3. Providing a Sheet UI with a back button and a confirmation button
+ * 3. Providing a Drawer UI with a back button and a confirmation button
  * 4. Supporting customization through props for different entity types and behaviors
  *
  * The component is reusable and can be adapted for various entity types by passing
@@ -21,21 +21,22 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 
 import { Code } from "@/types/base/code/code";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 
+import { isAppleDevice } from "@/Utils/utils";
 import MedicationValueSetSelect from "./MedicationValueSetSelect";
 import ValueSetSelect from "./ValueSetSelect";
 
-interface EntitySelectionSheetProps {
+interface EntitySelectionDrawerProps {
   /**
-   * Whether the Sheet is open
+   * Whether the Drawer is open
    */
   open: boolean;
   /**
@@ -96,7 +97,7 @@ interface EntitySelectionSheetProps {
   enableProduct?: boolean;
 }
 
-export function EntitySelectionSheet({
+export function EntitySelectionDrawer({
   open,
   onOpenChange,
   system,
@@ -109,7 +110,7 @@ export function EntitySelectionSheet({
   children,
   placeholder,
   enableProduct = false,
-}: EntitySelectionSheetProps) {
+}: EntitySelectionDrawerProps) {
   const { t } = useTranslation();
   const [selectedEntity, setSelectedEntity] = useState<Code | null>(null);
 
@@ -181,35 +182,36 @@ export function EntitySelectionSheet({
           }
         />
       )}
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent
-          className="px-0 pt-2 pb-0 rounded-t-3xl sm:max-w-md sm:mx-auto [&>button:first-child]:hidden"
-          side="bottom"
-        >
+      <Drawer
+        open={open}
+        onOpenChange={onOpenChange}
+        repositionInputs={!isAppleDevice}
+      >
+        <DrawerContent className="min-h-[60vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
           {selectedEntity ? (
-            <div className="flex flex-col h-auto min-h-[50vh] max-h-[80vh] sm:max-h-[70vh] md:max-h-[60vh]">
-              <div className="flex justify-between w-full p-2">
-                <Button
-                  variant="link"
-                  onClick={handleBack}
-                  className="underline text-sm"
-                >
-                  {t("back")}
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={handleConfirm}
-                  className="text-sm"
-                >
-                  {t("done")}
-                </Button>
-              </div>
-              <SheetHeader className="py-2 px-2 border-b border-gray-200">
-                <SheetTitle className="text-center text-base font-semibold">
+            <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)] mt-2">
+              <DrawerHeader className="py-1 px-1 border-b border-gray-200 sticky top-0 z-10 bg-white">
+                <div className="flex justify-between w-full p-1">
+                  <Button
+                    variant="link"
+                    onClick={handleBack}
+                    className="underline text-sm"
+                  >
+                    {t("back")}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={handleConfirm}
+                    className="text-sm"
+                  >
+                    {t("done")}
+                  </Button>
+                </div>
+                <DrawerTitle className="text-center text-base font-semibold">
                   {selectedEntity.display}
-                </SheetTitle>
-              </SheetHeader>
-              <div className="flex-1 overflow-y-auto pb-safe">{children}</div>
+                </DrawerTitle>
+              </DrawerHeader>
+              <div className="p-3">{children}</div>
             </div>
           ) : enableProduct ? (
             <MedicationValueSetSelect
@@ -230,8 +232,8 @@ export function EntitySelectionSheet({
               title={t(`select_${entityType}`)}
             />
           )}
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }
