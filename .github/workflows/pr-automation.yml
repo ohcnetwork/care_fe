@@ -157,8 +157,10 @@ jobs:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           AUTHOR: ${{ github.event.pull_request.user.login }}
+          REPO: ${{ github.repository }}
         run: |
-          gh pr edit $PR_NUMBER --add-assignee "$AUTHOR" --repo ${{ github.repository }}
+          echo "Assigning PR #$PR_NUMBER to author: $AUTHOR"
+          gh pr edit $PR_NUMBER --add-assignee "$AUTHOR" --repo $REPO
 
       - name: Update PR Status and Labels
         env:
