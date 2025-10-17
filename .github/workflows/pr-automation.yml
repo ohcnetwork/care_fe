@@ -155,10 +155,11 @@ jobs:
       - name: Assign PR Author
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
-          PR_ID: ${{ github.event.pull_request.node_id }}
-          AUTHOR_ID: ${{ github.event.pull_request.user.node_id }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          REPO: ${{ github.repository }}
         run: |
-          gh api --method POST repos/${{ github.repository }}/issues/$PR_NUMBER/assignees -f assignees[]="$AUTHOR"
+          gh api --method POST repos/$REPO/issues/$PR_NUMBER/assignees -f assignees[]="$AUTHOR"
 
       - name: Update PR Status and Labels
         env:
