@@ -158,24 +158,7 @@ jobs:
           PR_ID: ${{ github.event.pull_request.node_id }}
           AUTHOR_ID: ${{ github.event.pull_request.user.node_id }}
         run: |
-          gh api graphql -f query='
-            mutation($pr: ID!, $assignees: [ID!]!) {
-              addAssigneesToAssignable(input: {
-                assignableId: $pr
-                assigneeIds: $assignees
-              }) {
-                assignable {
-                  ... on PullRequest {
-                    id
-                    assignees(first: 5) {
-                      nodes {
-                        login
-                      }
-                    }
-                  }
-                }
-              }
-            }' -f pr=$PR_ID -f assignees="[\"$AUTHOR_ID\"]" || echo "Unable to assign PR author"
+          gh api --method POST repos/${{ github.repository }}/issues/$PR_NUMBER/assignees -f assignees[]="$AUTHOR"
 
       - name: Update PR Status and Labels
         env:
