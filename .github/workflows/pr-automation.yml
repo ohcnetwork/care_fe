@@ -159,8 +159,7 @@ jobs:
           AUTHOR: ${{ github.event.pull_request.user.login }}
           REPO: ${{ github.repository }}
         run: |
-          gh api --method POST repos/$REPO/issues/$PR_NUMBER/assignees -f assignees[]="$AUTHOR"
-
+          gh api --method POST repos/$REPO/issues/$PR_NUMBER/assignees -f assignees[]="$AUTHOR" || echo "Warning: Could not assign $AUTHOR"
       - name: Update PR Status and Labels
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
