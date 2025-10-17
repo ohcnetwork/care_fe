@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -31,10 +31,12 @@ import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { PLUGIN_Component } from "@/PluginEngine";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcuts, useShortcutSubContext } from "@/context/ShortcutContext";
+import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getPartialId,
@@ -158,7 +160,15 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     <div>
       <div className="container max-w-5xl mx-auto py-6">
         {canCreatePatient && (
-          <div className="flex justify-center md:justify-end">
+          <div className="flex max-md:flex-col justify-center md:justify-end gap-4">
+            <PLUGIN_Component
+              __name="PatientSearchActions"
+              facilityId={facilityId}
+              className={cn(
+                buttonVariants({ variant: "primary_gradient" }),
+                "w-full",
+              )}
+            />
             <AddPatientButton
               facilityId={facilityId}
               identifierConfigs={
