@@ -19,6 +19,9 @@ export const PatientInfoHoverCard = ({
 }) => {
   const { t } = useTranslation();
 
+  const path = usePath();
+  const isHome = path?.endsWith(`/facility/${facilityId}/patients/verify`);
+
   return (
     <>
       <div className="flex justify-between">
@@ -36,7 +39,7 @@ export const PatientInfoHoverCard = ({
         </div>
       </div>
       <div className="flex items-center gap-2">
-        {!usePath()?.includes("/patients/verify") && (
+        {!isHome && (
           <Button variant="outline" className="text-gray-950" asChild>
             <Link
               basePath="/"
