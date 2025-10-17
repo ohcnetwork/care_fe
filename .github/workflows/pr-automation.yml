@@ -155,12 +155,28 @@ jobs:
       - name: Assign PR Author
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          AUTHOR: ${{ github.event.pull_request.user.login }}
-          REPO: ${{ github.event.pull_request.base.repo.full_name }}
+          PR_ID: ${{ github.event.pull_request.node_id }}
+          AUTHOR_ID: ${{ github.event.pull_request.user.node_id }}
         run: |
-          echo "Assigning $AUTHOR to PR #$PR_NUMBER in $REPO"
-          gh pr edit $PR_NUMBER --add-assignee "$AUTHOR" --repo $REPO || echo "Unable to assign $AUTHOR (may not have permissions in $REPO)"
+          echo "Assigning PR author via GraphQL"
+          gh api graphql -f query='
+            mutation($pr: ID!, $assignees: [ID!]!) {
+              addAssigneesToAssignable(input: {
+                assignableId: $pr
+                assigneeIds: $assignees
+              }) {
+                assignable {
+                  ... on PullRequest {
+                    id
+                    assignees(first: 5) {
+                      nodes {
+                        login
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f pr=$PR_ID -f assignees="[\"$AUTHOR_ID\"]" || echo "Unable to assign PR author"
 
       - name: Update PR Status and Labels
         env:
