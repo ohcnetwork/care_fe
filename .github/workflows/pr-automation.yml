@@ -157,9 +157,10 @@ jobs:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           AUTHOR: ${{ github.event.pull_request.user.login }}
-          REPO: ${{ github.repository }}
+          REPO: ${{ github.event.pull_request.base.repo.full_name }}
         run: |
-          gh pr edit $PR_NUMBER --add-assignee "$AUTHOR" --repo $REPO || echo "Unable to assign PR to author"
+          echo "Assigning $AUTHOR to PR #$PR_NUMBER in $REPO"
+          gh pr edit $PR_NUMBER --add-assignee "$AUTHOR" --repo $REPO || echo "Unable to assign $AUTHOR (may not have permissions in $REPO)"
 
       - name: Update PR Status and Labels
         env:
