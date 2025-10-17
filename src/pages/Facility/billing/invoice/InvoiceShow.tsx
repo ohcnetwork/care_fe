@@ -383,6 +383,7 @@ export function InvoiceShow({
                     <DropdownMenuGroup>
                       <PLUGIN_Component
                         __name="InvoiceRecordPaymentOptions"
+                        facilityId={facilityId}
                         invoice={invoice}
                       />
                     </DropdownMenuGroup>

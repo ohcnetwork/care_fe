@@ -54,6 +54,7 @@ export type PatientDetailsTabDemographyGeneralInfoComponentType = React.FC<{
 }>;
 
 export type InvoiceRecordPaymentOptionsComponentType = React.FC<{
+  facilityId: string;
   invoice: InvoiceRead;
 }>;
 
