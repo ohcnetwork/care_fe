@@ -117,7 +117,6 @@ export function ResourceCategoryForm({
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
         form.setValue("slug_value", generateSlug(value.title || ""));
-        shouldValidate: true;
       }
     });
     return () => subscription.unsubscribe();
@@ -147,7 +146,7 @@ export function ResourceCategoryForm({
         queryKey: ["resourceCategories"],
       });
       onSuccess?.(data);
-      onClose();
+      handleClose();
     },
     onError: (error) => {
       toast.error(t("failed_to_create_category"));
@@ -165,7 +164,7 @@ export function ResourceCategoryForm({
         queryKey: ["resourceCategories", facilityId],
       });
       onSuccess?.(data);
-      onClose();
+      handleClose();
     },
     onError: (error) => {
       toast.error(t("failed_to_update_category"));
