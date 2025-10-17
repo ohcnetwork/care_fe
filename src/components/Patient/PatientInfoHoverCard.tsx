@@ -20,7 +20,7 @@ export const PatientInfoHoverCard = ({
   const { t } = useTranslation();
 
   const path = usePath();
-  const isHome = path?.endsWith(`/facility/${facilityId}/patients/verify`);
+  const isPatientHomePage = path?.endsWith(`/facility/${facilityId}/patients/verify`);
 
   return (
     <>
