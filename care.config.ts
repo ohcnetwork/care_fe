@@ -175,6 +175,8 @@ const careConfig = {
     ),
   },
 
+  i18nUrl: env.REACT_CUSTOM_REMOTE_I18N_URL,
+  
   /**
    * Custom shortcuts configuration from environment variables
    * Format: JSON string with array of shortcut objects
