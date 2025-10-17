@@ -23,6 +23,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   Popover,
   PopoverContent,
@@ -38,6 +39,7 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import { COLOR_PALETTE } from "@/components/ui/multi-filter/utils/Utils";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
@@ -83,6 +85,7 @@ export const PractitionerSelector = ({
   const [currentOrganizationId, setCurrentOrganizationId] = useState<
     string | null
   >(null);
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   // Fetch root organizations
   const { data: organizationsResponse } = useQuery({
@@ -223,6 +226,382 @@ export const PractitionerSelector = ({
     }
   };
 
+  const triggerButton = multiple ? (
+    <Button
+      variant="secondary"
+      role="combobox"
+      className="size-8! rounded-full"
+    >
+      {selected && selected.length > MULTI_SELECT_SHOW_LIMIT ? (
+        <span className="text-xs text-gray-500">
+          +{selected.length - MULTI_SELECT_SHOW_LIMIT}
+        </span>
+      ) : (
+        <CareIcon icon="l-plus" className="size-4" />
+      )}
+    </Button>
+  ) : (
+    <Button
+      variant="outline"
+      role="combobox"
+      className="min-w-60 w-full justify-start"
+    >
+      {selected[0] ? (
+        <div className="flex items-center gap-2">
+          <ScheduleResourceIcon
+            resource={{
+              resource_type: SchedulableResourceType.Practitioner,
+              resource: selected[0],
+            }}
+            className="size-6 rounded-full"
+          />
+          <span>
+            {formatScheduleResourceName({
+              resource_type: SchedulableResourceType.Practitioner,
+              resource: selected[0],
+            })}
+          </span>
+        </div>
+      ) : (
+        <span className="text-gray-400">{t("select_practitioner")}</span>
+      )}
+      <CaretDownIcon className="ml-auto" />
+    </Button>
+  );
+
+  const content = (
+    <div>
+      {/* Main Content */}
+      {!currentOrganizationId && (
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <div className="px-4 py-3 border-b bg-gray-50 rounded-t-md">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-600">
+                {t("select_practitioners")}
+              </span>
+            </div>
+          </div>
+
+          <Command className="border-0">
+            <div className="px-3 py-2 border-b">
+              <div className="relative">
+                <CommandInput
+                  placeholder={t("search_departments_and_practitioners")}
+                  value={searchQuery}
+                  onValueChange={setSearchQuery}
+                  className="pl-1 border-0 focus:ring-0 text-base sm:text-sm"
+                />
+              </div>
+            </div>
+
+            <CommandList className="max-h-[400px]">
+              <CommandEmpty>
+                {searchQuery ? (
+                  <div className="p-6 text-center text-gray-500">
+                    <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <div className="text-sm">
+                      {t("no_results")} "{searchQuery}"
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-6 text-center text-gray-500">
+                    <Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <div className="text-sm">{t("no_organizations_found")}</div>
+                  </div>
+                )}
+              </CommandEmpty>
+
+              {/* Selected Practitioners - Show at the top */}
+              {selected && selected.length > 0 && (
+                <CommandGroup>
+                  <div className="flex items-center justify-between px-2 py-1.5">
+                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      {t("selected")}
+                    </span>
+                    {multiple && selected.length > 1 && (
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={handleClearAll}
+                      >
+                        {t("clear_all")}
+                      </Button>
+                    )}
+                  </div>
+                  {selected.map((user) => (
+                    <CommandItem
+                      key={user.id}
+                      value={getItemValue(user)}
+                      onSelect={() => {
+                        onSelect(selected.filter((s) => s.id !== user.id));
+                      }}
+                      className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
+                    >
+                      <Avatar
+                        imageUrl={user.profile_picture_url}
+                        name={formatName(user, true)}
+                        className="size-6 rounded-full"
+                      />
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <span
+                          className="truncate text-sm font-medium"
+                          title={formatName(user)}
+                        >
+                          {formatName(user)}
+                        </span>
+                      </div>
+                      <XIcon className="ml-auto" />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+              {/* Organizations Section */}
+              {organizations.length > 0 && (
+                <CommandGroup heading={t("departments")}>
+                  {organizations.map((organization) => (
+                    <CommandItem
+                      key={organization.id}
+                      value={organization.name}
+                      onSelect={() => handleOrganizationClick(organization)}
+                      className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="flex-shrink-0">
+                          <div
+                            className={cn(
+                              "h-3 w-3 rounded-full flex-shrink-0 border",
+                              getColorForTag(organization.id),
+                            )}
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-sm truncate">
+                            {organization.name}
+                          </div>
+                          {organization.description && (
+                            <div className="text-xs text-gray-500 truncate mt-0.5">
+                              {organization.description}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {organization.has_children && (
+                          <ChevronRight className="h-4 w-4 text-gray-500" />
+                        )}
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+
+              {/* Search Results - Practitioners */}
+              {searchQuery &&
+                allPractitioners?.users?.length &&
+                allPractitioners?.users?.length > 0 && (
+                  <CommandGroup heading={t("practitioners")}>
+                    {allPractitioners?.users?.map((user) => {
+                      const isSelected = selected?.some(
+                        (s) => s.id === user.id,
+                      );
+
+                      return (
+                        <CommandItem
+                          key={user.id}
+                          value={getItemValue(user)}
+                          onSelect={() => {
+                            if (!isSelected) {
+                              handleUserSelect(user);
+                            }
+                          }}
+                          className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
+                        >
+                          <Avatar
+                            imageUrl={user.profile_picture_url}
+                            name={formatName(user, true)}
+                            className="size-6 rounded-full"
+                          />
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <span
+                              className="truncate text-sm font-medium"
+                              title={formatName(user)}
+                            >
+                              {formatName(user)}
+                            </span>
+                          </div>
+                          {isSelected && (
+                            <CheckIcon className="h-4 w-4 text-gray-700" />
+                          )}
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                )}
+            </CommandList>
+          </Command>
+        </div>
+      )}
+
+      {/* Sidebar */}
+      {currentOrganizationId && (
+        <div className="border-l border-gray-200 flex flex-col">
+          {/* Sidebar Header */}
+          <div className="px-4 py-3 border-b bg-gray-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBackNavigation}
+                  className="h-6 w-6 p-0"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <Building2 className="h-4 w-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-600">
+                  {navigationStack.length > 0
+                    ? navigationStack[navigationStack.length - 1].name
+                    : organizations.find(
+                        (org) => org.id === currentOrganizationId,
+                      )?.name || t("organization")}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setCurrentOrganizationId(null);
+                  setNavigationStack([]);
+                }}
+                className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Sidebar Content */}
+          <div className="flex-1 overflow-y-auto max-h-[400px]">
+            {/* Show child organizations if current org has children */}
+            {childOrganizations?.results?.length ? (
+              <div className="p-2">
+                <h3 className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  {t("departments")}
+                </h3>
+                {childOrganizations.results.map((organization) => (
+                  <div
+                    key={organization.id}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
+                    onClick={() => handleChildOrganizationClick(organization)}
+                  >
+                    <div className="flex-shrink-0">
+                      <div
+                        className={cn(
+                          "h-3 w-3 rounded-full flex-shrink-0 border",
+                          getColorForTag(organization.id),
+                        )}
+                      />
+                    </div>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <span className="font-medium text-sm truncate">
+                        {organization.name}
+                      </span>
+                      {organization.description && (
+                        <span className="text-xs text-gray-500 truncate mt-0.5">
+                          {organization.description}
+                        </span>
+                      )}
+                    </div>
+                    {organization.has_children && (
+                      <ChevronRight className="h-4 w-4 text-gray-500" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              /* Show users if current org has no children or is a leaf organization */
+              <div className="p-2">
+                {isLoadingOrganizationUsers ? (
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <div className="space-y-1 flex-1">
+                        <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
+                        <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse" />
+                      </div>
+                    </div>
+                  </div>
+                ) : organizationUsers?.users?.length ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <h3 className="px-2 py-1 text-sm font-medium text-gray-500 uppercase tracking-wide">
+                        {t("practitioners")}
+                      </h3>
+                      {multiple && (
+                        <div className="max-h-[400px] overflow-y-auto">
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            onClick={() => {
+                              handleSelectAll(
+                                organizationUsers.users as NonEmptyArray<UserReadMinimal>,
+                              );
+                            }}
+                          >
+                            {t("select_all")}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    {organizationUsers.users.map((user) => {
+                      const isSelected = selected?.some(
+                        (s) => s.id === user.id,
+                      );
+
+                      return (
+                        <div
+                          key={user.id}
+                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
+                          onClick={() => !isSelected && handleUserSelect(user)}
+                        >
+                          <Avatar
+                            imageUrl={user.profile_picture_url}
+                            name={formatName(user, true)}
+                            className="size-8 rounded-full"
+                          />
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <span
+                              className="truncate text-sm font-medium"
+                              title={formatName(user)}
+                            >
+                              {formatName(user)}
+                            </span>
+                          </div>
+                          {isSelected && (
+                            <CheckIcon className="h-4 w-4 text-gray-700" />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </>
+                ) : (
+                  <div className="p-6 text-center text-gray-500">
+                    <Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <div className="text-sm">
+                      {t("no_users_in_organization")}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="flex items-center gap-2">
       {multiple && (
@@ -254,411 +633,50 @@ export const PractitionerSelector = ({
           )}
         </div>
       )}
-      <Popover
-        open={open}
-        onOpenChange={(newOpen) => {
-          setOpen(newOpen);
-          if (!newOpen) {
-            setSearchQuery("");
-          }
-        }}
-        modal={true}
-      >
-        <PopoverTrigger asChild>
-          {multiple ? (
-            <Button
-              variant="secondary"
-              role="combobox"
-              className="size-8! rounded-full"
-            >
-              {selected && selected.length > MULTI_SELECT_SHOW_LIMIT ? (
-                <span className="text-xs text-gray-500">
-                  +{selected.length - MULTI_SELECT_SHOW_LIMIT}
-                </span>
-              ) : (
-                <CareIcon icon="l-plus" className="size-4" />
-              )}
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              role="combobox"
-              className="min-w-60 w-full justify-start"
-            >
-              {selected[0] ? (
-                <div className="flex items-center gap-2">
-                  <ScheduleResourceIcon
-                    resource={{
-                      resource_type: SchedulableResourceType.Practitioner,
-                      resource: selected[0],
-                    }}
-                    className="size-6 rounded-full"
-                  />
-                  <span>
-                    {formatScheduleResourceName({
-                      resource_type: SchedulableResourceType.Practitioner,
-                      resource: selected[0],
-                    })}
-                  </span>
-                </div>
-              ) : (
-                <span className="text-gray-400">
-                  {t("select_practitioner")}
-                </span>
-              )}
-              <CaretDownIcon className="ml-auto" />
-            </Button>
-          )}
-        </PopoverTrigger>
-        <PopoverContent
-          align="start"
-          className={cn(
-            "p-0",
-            !multiple && "w-[var(--radix-popover-trigger-width)]",
-          )}
+      {isMobile ? (
+        <Drawer
+          open={open}
+          onOpenChange={(newOpen) => {
+            setOpen(newOpen);
+            if (!newOpen) {
+              setSearchQuery("");
+              setCurrentOrganizationId(null);
+              setNavigationStack([]);
+            }
+          }}
         >
-          <div>
-            {/* Main Content */}
-            {!currentOrganizationId && (
-              <div className="flex-1 flex flex-col">
-                {/* Header */}
-                <div className="px-4 py-3 border-b bg-gray-50 rounded-t-md">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-600">
-                      {t("select_practitioners")}
-                    </span>
-                  </div>
-                </div>
-
-                <Command className="border-0">
-                  <div className="px-3 py-2 border-b">
-                    <div className="relative">
-                      <CommandInput
-                        placeholder={t("search_departments_and_practitioners")}
-                        value={searchQuery}
-                        onValueChange={setSearchQuery}
-                        className="pl-1 border-0 focus:ring-0"
-                      />
-                    </div>
-                  </div>
-
-                  <CommandList className="max-h-[400px]">
-                    <CommandEmpty>
-                      {searchQuery ? (
-                        <div className="p-6 text-center text-gray-500">
-                          <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                          <div className="text-sm">
-                            {t("no_results")} "{searchQuery}"
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="p-6 text-center text-gray-500">
-                          <Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                          <div className="text-sm">
-                            {t("no_organizations_found")}
-                          </div>
-                        </div>
-                      )}
-                    </CommandEmpty>
-
-                    {/* Selected Practitioners - Show at the top */}
-                    {selected && selected.length > 0 && (
-                      <CommandGroup>
-                        <div className="flex items-center justify-between px-2 py-1.5">
-                          <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                            {t("selected")}
-                          </span>
-                          {multiple && selected.length > 1 && (
-                            <Button
-                              variant="outline"
-                              size="xs"
-                              onClick={handleClearAll}
-                            >
-                              {t("clear_all")}
-                            </Button>
-                          )}
-                        </div>
-                        {selected.map((user) => (
-                          <CommandItem
-                            key={user.id}
-                            value={getItemValue(user)}
-                            onSelect={() => {
-                              onSelect(
-                                selected.filter((s) => s.id !== user.id),
-                              );
-                            }}
-                            className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
-                          >
-                            <Avatar
-                              imageUrl={user.profile_picture_url}
-                              name={formatName(user, true)}
-                              className="size-6 rounded-full"
-                            />
-                            <div className="flex flex-col min-w-0 flex-1">
-                              <span
-                                className="truncate text-sm font-medium"
-                                title={formatName(user)}
-                              >
-                                {formatName(user)}
-                              </span>
-                            </div>
-                            <XIcon className="ml-auto" />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    )}
-                    {/* Organizations Section */}
-                    {organizations.length > 0 && (
-                      <CommandGroup heading={t("departments")}>
-                        {organizations.map((organization) => (
-                          <CommandItem
-                            key={organization.id}
-                            value={organization.name}
-                            onSelect={() =>
-                              handleOrganizationClick(organization)
-                            }
-                            className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50"
-                          >
-                            <div className="flex items-center gap-3 min-w-0 flex-1">
-                              <div className="flex-shrink-0">
-                                <div
-                                  className={cn(
-                                    "h-3 w-3 rounded-full flex-shrink-0 border",
-                                    getColorForTag(organization.id),
-                                  )}
-                                />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="font-medium text-sm truncate">
-                                  {organization.name}
-                                </div>
-                                {organization.description && (
-                                  <div className="text-xs text-gray-500 truncate mt-0.5">
-                                    {organization.description}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              {organization.has_children && (
-                                <ChevronRight className="h-4 w-4 text-gray-500" />
-                              )}
-                            </div>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    )}
-
-                    {/* Search Results - Practitioners */}
-                    {searchQuery &&
-                      allPractitioners?.users?.length &&
-                      allPractitioners?.users?.length > 0 && (
-                        <CommandGroup heading={t("practitioners")}>
-                          {allPractitioners?.users?.map((user) => {
-                            const isSelected = selected?.some(
-                              (s) => s.id === user.id,
-                            );
-
-                            return (
-                              <CommandItem
-                                key={user.id}
-                                value={getItemValue(user)}
-                                onSelect={() => {
-                                  if (!isSelected) {
-                                    handleUserSelect(user);
-                                  }
-                                }}
-                                className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
-                              >
-                                <Avatar
-                                  imageUrl={user.profile_picture_url}
-                                  name={formatName(user, true)}
-                                  className="size-6 rounded-full"
-                                />
-                                <div className="flex flex-col min-w-0 flex-1">
-                                  <span
-                                    className="truncate text-sm font-medium"
-                                    title={formatName(user)}
-                                  >
-                                    {formatName(user)}
-                                  </span>
-                                </div>
-                                {isSelected && (
-                                  <CheckIcon className="h-4 w-4 text-gray-700" />
-                                )}
-                              </CommandItem>
-                            );
-                          })}
-                        </CommandGroup>
-                      )}
-                  </CommandList>
-                </Command>
-              </div>
+          <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
+          <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
+            <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
+              {content}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Popover
+          open={open}
+          onOpenChange={(newOpen) => {
+            setOpen(newOpen);
+            if (!newOpen) {
+              setSearchQuery("");
+              setCurrentOrganizationId(null);
+              setNavigationStack([]);
+            }
+          }}
+          modal={true}
+        >
+          <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
+          <PopoverContent
+            align="start"
+            className={cn(
+              "p-0",
+              !multiple && "w-[var(--radix-popover-trigger-width)]",
             )}
-
-            {/* Sidebar */}
-            {currentOrganizationId && (
-              <div className="border-l border-gray-200 flex flex-col">
-                {/* Sidebar Header */}
-                <div className="px-4 py-3 border-b bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleBackNavigation}
-                        className="h-6 w-6 p-0"
-                      >
-                        <ArrowLeft className="h-4 w-4" />
-                      </Button>
-                      <Building2 className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-600">
-                        {navigationStack.length > 0
-                          ? navigationStack[navigationStack.length - 1].name
-                          : organizations.find(
-                              (org) => org.id === currentOrganizationId,
-                            )?.name || t("organization")}
-                      </span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setCurrentOrganizationId(null);
-                        setNavigationStack([]);
-                      }}
-                      className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Sidebar Content */}
-                <div className="flex-1 overflow-y-auto max-h-[400px]">
-                  {/* Show child organizations if current org has children */}
-                  {childOrganizations?.results?.length ? (
-                    <div className="p-2">
-                      <h3 className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        {t("departments")}
-                      </h3>
-                      {childOrganizations.results.map((organization) => (
-                        <div
-                          key={organization.id}
-                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-                          onClick={() =>
-                            handleChildOrganizationClick(organization)
-                          }
-                        >
-                          <div className="flex-shrink-0">
-                            <div
-                              className={cn(
-                                "h-3 w-3 rounded-full flex-shrink-0 border",
-                                getColorForTag(organization.id),
-                              )}
-                            />
-                          </div>
-                          <div className="flex flex-col min-w-0 flex-1">
-                            <span className="font-medium text-sm truncate">
-                              {organization.name}
-                            </span>
-                            {organization.description && (
-                              <span className="text-xs text-gray-500 truncate mt-0.5">
-                                {organization.description}
-                              </span>
-                            )}
-                          </div>
-                          {organization.has_children && (
-                            <ChevronRight className="h-4 w-4 text-gray-500" />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    /* Show users if current org has no children or is a leaf organization */
-                    <div className="p-2">
-                      {isLoadingOrganizationUsers ? (
-                        <div className="p-6 space-y-3">
-                          <div className="flex items-center gap-3">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <div className="space-y-1 flex-1">
-                              <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
-                              <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse" />
-                            </div>
-                          </div>
-                        </div>
-                      ) : organizationUsers?.users?.length ? (
-                        <>
-                          <div className="flex items-center justify-between">
-                            <h3 className="px-2 py-1 text-sm font-medium text-gray-500 uppercase tracking-wide">
-                              {t("practitioners")}
-                            </h3>
-                            {multiple && (
-                              <div className="max-h-[400px] overflow-y-auto">
-                                <Button
-                                  variant="outline"
-                                  size="xs"
-                                  onClick={() => {
-                                    handleSelectAll(
-                                      organizationUsers.users as NonEmptyArray<UserReadMinimal>,
-                                    );
-                                  }}
-                                >
-                                  {t("select_all")}
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                          {organizationUsers.users.map((user) => {
-                            const isSelected = selected?.some(
-                              (s) => s.id === user.id,
-                            );
-
-                            return (
-                              <div
-                                key={user.id}
-                                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-                                onClick={() =>
-                                  !isSelected && handleUserSelect(user)
-                                }
-                              >
-                                <Avatar
-                                  imageUrl={user.profile_picture_url}
-                                  name={formatName(user, true)}
-                                  className="size-8 rounded-full"
-                                />
-                                <div className="flex flex-col min-w-0 flex-1">
-                                  <span
-                                    className="truncate text-sm font-medium"
-                                    title={formatName(user)}
-                                  >
-                                    {formatName(user)}
-                                  </span>
-                                </div>
-                                {isSelected && (
-                                  <CheckIcon className="h-4 w-4 text-gray-700" />
-                                )}
-                              </div>
-                            );
-                          })}
-                        </>
-                      ) : (
-                        <div className="p-6 text-center text-gray-500">
-                          <Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                          <div className="text-sm">
-                            {t("no_users_in_organization")}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </PopoverContent>
-      </Popover>
+          >
+            {content}
+          </PopoverContent>
+        </Popover>
+      )}
     </div>
   );
 };
