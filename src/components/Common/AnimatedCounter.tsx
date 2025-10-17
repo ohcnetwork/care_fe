@@ -6,7 +6,7 @@ interface AnimatedCounterProps {
 
 export function AnimatedCounter({ count }: AnimatedCounterProps) {
   return (
-    <div className="relative inline-block overflow-hidden size-4">
+    <div className="inline-flex items-center justify-center overflow-hidden h-4 min-w-4">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.span
           key={count}
@@ -19,7 +19,7 @@ export function AnimatedCounter({ count }: AnimatedCounterProps) {
             damping: 35,
             mass: 0.5,
           }}
-          className="absolute inset-0 flex items-center justify-center"
+          className="inline-block"
         >
           {count}
         </motion.span>
