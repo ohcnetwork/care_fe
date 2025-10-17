@@ -88,7 +88,7 @@ export function useLocationManagement({
         }),
       );
 
-      return mutate(batchApi.request, { silent: true })({
+      return mutate(batchApi.batchRequest, { silent: true })({
         requests: batchRequests,
       });
     },

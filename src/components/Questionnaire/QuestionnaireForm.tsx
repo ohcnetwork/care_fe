@@ -387,7 +387,7 @@ export function QuestionnaireForm({
   });
 
   const { mutate: submitBatch, isPending } = useMutation({
-    mutationFn: mutate(batchApi.request, { silent: true }),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       setServerErrors(undefined);
       toast.success(t("questionnaire_submitted_successfully"));

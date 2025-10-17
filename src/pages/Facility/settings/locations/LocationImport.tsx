@@ -494,7 +494,7 @@ export function useSaveLocations(facilityId: string) {
   const [queue, setQueue] = useState<QueueItem[]>([]);
 
   const { mutate: submitBatch } = useMutation({
-    mutationFn: mutate(batchApi.request),
+    mutationFn: mutate(batchApi.batchRequest),
     onSuccess: (data) => {
       const res = data as BatchRequestResponse<LocationDetail>;
       setQueue((prev) => {

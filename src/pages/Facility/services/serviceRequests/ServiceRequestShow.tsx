@@ -119,7 +119,7 @@ export default function ServiceRequestShow({
   });
 
   const { mutate: executeBatch } = useMutation({
-    mutationFn: mutate(batchApi.request, { silent: true }),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["serviceRequest", facilityId, serviceRequestId],
