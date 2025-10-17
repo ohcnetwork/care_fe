@@ -158,7 +158,6 @@ jobs:
           PR_ID: ${{ github.event.pull_request.node_id }}
           AUTHOR_ID: ${{ github.event.pull_request.user.node_id }}
         run: |
-          echo "Assigning PR author via GraphQL"
           gh api graphql -f query='
             mutation($pr: ID!, $assignees: [ID!]!) {
               addAssigneesToAssignable(input: {
