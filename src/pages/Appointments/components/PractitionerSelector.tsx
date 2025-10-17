@@ -91,7 +91,6 @@ export const PractitionerSelector = ({
       pathParams: { facilityId },
       queryParams: {
         parent: "",
-        ordering: "name",
         active: true,
         limit: 100,
       },
@@ -154,7 +153,6 @@ export const PractitionerSelector = ({
       pathParams: { facilityId },
       queryParams: {
         parent: currentOrganizationId!,
-        ordering: "name",
         active: true,
       },
     }),
@@ -178,6 +176,10 @@ export const PractitionerSelector = ({
 
   const handleSelectAll = (users: UserReadMinimal[]) => {
     onSelect([...selected, ...users]);
+  };
+
+  const handleClearAll = () => {
+    onSelect([]);
   };
 
   const handleUserSelect = (user: UserReadMinimal) => {
@@ -362,7 +364,21 @@ export const PractitionerSelector = ({
 
                     {/* Selected Practitioners - Show at the top */}
                     {selected && selected.length > 0 && (
-                      <CommandGroup heading={t("selected")}>
+                      <CommandGroup>
+                        <div className="flex items-center justify-between px-2 py-1.5">
+                          <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                            {t("selected")}
+                          </span>
+                          {multiple && selected.length > 1 && (
+                            <Button
+                              variant="outline"
+                              size="xs"
+                              onClick={handleClearAll}
+                            >
+                              {t("clear_all")}
+                            </Button>
+                          )}
+                        </div>
                         {selected.map((user) => (
                           <CommandItem
                             key={user.id}

@@ -66,7 +66,6 @@ function TreeViewItem({
         resource,
         parent: tag.id,
         status: "active",
-        ordering: "priority",
         facility: facilityId,
       },
     }),
@@ -180,7 +179,6 @@ function TagFilterDropdown({
         resource,
         parent_is_null: true,
         status: "active",
-        ordering: "priority",
         ...(facilityId ? { facility: facilityId } : {}),
         ...(search ? { search } : {}),
       },
@@ -227,7 +225,7 @@ function TagFilterDropdown({
   );
 
   return (
-    <div className="p-3 max-h-[calc(100vh-28rem)] overflow-y-auto">
+    <div className="p-3 max-h-[30vh] overflow-y-auto">
       <Input
         placeholder="Search tags..."
         value={search}
@@ -250,7 +248,10 @@ function TagFilterDropdown({
                 }}
                 className="flex items-center gap-2 px-2 py-1 cursor-pointer"
               >
-                <Checkbox checked={true} className="h-4 w-4" />
+                <Checkbox
+                  checked={true}
+                  className="data-[state=checked]:border-primary-700 text-white"
+                />
                 <div className="flex items-center gap-2 max-w-xs truncate">
                   {tag.parent && (
                     <Component
@@ -392,7 +393,6 @@ function GroupSubmenu({
         resource,
         parent: group.id,
         status: "active",
-        ordering: "priority",
         ...(facilityId ? { facility: facilityId } : {}),
       },
     }),

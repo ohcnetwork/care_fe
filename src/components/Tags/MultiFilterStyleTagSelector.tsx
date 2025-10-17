@@ -76,7 +76,6 @@ export function MultiFilterStyleTagSelector({
       queryParams: {
         resource,
         status: "active",
-        ordering: "priority",
         ...(search ? { display: search } : { parent_is_null: true }),
         ...(facilityId ? { facility: facilityId } : {}),
       },
@@ -97,7 +96,6 @@ export function MultiFilterStyleTagSelector({
         resource,
         parent: groupPopoverOpen || selectedGroup?.id,
         status: "active",
-        ordering: "priority",
         ...(facilityId ? { facility: facilityId } : {}),
       },
     }),

@@ -248,10 +248,13 @@ function ProductKnowledgeFormContent({
   const { mutate: createProductKnowledge, isPending: isCreating } = useMutation(
     {
       mutationFn: mutate(productKnowledgeApi.createProductKnowledge),
-      onSuccess: () => {
+      onSuccess: (productKnowledge: ProductKnowledgeBase) => {
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         toast.success(t("product_knowledge_created_successfully"));
         onSuccess();
+        navigate(
+          `/facility/${facilityId}/settings/product_knowledge/categories/${productKnowledge.category.slug}`,
+        );
       },
     },
   );
@@ -440,7 +443,9 @@ function ProductKnowledgeFormContent({
                               ResourceCategoryResourceType.product_knowledge
                             }
                             value={field.value}
-                            onValueChange={field.onChange}
+                            onValueChange={(category) =>
+                              field.onChange(category?.slug || "")
+                            }
                             placeholder={t("select_category")}
                             className="w-full"
                           />
@@ -452,27 +457,34 @@ function ProductKnowledgeFormContent({
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <FormLabel>{t("code")}</FormLabel>
-                    <div className="mt-2">
-                      <ValueSetSelect
-                        system="system-medication"
-                        value={form.watch("code")}
-                        placeholder={t("search_for_product_codes")}
-                        onSelect={(code) => {
-                          form.setValue("code", {
-                            code: code.code,
-                            display: code.display,
-                            system: code.system,
-                          });
-                        }}
-                        showCode={true}
-                      />
-                    </div>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t("code")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            {...field}
+                            system="system-medication"
+                            placeholder={t("search_for_product_codes")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <div>
-                    <FormLabel>{t("base_unit")}</FormLabel>
+                    <FormLabel aria-required>{t("base_unit")}</FormLabel>
                     <div className="mt-2">
                       <Select
                         value={form.watch("base_unit")?.code || ""}
