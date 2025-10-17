@@ -105,15 +105,15 @@ function ChargeItemTableRow({
   const { t } = useTranslation();
 
   return (
-    <TableRow className="hover:bg-gray-50 cursor-pointer">
-      <TableCell
-        className="font-medium cursor-pointer"
-        onClick={() =>
-          navigate(
-            `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}`,
-          )
-        }
-      >
+    <TableRow
+      className="hover:bg-gray-50 cursor-pointer"
+      onClick={() =>
+        navigate(
+          `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}`,
+        )
+      }
+    >
+      <TableCell className="font-medium cursor-pointer">
         <div className="flex items-center space-x-3">
           <div>
             <div className="font-medium text-gray-900">{definition.title}</div>
@@ -185,16 +185,12 @@ export function ChargeItemList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
 
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
-
-  // TODO: Remove this once we have a default status (robo's PR)
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: "active" });
-    }
-  }, [qParams.status, updateQuery]);
 
   // Fetch charge items for current category
   const { data: chargeItemsResponse, isLoading: isLoadingChargeItems } =
@@ -210,7 +206,6 @@ export function ChargeItemList({
             category: categorySlug,
             limit: resultsPerPage,
             offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-            ordering: "-created_date",
           },
         },
       ),

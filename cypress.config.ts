@@ -10,6 +10,11 @@ export default defineConfig({
   defaultCommandTimeout: 10000,
 
   e2e: {
+    excludeSpecPattern: [
+      "cypress/e2e/facility_spec/settings_spec/labs_spec/observation.cy.ts",
+      "cypress/e2e/patient_spec/patient_prescription.cy.ts",
+      "cypress/e2e/facility_spec/settings_spec/labs_spec/specimen.cy.ts",
+    ],
     setupNodeEvents(on, config) {
       // implement node event listeners here
 

@@ -1,5 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React from "react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -9,29 +13,60 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { Permission } from "@/types/emr/permission/permission";
+import permissionApi from "@/types/emr/permission/permissionApi";
 import { RoleRead } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
+import { useInView } from "react-intersection-observer";
 
 interface RoleFormProps {
   role: RoleRead | null;
-  permissions: Permission[];
   onSuccess: () => void;
 }
-
-export default function RoleForm({
-  role,
-  permissions,
-  onSuccess,
-}: RoleFormProps) {
+const PAGE_LIMIT = 100;
+export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { ref, inView } = useInView();
+  const [searchPermission, setSearchPermission] = useState("");
+
   const [formData, setFormData] = React.useState({
     name: role?.name || "",
     description: role?.description || "",
     permissions: role?.permissions.map((p: Permission) => p.slug) || [],
   });
+
+  const getQueryParams = (pageParam: number, name: string) => ({
+    limit: String(PAGE_LIMIT),
+    offset: String(pageParam),
+    name: name,
+  });
+
+  const {
+    data: permissionsList,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+  } = useInfiniteQuery({
+    queryKey: ["permissions", searchPermission],
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query.debounced(permissionApi.listPermissions, {
+        queryParams: getQueryParams(pageParam, searchPermission),
+      })({ signal });
+      return response;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const currentOffset = allPages.length * PAGE_LIMIT;
+      return currentOffset < lastPage.count ? currentOffset : null;
+    },
+    select: (data) => data?.pages.flatMap((p) => p.results) || [],
+  });
+
+  const permissions = permissionsList || [];
 
   const createRoleMutation = useMutation({
     mutationFn: mutate(roleApi.createRole),
@@ -75,11 +110,18 @@ export default function RoleForm({
     }));
   };
 
+  useEffect(() => {
+    if (inView && hasNextPage) fetchNextPage();
+  }, [inView, hasNextPage, fetchNextPage]);
+
   const isLoading =
     createRoleMutation.isPending || updateRoleMutation.isPending;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col space-y-6 max-h-[calc(100vh-7rem)]"
+    >
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">{t("name")}</Label>
@@ -108,8 +150,8 @@ export default function RoleForm({
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="flex flex-col min-h-80">
+        <CardHeader className="flex flex-col">
           <div className="flex items-center justify-between">
             <CardTitle>{t("permissions")}</CardTitle>
             <div className="flex gap-2">
@@ -141,13 +183,28 @@ export default function RoleForm({
               </Button>
             </div>
           </div>
+          <div className="relative">
+            <CareIcon
+              icon="l-search"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+            />
+            <Input
+              placeholder={t("search_permissions")}
+              value={searchPermission}
+              onChange={(e) => {
+                setSearchPermission(e.target.value);
+              }}
+              className="w-full pl-8"
+            />
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3 max-h-60 overflow-y-auto">
-            {permissions.map((permission) => (
+        <CardContent className="overflow-auto">
+          <div className="space-y-3 h-full pr-2">
+            {permissions.map((permission, index) => (
               <div
                 key={permission.slug}
                 className="flex items-center space-x-2"
+                ref={index == permissions.length - 1 ? ref : undefined}
               >
                 <Checkbox
                   id={permission.slug}
@@ -171,6 +228,15 @@ export default function RoleForm({
                 </Label>
               </div>
             ))}
+            {isFetching ? (
+              <div className="text-center text-sm">{t("loading")}</div>
+            ) : (
+              permissions.length == 0 && (
+                <div className="text-center text-sm">
+                  {t("no_matching_permissions")}
+                </div>
+              )
+            )}
           </div>
         </CardContent>
       </Card>

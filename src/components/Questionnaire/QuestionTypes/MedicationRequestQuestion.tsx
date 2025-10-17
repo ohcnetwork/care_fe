@@ -15,6 +15,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { CombinedDatePicker } from "@/components/ui/combined-date-picker";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,13 +34,12 @@ import {
 
 import { ComboboxQuantityInput } from "@/components/Common/ComboboxQuantityInput";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
-import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import UserSelector from "@/components/Common/UserSelector";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
-import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
+import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValueSetSelect";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
@@ -413,7 +413,7 @@ export function MedicationRequestQuestion({
   };
 
   const newMedicationSheetContent = (
-    <div className="space-y-4 p-3">
+    <div className="space-y-3">
       {newMedicationInSheet && (
         <MedicationRequestGridRow
           medication={newMedicationInSheet}
@@ -512,7 +512,6 @@ export function MedicationRequestQuestion({
                   offset,
                   status:
                     "active,on_hold,draft,unknown,ended,completed,cancelled",
-                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response;
@@ -556,7 +555,6 @@ export function MedicationRequestQuestion({
                   offset,
                   status:
                     "active,on_hold,completed,stopped,unknown,not_taken,intended",
-                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response;
@@ -789,7 +787,7 @@ export function MedicationRequestQuestion({
       )}
 
       {!desktopLayout ? (
-        <EntitySelectionSheet
+        <EntitySelectionDrawer
           open={!!newMedicationInSheet}
           onOpenChange={(isOpen) => {
             if (!isOpen) {
@@ -807,7 +805,7 @@ export function MedicationRequestQuestion({
           enableProduct
         >
           {newMedicationSheetContent}
-        </EntitySelectionSheet>
+        </EntitySelectionDrawer>
       ) : (
         <div className="max-w-4xl" data-cy="add-medication-request">
           <MedicationValueSetSelect
@@ -1219,7 +1217,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 dosageInstruction?.as_needed_boolean ||
                 isReadOnly
               }
-              className="h-9 text-sm"
+              className="h-9 text-base sm:text-sm"
             />
           )}
           <Select
@@ -1276,7 +1274,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Instructions */}
-      <div className="lg:px-2 lg:py-1 lg:border-r border-gray-200 overflow-hidden">
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("instructions")}
         </Label>
@@ -1292,9 +1290,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 });
               }}
               disabled={disabled || isReadOnly}
-              asSheet
             />
-
             <InstructionsPopover
               currentInstructions={currentInstructions}
               removeInstruction={removeInstruction}
@@ -1325,7 +1321,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onSelect={(route) => handleUpdateDosageInstruction({ route })}
           placeholder={t("select_route")}
           disabled={disabled || isReadOnly}
-          asSheet
         />
       </div>
       {/* Site */}
@@ -1340,7 +1335,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onSelect={(site) => handleUpdateDosageInstruction({ site })}
           placeholder={t("select_site")}
           disabled={disabled || isReadOnly}
-          asSheet
         />
       </div>
       {/* Method */}
@@ -1356,7 +1350,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           placeholder={t("select_method")}
           disabled={disabled || isReadOnly}
           count={20}
-          asSheet
         />
       </div>
       {/* Intent */}
@@ -1389,10 +1382,15 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         <Label className="mb-1.5 block text-sm lg:hidden">
           {t("authored_on")}
         </Label>
-        <DateTimeInput
-          value={medication.authored_on}
-          onDateChange={(val) => onUpdate?.({ authored_on: val })}
+        <CombinedDatePicker
+          value={
+            medication.authored_on
+              ? new Date(medication.authored_on)
+              : undefined
+          }
+          onChange={(date) => onUpdate?.({ authored_on: date?.toISOString() })}
           disabled={disabled || isReadOnly}
+          blockDate={(date) => date > new Date()}
         />
       </div>
       {/* Requester */}
@@ -1421,7 +1419,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           onChange={(e) => onUpdate?.({ note: e.target.value })}
           placeholder={t("additional_notes")}
           disabled={disabled}
-          className="h-9 text-sm"
+          className="h-9 text-base sm:text-sm"
         />
       </div>
 

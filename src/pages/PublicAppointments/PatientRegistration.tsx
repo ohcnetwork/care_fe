@@ -30,8 +30,7 @@ import mutate from "@/Utils/request/mutate";
 import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
-import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
-import { PatientRead } from "@/types/emr/patient/patient";
+import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import { Appointment } from "@/types/scheduling/schedule";
@@ -64,10 +63,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
       age: z.string().optional(),
       date_of_birth: z.date().or(z.string()).optional(),
       pincode: validators().pincode,
-      geo_organization: z
-        .string()
-        .min(1, t("organization_required"))
-        .optional(),
+      geo_organization: z.string().min(1, t("organization_required")),
       ageInputType: z.enum(["age", "date_of_birth"]),
     })
     .superRefine((data, ctx) => {
@@ -101,11 +97,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     defaultValues: {
       name: "",
       ageInputType: "date_of_birth",
-      age: undefined,
-      date_of_birth: undefined,
       address: "",
-      pincode: undefined,
-      geo_organization: undefined,
     },
   });
 
@@ -135,14 +127,12 @@ export function PatientRegistration(props: PatientRegistrationProps) {
     });
 
   const { mutate: createPatient } = useMutation({
-    mutationFn: (body: Partial<AppointmentPatientRegister>) =>
-      mutate(publicPatientApi.createPatient, {
-        body: { ...body, phone_number: tokenData.phoneNumber },
-        headers: {
-          Authorization: `Bearer ${tokenData.token}`,
-        },
-      })(body),
-    onSuccess: (data: PatientRead) => {
+    mutationFn: mutate(publicPatientApi.create, {
+      headers: {
+        Authorization: `Bearer ${tokenData.token}`,
+      },
+    }),
+    onSuccess: (data: PublicPatientRead) => {
       toast.success(t("patient_created_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["patients"],
@@ -157,7 +147,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
 
   const onSubmit = form.handleSubmit((data) => {
     const formattedData = {
-      phone_number: tokenData.phoneNumber,
       name: data.name,
       gender: data.gender,
       address: data.address || "",
@@ -165,10 +154,9 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         data.ageInputType === "date_of_birth"
           ? dateQueryString(data.date_of_birth)
           : undefined,
-      age: data.ageInputType === "age" ? data.age : undefined,
-      pincode: data.pincode || undefined,
+      age: data.ageInputType === "age" ? Number(data.age) : undefined,
+      pincode: data.pincode,
       geo_organization: data.geo_organization,
-      is_active: true,
     };
     createPatient(formattedData);
   });

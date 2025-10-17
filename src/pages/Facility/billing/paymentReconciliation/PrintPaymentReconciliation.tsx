@@ -8,6 +8,14 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Badge } from "@/components/ui/badge";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { Separator } from "@/components/ui/separator";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import Loading from "@/components/Common/Loading";
 
@@ -115,7 +123,7 @@ export function PrintPaymentReconciliation({
           </div>
 
           {/* Payment Information */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-sm">
+          <div className="flex justify-between items-start mb-6 text-sm">
             <div>
               <div className="font-semibold text-gray-500 mb-1">
                 {t("payment_date")}
@@ -128,7 +136,7 @@ export function PrintPaymentReconciliation({
                 </p>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-left sm:text-right">
               <div className="font-semibold text-gray-500 mb-1">
                 {t("payment_method")}
               </div>
@@ -166,40 +174,28 @@ export function PrintPaymentReconciliation({
                 {t("related_invoice")}
               </h3>
               <div className="overflow-x-auto mb-6">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b text-sm">
-                      <th className="pb-2 text-left font-medium text-gray-500">
-                        {t("invoice_number")}
-                      </th>
-                      <th className="pb-2 text-left font-medium text-gray-500">
-                        {t("title")}
-                      </th>
-                      <th className="pb-2 text-left font-medium text-gray-500">
-                        {t("status")}
-                      </th>
-                      <th className="pb-2 text-right font-medium text-gray-500">
-                        {t("amount")}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b">
-                      <td className="py-4">
-                        <div>
-                          <div>#{payment.target_invoice.id}</div>
-                        </div>
-                      </td>
-                      <td className="py-4">{payment.target_invoice.number}</td>
-                      <td className="py-4">{payment.target_invoice.status}</td>
-                      <td className="py-4 text-right">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t("invoice_number")}</TableHead>
+                      <TableHead>{t("title")}</TableHead>
+                      <TableHead>{t("status")}</TableHead>
+                      <TableHead>{t("amount")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>#{payment.target_invoice.id}</TableCell>
+                      <TableCell>{payment.target_invoice.number}</TableCell>
+                      <TableCell>{payment.target_invoice.status}</TableCell>
+                      <TableCell className="text-right">
                         <MonetaryDisplay
                           amount={String(payment.target_invoice.total_gross)}
                         />
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </div>
             </>
           )}
@@ -208,43 +204,35 @@ export function PrintPaymentReconciliation({
           <div className="mb-6">
             <h3 className="font-medium text-lg mb-2">{t("payment_details")}</h3>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b text-sm">
-                    <th className="pb-2 text-left font-medium text-gray-500">
-                      {t("type")}
-                    </th>
-                    <th className="pb-2 text-left font-medium text-gray-500">
-                      {t("kind")}
-                    </th>
-                    <th className="pb-2 text-left font-medium text-gray-500">
-                      {t("issuer_type")}
-                    </th>
-                    <th className="pb-2 text-right font-medium text-gray-500">
-                      {t("amount")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b">
-                    <td className="py-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("type")}</TableHead>
+                    <TableHead>{t("kind")}</TableHead>
+                    <TableHead>{t("issuer_type")}</TableHead>
+                    <TableHead className="text-right">{t("amount")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>
                       {payment.reconciliation_type.charAt(0).toUpperCase() +
                         payment.reconciliation_type.slice(1)}
-                    </td>
-                    <td className="py-4">
+                    </TableCell>
+                    <TableCell>
                       {payment.kind.charAt(0).toUpperCase() +
                         payment.kind.slice(1)}
-                    </td>
-                    <td className="py-4">
+                    </TableCell>
+                    <TableCell>
                       {payment.issuer_type.charAt(0).toUpperCase() +
                         payment.issuer_type.slice(1)}
-                    </td>
-                    <td className="py-4 text-right">
+                    </TableCell>
+                    <TableCell className="text-right">
                       <MonetaryDisplay amount={payment.amount} />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
             </div>
           </div>
 

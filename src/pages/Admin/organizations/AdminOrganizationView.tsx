@@ -175,7 +175,7 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
               />
             </div>
           </div>
-          <div className="w-auto">
+          <div className="w-full md:w-auto">
             {
               <FacilityOrganizationFormSheet
                 organizationType={organizationType}

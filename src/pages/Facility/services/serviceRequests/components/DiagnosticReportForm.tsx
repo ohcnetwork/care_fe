@@ -154,19 +154,20 @@ export function DiagnosticReportForm({
   });
 
   // Query to fetch files for the diagnostic report
-  const { data: files = { results: [], count: 0 }, refetch: refetchFiles } =
-    useQuery<PaginatedResponse<FileReadMinimal>>({
-      queryKey: ["files", "diagnostic_report", fullReport?.id],
-      queryFn: query(fileApi.list, {
-        queryParams: {
-          file_type: "diagnostic_report",
-          associating_id: fullReport?.id,
-          limit: 100,
-          offset: 0,
-        },
-      }),
-      enabled: !!fullReport?.id,
-    });
+  const { data: files = { results: [], count: 0 } } = useQuery<
+    PaginatedResponse<FileReadMinimal>
+  >({
+    queryKey: ["files", "diagnostic_report", fullReport?.id],
+    queryFn: query(fileApi.list, {
+      queryParams: {
+        file_type: "diagnostic_report",
+        associating_id: fullReport?.id,
+        limit: 100,
+        offset: 0,
+      },
+    }),
+    enabled: !!fullReport?.id,
+  });
 
   // Creating a new diagnostic report
   const { mutate: createDiagnosticReport, isPending: isCreatingReport } =
@@ -580,14 +581,23 @@ export function DiagnosticReportForm({
         }),
       );
 
+      // Check if any observations are marked for deletion
+      const hasDeletions =
+        !hasObservationValue &&
+        Object.values(observations).some((obsList) =>
+          obsList.some(
+            (obs) => obs.status === ObservationStatus.ENTERED_IN_ERROR,
+          ),
+        );
+
       // If there's a conclusion, we must have results first
       if (conclusion.trim() && !hasObservationValue) {
         toast.error(t("cannot_add_conclusion_without_results"));
         return;
       }
 
-      // Results are mandatory
-      if (!hasObservationValue) {
+      // Results are mandatory, unless an observation is being deleted
+      if (!hasObservationValue && !hasDeletions) {
         toast.error(t("please_fill_all_results"));
         return;
       }
@@ -1031,7 +1041,6 @@ export function DiagnosticReportForm({
                                         {t("marked_for_deletion")}
                                       </span>
                                     ) : (
-                                      observationsList.length > 1 &&
                                       !disableEdit && (
                                         <Button
                                           type="button"
@@ -1044,7 +1053,10 @@ export function DiagnosticReportForm({
                                               index,
                                             )
                                           }
-                                          disabled={isErrored}
+                                          disabled={
+                                            isErrored ||
+                                            (index === 0 && !observationData.id)
+                                          }
                                         >
                                           <Trash2 className="size-4" />
                                         </Button>
@@ -1237,7 +1249,6 @@ export function DiagnosticReportForm({
                             associatingId={fullReport.id}
                             canEdit={!disableEdit}
                             showHeader={false}
-                            onRefetch={refetchFiles}
                           />
                         </div>
                       )}

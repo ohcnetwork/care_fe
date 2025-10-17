@@ -259,7 +259,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
       "multi",
       t("tags", { count: 2 }),
     ),
-    dateFilter("date", t("date"), shortDateRangeOptions),
+    dateFilter("date", t("date"), shortDateRangeOptions, true),
   ];
 
   const onFilterUpdate = (query: Record<string, unknown>) => {
@@ -386,7 +386,6 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           {activeTab === "list" && (
             <Button
-              data-shortcut-id="print-button"
               variant="outline"
               disabled={
                 !qParams.date_from ||
@@ -401,7 +400,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
             >
               <CareIcon icon="l-print" className="text-lg" />
               {t("print")}
-              <ShortcutBadge actionId="print-button" className="bg-white" />
+              <ShortcutBadge actionId="print-button" />
             </Button>
           )}
           <PatientIdentifierFilter
@@ -520,9 +519,9 @@ function AppointmentColumn(props: {
           resource_ids: props.resourceIds.join(","),
           date_after: props.date_from,
           date_before: props.date_to,
-          ordering: "token_slot__start_datetime",
           patient: props.patient,
         },
+        silent: true,
       })({ signal });
       return response;
     },
@@ -794,7 +793,6 @@ function AppointmentRow(props: {
         tags_behavior: props.tags_behavior,
         limit: props.resultsPerPage,
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
-        ordering: "token_slot__start_datetime",
         patient: props.patient,
         resource_type: props.resourceType,
         resource_ids: props.resourceIds.join(","),

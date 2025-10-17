@@ -1,18 +1,10 @@
 import { PaginatedResponse } from "@/Utils/request/types";
-import { AppointmentPatientRegister } from "@/pages/Patient/Utils";
 import {
   BatchRequestBody,
   BatchRequestResponse,
 } from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
-import { PatientRead } from "@/types/emr/patient/patient";
 import { PlugConfig } from "@/types/plugConfig";
-import {
-  CommentModel,
-  CreateResourceRequest,
-  ResourceRequest,
-  UpdateResourceRequest,
-} from "@/types/resourceRequest/resourceRequest";
 import { UserReadMinimal } from "@/types/user/user";
 
 /**
@@ -55,41 +47,6 @@ const routes = {
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
     TRes: Type<PaginatedResponse<UserReadMinimal>>(),
-  },
-
-  // Request
-  createResource: {
-    path: "/api/v1/resource/",
-    method: "POST",
-    TRes: Type<ResourceRequest>(),
-    TBody: Type<CreateResourceRequest>(),
-  },
-  updateResource: {
-    path: "/api/v1/resource/{id}/",
-    method: "PUT",
-    TRes: Type<ResourceRequest>(),
-    TBody: Type<UpdateResourceRequest>(),
-  },
-  listResourceRequests: {
-    path: "/api/v1/resource/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<ResourceRequest>>(),
-  },
-  getResourceDetails: {
-    path: "/api/v1/resource/{id}/",
-    method: "GET",
-    TRes: Type<ResourceRequest>(),
-  },
-  getResourceComments: {
-    path: "/api/v1/resource/{id}/comment/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<CommentModel>>(),
-  },
-  addResourceComments: {
-    path: "/api/v1/resource/{id}/comment/",
-    method: "POST",
-    TRes: Type<CommentModel>(),
-    TBody: Type<Partial<CommentModel>>(),
   },
 
   valueset: {
@@ -138,48 +95,6 @@ const routes = {
       method: "DELETE",
       TRes: Type<Record<string, never>>(),
       TBody: Type<void>(),
-    },
-  },
-
-  // OTP Routes
-  otp: {
-    sendOtp: {
-      path: "/api/v1/otp/send/",
-      method: "POST",
-      TBody: Type<{ phone_number: string }>(),
-      TRes: Type<Record<string, never>>(),
-      auth: {
-        key: "Authorization",
-        value: "{OTP_API_KEY}",
-        type: "header",
-      },
-    },
-    loginByOtp: {
-      path: "/api/v1/otp/login/",
-      method: "POST",
-      TBody: Type<{ phone_number: string; otp: string }>(),
-      TRes: Type<{ access: string }>(),
-    },
-    getPatient: {
-      path: "/api/v1/otp/patient/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<PatientRead>>(),
-      auth: {
-        key: "Authorization",
-        value: "Bearer {token}",
-        type: "header",
-      },
-    },
-    createPatient: {
-      path: "/api/v1/otp/patient/",
-      method: "POST",
-      TBody: Type<Partial<AppointmentPatientRegister>>(),
-      TRes: Type<PatientRead>(),
-      auth: {
-        key: "Authorization",
-        value: "Bearer {token}",
-        type: "header",
-      },
     },
   },
 } as const;
