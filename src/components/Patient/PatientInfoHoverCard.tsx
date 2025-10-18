@@ -20,7 +20,9 @@ export const PatientInfoHoverCard = ({
   const { t } = useTranslation();
 
   const path = usePath();
-  const isPatientHomePage = path?.endsWith(`/facility/${facilityId}/patients/verify`);
+  const isPatientHomePage = path?.endsWith(
+    `/facility/${facilityId}/patients/verify`,
+  );
 
   return (
     <>
@@ -39,7 +41,7 @@ export const PatientInfoHoverCard = ({
         </div>
       </div>
       <div className="flex items-center gap-2">
-        {!isHome && (
+        {!isPatientHomePage && (
           <Button variant="outline" className="text-gray-950" asChild>
             <Link
               basePath="/"
