@@ -29,19 +29,16 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
-import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
-
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import {
+  RESOURCE_REQUEST_ACTIVE_STATUSES,
+  RESOURCE_REQUEST_COMPLETED_STATUSES,
+  RESOURCE_REQUEST_STATUS_OPTIONS,
+  ResourceRequestListRead,
+  ResourceRequestStatus,
   getResourceRequestCategoryEnum,
-  ResourceRequest,
 } from "@/types/resourceRequest/resourceRequest";
-
-const COMPLETED = ["completed", "rejected", "cancelled"];
-const ACTIVE = RESOURCE_STATUS_CHOICES.map((o) => o.text).filter(
-  (o) => !COMPLETED.includes(o),
-);
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
 function EmptyState() {
   const { t } = useTranslation();
@@ -68,16 +65,21 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
   });
   const { status, title, incoming } = qParams;
 
-  const isActive = !status || !COMPLETED.includes(status);
-  const currentStatuses = isActive ? ACTIVE : COMPLETED;
+  const isActive =
+    !status || !RESOURCE_REQUEST_COMPLETED_STATUSES.includes(status);
+  const currentStatuses = isActive
+    ? RESOURCE_REQUEST_ACTIVE_STATUSES
+    : RESOURCE_REQUEST_COMPLETED_STATUSES;
 
   // Set default status based on active/completed tab
-  const defaultStatus = isActive ? "pending" : "completed";
+  const defaultStatus = isActive
+    ? ResourceRequestStatus.PENDING
+    : ResourceRequestStatus.COMPLETED;
   const currentStatus = status || defaultStatus;
 
   const { data: queryResources, isLoading } = useQuery({
     queryKey: ["resources", facilityId, qParams],
-    queryFn: query.debounced(routes.listResourceRequests, {
+    queryFn: query.debounced(resourceRequestApi.list, {
       queryParams: {
         status: currentStatus,
         title,
@@ -156,14 +158,20 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       <TabsTrigger
                         value="active"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
-                        onClick={() => updateQuery({ status: "pending" })}
+                        onClick={() =>
+                          updateQuery({ status: ResourceRequestStatus.PENDING })
+                        }
                       >
                         {t("active")}
                       </TabsTrigger>
                       <TabsTrigger
                         value="completed"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
-                        onClick={() => updateQuery({ status: "completed" })}
+                        onClick={() =>
+                          updateQuery({
+                            status: ResourceRequestStatus.COMPLETED,
+                          })
+                        }
                       >
                         {t("completed")}
                       </TabsTrigger>
@@ -177,14 +185,18 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     <TabsTrigger
                       value="active"
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() => updateQuery({ status: "pending" })}
+                      onClick={() =>
+                        updateQuery({ status: ResourceRequestStatus.PENDING })
+                      }
                     >
                       {t("active")}
                     </TabsTrigger>
                     <TabsTrigger
                       value="completed"
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      onClick={() => updateQuery({ status: "completed" })}
+                      onClick={() =>
+                        updateQuery({ status: ResourceRequestStatus.COMPLETED })
+                      }
                     >
                       {t("completed")}
                     </TabsTrigger>
@@ -207,7 +219,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   <SelectContent>
                     {currentStatuses.map((statusOption) => (
                       <SelectItem key={statusOption} value={statusOption}>
-                        {t(`resource_status__${statusOption}`)}
+                        {t(`resource_request_status__${statusOption}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -227,13 +239,13 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                     >
                       <CareIcon
                         icon={
-                          RESOURCE_STATUS_CHOICES.find(
+                          RESOURCE_REQUEST_STATUS_OPTIONS.find(
                             (o) => o.text === statusOption,
                           )?.icon || "l-folder-open"
                         }
                         className="size-4"
                       />
-                      {t(`resource_status__${statusOption}`)}
+                      {t(`resource_request_status__${statusOption}`)}
                     </TabsTrigger>
                   ))}
                 </TabsList>
@@ -251,57 +263,62 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
             </div>
           ) : (
             <>
-              {resources.map((resource: ResourceRequest, index) => (
-                <Card
-                  key={index}
-                  className="hover:shadow-lg transition-shadow group flex flex-col justify-between"
-                  data-cy={`resource-card-${index}`}
-                >
-                  <CardHeader className="space-y-1 pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="group-hover:text-primary transition-colors">
-                        {resource.title}
-                      </CardTitle>
-                    </div>
-                    <CardDescription className="line-clamp-2">
-                      {resource.reason}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex flex-col space-y-2 px-6 py-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      {resource.emergency && (
-                        <Badge variant="destructive">{t("emergency")}</Badge>
-                      )}
-                      <Badge variant="secondary">
-                        {t(
-                          `resource_request_category__${getResourceRequestCategoryEnum(resource.category)}`,
+              {resources.map(
+                (resource: ResourceRequestListRead, index: number) => (
+                  <Card
+                    key={index}
+                    className="hover:shadow-lg transition-shadow group flex flex-col justify-between"
+                    data-cy={`resource-card-${index}`}
+                  >
+                    <CardHeader className="space-y-1 pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="group-hover:text-primary transition-colors">
+                          {resource.title}
+                        </CardTitle>
+                      </div>
+                      <CardDescription className="line-clamp-2">
+                        {resource.reason}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col space-y-2 px-6 py-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {resource.emergency && (
+                          <Badge variant="destructive">{t("emergency")}</Badge>
                         )}
-                      </Badge>
-                    </div>
-                    <div className="flex flex-row gap-2">
-                      <Badge variant="secondary">
-                        {resource.origin_facility?.name}
+                        <Badge variant="secondary">
+                          {t(
+                            `resource_request_category__${getResourceRequestCategoryEnum(resource.category)}`,
+                          )}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-row gap-2">
+                        <Badge variant="secondary">
+                          {resource.origin_facility?.name}
+                          <CareIcon
+                            icon="l-arrow-right"
+                            className="mx-2 size-4"
+                          />
+                          {resource.assigned_facility?.name}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex flex-col p-0">
+                      <Separator className="my-2" />
+                      <Link
+                        href={`/facility/${resource.origin_facility.id}/resource/${resource.id}`}
+                        className="items-center self-end pt-2 pr-4 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
+                        data-cy={`resource-view-details-${index}`}
+                      >
+                        {t("view_details")}
                         <CareIcon
                           icon="l-arrow-right"
-                          className="mx-2 size-4"
+                          className="ml-1 size-4"
                         />
-                        {resource.assigned_facility?.name}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex flex-col p-0">
-                    <Separator className="my-2" />
-                    <Link
-                      href={`/facility/${resource.origin_facility.id}/resource/${resource.id}`}
-                      className="items-center self-end pt-2 pr-4 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
-                      data-cy={`resource-view-details-${index}`}
-                    >
-                      {t("view_details")}
-                      <CareIcon icon="l-arrow-right" className="ml-1 size-4" />
-                    </Link>
-                  </CardFooter>
-                </Card>
-              ))}
+                      </Link>
+                    </CardFooter>
+                  </Card>
+                ),
+              )}
               {queryResources?.count &&
                 queryResources.count > resultsPerPage && (
                   <div className="col-span-full">

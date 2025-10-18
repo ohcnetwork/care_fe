@@ -85,6 +85,7 @@ export const useAvailabilityHeatmap = ({
       from_date: fromDate,
       to_date: toDate,
     },
+    silent: true,
   });
 
   if (careConfig.appointments.useAvailabilityStatsAPI === false) {

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -31,10 +31,12 @@ import { getPermissions } from "@/common/Permissions";
 import { GENDER_TYPES } from "@/common/constants";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { PLUGIN_Component } from "@/PluginEngine";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcuts, useShortcutSubContext } from "@/context/ShortcutContext";
+import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getPartialId,
@@ -44,10 +46,8 @@ import {
 import patientApi from "@/types/emr/patient/patientApi";
 import { FacilityRead } from "@/types/facility/facility";
 import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
+import careConfig from "@careConfig";
 import { TFunction } from "i18next";
-
-const PHONE_NUMBER_CONFIG_SYSTEM =
-  "system.care.ohc.network/patient-phone-number";
 
 export default function PatientIndex({ facilityId }: { facilityId: string }) {
   useShortcutSubContext("patient:search:-global");
@@ -160,7 +160,15 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     <div>
       <div className="container max-w-5xl mx-auto py-6">
         {canCreatePatient && (
-          <div className="flex justify-center md:justify-end">
+          <div className="flex max-md:flex-col justify-center md:justify-end gap-4">
+            <PLUGIN_Component
+              __name="PatientSearchActions"
+              facilityId={facilityId}
+              className={cn(
+                buttonVariants({ variant: "primary_gradient" }),
+                "w-full",
+              )}
+            />
             <AddPatientButton
               facilityId={facilityId}
               identifierConfigs={
@@ -323,19 +331,21 @@ const getSearchOptions = (
     // Phone number configs
     ...configs.filter(
       ({ config }) =>
-        config.auto_maintained && config.system === PHONE_NUMBER_CONFIG_SYSTEM,
+        config.auto_maintained &&
+        config.system === careConfig.phoneNumberConfigSystem,
     ),
     // Auto-maintained configs but not phone number configs
     ...configs.filter(
       ({ config }) =>
-        config.auto_maintained && config.system !== PHONE_NUMBER_CONFIG_SYSTEM,
+        config.auto_maintained &&
+        config.system !== careConfig.phoneNumberConfigSystem,
     ),
     // Non-auto-maintained configs
     ...configs.filter((c) => !c.config.auto_maintained),
   ].map((c) => ({
     key: c.id,
     type:
-      c.config.system === PHONE_NUMBER_CONFIG_SYSTEM
+      c.config.system === careConfig.phoneNumberConfigSystem
         ? ("phone" as const)
         : ("text" as const),
     placeholder: t("search_by_identifier", { name: c.config.display }),
@@ -347,7 +357,7 @@ const getSearchOptions = (
 
 const getPhoneNumberConfig = (identifierConfigs: PatientIdentifierConfig[]) => {
   return identifierConfigs.find(
-    (c) => c.config.system === PHONE_NUMBER_CONFIG_SYSTEM,
+    (c) => c.config.system === careConfig.phoneNumberConfigSystem,
   );
 };
 
