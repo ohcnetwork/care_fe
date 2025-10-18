@@ -58,20 +58,27 @@ import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specime
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
 
 const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z.string().trim().min(1, "Title is required"),
   slug_value: z.string().min(1, "Slug is required"),
-  description: z.string().min(1, "Description is required"),
-  usage: z.string().min(1, "Usage is required"),
+  description: z.string().trim().min(1, "Description is required"),
+  usage: z.string().trim().min(1, "Usage is required"),
   derived_from_uri: z.string().nullable(),
   status: z.nativeEnum(Status),
-  classification: z.nativeEnum(Classification),
+  classification: z.nativeEnum(Classification, {
+    errorMap: () => ({ message: "Category is required" }),
+  }),
   kind: z.nativeEnum(Kind),
   healthcare_service: z.string().nullable(),
-  code: z.object({
-    code: z.string().min(1, "Code is required"),
-    display: z.string().min(1, "Display name is required"),
-    system: z.string().min(1, "System is required"),
-  }),
+  code: z.object(
+    {
+      code: z.string().min(1, "Code is required"),
+      display: z.string().min(1, "Display name is required"),
+      system: z.string().min(1, "System is required"),
+    },
+    {
+      required_error: "Code is required",
+    },
+  ),
   body_site: z
     .object({
       code: z.string().min(1, "Code is required"),
@@ -326,6 +333,10 @@ function ActivityDefinitionFormContent({
             category: existingData.category?.slug || "",
           }
         : {
+            title: "",
+            slug_value: "",
+            description: "",
+            usage: "",
             status: Status.active,
             kind: Kind.service_request,
             specimen_requirements: [],
@@ -570,7 +581,7 @@ function ActivityDefinitionFormContent({
                         </FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value || undefined}
                         >
                           <FormControl>
                             <SelectTrigger>
