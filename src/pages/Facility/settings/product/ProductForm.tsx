@@ -147,7 +147,8 @@ export function ProductFormContent({
   existingData,
   slug,
   containerClassName,
-  onSuccess = () => navigate(`/facility/${facilityId}/settings/product`),
+  onSuccess = (product: ProductRead) =>
+    navigate(`/facility/${facilityId}/settings/product/${product.id}`),
   onCancel = () => navigate(`/facility/${facilityId}/settings/product`),
   disableButtons = false,
   enabled = true,
@@ -263,7 +264,7 @@ export function ProductFormContent({
     mutationFn: mutate(productApi.updateProduct, {
       pathParams: {
         facilityId,
-        productId: productId || "",
+        productId: productId!,
       },
     }),
     onSuccess: () => {
