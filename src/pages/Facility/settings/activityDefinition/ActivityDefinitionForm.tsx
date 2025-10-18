@@ -65,7 +65,7 @@ const formSchema = z.object({
   derived_from_uri: z.string().nullable(),
   status: z.nativeEnum(Status),
   classification: z.nativeEnum(Classification, {
-    errorMap: () => ({ message: "Category is required" }),
+    errorMap: () => ({ message: "Classification is required" }),
   }),
   kind: z.nativeEnum(Kind),
   healthcare_service: z.string().nullable(),
