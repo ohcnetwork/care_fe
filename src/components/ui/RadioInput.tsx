@@ -14,12 +14,15 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
   return (
     <RadioGroup
       {...props}
-      className={cn("flex flex-wrap gap-4 items-center", props.className)}
+      className={cn(
+        "flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 items-stretch",
+        props.className,
+      )}
     >
       {options.map((option) => (
         <div
           className={cn(
-            "border rounded-md p-2 w-full sm:w-fit cursor-pointer hover:border-primary-500 group overflow-hidden",
+            "border rounded-md p-2 sm:p-3 min-w-[55px] basis-full sm:basis-auto w-full sm:w-fit max-w-full sm:max-w-[140px] cursor-pointer hover:border-primary-500 group",
             props.value === option.value
               ? "bg-primary-100 border-primary-500"
               : "bg-white border-gray-300",
@@ -35,7 +38,7 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
             }
           }}
         >
-          <div className="flex items-center justify-start space-x-2 min-w-0">
+          <div className="flex items-center justify-start gap-1.5 sm:gap-2">
             <RadioGroupItem
               value={option.value.toString()}
               id={option.value}
@@ -43,7 +46,7 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
             />
             <Label
               htmlFor={option.value}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed cursor-pointer peer-disabled:opacity-70 whitespace-nowrap"
+              className="text-[10px] sm:text-xs font-medium leading-tight peer-disabled:cursor-not-allowed cursor-pointer peer-disabled:opacity-70 break-words min-w-0"
             >
               {option.label}
             </Label>
