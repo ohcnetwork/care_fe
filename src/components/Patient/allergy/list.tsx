@@ -144,7 +144,7 @@ export function AllergyList({
 
                         <div className="space-y-3 overflow-auto w-full">
                           <h3 className="text-sm font-medium text-indigo-700">
-                            {format(date, "dd MMMM, yyyy")}
+                            {format(new Date(date), "dd MMMM, yyyy")}
                           </h3>
                           <AllergyTable
                             patientId={patientId}

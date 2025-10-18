@@ -114,6 +114,21 @@ export default function PatientIdentifierFilter({
       (c) => c.id === searchType,
     )?.config.system === careConfig.phoneNumberConfigSystem;
 
+  const handleSearchTermChange = (value: string) => {
+    let filteredValue = value;
+
+    if (isPhoneNumberConfig) {
+      filteredValue = value.replace(/[^0-9+\-() ]/g, "");
+    } else {
+      filteredValue = value.replace(/[^\p{L}\s\-']/gu, "");
+      if (filteredValue.match(/^\d+$/)) {
+        filteredValue = "";
+      }
+    }
+
+    setSearchTerm(filteredValue);
+  };
+
   // Patient search query (for identifier-based search)
   const { data: patientList, isFetching: isPatientFetching } = useQuery({
     queryKey: ["patient-search", searchTerm, searchType],
@@ -212,7 +227,7 @@ export default function PatientIdentifierFilter({
                 : t("select_search_type")
             }
             value={searchTerm}
-            onChange={(value) => setSearchTerm(value || "")}
+            onChange={(value) => handleSearchTermChange(value || "")}
             className="border-none focus:ring-0 focus:outline-none flex-1"
           />
         ) : (
@@ -228,7 +243,7 @@ export default function PatientIdentifierFilter({
                 : t("select_search_type")
             }
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchTermChange(e.target.value)}
             className="border-none focus:ring-0 focus:outline-none focus-visible:ring-0 shadow-none flex-1"
           />
         )}
