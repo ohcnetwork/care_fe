@@ -73,6 +73,7 @@ const formSchema = z.object({
     })
     .required(),
   expiration_date: z.date(),
+  quantity: z.number().min(1, "Quantity must be at least 1"),
 });
 
 export default function ProductForm({
@@ -242,10 +243,12 @@ export function ProductFormContent({
             expiration_date: existingData.expiration_date
               ? new Date(existingData.expiration_date)
               : undefined,
+            quantity: existingData.quantity || 1,
           }
         : {
             status: ProductStatusOptions.active,
             product_knowledge: slug,
+            quantity: 1,
           },
   });
 
@@ -301,6 +304,7 @@ export function ProductFormContent({
         expiration_date: formattedData.expiration_date,
         charge_item_definition: formattedData.charge_item_definition,
         product_knowledge: formattedData.product_knowledge,
+        quantity: formattedData.quantity,
       };
       updateProduct(updatePayload);
     } else {
@@ -310,6 +314,7 @@ export function ProductFormContent({
         expiration_date: formattedData.expiration_date,
         product_knowledge: formattedData.product_knowledge,
         charge_item_definition: formattedData.charge_item_definition,
+        quantity: formattedData.quantity,
       };
       createProduct(createPayload);
     }
@@ -348,33 +353,32 @@ export function ProductFormContent({
               )}
             />
 
-            {!isEditMode && !existingProductKnowledge && (
-              <FormField
-                control={form.control}
-                name="product_knowledge"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel aria-required>
-                      {t("product_knowledge")}
-                    </FormLabel>
-                    <FormControl>
-                      <ProductKnowledgeSelect
-                        value={productKnowledgeData?.find(
-                          (pk) => pk.slug === field.value,
-                        )}
-                        onChange={(selected) => field.onChange(selected.slug)}
-                        className="border-gray-300 font-normal text-gray-700"
-                        enableFavorites
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {t("product_knowledge_selection_description")}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+            <FormField
+              control={form.control}
+              name="product_knowledge"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel aria-required>
+                    {t("product_knowledge")}
+                  </FormLabel>
+                  <FormControl>
+                    <ProductKnowledgeSelect
+                      value={productKnowledgeData?.find(
+                        (pk) => pk.slug === field.value,
+                      )}
+                      onChange={isEditMode ? () => {} : (selected) => field.onChange(selected.slug)}
+                      className="border-gray-300 font-normal text-gray-700"
+                      enableFavorites={!isEditMode}
+                      disabled={isEditMode}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t("product_knowledge_selection_description")}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
@@ -410,6 +414,29 @@ export function ProductFormContent({
                   />
                   <FormDescription>
                     {t("expiration_date_description")}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="quantity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel aria-required>{t("quantity")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder={t("enter_quantity")}
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      value={field.value || ""}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t("quantity_description")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
