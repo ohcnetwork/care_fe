@@ -521,14 +521,7 @@ function WardCard({ ward }: WardCardProps) {
                       )}
                     </div>
                   </div>
-                  <Badge
-                    variant={isOccupied ? "default" : "success"}
-                    className={cn(
-                      isOccupied
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-green-100 text-green-700",
-                    )}
-                  >
+                  <Badge variant={isOccupied ? "blue" : "green"}>
                     {isOccupied ? t("occupied") : t("available")}
                   </Badge>
                 </div>
