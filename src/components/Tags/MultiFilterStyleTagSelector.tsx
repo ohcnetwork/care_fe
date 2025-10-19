@@ -655,15 +655,14 @@ export function MultiFilterStyleTagSelector({
                   </span>
                 </div>
                 <div className="flex gap-1 my-2 mx-2">
-                  <button
-                    type="button"
-                    data-cy="tag-selector-done"
+                  <Button
+                    variant="primary_gradient"
                     onClick={() => setOpen(false)}
-                    className="bg-green-800 text-white px-3 py-2 rounded-md flex items-center gap-2"
+                    className="flex items-center gap-2"
                   >
                     <span className="text-sm font-bold">{t("done")}</span>
                     <CornerDownLeft className="size-4" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
