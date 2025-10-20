@@ -3,13 +3,11 @@ import { motion } from "framer-motion";
 import { GripVertical } from "lucide-react";
 
 interface RailPanelProps {
-  className?: string;
   children: React.ReactNode;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 export default function RailPanel({
-  className,
   children,
   open = true,
   onOpenChange,
@@ -21,7 +19,7 @@ export default function RailPanel({
         animate={{ width: open ? "auto" : 0, opacity: open ? 1 : 0 }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
         layout
-        className={cn("overflow-hidden pr-3", className)}
+        className="overflow-hidden pr-3"
       >
         {children}
       </motion.div>
@@ -40,7 +38,6 @@ export default function RailPanel({
               className={cn(
                 "rounded-b-lg rounded-t-lg border border-gray-300 bg-white",
                 open ? "cursor-w-resize" : "cursor-e-resize",
-                className,
               )}
             >
               <GripVertical className="size-4 my-2" />
