@@ -19,7 +19,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
-import { Code, DEFAULT_EXPAND_REQUEST_LANGUAGE } from "@/types/base/code/code";
+import {
+  CodeConceptMinimal,
+  DEFAULT_EXPAND_REQUEST_LANGUAGE,
+} from "@/types/base/code/code";
 import valueSetApi from "@/types/valueSet/valueSetApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -27,7 +30,7 @@ import { Loader2 } from "lucide-react";
 
 interface Props {
   system: string;
-  onSelect: (value: Code) => void;
+  onSelect: (value: CodeConceptMinimal) => void;
   count?: number;
   searchPostFix?: string;
   showCode?: boolean;
@@ -38,7 +41,7 @@ interface Props {
 }
 
 interface ItemProps {
-  option: Code;
+  option: CodeConceptMinimal;
   isFavourite: boolean;
   onFavourite: () => void;
   onSelect: () => void;
@@ -92,7 +95,9 @@ export default function ValueSetSearchContent({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState(0);
-  const [itemToRemove, setItemToRemove] = useState<Code | null>(null);
+  const [itemToRemove, setItemToRemove] = useState<CodeConceptMinimal | null>(
+    null,
+  );
   const [showBulkClearConfirm, setShowBulkClearConfirm] = useState(false);
 
   const searchQuery = useQuery({
@@ -258,6 +263,7 @@ export default function ValueSetSearchContent({
                         code: option.code,
                         display: option.display || "",
                         system: option.system || "",
+                        designation: option.designation || [],
                       });
                       addRecentMutation.mutate(option);
                     }}
@@ -326,6 +332,7 @@ export default function ValueSetSearchContent({
                         code: option.code,
                         display: option.display || "",
                         system: option.system || "",
+                        designation: option.designation || [],
                       });
                       addRecentMutation.mutate(option);
                     }}

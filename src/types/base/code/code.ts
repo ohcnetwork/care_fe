@@ -1,8 +1,19 @@
 import { z } from "zod";
+
 export interface Designation {
-  language: string;
-  use: Code;
-  value: string;
+  language?: string;
+  use?: {
+    system: string;
+    code: string;
+  };
+  value?: string;
+}
+
+export interface CodeConceptMinimal {
+  code: string;
+  display: string;
+  system: string;
+  designation: Designation[];
 }
 
 export const DEFAULT_EXPAND_REQUEST_LANGUAGE = "en-gb";
@@ -11,7 +22,6 @@ export interface Code {
   system: string;
   code: string;
   display: string;
-  designation?: Designation[];
 }
 
 export const CodeSchema = z.object({
