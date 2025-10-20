@@ -19,7 +19,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
-import { CodeConceptMinimal } from "@/types/base/code/code";
+import { Code, CodeConceptMinimal } from "@/types/base/code/code";
 import { DEFAULT_EXPAND_REQUEST_LANGUAGE } from "@/types/valueSet/valueSet";
 import valueSetApi from "@/types/valueSet/valueSetApi";
 import mutate from "@/Utils/request/mutate";
@@ -28,7 +28,7 @@ import { Loader2 } from "lucide-react";
 
 interface Props {
   system: string;
-  onSelect: (value: CodeConceptMinimal) => void;
+  onSelect: (value: Code) => void;
   count?: number;
   searchPostFix?: string;
   showCode?: boolean;
@@ -261,7 +261,6 @@ export default function ValueSetSearchContent({
                         code: option.code,
                         display: option.display || "",
                         system: option.system || "",
-                        designation: option.designation || [],
                       });
                       addRecentMutation.mutate(option);
                     }}
@@ -330,7 +329,6 @@ export default function ValueSetSearchContent({
                         code: option.code,
                         display: option.display || "",
                         system: option.system || "",
-                        designation: option.designation || [],
                       });
                       addRecentMutation.mutate(option);
                     }}
