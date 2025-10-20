@@ -22,7 +22,7 @@ export default function RadioInput({ options, ...props }: RadioInputProps) {
       {options.map((option) => (
         <div
           className={cn(
-            "border rounded-md p-2 sm:p-3 min-w-[55px] basis-full sm:basis-auto w-full sm:w-fit max-w-full sm:max-w-[140px] cursor-pointer hover:border-primary-500 group",
+            "border rounded-md p-2 sm:p-3 basis-full sm:basis-auto cursor-pointer hover:border-primary-500 group",
             props.value === option.value
               ? "bg-primary-100 border-primary-500"
               : "bg-white border-gray-300",
