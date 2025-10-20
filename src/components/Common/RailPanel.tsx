@@ -1,16 +1,19 @@
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { GripVertical } from "lucide-react";
 
 interface RailPanelProps {
   className?: string;
   children: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
-export default function RailPanel({ className, children }: RailPanelProps) {
-  const [open, setOpen] = useState(true);
-
+export default function RailPanel({
+  className,
+  children,
+  open = true,
+  onOpenChange,
+}: RailPanelProps) {
   return (
     <div className="relative flex">
       <motion.div
@@ -18,33 +21,30 @@ export default function RailPanel({ className, children }: RailPanelProps) {
         animate={{ width: open ? "auto" : 0, opacity: open ? 1 : 0 }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
         layout
-        className={cn(
-          "bg-sidebar text-sidebar-foreground border-r overflow-hidden pr-3",
-          className,
-        )}
+        className={cn("overflow-hidden pr-3", className)}
       >
         {children}
       </motion.div>
 
       <div className="relative flex items-center">
-        <div className="border-r border-gray-300 h-full relative">
+        <div
+          className={cn(
+            "border border-gray-200 rounded-sm bg-gray-200 h-full relative transition-all duration-300 ease-in-out",
+            open ? "w-auto" : "w-4",
+          )}
+        >
           <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">
-            <Button
-              variant="outline"
+            <button
               aria-expanded={open}
-              onClick={() => setOpen(!open)}
+              onClick={() => onOpenChange(!open)}
               className={cn(
-                "rounded-full shadow-lg border-gray-300",
+                "rounded-b-lg rounded-t-lg border border-gray-300 bg-white",
+                open ? "cursor-w-resize" : "cursor-e-resize",
                 className,
               )}
-              size="icon"
             >
-              {open ? (
-                <ChevronLeft className="size-5" />
-              ) : (
-                <ChevronRight className="size-5" />
-              )}
-            </Button>
+              <GripVertical className="size-4 my-2" />
+            </button>
           </div>
         </div>
       </div>
