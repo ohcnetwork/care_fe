@@ -193,7 +193,7 @@ export default function BedAvailabilityDashboard({
 
   if (isLoading) {
     return (
-      <Page title={t("bed_availability_dashboard")}>
+      <Page title={t("bed_availability_dashboard")} hideTitleOnPage>
         <div className="p-6">
           <CardGridSkeleton count={6} />
         </div>
@@ -202,7 +202,7 @@ export default function BedAvailabilityDashboard({
   }
 
   return (
-    <Page title={t("bed_availability_dashboard")}>
+    <Page title={t("bed_availability_dashboard")} hideTitleOnPage>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
