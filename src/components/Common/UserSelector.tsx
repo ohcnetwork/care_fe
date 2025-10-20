@@ -14,6 +14,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   Popover,
   PopoverContent,
@@ -25,6 +26,7 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import facilityApi from "@/types/facility/facilityApi";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { UserReadMinimal } from "@/types/user/user";
@@ -43,6 +45,84 @@ interface Props {
 
 const PAGE_LIMIT = 50;
 
+interface UserCommandContentProps {
+  setSearch: (value: string) => void;
+  usersList?: UserReadMinimal[];
+  isFetching: boolean;
+  isFetchingNextPage: boolean;
+  noOptionsMessage?: string;
+  selected?: UserReadMinimal;
+  onChange: (user: UserReadMinimal) => void;
+  setOpen: (value: boolean) => void;
+  ref: (node?: Element | null) => void;
+}
+
+function UserCommandContent({
+  setSearch,
+  usersList,
+  isFetching,
+  isFetchingNextPage,
+  noOptionsMessage,
+  selected,
+  onChange,
+  setOpen,
+  ref,
+}: UserCommandContentProps) {
+  const { t } = useTranslation();
+
+  return (
+    <Command>
+      <CommandInput
+        placeholder={t("search")}
+        onValueChange={setSearch}
+        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
+      />
+      <CommandList>
+        <CommandEmpty>
+          {isFetching ? t("searching") : noOptionsMessage || t("no_results")}
+        </CommandEmpty>
+        <CommandGroup>
+          {usersList?.map((user: UserReadMinimal, i) => (
+            <CommandItem
+              key={user.id}
+              value={`${formatName(user)} ${user.username ?? ""}`}
+              onSelect={() => {
+                onChange(user);
+                setOpen(false);
+              }}
+              className="cursor-pointer w-full"
+              ref={i === usersList.length - 1 ? ref : undefined}
+            >
+              <div className="flex items-center gap-2 w-full">
+                <Avatar
+                  imageUrl={user.profile_picture_url}
+                  name={formatName(user, true)}
+                  className="size-6 rounded-full"
+                />
+                <div className="flex flex-col min-w-0">
+                  <span
+                    className="truncate text-sm font-medium"
+                    title={formatName(user)}
+                  >
+                    {formatName(user)}
+                  </span>
+                  <span className="text-xs text-gray-500 truncate">
+                    {user.username}
+                  </span>
+                </div>
+                {selected?.id === user.id && <CheckIcon className="ml-auto" />}
+              </div>
+            </CommandItem>
+          ))}
+          {isFetchingNextPage && (
+            <div className="text-center text-sm py-2">{t("loading")}</div>
+          )}
+        </CommandGroup>
+      </CommandList>
+    </Command>
+  );
+}
+
 export default function UserSelector({
   selected,
   onChange,
@@ -57,6 +137,7 @@ export default function UserSelector({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const { ref, inView } = useInView();
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const getPathParams = () => {
     if (!facilityId) return undefined;
@@ -108,93 +189,80 @@ export default function UserSelector({
     if (inView && hasNextPage) fetchNextPage();
   }, [inView, hasNextPage, fetchNextPage]);
 
+  const renderTriggerButton = () => (
+    <Button
+      variant="outline"
+      role="combobox"
+      className="min-w-60 w-full justify-start"
+      data-cy="select-assigned-user"
+      disabled={disabled}
+    >
+      {selected ? (
+        <div className="flex items-center gap-2">
+          <Avatar
+            imageUrl={selected.profile_picture_url}
+            name={formatName(selected, true)}
+            className="size-6 rounded-full"
+          />
+          <TooltipComponent content={formatName(selected)} side="bottom">
+            <p className="font-medium text-gray-900 truncate max-w-48 sm:max-w-56 md:max-w-64">
+              {formatName(selected)}
+            </p>
+          </TooltipComponent>
+        </div>
+      ) : (
+        <span>{placeholder || t("select_user")}</span>
+      )}
+      <CaretDownIcon className="ml-auto" />
+    </Button>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerTrigger asChild className={popoverClassName}>
+          {renderTriggerButton()}
+        </DrawerTrigger>
+        <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
+          <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
+            <UserCommandContent
+              setSearch={setSearch}
+              usersList={usersList}
+              isFetching={isFetching}
+              isFetchingNextPage={isFetchingNextPage}
+              noOptionsMessage={noOptionsMessage}
+              selected={selected}
+              onChange={onChange}
+              setOpen={setOpen}
+              ref={ref}
+            />
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild className={popoverClassName}>
-        <Button
-          variant="outline"
-          role="combobox"
-          className="min-w-60 w-full justify-start"
-          data-cy="select-assigned-user"
-          disabled={disabled}
-        >
-          {selected ? (
-            <div className="flex items-center gap-2">
-              <Avatar
-                imageUrl={selected.profile_picture_url}
-                name={formatName(selected, true)}
-                className="size-6 rounded-full"
-              />
-              <TooltipComponent content={formatName(selected)} side="bottom">
-                <p className="font-medium text-gray-900 truncate max-w-48 sm:max-w-56 md:max-w-64">
-                  {formatName(selected)}
-                </p>
-              </TooltipComponent>
-            </div>
-          ) : (
-            <span>{placeholder || t("select_user")}</span>
-          )}
-          <CaretDownIcon className="ml-auto" />
-        </Button>
+        {renderTriggerButton()}
       </PopoverTrigger>
       <PopoverContent
         className="p-0 w-[var(--radix-popover-trigger-width)]"
         align="start"
         sideOffset={4}
       >
-        <Command>
-          <CommandInput
-            placeholder={t("search")}
-            onValueChange={setSearch}
-            className="outline-hidden border-none ring-0 shadow-none"
-          />
-          <CommandList>
-            <CommandEmpty>
-              {isFetching
-                ? t("searching")
-                : noOptionsMessage || t("no_results")}
-            </CommandEmpty>
-            <CommandGroup>
-              {usersList?.map((user: UserReadMinimal, i) => (
-                <CommandItem
-                  key={user.id}
-                  value={`${formatName(user)} ${user.username ?? ""}`}
-                  onSelect={() => {
-                    onChange(user);
-                    setOpen(false);
-                  }}
-                  className="cursor-pointer w-full"
-                  ref={i === usersList.length - 1 ? ref : undefined}
-                >
-                  <div className="flex items-center gap-2 w-full">
-                    <Avatar
-                      imageUrl={user.profile_picture_url}
-                      name={formatName(user, true)}
-                      className="size-6 rounded-full"
-                    />
-                    <div className="flex flex-col min-w-0">
-                      <span
-                        className="truncate text-sm font-medium"
-                        title={formatName(user)}
-                      >
-                        {formatName(user)}
-                      </span>
-                      <span className="text-xs text-gray-500 truncate">
-                        {user.username}
-                      </span>
-                    </div>
-                    {selected?.id === user.id && (
-                      <CheckIcon className="ml-auto" />
-                    )}
-                  </div>
-                </CommandItem>
-              ))}
-              {isFetchingNextPage && (
-                <div className="text-center text-sm py-2">{t("loading")}</div>
-              )}
-            </CommandGroup>
-          </CommandList>
-        </Command>
+        <UserCommandContent
+          setSearch={setSearch}
+          usersList={usersList}
+          isFetching={isFetching}
+          isFetchingNextPage={isFetchingNextPage}
+          noOptionsMessage={noOptionsMessage}
+          selected={selected}
+          onChange={onChange}
+          setOpen={setOpen}
+          ref={ref}
+        />
       </PopoverContent>
     </Popover>
   );

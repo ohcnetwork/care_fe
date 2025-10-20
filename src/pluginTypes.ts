@@ -1,18 +1,16 @@
-import { LazyExoticComponent } from "react";
-import { UseFormReturn } from "react-hook-form";
-
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
-
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import { DeviceDetail } from "@/types/device/device";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { FacilityRead } from "@/types/facility/facility";
 import { UserReadMinimal } from "@/types/user/user";
-
-import { AppRoutes } from "./Routers/AppRouter";
+import { LazyExoticComponent } from "react";
+import { UseFormReturn } from "react-hook-form";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { pluginMap } from "./pluginMap";
-import { FacilityRead } from "./types/facility/facility";
+import { AppRoutes } from "./Routers/AppRouter";
 
 export type DoctorConnectButtonComponentType = React.FC<{
   user: UserReadMinimal;
@@ -60,6 +58,11 @@ export type PatientDetailsTabDemographyGeneralInfoComponentType = React.FC<{
   patientData: PatientRead;
 }>;
 
+export type InvoiceRecordPaymentOptionsComponentType = React.FC<{
+  facilityId: string;
+  invoice: InvoiceRead;
+}>;
+
 export type PatientSearchActionsComponentType = React.FC<{
   facilityId: string;
   className?: string;
@@ -76,6 +79,7 @@ export type SupportedPluginComponents = {
   FacilityHomeActions: FacilityHomeActionsComponentType;
   PatientRegistrationForm: PatientRegistrationFormComponentType;
   PatientDetailsTabDemographyGeneralInfo: PatientDetailsTabDemographyGeneralInfoComponentType;
+  InvoiceRecordPaymentOptions: InvoiceRecordPaymentOptionsComponentType;
   PatientSearchActions: PatientSearchActionsComponentType;
 };
 

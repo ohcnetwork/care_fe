@@ -23,10 +23,10 @@ import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import CreateQuestionnaireTagSheet from "./CreateQuestionnaireTagSheet";
 import ManageQuestionnaireOrganizationsSheet, {
-  OrgSelectorPopover,
+  OrgSelector,
 } from "./ManageQuestionnaireOrganizationsSheet";
 import ManageQuestionnaireTagsSheet, {
-  QuestionnaireTagSelectorPopover,
+  QuestionnaireTagSelector,
 } from "./ManageQuestionnaireTagsSheet";
 
 interface Organization {
@@ -232,7 +232,7 @@ function OrganizationSelector({
       {selection.error && (
         <p className="text-sm text-red-500">{selection.error}</p>
       )}
-      <OrgSelectorPopover
+      <OrgSelector
         title={t("select_organizations")}
         selected={selection.selectedOrgs.map((org) => org.id)}
         onToggle={(value) => {
@@ -317,7 +317,7 @@ function TagSelector({
         )}
       </div>
 
-      <QuestionnaireTagSelectorPopover
+      <QuestionnaireTagSelector
         title={t("select_tags")}
         selected={selection.selectedTags}
         onToggle={selection.onToggle}
