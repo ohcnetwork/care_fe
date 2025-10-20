@@ -163,7 +163,7 @@ export default function RolesIndex() {
       title={t("roles")}
       hideTitleOnPage
       className={cn(
-        "w-full mt-3 overflow-y-auto",
+        "w-full overflow-y-auto",
         isSidebarOpen
           ? "md:max-w-[calc(100vw-20rem)]"
           : "md:max-w-[calc(100vw-5rem)]",
