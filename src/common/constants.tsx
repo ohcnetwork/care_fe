@@ -44,23 +44,6 @@ export const BLOOD_GROUP_CHOICES = [
   { id: "O_negative", text: "O-" },
 ];
 
-export const RESOURCE_CATEGORY_CHOICES = [
-  { id: "PATIENT_CARE", text: "Clinical Care and Social Support" },
-  { id: "COMFORT_DEVICES", text: "Comfort Devices" },
-  { id: "MEDICINES", text: "Medicines" },
-  { id: "FINANCIAL", text: "Financial" },
-  { id: "OTHERS", text: "Other" },
-];
-export const RESOURCE_STATUS_CHOICES = [
-  { icon: "l-clock", text: "pending" },
-  { icon: "l-check", text: "approved" },
-  { icon: "l-ban", text: "rejected" },
-  { icon: "l-file-slash", text: "cancelled" },
-  { icon: "l-truck", text: "transportation_to_be_arranged" },
-  { icon: "l-spinner", text: "transfer_in_progress" },
-  { icon: "l-check-circle", text: "completed" },
-] as const;
-
 export const SOCIOECONOMIC_STATUS_CHOICES = [
   "MIDDLE_CLASS",
   "POOR",

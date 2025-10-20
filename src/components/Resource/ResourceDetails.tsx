@@ -11,15 +11,14 @@ import { Separator } from "@/components/ui/separator";
 
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
-import CommentSection from "@/components/Resource/ResourceCommentSection";
-
-import routes from "@/Utils/request/api";
-import query from "@/Utils/request/query";
-import { formatDateTime, formatName } from "@/Utils/utils";
 import { formatPatientAddress } from "@/components/Patient/utils";
+import CommentSection from "@/components/Resource/ResourceCommentSection";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 import { getResourceRequestCategoryEnum } from "@/types/resourceRequest/resourceRequest";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
+import query from "@/Utils/request/query";
+import { formatDateTime, formatName } from "@/Utils/utils";
 
 function PatientCard({ patient }: { patient: PatientRead }) {
   const { t } = useTranslation();
@@ -117,8 +116,8 @@ export default function ResourceDetails({
 
   const { data, isLoading } = useQuery({
     queryKey: ["resource_request", id],
-    queryFn: query(routes.getResourceDetails, {
-      pathParams: { id },
+    queryFn: query(resourceRequestApi.get, {
+      pathParams: { resourceRequestId: id },
     }),
   });
 
@@ -170,7 +169,7 @@ export default function ResourceDetails({
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("status")}</p>
                 <Badge>
-                  {t(`resource_status__${data.status.toLowerCase()}`)}
+                  {t(`resource_request_status__${data.status.toLowerCase()}`)}
                 </Badge>
               </div>
               <div className="space-y-1">
@@ -261,7 +260,7 @@ export default function ResourceDetails({
               <div className="space-y-1">
                 <p className="text-sm font-medium">{t("last_modified_by")}</p>
                 <p className="text-sm text-gray-500">
-                  {formatName(data.updated_by)}
+                  {data.updated_by ? formatName(data.updated_by) : "--"}
                 </p>
                 <p className="text-xs text-gray-500">
                   {formatDateTime(data.modified_date)}
