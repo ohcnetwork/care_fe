@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -34,6 +35,7 @@ import {
   ValuesetFormType,
 } from "@/types/valueset/valueset";
 
+import { generateSlug } from "@/Utils/utils";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
 
@@ -65,7 +67,7 @@ function ConceptFields({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h4 className="text-sm font-medium">{t("concepts")}</h4>
         <Button
           type="button"
@@ -73,6 +75,7 @@ function ConceptFields({
           size="sm"
           onClick={() => append({ code: "", display: "" })}
           disabled={disabled}
+          className="w-full sm:w-auto"
         >
           <PlusIcon className="size-4 mr-2" />
           {t("add_concept")}
@@ -85,16 +88,9 @@ function ConceptFields({
             name={`compose.${type}.${nestIndex}.concept.${index}`}
             form={parentForm}
             className="flex-1"
+            onRemove={() => remove(index)}
+            removeDisabled={disabled}
           />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => remove(index)}
-            disabled={disabled}
-          >
-            <TrashIcon className="size-4" />
-          </Button>
         </div>
       ))}
     </div>
@@ -120,7 +116,7 @@ function FilterFields({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h4 className="text-sm font-medium">{t("filters")}</h4>
         <Button
           type="button"
@@ -128,6 +124,7 @@ function FilterFields({
           size="sm"
           onClick={() => append({ property: "", op: "", value: "" })}
           disabled={disabled}
+          className="w-full sm:w-auto"
         >
           <PlusIcon className="size-4 mr-2" />
           {t("add_filter")}
@@ -135,54 +132,56 @@ function FilterFields({
       </div>
       {fields.map((field, index) => (
         <div key={field.id} className="flex gap-4 items-start">
-          <FormField
-            control={parentForm.control}
-            name={`compose.${type}.${nestIndex}.filter.${index}.property`}
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={t("property")}
-                    disabled={disabled}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={parentForm.control}
-            name={`compose.${type}.${nestIndex}.filter.${index}.op`}
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={t("operator")}
-                    disabled={disabled}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={parentForm.control}
-            name={`compose.${type}.${nestIndex}.filter.${index}.value`}
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={t("value")}
-                    disabled={disabled}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-1">
+            <FormField
+              control={parentForm.control}
+              name={`compose.${type}.${nestIndex}.filter.${index}.property`}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder={t("property")}
+                      disabled={disabled}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={parentForm.control}
+              name={`compose.${type}.${nestIndex}.filter.${index}.op`}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder={t("operator")}
+                      disabled={disabled}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={parentForm.control}
+              name={`compose.${type}.${nestIndex}.filter.${index}.value`}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder={t("value")}
+                      disabled={disabled}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <Button
             type="button"
             variant="ghost"
@@ -215,7 +214,7 @@ function RuleFields({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 pb-2 p-4 sm:p-6">
         <CardTitle className="text-lg font-medium">
           {type === "include" ? t("include_rules") : t("exclude_rules")}
         </CardTitle>
@@ -231,15 +230,16 @@ function RuleFields({
             })
           }
           disabled={disabled}
+          className="w-full sm:w-auto"
         >
           <PlusIcon className="size-4 mr-2" />
           {t("add_rule")}
         </Button>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 p-4 sm:p-6 pt-0">
         {fields.map((field, index) => (
           <div key={field.id} className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-end gap-4">
               <FormField
                 control={form.control}
                 name={`compose.${type}.${index}.system`}
@@ -270,7 +270,6 @@ function RuleFields({
                 )}
               />
               <Button
-                className="mt-5"
                 type="button"
                 variant="ghost"
                 size="icon"
@@ -406,7 +405,16 @@ export function ValueSetForm({
             <FormItem>
               <FormLabel aria-required>{t("name")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    form.setValue("slug", generateSlug(e.target.value, 25), {
+                      shouldValidate: true,
+                      shouldDirty: false,
+                    });
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -421,9 +429,18 @@ export function ValueSetForm({
             <FormItem>
               <FormLabel aria-required>{t("slug")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    const sanitizedValue = e.target.value
+                      .toLowerCase()
+                      .replace(/[^a-z0-9_-]/g, "");
+                    field.onChange(sanitizedValue);
+                  }}
+                />
               </FormControl>
               <FormMessage />
+              <FormDescription>{t("slug_format_message")}</FormDescription>
             </FormItem>
           )}
         />

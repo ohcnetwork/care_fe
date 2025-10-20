@@ -267,7 +267,7 @@ Cypress.Commands.add(
     // Click to open the dropdown
     cy.contains("label", labelText)
       .parent('[data-slot="form-item"]')
-      .find("[data-slot='popover-trigger']")
+      .find("[role='combobox']")
       .click()
       .scrollIntoView()
       .then(() => {
