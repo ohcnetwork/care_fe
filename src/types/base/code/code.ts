@@ -16,8 +16,6 @@ export interface CodeConceptMinimal {
   designation: Designation[];
 }
 
-export const DEFAULT_EXPAND_REQUEST_LANGUAGE = "en-gb";
-
 export interface Code {
   system: string;
   code: string;

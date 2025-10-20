@@ -27,6 +27,8 @@ export const VALUESET_STATUS_ICONS = {
   [ValueSetStatus.UNKNOWN]: HelpCircle,
 } as const;
 
+export const DEFAULT_EXPAND_REQUEST_LANGUAGE = "en-gb";
+
 export interface ValueSetFilter {
   op: string;
   value: string;
