@@ -143,9 +143,9 @@ function HealthcareServiceFormContent({
         ? {
             name: existingData.name,
             // service_type: existingData.service_type,
-            styling_metadata: existingData.styling_metadata,
+            styling_metadata: existingData.styling_metadata || { careIcon: "" },
             extra_details: existingData.extra_details,
-            internal_type: existingData.internal_type,
+            internal_type: existingData.internal_type || undefined,
             locations: existingData.locations.map((loc) => ({
               id: loc.id,
               name: loc.name,
