@@ -104,11 +104,7 @@ import {
 import scheduleApis from "@/types/scheduling/scheduleApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import {
-  formatName,
-  getReadableDuration,
-  stringifyNestedObject,
-} from "@/Utils/utils";
+import { formatName, getReadableDuration } from "@/Utils/utils";
 
 import { Avatar } from "@/components/Common/Avatar";
 import BackButton from "@/components/Common/BackButton";
@@ -693,11 +689,6 @@ const AppointmentDetailsContent = ({
                       <span className="text-gray-500">
                         {t("no_address_provided")}
                       </span>
-                    )}
-                  </p>
-                  <p className="text-gray-600 break-words">
-                    {stringifyNestedObject(
-                      appointment.patient.geo_organization,
                     )}
                   </p>
                   <p className="text-gray-600">
