@@ -8,7 +8,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -77,7 +77,7 @@ export function LocationPicker({
         mode: "kind",
         ordering: "sort_index",
         status: "active",
-        mine: true, // This ensures user access filtering
+        mine: true,
       },
     }),
   });
@@ -96,8 +96,25 @@ export function LocationPicker({
     );
   }, [locations, searchQuery]);
 
-  // Reset search when navigating
   const resetSearch = () => setSearchQuery("");
+
+  useEffect(() => {
+    if (open && value?.parent) {
+      const breadcrumbChain: LocationBreadcrumb[] = [];
+      let current = value.parent as LocationList;
+
+      while (current && current.id) {
+        breadcrumbChain.unshift({ id: current.id, name: current.name });
+        current = current.parent as LocationList;
+      }
+
+      setBreadcrumbs(breadcrumbChain);
+      setCurrentParent(value.parent?.id || undefined);
+    } else {
+      setBreadcrumbs([]);
+      setCurrentParent(undefined);
+    }
+  }, [open]);
 
   const handleLocationSelect = (location: LocationList) => {
     if (location.has_children) {
