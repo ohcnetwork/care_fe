@@ -62,6 +62,7 @@ export const Updates = (props: PatientProps) => {
       <QuestionnaireResponsesList
         patientId={patientId}
         canAccess={canViewPatientQuestionnaireResponses}
+        subjectType="patient"
       />
     </div>
   );

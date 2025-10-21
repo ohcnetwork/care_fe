@@ -14,6 +14,9 @@ export default {
     path: "/api/v1/facility/{facility_id}/location/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<LocationList>>(),
+    defaultQueryParams: {
+      ordering: "sort_index",
+    },
   },
   get: {
     path: "/api/v1/facility/{facility_id}/location/{id}/",

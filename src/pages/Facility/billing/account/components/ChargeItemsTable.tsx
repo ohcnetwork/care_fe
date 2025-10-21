@@ -61,6 +61,7 @@ import {
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import query from "@/Utils/request/query";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./AddChargeItemsBillingSheet";
 import EditChargeItemSheet from "./EditChargeItemSheet";
@@ -129,7 +130,6 @@ export function ChargeItemsTable({
         status: qParams.charge_item_status,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        ordering: "-created_date",
       },
     }),
   }) as {
@@ -248,9 +248,8 @@ export function ChargeItemsTable({
         <TableSkeleton count={3} />
       ) : !chargeItems?.results?.length ? (
         <EmptyState
-          icon="l-receipt"
+          icon={<CareIcon icon="l-receipt" className="text-primary size-6" />}
           title={t("no_charge_items")}
-          description={t("no_charge_items")}
         />
       ) : (
         <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">

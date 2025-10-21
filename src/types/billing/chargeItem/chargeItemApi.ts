@@ -13,6 +13,9 @@ export default {
     path: "/api/v1/facility/{facilityId}/charge_item/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ChargeItemRead>>(),
+    defaultQueryParams: {
+      ordering: "-created_date",
+    },
   },
   retrieveChargeItem: {
     path: "/api/v1/facility/{facilityId}/charge_item/{chargeItemId}/",

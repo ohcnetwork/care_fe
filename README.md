@@ -93,11 +93,49 @@ For patient login via phone number:
 
 All strings must be encased in i18n translations. New translation strings must be specified in `src`->`Locale`->`en`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
 
+#### Remote i18n configuration (optional)
+
+CARE can load translation files from a remote URL and fall back to local files for any missing keys.
+
+- **Enable remote translations**: set `REACT_CUSTOM_REMOTE_I18N_URL` in your environment.
+- **Expected remote file path**: `${REACT_CUSTOM_REMOTE_I18N_URL}/{lang}.json` (for example: `https://cdn.example.com/i18n/en.json`).
+- **Local fallback path**: `/public/locale/{lang}.json` in this repository (served as `/locale/{lang}.json`).
+- **Merge behavior**: remote keys override local; any keys absent in remote are served from local.
+
+Example `.env.local`:
+
+```env
+# Load i18n from a CDN (per-language JSON files)
+REACT_CUSTOM_REMOTE_I18N_URL=https://cdn.example.com/i18n
+```
+
+Remote file example (`en.json`):
+
+```json
+{
+  "hello_care": "Hello Care Remote"
+}
+```
+
+Local file example (`public/locale/en.json`):
+
+```json
+{
+  "hello_care": "Hello Care Local",
+  "welcome_message": "Welcome to Care"
+}
+```
+
+With the above, the app serves:
+
+- `hello_care` -> "Hello Care Remote" (remote overrides local)
+- `welcome_message` -> "Welcome to Care" (falls back to local as remote is missing)
+
 ### Testing
 
 To ensure the quality of our pull requests, we use a variety of tools:
 
-- **Automated E2E Testing:** We use Cypress for end-to-end testing to automatically verify the functionality and performance of our code.
+- **Automated E2E Testing:** We use Cypress and Playwright for end-to-end testing to automatically verify the functionality and performance of our code.
 - **Manual Real Device Testing:** We use BrowserStack to manually test our code on real devices, ensuring compatibility and functionality across different platforms and browsers.
 
 #### 🧪 Run cypress tests
@@ -133,6 +171,30 @@ npm run cypress:open       # To debug and run tests individually.
 
 - Failed test screenshots are saved in `cypress/screenshots`
 - All test videos are saved in `cypress/videos`
+
+#### 🎭 Run Playwright tests
+
+To run Playwright tests locally, follow the same backend setup steps as Cypress above.
+
+First, install Playwright browsers:
+
+```sh
+npm run playwright:install
+```
+
+Then run Playwright tests in one of the following modes:
+
+```sh
+npm run playwright:test           # Run all tests in headless mode
+npm run playwright:test:ui        # Run tests in interactive UI mode
+npm run playwright:test:headed    # Run tests in headed mode (visible browser)
+npm run playwright:show-report    # View the HTML test report
+```
+
+- Test results and artifacts are saved in `test-results/`
+- HTML reports are saved in `playwright-report/`
+
+For more details, see [tests/README.md](tests/README.md).
 
 ## 📖 Documentations
 

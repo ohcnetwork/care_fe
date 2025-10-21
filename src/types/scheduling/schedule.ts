@@ -154,11 +154,6 @@ export enum AppointmentStatus {
   RESCHEDULED = "rescheduled",
 }
 
-export const PastAppointmentStatuses = [
-  AppointmentStatus.FULFILLED,
-  AppointmentStatus.NO_SHOW,
-];
-
 export const UpcomingAppointmentStatuses = [
   AppointmentStatus.PROPOSED,
   AppointmentStatus.PENDING,
@@ -167,6 +162,12 @@ export const UpcomingAppointmentStatuses = [
   AppointmentStatus.CHECKED_IN,
   AppointmentStatus.WAITLIST,
   AppointmentStatus.IN_CONSULTATION,
+];
+
+export const PastAppointmentStatuses = [
+  ...UpcomingAppointmentStatuses,
+  AppointmentStatus.FULFILLED,
+  AppointmentStatus.NO_SHOW,
 ];
 
 export const CancelledAppointmentStatuses = [
@@ -178,7 +179,8 @@ export const CancelledAppointmentStatuses = [
 
 export const AppointmentFinalStatuses = [
   ...CancelledAppointmentStatuses,
-  ...PastAppointmentStatuses,
+  AppointmentStatus.FULFILLED,
+  AppointmentStatus.NO_SHOW,
 ];
 
 export const APPOINTMENT_STATUS_COLORS = {
