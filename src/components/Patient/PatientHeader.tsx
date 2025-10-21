@@ -86,7 +86,11 @@ export function PatientHeader({
   );
 }
 
-export const PatientDeceasedInfo = ({ patient }: { patient: PatientRead }) => {
+export const PatientDeceasedInfo = ({
+  patient,
+}: {
+  patient: PatientRead | PatientListRead;
+}) => {
   const { t } = useTranslation();
 
   if (!patient.deceased_datetime) return null;
