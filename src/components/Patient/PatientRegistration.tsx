@@ -184,7 +184,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       permanent_address: data.permanent_address || "",
       permanent_address_same_as_address:
         data.address === data.permanent_address,
-      geo_organization: data.geo_organization?.id,
+      geo_organization: data.geo_organization?.id || "",
       pincode: data.pincode || undefined,
 
       is_deceased: !!data.deceased_datetime,

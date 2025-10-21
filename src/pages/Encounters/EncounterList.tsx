@@ -31,7 +31,6 @@ import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilte
 import {
   EncounterClass,
   EncounterListRead,
-  EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -42,7 +41,7 @@ import careConfig from "@careConfig";
 import { subDays } from "date-fns";
 
 interface EncounterListProps {
-  encounters?: EncounterRead[];
+  encounters?: EncounterListRead[];
   facilityId: string;
   encounterClass?: EncounterClass;
 }
