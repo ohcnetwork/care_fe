@@ -220,6 +220,8 @@ export function useKeyboardShortcuts(
         return;
       }
 
+      if (!event.key) return;
+
       const key = event.key.toLowerCase();
       const modifiedShortcut = Object.entries(
         categorizedShortcuts.modified,
