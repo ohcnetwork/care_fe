@@ -7,7 +7,6 @@ import {
   Check,
   ChevronLeft,
   Component,
-  CornerDownLeft,
   Loader2,
   Space,
   Tag as TagIcon,
@@ -635,7 +634,7 @@ export function MultiFilterStyleTagSelector({
               {/* Footer Navigation */}
               <div className="bg-gray-200 h-px"></div>
               <div className="flex justify-between">
-                <div className="flex gap-1 my-4 mx-2">
+                <div className="flex gap-1 my-4 mx-4">
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
                     <ArrowUp className="size-3" />
                   </div>
@@ -646,23 +645,13 @@ export function MultiFilterStyleTagSelector({
                     {t("navigate")}
                   </span>
                 </div>
-                <div className="flex gap-1 my-4 mx-2">
+                <div className="flex gap-1 my-4 mx-4">
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
                     <Space className="size-3" />
                   </div>
                   <span className="text-xs text-gray-700 self-center">
                     {t("to_select")}
                   </span>
-                </div>
-                <div className="flex gap-1 my-2 mx-2">
-                  <Button
-                    variant="primary_gradient"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-2"
-                  >
-                    <span className="text-sm font-bold">{t("done")}</span>
-                    <CornerDownLeft className="size-4" />
-                  </Button>
                 </div>
               </div>
             </div>
