@@ -1,10 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, Edit, MoreVertical, Truck } from "lucide-react";
+import {
+  ChevronLeft,
+  Edit,
+  EllipsisVertical,
+  MoreVertical,
+  Truck,
+} from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import BackButton from "@/components/Common/BackButton";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -394,14 +401,15 @@ export function DeliveryOrderShow({
             </div>
           </div>
           <div className="flex items-center justify-end gap-2">
-            {!isRequester && (
-              <Button variant="outline" asChild>
-                <Link href={`${deliveryOrderId}/edit`}>
-                  <Edit /> {t("edit")}
-                  <ShortcutBadge actionId="edit-order" />
-                </Link>
-              </Button>
-            )}
+            {!isRequester &&
+              deliveryOrder.status === DeliveryOrderStatus.draft && (
+                <Button variant="outline" asChild>
+                  <Link href={`${deliveryOrderId}/edit`}>
+                    <Edit /> {t("edit")}
+                    <ShortcutBadge actionId="edit-order" />
+                  </Link>
+                </Button>
+              )}
 
             {deliveryOrder.status === DeliveryOrderStatus.draft && (
               <Button
@@ -428,6 +436,48 @@ export function DeliveryOrderShow({
                   <ShortcutBadge actionId="mark-as" />
                 </Button>
               )}
+
+            {deliveryOrder.status === DeliveryOrderStatus.draft && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <EllipsisVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={() =>
+                        handleUpdateDeliveryOrderStatus(
+                          DeliveryOrderStatus.entered_in_error,
+                        )
+                      }
+                      disabled={isUpdating}
+                      className="w-full flex flex-row self-center"
+                    >
+                      <CareIcon icon="l-exclamation-circle" />
+                      <span>{t("mark_as_entered_in_error")}</span>
+                    </Button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={() =>
+                        handleUpdateDeliveryOrderStatus(
+                          DeliveryOrderStatus.abandoned,
+                        )
+                      }
+                      disabled={isUpdating}
+                      className="w-full flex flex-row justify-stretch items-center"
+                    >
+                      <CareIcon icon="l-ban" />
+                      {t("mark_as_abandoned")}
+                    </Button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
 
