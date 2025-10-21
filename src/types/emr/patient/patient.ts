@@ -34,7 +34,6 @@ export interface PatientBase {
   deceased_datetime?: string | null;
   blood_group?: BloodGroupChoices;
   date_of_birth?: string | null;
-  nationality?: string | null; // This field needs to be added in the backend
 }
 
 export interface PatientListRead extends PatientBase {
