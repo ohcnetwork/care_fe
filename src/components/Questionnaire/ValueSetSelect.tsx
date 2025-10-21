@@ -5,17 +5,23 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import ValueSetSearchContent from "@/components/Questionnaire/ValueSetSearchContent";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { Code } from "@/types/base/code/code";
+import { useTranslation } from "react-i18next";
 
 type ButtonProps = Omit<React.ComponentProps<typeof Button>, keyof Props>;
 
@@ -49,6 +55,7 @@ export default function ValueSetSelect({
   mobileTrigger,
   ...props
 }: Props & ButtonProps) {
+  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -68,14 +75,13 @@ export default function ValueSetSelect({
       return () => clearTimeout(timer);
     }
   }, [internalOpen, isMobile]);
-
   if (isMobile && !hideTrigger) {
     return (
-      <Sheet
+      <Drawer
         open={internalOpen || controlledOpen}
         onOpenChange={setInternalOpen}
       >
-        <SheetTrigger asChild>
+        <DrawerTrigger asChild>
           {mobileTrigger ? (
             mobileTrigger
           ) : (
@@ -97,31 +103,31 @@ export default function ValueSetSelect({
               <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
             </Button>
           )}
-        </SheetTrigger>
-        <SheetContent side="bottom" className="px-0 pt-2 pb-0 rounded-t-3xl">
-          <div className="absolute inset-x-0 top-0 h-1.5 w-12 mx-auto bg-gray-300 mt-2" />
-          <div className="mt-6 h-full">
-            <ValueSetSearchContent
-              system={system}
-              onSelect={(selected) => {
-                onSelect(selected);
-                if (closeOnSelect) {
-                  setInternalOpen(false);
-                } else {
-                  inputRef.current?.focus();
-                }
-              }}
-              placeholder={placeholder}
-              count={count}
-              searchPostFix={searchPostFix}
-              showCode={showCode}
-              search={search}
-              onSearchChange={setSearch}
-              title={title}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerTrigger>
+        <DrawerContent>
+          <DrawerTitle className="sr-only">
+            {title || t("select_value")}
+          </DrawerTitle>
+          <ValueSetSearchContent
+            system={system}
+            onSelect={(selected) => {
+              onSelect(selected);
+              if (closeOnSelect) {
+                setInternalOpen(false);
+              } else {
+                inputRef.current?.focus();
+              }
+            }}
+            placeholder={placeholder}
+            count={count}
+            searchPostFix={searchPostFix}
+            showCode={showCode}
+            search={search}
+            onSearchChange={setSearch}
+            title={title}
+          />
+        </DrawerContent>
+      </Drawer>
     );
   }
 
