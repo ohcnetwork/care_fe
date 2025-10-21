@@ -215,7 +215,7 @@ export function SupplyDeliveryTable({
               )}
             </TableCell>
             <TableCell className="text-center">
-              {delivery.status === SupplyDeliveryStatus.in_progress ? (
+              {delivery.status === SupplyDeliveryStatus.in_progress && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon">
@@ -255,8 +255,6 @@ export function SupplyDeliveryTable({
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              ) : (
-                "-"
               )}
             </TableCell>
           </TableRow>
