@@ -155,11 +155,10 @@ export const formatPatientAge = (
       : new Date(obj.year_of_birth!, 0, 1),
   );
 
-  const end = dayjs(
+  const end =
     "deceased_datetime" in obj && obj.deceased_datetime
-      ? new Date(obj.deceased_datetime)
-      : new Date(),
-  );
+      ? dayjs(new Date(obj.deceased_datetime))
+      : dayjs(new Date());
 
   const years = end.diff(start, "years");
   if (years) {
