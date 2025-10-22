@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -19,14 +18,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+
+import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -75,32 +71,10 @@ function ChargeItemCard({
             </div>
           </div>
           <div className="ml-auto flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}/edit`,
-                )
-              }
-            >
-              <CareIcon icon="l-edit" className="size-5 text-sm" />
-              {t("edit")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}`,
-                )
-              }
-            >
-              <CareIcon icon="l-eye" className="size-5 text-xl" />
-              {t("view")}
-            </Button>
+            <ChargeItemDefinitionActions
+              definition={definition}
+              facilityId={facilityId}
+            />
           </div>
         </div>
       </CardContent>
@@ -149,47 +123,11 @@ function ChargeItemTableRow({
           : t("no_price_components")}
       </TableCell>
       <TableCell>
-        <div className="flex items-center justify-center space-x-1">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="md"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}/edit`,
-                    )
-                  }
-                >
-                  <CareIcon icon="l-edit" className="size-5 text-sm" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t("edit_charge_item")}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="md"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}`,
-                    )
-                  }
-                >
-                  <CareIcon icon="l-eye" className="size-5 text-xl" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t("view_charge_item")}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        <div className="flex justify-center gap-2">
+          <ChargeItemDefinitionActions
+            definition={definition}
+            facilityId={facilityId}
+          />
         </div>
       </TableCell>
     </TableRow>
@@ -384,5 +322,20 @@ export function ChargeItemList({
         )}
       </div>
     </TooltipProvider>
+  );
+}
+
+function ChargeItemDefinitionActions({
+  definition,
+  facilityId,
+}: {
+  definition: ChargeItemDefinitionRead;
+  facilityId: string;
+}) {
+  return (
+    <ActionButtons
+      editPath={`/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}/edit`}
+      viewPath={`/facility/${facilityId}/settings/charge_item_definitions/${definition.slug}`}
+    />
   );
 }

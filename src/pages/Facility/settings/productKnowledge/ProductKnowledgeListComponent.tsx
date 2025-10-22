@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -19,14 +19,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+
+import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -92,30 +89,10 @@ function ProductKnowledgeCard({
             </div>
           </div>
           <div className="flex flex-wrap gap-2 ml-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/product_knowledge/${product.slug}/edit`,
-                )
-              }
-            >
-              <CareIcon icon="l-edit" className="size-5 text-sm" />
-              {t("edit")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/product_knowledge/${product.slug}`,
-                )
-              }
-            >
-              <CareIcon icon="l-eye" className="size-5 text-xl" />
-              {t("view")}
-            </Button>
+            <ProductKnowledgeActionButtons
+              product={product}
+              facilityId={facilityId}
+            />
           </div>
         </div>
       </CardContent>
@@ -175,35 +152,11 @@ function ProductKnowledgeTableRow({
         </Badge>
       </TableCell>
       <TableCell>
-        <div className="flex items-center space-x-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button asChild variant="ghost" size="sm">
-                  <Link href={`/product_knowledge/${product.slug}/edit`}>
-                    <CareIcon icon="l-edit" className="size-5 text-sm" />
-                  </Link>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t("edit_product_knowledge")}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button asChild variant="ghost" size="sm">
-                  <Link href={`/product_knowledge/${product.slug}`}>
-                    <CareIcon icon="l-eye" className="size-5 text-xl" />
-                  </Link>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t("view_product_knowledge")}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        <div className="flex gap-2">
+          <ProductKnowledgeActionButtons
+            product={product}
+            facilityId={facilityId}
+          />
         </div>
       </TableCell>
     </TableRow>
@@ -402,5 +355,20 @@ export function ProductKnowledgeList({
         )}
       </div>
     </TooltipProvider>
+  );
+}
+
+function ProductKnowledgeActionButtons({
+  product,
+  facilityId,
+}: {
+  product: ProductKnowledgeBase;
+  facilityId: string;
+}) {
+  return (
+    <ActionButtons
+      editPath={`/facility/${facilityId}/settings/product_knowledge/${product.slug}/edit`}
+      viewPath={`/facility/${facilityId}/settings/product_knowledge/${product.slug}`}
+    />
   );
 }

@@ -25,6 +25,8 @@ import {
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
 
+import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
+
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
@@ -34,45 +36,6 @@ import {
   SpecimenDefinitionStatus,
 } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
-
-function SpecimenDefinitionActions({
-  definition,
-  facilityId,
-}: {
-  definition: SpecimenDefinitionRead;
-  facilityId: string;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() =>
-          navigate(
-            `/facility/${facilityId}/settings/specimen_definitions/${definition.slug}/edit`,
-          )
-        }
-      >
-        <CareIcon icon="l-edit" className="size-5 text-sm" />
-        {t("edit")}
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() =>
-          navigate(
-            `/facility/${facilityId}/settings/specimen_definitions/${definition.slug}`,
-          )
-        }
-      >
-        <CareIcon icon="l-eye" className="size-5 text-xl" />
-        {t("view")}
-      </Button>
-    </>
-  );
-}
 
 function SpecimenDefinitionCard({
   definition,
@@ -280,5 +243,20 @@ export function SpecimenDefinitionsList({
         </div>
       </div>
     </Page>
+  );
+}
+
+function SpecimenDefinitionActions({
+  definition,
+  facilityId,
+}: {
+  definition: SpecimenDefinitionRead;
+  facilityId: string;
+}) {
+  return (
+    <ActionButtons
+      editPath={`/facility/${facilityId}/settings/specimen_definitions/${definition.slug}/edit`}
+      viewPath={`/facility/${facilityId}/settings/specimen_definitions/${definition.slug}`}
+    />
   );
 }

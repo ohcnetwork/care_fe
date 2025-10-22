@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -19,14 +18,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+
+import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -85,32 +81,10 @@ function ActivityDefinitionCard({
             </div>
           </div>
           <div className="ml-auto flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/activity_definitions/${definition.slug}/edit`,
-                )
-              }
-            >
-              <CareIcon icon="l-edit" className="size-5 text-sm" />
-              {t("edit")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/activity_definitions/${definition.slug}`,
-                )
-              }
-            >
-              <CareIcon icon="l-eye" className="size-5 text-xl" />
-              {t("view")}
-            </Button>
+            <ActivityDefinitionActions
+              definition={definition}
+              facilityId={facilityId}
+            />
           </div>
         </div>
       </CardContent>
@@ -162,47 +136,11 @@ function ActivityDefinitionTableRow({
         {t(definition.kind)}
       </TableCell>
       <TableCell>
-        <div className="flex items-center space-x-1">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/settings/activity_definitions/${definition.slug}/edit`,
-                    )
-                  }
-                >
-                  <CareIcon icon="l-edit" className="size-5 text-sm" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t("edit_activity_definition")}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/settings/activity_definitions/${definition.slug}`,
-                    )
-                  }
-                >
-                  <CareIcon icon="l-eye" className="size-5 text-xl" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t("view_activity_definition")}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        <div className="flex gap-2">
+          <ActivityDefinitionActions
+            definition={definition}
+            facilityId={facilityId}
+          />
         </div>
       </TableCell>
     </TableRow>
@@ -412,5 +350,20 @@ export function ActivityDefinitionList({
         )}
       </div>
     </TooltipProvider>
+  );
+}
+
+function ActivityDefinitionActions({
+  definition,
+  facilityId,
+}: {
+  definition: ActivityDefinitionReadSpec;
+  facilityId: string;
+}) {
+  return (
+    <ActionButtons
+      editPath={`/facility/${facilityId}/settings/activity_definitions/${definition.slug}/edit`}
+      viewPath={`/facility/${facilityId}/settings/activity_definitions/${definition.slug}`}
+    />
   );
 }

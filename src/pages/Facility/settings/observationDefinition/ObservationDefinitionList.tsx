@@ -25,6 +25,8 @@ import {
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
 
+import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
+
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
@@ -35,45 +37,6 @@ import {
   type ObservationDefinitionReadSpec,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
-
-function ObservationDefinitionActions({
-  definition,
-  facilityId,
-}: {
-  definition: ObservationDefinitionReadSpec;
-  facilityId: string;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() =>
-          navigate(
-            `/facility/${facilityId}/settings/observation_definitions/${definition.slug}/edit`,
-          )
-        }
-      >
-        <CareIcon icon="l-edit" className="size-5 text-sm" />
-        {t("edit")}
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() =>
-          navigate(
-            `/facility/${facilityId}/settings/observation_definitions/${definition.slug}`,
-          )
-        }
-      >
-        <CareIcon icon="l-eye" className="size-5 text-xl" />
-        {t("view")}
-      </Button>
-    </>
-  );
-}
 
 function ObservationDefinitionCard({
   definition,
@@ -305,5 +268,20 @@ export default function ObservationDefinitionList({
         </div>
       </div>
     </Page>
+  );
+}
+
+function ObservationDefinitionActions({
+  definition,
+  facilityId,
+}: {
+  definition: ObservationDefinitionReadSpec;
+  facilityId: string;
+}) {
+  return (
+    <ActionButtons
+      editPath={`/facility/${facilityId}/settings/observation_definitions/${definition.slug}/edit`}
+      viewPath={`/facility/${facilityId}/settings/observation_definitions/${definition.slug}`}
+    />
   );
 }
