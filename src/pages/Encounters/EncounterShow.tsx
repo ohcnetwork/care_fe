@@ -260,14 +260,18 @@ export const EncounterShow = (props: Props) => {
         />
         <div className="w-full">
           {selectedEncounter && (
-            <div className="hidden lg:flex items-center gap-3 text-gray-800">
-              <button onClick={() => setIsEncounterRailOpen((open) => !open)}>
+            <div className="hidden lg:flex items-center gap-2 text-gray-800">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => setIsEncounterRailOpen((open) => !open)}
+              >
                 {isEncounterRailOpen ? (
                   <PanelLeftClose className="size-5" />
                 ) : (
                   <PanelRightClose className="size-5" />
                 )}
-              </button>
+              </Button>
 
               <h4 className="font-bold">
                 {t(`encounter_class__${selectedEncounter?.encounter_class}`)}

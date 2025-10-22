@@ -26,22 +26,18 @@ export default function RailPanel({
 
       <div className="relative flex items-center">
         <div
+          aria-expanded={open}
+          onClick={() => onOpenChange(!open)}
           className={cn(
             "border border-gray-200 rounded-sm bg-gray-200 h-full relative transition-all duration-300 ease-in-out",
             open ? "w-auto" : "w-4",
+            open ? "cursor-w-resize" : "cursor-e-resize",
           )}
         >
           <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">
-            <button
-              aria-expanded={open}
-              onClick={() => onOpenChange(!open)}
-              className={cn(
-                "rounded-b-lg rounded-t-lg border border-gray-300 bg-white",
-                open ? "cursor-w-resize" : "cursor-e-resize",
-              )}
-            >
+            <div className="rounded-b-lg rounded-t-lg border border-gray-300 bg-white">
               <GripVertical className="size-4 my-2" />
-            </button>
+            </div>
           </div>
         </div>
       </div>
