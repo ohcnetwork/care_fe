@@ -149,7 +149,13 @@ export function ProductFormContent({
   containerClassName,
   onSuccess = (product: ProductRead) =>
     navigate(`/facility/${facilityId}/settings/product/${product.id}`),
-  onCancel = () => navigate(`/facility/${facilityId}/settings/product`),
+  onCancel = () => {
+    if (productId) {
+      navigate(`/facility/${facilityId}/settings/product/${productId}`);
+    } else {
+      navigate(`/facility/${facilityId}/settings/product`);
+    }
+  },
   disableButtons = false,
   enabled = true,
   ref,
@@ -264,16 +270,16 @@ export function ProductFormContent({
     mutationFn: mutate(productApi.updateProduct, {
       pathParams: {
         facilityId,
-        productId: productId!,
+        productId: productId || "",
       },
     }),
-    onSuccess: () => {
+    onSuccess: (product: ProductRead) => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({
         queryKey: ["product", productId],
       });
       toast.success(t("product_updated_successfully"));
-      navigate(`/facility/${facilityId}/settings/product/${productId}`);
+      onSuccess(product);
     },
   });
 

@@ -156,9 +156,11 @@ function ProductKnowledgeFormContent({
   slug,
   existingData,
   categorySlug,
-  onSuccess = (productKnowledge) =>
+  onSuccess = (productKnowledge?: ProductKnowledgeBase) =>
     navigate(
-      `/facility/${facilityId}/settings/product_knowledge/${productKnowledge.slug}`,
+      productKnowledge
+        ? `/facility/${facilityId}/settings/product_knowledge/${productKnowledge.slug}`
+        : `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
     ),
 }: {
   facilityId: string;
