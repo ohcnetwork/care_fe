@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import {
   SUPPLY_DELIVERY_CONDITION_COLORS,
   SUPPLY_DELIVERY_STATUS_COLORS,
@@ -44,6 +45,7 @@ interface SupplyDeliveryTableProps {
   onSelectAll?: (checked: boolean) => void;
   internal?: boolean;
   onDeliveryClick?: (delivery: SupplyDeliveryRead) => void;
+  deliveryOrderStatus?: DeliveryOrderStatus;
 }
 
 export function SupplyDeliveryTable({
@@ -54,6 +56,7 @@ export function SupplyDeliveryTable({
   onSelectAll,
   internal = false,
   onDeliveryClick,
+  deliveryOrderStatus,
 }: SupplyDeliveryTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -124,7 +127,9 @@ export function SupplyDeliveryTable({
           <TableHead>{t("disc")}</TableHead>
           <TableHead>{t("status")}</TableHead>
           <TableHead>{t("condition")}</TableHead>
-          <TableHead>{t("actions")}</TableHead>
+          {deliveryOrderStatus === DeliveryOrderStatus.draft && (
+            <TableHead>{t("actions")}</TableHead>
+          )}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -214,49 +219,50 @@ export function SupplyDeliveryTable({
                 </Badge>
               )}
             </TableCell>
-            <TableCell className="text-center">
-              {delivery.status === SupplyDeliveryStatus.in_progress && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <EllipsisVertical className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                      <Button
-                        variant="ghost"
-                        onClick={() =>
-                          updateStatus(
-                            delivery.id,
-                            SupplyDeliveryStatus.entered_in_error,
-                          )
-                        }
-                        className="w-full flex flex-row self-center"
-                      >
-                        <CareIcon icon="l-exclamation-circle" />
-                        <span>{t("mark_as_entered_in_error")}</span>
+            {delivery.status === SupplyDeliveryStatus.in_progress &&
+              deliveryOrderStatus === DeliveryOrderStatus.draft && (
+                <TableCell className="text-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        <EllipsisVertical className="size-4" />
                       </Button>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Button
-                        variant="ghost"
-                        onClick={() =>
-                          updateStatus(
-                            delivery.id,
-                            SupplyDeliveryStatus.abandoned,
-                          )
-                        }
-                        className="w-full flex flex-row justify-stretch items-center"
-                      >
-                        <CareIcon icon="l-ban" />
-                        {t("mark_as_abandoned")}
-                      </Button>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Button
+                          variant="ghost"
+                          onClick={() =>
+                            updateStatus(
+                              delivery.id,
+                              SupplyDeliveryStatus.entered_in_error,
+                            )
+                          }
+                          className="w-full flex flex-row self-center"
+                        >
+                          <CareIcon icon="l-exclamation-circle" />
+                          <span>{t("mark_as_entered_in_error")}</span>
+                        </Button>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Button
+                          variant="ghost"
+                          onClick={() =>
+                            updateStatus(
+                              delivery.id,
+                              SupplyDeliveryStatus.abandoned,
+                            )
+                          }
+                          className="w-full flex flex-row justify-stretch items-center"
+                        >
+                          <CareIcon icon="l-ban" />
+                          {t("mark_as_abandoned")}
+                        </Button>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
               )}
-            </TableCell>
           </TableRow>
         ))}
       </TableBody>

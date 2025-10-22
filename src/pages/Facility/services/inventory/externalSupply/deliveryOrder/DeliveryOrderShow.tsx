@@ -689,6 +689,7 @@ export function DeliveryOrderShow({
                             : delivery.supplied_item?.product_knowledge,
                         );
                       }}
+                      deliveryOrderStatus={deliveryOrder.status}
                     />
                   </div>
                 ) : (
