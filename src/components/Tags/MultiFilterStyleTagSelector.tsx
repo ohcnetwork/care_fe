@@ -431,7 +431,7 @@ export function MultiFilterStyleTagSelector({
                   placeholder={t("search_tags")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-xs transition-colors file:border-0 file:bg-transparent focus:ring-primary-500 focus:border-primary-500 file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-300 h-9 text-sm mb-2"
+                  className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-xs transition-colors file:border-0 file:bg-transparent focus:ring-primary-500 focus:border-primary-500 file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-300 h-10 text-sm mb-2"
                 />
 
                 <div>
@@ -634,7 +634,7 @@ export function MultiFilterStyleTagSelector({
               {/* Footer Navigation */}
               <div className="bg-gray-200 h-px"></div>
               <div className="flex justify-between">
-                <div className="flex gap-1 my-4 mx-4">
+                <div className="flex gap-1 my-3.5 mx-4">
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
                     <ArrowUp className="size-3" />
                   </div>
@@ -645,7 +645,7 @@ export function MultiFilterStyleTagSelector({
                     {t("navigate")}
                   </span>
                 </div>
-                <div className="flex gap-1 my-4 mx-4">
+                <div className="flex gap-1 my-3.5 mx-4">
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
                     <Space className="size-3" />
                   </div>
