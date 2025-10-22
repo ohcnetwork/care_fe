@@ -444,7 +444,7 @@ export function ResourceDefinitionCategoryPicker<T>({
         placeholder={t(translations.searchPlaceholder)}
         value={searchQuery}
         onValueChange={setSearchQuery}
-        className="h-9 border-0 focus:ring-0 text-base md:text-sm"
+        className="h-9 border-0 focus:ring-0 text-base sm:text-sm"
         autoFocus
       />
     </div>

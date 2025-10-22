@@ -103,6 +103,7 @@ const envSchema = z
     REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED: numberAsString.optional(),
     REACT_DEFAULT_ENCOUNTER_TYPE: z.string().optional(),
     REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.string().uuid().optional(),
+    REACT_CUSTOM_REMOTE_I18N_URL: z.string().url().optional(),
     REACT_CUSTOM_SHORTCUTS: customShortcutsSchemaString.optional(),
   })
   .superRefine(async (data, ctx) => {

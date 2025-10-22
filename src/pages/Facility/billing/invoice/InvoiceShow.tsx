@@ -1,25 +1,3 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
-import {
-  ArrowLeft,
-  BadgeCheck,
-  BanknoteArrowDownIcon,
-  Building2,
-  CreditCard,
-  FileCheck,
-  FileText,
-  Wallet,
-} from "lucide-react";
-import { Link, navigate, useQueryParams } from "raviger";
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
-import { toast } from "sonner";
-
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -31,12 +9,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -44,7 +22,6 @@ import {
   MonetaryDisplay,
   getCurrencySymbol,
 } from "@/components/ui/monetary-display";
-import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -53,39 +30,63 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import AddChargeItemSheet from "@/components/Billing/Invoice/AddChargeItemSheet";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-
-import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
-import BackButton from "@/components/Common/BackButton";
-import { formatPatientAddress } from "@/components/Patient/utils";
-import { useShortcutSubContext } from "@/context/ShortcutContext";
-import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
-import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   ChargeItemRead,
   MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
-import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import {
   INVOICE_STATUS_COLORS,
   InvoiceCreate,
   InvoiceRead,
   InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
-import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import {
   PAYMENT_RECONCILIATION_STATUS_COLORS,
   PaymentReconciliationPaymentMethod,
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowLeft,
+  BadgeCheck,
+  BanknoteArrowDownIcon,
+  Building2,
+  ChevronDown,
+  CreditCard,
+  FileCheck,
+  FileText,
+  Wallet,
+} from "lucide-react";
+import { Link, navigate, useQueryParams } from "raviger";
+import React, { useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import AddChargeItemSheet from "@/components/Billing/Invoice/AddChargeItemSheet";
+import { EditInvoiceDialog } from "@/components/Billing/Invoice/EditInvoiceDialog";
+import BackButton from "@/components/Common/BackButton";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { formatPatientAddress } from "@/components/Patient/utils";
+import { Badge } from "@/components/ui/badge";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Separator } from "@/components/ui/separator";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { useCareApps } from "@/hooks/useCareApps";
+import { cn } from "@/lib/utils";
+import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
+import { PLUGIN_Component } from "@/PluginEngine";
+import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
+import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import facilityApi from "@/types/facility/facilityApi";
 import dayjs from "@/Utils/dayjs";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
+import { toast } from "sonner";
 
 const paymentMethodMap: Record<
   PaymentReconciliationPaymentMethod,
@@ -298,6 +299,10 @@ export function InvoiceShow({
       ? t("service_request_invoice_alert")
       : t("appointment_invoice_alert");
 
+  const isInvoiceRecordPaymentPluginsPresent = useCareApps().some(
+    (plugin) => plugin.components?.InvoiceRecordPaymentOptions,
+  );
+
   if (isLoading) {
     return <TableSkeleton count={5} />;
   }
@@ -354,11 +359,38 @@ export function InvoiceShow({
             </Button>
           )}
           {invoice.status === InvoiceStatus.issued && (
-            <Button onClick={() => setIsPaymentSheetOpen(true)}>
-              <CareIcon icon="l-plus" className="mr-2 size-4" />
-              {t("record_payment")}
-              <ShortcutBadge actionId="record-payment" />
-            </Button>
+            <ButtonGroup className="w-full">
+              <Button
+                className="w-full"
+                onClick={() => setIsPaymentSheetOpen(true)}
+              >
+                <CareIcon icon="l-plus" className="mr-2 size-4" />
+                {t("record_payment")}
+                <ShortcutBadge actionId="record-payment" />
+              </Button>
+              {isInvoiceRecordPaymentPluginsPresent && (
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline_primary"
+                      size="icon"
+                      aria-label="More Options"
+                    >
+                      <ChevronDown />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-min">
+                    <DropdownMenuGroup>
+                      <PLUGIN_Component
+                        __name="InvoiceRecordPaymentOptions"
+                        facilityId={facilityId}
+                        invoice={invoice}
+                      />
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </ButtonGroup>
           )}
         </div>
       </div>
