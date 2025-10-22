@@ -27,6 +27,11 @@ export default defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: "http://localhost:4000",
+    /* API Base URL for backend requests */
+    // @ts-expect-error - Custom property for API requests
+    apiBaseURL: process.env.PLAYWRIGHT_API_BASE_URL || "http://localhost:9000",
+    screenshot: "on",
+    video: "on",
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
