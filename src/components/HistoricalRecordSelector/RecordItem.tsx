@@ -28,7 +28,7 @@ export function RecordItem<T>({
 
   return (
     <TableRow className="border-0">
-      <TableCell className="border-0 bg-transparent p-2 w-12">
+      <TableCell className="border-0 bg-transparent !p-2 w-12">
         <Checkbox
           checked={isSelected}
           onCheckedChange={handleToggle}
