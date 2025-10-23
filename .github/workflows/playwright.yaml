@@ -150,6 +150,9 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Run frontend server
+        run: nohup npm run preview > frontend.log 2>&1 &
+
       - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
         id: test
         run: |
