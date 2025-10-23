@@ -23,7 +23,7 @@ jobs:
   assign-pr:
     runs-on: ubuntu-24.04-arm
     # Skip workflow for PRs created by bots
-    if: ${{ !endsWith(github.event.pull_request.user.login, '[bot]') }}
+    if: ${{ github.event.pull_request.user.type != 'Bot' }}
 
     steps:
       - name: Generate token
