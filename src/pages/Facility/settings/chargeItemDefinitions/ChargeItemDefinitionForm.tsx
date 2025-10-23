@@ -73,6 +73,7 @@ import {
 
 import RadioInput from "@/components/ui/RadioInput";
 import { generateSlug } from "@/Utils/utils";
+import { toast } from "sonner";
 
 interface MonetaryComponentSelectorProps {
   title: string;
@@ -575,7 +576,7 @@ export function ChargeItemDefinitionForm({
 
   // Main form schema (including basic information fields)
   const formSchema = z.object({
-    title: z.string().min(1, { message: "field_required" }),
+    title: z.string().min(1, { message: t("field_required") }),
     slug_value: z
       .string()
       .trim()
@@ -584,7 +585,7 @@ export function ChargeItemDefinitionForm({
       .regex(/^[a-z0-9-]+$/, {
         message: "slug_format_message",
       }),
-    category: z.string().min(1, { message: "field_required" }),
+    category: z.string().min(1, { message: t("field_required") }),
     _categoryName: z.string().optional(),
     status: z.nativeEnum(ChargeItemDefinitionStatus),
     description: z.string().optional(),
@@ -596,29 +597,17 @@ export function ChargeItemDefinitionForm({
         (val) => {
           return !val || /^https?:\/\/.+/.test(val);
         },
-        { message: "Please enter a valid URL" },
+        { message: t("invalid_url") },
       ),
-    price_components: z.array(priceComponentSchema).refine(
-      (components) => {
-        // Ensure there is exactly one base price component and it's the first one
-        return (
-          components.length > 0 &&
-          components[0].monetary_component_type ===
-            MonetaryComponentType.base &&
-          components.filter(
-            (c) => c.monetary_component_type === MonetaryComponentType.base,
-          ).length === 1 &&
-          components[0].amount !== undefined &&
-          components[0].amount !== null &&
-          components[0].amount !== "0"
-        );
-      },
-      {
-        message:
-          "Exactly one base price component is required as the first component",
-        path: ["price_components", "0", "amount"],
-      },
-    ),
+    base_price: z
+      .string()
+      .refine((val) => !val || Number(val) > 0, {
+        message: t("must_be_greater_than_value", { value: 0 }),
+      })
+      .refine((val) => val && val !== "0", {
+        message: t("base_price_is_required"),
+      }),
+    price_components: z.array(priceComponentSchema),
   });
 
   // Initialize form (with basic information fields)
@@ -641,17 +630,22 @@ export function ChargeItemDefinitionForm({
       purpose: initialData?.purpose || "",
       derived_from_uri: initialData?.derived_from_uri || undefined,
 
-      // Price components
-      price_components: initialData?.price_components.map((component) => ({
-        ...mapPriceComponent(component),
-        conditions: component.conditions || [],
-      })) || [
-        {
-          monetary_component_type: MonetaryComponentType.base,
-          amount: "0",
-          conditions: [],
-        },
-      ],
+      // Base price
+      base_price:
+        initialData?.price_components
+          .find((c) => c.monetary_component_type === MonetaryComponentType.base)
+          ?.amount?.toString() || "0",
+
+      // Price components (excluding base price component)
+      price_components:
+        initialData?.price_components
+          .filter(
+            (c) => c.monetary_component_type !== MonetaryComponentType.base,
+          )
+          .map((component) => ({
+            ...mapPriceComponent(component),
+            conditions: component.conditions || [],
+          })) || [],
     },
   });
 
@@ -671,7 +665,7 @@ export function ChargeItemDefinitionForm({
 
   // Get current form values
   const priceComponents = form.watch("price_components");
-  const basePrice = form.watch("price_components.0.amount")?.toString() || "0";
+  const basePrice = form.watch("base_price") || "0";
   const mrp = priceComponents.find(
     (c) =>
       c.code?.code === MRP_CODE &&
@@ -696,6 +690,11 @@ export function ChargeItemDefinitionForm({
     onSuccess: (chargeItemDefinition: ChargeItemDefinitionRead) => {
       queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
       onSuccess?.(chargeItemDefinition);
+      toast.success(
+        isUpdate
+          ? t("charge_item_definition_updated_successfully")
+          : t("charge_item_definition_created_successfully"),
+      );
     },
     onError: (error) => {
       console.error("Mutation failed:", error);
@@ -708,10 +707,19 @@ export function ChargeItemDefinitionForm({
       ...values,
       // Override status if in minimal mode
       status: minimal ? ChargeItemDefinitionStatus.active : values.status,
-      price_components: values.price_components.map((component) => ({
-        ...component,
-        conditions: component.conditions,
-      })),
+      price_components: [
+        // Base price component (always first)
+        {
+          monetary_component_type: MonetaryComponentType.base,
+          amount: values.base_price,
+          conditions: [],
+        },
+        // Other components
+        ...values.price_components.map((component) => ({
+          ...component,
+          conditions: component.conditions,
+        })),
+      ],
     };
     upsert(submissionData);
   };
@@ -1048,17 +1056,15 @@ export function ChargeItemDefinitionForm({
             <div className={"flex md:flex-row flex-col gap-4"}>
               <div className="w-full">
                 <FormItem className="flex flex-col">
-                  <FormLabel
-                    className={cn("font-medium text-gray-900 text-base")}
-                  >
-                    {t("base_price")}
-                  </FormLabel>
                   <div className="flex flex-col w-full gap-2">
                     <FormField
                       control={form.control}
-                      name="price_components.0.amount"
+                      name="base_price"
                       render={({ field }) => (
                         <FormItem className="w-full">
+                          <FormLabel className="font-medium text-gray-900 text-base">
+                            {t("base_price")}
+                          </FormLabel>
                           <FormControl>
                             <MonetaryAmountInput
                               {...field}
@@ -1066,15 +1072,11 @@ export function ChargeItemDefinitionForm({
                               onChange={(e) =>
                                 field.onChange(String(e.target.value))
                               }
-                              placeholder="0.00"
+                              name="base_price"
+                              // placeholder="0.00"
                             />
                           </FormControl>
-                          <FormMessage>
-                            {
-                              form.formState.errors.price_components?.[0]
-                                ?.amount?.message
-                            }
-                          </FormMessage>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -1084,9 +1086,7 @@ export function ChargeItemDefinitionForm({
               {/* MRP */}
               <div className="w-full">
                 <FormItem className="flex flex-col">
-                  <FormLabel
-                    className={cn("font-medium text-gray-900 text-base")}
-                  >
+                  <FormLabel className="font-medium text-gray-900 text-base">
                     {t("mrp")}
                   </FormLabel>
                   <div className="flex flex-col w-full gap-2">
@@ -1109,9 +1109,7 @@ export function ChargeItemDefinitionForm({
               {/* Purchase Price */}
               <div className="w-full">
                 <FormItem className="flex flex-col">
-                  <FormLabel
-                    className={cn("font-medium text-gray-900 text-base")}
-                  >
+                  <FormLabel className="font-medium text-gray-900 text-base">
                     {t("purchase_price")}
                   </FormLabel>
                   <div className="flex flex-col w-full gap-2">
