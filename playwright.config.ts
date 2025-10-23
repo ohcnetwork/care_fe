@@ -29,7 +29,7 @@ export default defineConfig({
     baseURL: "http://localhost:4000",
     /* API Base URL for backend requests */
     // @ts-expect-error - Custom property for API requests
-    apiBaseURL: process.env.PLAYWRIGHT_API_BASE_URL || "http://localhost:9000",
+    apiBaseURL: process.env.REACT_CARE_API_URL || "http://localhost:9000",
     screenshot: "on",
     video: "on",
 
