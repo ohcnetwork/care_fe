@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
 import { getFacilityAndCategory, type FacilitySetup } from "@/tests/helpers";
+import { selectFromCommand } from "@/tests/helpers/ui";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -82,22 +83,11 @@ test.describe("Activity Definition Form", () => {
     await page.getByRole("option", { name: /service request/i }).click();
 
     const codeCombobox = page.getByRole("combobox", { name: /^code/i });
-    await codeCombobox.click();
-
-    const dialog = page.getByRole("dialog");
-    await dialog.waitFor({ state: "visible" });
-
-    const searchInput = dialog.getByPlaceholder(/search for activity codes/i);
-    await searchInput.waitFor({ state: "visible" });
-
-    await searchInput.fill("procedure");
-
-    const listbox = dialog.getByRole("listbox", { name: /suggestions/i });
-    await listbox.waitFor({ state: "visible" });
-
-    const firstOption = dialog.getByRole("option").first();
-    await firstOption.waitFor({ state: "visible" });
-    await firstOption.click();
+    await selectFromCommand(page, codeCombobox, {
+      search: "procedure",
+      option: "first",
+      placeholder: /search for activity codes/i,
+    });
 
     await page.getByRole("button", { name: /^create$/i }).click();
 
