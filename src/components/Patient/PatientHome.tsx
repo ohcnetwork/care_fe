@@ -23,7 +23,9 @@ import {
   PatientDeceasedInfo,
   PatientHeader,
 } from "@/components/Patient/PatientHeader";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { cn } from "@/lib/utils";
 import BookAppointmentSheet from "@/pages/Appointments/BookAppointment/BookAppointmentSheet";
 import { PatientNotesTab } from "./PatientDetailsTab/PatientNotes";
 export const PatientHome = (props: {
@@ -32,6 +34,7 @@ export const PatientHome = (props: {
   page: (typeof tabs)[0]["route"];
 }) => {
   const { facilityId, id, page } = props;
+  const { open: isSidebarOpen } = useSidebar();
 
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
@@ -62,7 +65,7 @@ export const PatientHome = (props: {
 
   const tabs = getPatientTabs;
 
-  const Tab = tabs.find((t) => t.route === page)?.component;
+  const Tab = tabs.find((t) => t.route === page);
 
   if (!patientData) {
     return <div>{t("patient_not_found")}</div>;
@@ -85,7 +88,15 @@ export const PatientHome = (props: {
         </>
       }
     >
-      <div className="mt-3 overflow-y-auto" data-testid="patient-dashboard">
+      <div
+        className={cn(
+          "w-full mt-3 overflow-y-auto",
+          isSidebarOpen
+            ? "md:max-w-[calc(100vw-25rem)]"
+            : "md:max-w-[calc(100vw-8rem)]",
+        )}
+        data-testid="patient-dashboard"
+      >
         <div className="flex flex-col gap-2">
           <PatientHeader
             patient={patientData}
@@ -95,7 +106,6 @@ export const PatientHome = (props: {
           />
           <PatientDeceasedInfo patient={patientData} />
         </div>
-
         <div
           className="sticky top-0 z-9 mt-4 w-full border-b border-gray-200 bg-gray-50"
           role="navigation"
@@ -128,15 +138,17 @@ export const PatientHome = (props: {
         </div>
         <div className="lg:flex">
           <div className="h-full lg:mr-7 lg:basis-5/6">
-            {Tab && (
-              <Tab
-                facilityId={facilityId || ""}
+            {Tab?.component && (
+              <Tab.component
+                facilityId={
+                  Tab?.route === "appointments" ? undefined : facilityId || ""
+                }
                 patientId={id}
                 patientData={patientData}
               />
             )}
           </div>
-          {Tab !== PatientNotesTab && (
+          {Tab?.component !== PatientNotesTab && (
             <div className="sticky top-20 mt-8 mx-4 md:mx-0 h-full lg:basis-1/6">
               <section className="mb-4 space-y-2 md:flex">
                 <div className="w-full lg:mx-0">

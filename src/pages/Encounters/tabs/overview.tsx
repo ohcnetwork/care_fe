@@ -52,16 +52,19 @@ export const EncounterOverviewTab = () => {
               encounterId={encounterId}
               readOnly={!canWrite}
               encounterStatus={encounter?.status}
+              showViewEncounter={false}
             />
             <SymptomsList
               patientId={patientId}
               encounterId={encounterId}
               readOnly={!canWrite}
+              showViewEncounter={false}
             />
             <DiagnosisList
               patientId={patientId}
               encounterId={encounterId}
               readOnly={!canWrite}
+              showViewEncounter={false}
             />
             <VitalsList
               patientId={patientId}
@@ -69,7 +72,7 @@ export const EncounterOverviewTab = () => {
               codeGroups={vitalGroups}
             />
             <QuestionnaireResponsesList
-              encounter={encounter}
+              encounterId={encounterId}
               patientId={patientId}
               canAccess={canAccess}
             />

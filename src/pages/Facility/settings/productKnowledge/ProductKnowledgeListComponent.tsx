@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -167,16 +167,10 @@ function ProductKnowledgeTableRow({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    navigate(
-                      `/facility/${facilityId}/settings/product_knowledge/${product.slug}`,
-                    )
-                  }
-                >
-                  <CareIcon icon="l-edit" className="h-4 w-4" />
+                <Button asChild variant="ghost" size="sm">
+                  <Link href={`/product_knowledge/${product.slug}/edit`}>
+                    <CareIcon icon="l-edit" className="h-4 w-4" />
+                  </Link>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -205,16 +199,12 @@ export function ProductKnowledgeList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
 
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
-
-  // TODO: Remove this once we have a default status (robo's PR)
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: "active" });
-    }
-  }, [qParams.status, updateQuery]);
 
   // Fetch product knowledge for current category
   const { data: productsResponse, isLoading: isLoadingProducts } = useQuery({
@@ -228,7 +218,6 @@ export function ProductKnowledgeList({
         name: qParams.search,
         product_type: qParams.product_type,
         status: qParams.status,
-        ordering: "-created_date",
       },
     }),
   });
@@ -327,7 +316,9 @@ export function ProductKnowledgeList({
           <TableSkeleton count={5} />
         ) : products.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
             title={t("no_product_knowledge_found")}
             description={t("no_products_in_category")}
           />

@@ -7,8 +7,8 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
@@ -16,6 +16,7 @@ import { formatName } from "@/Utils/utils";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import { ServiceRequestReadSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import { SpecimenRead } from "@/types/emr/specimen/specimen";
+import { useTranslation } from "react-i18next";
 
 interface TimelineEvent {
   title: string;
@@ -82,11 +83,12 @@ function TimelineNode({ event }: { event: TimelineEvent }) {
 }
 
 function WorkflowContent({ events }: { events: TimelineEvent[] }) {
+  const { t } = useTranslation();
   return (
     <>
       <div className="flex items-center gap-2 p-4 border-b">
         <CareIcon icon="l-clipboard-alt" className="size-5" />
-        <h2 className="text-lg font-semibold">Workflow Progress</h2>
+        <h2 className="text-lg font-semibold">{t("workflow_progress")}</h2>
       </div>
       <ScrollArea className="h-[calc(100vh-10rem)]">
         <div className="p-4 space-y-2">
@@ -105,9 +107,9 @@ export function WorkflowProgress({
   variant = "card",
 }: WorkflowProgressProps) {
   const events: TimelineEvent[] = [];
-  const sheetPosition = useBreakpoints({
-    default: "bottom",
-    md: "right",
+  const direction = useBreakpoints({
+    default: "bottom" as const,
+    md: "right" as const,
   });
 
   // Add service request creation
@@ -180,8 +182,8 @@ export function WorkflowProgress({
 
   if (variant === "sheet") {
     return (
-      <Sheet>
-        <SheetTrigger asChild>
+      <Drawer direction={direction}>
+        <DrawerTrigger asChild>
           <Button
             variant="outline"
             size="icon"
@@ -189,19 +191,18 @@ export function WorkflowProgress({
           >
             <PanelRight />
           </Button>
-        </SheetTrigger>
-        <SheetContent
-          side={sheetPosition === "bottom" ? "bottom" : "right"}
+        </DrawerTrigger>
+        <DrawerContent
           className={cn(
             "p-0",
-            sheetPosition === "bottom" ? "h-[80vh]" : "h-screen max-w-md",
+            direction === "bottom" ? "h-[80vh]" : "h-screen max-w-md",
           )}
         >
           <Card className="h-full rounded-none border-none shadow-none">
             <WorkflowContent events={events} />
           </Card>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     );
   }
 

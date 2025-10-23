@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -90,14 +89,10 @@ export function SpecimenDefinitionsList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
-
-  // TODO: Remove this once we have a default status (robo's PR)
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: "active" });
-    }
-  }, []);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["specimenDefinitions", facilityId, qParams],
@@ -108,7 +103,6 @@ export function SpecimenDefinitionsList({
         status: qParams.status,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        ordering: "-created_date",
       },
     }),
   });
@@ -181,7 +175,9 @@ export function SpecimenDefinitionsList({
           </>
         ) : specimenDefinitions.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
             title={t("no_specimen_definitions_found")}
             description={t("adjust_specimen_definition_filters")}
           />

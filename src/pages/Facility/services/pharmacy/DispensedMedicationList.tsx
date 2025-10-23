@@ -305,7 +305,6 @@ export default function DispensedMedicationList({
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: status ?? qParams.status,
         patient: patientId,
-        ordering: "-created_date",
       },
     }),
   });
@@ -471,7 +470,7 @@ export default function DispensedMedicationList({
         <EmptyState
           title={t("no_medications_found")}
           description={t("no_medications_found_description")}
-          icon="l-tablets"
+          icon={<CareIcon icon="l-tablets" className="text-primary size-6" />}
         />
       ) : (
         <div className="space-y-8">

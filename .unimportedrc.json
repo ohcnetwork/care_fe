@@ -6,11 +6,11 @@
   "ignoreUnimported": [
     "src/Locale/update_locale.js",
     "src/PluginRegistry.ts",
+    "src/components/ui/definition-list.tsx",
+    "src/pages/Admin/organizations/components/AdminOrganizationSelector.tsx",
     "src/pages/Encounters/ReportBuilder/ReportBuilderSheet.tsx",
     "src/pluginTypes.ts",
-    "src/service-worker.ts",
-    "src/components/ui/definition-list.tsx",
-    "src/pages/Admin/organizations/components/AdminOrganizationSelector.tsx"
+    "src/service-worker.ts"
   ],
   "ignoreUnused": [
     "@fontsource/figtree",
@@ -32,6 +32,13 @@
       "@/supportedBrowsers",
       [
         "src/components/ErrorPages/BrowserWarning.tsx"
+      ]
+    ],
+    [
+      "supports-color",
+      [
+        "node_modules/debug/src/node.js",
+        "node_modules/require-and-forget/node_modules/debug/src/node.js"
       ]
     ],
     [

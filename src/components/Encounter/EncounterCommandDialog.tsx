@@ -350,7 +350,7 @@ export function EncounterCommandDialog({
         <div className="border-b border-gray-100 shadow-xs">
           <CommandInput
             placeholder={t("search_encounter_command")}
-            className="border-none focus:ring-0"
+            className="border-none focus:ring-0 text-base sm:text-sm"
           />
         </div>
         <CommandList className="h-[80vh] max-h-[80vh] w-full">
@@ -381,11 +381,11 @@ export function EncounterCommandDialog({
             </div>
           ))}
           {useCareApps().some(
-            (plugin) => plugin.components?.PatientInfoCardActions,
+            (plugin) => plugin.components?.EncounterActions,
           ) && (
             <CommandGroup heading={t("plugin_actions")} className="px-0">
               <PLUGIN_Component
-                __name="PatientInfoCardActions"
+                __name="EncounterActions"
                 encounter={encounter}
                 className="rounded-md cursor-pointer text-gray-600 hover:bg-gray-100 flex justify-baseline aria-selected:bg-gray-100 w-full p-2"
               />

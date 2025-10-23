@@ -65,7 +65,7 @@ export function PaymentReconciliationShow({
   const { goBack } = useAppHistory();
   const queryClient = useQueryClient();
 
-  useShortcutSubContext();
+  useShortcutSubContext("facility:payment");
 
   const { data: payment, isLoading } = useQuery({
     queryKey: ["paymentReconciliation", paymentReconciliationId],
@@ -75,8 +75,8 @@ export function PaymentReconciliationShow({
     enabled: !!paymentReconciliationId,
   });
 
-  const updatePaymentMutation = useMutation({
-    mutationFn: mutate(paymentReconciliationApi.updatePaymentReconciliation, {
+  const { mutate: cancelPayment, isPending } = useMutation({
+    mutationFn: mutate(paymentReconciliationApi.cancelPaymentReconciliation, {
       pathParams: { facilityId, paymentReconciliationId },
     }),
     onSuccess: () => {
@@ -136,7 +136,6 @@ export function PaymentReconciliationShow({
         <Button variant="outline" asChild>
           <Link
             href={`/facility/${facilityId}/billing/payments/${paymentReconciliationId}/print`}
-            data-shortcut-id="print-button"
           >
             <CareIcon icon="l-print" className="mr-2 size-4" />
             {t("print_receipt")}
@@ -301,7 +300,6 @@ export function PaymentReconciliationShow({
                       <Link
                         href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
                         className="text-lg font-medium text-primary hover:underline"
-                        data-shortcut-id="view-invoice-payment"
                       >
                         {t("view_invoice")}
                       </Link>
@@ -330,11 +328,9 @@ export function PaymentReconciliationShow({
                   <Button variant="outline" size="sm" asChild>
                     <Link
                       href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
-                      data-shortcut-id="view-invoice-payment"
                     >
                       <CareIcon icon="l-eye" className="mr-2 size-4" />
                       {t("view_invoice")}
-                      <ShortcutBadge actionId="view-invoice-payment" />
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" asChild>
@@ -396,19 +392,17 @@ export function PaymentReconciliationShow({
                   >
                     <CareIcon icon="l-print" className="mr-2 size-4" />
                     {t("print_receipt")}
-                    <ShortcutBadge actionId="print-button" />
                   </Link>
                 </Button>
                 {payment.target_invoice && (
                   <Button className="w-full" variant="outline" asChild>
                     <Link
                       href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
-                      data-shortcut-id="view-invoice-payment"
                       className="flex items-center w-full relative"
                     >
                       <CareIcon icon="l-eye" className="mr-2 size-4" />
                       {t("view_invoice")}
-                      <ShortcutBadge actionId="view-invoice-payment" />
+                      <ShortcutBadge actionId="view-invoice" />
                     </Link>
                   </Button>
                 )}
@@ -420,13 +414,11 @@ export function PaymentReconciliationShow({
                         className="w-full flex items-center relative"
                         variant="outline"
                         onClick={() =>
-                          updatePaymentMutation.mutate({
-                            ...payment,
-                            status: PaymentReconciliationStatus.cancelled,
+                          cancelPayment({
+                            reason: PaymentReconciliationStatus.cancelled,
                           })
                         }
-                        disabled={updatePaymentMutation.isPending}
-                        data-shortcut-id="mark-payment-cancelled"
+                        disabled={isPending}
                       >
                         <CareIcon icon="l-ban" className="mr-2 size-4" />
                         {t("mark_as_cancelled")}
@@ -436,14 +428,12 @@ export function PaymentReconciliationShow({
                         className="w-full flex items-center relative"
                         variant="outline"
                         onClick={() =>
-                          updatePaymentMutation.mutate({
-                            ...payment,
-                            status:
+                          cancelPayment({
+                            reason:
                               PaymentReconciliationStatus.entered_in_error,
                           })
                         }
-                        disabled={updatePaymentMutation.isPending}
-                        data-shortcut-id="mark-payment-error"
+                        disabled={isPending}
                       >
                         <CareIcon
                           icon="l-exclamation-triangle"
@@ -464,7 +454,6 @@ export function PaymentReconciliationShow({
                 >
                   <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
                   {t("back_to_payments")}
-                  <ShortcutBadge actionId="go-back" />
                 </Button>
               </div>
             </CardContent>

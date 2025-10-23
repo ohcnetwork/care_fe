@@ -89,3 +89,7 @@ export interface PaymentReconciliationRead extends PaymentReconciliationBase {
   account: AccountRead;
   is_credit_note: boolean;
 }
+
+export interface PaymentReconciliationCancel {
+  reason: PaymentReconciliationStatus;
+}

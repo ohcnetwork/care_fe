@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
@@ -40,13 +39,10 @@ const createQueueFormSchema = z.object({
   date: z.date({
     required_error: "Date is required",
   }),
-  set_is_primary: z.boolean(),
 });
 
 const editQueueFormSchema = z.object({
   name: z.string().min(1, "Queue name is required"),
-  date: z.date().optional(),
-  set_is_primary: z.boolean().optional(),
 });
 
 type CreateQueueFormData = z.infer<typeof createQueueFormSchema>;
@@ -85,7 +81,6 @@ export default function QueueFormSheet({
     defaultValues: {
       name: "",
       date: initialDate,
-      set_is_primary: false,
     },
   });
 
@@ -104,7 +99,6 @@ export default function QueueFormSheet({
       form.reset({
         name: queue.name,
         date: new Date(queue.date),
-        set_is_primary: queue.is_primary,
       });
     }
   }, [queue, isEditMode, form, isOpen]);
@@ -115,7 +109,6 @@ export default function QueueFormSheet({
       form.reset({
         name: "",
         date: initialDate,
-        set_is_primary: false,
       });
     }
   }, [isOpen, form, initialDate]);
@@ -152,16 +145,16 @@ export default function QueueFormSheet({
   });
 
   const onSubmit = (data: QueueFormData) => {
-    if (isEditMode) {
-      updateQueue({ name: data.name });
-    } else {
+    if (!isEditMode && "date" in data) {
       createQueue({
         name: data.name,
         date: dateQueryString(data.date),
         resource_type: resourceType,
         resource_id: resourceId,
-        set_is_primary: data.set_is_primary ?? false,
       });
+    }
+    if (isEditMode) {
+      updateQueue({ name: data.name });
     }
   };
 
@@ -240,30 +233,6 @@ export default function QueueFormSheet({
                         />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              {/* Set as Primary - Only show in create mode */}
-              {!isEditMode && (
-                <FormField
-                  control={form.control}
-                  name="set_is_primary"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>{t("set_as_primary")}</FormLabel>
-                        <p className="text-sm text-gray-600">
-                          {t("set_as_primary_description")}
-                        </p>
-                      </div>
                     </FormItem>
                   )}
                 />

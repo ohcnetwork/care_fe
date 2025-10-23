@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
@@ -25,7 +26,9 @@ import {
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { ResourceCategoryForm } from "@/components/Common/ResourceCategoryForm";
+import useFilters from "@/hooks/useFilters";
 import {
   ResourceCategoryRead,
   ResourceCategoryResourceType,
@@ -194,6 +197,10 @@ export function ResourceCategoryList({
   const [editingCategory, setEditingCategory] = React.useState<string | null>(
     null,
   );
+  const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
+    limit: RESULTS_PER_PAGE_LIMIT,
+    disableCache: true,
+  });
 
   // Fetch current category by slug
   const { data: currentCategory } = useQuery({
@@ -207,13 +214,21 @@ export function ResourceCategoryList({
   // Fetch categories for current level
   const { data: categoriesResponse, isLoading: isLoadingCategories } = useQuery(
     {
-      queryKey: ["resourceCategories", facilityId, categorySlug],
-      queryFn: query(resourceCategoryApi.list, {
+      queryKey: [
+        "resourceCategories",
+        facilityId,
+        categorySlug,
+        qParams.searchCategory,
+        qParams.page,
+      ],
+      queryFn: query.debounced(resourceCategoryApi.list, {
         pathParams: { facilityId },
         queryParams: {
           resource_type: resourceType,
           parent: categorySlug || "",
-          ordering: "title",
+          title: qParams.searchCategory,
+          limit: resultsPerPage,
+          offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         },
       }),
     },
@@ -292,13 +307,40 @@ export function ResourceCategoryList({
           </div>
         </div>
 
+        {/* Search Section */}
+        {!isLeafCategory && (
+          <div className="relative w-full sm:w-auto mb-4">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <CareIcon icon="l-search" className="size-5" />
+            </span>
+            <Input
+              placeholder={t("search_categories")}
+              value={qParams.searchCategory || ""}
+              onChange={(e) =>
+                updateQuery({ searchCategory: e.target.value || undefined })
+              }
+              className="w-full sm:w-auto pl-10"
+            />
+          </div>
+        )}
+
         {isLoadingCategories ? (
           <TableSkeleton count={5} />
         ) : isRootLevel && categories.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
-            title={t("no_categories_found")}
-            description={t("create_your_first_category")}
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
+            title={
+              qParams.searchCategory
+                ? t("no_results")
+                : t("no_categories_found")
+            }
+            description={
+              qParams.searchCategory
+                ? t("try_different_search_terms")
+                : t("create_your_first_category")
+            }
           />
         ) : (
           <>
@@ -329,6 +371,8 @@ export function ResourceCategoryList({
           onClose={() => setIsCategoryFormOpen(false)}
           onSuccess={handleCategoryFormSuccess}
         />
+
+        <Pagination totalCount={categoriesResponse?.count || 0} />
       </div>
     </TooltipProvider>
   );

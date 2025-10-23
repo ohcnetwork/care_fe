@@ -109,7 +109,7 @@ export const HealthcareServiceSelector = ({
     <Command shouldFilter={false}>
       <CommandInput
         placeholder={t("search")}
-        className="outline-hidden border-none ring-0 shadow-none"
+        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
         value={searchValue}
         onValueChange={setSearchValue}
         autoFocus
