@@ -519,9 +519,9 @@ function AppointmentColumn(props: {
           resource_ids: props.resourceIds.join(","),
           date_after: props.date_from,
           date_before: props.date_to,
-          ordering: "token_slot__start_datetime",
           patient: props.patient,
         },
+        silent: true,
       })({ signal });
       return response;
     },
@@ -793,7 +793,6 @@ function AppointmentRow(props: {
         tags_behavior: props.tags_behavior,
         limit: props.resultsPerPage,
         offset: ((props.page ?? 1) - 1) * props.resultsPerPage,
-        ordering: "token_slot__start_datetime",
         patient: props.patient,
         resource_type: props.resourceType,
         resource_ids: props.resourceIds.join(","),

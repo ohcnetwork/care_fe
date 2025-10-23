@@ -59,15 +59,8 @@ function TagConfigCard({
   const { t } = useTranslation();
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
 
-  const handleCardClick = () => {
-    onView(config.id);
-  };
-
   return (
-    <Card
-      className="cursor-pointer hover:shadow-md transition-shadow"
-      onClick={handleCardClick}
-    >
+    <Card>
       <CardContent className="p-6">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="flex-1">
@@ -100,10 +93,7 @@ function TagConfigCard({
               </ExpandableText>
             )}
           </div>
-          <div
-            className="flex items-center gap-2"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="flex items-center gap-2">
             {showArchiveAction && onArchive && config.status !== "archived" && (
               <>
                 <Button
@@ -128,7 +118,11 @@ function TagConfigCard({
                 />
               </>
             )}
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onView(config.id)}
+            >
               <CareIcon icon="l-arrow-right" className="size-4" />
               {t("view")}
             </Button>

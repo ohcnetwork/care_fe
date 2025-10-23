@@ -109,7 +109,7 @@ describe("All combination of questionnaire submissions", () => {
     cy.verifyNotification("Questionnaire submitted successfully");
 
     // Verify the allergy information appears in the patient overview
-    cy.verifyContentPresence("[data-slot='accordion']", [
+    cy.verifyContentPresence("[data-slot='collapsible']", [
       "Allergies",
       allergyName,
       "Active",

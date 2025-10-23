@@ -18,6 +18,9 @@ export default {
     path: "/api/v1/files/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<FileReadMinimal>>(),
+    defaultQueryParams: {
+      ordering: "-modified_date",
+    },
   },
   get: {
     path: "/api/v1/files/{fileId}/",

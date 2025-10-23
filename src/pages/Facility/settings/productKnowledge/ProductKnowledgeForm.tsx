@@ -457,24 +457,31 @@ function ProductKnowledgeFormContent({
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <FormLabel>{t("code")}</FormLabel>
-                    <div className="mt-2">
-                      <ValueSetSelect
-                        system="system-medication"
-                        value={form.watch("code")}
-                        placeholder={t("search_for_product_codes")}
-                        onSelect={(code) => {
-                          form.setValue("code", {
-                            code: code.code,
-                            display: code.display,
-                            system: code.system,
-                          });
-                        }}
-                        showCode={true}
-                      />
-                    </div>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t("code")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            {...field}
+                            system="system-medication"
+                            placeholder={t("search_for_product_codes")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <div>
                     <FormLabel aria-required>{t("base_unit")}</FormLabel>
@@ -684,7 +691,7 @@ function ProductKnowledgeFormContent({
                       });
                     }}
                   >
-                    <PlusCircle className="mr-2 size-4" />
+                    <PlusCircle className="size-4" />
                     {t("add_guideline")}
                   </Button>
                 </div>
@@ -826,8 +833,8 @@ function ProductKnowledgeFormContent({
 
             {/* Product Definition Section */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div>
                     <h2 className="text-base font-medium text-gray-900">
                       {t("product_definition")}
@@ -842,8 +849,9 @@ function ProductKnowledgeFormContent({
                       variant="outline"
                       size="sm"
                       onClick={() => form.setValue("definitional", null)}
+                      className="w-full sm:w-auto flex items-center justify-center gap-1 "
                     >
-                      <X className="mr-2 size-4" />
+                      <X className="size-4 " />
                       {t("remove_definition")}
                     </Button>
                   ) : (
