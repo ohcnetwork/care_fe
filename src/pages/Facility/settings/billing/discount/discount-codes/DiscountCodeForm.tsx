@@ -34,14 +34,12 @@ export function DiscountCodeForm({
       z.object({
         code: z
           .string()
-          //.min(1, { message: t("field_required") })
           .transform((val) => val.trim())
           .refine((val) => val.trim().length > 0, {
             message: t("field_required"),
           }),
         display: z
           .string()
-          //.min(1, { message: t("field_required") })
           .transform((val) => val.trim())
           .refine((val) => val.trim().length > 0, {
             message: t("field_required"),
