@@ -1,32 +1,35 @@
 import type { APIRequestContext } from "@playwright/test";
 import { ResourceCategoryRead } from "src/types/base/resourceCategory/resourceCategory";
+import type { FacilityRead } from "src/types/facility/facility";
 import { createAuthenticatedAPIContext } from "./utils/auth-context";
 
 export interface FacilitySetup {
-  facilityId: string;
+  facility: FacilityRead;
   resourceCategory: ResourceCategoryRead;
 }
 
-export async function getFacilityAndCategory(): Promise<FacilitySetup> {
+export async function getFacilityAndCategory(
+  resourceType: string,
+): Promise<FacilitySetup> {
   const apiContext = await createAuthenticatedAPIContext();
 
   try {
-    const facilityId = await getFirstFacility(apiContext);
-    const resourceCategory = await getFirstResourceCategory(
+    const facility = await getLastFacility(apiContext);
+    const resourceCategory = await getLastResourceCategory(
       apiContext,
-      facilityId,
-      "activity_definition",
+      facility.id,
+      resourceType,
     );
 
-    return { facilityId, resourceCategory };
+    return { facility, resourceCategory };
   } finally {
     await apiContext.dispose();
   }
 }
 
-async function getFirstFacility(
+async function getLastFacility(
   apiContext: APIRequestContext,
-): Promise<string> {
+): Promise<FacilityRead> {
   const response = await apiContext.get("/api/v1/facility/?limit=1");
 
   if (!response.ok()) {
@@ -36,8 +39,9 @@ async function getFirstFacility(
   }
 
   const data = await response.json();
-  if (data?.results?.[0]?.id) {
-    return data.results[0].id;
+  const last = data?.results?.at?.(-1);
+  if (last) {
+    return last;
   }
 
   throw new Error(
@@ -45,7 +49,7 @@ async function getFirstFacility(
   );
 }
 
-async function getFirstResourceCategory(
+async function getLastResourceCategory(
   apiContext: APIRequestContext,
   facilityId: string,
   resourceType: string,
@@ -61,8 +65,9 @@ async function getFirstResourceCategory(
   }
 
   const data = await response.json();
-  if (data?.results?.[0]) {
-    return data.results[0];
+  const last = data?.results?.at?.(-1);
+  if (last) {
+    return last;
   }
 
   throw new Error(

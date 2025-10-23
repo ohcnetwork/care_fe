@@ -16,13 +16,13 @@ function generateActivityDefinitionData() {
 let setup: FacilitySetup;
 
 test.beforeAll(async () => {
-  setup = await getFacilityAndCategory();
+  setup = await getFacilityAndCategory("activity_definition");
 });
 
 test.describe("Activity Definition Form", () => {
   test("should load the form and display page content", async ({ page }) => {
     await page.goto(
-      `/facility/${setup.facilityId}/settings/activity_definitions/categories/${setup.resourceCategory.slug}/new`,
+      `/facility/${setup.facility.id}/settings/activity_definitions/categories/${setup.resourceCategory.slug}/new`,
     );
 
     await page.waitForLoadState("networkidle", { timeout: 30000 });
@@ -57,7 +57,7 @@ test.describe("Activity Definition Form", () => {
     const testData = generateActivityDefinitionData();
 
     await page.goto(
-      `/facility/${setup.facilityId}/settings/activity_definitions/categories/${setup.resourceCategory.slug}/new`,
+      `/facility/${setup.facility.id}/settings/activity_definitions/categories/${setup.resourceCategory.slug}/new`,
     );
 
     await page.waitForLoadState("networkidle", { timeout: 30000 });
@@ -106,7 +106,7 @@ test.describe("Activity Definition Form", () => {
     ).toBeVisible({ timeout: 15000 });
 
     await expect(page).toHaveURL(
-      `/facility/${setup.facilityId}/settings/activity_definitions`,
+      `/facility/${setup.facility.id}/settings/activity_definitions`,
     );
   });
 });
