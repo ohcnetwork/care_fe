@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
-import { Clock } from "lucide-react";
+import { Clock, Files } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -354,7 +354,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
             state.dateGroupedRecords.map(({ date, records }) => (
               <div key={date} className="my-4">
                 <div className="px-2">
-                  <p className="text-sm text-gray-500">{date}</p>
+                  <p className="text-sm text-indigo-700 font-medium">{date}</p>
                 </div>
                 <div className="overflow-x-auto p-2">
                   {isLoadingRecords ? (
@@ -424,7 +424,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
           {isLoadingRecords && <Skeleton className="h-8 w-full" />}
         </div>
 
-        <div className="sticky bottom-0 bg-white flex flex-col gap-2 p-4 border-t">
+        <div className="sticky bottom-0 bg-white p-4 border-t">
           {state.dateGroupedRecords.length > 0 &&
             (isLoadingRecords ? (
               <div className="flex justify-center p-4">
@@ -434,31 +434,40 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
               recordsData.count >
                 (state.currentOffset[activeType] || 0) + LIMIT ? (
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={handleLoadMore}
-                className="w-full"
+                className="w-1/8 font-semibold underline p-0 justify-start"
               >
                 {t("load_more")}
               </Button>
             ) : null)}
-          <div className="text-sm">
-            <span className="font-medium">
-              {(state.selectedRecords[activeType] || []).length} {activeType}
-            </span>{" "}
-            {t("selected")}
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleClose}>
-              {t("cancel")}
-            </Button>
-            <Button
-              onClick={handleAddSelected}
-              disabled={(state.selectedRecords[activeType] || []).length === 0}
-              className="bg-emerald-600 hover:bg-emerald-700"
-              data-cy="add-selected-records"
-            >
-              {t("add_selected")}
-            </Button>
+          <div className="flex justify-between items-center gap-2 w-full">
+            <div className="text-sm">
+              <span className="font-medium">
+                {(state.selectedRecords[activeType] || []).length} {activeType}
+              </span>{" "}
+              {t("selected")}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                className="font-semibold underline"
+                onClick={handleClose}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                onClick={handleAddSelected}
+                disabled={
+                  (state.selectedRecords[activeType] || []).length === 0
+                }
+                className="bg-emerald-600 hover:bg-emerald-700"
+                data-cy="add-selected-records"
+              >
+                <Files className="size-4" />
+                {t("add_selected")}
+              </Button>
+            </div>
           </div>
         </div>
       </SheetContent>

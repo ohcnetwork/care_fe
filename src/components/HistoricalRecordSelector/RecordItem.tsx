@@ -6,7 +6,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 export interface DisplayField<T> {
   key: keyof T | string;
   label: string;
-  render?: (value: any) => string;
+  render?: (value: any) => React.ReactNode;
 }
 
 interface RecordItemProps<T> {
@@ -48,6 +48,8 @@ export function RecordItem<T>({
             key={field.key.toString()}
             className={cn(
               "p-2 text-sm whitespace-pre-wrap border border-gray-200 bg-white",
+              idx % 2 === 0 ? "bg-gray-100" : "bg-white",
+              isSelected && idx === arr.length - 1 && "bg-primary-100",
               idx === 0 && "rounded-l-md",
               idx === arr.length - 1 && "rounded-r-md",
             )}
