@@ -32,8 +32,20 @@ export function DiscountCodeForm({
   const formSchema = useMemo(
     () =>
       z.object({
-        code: z.string().min(1, { message: t("field_required") }),
-        display: z.string().min(1, { message: t("field_required") }),
+        code: z
+          .string()
+          //.min(1, { message: t("field_required") })
+          .transform((val) => val.trim())
+          .refine((val) => val.trim().length > 0, {
+            message: t("field_required"),
+          }),
+        display: z
+          .string()
+          //.min(1, { message: t("field_required") })
+          .transform((val) => val.trim())
+          .refine((val) => val.trim().length > 0, {
+            message: t("field_required"),
+          }),
       }),
     [t],
   );
@@ -64,7 +76,10 @@ export function DiscountCodeForm({
             <FormItem>
               <FormLabel>{t("name")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value.trim())}
+                />
               </FormControl>
               <FormDescription>
                 {t("discount_code_name_description")}
@@ -81,7 +96,10 @@ export function DiscountCodeForm({
             <FormItem>
               <FormLabel>{t("code")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value.trim())}
+                />
               </FormControl>
               <FormDescription>
                 {t("discount_code_code_description")}
