@@ -59,6 +59,7 @@ function RoleCommandContent({
   ref,
 }: RoleCommandContentProps) {
   const { t } = useTranslation();
+  const visibleRoles = rolesList?.filter((role) => !role.is_archived) || [];
 
   return (
     <Command>
@@ -73,7 +74,7 @@ function RoleCommandContent({
           {isFetching ? t("searching") : t("no_roles_found")}
         </CommandEmpty>
         <CommandGroup>
-          {rolesList?.map((role, i) => (
+          {visibleRoles?.map((role, i) => (
             <CommandItem
               key={role.id}
               value={role.name}
@@ -82,7 +83,7 @@ function RoleCommandContent({
                 setOpen(false);
               }}
               className="cursor-pointer"
-              ref={i === rolesList.length - 1 ? ref : undefined}
+              ref={i === visibleRoles.length - 1 ? ref : undefined}
             >
               <CheckIcon
                 className={cn(
@@ -153,7 +154,6 @@ export function RoleSelect({
     if (inView && hasNextPage) fetchNextPage();
   }, [inView, hasNextPage, fetchNextPage]);
 
-  const visibleRoles = rolesList?.filter((role) => !role.is_archived) || [];
   const renderTriggerButton = () => (
     <Button
       variant="outline"
