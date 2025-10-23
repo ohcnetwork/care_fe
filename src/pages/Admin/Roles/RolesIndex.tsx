@@ -34,6 +34,8 @@ import {
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { useSidebar } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 import RoleForm from "@/pages/Admin/Roles/RoleForm";
 import { RoleRead } from "@/types/emr/role/role";
 import roleApi from "@/types/emr/role/roleApi";
@@ -53,7 +55,7 @@ function RoleCard({
       <CardContent className="p-6">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 mb-2">
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 mb-3">
               <h3
                 className="font-medium text-gray-900 mb-2 truncate"
                 title={role.name}
@@ -115,6 +117,7 @@ export default function RolesIndex() {
     limit: 15,
     disableCache: true,
   });
+  const { open: isSidebarOpen } = useSidebar();
 
   const [selectedRole, setSelectedRole] = React.useState<RoleRead | null>(null);
   const [mode, setMode] = React.useState<"add" | "edit" | "clone">("add");
@@ -158,7 +161,16 @@ export default function RolesIndex() {
   };
 
   return (
-    <Page title={t("roles")} hideTitleOnPage>
+    <Page
+      title={t("roles")}
+      hideTitleOnPage
+      className={cn(
+        "w-full overflow-y-auto",
+        isSidebarOpen
+          ? "md:max-w-[calc(100vw-20rem)]"
+          : "md:max-w-[calc(100vw-5rem)]",
+      )}
+    >
       <div className="container mx-auto">
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-gray-700">{t("roles")}</h1>

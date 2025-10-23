@@ -21,6 +21,7 @@ interface NavTabDefinition {
   label: string;
   component: React.ReactNode;
   shortcutId?: string;
+  labelSuffix?: React.ReactNode;
 }
 
 interface Props<TabKey extends string> {
@@ -99,6 +100,7 @@ export const NavTabs = <TabKey extends string>({
             onClick={() => onTabChange(option)}
           >
             {tabs[option].label}
+            {tabs[option].labelSuffix}
             {tabs[option].shortcutId && (
               <ShortcutBadge actionId={tabs[option].shortcutId}></ShortcutBadge>
             )}
