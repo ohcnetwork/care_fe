@@ -3362,7 +3362,7 @@
   "now": "now",
   "now_serving": "Now Serving",
   "now_using_the_latest_version_of_care": "Now using the latest version of CARE",
-  "number_min_error": "Must be greater than {{min}}",
+  "number_min_error": "Must be at least {{min}}",
   "number_of_aged_dependents": "Number of Aged Dependents (Above 60)",
   "number_of_beds": "Number of beds",
   "number_of_beds_out_of_range_error": "Number of beds cannot be greater than 100",
