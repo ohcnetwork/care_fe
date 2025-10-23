@@ -109,7 +109,7 @@ export default function ProductKnowledgeForm({
   facilityId: string;
   slug?: string;
   categorySlug?: string;
-  onSuccess?: () => void;
+  onSuccess?: (productKnowledge: ProductKnowledgeBase) => void;
 }) {
   const { t } = useTranslation();
   const isEditMode = Boolean(slug);
@@ -156,16 +156,18 @@ function ProductKnowledgeFormContent({
   slug,
   existingData,
   categorySlug,
-  onSuccess = () =>
+  onSuccess = (productKnowledge) =>
     navigate(
-      `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
+      productKnowledge
+        ? `/facility/${facilityId}/settings/product_knowledge/${productKnowledge.slug}`
+        : `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
     ),
 }: {
   facilityId: string;
   slug?: string;
   existingData?: ProductKnowledgeBase;
   categorySlug?: string;
-  onSuccess?: () => void;
+  onSuccess?: (productKnowledge: ProductKnowledgeBase) => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -251,10 +253,7 @@ function ProductKnowledgeFormContent({
       onSuccess: (productKnowledge: ProductKnowledgeBase) => {
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         toast.success(t("product_knowledge_created_successfully"));
-        onSuccess();
-        navigate(
-          `/facility/${facilityId}/settings/product_knowledge/categories/${productKnowledge.category.slug}`,
-        );
+        onSuccess(productKnowledge);
       },
     },
   );
@@ -275,9 +274,7 @@ function ProductKnowledgeFormContent({
           queryKey: ["productKnowledge", slug],
         });
         toast.success(t("product_knowledge_updated_successfully"));
-        navigate(
-          `/facility/${facilityId}/settings/product_knowledge/${productKnowledge.slug}`,
-        );
+        onSuccess(productKnowledge);
       },
     },
   );
@@ -1004,8 +1001,8 @@ function ProductKnowledgeFormContent({
                 <Link
                   href={
                     isEditMode
-                      ? `/product_knowledge/${slug}`
-                      : `/product_knowledge/categories/${categorySlug}`
+                      ? `/facility/${facilityId}/settings/product_knowledge/${slug}`
+                      : `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`
                   }
                 >
                   {t("cancel")}
