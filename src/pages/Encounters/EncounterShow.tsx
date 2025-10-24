@@ -18,6 +18,7 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { Badge } from "@/components/ui/badge";
 import { CommandShortcut } from "@/components/ui/command";
 import { NavTabs } from "@/components/ui/nav-tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { usePermissions } from "@/context/PermissionContext";
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -41,7 +42,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
-import { PanelLeftClose, PanelRightClose } from "lucide-react";
+import { PanelLeftClose } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -64,6 +65,7 @@ export const EncounterShow = (props: Props) => {
     facilityId,
     primaryEncounter,
     selectedEncounter,
+    isSelectedEncounterLoading,
     primaryEncounterId,
     selectedEncounterId,
     isPrimaryEncounterLoading,
@@ -259,61 +261,70 @@ export const EncounterShow = (props: Props) => {
           SetIssRailOpen={setIsEncounterRailOpen}
         />
         <div className="w-full">
-          {selectedEncounter && (
-            <div className="hidden lg:flex items-center gap-2 text-gray-800">
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => setIsEncounterRailOpen((open) => !open)}
-              >
-                {isEncounterRailOpen ? (
-                  <PanelLeftClose className="size-5" />
-                ) : (
-                  <PanelRightClose className="size-5" />
+          {isSelectedEncounterLoading ? (
+            <Skeleton className="h-10 w-md" />
+          ) : (
+            selectedEncounter && (
+              <div className="hidden lg:flex items-center text-gray-800">
+                {isEncounterRailOpen && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => setIsEncounterRailOpen((open) => !open)}
+                  >
+                    <PanelLeftClose className="size-5" />
+                  </Button>
                 )}
-              </Button>
+                <div className="flex gap-2 items-center">
+                  <h4 className="font-bold">
+                    {t(
+                      `encounter_class__${selectedEncounter?.encounter_class}`,
+                    )}
+                  </h4>
+                  <div className="text-sm text-gray-700 space-x-2">
+                    <span className="">{selectedEncounter?.facility.name}</span>
 
-              <h4 className="font-bold">
-                {t(`encounter_class__${selectedEncounter?.encounter_class}`)}
-              </h4>
-              <div className="text-sm text-gray-700 space-x-2">
-                <span className="">{selectedEncounter?.facility.name}</span>
+                    <span>|</span>
 
-                <span>|</span>
-
-                <span className="whitespace-nowrap">
-                  {selectedEncounter.period.start && (
-                    <span>
-                      {format(
-                        new Date(selectedEncounter.period.start!),
-                        "dd MMM",
+                    <span className="whitespace-nowrap">
+                      {selectedEncounter.period.start && (
+                        <span>
+                          {format(
+                            new Date(selectedEncounter.period.start!),
+                            "dd MMM",
+                          )}
+                        </span>
+                      )}
+                      {selectedEncounter.period.end &&
+                        selectedEncounter.period.start && <span>{" - "}</span>}
+                      {selectedEncounter.period.end ? (
+                        <span>
+                          {format(
+                            new Date(selectedEncounter.period.end),
+                            "dd MMM",
+                          )}
+                        </span>
+                      ) : (
+                        <span>
+                          {" - "}
+                          {t("ongoing")}
+                        </span>
                       )}
                     </span>
-                  )}
-                  {selectedEncounter.period.end &&
-                    selectedEncounter.period.start && <span>{" - "}</span>}
-                  {selectedEncounter.period.end ? (
-                    <span>
-                      {format(new Date(selectedEncounter.period.end), "dd MMM")}
-                    </span>
-                  ) : (
-                    <span>
-                      {" - "}
-                      {t("ongoing")}
-                    </span>
-                  )}
-                </span>
-              </div>
+                  </div>
 
-              <Badge
-                variant={ENCOUNTER_STATUS_COLORS[selectedEncounter.status]}
-                size="sm"
-                className="whitespace-nowrap"
-              >
-                {t(`encounter_status__${selectedEncounter.status}`)}
-              </Badge>
-            </div>
+                  <Badge
+                    variant={ENCOUNTER_STATUS_COLORS[selectedEncounter.status]}
+                    size="sm"
+                    className="whitespace-nowrap"
+                  >
+                    {t(`encounter_status__${selectedEncounter.status}`)}
+                  </Badge>
+                </div>
+              </div>
+            )
           )}
+
           <NavTabs
             showMoreAfterIndex={showMoreAfterIndex}
             className="@container w-full"
