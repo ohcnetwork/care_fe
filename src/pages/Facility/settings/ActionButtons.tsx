@@ -1,4 +1,4 @@
-import { navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -15,13 +15,17 @@ export function ActionButtons({ editPath, viewPath }: ActionButtonsProps) {
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => navigate(viewPath)}>
-        <CareIcon icon="l-eye" className="size-5 text-xl" />
-        {t("view")}
+      <Button variant="outline" size="sm" asChild>
+        <Link basePath="/" href={viewPath}>
+          <CareIcon icon="l-eye" className="size-5 text-xl" />
+          {t("view")}
+        </Link>
       </Button>
-      <Button variant="outline" size="sm" onClick={() => navigate(editPath)}>
-        <CareIcon icon="l-edit" className="size-5 text-sm" />
-        {t("edit")}
+      <Button variant="outline" size="sm" asChild>
+        <Link basePath="/" href={editPath}>
+          <CareIcon icon="l-edit" className="size-5 text-sm" />
+          {t("edit")}
+        </Link>
       </Button>
     </>
   );
