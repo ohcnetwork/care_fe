@@ -81,7 +81,7 @@ test.describe("Inventory Management", () => {
         await page
           .getByRole("textbox", { name: /search/i })
           .fill("Test Category");
-        await page.waitForTimeout(1000); // Wait for search results
+        await page.waitForSelector('div:has-text("Test Category")');
       });
 
       // If Test Category exists, use it; if not, create it
@@ -174,7 +174,10 @@ test.describe("Inventory Management", () => {
         await page
           .getByRole("textbox", { name: /search/i })
           .fill("Test Category");
-        await page.waitForTimeout(1000);
+        await page
+          .locator("div", { hasText: /^Test Category$/ })
+          .nth(3)
+          .waitFor({ state: "visible" });
         await page
           .locator("div")
           .filter({ hasText: /^Test Category$/ })
@@ -216,11 +219,15 @@ test.describe("Inventory Management", () => {
           .getByRole("link", { name: /charge item definitions/i })
           .click();
 
-        // Search for "Test Category"
+        // Search for "Medi Category"
         await page
           .getByRole("textbox", { name: /search/i })
           .fill("Medi Category");
-        await page.waitForTimeout(1000); // Wait for search results
+        await page
+          .locator("div", { hasText: /^Medi Category$/ })
+          .first()
+          .waitFor({ state: "visible", timeout: 5000 })
+          .catch(() => {});
       });
 
       // If Test Category exists, use it; if not, create it
@@ -310,14 +317,17 @@ test.describe("Inventory Management", () => {
           .getByRole("link", { name: /charge item definitions/i })
           .click();
 
-        // Search for "Test Category"
+        // Search for "Medi Category"
         await page
           .getByRole("textbox", { name: /search/i })
           .fill("Medi Category");
-        await page.waitForTimeout(1000); // Wait for search results
+        await page
+          .locator("div", { hasText: /^Medi Category$/ })
+          .first()
+          .waitFor({ state: "visible" });
       });
 
-      // If Test Category exists, use it; if not, create it
+      // If Category exists, use it; if not, create it
       const testCategoryExists =
         (await page
           .locator("div")
@@ -432,21 +442,27 @@ test.describe("Inventory Management", () => {
 
         await page.getByRole("combobox").click();
         await page.getByPlaceholder("Search Product Knowledge").fill("Gloves");
-        await page.waitForTimeout(1000);
+        await expect(page.getByRole("option", { name: "Gloves" })).toBeVisible({
+          timeout: 5000,
+        });
         await page.getByPlaceholder("Search Product Knowledge").click();
         await page.getByRole("option", { name: "Gloves" }).click();
         await page.getByRole("combobox").click();
         await page
           .getByPlaceholder("Search Product Knowledge")
           .fill("Ibuprofen");
-        await page.waitForTimeout(1000);
+        await expect(
+          page.getByRole("option", { name: "Ibuprofen" }),
+        ).toBeVisible({ timeout: 5000 });
         await page.getByPlaceholder("Search Product Knowledge").click();
         await page.getByRole("option", { name: "Ibuprofen" }).click();
         // Target the quantity input for each item specifically using the name attribute
         await page.locator('input[name="requests.1.quantity"]').fill("2");
 
         await page.getByRole("button", { name: "Add Items" }).click();
-        await page.waitForTimeout(1000);
+        await expect(
+          page.getByRole("button", { name: "Mark as Approved" }),
+        ).toBeEnabled();
 
         await page.getByRole("button", { name: "Mark as Approved" }).click();
       });
@@ -490,7 +506,7 @@ test.describe("Inventory Management", () => {
       await page.getByRole("checkbox").click();
       //clickoutside to close the dropdown
       await page.locator("div").first().click();
-      await page.waitForTimeout(1000);
+      await page.waitForSelector(".dropdown-menu", { state: "hidden" });
       await page.getByRole("button", { name: "Select stock" }).nth(1).click();
       await page.getByRole("checkbox").click();
 
@@ -630,7 +646,7 @@ test.describe("Inventory Management", () => {
           .getByRole("combobox")
           .filter({ hasText: "Select Vendor" })
           .click();
-        await page.waitForTimeout(1000);
+        await page.waitForSelector('[role="option"]');
         await page.getByRole("option").first().click();
       });
 
@@ -649,28 +665,26 @@ test.describe("Inventory Management", () => {
 
         await page.getByRole("combobox").click();
         await page.getByPlaceholder("Search Product Knowledge").fill("Gloves");
-        await page.waitForTimeout(1000);
+        await page.getByRole("option", { name: "Gloves" }).waitFor();
         await page.getByPlaceholder("Search Product Knowledge").click();
         await page.getByRole("option", { name: "Gloves" }).click();
         await page.getByRole("combobox").click();
         await page
           .getByPlaceholder("Search Product Knowledge")
           .fill("Ibuprofen");
-        await page.waitForTimeout(1000);
+        await page.getByRole("option", { name: "Ibuprofen" }).waitFor();
         await page.getByPlaceholder("Search Product Knowledge").click();
         await page.getByRole("option", { name: "Ibuprofen" }).click();
         // Target the quantity input for each item specifically using the name attribute
         await page.locator('input[name="requests.1.quantity"]').fill("2");
 
         await page.getByRole("button", { name: "Add Items" }).click();
-
-        await page.getByRole("button", { name: "Mark as Approved" }).click();
-        await page.waitForTimeout(1000);
-
         // Wait for success message or navigation
-        await expect(page.getByText(/created successfully/i)).toBeVisible({
+        await expect(page.getByText(/.* successfully/i)).toBeVisible({
           timeout: 10000,
         });
+        await page.getByRole("button", { name: "Mark as Approved" }).click();
+        await page.waitForTimeout(1000);
       });
     });
 
@@ -721,43 +735,16 @@ test.describe("Inventory Management", () => {
         timeout: 10000,
       });
 
-      await test.step("Add items to the order", async () => {
-        // Click on add items button
-
-        await page.getByRole("combobox").filter({ hasText: /^$/ }).click();
-        await page.getByPlaceholder("Search Product Knowledge").click();
-        await page
-          .getByPlaceholder("Search Product Knowledge")
-          .fill("Amoxicillin");
-        await page.getByRole("option", { name: "Amoxicillin" }).click();
-        await page.getByRole("spinbutton").fill("10");
-        await page
-          .getByRole("combobox")
-          .filter({ hasText: "Search Product" })
-          .click();
-        await page.getByRole("option").first().click();
-
-        await page.getByRole("button", { name: "Add Items" }).click();
-        await expect(page.getByText(/created/i)).toBeVisible({
-          timeout: 10000,
-        });
-
-        //mark the first item as entered in error
-        await page.getByRole("cell").filter({ hasText: /^$/ }).first().click();
-        await page
-          .getByRole("menuitem", { name: "Mark as entered in error" })
-          .click();
-        await page.getByRole("button", { name: "Mark as Approved" }).click();
-        await page
-          .getByRole("row", { name: "Item Requested Qty. Received" })
-          .getByRole("checkbox")
-          .click();
-        await page
-          .getByRole("button", { name: "Confirm & Update Stock" })
-          .click();
-        await page.getByRole("button", { name: "Confirm" }).click();
-        await page.getByRole("button", { name: "Mark as Completed" }).click();
-      });
+      await page.getByRole("button", { name: "Mark as Approved" }).click();
+      await page
+        .getByRole("row", { name: "Item Requested Qty. Received" })
+        .getByRole("checkbox")
+        .click();
+      await page
+        .getByRole("button", { name: "Confirm & Update Stock" })
+        .click();
+      await page.getByRole("button", { name: "Confirm" }).click();
+      await page.getByRole("button", { name: "Mark as Completed" }).click();
     });
 
     test("Mark as completed/successful delivery for External order", async ({

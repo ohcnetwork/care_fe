@@ -1072,8 +1072,7 @@ export function ChargeItemDefinitionForm({
                               onChange={(e) =>
                                 field.onChange(String(e.target.value))
                               }
-                              name="base_price"
-                              // placeholder="0.00"
+                              placeholder="0.00"
                             />
                           </FormControl>
                           <FormMessage />
