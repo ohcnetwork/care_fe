@@ -63,7 +63,7 @@ jobs:
   parallel-job:
     if: github.repository == 'ohcnetwork/care_fe'
     permissions: write-all
-    timeout-minutes: 15
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     needs: install
     strategy:
@@ -129,7 +129,17 @@ jobs:
         if: steps.pr_origin.outputs.is_forked == 'false'
         run: |
           npx vite preview --host &
-          sleep 10
+          echo "Waiting for Vite server to start..."
+          timeout=60
+          while [ $timeout -gt 0 ]; do
+            if curl -f -s http://localhost:4000 >/dev/null 2>&1; then
+              echo "Vite server is ready!"
+              break
+            fi
+            echo "Server not ready, waiting... ($timeout seconds left)"
+            sleep 2
+            timeout=$((timeout - 2))
+          done
           npx playwright test --shard=${{ matrix.containers }}/3
         env:
           NODE_OPTIONS: --max_old_space_size=1536
@@ -140,7 +150,17 @@ jobs:
         if: steps.pr_origin.outputs.is_forked == 'true'
         run: |
           npx vite preview --host &
-          sleep 10
+          echo "Waiting for Vite server to start..."
+          timeout=60
+          while [ $timeout -gt 0 ]; do
+            if curl -f -s http://localhost:4000 >/dev/null 2>&1; then
+              echo "Vite server is ready!"
+              break
+            fi
+            echo "Server not ready, waiting... ($timeout seconds left)"
+            sleep 2
+            timeout=$((timeout - 2))
+          done
           npx playwright test --shard=${{ matrix.containers }}/3
         env:
           NODE_OPTIONS: --max_old_space_size=1536

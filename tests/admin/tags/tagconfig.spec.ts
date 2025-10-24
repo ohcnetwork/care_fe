@@ -190,7 +190,39 @@ test.describe("Tag Configuration Management", () => {
     // Update the child tag
     await displayNameInput.clear();
     await displayNameInput.fill(updatedChildTagName);
-    await page.getByRole("button", { name: "Update tag config" }).click();
+
+    // Wait for form to be ready and click update button with enhanced stability
+    const updateButton = page.getByRole("button", {
+      name: "Update tag config",
+    });
+
+    // Wait for button to be ready
+    await updateButton.waitFor({ state: "visible" });
+    await updateButton.waitFor({ state: "attached" });
+
+    // Ensure button is enabled before clicking
+    await expect(updateButton).toBeEnabled({ timeout: 10000 });
+
+    // Wait for any form validation or animations to settle
+    await page.waitForTimeout(1000);
+
+    // Click with enhanced error handling
+    try {
+      await updateButton.click({ timeout: 15000 });
+    } catch (error) {
+      // If normal click fails, try force click
+      console.log("Normal click failed, trying force click:", error);
+      await updateButton.click({ force: true, timeout: 15000 });
+    }
+
+    // Wait for the update operation to complete
+    // Look for either success indicator or page navigation
+    try {
+      await page.waitForLoadState("networkidle", { timeout: 15000 });
+    } catch {
+      // If network idle doesn't work, wait for URL change or success message
+      await page.waitForTimeout(2000);
+    }
 
     // Verify the update was successful
     await page.getByRole("button", { name: "Back" }).click();

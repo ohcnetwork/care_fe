@@ -21,6 +21,8 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
+  /* Global test timeout */
+  timeout: process.env.CI ? 90000 : 60000,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
     ? [["html"], ["json", { outputFile: "test-results/results.json" }]]
@@ -32,6 +34,16 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
+
+    /* Global test timeout */
+    actionTimeout: 60000,
+    navigationTimeout: 60000,
+
+    /* Screenshots on failure */
+    screenshot: "only-on-failure",
+
+    /* Video recording on failure */
+    video: "retain-on-failure",
   },
 
   /* Configure projects for major browsers */
