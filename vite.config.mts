@@ -165,14 +165,9 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       tailwindcss(),
       federation({
         name: "core",
-        remotes: getRemotes(env.REACT_ENABLED_APPS),
-        // {
-        // care_livekit_fe: {
-        //   external: `Promise.resolve("http://localhost:5173/assets/remoteEntry.js")`,
-        //   externalType: "promise",
-        //   from: "vite",
-        // },
-        // },
+        remotes: {
+          dummy: "dummy.js", // this is a dummy remote needed to avoid errors that are thrown randomly by vite
+        },
         shared: [
           "react",
           "react-dom",
