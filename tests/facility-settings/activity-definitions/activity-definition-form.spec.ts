@@ -42,8 +42,6 @@ test.describe("Activity Definition Form", () => {
       `/facility/${setup.facility.id}/settings/activity_definitions/categories/${setup.resourceCategory.slug}/new`,
     );
 
-    await page.waitForLoadState("networkidle", { timeout: 30000 });
-
     await expect(
       page.getByRole("heading", { name: /create activity definition/i }),
     ).toBeVisible();
@@ -120,8 +118,6 @@ test.describe("Activity Definition Form", () => {
     await page.goto(
       `/facility/${setup.facility.id}/settings/activity_definitions/categories/${setup.resourceCategory.slug}/new`,
     );
-
-    await page.waitForLoadState("networkidle", { timeout: 30000 });
 
     await test.step("Basic Information", async () => {
       await page.getByLabel(/title.*\*/i).fill(testData.title);
