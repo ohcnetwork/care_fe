@@ -1,27 +1,39 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
-import { getFacilityAndCategory, type FacilitySetup } from "@/tests/helpers";
+import { ResourceCategoryRead } from "@/src/types/base/resourceCategory/resourceCategory";
+import { FacilityRead } from "@/src/types/facility/facility";
+import { getResourceCategory, loadFacility } from "@/tests/helpers/helpers";
 import {
   closeAnyOpenPopovers,
   selectFromCommand,
   selectFromLocationMultiSelect,
 } from "@/tests/helpers/ui";
 
+export interface TestSetup {
+  facility: FacilityRead;
+  resourceCategory: ResourceCategoryRead;
+}
+
 test.use({ storageState: "tests/.auth/user.json" });
 
 function generateActivityDefinitionData() {
   return {
-    title: faker.commerce.productName().slice(0, 25),
+    title: `${faker.science.chemicalElement().name.slice(0, 16)}_${faker.string.uuid().slice(0, 8)}`,
     description: faker.lorem.sentence(),
     usage: faker.lorem.sentences(2),
   };
 }
 
-let setup: FacilitySetup;
+let setup: TestSetup;
 
 test.beforeAll(async () => {
-  setup = await getFacilityAndCategory("activity_definition");
+  const facility = loadFacility();
+  const resourceCategory = await getResourceCategory(
+    facility.id,
+    "activity_definition",
+  );
+  setup = { facility, resourceCategory };
 });
 
 test.describe("Activity Definition Form", () => {
