@@ -229,11 +229,11 @@ export type AppointmentBase = {
   note: string;
   facility: FacilityBareMinimum;
   token: TokenRead | null;
+  booked_by: UserReadMinimal | null;
 } & ScheduleResource;
 
 export type Appointment = AppointmentBase & {
   patient: PatientRead;
-  booked_by: UserReadMinimal | null;
 };
 
 export type PublicAppointment = AppointmentBase & {
