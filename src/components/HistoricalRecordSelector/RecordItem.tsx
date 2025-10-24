@@ -6,7 +6,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 export interface DisplayField<T> {
   key: keyof T | string;
   label: string;
-  render?: (value: any) => string;
+  render?: (value: any) => React.ReactNode;
 }
 
 interface RecordItemProps<T> {
@@ -27,15 +27,15 @@ export function RecordItem<T>({
   };
 
   return (
-    <TableRow className="divide-x">
-      <TableCell>
+    <TableRow className="border-0">
+      <TableCell className="border-0 bg-transparent p-2 w-12 [&:has([role=checkbox])]:pr-2">
         <Checkbox
           checked={isSelected}
           onCheckedChange={handleToggle}
-          className="mr-1 size-5"
+          className="size-5"
         />
       </TableCell>
-      {displayFields.map((field, index) => {
+      {displayFields.map((field, idx, arr) => {
         const value = record[field.key as keyof T];
         const displayValue = field.render
           ? field.key == ""
@@ -47,8 +47,10 @@ export function RecordItem<T>({
           <TableCell
             key={field.key.toString()}
             className={cn(
-              "p-2 text-sm whitespace-pre-wrap",
-              index % 2 === 1 && "bg-white",
+              "p-2 text-sm whitespace-pre-wrap border border-gray-200 bg-white min-w-[120px]",
+              idx % 2 === 0 ? "bg-gray-100" : "bg-white",
+              idx === 0 && "rounded-l-md",
+              idx === arr.length - 1 && "rounded-r-md",
             )}
           >
             <div className="text-sm">{displayValue}</div>
