@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterSelect } from "@/components/ui/filter-select";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -19,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 
 import Page from "@/components/Common/Page";
 import {
@@ -35,6 +35,8 @@ import {
   ProductStatusOptions,
 } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
+import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { useEffect, useState } from "react";
 
 function ProductCard({
   product,
@@ -94,6 +96,15 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
       status: "active",
     },
   });
+  const [selectedProductKnowledge, setSelectedProductKnowledge] = useState<
+    ProductKnowledgeBase | undefined
+  >(undefined);
+
+  useEffect(() => {
+    if (!qParams.product_knowledge_id) {
+      setSelectedProductKnowledge(undefined);
+    }
+  }, [qParams.product_knowledge_id]);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["products", qParams],
@@ -105,7 +116,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: qParams.status,
-        name: qParams.search,
+        product_knowledge: qParams.product_knowledge_slug,
       },
     }),
   });
@@ -124,20 +135,20 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
-            <div className="w-full md:w-auto">
-              <div className="relative w-full md:w-auto">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  <CareIcon icon="l-search" className="size-5" />
-                </span>
-                <Input
-                  placeholder={t("search_products")}
-                  value={qParams.search || ""}
-                  onChange={(e) =>
-                    updateQuery({ search: e.target.value || undefined })
-                  }
-                  className="w-full md:w-[300px] pl-10"
-                />
-              </div>
+            <div className="w-full sm:w-auto">
+              <ProductKnowledgeSelect
+                value={selectedProductKnowledge}
+                onChange={(
+                  productKnowledge: ProductKnowledgeBase | undefined,
+                ) => {
+                  setSelectedProductKnowledge(productKnowledge);
+                  updateQuery({
+                    product_knowledge_slug: productKnowledge?.slug || undefined,
+                  });
+                }}
+                placeholder={t("search_product_knowledge")}
+                disableFavorites
+              />
             </div>
             <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">
               <div className="flex-1 sm:flex-initial sm:w-auto">
