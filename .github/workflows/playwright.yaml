@@ -7,16 +7,18 @@ name: Playwright Tests
 # - Provides detailed test reports as artifacts
 
 on:
-  push:
-    branches: [main, develop, production]
   pull_request:
-    branches: [develop, production]
+    branches:
+      - develop
+      - production
     paths:
       - "src/**"
       - "tests/**"
       - "package.json"
       - "package-lock.json"
       - "playwright.config.ts"
+      - "plugins/**"
+      - "public/**"
       - ".github/workflows/playwright.yaml"
   workflow_dispatch:
 
@@ -24,48 +26,23 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  NODE_VERSION: "22"
-  REACT_CARE_API_URL: http://localhost:9000
-  BACKEND_STARTUP_TIMEOUT: 120
-  TEST_SHARDS: 3
+
 
 jobs:
-  # Detect if test-related files changed
-  changes:
+  install:
     if: github.repository == 'ohcnetwork/care_fe'
+    permissions: write-all
     runs-on: ubuntu-latest
-    outputs:
-      tests: ${{ steps.filter.outputs.tests }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            tests:
-              - 'tests/**'
-              - 'src/**'
-              - 'package.json'
-              - 'playwright.config.ts'
-
-  # Build application once and cache for all test shards
-  build:
-    if: github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
-    needs: changes
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    env:
+      REACT_CARE_API_URL: http://localhost:9000
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: "22"
           cache: "npm"
 
       - name: Install dependencies
@@ -73,27 +50,26 @@ jobs:
 
       - name: Build application
         run: npm run build
-        env:
-          NODE_ENV: production
 
-      - name: Cache build
-        uses: actions/cache@v4
+      - name: Save build folder
+        uses: actions/upload-artifact@v4
         with:
-          path: |
-            dist/
-            node_modules/
-          key: build-${{ github.sha }}
+          name: build
+          if-no-files-found: error
+          path: build
+          retention-days: 1
 
   # Run E2E tests with backend integration
-  test:
-    if: github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
-    needs: [changes, build]
-    timeout-minutes: 30
+  parallel-job:
+    if: github.repository == 'ohcnetwork/care_fe'
+    permissions: write-all
+    timeout-minutes: 15
     runs-on: ubuntu-latest
+    needs: install
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
+        containers: [1, 2, 3]
 
     steps:
       - name: Checkout 📥
@@ -124,144 +100,74 @@ jobs:
         env:
           JWKS_BASE64: ${{ secrets.JWKS_BASE64 }}
 
+      - name: Determine PR Origin
+        id: pr_origin
+        run: |
+          echo "is_forked=$(echo ${{ github.event.pull_request.head.repo.fork }})" >> $GITHUB_OUTPUT
+
+      - name: Download the build folders
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+          path: build
+          merge-multiple: true
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: "22"
           cache: "npm"
 
-      - name: Restore build cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            dist/
-            node_modules/
-          key: build-${{ github.sha }}
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}-${{ hashFiles('playwright.config.ts') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}-
-            ${{ runner.os }}-playwright-
+      - name: Install dependencies
+        run: npm ci --prefer-offline
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
-        id: test
+      # For non-forked PRs
+      - name: "UI Tests - Playwright (Non-forked)"
+        if: steps.pr_origin.outputs.is_forked == 'false'
         run: |
-          npx playwright test --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
+          npx vite preview --host &
+          sleep 10
+          npx playwright test --shard=${{ matrix.containers }}/3
         env:
-          NODE_ENV: production
-          REACT_CARE_API_URL: ${{ env.REACT_CARE_API_URL }}
+          NODE_OPTIONS: --max_old_space_size=1536
+          REACT_CARE_API_URL: http://localhost:9000
 
-      - name: Annotate test failure
-        if: failure() && steps.test.conclusion == 'failure'
+      # For forked PRs
+      - name: "UI Tests - Playwright (Forked)"
+        if: steps.pr_origin.outputs.is_forked == 'true'
         run: |
-          echo "::error::Playwright tests failed in shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }}"
+          npx vite preview --host &
+          sleep 10
+          npx playwright test --shard=${{ matrix.containers }}/3
+        env:
+          NODE_OPTIONS: --max_old_space_size=1536
+          REACT_CARE_API_URL: http://localhost:9000
 
-      - name: Upload test results
+      - name: Upload playwright screenshots on failure 📸
         uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
-          name: playwright-results-shard-${{ matrix.shard }}
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 7
+          name: playwright-screenshots-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.containers }}
+          path: test-results/
+          compression-level: 9
 
-      - name: Stop backend services
-        if: always()
-        run: |
-          cd care
-          make docker_config_file=docker-compose.local.yaml down || true
+      - name: Upload playwright videos 📹
+        uses: actions/upload-artifact@v4
+        if: ${{ failure() && steps.pr_origin.outputs.is_forked == 'true' }}
+        with:
+          name: playwright-videos-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.containers }}
+          path: test-results/
+          compression-level: 9
 
-  # Aggregate results and create final report
-  report:
-    if: always() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
-    needs: [changes, test]
+  cleanup:
+    if: always() && github.repository == 'ohcnetwork/care_fe'
+    needs: parallel-job
     runs-on: ubuntu-latest
     steps:
-      - name: Download all test results
-        uses: actions/download-artifact@v4
+      - name: Delete build artifact
+        uses: geekyeggo/delete-artifact@v5
         with:
-          pattern: playwright-results-shard-*
-          path: all-results
-
-      - name: Merge test results
-        id: merge
-        run: |
-          TOTAL_TESTS=0
-          PASSED_TESTS=0
-          FAILED_TESTS=0
-          SKIPPED_TESTS=0
-
-          # Parse test results from each shard
-          for dir in all-results/playwright-results-shard-*/; do
-            if [ -f "$dir/test-results.json" ]; then
-              # Add your result parsing logic here
-              echo "Processing results from $dir"
-            fi
-          done
-
-          echo "total=$TOTAL_TESTS" >> $GITHUB_OUTPUT
-          echo "passed=$PASSED_TESTS" >> $GITHUB_OUTPUT
-          echo "failed=$FAILED_TESTS" >> $GITHUB_OUTPUT
-          echo "skipped=$SKIPPED_TESTS" >> $GITHUB_OUTPUT
-
-          if [ $FAILED_TESTS -gt 0 ]; then
-            echo "status=❌ Failed" >> $GITHUB_OUTPUT
-          else
-            echo "status=✅ Passed" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Upload final report
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-final-report
-          path: all-results/
-          retention-days: 14
-
-      - name: Comment PR with test results
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const status = '${{ steps.merge.outputs.status }}';
-            const total = '${{ steps.merge.outputs.total }}' || 'N/A';
-            const passed = '${{ steps.merge.outputs.passed }}' || 'N/A';
-            const failed = '${{ steps.merge.outputs.failed }}' || 'N/A';
-            const skipped = '${{ steps.merge.outputs.skipped }}' || 'N/A';
-            const shards = ${{ env.TEST_SHARDS }};
-
-            const body = `## 🎭 Playwright Test Results
-
-            **Status:** ${status}
-            **Test Shards:** ${shards}
-
-            | Metric | Count |
-            |--------|-------|
-            | Total Tests | ${total} |
-            | ✅ Passed | ${passed} |
-            | ❌ Failed | ${failed} |
-            | ⏭️ Skipped | ${skipped} |
-
-            📊 Detailed results are available in the [playwright-final-report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) artifact.
-
-            <sub>Run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})</sub>`;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: body
-            });
-
-      - name: Fail workflow if tests failed
-        if: needs.test.result == 'failure'
-        run: |
-          echo "::error::One or more test shards failed"
-          exit 1
+          name: build
