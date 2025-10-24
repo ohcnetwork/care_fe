@@ -34,16 +34,12 @@ export function DiscountCodeForm({
       z.object({
         code: z
           .string()
-          .transform((val) => val.trim())
-          .refine((val) => val.trim().length > 0, {
-            message: t("field_required"),
-          }),
+          .trim()
+          .min(1, { message: t("field_required") }),
         display: z
           .string()
-          .transform((val) => val.trim())
-          .refine((val) => val.trim().length > 0, {
-            message: t("field_required"),
-          }),
+          .trim()
+          .min(1, { message: t("field_required") }),
       }),
     [t],
   );
@@ -74,10 +70,7 @@ export function DiscountCodeForm({
             <FormItem>
               <FormLabel>{t("name")}</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.value.trim())}
-                />
+                <Input {...field} />
               </FormControl>
               <FormDescription>
                 {t("discount_code_name_description")}
@@ -94,10 +87,7 @@ export function DiscountCodeForm({
             <FormItem>
               <FormLabel>{t("code")}</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.value.trim())}
-                />
+                <Input {...field} />
               </FormControl>
               <FormDescription>
                 {t("discount_code_code_description")}
