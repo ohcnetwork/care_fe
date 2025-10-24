@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { navigate } from "raviger";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -36,7 +37,6 @@ import {
 } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
-import { useEffect, useState } from "react";
 
 function ProductCard({
   product,
@@ -101,10 +101,10 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
   >(undefined);
 
   useEffect(() => {
-    if (!qParams.product_knowledge_id) {
+    if (!qParams.product_knowledge_slug) {
       setSelectedProductKnowledge(undefined);
     }
-  }, [qParams.product_knowledge_id]);
+  }, [qParams.product_knowledge_slug]);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["products", qParams],
