@@ -109,7 +109,7 @@ test.describe("Patient Registration", () => {
         .fill(patientData.address);
       // fill pincode
       await page
-        .getByRole("spinbutton", { name: "PIN Code *" })
+        .getByRole("spinbutton", { name: "PIN Code" })
         .fill(patientData.pincode);
       // Scroll to the Register Patient button to ensure dropdown is visible
       await page
@@ -224,7 +224,7 @@ test.describe("Patient Registration", () => {
 
       // fill pincode
       await page
-        .getByRole("spinbutton", { name: "PIN Code *" })
+        .getByRole("spinbutton", { name: "PIN Code" })
         .fill(patientData.pincode);
 
       // Scroll to the Register Patient button to ensure dropdown is visible
@@ -272,11 +272,10 @@ test.describe("Patient Registration", () => {
       await page.getByRole("radio", { name: "Male", exact: true }).click();
 
       // Fill date of birth
-      await test.step("Fill date of birth", async () => {
-        await page.getByPlaceholder("DD", { exact: true }).fill("16");
-        await page.getByPlaceholder("MM").fill("06");
-        await page.getByPlaceholder("YYYY").fill("2009");
-      });
+      await page.getByPlaceholder("DD", { exact: true }).fill("16");
+      await page.getByPlaceholder("MM").fill("06");
+      await page.getByPlaceholder("YYYY").fill("2009");
+
       // Try to submit and expect validation error
       await page.getByRole("button", { name: /register patient/i }).click();
 
@@ -313,13 +312,11 @@ test.describe("Patient Registration", () => {
 
     // Fill date of birth
     await test.step("Fill date of birth", async () => {
-      const dateSection = page.getByRole("region", {
-        name: /1: patient basics/i,
-      });
-      const dobInputs = dateSection.getByRole("spinbutton");
-      await dobInputs.nth(0).fill(patientData.dateOfBirth.day);
-      await dobInputs.nth(1).fill(patientData.dateOfBirth.month);
-      await dobInputs.nth(2).fill(patientData.dateOfBirth.year);
+      await page
+        .getByPlaceholder("DD", { exact: true })
+        .fill(patientData.dateOfBirth.day);
+      await page.getByPlaceholder("MM").fill(patientData.dateOfBirth.month);
+      await page.getByPlaceholder("YYYY").fill(patientData.dateOfBirth.year);
     });
 
     // Test patient tags
@@ -356,7 +353,7 @@ test.describe("Patient Registration", () => {
 
       // fill pincode
       await page
-        .getByRole("spinbutton", { name: "PIN Code *" })
+        .getByRole("spinbutton", { name: "PIN Code" })
         .fill(patientData.pincode);
 
       // Scroll to the Register Patient button to ensure dropdown is visible
