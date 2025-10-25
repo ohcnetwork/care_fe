@@ -80,7 +80,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            dist/
+            build/
             node_modules/
           key: build-${{ github.sha }}
 
@@ -135,14 +135,14 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: |
-            dist/
+            build/
             node_modules/
           key: build-${{ github.sha }}
           fail-on-cache-miss: true
 
       - name: Verify build exists
         run: |
-          if [ ! -d "dist" ]; then
+          if [ ! -d "build" ]; then
             echo "::error::Build directory not found. Cache restoration may have failed."
             exit 1
           fi
