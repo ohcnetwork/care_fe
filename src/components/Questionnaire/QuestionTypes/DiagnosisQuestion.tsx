@@ -86,11 +86,44 @@ const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   code: { code: "", display: "", system: "" },
   clinical_status: "active",
   verification_status: "confirmed",
+  severity: "moderate",
   category: "encounter_diagnosis",
   onset: { onset_datetime: dateQueryString(new Date()) },
   severity: "moderate",
   dirty: true,
 };
+
+function SeveritySelect({
+  severity,
+  onValueChange,
+  disabled,
+}: {
+  severity?: DiagnosisSeverity;
+  onValueChange: (value: DiagnosisSeverity) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Select value={severity} onValueChange={onValueChange} disabled={disabled}>
+      <SelectTrigger className="h-8 md:h-9">
+        <SelectValue
+          placeholder={
+            <span className="text-gray-500">
+              {t("diagnosis_severity_placeholder")}
+            </span>
+          }
+        />
+      </SelectTrigger>
+      <SelectContent>
+        {DIAGNOSIS_SEVERITY.map((severity) => (
+          <SelectItem key={severity} value={severity} className="capitalize">
+            {t(severity)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
 
 function ClinicalStatusSelect({
   status,
@@ -274,10 +307,10 @@ function DiagnosisDetailsForm({
       <div className="space-y-2">
         <Label className="text-sm">{t("severity")}</Label>
         <SeveritySelect
-          severity={diagnosis.severity || "moderate"}
+          severity={diagnosis.severity}
           onValueChange={(value) =>
             onUpdate({
-              severity: value as DiagnosisRequest["severity"],
+              severity: value,
             })
           }
           disabled={disabled}
@@ -301,6 +334,7 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
     code: diagnosis.code,
     clinical_status: diagnosis.clinical_status,
     verification_status: diagnosis.verification_status,
+    severity: diagnosis.severity,
     onset: diagnosis.onset
       ? {
         ...diagnosis.onset,

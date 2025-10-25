@@ -39,11 +39,26 @@ export const DIAGNOSIS_VERIFICATION_STATUS = [
   "entered_in_error",
 ] as const;
 
+export const DIAGNOSIS_SEVERITY = [
+  "mild",
+  "moderate",
+  "severe",
+] as const;
+
+export const DIAGNOSIS_SEVERITY_COLORS = {
+  mild: "outline",
+  moderate: "yellow",
+  severe: "destructive",
+} as const;
+
 export type DiagnosisVerificationStatus =
   (typeof DIAGNOSIS_VERIFICATION_STATUS)[number];
 
+<<<<<<< Updated upstream
 export const DIAGNOSIS_SEVERITY = ["severe", "moderate", "mild"] as const;
 
+=======
+>>>>>>> Stashed changes
 export type DiagnosisSeverity = (typeof DIAGNOSIS_SEVERITY)[number];
 
 export type Onset = {
@@ -58,7 +73,11 @@ export interface Diagnosis {
   code: Code;
   clinical_status: DiagnosisClinicalStatus;
   verification_status: DiagnosisVerificationStatus;
+<<<<<<< Updated upstream
   severity: DiagnosisSeverity;
+=======
+  severity?: DiagnosisSeverity;
+>>>>>>> Stashed changes
   onset?: Onset;
   recorded_date?: string;
   note?: string;
@@ -76,6 +95,7 @@ export interface DiagnosisRequest {
   id?: string;
   clinical_status: DiagnosisClinicalStatus;
   verification_status: DiagnosisVerificationStatus;
+  severity?: DiagnosisSeverity;
   code: Code;
   onset?: Onset;
   recorded_date?: string;

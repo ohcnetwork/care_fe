@@ -23,6 +23,7 @@ import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFac
 import {
   DIAGNOSIS_CLINICAL_STATUS_COLORS,
   DIAGNOSIS_VERIFICATION_STATUS_COLORS,
+  DIAGNOSIS_SEVERITY_COLORS,
   type Diagnosis,
 } from "@/types/emr/diagnosis/diagnosis";
 
@@ -50,6 +51,11 @@ const DiagnosisCard = ({
           >
             {t(diagnosis.clinical_status)}
           </Badge>
+          {diagnosis.severity && (
+            <Badge variant={DIAGNOSIS_SEVERITY_COLORS[diagnosis.severity]}>
+              {t(diagnosis.severity)}
+            </Badge>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -107,7 +113,7 @@ const DiagnosisCard = ({
           <Badge
             variant={
               DIAGNOSIS_VERIFICATION_STATUS_COLORS[
-                diagnosis.verification_status
+              diagnosis.verification_status
               ]
             }
           >
@@ -175,11 +181,11 @@ export const DiagnosisTable = ({
             onViewEncounter={
               showViewEncounter
                 ? () =>
-                    navigate(
-                      facilityId
-                        ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
-                        : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-                    )
+                  navigate(
+                    facilityId
+                      ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
+                      : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
+                  )
                 : undefined
             }
           />
@@ -217,11 +223,11 @@ export const DiagnosisTable = ({
                 onViewEncounter={
                   showViewEncounter
                     ? () =>
-                        navigate(
-                          facilityId
-                            ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
-                            : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
-                        )
+                      navigate(
+                        facilityId
+                          ? `/facility/${facilityId}/patient/${patientId}/encounter/${diagnosis.encounter}/updates`
+                          : `/organization/organizationId/patient/${patientId}/encounter/${diagnosis.encounter}/updates`,
+                      )
                     : undefined
                 }
                 columns={[
@@ -237,7 +243,7 @@ export const DiagnosisTable = ({
                       <Badge
                         variant={
                           DIAGNOSIS_CLINICAL_STATUS_COLORS[
-                            diagnosis.clinical_status
+                          diagnosis.clinical_status
                           ]
                         }
                       >
@@ -251,7 +257,7 @@ export const DiagnosisTable = ({
                       <Badge
                         variant={
                           DIAGNOSIS_VERIFICATION_STATUS_COLORS[
-                            diagnosis.verification_status
+                          diagnosis.verification_status
                           ]
                         }
                       >
@@ -280,3 +286,4 @@ export const DiagnosisTable = ({
     </>
   );
 };
+
