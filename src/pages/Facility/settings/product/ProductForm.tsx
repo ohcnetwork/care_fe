@@ -1,13 +1,5 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { navigate } from "raviger";
-import { useImperativeHandle, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
-import { z } from "zod";
-
+import Page from "@/components/Common/Page";
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,13 +27,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-
-import Page from "@/components/Common/Page";
-import { FormSkeleton } from "@/components/Common/SkeletonLoading";
-
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { mergeAutocompleteOptions } from "@/Utils/utils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
 import {
@@ -61,7 +46,18 @@ import {
   ProductKnowledgeStatus,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
-
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { mergeAutocompleteOptions } from "@/Utils/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { navigate } from "raviger";
+import { useImperativeHandle, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+import { z } from "zod";
 const formSchema = z.object({
   status: z.nativeEnum(ProductStatusOptions),
   product_knowledge: z.string().min(1, "Product Knowledge is required"),
@@ -73,7 +69,12 @@ const formSchema = z.object({
     .required(),
   expiration_date: z.date(),
 });
-
+/**
+ * @param {string} facilityId - The ID of the facility the product belongs to.
+ * @param {string} [productId] - The optional ID of the product being edited. Determines edit mode.
+ * @param {(product: ProductRead) => void} [onSuccess] - Optional callback executed after successful form submission.
+ * @returns {JSX.Element} The Product Form page with loading skeleton or form content.
+ */
 export default function ProductForm({
   facilityId,
   productId,
@@ -84,9 +85,7 @@ export default function ProductForm({
   onSuccess?: (product: ProductRead) => void;
 }) {
   const { t } = useTranslation();
-
   const isEditMode = Boolean(productId);
-
   const { data: existingData, isFetching } = useQuery({
     queryKey: ["product", productId],
     queryFn: query(productApi.retrieveProduct, {
@@ -97,7 +96,6 @@ export default function ProductForm({
     }),
     enabled: isEditMode,
   });
-
   if (isEditMode && isFetching) {
     return (
       <Page title={t("edit_product")} hideTitleOnPage>
@@ -112,7 +110,6 @@ export default function ProductForm({
       </Page>
     );
   }
-
   return (
     <Page
       title={isEditMode ? t("edit_product") : t("create_product")}
@@ -140,7 +137,25 @@ export default function ProductForm({
     </Page>
   );
 }
-
+/**
+ * Core component containing the Product creation and update form logic.
+ *
+ * It manages form state using react-hook-form, handles API mutations (create/update),
+ * manages success/cancel navigation, and integrates necessary dropdowns (Product Knowledge, CID).
+ *
+ * @param {object} props - The component properties.
+ * @param {string} props.facilityId - The ID of the facility.
+ * @param {string} [props.productId] - The ID of the product (for edit mode).
+ * @param {ProductRead} [props.existingData] - The current data for the product being edited.
+ * @param {string} [props.slug] - The Product Knowledge slug (used for initial creation context).
+ * @param {string} [props.containerClassName] - CSS classes for the main form container.
+ * @param {(product: ProductRead) => void} [props.onSuccess] - Success callback, defaults to redirecting to the product details page.
+ * @param {() => void} [props.onCancel] - Cancel callback, defaults to redirecting back to the detail or list page.
+ * @param {boolean} [props.disableButtons] - If true, form action buttons are hidden.
+ * @param {boolean} [props.enabled] - If false, disables data fetching queries.
+ * @param {React.RefObject<{ createNewProduct: () => void }>} [props.ref] - Imperative handle ref for external form submission.
+ * @returns {JSX.Element} The form structure for creating or editing a Product.
+ */
 export function ProductFormContent({
   facilityId,
   productId,
@@ -178,7 +193,6 @@ export function ProductFormContent({
   const isEditMode = Boolean(productId);
   const [cidSearch, setCidSearch] = useState("");
   const [createCidOpen, setCreateCidOpen] = useState(false);
-
   // Get product knowledge list for the dropdown
   const { data: productKnowledgeResponse } = useQuery({
     queryKey: ["productKnowledge"],
@@ -191,7 +205,6 @@ export function ProductFormContent({
     }),
     enabled,
   });
-
   const { data: existingProductKnowledge } = useQuery({
     queryKey: ["productKnowledge", slug],
     queryFn: query(productKnowledgeApi.retrieveProductKnowledge, {
@@ -204,7 +217,6 @@ export function ProductFormContent({
     }),
     enabled: !!slug && enabled,
   });
-
   // Add selected product knowledge to the product knowledge list if it's not already there
   const productKnowledgeData: ProductKnowledgeBase[] =
     productKnowledgeResponse?.results.find(
@@ -215,7 +227,6 @@ export function ProductFormContent({
           ...(productKnowledgeResponse?.results || []),
           ...(existingProductKnowledge ? [existingProductKnowledge] : []),
         ];
-
   // Get charge item definition list for the dropdown with search
   const { data: chargeItemDefinitionResponse, isLoading: isLoadingCID } =
     useQuery({
@@ -232,10 +243,8 @@ export function ProductFormContent({
         },
       ),
     });
-
   const chargeItemDefinitionOptions =
     chargeItemDefinitionResponse?.results || [];
-
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues:
@@ -254,7 +263,6 @@ export function ProductFormContent({
             product_knowledge: slug,
           },
   });
-
   const { mutate: createProduct, isPending: isCreating } = useMutation({
     mutationFn: mutate(productApi.createProduct, {
       pathParams: { facilityId },
@@ -265,7 +273,6 @@ export function ProductFormContent({
       onSuccess?.(product);
     },
   });
-
   const { mutate: updateProduct, isPending: isUpdating } = useMutation({
     mutationFn: mutate(productApi.updateProduct, {
       pathParams: {
@@ -282,14 +289,17 @@ export function ProductFormContent({
       onSuccess(product);
     },
   });
-
   useImperativeHandle(ref, () => ({
     createNewProduct: () => {
       form.handleSubmit(onSubmit)();
     },
   }));
-
   const isPending = isCreating || isUpdating;
+  /**
+   * Handles the form submission: formats data, and calls the appropriate
+   * create or update mutation based on the form mode (isEditMode).
+   * @param data - The validated form data.
+   */
   function onSubmit(data: z.infer<typeof formSchema>) {
     // Format the data for API submission
     const formattedData = {
@@ -298,7 +308,6 @@ export function ProductFormContent({
         ? format(data.expiration_date, "yyyy-MM-dd")
         : undefined,
     };
-
     if (isEditMode && productId) {
       const updatePayload: ProductUpdate = {
         id: productId,
@@ -320,7 +329,6 @@ export function ProductFormContent({
       createProduct(createPayload);
     }
   }
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -353,7 +361,6 @@ export function ProductFormContent({
                 </FormItem>
               )}
             />
-
             {!isEditMode && !existingProductKnowledge && (
               <FormField
                 control={form.control}
@@ -380,7 +387,6 @@ export function ProductFormContent({
                 )}
               />
             )}
-
             <FormField
               control={form.control}
               name="batch.lot_number"
@@ -401,7 +407,6 @@ export function ProductFormContent({
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="expiration_date"
@@ -430,7 +435,6 @@ export function ProductFormContent({
             />
           </div>
         </div>
-
         <div className="rounded-lg border border-gray-200 bg-white p-6">
           <div className="mb-4">
             <h2 className="text-lg font-medium text-gray-900">
@@ -521,7 +525,6 @@ export function ProductFormContent({
             />
           </div>
         </div>
-
         {!disableButtons && (
           <div className="flex justify-end gap-4">
             <Button type="button" variant="outline" onClick={onCancel}>
