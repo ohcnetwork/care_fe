@@ -1,0 +1,669 @@
+{
+  "config": {
+    "configFile": "/home/runner/work/care_fe/care_fe/playwright.config.ts",
+    "rootDir": "/home/runner/work/care_fe/care_fe/tests",
+    "forbidOnly": true,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/home/runner/work/care_fe/care_fe/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "metadata": {},
+        "id": "setup",
+        "name": "setup",
+        "testDir": "/home/runner/work/care_fe/care_fe/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.setup\\.ts/"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "/home/runner/work/care_fe/care_fe/test-results",
+        "repeatEach": 1,
+        "retries": 2,
+        "metadata": {},
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/home/runner/work/care_fe/care_fe/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.55.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run preview",
+      "url": "http://localhost:4000",
+      "reuseExistingServer": false
+    }
+  },
+  "suites": [
+    {
+      "title": "setup/auth.setup.ts",
+      "file": "setup/auth.setup.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "authenticate",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "setup",
+              "projectName": "setup",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "e717b06d8d484d1cd946-ece6ea03d0ba8d9d0fd4",
+          "file": "setup/auth.setup.ts",
+          "line": 5,
+          "column": 6
+        }
+      ]
+    },
+    {
+      "title": "admin/tags/tagconfig.spec.ts",
+      "file": "admin/tags/tagconfig.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Tag Configuration Management",
+          "file": "admin/tags/tagconfig.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should create a new tag configuration",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c48d0ff2b0c9229c1138-80b501d617569210ef71",
+              "file": "admin/tags/tagconfig.spec.ts",
+              "line": 17,
+              "column": 7
+            },
+            {
+              "title": "should display existing tag configurations",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c48d0ff2b0c9229c1138-f4d63131e988e2359891",
+              "file": "admin/tags/tagconfig.spec.ts",
+              "line": 55,
+              "column": 7
+            },
+            {
+              "title": "should validate required fields when creating tag config",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c48d0ff2b0c9229c1138-4a44aab76e7c2e1372f0",
+              "file": "admin/tags/tagconfig.spec.ts",
+              "line": 66,
+              "column": 7
+            },
+            {
+              "title": "should view tag details",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c48d0ff2b0c9229c1138-22b55b958219208e4c74",
+              "file": "admin/tags/tagconfig.spec.ts",
+              "line": 84,
+              "column": 7
+            },
+            {
+              "title": "should create child tag",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c48d0ff2b0c9229c1138-076f86f92a45198fd8ea",
+              "file": "admin/tags/tagconfig.spec.ts",
+              "line": 107,
+              "column": 7
+            },
+            {
+              "title": "should edit child tag with prefilled values",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c48d0ff2b0c9229c1138-494329099ae3e9defe70",
+              "file": "admin/tags/tagconfig.spec.ts",
+              "line": 146,
+              "column": 7
+            },
+            {
+              "title": "should display child tags in hierarchy",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c48d0ff2b0c9229c1138-b154ffac0aa12a191ad3",
+              "file": "admin/tags/tagconfig.spec.ts",
+              "line": 204,
+              "column": 7
+            },
+            {
+              "title": "should display tag hierarchy correctly",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c48d0ff2b0c9229c1138-93b51d70a59e74e1c2a0",
+              "file": "admin/tags/tagconfig.spec.ts",
+              "line": 243,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "auth/authenticated.spec.ts",
+      "file": "auth/authenticated.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Authenticated User Flow",
+          "file": "auth/authenticated.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should access dashboard when logged in",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "efae60440e194433c60a-36b49a90c5b55d407266",
+              "file": "auth/authenticated.spec.ts",
+              "line": 7,
+              "column": 7
+            },
+            {
+              "title": "should be able to navigate to facilities",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "efae60440e194433c60a-ddd750055749518a6799",
+              "file": "auth/authenticated.spec.ts",
+              "line": 16,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "auth/homepage.spec.ts",
+      "file": "auth/homepage.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Homepage",
+          "file": "auth/homepage.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should load successfully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "5f39fc327f2af8c932c9-3ae8730e8bb76ce47178",
+              "file": "auth/homepage.spec.ts",
+              "line": 4,
+              "column": 7
+            },
+            {
+              "title": "should display main navigation",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "5f39fc327f2af8c932c9-2f88e4ab2eba6c3afb78",
+              "file": "auth/homepage.spec.ts",
+              "line": 11,
+              "column": 7
+            },
+            {
+              "title": "should have facility search functionality",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "5f39fc327f2af8c932c9-4179dd1fa3eb1cd2c136",
+              "file": "auth/homepage.spec.ts",
+              "line": 20,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "auth/login.spec.ts",
+      "file": "auth/login.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Login",
+          "file": "auth/login.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should navigate to login page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "231ca1f0f4db3e4958c3-cf6bac18852f21b7f5ff",
+              "file": "auth/login.spec.ts",
+              "line": 4,
+              "column": 7
+            },
+            {
+              "title": "should display login form",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "231ca1f0f4db3e4958c3-a5e3d83d42b40b1c422b",
+              "file": "auth/login.spec.ts",
+              "line": 14,
+              "column": 7
+            },
+            {
+              "title": "should show validation errors for empty form",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "231ca1f0f4db3e4958c3-ba151b31676ca0bd485a",
+              "file": "auth/login.spec.ts",
+              "line": 29,
+              "column": 7
+            },
+            {
+              "title": "should show error for invalid credentials",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "231ca1f0f4db3e4958c3-870ca64c501faf769cc0",
+              "file": "auth/login.spec.ts",
+              "line": 41,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "patient-registration.spec.ts",
+      "file": "patient-registration.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Patient Registration",
+          "file": "patient-registration.spec.ts",
+          "line": 34,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should successfully register a new patient with all required fields",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "05a91a25c10ef6ebc394-eaea0b48171a8cdee639",
+              "file": "patient-registration.spec.ts",
+              "line": 52,
+              "column": 7
+            },
+            {
+              "title": "should show validation errors for empty required fields",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "05a91a25c10ef6ebc394-5b5d74ceac3fcc1ae729",
+              "file": "patient-registration.spec.ts",
+              "line": 134,
+              "column": 7
+            },
+            {
+              "title": "should handle emergency contact information",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "05a91a25c10ef6ebc394-09fcad5ca2a70ffdaaaa",
+              "file": "patient-registration.spec.ts",
+              "line": 153,
+              "column": 7
+            },
+            {
+              "title": "should validate phone number format",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "05a91a25c10ef6ebc394-e2b27db3d3bad271771b",
+              "file": "patient-registration.spec.ts",
+              "line": 246,
+              "column": 7
+            },
+            {
+              "title": "should allow patient tags selection",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "05a91a25c10ef6ebc394-477c4ab6e4ccee29a616",
+              "file": "patient-registration.spec.ts",
+              "line": 282,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "user-schedulecreation.spec.ts",
+      "file": "user-schedulecreation.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "user can create a schedule template with weekdays",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "ff348984fd8a0059d33c-c2c4ebded660c60afe79",
+          "file": "user-schedulecreation.spec.ts",
+          "line": 21,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-10-25T23:22:00.169Z",
+    "duration": 252.721,
+    "expected": 0,
+    "skipped": 24,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

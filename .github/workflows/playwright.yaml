@@ -131,12 +131,22 @@ jobs:
           cache: "npm"
 
       - name: Restore build cache
-        uses: actions/cache@v4
+        id: cache-restore
+        uses: actions/cache/restore@v4
         with:
           path: |
             dist/
             node_modules/
           key: build-${{ github.sha }}
+          fail-on-cache-miss: true
+
+      - name: Verify build exists
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "::error::Build directory not found. Cache restoration may have failed."
+            exit 1
+          fi
+          echo "Build directory verified ✓"
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -171,6 +181,7 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            test-results.json
           retention-days: 7
 
       - name: Stop backend services
@@ -202,8 +213,19 @@ jobs:
           # Parse test results from each shard
           for dir in all-results/playwright-results-shard-*/; do
             if [ -f "$dir/test-results.json" ]; then
-              # Add your result parsing logic here
               echo "Processing results from $dir"
+              # Use jq to parse JSON if available, otherwise use basic parsing
+              if command -v jq &> /dev/null; then
+                SHARD_TOTAL=$(jq '[.suites[].specs[]] | length' "$dir/test-results.json")
+                SHARD_PASSED=$(jq '[.suites[].specs[].tests[] | select(.status == "expected")] | length' "$dir/test-results.json")
+                SHARD_FAILED=$(jq '[.suites[].specs[].tests[] | select(.status == "unexpected")] | length' "$dir/test-results.json")
+                SHARD_SKIPPED=$(jq '[.suites[].specs[].tests[] | select(.status == "skipped")] | length' "$dir/test-results.json")
+                
+                TOTAL_TESTS=$((TOTAL_TESTS + SHARD_TOTAL))
+                PASSED_TESTS=$((PASSED_TESTS + SHARD_PASSED))
+                FAILED_TESTS=$((FAILED_TESTS + SHARD_FAILED))
+                SKIPPED_TESTS=$((SKIPPED_TESTS + SHARD_SKIPPED))
+              fi
             fi
           done
 
