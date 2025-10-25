@@ -35,7 +35,7 @@ export function RecordItem<T>({
           className="size-5"
         />
       </TableCell>
-      {displayFields.map((field, idx, arr) => {
+      {displayFields.map((field) => {
         const value = record[field.key as keyof T];
         const displayValue = field.render
           ? field.key == ""
@@ -47,10 +47,11 @@ export function RecordItem<T>({
           <TableCell
             key={field.key.toString()}
             className={cn(
-              "p-2 text-sm whitespace-pre-wrap border border-gray-200 bg-white min-w-[120px]",
-              idx % 2 === 0 ? "bg-gray-100" : "bg-white",
-              idx === 0 && "rounded-l-md",
-              idx === arr.length - 1 && "rounded-r-md",
+              "p-2 text-sm whitespace-pre-wrap border border-gray-200 bg-white",
+              "[&:nth-child(even)]:bg-gray-100",
+              "[&:nth-child(2)]:rounded-l-md",
+              "[&:nth-last-child(1)]:rounded-r-md",
+              isSelected && "[&:nth-last-child(1)]:bg-primary-100",
             )}
           >
             <div className="text-sm">{displayValue}</div>

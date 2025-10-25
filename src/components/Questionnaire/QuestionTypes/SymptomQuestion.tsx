@@ -52,7 +52,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import {
   Onset,
@@ -849,6 +849,11 @@ export function SymptomQuestion({
                     {t(severity)}
                   </Badge>
                 ),
+              },
+              {
+                key: "created_by",
+                label: t("recorded_by"),
+                render: (created_by) => formatName(created_by),
               },
               {
                 key: "onset",

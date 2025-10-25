@@ -382,20 +382,16 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                               className="size-5"
                             />
                           </TableHead>
-                          {activeTypeConfig?.displayFields.map(
-                            (field, idx, arr) => (
-                              <TableHead
-                                key={String(field.label)}
-                                className={cn(
-                                  "border border-gray-200 bg-gray-50",
-                                  idx === 0 && "rounded-l-md",
-                                  idx === arr.length - 1 && "rounded-r-md",
-                                )}
-                              >
-                                {field.label}
-                              </TableHead>
-                            ),
-                          )}
+                          {activeTypeConfig?.displayFields.map((field) => (
+                            <TableHead
+                              key={String(field.label)}
+                              className={cn(
+                                "border border-gray-200 bg-gray-50 [&:nth-child(2)]:rounded-l-md [&:nth-last-child(1)]:rounded-r-md",
+                              )}
+                            >
+                              {field.label}
+                            </TableHead>
+                          ))}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
