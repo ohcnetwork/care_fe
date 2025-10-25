@@ -212,7 +212,9 @@ export default function PatientIdentifierFilter({
                 : t("select_search_type")
             }
             value={searchTerm}
-            onChange={(value) => setSearchTerm(value || "")}
+            onChange={(value) => {
+              setSearchTerm(value || "");
+            }}
             className="border-none focus:ring-0 focus:outline-none flex-1"
           />
         ) : (
@@ -228,7 +230,10 @@ export default function PatientIdentifierFilter({
                 : t("select_search_type")
             }
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              const filteredValue = e.target.value.replace(/[0-9]/g, "");
+              setSearchTerm(filteredValue);
+            }}
             className="border-none focus:ring-0 focus:outline-none focus-visible:ring-0 shadow-none flex-1"
           />
         )}
