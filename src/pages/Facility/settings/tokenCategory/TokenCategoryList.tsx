@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -25,6 +24,8 @@ import {
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
 
+import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
+
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
@@ -43,7 +44,7 @@ function TokenCategoryCard({
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="mb-4 flex flex-wrap flex-col md:flex-row items-start justify-between gap-2">
           <div>
             <div className="mb-2 flex items-center gap-2">
               <Badge
@@ -54,7 +55,7 @@ function TokenCategoryCard({
                 {t(tokenCategory.resource_type)}
               </Badge>
             </div>
-            <h3 className="font-medium text-gray-900">
+            <h3 className="font-medium text-gray-900 text-lg">
               {t("name")}: {tokenCategory.name}
             </h3>
             {tokenCategory.shorthand && (
@@ -63,18 +64,12 @@ function TokenCategoryCard({
               </p>
             )}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/token_category/${tokenCategory.id}`,
-              )
-            }
-          >
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("see_details")}
-          </Button>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <TokenCategoryActions
+              tokenCategory={tokenCategory}
+              facilityId={facilityId}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -90,14 +85,10 @@ export default function TokenCategoryList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
-
-  // TODO: Remove this once we have a default status (robo's PR)
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: "active" });
-    }
-  }, []);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["tokenCategories", qParams],
@@ -110,7 +101,6 @@ export default function TokenCategoryList({
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: qParams.status,
         name: qParams.search,
-        ordering: "-created_date",
       },
     }),
   });
@@ -233,18 +223,12 @@ export default function TokenCategoryList({
                         </TableCell>
                         <TableCell>{tokenCategory.shorthand || "-"}</TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              navigate(
-                                `/facility/${facilityId}/settings/token_category/${tokenCategory.id}`,
-                              )
-                            }
-                          >
-                            <CareIcon icon="l-edit" className="size-4" />
-                            {t("see_details")}
-                          </Button>
+                          <div className="flex gap-2">
+                            <TokenCategoryActions
+                              tokenCategory={tokenCategory}
+                              facilityId={facilityId}
+                            />
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -262,5 +246,20 @@ export default function TokenCategoryList({
         )}
       </div>
     </Page>
+  );
+}
+
+function TokenCategoryActions({
+  tokenCategory,
+  facilityId,
+}: {
+  tokenCategory: TokenCategoryRead;
+  facilityId: string;
+}) {
+  return (
+    <ActionButtons
+      editPath={`/facility/${facilityId}/settings/token_category/${tokenCategory.id}/edit`}
+      viewPath={`/facility/${facilityId}/settings/token_category/${tokenCategory.id}`}
+    />
   );
 }

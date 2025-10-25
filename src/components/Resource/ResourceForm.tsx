@@ -41,9 +41,6 @@ import UserSelector from "@/components/Common/UserSelector";
 import useAppHistory from "@/hooks/useAppHistory";
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { RESOURCE_STATUS_CHOICES } from "@/common/constants";
-
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions, valuesOf } from "@/Utils/utils";
@@ -52,10 +49,12 @@ import patientApi from "@/types/emr/patient/patientApi";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
   getResourceRequestCategoryEnum,
-  RESOURCE_REQUEST_STATUSES,
-  ResourceRequest,
+  RESOURCE_REQUEST_STATUS_OPTIONS,
   ResourceRequestCategory,
+  ResourceRequestRead,
+  ResourceRequestStatus,
 } from "@/types/resourceRequest/resourceRequest";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import { UserReadMinimal } from "@/types/user/user";
 
 interface ResourceProps {
@@ -72,12 +71,14 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const authUser = useAuthUser();
 
   const resourceFormSchema = z.object({
-    status: z.enum(RESOURCE_REQUEST_STATUSES),
+    status: z.nativeEnum(ResourceRequestStatus),
     category: z.nativeEnum(ResourceRequestCategory),
-    assigned_facility: z.object({
-      id: z.string(),
-      name: z.string(),
-    }),
+    assigned_facility: z
+      .object({
+        id: z.string(),
+        name: z.string(),
+      })
+      .nullable(),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
     reason: z
@@ -104,8 +105,8 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const { data: resourceData } = useQuery({
     queryKey: ["resource_request", id],
-    queryFn: query(routes.getResourceDetails, {
-      pathParams: { id: String(id) },
+    queryFn: query(resourceRequestApi.get, {
+      pathParams: { resourceRequestId: String(id) },
     }),
     enabled: !!id,
   });
@@ -113,8 +114,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const form = useForm({
     resolver: zodResolver(resourceFormSchema),
     defaultValues: {
-      status: "pending",
-      assigned_facility: undefined,
+      status: ResourceRequestStatus.PENDING,
       assigned_to: "",
       emergency: "false" as const,
       title: "",
@@ -150,18 +150,18 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   }, [resourceData, form]);
 
   const { mutate: createResource, isPending } = useMutation({
-    mutationFn: mutate(routes.createResource),
-    onSuccess: (data: ResourceRequest) => {
+    mutationFn: mutate(resourceRequestApi.create),
+    onSuccess: (data: ResourceRequestRead) => {
       toast.success(t("resource_created_successfully"));
       navigate(`/facility/${facilityId}/resource/${data.id}`);
     },
   });
 
   const { mutate: updateResource, isPending: isUpdatePending } = useMutation({
-    mutationFn: mutate(routes.updateResource, {
-      pathParams: { id: String(id) },
+    mutationFn: mutate(resourceRequestApi.update, {
+      pathParams: { resourceRequestId: String(id) },
     }),
-    onSuccess: (data: ResourceRequest) => {
+    onSuccess: (data: ResourceRequestRead) => {
       toast.success(t("resource_updated_successfully"));
       navigate(`/facility/${facilityId}/resource/${data.id}`);
     },
@@ -172,7 +172,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       status: data.status,
       category: data.category,
       origin_facility: String(facilityId),
-      assigned_facility: data.assigned_facility?.id,
+      assigned_facility: data.assigned_facility?.id || null,
       assigned_to: assignedToUser?.id || null,
       approving_facility: null,
       emergency: data.emergency === "true",
@@ -185,7 +185,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     };
 
     if (id) {
-      updateResource({ ...resourcePayload, id });
+      updateResource({ ...resourcePayload });
     } else {
       createResource(resourcePayload);
     }
@@ -367,9 +367,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {RESOURCE_STATUS_CHOICES.map((option, index) => (
-                          <SelectItem key={index} value={option.text}>
-                            {t(`resource_status__${option.text}`)}
+                        {RESOURCE_REQUEST_STATUS_OPTIONS.map((option) => (
+                          <SelectItem key={option.text} value={option.text}>
+                            {t(`resource_request_status__${option.text}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>
