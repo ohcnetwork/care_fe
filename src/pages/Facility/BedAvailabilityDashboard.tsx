@@ -193,7 +193,7 @@ export default function BedAvailabilityDashboard({
 
   if (isLoading) {
     return (
-      <Page title={t("bed_availability_dashboard")}>
+      <Page title={t("bed_availability_dashboard")} hideTitleOnPage>
         <div className="p-6">
           <CardGridSkeleton count={6} />
         </div>
@@ -202,7 +202,7 @@ export default function BedAvailabilityDashboard({
   }
 
   return (
-    <Page title={t("bed_availability_dashboard")}>
+    <Page title={t("bed_availability_dashboard")} hideTitleOnPage>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -402,112 +402,134 @@ interface WardCardProps {
 
 function WardCard({ ward }: WardCardProps) {
   const { t } = useTranslation();
+  const [sheetOpen, setSheetOpen] = useState(false);
   const Icon = LocationTypeIcons[ward.form as keyof typeof LocationTypeIcons];
 
   const occupancyRate =
     ward.total > 0 ? Math.round((ward.occupied / ward.total) * 100) : 0;
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+    <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+      <SheetTrigger asChild>
+        <Card className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Icon className="size-5 text-blue-500" />
+                <CardTitle className="text-lg">{ward.name}</CardTitle>
+              </div>
+              <Badge
+                variant={
+                  LOCATION_TYPE_BADGE_COLORS[
+                    ward.form as keyof typeof LOCATION_TYPE_BADGE_COLORS
+                  ]
+                }
+              >
+                {t(`location_form__${ward.form}`)}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Statistics */}
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-lg font-bold text-green-600">
+                  {ward.available}
+                </div>
+                <div className="text-xs text-gray-600">{t("available")}</div>
+              </div>
+              <div>
+                <div className="text-lg font-bold text-blue-600">
+                  {ward.occupied}
+                </div>
+                <div className="text-xs text-gray-600">{t("occupied")}</div>
+              </div>
+              <div>
+                <div className="text-lg font-bold text-gray-600">
+                  {ward.total}
+                </div>
+                <div className="text-xs text-gray-600">{t("total")}</div>
+              </div>
+            </div>
+
+            {/* Occupancy Bar */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>{t("occupancy_rate")}</span>
+                <span className="font-medium">{occupancyRate}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className={cn(
+                    "h-2 rounded-full transition-all duration-300",
+                    occupancyRate < 60
+                      ? "bg-green-500"
+                      : occupancyRate < 80
+                        ? "bg-yellow-500"
+                        : "bg-red-500",
+                  )}
+                  style={{ width: `${occupancyRate}%` }}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </SheetTrigger>
+      <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2">
             <Icon className="size-5 text-blue-500" />
-            <CardTitle className="text-lg">{ward.name}</CardTitle>
-          </div>
-          <Badge
-            variant={
-              LOCATION_TYPE_BADGE_COLORS[
-                ward.form as keyof typeof LOCATION_TYPE_BADGE_COLORS
-              ]
-            }
-          >
-            {t(`location_form__${ward.form}`)}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Statistics */}
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-lg font-bold text-green-600">
-              {ward.available}
-            </div>
-            <div className="text-xs text-gray-600">{t("available")}</div>
-          </div>
-          <div>
-            <div className="text-lg font-bold text-blue-600">
-              {ward.occupied}
-            </div>
-            <div className="text-xs text-gray-600">{t("occupied")}</div>
-          </div>
-          <div>
-            <div className="text-lg font-bold text-gray-600">{ward.total}</div>
-            <div className="text-xs text-gray-600">{t("total")}</div>
-          </div>
-        </div>
+            {ward.name}
+          </SheetTitle>
+          <SheetDescription>
+            {t("bed_layout")} - {ward.total} {t("beds")}
+          </SheetDescription>
+        </SheetHeader>
+        <div className="mt-6 space-y-4">
+          {/* Bed Status Legend */}
+          <BedStatusLegend />
 
-        {/* Occupancy Bar */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>{t("occupancy_rate")}</span>
-            <span className="font-medium">{occupancyRate}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className={cn(
-                "h-2 rounded-full transition-all duration-300",
-                occupancyRate < 60
-                  ? "bg-green-500"
-                  : occupancyRate < 80
-                    ? "bg-yellow-500"
-                    : "bg-red-500",
-              )}
-              style={{ width: `${occupancyRate}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Bed Visual Grid */}
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-gray-700">
-            {t("bed_layout")}
-          </div>
-          <div className="grid grid-cols-5 gap-1">
-            {ward.beds.slice(0, 15).map((bed) => {
+          {/* Bed List */}
+          <div className="space-y-2">
+            {ward.beds.map((bed) => {
               const isOccupied =
                 !!bed.current_encounter &&
                 bed.current_encounter.status !== "discharged";
               return (
                 <div
                   key={bed.id}
-                  className={cn(
-                    "size-6 rounded-sm border-2 flex items-center justify-center",
-                    isOccupied
-                      ? "bg-blue-100 border-blue-300"
-                      : "bg-green-100 border-green-300",
-                  )}
-                  title={`${bed.name}: ${isOccupied ? t("occupied") : t("available")}`}
+                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50"
                 >
-                  <Bed
-                    className={cn(
-                      "size-3",
-                      isOccupied ? "text-blue-600" : "text-green-600",
-                    )}
-                  />
+                  <div className="flex items-center gap-3">
+                    <div className="relative size-8">
+                      <img
+                        src={
+                          isOccupied
+                            ? "/images/bed-unavailable.svg"
+                            : "/images/bed-available.svg"
+                        }
+                        alt={isOccupied ? t("occupied") : t("available")}
+                        className="w-full h-full"
+                      />
+                    </div>
+                    <div>
+                      <div className="font-medium">{bed.name}</div>
+                      {bed.current_encounter && (
+                        <div className="text-sm text-gray-600">
+                          {t("admitted")}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <Badge variant={isOccupied ? "blue" : "green"}>
+                    {isOccupied ? t("occupied") : t("available")}
+                  </Badge>
                 </div>
               );
             })}
-            {ward.beds.length > 15 && (
-              <div className="size-6 rounded-sm border-2 border-gray-300 bg-gray-100 flex items-center justify-center">
-                <span className="text-xs font-medium text-gray-600">
-                  +{ward.beds.length - 15}
-                </span>
-              </div>
-            )}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </SheetContent>
+    </Sheet>
   );
 }

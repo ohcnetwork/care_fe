@@ -14,11 +14,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import PageTitle from "@/components/Common/PageHeadTitle";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { entriesOf, keysOf } from "@/Utils/utils";
 
 interface NavTabDefinition {
   label: string;
   component: React.ReactNode;
+  shortcutId?: string;
+  labelSuffix?: React.ReactNode;
 }
 
 interface Props<TabKey extends string> {
@@ -29,6 +32,7 @@ interface Props<TabKey extends string> {
   tabTriggerClassName?: string;
   showMoreAfterIndex?: number;
   tabContentClassName?: string;
+  enableIndexShortcut?: boolean;
 }
 
 const getTabsToShowAndShowMore = <TabKey extends string>(
@@ -66,6 +70,7 @@ export const NavTabs = <TabKey extends string>({
   setPageTitle = true,
   tabTriggerClassName,
   showMoreAfterIndex,
+  enableIndexShortcut = false,
   ...props
 }: Props<TabKey> & React.ComponentProps<typeof Tabs>) => {
   const { t } = useTranslation();
@@ -84,7 +89,7 @@ export const NavTabs = <TabKey extends string>({
       onValueChange={(tab) => onTabChange(tab as TabKey)}
     >
       <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-        {visibleTabs.map((option) => (
+        {visibleTabs.map((option, index) => (
           <TabsTrigger
             key={option}
             value={option}
@@ -92,8 +97,18 @@ export const NavTabs = <TabKey extends string>({
               "border-b-3 px-1.5 sm:px-2.5 py-2 text-gray-600 font-semibold hover:text-gray-900 data-[state=active]:border-b-primary-700 data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none",
               tabTriggerClassName,
             )}
+            onClick={() => onTabChange(option)}
           >
             {tabs[option].label}
+            {tabs[option].labelSuffix}
+            {tabs[option].shortcutId && (
+              <ShortcutBadge actionId={tabs[option].shortcutId}></ShortcutBadge>
+            )}
+            {enableIndexShortcut && (
+              <ShortcutBadge
+                actionId={`tab-index-${index + 1}`}
+              ></ShortcutBadge>
+            )}
           </TabsTrigger>
         ))}
         {showMoreTabs.length > 0 && (

@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, X } from "lucide-react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -157,7 +157,9 @@ function ProductKnowledgeFormContent({
   existingData,
   categorySlug,
   onSuccess = () =>
-    navigate(`/facility/${facilityId}/settings/product_knowledge`),
+    navigate(
+      `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
+    ),
 }: {
   facilityId: string;
   slug?: string;
@@ -246,10 +248,13 @@ function ProductKnowledgeFormContent({
   const { mutate: createProductKnowledge, isPending: isCreating } = useMutation(
     {
       mutationFn: mutate(productKnowledgeApi.createProductKnowledge),
-      onSuccess: () => {
+      onSuccess: (productKnowledge: ProductKnowledgeBase) => {
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         toast.success(t("product_knowledge_created_successfully"));
         onSuccess();
+        navigate(
+          `/facility/${facilityId}/settings/product_knowledge/categories/${productKnowledge.category.slug}`,
+        );
       },
     },
   );
@@ -438,7 +443,9 @@ function ProductKnowledgeFormContent({
                               ResourceCategoryResourceType.product_knowledge
                             }
                             value={field.value}
-                            onValueChange={field.onChange}
+                            onValueChange={(category) =>
+                              field.onChange(category?.slug || "")
+                            }
                             placeholder={t("select_category")}
                             className="w-full"
                           />
@@ -450,27 +457,34 @@ function ProductKnowledgeFormContent({
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <FormLabel>{t("code")}</FormLabel>
-                    <div className="mt-2">
-                      <ValueSetSelect
-                        system="system-medication"
-                        value={form.watch("code")}
-                        placeholder={t("search_for_product_codes")}
-                        onSelect={(code) => {
-                          form.setValue("code", {
-                            code: code.code,
-                            display: code.display,
-                            system: code.system,
-                          });
-                        }}
-                        showCode={true}
-                      />
-                    </div>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t("code")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            {...field}
+                            system="system-medication"
+                            placeholder={t("search_for_product_codes")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <div>
-                    <FormLabel>{t("base_unit")}</FormLabel>
+                    <FormLabel aria-required>{t("base_unit")}</FormLabel>
                     <div className="mt-2">
                       <Select
                         value={form.watch("base_unit")?.code || ""}
@@ -677,7 +691,7 @@ function ProductKnowledgeFormContent({
                       });
                     }}
                   >
-                    <PlusCircle className="mr-2 size-4" />
+                    <PlusCircle className="size-4" />
                     {t("add_guideline")}
                   </Button>
                 </div>
@@ -784,8 +798,8 @@ function ProductKnowledgeFormContent({
                                         >
                                           <span>
                                             {t(`unit_${duration.code}`)}
-                                            <span className="text-sm ml-1">
-                                              {duration.code}
+                                            <span className="text-sm ml-1 text-gray-500">
+                                              ({duration.code})
                                             </span>
                                           </span>
                                         </SelectItem>
@@ -819,8 +833,8 @@ function ProductKnowledgeFormContent({
 
             {/* Product Definition Section */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div>
                     <h2 className="text-base font-medium text-gray-900">
                       {t("product_definition")}
@@ -835,8 +849,9 @@ function ProductKnowledgeFormContent({
                       variant="outline"
                       size="sm"
                       onClick={() => form.setValue("definitional", null)}
+                      className="w-full sm:w-auto flex items-center justify-center gap-1 "
                     >
-                      <X className="mr-2 size-4" />
+                      <X className="size-4 " />
                       {t("remove_definition")}
                     </Button>
                   ) : (
@@ -985,14 +1000,16 @@ function ProductKnowledgeFormContent({
             </div>
 
             <div className="mt-6 flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(`/facility/${facilityId}/settings/product_knowledge`)
-                }
-              >
-                {t("cancel")}
+              <Button type="button" variant="outline" asChild>
+                <Link
+                  href={
+                    isEditMode
+                      ? `/product_knowledge/${slug}`
+                      : `/product_knowledge/categories/${categorySlug}`
+                  }
+                >
+                  {t("cancel")}
+                </Link>
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending ? t("saving") : t("save")}

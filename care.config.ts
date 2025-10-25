@@ -35,15 +35,10 @@ const careConfig = {
   apiUrl: env.REACT_CARE_API_URL,
   sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
   urls: {
-    dashboard: env.REACT_DASHBOARD_URL,
     github: env.REACT_GITHUB_URL || "https://github.com/ohcnetwork",
     ohcn: env.REACT_OHCN_URL || "https://ohc.network?ref=care",
   },
 
-  headerLogo: logo(env.REACT_HEADER_LOGO, {
-    light: "https://cdn.ohc.network/header_logo.png",
-    dark: "https://cdn.ohc.network/header_logo.png",
-  }),
   mainLogo: logo(env.REACT_MAIN_LOGO, {
     light: "/images/care_logo.svg",
     dark: "/images/care_logo.svg",
@@ -58,8 +53,11 @@ const careConfig = {
   encounterClasses: (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",") ??
     ENCOUNTER_CLASS) as NonEmptyArray<EncounterClass>,
 
-  defaultEncounterType: (env.REACT_DEFAULT_ENCOUNTER_TYPE ||
-    "hh") as EncounterClass,
+  defaultEncounterType:
+    (env.REACT_DEFAULT_ENCOUNTER_TYPE as EncounterClass) ||
+    (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",").length === 1
+      ? (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",")[0] as EncounterClass)
+      : undefined),
 
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
@@ -73,8 +71,6 @@ const careConfig = {
       : 5 * 60e3,
   },
 
-  minEncounterDate: new Date(env.REACT_MIN_ENCOUNTER_DATE || "2020-01-01"),
-
   // Plugins related configs...
   sentry: {
     dsn:
@@ -82,6 +78,14 @@ const careConfig = {
       "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
     environment: env.REACT_SENTRY_ENVIRONMENT || "staging",
   },
+
+  /**
+   * Relative number of days to show in the encounters page by default.
+   * 0 means today.
+   */
+  encounterDateFilter: env.REACT_ENCOUNTER_DEFAULT_DATE_FILTER
+    ? parseInt(env.REACT_ENCOUNTER_DEFAULT_DATE_FILTER)
+    : 0,
 
   appointments: {
     /**
@@ -143,6 +147,11 @@ const careConfig = {
     ? parseInt(env.REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB, 10)
     : 2,
 
+  /**
+   * Disable patient login if set to "true"
+   */
+  disablePatientLogin: boolean("REACT_DISABLE_PATIENT_LOGIN", false),
+
   patientRegistration: {
     /**
      * Minimum number of geo-organization levels the user must select
@@ -165,6 +174,22 @@ const careConfig = {
       false,
     ),
   },
+
+  i18nUrl: env.REACT_CUSTOM_REMOTE_I18N_URL,
+  
+  /**
+   * Custom shortcuts configuration from environment variables
+   * Format: JSON string with array of shortcut objects
+   * Each shortcut can have: title, description, href, icon (optional)
+   * Placeholders like {facilityId}, {userId} will be replaced at runtime
+   */
+  customShortcuts: env.REACT_CUSTOM_SHORTCUTS
+    ? JSON.parse(env.REACT_CUSTOM_SHORTCUTS)
+    : [],
+  /**
+   * System identifier for patient phone number configuration
+   */
+  phoneNumberConfigSystem: "system.care.ohc.network/patient-phone-number",
 } as const;
 
 export default careConfig;

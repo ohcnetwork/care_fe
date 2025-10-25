@@ -21,7 +21,7 @@ import ServiceRequestTable from "@/components/ServiceRequest/ServiceRequestTable
 
 import useFilters from "@/hooks/useFilters";
 
-import PatientEncounterOrIdentifierFilter from "@/components/Patient/PatientEncounterOrIdentifierFilter";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
@@ -182,6 +182,9 @@ export default function ServiceRequestList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 14,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
   const [isBarcodeOpen, setBarcodeOpen] = useState(false);
 
@@ -252,7 +255,6 @@ export default function ServiceRequestList({
         status: qParams.status,
         priority: qParams.priority,
         tags: qParams.tags,
-        ordering: "-created_date",
         patient: qParams.patient,
         tags_behavior: qParams.tags_behavior,
       },
@@ -322,7 +324,7 @@ export default function ServiceRequestList({
               />
             </div>
             <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">
-              <PatientEncounterOrIdentifierFilter
+              <PatientIdentifierFilter
                 onSelect={(patientId) => updateQuery({ patient: patientId })}
                 placeholder={t("filter_by_identifier")}
                 className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"

@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/table";
 
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
-import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
+import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -206,6 +206,7 @@ function DiagnosisDetailsForm({
             })
           }
           disabled={disabled || !!diagnosis.id}
+          blockDate={(date) => date > new Date()}
           buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
         />
       </div>
@@ -533,7 +534,6 @@ export function DiagnosisQuestion({
                   offset,
                   limit,
                   exclude_verification_status: "entered_in_error",
-                  ordering: "-created_date",
                   category: "encounter_diagnosis,chronic_condition",
                 },
               })({ signal: new AbortController().signal });
@@ -612,7 +612,7 @@ export function DiagnosisQuestion({
       )}
 
       {isMobile ? (
-        <EntitySelectionSheet
+        <EntitySelectionDrawer
           open={showDiagnosisSelection}
           onOpenChange={setShowDiagnosisSelection}
           system="system-condition-code"
@@ -622,16 +622,14 @@ export function DiagnosisQuestion({
           onConfirm={handleConfirmDiagnosis}
           placeholder={addDiagnosisPlaceholder}
         >
-          <div className="space-y-4 p-3">
-            <DiagnosisDetailsForm
-              diagnosis={newDiagnosis}
-              onUpdate={(updates) =>
-                setNewDiagnosis((prev) => ({ ...prev, ...updates }))
-              }
-              disabled={disabled}
-            />
-          </div>
-        </EntitySelectionSheet>
+          <DiagnosisDetailsForm
+            diagnosis={newDiagnosis}
+            onUpdate={(updates) =>
+              setNewDiagnosis((prev) => ({ ...prev, ...updates }))
+            }
+            disabled={disabled}
+          />
+        </EntitySelectionDrawer>
       ) : (
         <ValueSetSelect
           system="system-condition-code"
@@ -688,6 +686,7 @@ const DiagnosisTableRow = ({
               })
             }
             disabled={disabled || !!diagnosis.id}
+            blockDate={(date) => date > new Date()}
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>

@@ -10,17 +10,7 @@ import { cn } from "@/lib/utils";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Collapsible,
@@ -38,10 +28,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
-import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
+import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -316,31 +307,17 @@ export function MedicationStatementQuestion({
         medications.length > 0 ? "md:max-w-fit" : "max-w-4xl",
       )}
     >
-      <AlertDialog
+      <ConfirmActionDialog
         open={medicationToDelete !== null}
         onOpenChange={(open) => !open && setMedicationToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("remove_medication")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("remove_medication_confirmation", {
-                medication:
-                  medications[medicationToDelete!]?.medication?.display,
-              })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmRemoveMedication}
-              className={cn(buttonVariants({ variant: "destructive" }))}
-            >
-              {t("remove")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={t("remove_medication")}
+        description={t("remove_medication_confirmation", {
+          medication: medications[medicationToDelete!]?.medication?.display,
+        })}
+        onConfirm={confirmRemoveMedication}
+        confirmText={t("remove")}
+        variant="destructive"
+      />
 
       <HistoricalRecordSelector<MedicationRequestRead | MedicationStatementRead>
         title={t("medication_history")}
@@ -407,7 +384,6 @@ export function MedicationStatementQuestion({
                   offset,
                   status:
                     "active,on_hold,draft,unknown,ended,completed,cancelled",
-                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response as PaginatedResponse<MedicationRequestRead>;
@@ -451,7 +427,6 @@ export function MedicationStatementQuestion({
                   offset,
                   status:
                     "active,on_hold,completed,stopped,unknown,not_taken,intended",
-                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response as PaginatedResponse<MedicationStatementRead>;
@@ -670,7 +645,7 @@ export function MedicationStatementQuestion({
           />
         </div>
       ) : (
-        <EntitySelectionSheet
+        <EntitySelectionDrawer
           open={!!newMedicationInSheet}
           onOpenChange={(open) => {
             if (!open) {
@@ -685,29 +660,27 @@ export function MedicationStatementQuestion({
           onConfirm={handleConfirmMedication}
           placeholder={addMedicationPlaceholder}
         >
-          <div className="space-y-4 p-3">
-            {newMedicationInSheet && (
-              <MedicationStatementGridRow
-                medication={newMedicationInSheet}
-                disabled={disabled}
-                onUpdate={(updates) => {
-                  setNewMedicationInSheet((prev) =>
-                    prev
-                      ? {
-                          ...prev,
-                          ...updates,
-                        }
-                      : null,
-                  );
-                }}
-                onRemove={() => {}}
-                index={-1}
-                questionId={question.id}
-                errors={errors}
-              />
-            )}
-          </div>
-        </EntitySelectionSheet>
+          {newMedicationInSheet && (
+            <MedicationStatementGridRow
+              medication={newMedicationInSheet}
+              disabled={disabled}
+              onUpdate={(updates) => {
+                setNewMedicationInSheet((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        ...updates,
+                      }
+                    : null,
+                );
+              }}
+              onRemove={() => {}}
+              index={-1}
+              questionId={question.id}
+              errors={errors}
+            />
+          )}
+        </EntitySelectionDrawer>
       )}
     </div>
   );

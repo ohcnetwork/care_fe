@@ -74,7 +74,6 @@ export function PrintAppointments({
         tags: qParams.tags,
         resource_type: resourceType,
         resource_ids: qParams.practitioners ?? resourceId,
-        ordering: "token_slot__start_datetime",
         patient: qParams.patient,
       },
     }),
@@ -103,7 +102,7 @@ export function PrintAppointments({
 
   return (
     <PrintPreview title={t("appointments")}>
-      <div className="min-h-screen py-8 max-w-4xl mx-auto">
+      <div className="py-8 max-w-4xl mx-auto">
         {/* Header with Facility Name and Logo */}
         <div className="flex justify-between items-start pb-6 border-b border-gray-200">
           <div className="space-y-4 break-all">
