@@ -69,12 +69,6 @@ const formSchema = z.object({
     .required(),
   expiration_date: z.date(),
 });
-/**
- * @param {string} facilityId - The ID of the facility the product belongs to.
- * @param {string} [productId] - The optional ID of the product being edited. Determines edit mode.
- * @param {(product: ProductRead) => void} [onSuccess] - Optional callback executed after successful form submission.
- * @returns {JSX.Element} The Product Form page with loading skeleton or form content.
- */
 export default function ProductForm({
   facilityId,
   productId,
@@ -137,25 +131,6 @@ export default function ProductForm({
     </Page>
   );
 }
-/**
- * Core component containing the Product creation and update form logic.
- *
- * It manages form state using react-hook-form, handles API mutations (create/update),
- * manages success/cancel navigation, and integrates necessary dropdowns (Product Knowledge, CID).
- *
- * @param {object} props - The component properties.
- * @param {string} props.facilityId - The ID of the facility.
- * @param {string} [props.productId] - The ID of the product (for edit mode).
- * @param {ProductRead} [props.existingData] - The current data for the product being edited.
- * @param {string} [props.slug] - The Product Knowledge slug (used for initial creation context).
- * @param {string} [props.containerClassName] - CSS classes for the main form container.
- * @param {(product: ProductRead) => void} [props.onSuccess] - Success callback, defaults to redirecting to the product details page.
- * @param {() => void} [props.onCancel] - Cancel callback, defaults to redirecting back to the detail or list page.
- * @param {boolean} [props.disableButtons] - If true, form action buttons are hidden.
- * @param {boolean} [props.enabled] - If false, disables data fetching queries.
- * @param {React.RefObject<{ createNewProduct: () => void }>} [props.ref] - Imperative handle ref for external form submission.
- * @returns {JSX.Element} The form structure for creating or editing a Product.
- */
 export function ProductFormContent({
   facilityId,
   productId,
@@ -295,11 +270,6 @@ export function ProductFormContent({
     },
   }));
   const isPending = isCreating || isUpdating;
-  /**
-   * Handles the form submission: formats data, and calls the appropriate
-   * create or update mutation based on the form mode (isEditMode).
-   * @param data - The validated form data.
-   */
   function onSubmit(data: z.infer<typeof formSchema>) {
     // Format the data for API submission
     const formattedData = {
