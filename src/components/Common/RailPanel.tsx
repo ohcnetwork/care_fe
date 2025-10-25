@@ -15,6 +15,8 @@ export default function RailPanel({
   return (
     <div className="relative flex">
       <motion.div
+        inert={!open}
+        aria-hidden={!open}
         initial={{ width: "auto", opacity: 1 }}
         animate={{ width: open ? "auto" : 0, opacity: open ? 1 : 0 }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
