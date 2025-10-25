@@ -28,7 +28,7 @@ test.beforeAll(async () => {
   setup = { facility };
 });
 
-test.describe("Activity Definition List", () => {
+test.describe("category list", () => {
   test("should load page and verify initial state", async ({ page }) => {
     await page.goto(
       `/facility/${setup.facility.id}/settings/activity_definitions`,
@@ -51,7 +51,7 @@ test.describe("Activity Definition List", () => {
     await expect(addActivityButton).toBeDisabled();
   });
 
-  test("should create a new category and navigate to it", async ({ page }) => {
+  test("should create category and navigate to it", async ({ page }) => {
     const testData = generateCategoryData();
 
     await page.goto(
@@ -103,7 +103,7 @@ test.describe("Activity Definition List", () => {
       });
     });
 
-    test("should search for the created category", async ({ page }) => {
+    test("should search for category", async ({ page }) => {
       await page.goto(
         `/facility/${setup.facility.id}/settings/activity_definitions`,
       );
@@ -116,7 +116,7 @@ test.describe("Activity Definition List", () => {
       await expect(page.getByText(testCategory.title)).toBeVisible();
     });
 
-    test("should navigate into the created category", async ({ page }) => {
+    test("should navigate into category", async ({ page }) => {
       await page.goto(
         `/facility/${setup.facility.id}/settings/activity_definitions`,
       );
@@ -138,7 +138,7 @@ test.describe("Activity Definition List", () => {
       await expect(addActivityButton).toBeEnabled();
     });
 
-    test("should edit the category via three-dot menu", async ({ page }) => {
+    test("should edit category", async ({ page }) => {
       const updatedData = generateCategoryData();
 
       await page.goto(

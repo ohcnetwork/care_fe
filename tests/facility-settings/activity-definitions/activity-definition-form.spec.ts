@@ -36,8 +36,8 @@ test.beforeAll(async () => {
   setup = { facility, resourceCategory };
 });
 
-test.describe("Activity Definition Form", () => {
-  test("should load the form and display page content", async ({ page }) => {
+test.describe("activity definition form", () => {
+  test("should display page content", async ({ page }) => {
     await page.goto(
       `/facility/${setup.facility.id}/settings/activity_definitions/categories/${setup.resourceCategory.slug}/new`,
     );
@@ -68,7 +68,9 @@ test.describe("Activity Definition Form", () => {
     await expect(page.getByRole("button", { name: /create/i })).toBeVisible();
   });
 
-  test("should fill form with required fields and submit", async ({ page }) => {
+  test("should create activity definition with required fields", async ({
+    page,
+  }) => {
     const testData = generateActivityDefinitionData();
 
     await page.goto(
@@ -112,14 +114,16 @@ test.describe("Activity Definition Form", () => {
     );
   });
 
-  test("should fill form with all the fields and submit", async ({ page }) => {
+  test("should create activity definition with all the fields", async ({
+    page,
+  }) => {
     const testData = generateActivityDefinitionData();
 
     await page.goto(
       `/facility/${setup.facility.id}/settings/activity_definitions/categories/${setup.resourceCategory.slug}/new`,
     );
 
-    await test.step("Basic Information", async () => {
+    await test.step("fill basic information", async () => {
       await page.getByLabel(/title.*\*/i).fill(testData.title);
       await page.getByLabel(/description.*\*/i).fill(testData.description);
       await page.getByLabel(/usage.*\*/i).fill(testData.usage);
@@ -144,14 +148,14 @@ test.describe("Activity Definition Form", () => {
         .fill("https://example.com/uri");
     });
 
-    await test.step("Additional Details", async () => {
+    await test.step("fill additional details", async () => {
       const bodySite = page.getByRole("combobox", { name: /body site/i });
       await selectFromCommand(page, bodySite, {
         placeholder: /select body site/i,
       });
     });
 
-    await test.step("Requirements", async () => {
+    await test.step("select requirements", async () => {
       const specimenContainer = page
         .getByText(/^specimen requirements$/i)
         .locator("..");
@@ -178,7 +182,7 @@ test.describe("Activity Definition Form", () => {
       await selectFromLocationMultiSelect(page, locationsTrigger, { index: 0 });
     });
 
-    await test.step("Diagnostic Report", async () => {
+    await test.step("select diagnostic report codes", async () => {
       const diagSection = page
         .getByText(/^diagnostic report codes$/i)
         .locator("..");
