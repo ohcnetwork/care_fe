@@ -4,8 +4,6 @@ import { t } from "i18next";
 import { Clock, Files } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { cn } from "@/lib/utils";
-
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -378,20 +376,14 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                               className="size-5"
                             />
                           </TableHead>
-                          {activeTypeConfig?.displayFields.map(
-                            (field, idx, arr) => (
-                              <TableHead
-                                key={String(field.label)}
-                                className={cn(
-                                  "border border-gray-200 bg-gray-50",
-                                  idx === 0 && "rounded-l-md",
-                                  idx === arr.length - 1 && "rounded-r-md",
-                                )}
-                              >
-                                {field.label}
-                              </TableHead>
-                            ),
-                          )}
+                          {activeTypeConfig?.displayFields.map((field) => (
+                            <TableHead
+                              key={String(field.label)}
+                              className="border border-gray-200 bg-gray-50 [&:nth-child(2)]:rounded-l-md [&:nth-last-child(1)]:rounded-r-md"
+                            >
+                              {field.label}
+                            </TableHead>
+                          ))}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -436,7 +428,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
               <Button
                 variant="ghost"
                 onClick={handleLoadMore}
-                className="w-1/8 font-semibold underline p-0 justify-start"
+                className="font-semibold underline justify-start"
               >
                 {t("load_more")}
               </Button>
