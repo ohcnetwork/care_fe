@@ -57,9 +57,11 @@ import { Code } from "@/types/base/code/code";
 import {
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_VERIFICATION_STATUS,
+  DIAGNOSIS_SEVERITY,
   Diagnosis,
   DiagnosisClinicalStatus,
   DiagnosisRequest,
+  DiagnosisSeverity,
   Onset,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
@@ -86,6 +88,7 @@ const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   verification_status: "confirmed",
   category: "encounter_diagnosis",
   onset: { onset_datetime: dateQueryString(new Date()) },
+  severity: "moderate",
   dirty: true,
 };
 
@@ -153,6 +156,38 @@ function VerificationStatusSelect({
               </SelectItem>
             ),
         )}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function SeveritySelect({
+  severity,
+  onValueChange,
+  disabled,
+}: {
+  severity: DiagnosisSeverity;
+  onValueChange: (value: DiagnosisSeverity) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Select value={severity} onValueChange={onValueChange} disabled={disabled}>
+      <SelectTrigger className="h-8 md:h-9">
+        <SelectValue
+          placeholder={
+            <span className="text-gray-500">
+              {t("diagnosis_severity_placeholder")}
+            </span>
+          }
+        />
+      </SelectTrigger>
+      <SelectContent>
+        {DIAGNOSIS_SEVERITY.map((severity) => (
+          <SelectItem key={severity} value={severity} className="capitalize">
+            {t(severity)}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );
@@ -237,6 +272,18 @@ function DiagnosisDetailsForm({
         />
       </div>
       <div className="space-y-2">
+        <Label className="text-sm">{t("severity")}</Label>
+        <SeveritySelect
+          severity={diagnosis.severity || "moderate"}
+          onValueChange={(value) =>
+            onUpdate({
+              severity: value as DiagnosisRequest["severity"],
+            })
+          }
+          disabled={disabled}
+        />
+      </div>
+      <div className="space-y-2">
         <Label className="text-sm">{t("notes")}</Label>
         <DiagnosisNotesInput
           note={diagnosis.note}
@@ -256,11 +303,11 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
     verification_status: diagnosis.verification_status,
     onset: diagnosis.onset
       ? {
-          ...diagnosis.onset,
-          onset_datetime: diagnosis.onset.onset_datetime
-            ? format(new Date(diagnosis.onset.onset_datetime), "yyyy-MM-dd")
-            : "",
-        }
+        ...diagnosis.onset,
+        onset_datetime: diagnosis.onset.onset_datetime
+          ? format(new Date(diagnosis.onset.onset_datetime), "yyyy-MM-dd")
+          : "",
+      }
       : undefined,
     recorded_date: diagnosis.recorded_date,
     category: diagnosis.category,
@@ -269,6 +316,7 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
     created_by: diagnosis.created_by,
     created_date: diagnosis.created_date,
     dirty: false,
+    severity: diagnosis.severity || "moderate",
   };
 }
 
@@ -411,10 +459,10 @@ export function DiagnosisQuestion({
       const newDiagnoses = sortedDiagnoses.map((d, i) =>
         i === index
           ? {
-              ...d,
-              verification_status: "entered_in_error" as const,
-              dirty: true,
-            }
+            ...d,
+            verification_status: "entered_in_error" as const,
+            dirty: true,
+          }
           : d,
       ) as DiagnosisRequest[];
       updateQuestionnaireResponseCB(
@@ -562,6 +610,9 @@ export function DiagnosisQuestion({
                   <TableHead className="w-[15%] text-center">
                     {t("verification")}
                   </TableHead>
+                  <TableHead className="w-[15%] text-center">
+                    {t("severity")}
+                  </TableHead>
                   <TableHead className="w-[5%] text-center">
                     {t("action")}
                   </TableHead>
@@ -578,7 +629,7 @@ export function DiagnosisQuestion({
                     disabled={
                       disabled ||
                       patientDiagnoses?.results[index]?.verification_status ===
-                        "entered_in_error"
+                      "entered_in_error"
                     }
                     onUpdate={(updates) =>
                       handleUpdateDiagnosis(index, updates)
@@ -601,7 +652,7 @@ export function DiagnosisQuestion({
                 disabled={
                   disabled ||
                   patientDiagnoses?.results[index]?.verification_status ===
-                    "entered_in_error"
+                  "entered_in_error"
                 }
                 onUpdate={(updates) => handleUpdateDiagnosis(index, updates)}
                 onRemove={() => handleRemoveDiagnosis(index)}
@@ -711,6 +762,17 @@ const DiagnosisTableRow = ({
               })
             }
             isExistingRecord={!!diagnosis.id}
+            disabled={disabled}
+          />
+        </TableCell>
+        <TableCell className="py-1">
+          <SeveritySelect
+            severity={diagnosis.severity}
+            onValueChange={(value) =>
+              onUpdate?.({
+                severity: value as DiagnosisRequest["severity"],
+              })
+            }
             disabled={disabled}
           />
         </TableCell>
@@ -851,9 +913,9 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                     {t("diagnosed_on")}{" "}
                     {diagnosis.onset?.onset_datetime
                       ? format(
-                          new Date(diagnosis.onset.onset_datetime),
-                          "MMMM d, yyyy",
-                        )
+                        new Date(diagnosis.onset.onset_datetime),
+                        "MMMM d, yyyy",
+                      )
                       : ""}
                     {" · "}
                     {t(diagnosis.clinical_status)}
@@ -868,7 +930,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
             <CardContent className="p-3 pt-2 space-y-3 rounded-lg bg-gray-50">
               <DiagnosisDetailsForm
                 diagnosis={diagnosis}
-                onUpdate={onUpdate || (() => {})}
+                onUpdate={onUpdate || (() => { })}
                 disabled={disabled}
               />
             </CardContent>

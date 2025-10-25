@@ -449,8 +449,8 @@ export default function TreatmentSummary({
                       verification: t(symptom.verification_status),
                       onset: symptom.onset?.onset_datetime
                         ? new Date(
-                            symptom.onset.onset_datetime,
-                          ).toLocaleDateString()
+                          symptom.onset.onset_datetime,
+                        ).toLocaleDateString()
                         : "-",
                       notes: symptom.note,
                       logged_by: formatName(symptom.created_by),
@@ -466,6 +466,7 @@ export default function TreatmentSummary({
                     headers={[
                       { key: "diagnosis" },
                       { key: "status" },
+                      { key: "severity" },
                       { key: "verification" },
                       { key: "onset" },
                       { key: "notes" },
@@ -474,11 +475,10 @@ export default function TreatmentSummary({
                     rows={diagnoses?.results.map((diagnosis) => ({
                       diagnosis: diagnosis.code.display,
                       status: t(diagnosis.clinical_status),
+                      severity: t(diagnosis.severity || "moderate"),
                       verification: t(diagnosis.verification_status),
                       onset: diagnosis.onset?.onset_datetime
-                        ? new Date(
-                            diagnosis.onset.onset_datetime,
-                          ).toLocaleDateString()
+                        ? new Date(diagnosis.onset.onset_datetime).toLocaleDateString()
                         : undefined,
                       notes: diagnosis.note,
                       logged_by: formatName(diagnosis.created_by),
@@ -520,14 +520,13 @@ export default function TreatmentSummary({
                         dosage: dosage,
                         frequency: instruction?.as_needed_boolean
                           ? `${t("as_needed_prn")} (${instruction?.as_needed_for?.display ?? "-"})` +
-                            (instruction?.additional_instruction?.length
-                              ? `, ${additionalInstructions}`
-                              : "")
-                          : `${frequency?.meaning ?? "-"}${
-                              instruction?.additional_instruction?.length
-                                ? `, ${additionalInstructions}`
-                                : ""
-                            }`,
+                          (instruction?.additional_instruction?.length
+                            ? `, ${additionalInstructions}`
+                            : "")
+                          : `${frequency?.meaning ?? "-"}${instruction?.additional_instruction?.length
+                            ? `, ${additionalInstructions}`
+                            : ""
+                          }`,
                         duration: duration
                           ? `${duration.value} ${duration.unit}`
                           : "-",
@@ -603,3 +602,6 @@ export default function TreatmentSummary({
     </div>
   );
 }
+  );
+}
+

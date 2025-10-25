@@ -42,6 +42,10 @@ export const DIAGNOSIS_VERIFICATION_STATUS = [
 export type DiagnosisVerificationStatus =
   (typeof DIAGNOSIS_VERIFICATION_STATUS)[number];
 
+export const DIAGNOSIS_SEVERITY = ["severe", "moderate", "mild"] as const;
+
+export type DiagnosisSeverity = (typeof DIAGNOSIS_SEVERITY)[number];
+
 export type Onset = {
   onset_datetime?: string;
   onset_age?: string;
@@ -54,6 +58,7 @@ export interface Diagnosis {
   code: Code;
   clinical_status: DiagnosisClinicalStatus;
   verification_status: DiagnosisVerificationStatus;
+  severity: DiagnosisSeverity;
   onset?: Onset;
   recorded_date?: string;
   note?: string;
@@ -77,6 +82,7 @@ export interface DiagnosisRequest {
   note?: string;
   category: DiagnosisCategory;
   encounter: string;
+  severity: DiagnosisSeverity;
   dirty: boolean;
   created_by?: UserReadMinimal;
   created_date?: string;
@@ -100,3 +106,9 @@ export const DIAGNOSIS_VERIFICATION_STATUS_COLORS = {
   refuted: "destructive",
   entered_in_error: "destructive",
 } as const;
+
+export const DIAGNOSIS_SEVERITY_COLORS = {
+  severe: "destructive",
+  moderate: "yellow",
+  mild: "blue",
+} as const satisfies Record<DiagnosisSeverity, string>;
