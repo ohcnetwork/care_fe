@@ -5040,6 +5040,8 @@
   "tag_config": "Tag config",
   "tag_config_created_successfully": "Tag Config created successfully",
   "tag_config_details": "Tag Config Details",
+  "tag_config_dialog_add_description": "Use this form to define a new configuration for a clinical or operational tag, specifying its resource, category, and priority.",
+  "tag_config_dialog_edit_description": "Use this form to modify the existing configuration for this tag.",
   "tag_config_not_found": "Tag Config Not Found",
   "tag_config_not_found_description": "The tag config you are looking for does not exist. Please check the tag config id.",
   "tag_config_updated_successfully": "Tag Config updated successfully",
