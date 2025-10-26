@@ -171,7 +171,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 - ESLint 9.18.0 with TypeScript plugin
 - Prettier 3.3.3 with Tailwind plugin
-- Playwright for E2E testing
+- Playwright 1.55.1 for E2E testing
 - Vite PWA plugin for service worker
 
 ## Configuration Files & Environment
