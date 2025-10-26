@@ -15,13 +15,13 @@ This is a healthcare management system for TeleICU & hospital capacity administr
 
 - Use lowercase with dashes for directories (e.g., patient-management/, facility-overview/)
 - Favor named exports for components
-- Use PascalCase for components (PatientOverview, FacilityList)  
+- Use PascalCase for components (PatientOverview, FacilityList)
 - Use camelCase for functions and variables (fetchData, isLoading)
 
 ## TypeScript Usage
 
 - Use TypeScript for all code; prefer interfaces over types for data structures
-- Avoid enums; use maps instead
+- Avoid enums; use maps instead (except for medical constants like BloodGroupChoices)
 - Use functional components with TypeScript interfaces
 - Strict typing for all data and API interfaces
 
@@ -64,7 +64,7 @@ This is a healthcare management system for TeleICU & hospital capacity administr
 
 ## Testing Guidelines
 
-For Cypress testing guidelines, refer to cypress/docs/*.md for testing patterns.
+For Playwright testing guidelines, refer to tests/README.md for testing patterns.
 
 ## Reference
 

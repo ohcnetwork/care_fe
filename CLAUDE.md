@@ -13,7 +13,7 @@ CARE is a Digital Public Good enabling TeleICU & Decentralised Administration of
 - `npm run build`: Build for production (takes ~2 minutes, never cancel)
 - `npm run lint`: Run ESLint (takes ~85 seconds)
 - `npm run format`: Format code with Prettier
-- `npm run cypress:open`: Open Cypress UI for testing
+- `npm run playwright:test:ui`: Open Playwright UI for testing
 
 ## Code Style Guidelines
 
@@ -23,7 +23,7 @@ CARE is a Digital Public Good enabling TeleICU & Decentralised Administration of
 - Types: Use `interface` for objects, avoid explicit `any`, proper nullability
 - Naming: PascalCase for components/classes, camelCase for variables/functions
 - Components: Organized by feature (Patient/, Facility/, etc.), maintain separation of concerns
-- Testing: Follow Page Object Model, use data-cy attributes, AAA pattern (Arrange-Act-Assert)
+- Testing: Follow Page Object Model, use data-testid attributes, AAA pattern (Arrange-Act-Assert)
 - Error Handling: Use dedicated error handlers, TypeScript strict null checks
 
 ## Standards
@@ -38,6 +38,6 @@ CARE is a Digital Public Good enabling TeleICU & Decentralised Administration of
 - CAREUI for custom components, shadcn/ui for standard components
 - @tanstack/react-query for data state management
 - Tailwind CSS 4.1.3 with design system
-- Cypress for E2E testing of critical workflows
+- Playwright for E2E testing of critical workflows
 
 Refer to `.github/copilot-instructions.md` for comprehensive guidance.

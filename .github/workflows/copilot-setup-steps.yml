@@ -48,17 +48,17 @@ jobs:
         run: npm run setup
         timeout-minutes: 2
 
-      - name: Cache Cypress Binary
+      - name: Cache Playwright Browsers
         uses: actions/cache@v4
         with:
-          path: ~/.cache/Cypress
-          key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            cypress-${{ runner.os }}-
+            playwright-${{ runner.os }}-
 
-      - name: Install Cypress
+      - name: Install Playwright
         run: |
-          npm run cypress:install 2>/dev/null || echo "Cypress install failed (expected in restricted environments)"
+          npm run playwright:install 2>/dev/null || echo "Playwright install failed (expected in restricted environments)"
         timeout-minutes: 5
 
       - name: Display Setup Summary

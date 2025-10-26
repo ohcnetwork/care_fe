@@ -7,7 +7,7 @@ This file provides guidance for AI coding agents working with the CARE frontend 
 This repository uses a comprehensive instructions system:
 
 - Main Instructions: Complete project overview and workflows (`.github/copilot-instructions.md`)
-- Agent Environment: Pre-configured development environment
+- Agent Environment: Pre-configured development environment (`.github/workflows/copilot-setup-steps.yml`)
 
 For detailed project context, build instructions, and architecture information, refer to `.github/copilot-instructions.md`.
 
@@ -26,7 +26,7 @@ npm run dev          # Start development server on http://localhost:4000
 npm run build        # Build for production (~2 minutes)
 npm run lint         # Run ESLint (~85 seconds)
 npm run format       # Format code with Prettier
-npm run cypress:open # Open Cypress UI for testing
+npm run playwright:test:ui # Open Playwright UI for testing
 ```
 
 ## Code Style Standards
@@ -35,4 +35,4 @@ npm run cypress:open # Open Cypress UI for testing
 - Components: Feature-based organization (Patient/, Facility/, etc.)
 - State Management: @tanstack/react-query for server data, React hooks for UI state
 - UI System: shadcn/ui for standard components, CAREUI for custom components
-- Testing: Cypress E2E testing for critical workflows
+- Testing: Playwright E2E testing for critical workflows
