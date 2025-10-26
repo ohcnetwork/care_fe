@@ -1,11 +1,13 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: false
 ---
+
 # UI Component Guidelines
 
 ## Component Libraries
+
 - shadcn/ui for standard components
 - CAREUI for custom components
 - NEVER modify shadcn files directly in `components/ui/*`
@@ -16,6 +18,7 @@ alwaysApply: false
 ## Routing with Raviger
 
 ### Route Definition
+
 ```typescript
 // src/Routers/routes/FacilityRoutes.tsx
 const FacilityRoutes: AppRoutes = {
@@ -37,6 +40,7 @@ type RouteParams<T extends string> =
 ```
 
 ### Navigation and Hooks
+
 ```typescript
 // Navigation
 import { navigate, useRedirect } from "raviger";
@@ -52,6 +56,7 @@ const routes = useRoutes(Routes);
 ```
 
 ### Route Organization
+
 - Define routes in dedicated files under `src/Routers/routes/`
 - Group related routes in feature-specific files (e.g., `FacilityRoutes.tsx`)
 - Combine routes in `AppRouter.tsx`
@@ -59,6 +64,7 @@ const routes = useRoutes(Routes);
 - Support plugin routes through `usePluginRoutes` hook
 
 ### Layout and Navigation
+
 ```typescript
 // Conditional sidebar rendering
 const PATHS_WITHOUT_SIDEBAR = [
@@ -74,12 +80,14 @@ const PATHS_WITHOUT_SIDEBAR = [
 ```
 
 ## Responsive Design
+
 - Use Tailwind's responsive classes
 - Follow mobile-first approach
 - Test components across different screen sizes
 - Use proper breakpoints as defined in `tailwind.config.js`
 
 ## Accessibility
+
 - Implement proper ARIA attributes
 - Ensure keyboard navigation works
 - Maintain proper color contrast
@@ -87,6 +95,7 @@ const PATHS_WITHOUT_SIDEBAR = [
 - Test with accessibility tools
 
 ## Component Structure
+
 ```typescript
 // Example component structure
 interface ComponentProps {
@@ -96,7 +105,7 @@ interface ComponentProps {
 
 export function Component({ title, onAction }: ComponentProps) {
   const [state, setState] = useState(false);
-  
+
   return (
     <div className="p-4 space-y-4">
       <h2 className="text-xl font-bold">{title}</h2>
@@ -109,6 +118,7 @@ export function Component({ title, onAction }: ComponentProps) {
 ```
 
 ## Internationalization
+
 - Use translation keys from `src/Locale/`
 - Support RTL languages
 - Use proper date/time formatting

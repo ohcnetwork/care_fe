@@ -1,18 +1,21 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: false
 ---
+
 # Coding Standards
 
 ## TypeScript Guidelines
+
 - Strict TypeScript configuration
-- Use interfaces for data structures  
+- Use interfaces for data structures
 - Proper nullability for optional fields
 - zod validation for runtime data validation
 - Avoid `any` type
 
 ## Components Structure
+
 - One component per file
 - Descriptive naming: `PatientOverview.tsx`, `FacilityList.tsx`
 - Organize by feature: Patient/, Facility/, etc.
@@ -20,24 +23,28 @@ alwaysApply: false
 - Proper error boundaries
 
 ## UI Standards
+
 - shadcn/ui for standard components
 - CAREUI for custom components
 - Tailwind CSS design system
 - Mobile-first responsive design
 
 ## Data Management
+
 - TanStack Query for API data
 - React Context for app state
 - Proper error handling
 - Data validation patterns
 
 ## File Naming
+
 - kebab-case directories: `patient-management/`
 - PascalCase components: `PatientList.tsx`
 - Camel case hooks: `useData.ts`
 
 ## Testing
-- Cypress E2E for critical workflows
+
+- Playwright E2E for critical workflows
 - Accessibility testing
-- Follow patterns in `cypress/docs/`
+- Follow patterns in `tests/README.md`
 - Write clear test descriptions

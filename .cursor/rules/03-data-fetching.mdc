@@ -78,8 +78,8 @@ export const routes = {
 
 ```typescript
 const { data } = useQuery({
-  queryKey: ['users'],
-  queryFn: query(userApi.list)
+  queryKey: ["users"],
+  queryFn: query(userApi.list),
 });
 ```
 
@@ -88,18 +88,18 @@ const { data } = useQuery({
 ```typescript
 // Path parameters
 const { data } = useQuery({
-  queryKey: ['user', username],
+  queryKey: ["user", username],
   queryFn: query(userApi.get, {
-    pathParams: { username }
-  })
+    pathParams: { username },
+  }),
 });
 
 // Query parameters
 const { data } = useQuery({
-  queryKey: ['facilities', searchTerm],
+  queryKey: ["facilities", searchTerm],
   queryFn: query(facilityApi.getAllFacilities, {
-    queryParams: { search: searchTerm }
-  })
+    queryParams: { search: searchTerm },
+  }),
 });
 ```
 

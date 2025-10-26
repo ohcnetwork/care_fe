@@ -102,7 +102,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 ### Bootstrap, Build, and Test the Repository
 
-- `npm install --ignore-scripts` -- installs dependencies without Cypress binary (takes ~16 seconds)
+- `npm install --ignore-scripts` -- installs dependencies without Playwright browsers (takes ~16 seconds)
 - `npm run postinstall` -- installs platform-specific dependencies and generates headers (takes ~3 seconds)
 - `npm run setup` -- generates plugin map and setup (takes ~1 second)
 - `npm run build` -- production build. NEVER CANCEL: Takes 2+ minutes. Set timeout to 180+ seconds.
@@ -161,7 +161,6 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ### Additional Dependencies
 
 - @tanstack/react-query for API state management
-- react-query is
 - raviger for routing
 - i18next for internationalization
 - date-fns for date handling

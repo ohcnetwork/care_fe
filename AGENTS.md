@@ -9,15 +9,9 @@ This repository uses a comprehensive instructions system:
 - Main Instructions: Complete project overview and workflows (`.github/copilot-instructions.md`)
 - Agent Environment: Pre-configured development environment (`.github/workflows/copilot-setup-steps.yml`)
 
-For detailed project context, build instructions, and architecture information, refer to `.github/copilot-instructions.md`.
-
 ## Project Context
 
-CARE is a Digital Public Good for TeleICU & Decentralised Administration of Healthcare Capacity. This React + TypeScript application manages:
-
-- Patient Management: Patient records, consultation workflows
-- Facility Management: Bed allocation, staff assignments, resource tracking
-- Resource Management: Equipment, supplies, and availability tracking
+CARE is a Digital Public Good for TeleICU & Decentralised Administration of Healthcare Capacity. This is a React + TypeScript + Vite healthcare management application.
 
 ## Build/Lint/Test Commands
 
