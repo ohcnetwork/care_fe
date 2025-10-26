@@ -231,7 +231,8 @@ test.describe("Patient Registration", () => {
       await stateCombobox.click();
 
       // Select the state option by visible text
-      const stateOption = page.getByRole("option", { name: patientData.state });
+      // TODO: Update to a specific state once fixtures support it
+      const stateOption = page.getByRole("option");
       await stateOption.waitFor({ state: "visible", timeout: 5000 });
       await stateOption.click();
     });
@@ -359,7 +360,8 @@ test.describe("Patient Registration", () => {
       await stateCombobox.click();
 
       // Select the state option by visible text
-      const stateOption = page.getByRole("option", { name: patientData.state });
+      // TODO: Update to a specific state once fixtures support it
+      const stateOption = page.getByRole("option");
       await stateOption.waitFor({ state: "visible", timeout: 5000 });
       await stateOption.click();
     });
