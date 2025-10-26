@@ -65,23 +65,20 @@ jobs:
           script: |
             const head_sha = '${{ github.event.workflow_run.head_sha }}';
 
-            // Find PRs with this commit
-            const { data: pulls } = await github.rest.pulls.list({
+            // Find PRs associated with this commit
+            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              state: 'open',
-              per_page: 100
+              commit_sha: head_sha
             });
 
-            // Find the PR that matches this commit
-            const pr = pulls.find(p => p.head.sha === head_sha);
-
-            if (pr) {
+            if (prs.length > 0) {
+              const pr = prs[0]; // Get the first (usually only) PR
               console.log(`Found PR #${pr.number} for commit ${head_sha}`);
               core.setOutput('pr_number', pr.number);
               core.setOutput('found', 'true');
             } else {
-              console.log(`No open PR found for commit ${head_sha}`);
+              console.log(`No PR found for commit ${head_sha}`);
               core.setOutput('found', 'false');
             }
 
