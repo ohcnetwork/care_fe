@@ -49,6 +49,7 @@ jobs:
               - 'src/**'
               - 'package.json'
               - 'playwright.config.ts'
+              - '.github/workflows/**'
 
   # Build application once and cache for all test shards
   build:
