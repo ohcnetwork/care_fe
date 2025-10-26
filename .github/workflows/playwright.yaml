@@ -221,12 +221,12 @@ jobs:
                 SHARD_PASSED=$(jq '[.suites[].specs[].tests[].results[] | select(.status == "passed")] | length' "$dir/test-results.json")
                 SHARD_FAILED=$(jq '[.suites[].specs[].tests[].results[] | select(.status == "failed" or .status == "timedOut" or .status == "interrupted")] | length' "$dir/test-results.json")
                 SHARD_SKIPPED=$(jq '[.suites[].specs[].tests[].results[] | select(.status == "skipped")] | length' "$dir/test-results.json")
-                
+
                 TOTAL_TESTS=$((TOTAL_TESTS + SHARD_TOTAL))
                 PASSED_TESTS=$((PASSED_TESTS + SHARD_PASSED))
                 FAILED_TESTS=$((FAILED_TESTS + SHARD_FAILED))
                 SKIPPED_TESTS=$((SKIPPED_TESTS + SHARD_SKIPPED))
-                
+
                 echo "  Shard stats: Total=$SHARD_TOTAL, Passed=$SHARD_PASSED, Failed=$SHARD_FAILED, Skipped=$SHARD_SKIPPED"
               fi
             fi
@@ -250,40 +250,79 @@ jobs:
           path: all-results/
           retention-days: 14
 
-      - name: Comment PR with test results
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+      - name: Create summary JSON
+        run: |
+          cat > summary.json << EOF
+          {
+            "status": "${{ steps.merge.outputs.status }}",
+            "total": "${{ steps.merge.outputs.total }}",
+            "passed": "${{ steps.merge.outputs.passed }}",
+            "failed": "${{ steps.merge.outputs.failed }}",
+            "skipped": "${{ steps.merge.outputs.skipped }}",
+            "shards": "${{ env.TEST_SHARDS }}"
+          }
+          EOF
+          cat summary.json
+
+      - name: Upload summary artifact
+        uses: actions/upload-artifact@v4
         with:
-          script: |
-            const status = '${{ steps.merge.outputs.status }}';
-            const total = '${{ steps.merge.outputs.total }}' || 'N/A';
-            const passed = '${{ steps.merge.outputs.passed }}' || 'N/A';
-            const failed = '${{ steps.merge.outputs.failed }}' || 'N/A';
-            const skipped = '${{ steps.merge.outputs.skipped }}' || 'N/A';
-            const shards = ${{ env.TEST_SHARDS }};
+          name: playwright-summary
+          path: summary.json
+          retention-days: 5
 
-            const body = `## 🎭 Playwright Test Results
+      - name: Add Job Summary
+        run: |
+          echo "## 🎭 Playwright Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ steps.merge.outputs.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Test Shards:** ${{ env.TEST_SHARDS }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Total Tests | ${{ steps.merge.outputs.total }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ✅ Passed | ${{ steps.merge.outputs.passed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ❌ Failed | ${{ steps.merge.outputs.failed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⏭️ Skipped | ${{ steps.merge.outputs.skipped }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📊 Detailed results are available in the [playwright-final-report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) artifact." >> $GITHUB_STEP_SUMMARY
 
-            **Status:** ${status}
-            **Test Shards:** ${shards}
-
-            | Metric | Count |
-            |--------|-------|
-            | Total Tests | ${total} |
-            | ✅ Passed | ${passed} |
-            | ❌ Failed | ${failed} |
-            | ⏭️ Skipped | ${skipped} |
-
-            📊 Detailed results are available in the [playwright-final-report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) artifact.
-
-            <sub>Run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})</sub>`;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: body
-            });
+      # Disabled: PR comments are now handled by playwright-comment.yaml workflow
+      # This prevents "Resource not accessible by integration" errors on fork PRs
+      # - name: Comment PR with test results
+      #   if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+      #   uses: actions/github-script@v7
+      #   with:
+      #     script: |
+      #       const status = '${{ steps.merge.outputs.status }}';
+      #       const total = '${{ steps.merge.outputs.total }}' || 'N/A';
+      #       const passed = '${{ steps.merge.outputs.passed }}' || 'N/A';
+      #       const failed = '${{ steps.merge.outputs.failed }}' || 'N/A';
+      #       const skipped = '${{ steps.merge.outputs.skipped }}' || 'N/A';
+      #       const shards = ${{ env.TEST_SHARDS }};
+      #
+      #       const body = `## 🎭 Playwright Test Results
+      #
+      #       **Status:** ${status}
+      #       **Test Shards:** ${shards}
+      #
+      #       | Metric | Count |
+      #       |--------|-------|
+      #       | Total Tests | ${total} |
+      #       | ✅ Passed | ${passed} |
+      #       | ❌ Failed | ${failed} |
+      #       | ⏭️ Skipped | ${skipped} |
+      #
+      #       📊 Detailed results are available in the [playwright-final-report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) artifact.
+      #
+      #       <sub>Run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})</sub>`;
+      #
+      #       github.rest.issues.createComment({
+      #         issue_number: context.issue.number,
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         body: body
+      #       });
 
       - name: Fail workflow if tests failed
         if: needs.test.result == 'failure'
