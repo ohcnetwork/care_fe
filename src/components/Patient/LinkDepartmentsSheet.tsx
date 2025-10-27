@@ -156,6 +156,7 @@ function DeleteOrganizationButton({
       onSuccess?.();
     },
     onError: (error) => {
+      error.handled = true; // Mark as handled to prevent duplicate error toasts
       const errorData = error.cause as { errors: { msg: string }[] };
       errorData.errors.forEach((er) => {
         toast.error(er.msg);
@@ -217,6 +218,7 @@ export default function LinkDepartmentsSheet({
       onUpdate?.();
     },
     onError: (error) => {
+      error.handled = true; // Mark as handled to prevent duplicate error toasts
       try {
         const errorData = error.cause as {
           results?: {
