@@ -73,8 +73,9 @@ test.describe("Create an Encounter", () => {
         .locator('a[href^="tel:"]')
         .first()
         .textContent();
-      const dobText = await page
-        .locator('.sm\\:col-span-1:has-text("Date of Birth")')
+      const dobLabel = await page.getByText("Date of Birth");
+      const dobText = await dobLabel
+        .locator("xpath=following-sibling::*[1]")
         .textContent();
 
       // Store the phone number for future use (remove any whitespace and special characters)
