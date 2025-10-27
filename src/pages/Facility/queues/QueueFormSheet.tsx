@@ -239,7 +239,11 @@ export default function QueueFormSheet({
               )}
 
               {/* Submit Button */}
-              <Button type="submit" disabled={isPending} className="w-full">
+              <Button
+                type="submit"
+                disabled={isPending || !form.formState.isDirty}
+                className="w-full"
+              >
                 {isPending ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
