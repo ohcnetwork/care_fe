@@ -41,10 +41,14 @@ test.describe("Facility Location Creation", () => {
       .first()
       .click();
     const currentUrl = page.url();
-    const lastSlashIndex = currentUrl.lastIndexOf("/");
-    const baseUrl = currentUrl.substring(0, lastSlashIndex);
-    const targetUrl = `${baseUrl}/settings/locations`;
-    await page.goto(targetUrl);
+    const urlObj = new URL(currentUrl);
+    const match = urlObj.pathname.match(/\/facility\/([^/]+)/);
+    if (!match) {
+      throw new Error("Could not extract facility ID from URL: " + currentUrl);
+    }
+    const facilityId = match[1];
+    const targetPath = `/facility/${facilityId}/settings/locations`;
+    await page.goto(targetPath);
   });
 
   test("Add a new location with mandatory fields", async ({ page }) => {
@@ -55,7 +59,6 @@ test.describe("Facility Location Creation", () => {
     await page.getByRole("option", { name: location }).click();
 
     // Fill location name (mandatory field)
-    await page.getByRole("textbox", { name: "Name" }).click();
     await page.getByRole("textbox", { name: "Name" }).fill(locationName);
 
     // Note: Description is intentionally skipped as it's optional
@@ -72,8 +75,9 @@ test.describe("Facility Location Creation", () => {
     await page.getByRole("button", { name: "Create" }).click();
 
     // Verify location appears in search results
-    await page.getByPlaceholder("Search by name").click();
-    await page.getByPlaceholder("Search by name").fill(locationName);
+    await page
+      .getByRole("textbox", { name: "Search by name" })
+      .fill(locationName);
 
     // Assert that all entered data is correctly displayed
     const tableBody = page.locator('[data-slot="table-body"]');
@@ -91,11 +95,9 @@ test.describe("Facility Location Creation", () => {
     await page.getByRole("option", { name: location }).click();
 
     // Fill location name (mandatory field)
-    await page.getByRole("textbox", { name: "Name" }).click();
     await page.getByRole("textbox", { name: "Name" }).fill(locationName);
 
     // Fill description field (optional field - testing that optional fields work)
-    await page.getByRole("textbox", { name: "Description" }).click();
     await page
       .getByRole("textbox", { name: "Description" })
       .fill(locationDescription);
@@ -112,8 +114,9 @@ test.describe("Facility Location Creation", () => {
     await page.getByRole("button", { name: "Create" }).click();
 
     // Verify location appears in search results
-    await page.getByPlaceholder("Search by name").click();
-    await page.getByPlaceholder("Search by name").fill(locationName);
+    await page
+      .getByRole("textbox", { name: "Search by name" })
+      .fill(locationName);
 
     // Assert that all entered data is correctly displayed
     const tableBody = page.locator('[data-slot="table-body"]');
@@ -129,13 +132,9 @@ test.describe("Facility Location Creation", () => {
     await page.locator("button:has(.lucide-pen-line)").first().click();
 
     // Update location name with new random value
-    await page.getByRole("textbox", { name: "Name" }).click();
-    await page.getByRole("textbox", { name: "Name" }).clear();
     await page.getByRole("textbox", { name: "Name" }).fill(locationName);
 
     // Update description with new random value
-    await page.getByRole("textbox", { name: "Description" }).click();
-    await page.getByRole("textbox", { name: "Description" }).clear();
     await page
       .getByRole("textbox", { name: "Description" })
       .fill(locationDescription);
@@ -152,8 +151,9 @@ test.describe("Facility Location Creation", () => {
     await page.getByRole("button", { name: "Update" }).click();
 
     // Search for the updated location to verify changes were saved
-    await page.getByPlaceholder("Search by name").click();
-    await page.getByPlaceholder("Search by name").fill(locationName);
+    await page
+      .getByRole("textbox", { name: "Search by name" })
+      .fill(locationName);
 
     // Assert that all updated data is correctly displayed in the table
     const tableBody = page.locator('[data-slot="table-body"]');
