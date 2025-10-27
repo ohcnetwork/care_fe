@@ -1,7 +1,7 @@
 {
   "name": "care_fe",
   "version": "3.0.5",
-  "description": "Care is a Digital Public Good enabling TeleICU & Decentralised Administration of Healthcare Capacity across States.",
+  "description": "CARE is a Digital Public Good and Hospital Management Information System (HMIS) that enables TeleICU operations and decentralized administration of healthcare capacity across healthcare facilities.",
   "private": true,
   "repository": {
     "type": "git",

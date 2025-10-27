@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Project Context
 
-CARE is a Digital Public Good enabling TeleICU & Decentralised Administration of Healthcare Capacity. This React + TypeScript + Vite frontend serves workflows including patient management, facility administration, and data processing.
+CARE is a Digital Public Good and Hospital Management Information System (HMIS) that enables TeleICU operations and decentralized administration of healthcare capacity across healthcare facilities. This is a React + TypeScript + Vite frontend application.
 
 ## Build/Test Commands
 

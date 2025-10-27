@@ -2,7 +2,7 @@
 
 You are an expert in TypeScript, React, Shadcn UI, Tailwind, and CARE frontend development.
 
-This is a healthcare management system for TeleICU & hospital capacity administration.
+CARE is a Digital Public Good and Hospital Management Information System (HMIS) that enables TeleICU operations and decentralized administration of healthcare capacity across healthcare facilities.
 
 ## Key Principles
 
@@ -41,7 +41,7 @@ This is a healthcare management system for TeleICU & hospital capacity administr
 ## Data & API Guidelines
 
 - CARE uses TanStack Query for data fetching with query and mutate utilities (src/Utils/request/README.md)
-- APIs are defined in *.Api.ts files under src/types/ directories
+- APIs are defined in \*.Api.ts files under src/types/ directories
 - Use zod validation for all data inputs
 - Handle data with appropriate security measures
 
@@ -68,4 +68,4 @@ For Playwright testing guidelines, refer to tests/README.md for testing patterns
 
 ## Reference
 
-See .github/copilot-instructions.md and .cursor/rules/*.mdc for comprehensive guidance.
+See .github/copilot-instructions.md and .cursor/rules/\*.mdc for comprehensive guidance.

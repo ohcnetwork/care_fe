@@ -1,6 +1,6 @@
 # CARE Frontend
 
-CARE is a Digital Public Good enabling TeleICU & Decentralised Administration of Healthcare Capacity across States. This is a React + TypeScript + Vite frontend application for the healthcare management system.
+CARE is a Digital Public Good and Hospital Management Information System (HMIS) that enables TeleICU operations and decentralized administration of healthcare capacity across healthcare facilities. This is a React + TypeScript + Vite frontend application.
 
 ## Important: Trust These Instructions
 

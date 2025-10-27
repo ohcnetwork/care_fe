@@ -26,7 +26,7 @@ const FacilityRoutes: AppRoutes = {
     <FacilityOverview facilityId={facilityId} />
   ),
   "/facility/:facilityId/services/:serviceId": ({ facilityId, serviceId }) => (
-    <ServiceShow facilityId={facilityId} serviceId={serviceId} />
+    <HealthcareServiceShow facilityId={facilityId} serviceId={serviceId} />
   )
 };
 
