@@ -53,6 +53,17 @@ jobs:
               - 'package.json'
               - 'playwright.config.ts'
 
+  # Skip job if no relevant files changed (makes workflow pass)
+  skip:
+    if: github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests != 'true'
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: No relevant files changed, skipping tests
+        run: |
+          echo "No relevant files changed, skipping Playwright tests. Passing check."
+          exit 0
+
   # Build application once and cache for all test shards
   build:
     if: github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
