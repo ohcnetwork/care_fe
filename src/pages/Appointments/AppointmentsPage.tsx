@@ -164,6 +164,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   const [activeTab, setActiveTab] = useView("appointments", "board");
   const { open: isSidebarOpen } = useSidebar();
   const { facility, facilityId, isFacilityLoading } = useCurrentFacility();
+  const [appointmentCount, setAppointmentCount] = useState<number>(0);
   const selectedTagIds = qParams.tags?.split(",") ?? [];
   const tagConfigsQuery = useTagConfigs({ ids: selectedTagIds, facilityId });
   const selectedTags = tagConfigsQuery
@@ -392,7 +393,8 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 differenceInDays(
                   qParams.date_to ?? new Date(),
                   qParams.date_from,
-                ) >= 31
+                ) >= 31 ||
+                appointmentCount === 0
               }
               onClick={() => {
                 navigate("appointments/print", { query: qParams });
@@ -457,6 +459,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           patient={qParams.patient}
           resourceType={resourceType}
           resourceIds={resourceId ? [resourceId] : practitionerIds}
+          onCountChange={setAppointmentCount}
         />
       )}
     </Page>
@@ -763,6 +766,7 @@ function AppointmentRow(props: {
   patient?: string;
   resourceType: SchedulableResourceType;
   resourceIds: string[];
+  onCountChange?: (count: number) => void;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -802,6 +806,12 @@ function AppointmentRow(props: {
   });
 
   const appointments = data?.results ?? [];
+
+  useEffect(() => {
+    if (props.onCountChange) {
+      props.onCountChange(data?.count ?? 0);
+    }
+  }, [data?.count, props.onCountChange]);
 
   return (
     <div className="overflow-x-auto">
