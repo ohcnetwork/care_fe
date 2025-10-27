@@ -1,3 +1,4 @@
+import { getFacilityId } from "@/tests/support/facilityId";
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
@@ -5,6 +6,7 @@ import { expect, test } from "@playwright/test";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Facility Location Creation", () => {
+  let facilityId: string;
   // Common faker option arrays for all tests
   const locationTypes = [
     "Building",
@@ -33,6 +35,9 @@ test.describe("Facility Location Creation", () => {
 
   // Common navigation before each test
   test.beforeEach(async ({ page }) => {
+    // Get facility ID for each test run
+    facilityId = getFacilityId();
+
     // Generate fresh faker values for each test
     location = faker.helpers.arrayElement(locationTypes);
     locationName = faker.company.name();
@@ -40,20 +45,8 @@ test.describe("Facility Location Creation", () => {
     status = faker.helpers.arrayElement(statusOptions);
     operationalStatus = faker.helpers.arrayElement(operationalStatusOptions);
 
-    await page.goto("/");
-    await page
-      .getByRole("link", { name: /facility with patients/i })
-      .first()
-      .click();
-    const currentUrl = page.url();
-    const urlObj = new URL(currentUrl);
-    const match = urlObj.pathname.match(/\/facility\/([^/]+)/);
-    if (!match) {
-      throw new Error("Could not extract facility ID from URL: " + currentUrl);
-    }
-    const facilityId = match[1];
-    const targetPath = `/facility/${facilityId}/settings/locations`;
-    await page.goto(targetPath);
+    const targetUrl = `/facility/${facilityId}/settings/locations`;
+    await page.goto(targetUrl);
   });
 
   test("Add a new location with mandatory fields", async ({ page }) => {
