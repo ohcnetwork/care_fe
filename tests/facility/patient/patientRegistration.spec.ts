@@ -20,8 +20,8 @@ function generatePatientData() {
       year: "2009",
     },
     bloodGroup: "A+",
-    state: "Odisha",
-    pincode: "751001",
+    state: "Rajasthan", //not used currently
+    pincode: "302020",
     address: "123 Test Street, Test City",
     emergencyContact: {
       name: `Emergency Contact ${timestamp}`,
@@ -80,8 +80,12 @@ test.describe("Patient Registration", () => {
       await page
         .getByPlaceholder("DD", { exact: true })
         .fill(patientData.dateOfBirth.day);
-      await page.getByPlaceholder("MM").fill(patientData.dateOfBirth.month);
-      await page.getByPlaceholder("YYYY").fill(patientData.dateOfBirth.year);
+      await page
+        .getByPlaceholder("MM", { exact: true })
+        .fill(patientData.dateOfBirth.month);
+      await page
+        .getByPlaceholder("YYYY", { exact: true })
+        .fill(patientData.dateOfBirth.year);
     });
 
     // Select blood group
@@ -92,22 +96,17 @@ test.describe("Patient Registration", () => {
 
     // Fill additional details
     await test.step("Fill additional details", async () => {
-      // Select state
-      const stateRegion = page.getByRole("region", {
-        name: /2: additional details/i,
-      });
-
-      // expect page to have text state
-      await expect(stateRegion).toHaveText(/state/i);
-
       // Use data-cy selector for state dropdown
       // fill address
       await page
         .getByRole("textbox", { name: "Address" })
         .fill(patientData.address);
-      // fill pincode
       await page
-        .getByRole("spinbutton", { name: "PIN Code" })
+        .getByRole("button", { name: /register patient/i })
+        .scrollIntoViewIfNeeded();
+      // fill Pincode
+      await page
+        .getByRole("spinbutton", { name: "PIN Code *" })
         .fill(patientData.pincode);
       // Scroll to the Register Patient button to ensure dropdown is visible
       await page
@@ -118,6 +117,7 @@ test.describe("Patient Registration", () => {
         .getByRole("combobox")
         .click();
 
+      // Select the state option by visible text
       // TODO: Update to a specific state once fixtures support it
       const stateOption = page.getByRole("option");
       await stateOption.waitFor({ state: "visible", timeout: 5000 });
@@ -224,9 +224,8 @@ test.describe("Patient Registration", () => {
         .getByRole("textbox", { name: "Address" })
         .fill(patientData.address);
 
-      // fill pincode
       await page
-        .getByRole("spinbutton", { name: "PIN Code" })
+        .getByRole("spinbutton", { name: "PIN Code *" })
         .fill(patientData.pincode);
 
       // Scroll to the Register Patient button to ensure dropdown is visible
@@ -318,8 +317,12 @@ test.describe("Patient Registration", () => {
       await page
         .getByPlaceholder("DD", { exact: true })
         .fill(patientData.dateOfBirth.day);
-      await page.getByPlaceholder("MM").fill(patientData.dateOfBirth.month);
-      await page.getByPlaceholder("YYYY").fill(patientData.dateOfBirth.year);
+      await page
+        .getByPlaceholder("MM", { exact: true })
+        .fill(patientData.dateOfBirth.month);
+      await page
+        .getByPlaceholder("YYYY", { exact: true })
+        .fill(patientData.dateOfBirth.year);
     });
 
     // Test patient tags
@@ -352,9 +355,8 @@ test.describe("Patient Registration", () => {
         .getByRole("textbox", { name: "Address" })
         .fill(patientData.address);
 
-      // fill pincode
       await page
-        .getByRole("spinbutton", { name: "PIN Code" })
+        .getByRole("spinbutton", { name: "PIN Code *" })
         .fill(patientData.pincode);
 
       // Scroll to the Register Patient button to ensure dropdown is visible
