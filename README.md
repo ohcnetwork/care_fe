@@ -196,6 +196,26 @@ npm run playwright:show-report    # View the HTML test report
 
 For more details, see [tests/README.md](tests/README.md).
 
+#### 🐳 Run Playwright tests with Docker
+
+For a fully containerized testing experience with the backend, use the custom Docker image:
+
+```sh
+# Using the helper script (recommended)
+./scripts/run-playwright-docker.sh
+
+# Or using docker-compose directly
+docker-compose -f docker-compose.playwright.yml up --build
+```
+
+This custom Docker setup:
+- Includes Playwright with pre-installed browsers
+- Automatically manages the CARE backend (@ohcnetwork/care)
+- Provides consistent testing environment across local and CI
+- Reduces setup complexity
+
+For detailed documentation, see [docs/playwright-docker.md](docs/playwright-docker.md).
+
 ## 📖 Documentations
 
 - [CARE Documentation](https://docs.ohc.network/docs/care)

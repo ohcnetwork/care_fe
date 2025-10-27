@@ -1,0 +1,71 @@
+# Custom Docker Image for Playwright E2E Testing with CARE Backend
+# This image includes Playwright, Node.js, Docker Compose, and all dependencies
+# needed to run the CARE frontend tests with the backend from @ohcnetwork/care
+
+FROM mcr.microsoft.com/playwright:v1.49.1-noble
+
+# Set working directory
+WORKDIR /workspace
+
+# Install additional dependencies including Docker
+RUN apt-get update && apt-get install -y \
+    git \
+    make \
+    curl \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Docker (for running care backend containers)
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y docker-ce-cli docker-compose-plugin && \
+    rm -rf /var/lib/apt/lists/*
+
+# Verify Node.js version (Playwright image comes with Node)
+RUN node --version && npm --version
+
+# Configure npm for better performance
+RUN npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000
+
+# Pre-install common frontend dependencies (can be overridden by mounting)
+WORKDIR /workspace/care_fe
+COPY package.json package-lock.json ./
+
+# Install dependencies
+RUN npm ci --prefer-offline --ignore-scripts
+
+# Copy application files
+COPY . .
+
+# Run post-install and setup scripts
+RUN npm run postinstall && npm run setup
+
+# Build the frontend application
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NODE_ENV=production
+RUN npm run build
+
+# Verify Playwright installation
+RUN npx playwright --version
+
+# Set default environment variables
+ENV REACT_CARE_API_URL=http://localhost:9000
+ENV CI=true
+ENV BACKEND_STARTUP_TIMEOUT=120
+
+# Create directory for backend
+WORKDIR /workspace
+
+# Expose ports for frontend and backend
+EXPOSE 4000 9000
+
+# Default working directory
+WORKDIR /workspace/care_fe
+
+# Default command
+CMD ["npx", "playwright", "test"]

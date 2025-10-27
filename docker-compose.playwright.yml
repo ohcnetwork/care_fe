@@ -1,0 +1,108 @@
+version: "3.9"
+
+# Docker Compose configuration for Playwright E2E Testing
+# This orchestrates the CARE backend and frontend for testing
+# 
+# Usage:
+#   1. Set JWKS_BASE64 environment variable
+#   2. Run: docker-compose -f docker-compose.playwright.yml up --build
+#   3. Tests will run automatically
+#
+# The care backend (@ohcnetwork/care) should be checked out in ../care
+# relative to this repository, or you can modify the context path below.
+
+services:
+  # Playwright test runner with frontend and backend integration
+  playwright:
+    build:
+      context: .
+      dockerfile: Dockerfile.playwright
+    environment:
+      REACT_CARE_API_URL: http://localhost:9000
+      CI: "true"
+      NODE_ENV: production
+      BACKEND_STARTUP_TIMEOUT: ${BACKEND_STARTUP_TIMEOUT:-120}
+      JWKS_BASE64: ${JWKS_BASE64:-}
+    volumes:
+      # Mount test results for access from host
+      - ./playwright-report:/workspace/care_fe/playwright-report
+      - ./test-results:/workspace/care_fe/test-results
+      # Mount Docker socket to allow running backend containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mount care backend if available locally
+      - ${CARE_BACKEND_PATH:-../care}:/workspace/care
+    network_mode: "host"
+    privileged: true
+    working_dir: /workspace/care_fe
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        echo "Starting Playwright E2E Tests with Backend Integration"
+        
+        # Check if care backend is available
+        if [ ! -d "/workspace/care" ]; then
+          echo "Cloning care backend from @ohcnetwork/care..."
+          cd /workspace
+          git clone --depth 1 --branch ${CARE_BACKEND_BRANCH:-develop} https://github.com/ohcnetwork/care.git
+          cd care_fe
+        fi
+        
+        # Start care backend
+        echo "Starting CARE backend services..."
+        cd /workspace/care
+        
+        # Configure backend environment
+        echo "DISABLE_RATELIMIT=True" >> docker/.local.env
+        if [ -n "$${JWKS_BASE64}" ]; then
+          echo "JWKS_BASE64=\"$${JWKS_BASE64}\"" >> docker/.local.env
+        fi
+        echo "MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500" >> docker/.local.env
+        
+        # Start backend with docker-compose
+        make docker_config_file=docker-compose.local.yaml up load-fixtures &
+        BACKEND_PID=$$!
+        
+        # Wait for backend to be ready
+        echo "Waiting for backend to be ready..."
+        timeout $${BACKEND_STARTUP_TIMEOUT} bash -c 'until curl -f http://localhost:9000/api/v1/health/ 2>/dev/null; do sleep 2; done' || {
+          echo "Backend failed to start within timeout"
+          exit 1
+        }
+        
+        echo "Backend is ready!"
+        
+        # Return to frontend directory
+        cd /workspace/care_fe
+        
+        # Start frontend preview server
+        echo "Starting frontend preview server..."
+        npm run preview &
+        FRONTEND_PID=$$!
+        
+        # Wait for frontend to be ready
+        timeout 30 bash -c 'until curl -f http://localhost:4000 2>/dev/null; do sleep 1; done' || {
+          echo "Frontend failed to start"
+          kill $$FRONTEND_PID 2>/dev/null || true
+          exit 1
+        }
+        
+        echo "Frontend is ready!"
+        
+        # Run Playwright tests
+        echo "Running Playwright tests..."
+        npx playwright test
+        TEST_EXIT_CODE=$$?
+        
+        # Cleanup
+        echo "Cleaning up..."
+        kill $$FRONTEND_PID 2>/dev/null || true
+        cd /workspace/care
+        make docker_config_file=docker-compose.local.yaml down || true
+        
+        exit $$TEST_EXIT_CODE
+
+volumes:
+  playwright-report:
+  test-results:
+
