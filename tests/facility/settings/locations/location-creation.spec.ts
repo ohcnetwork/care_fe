@@ -7,7 +7,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Facility Location Creation", () => {
   let facilityId: string;
-  // Common faker option arrays for all tests
+  // Common faker option arrays for all below tests
   const locationTypes = [
     "Building",
     "Ward",
