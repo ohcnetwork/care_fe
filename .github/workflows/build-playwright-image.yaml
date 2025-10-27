@@ -1,0 +1,171 @@
+name: Build Playwright Docker Image
+
+# This workflow builds and publishes the custom Playwright Docker image
+# to GitHub Container Registry (GHCR) for use in testing workflows
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'Dockerfile.playwright'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/build-playwright-image.yaml'
+  pull_request:
+    paths:
+      - 'Dockerfile.playwright'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+    inputs:
+      push_image:
+        description: 'Push image to registry'
+        required: false
+        default: 'true'
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/playwright
+
+jobs:
+  build:
+    if: github.repository == 'ohcnetwork/care_fe'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository 📥
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx 🔧
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry 🔐
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata 📋
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            # Branch name for branch pushes
+            type=ref,event=branch
+            # PR number for pull requests  
+            type=ref,event=pr
+            # SHA for all events
+            type=sha,prefix={{branch}}-
+            # Latest tag for default branch
+            type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.title=CARE Playwright Testing Image
+            org.opencontainers.image.description=Custom Docker image for Playwright E2E testing with CARE backend integration
+            org.opencontainers.image.vendor=Open Healthcare Network
+
+      - name: Build and push Docker image 🐳
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.playwright
+          push: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_image != 'false') }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+
+      - name: Generate build summary 📊
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## 🐳 Playwright Docker Image Build
+          
+          **Status:** ✅ Success
+          
+          **Image Details:**
+          - **Registry:** ${{ env.REGISTRY }}
+          - **Repository:** ${{ env.IMAGE_NAME }}
+          - **Tags:** 
+          ```
+          ${{ steps.meta.outputs.tags }}
+          ```
+          
+          **Labels:**
+          ```
+          ${{ steps.meta.outputs.labels }}
+          ```
+          
+          **Usage:**
+          ```bash
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          ```
+          
+          **Run Tests:**
+          ```bash
+          docker run --rm -v ./playwright-report:/workspace/care_fe/playwright-report \\
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          ```
+          EOF
+
+      - name: Test image 🧪
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Testing image build (not pushed in PRs)..."
+          docker images | grep playwright || echo "Image built successfully"
+
+  # Optional: Scan image for vulnerabilities
+  scan:
+    if: github.repository == 'ohcnetwork/care_fe' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository 📥
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry 🔐
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image for scanning
+        run: |
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Run Trivy vulnerability scanner 🔍
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Generate security summary
+        if: always()
+        run: |
+          echo "## 🔍 Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Vulnerability scan completed. Check Security tab for details." >> $GITHUB_STEP_SUMMARY

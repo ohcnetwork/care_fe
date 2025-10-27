@@ -83,6 +83,27 @@ jobs:
 
 ## Building the Image
 
+### Using Pre-built Image from GHCR
+
+The easiest way to use the custom image is to pull the pre-built version from GitHub Container Registry:
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/ohcnetwork/care_fe/playwright:latest
+
+# Pull a specific version
+docker pull ghcr.io/ohcnetwork/care_fe/playwright:develop
+docker pull ghcr.io/ohcnetwork/care_fe/playwright:main
+
+# Pull by commit SHA
+docker pull ghcr.io/ohcnetwork/care_fe/playwright:develop-abc123
+```
+
+The image is automatically built and published when:
+- Changes are pushed to `develop` or `main` branches
+- Changes are made to `Dockerfile.playwright`, `package.json`, or `package-lock.json`
+- Manually triggered via workflow dispatch
+
 ### Local Build
 
 ```bash
