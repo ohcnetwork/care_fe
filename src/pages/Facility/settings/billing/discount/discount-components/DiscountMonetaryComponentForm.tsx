@@ -57,20 +57,45 @@ export function DiscountMonetaryComponentForm({
         .object({
           monetary_component_type: z.literal(MonetaryComponentType.discount),
           code: CodeSchema.optional(),
-          factor: z.number().min(0).max(100).optional(),
-          amount: z
-            .string()
-            .refine((val) => !val || Number(val) >= 0, {
-              message: t("amount_must_be_greater_than_or_equal_to_0"),
+          factor: z
+            .number({
+              required_error: t("field_required"),
+              invalid_type_error: t("field_required"),
             })
+            .min(0)
+            .max(100)
             .optional(),
-          title: z.string().min(1, { message: t("field_required") }),
+          amount: z.string().optional(),
+          title: z
+            .string()
+            .trim()
+            .min(1, { message: t("field_required") }),
           conditions: z.array(conditionSchema).default([]),
         })
-        .refine((data) => data.factor != null || data.amount != null, {
-          message: t("either_amount_or_factor_required"),
-          path: ["factor", "amount"],
-        })
+        .refine(
+          (data) => {
+            if (valueType === "factor") {
+              return data.factor != null;
+            }
+            return data.amount != null && data.amount !== "";
+          },
+          {
+            message: t("field_required"),
+            path: valueType === "factor" ? ["factor"] : ["amount"],
+          },
+        )
+        .refine(
+          (data) => {
+            if (data.amount && data.amount !== "") {
+              return Number(data.amount) >= 0;
+            }
+            return true;
+          },
+          {
+            message: t("amount_must_be_greater_than_or_equal_to_0"),
+            path: ["amount"],
+          },
+        )
         .refine(
           (data) => {
             // If there's a code, it must have a display value
@@ -81,7 +106,7 @@ export function DiscountMonetaryComponentForm({
             path: ["code"],
           },
         ),
-    [t],
+    [t, valueType],
   );
 
   const { facility } = useCurrentFacility();
@@ -168,10 +193,14 @@ export function DiscountMonetaryComponentForm({
                               field.onChange(
                                 e.target.value
                                   ? parseFloat(e.target.value)
-                                  : null,
+                                  : undefined,
                               )
                             }
-                            value={field.value === null ? "" : field.value}
+                            value={
+                              field.value === null || field.value === undefined
+                                ? ""
+                                : field.value
+                            }
                             className="pr-8"
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
@@ -200,9 +229,13 @@ export function DiscountMonetaryComponentForm({
                             step="0.01"
                             {...field}
                             onChange={(e) =>
-                              field.onChange(e.target.value || null)
+                              field.onChange(e.target.value || undefined)
                             }
-                            value={field.value === null ? "" : field.value}
+                            value={
+                              field.value === null || field.value === undefined
+                                ? ""
+                                : field.value
+                            }
                             className="pl-8"
                           />
                         </div>
