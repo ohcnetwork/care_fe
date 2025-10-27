@@ -92,8 +92,6 @@ test.describe("Patient Registration", () => {
 
     // Fill additional details
     await test.step("Fill additional details", async () => {
-      // Navigate to additional details section
-
       // Select state
       const stateRegion = page.getByRole("region", {
         name: /2: additional details/i,
@@ -115,12 +113,14 @@ test.describe("Patient Registration", () => {
       await page
         .getByRole("button", { name: /register patient/i })
         .scrollIntoViewIfNeeded();
-      const stateCombobox = stateRegion.locator('[data-cy="select-state"]');
-      await stateCombobox.click();
+      await page
+        .getByRole("region", { name: ": Additional Details" })
+        .getByRole("combobox")
+        .click();
 
-      // Select the state option by visible text
-      const stateOption = page.getByRole("option", { name: patientData.state });
-      await stateOption.waitFor({ state: "visible" });
+      // TODO: Update to a specific state once fixtures support it
+      const stateOption = page.getByRole("option");
+      await stateOption.waitFor({ state: "visible", timeout: 5000 });
       await stateOption.click();
     });
 
@@ -182,8 +182,12 @@ test.describe("Patient Registration", () => {
       await page
         .getByPlaceholder("DD", { exact: true })
         .fill(patientData.dateOfBirth.day);
-      await page.getByPlaceholder("MM").fill(patientData.dateOfBirth.month);
-      await page.getByPlaceholder("YYYY").fill(patientData.dateOfBirth.year);
+      await page
+        .getByPlaceholder("MM", { exact: true })
+        .fill(patientData.dateOfBirth.month);
+      await page
+        .getByPlaceholder("YYYY", { exact: true })
+        .fill(patientData.dateOfBirth.year);
     });
 
     // Test emergency contact checkbox
@@ -207,8 +211,6 @@ test.describe("Patient Registration", () => {
 
     // Fill additional details
     await test.step("Fill additional details", async () => {
-      // Navigate to additional details section
-
       // Select state
       const stateRegion = page.getByRole("region", {
         name: /2: additional details/i,
@@ -235,7 +237,8 @@ test.describe("Patient Registration", () => {
       await stateCombobox.click();
 
       // Select the state option by visible text
-      const stateOption = page.getByRole("option", { name: patientData.state });
+      // TODO: Update to a specific state once fixtures support it
+      const stateOption = page.getByRole("option");
       await stateOption.waitFor({ state: "visible", timeout: 5000 });
       await stateOption.click();
     });
@@ -273,8 +276,8 @@ test.describe("Patient Registration", () => {
 
       // Fill date of birth
       await page.getByPlaceholder("DD", { exact: true }).fill("16");
-      await page.getByPlaceholder("MM").fill("06");
-      await page.getByPlaceholder("YYYY").fill("2009");
+      await page.getByPlaceholder("MM", { exact: true }).fill("06");
+      await page.getByPlaceholder("YYYY", { exact: true }).fill("2009");
 
       // Try to submit and expect validation error
       await page.getByRole("button", { name: /register patient/i }).click();
@@ -336,8 +339,6 @@ test.describe("Patient Registration", () => {
 
     // Fill additional details
     await test.step("Fill additional details", async () => {
-      // Navigate to additional details section
-
       // Select state
       const stateRegion = page.getByRole("region", {
         name: /2: additional details/i,
@@ -364,7 +365,8 @@ test.describe("Patient Registration", () => {
       await stateCombobox.click();
 
       // Select the state option by visible text
-      const stateOption = page.getByRole("option", { name: patientData.state });
+      // TODO: Update to a specific state once fixtures support it
+      const stateOption = page.getByRole("option");
       await stateOption.waitFor({ state: "visible", timeout: 5000 });
       await stateOption.click();
     });
@@ -378,5 +380,7 @@ test.describe("Patient Registration", () => {
         page.getByText(/patient registered successfully/i),
       ).toBeVisible({ timeout: 10000 });
     });
+
+    // TODO: Verify that selected tags are associated with the patient
   });
 });
