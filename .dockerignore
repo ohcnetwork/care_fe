@@ -4,3 +4,24 @@ build
 Dockerfile
 .git
 apps
+
+# Playwright-specific ignores
+playwright-report
+test-results
+.cache
+coverage
+
+# Development files
+.env.local
+.vscode
+.idea
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+cypress/videos
+cypress/screenshots

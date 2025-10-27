@@ -32,8 +32,8 @@ The custom Playwright Docker image provides:
 # Using the helper script (recommended)
 ./scripts/run-playwright-docker.sh
 
-# Or using docker-compose directly
-docker-compose -f docker-compose.playwright.yml up --build
+# Or using docker compose directly
+docker compose -f docker-compose.playwright.yml up --build
 ```
 
 ### Environment Variables

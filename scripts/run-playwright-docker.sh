@@ -33,7 +33,7 @@ log_error() {
 
 cleanup() {
     log_info "Cleaning up..."
-    docker-compose -f docker-compose.playwright.yml down -v 2>/dev/null || true
+    docker compose -f docker-compose.playwright.yml down -v 2>/dev/null || true
 }
 
 # Trap cleanup on exit
@@ -48,7 +48,8 @@ main() {
     
     # Check if JWKS file exists
     if [ -f "$JWKS_FILE" ]; then
-        export JWKS_BASE64=$(cat "$JWKS_FILE")
+        JWKS_BASE64=$(cat "$JWKS_FILE")
+        export JWKS_BASE64
         log_info "JWKS configuration loaded"
     else
         log_warn "JWKS file not found at $JWKS_FILE - some tests may fail"
@@ -64,10 +65,10 @@ main() {
     
     # Build and run the custom image
     log_info "Building custom Playwright Docker image..."
-    docker-compose -f docker-compose.playwright.yml build
+    docker compose -f docker-compose.playwright.yml build
     
     log_info "Running Playwright tests..."
-    docker-compose -f docker-compose.playwright.yml up --abort-on-container-exit
+    docker compose -f docker-compose.playwright.yml up --abort-on-container-exit
     
     # Get exit code
     EXIT_CODE=$?

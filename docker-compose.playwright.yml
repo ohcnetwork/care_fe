@@ -1,11 +1,9 @@
-version: "3.9"
-
 # Docker Compose configuration for Playwright E2E Testing
 # This orchestrates the CARE backend and frontend for testing
 # 
 # Usage:
 #   1. Set JWKS_BASE64 environment variable
-#   2. Run: docker-compose -f docker-compose.playwright.yml up --build
+#   2. Run: docker compose -f docker-compose.playwright.yml up --build
 #   3. Tests will run automatically
 #
 # The care backend (@ohcnetwork/care) should be checked out in ../care
