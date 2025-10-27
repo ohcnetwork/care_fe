@@ -58,7 +58,8 @@ function OrganizationCard({
       });
       toast.success(t("organization_deleted_successfully"));
     },
-    onError: () => {
+    onError: (error) => {
+      error.handled = true; // Mark as handled to prevent duplicate error toasts
       toast.error(t("something_went_wrong"));
     },
   });

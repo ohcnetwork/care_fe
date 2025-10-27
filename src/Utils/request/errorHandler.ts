@@ -11,6 +11,11 @@ export function handleHttpError(error: Error) {
     return;
   }
 
+  // Skip if error was already handled by a local onError handler
+  if ("handled" in error && error.handled) {
+    return;
+  }
+
   if (!(error instanceof HTTPError)) {
     toast.error(error.message || t("something_went_wrong"));
     return;

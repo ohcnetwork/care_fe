@@ -57,6 +57,7 @@ export const BookAppointmentDetails = ({
       );
     },
     onError: (error) => {
+      error.handled = true; // Mark as handled to prevent duplicate error toasts
       toast.error(error.message);
     },
   });

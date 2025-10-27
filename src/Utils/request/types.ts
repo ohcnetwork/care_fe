@@ -44,6 +44,7 @@ export class HTTPError extends Error {
   status: number;
   silent: boolean;
   cause?: HTTPErrorCause;
+  handled?: boolean; // Mark if error was handled by local onError handler
 
   constructor({
     message,
@@ -60,6 +61,7 @@ export class HTTPError extends Error {
     this.status = status;
     this.silent = silent;
     this.cause = cause;
+    this.handled = false;
   }
 }
 

@@ -159,6 +159,7 @@ export default function PatientSelect({
       });
     },
     onError: (error) => {
+      error.handled = true; // Mark as handled to prevent duplicate error toasts
       toast.error(error?.message || t("failed_to_create_appointment"));
     },
   });
