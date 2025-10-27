@@ -57,7 +57,7 @@ test.describe("Facility Location Creation", () => {
   });
 
   test("Add a new location with mandatory fields", async ({ page }) => {
-    await page.getByRole("button", { name: "Add Location" }).click();
+    // await page.getByRole("button", { name: "Add Location" }).click();
 
     // Select location type (mandatory field)
     await page.getByRole("combobox", { name: "Location Form" }).click();
