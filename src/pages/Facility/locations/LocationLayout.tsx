@@ -12,8 +12,8 @@ import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { InventoryList } from "@/pages/Facility/services/inventory/InventoryList";
 // import { ReceiveStock } from "@/pages/Facility/services/inventory/ReceiveStock";
 
+import { ExternalPurchasesList } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/ExternalPurchasesList";
 import RequestOrderForm from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderForm";
-import { ExternalPurchasesList } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderList";
 import { RequestOrderShow } from "@/pages/Facility/services/inventory/externalSupply/requestOrder/RequestOrderShow";
 
 import DeliveryOrderForm from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderForm";
