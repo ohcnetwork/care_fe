@@ -57,7 +57,7 @@ test.describe("Facility Location Creation", () => {
   });
 
   test("Add a new location with mandatory fields", async ({ page }) => {
-    // await page.getByRole("button", { name: "Add Location" }).click();
+    await page.getByRole("button", { name: "Add Location" }).click();
 
     // Select location type (mandatory field)
     await page.getByRole("combobox", { name: "Location Form" }).click();
@@ -89,6 +89,39 @@ test.describe("Facility Location Creation", () => {
     await expect(tableBody).toContainText(locationName);
     await expect(tableBody).toContainText(status);
     await expect(tableBody).toContainText(location);
+
+    // assert that all entered data is correctly displayed in edit slideover
+    await page.locator("button[name='Edit Location']").first().click();
+
+    // Verify that Location Form combobox is disabled and has the correct location type
+    const locationFormCombobox = page.getByRole("combobox", {
+      name: "Location Form",
+    });
+    await expect(locationFormCombobox).toBeDisabled();
+    await expect(locationFormCombobox).toContainText(location);
+
+    // Verify that Name textbox contains the correct location name
+    const nameTextbox = page.getByRole("textbox", { name: "Name" });
+    await expect(nameTextbox).toHaveValue(locationName);
+
+    // Verify that Description textbox is empty (since we didn't fill it during creation)
+    const descriptionTextbox = page.getByRole("textbox", {
+      name: "Description",
+    });
+    await expect(descriptionTextbox).toHaveValue("");
+
+    // Verify that Status combobox contains the correct status
+    const statusCombobox = page.getByRole("combobox", {
+      name: "Status",
+      exact: true,
+    });
+    await expect(statusCombobox).toContainText(status);
+
+    // Verify that Operational Status combobox contains the correct operational status
+    const operationalStatusCombobox = page.getByRole("combobox", {
+      name: "Operational Status",
+    });
+    await expect(operationalStatusCombobox).toContainText(operationalStatus);
   });
 
   test("Add a new location with all fields", async ({ page }) => {
@@ -128,13 +161,46 @@ test.describe("Facility Location Creation", () => {
     await expect(tableBody).toContainText(locationName);
     await expect(tableBody).toContainText(status);
     await expect(tableBody).toContainText(location);
+
+    // assert that all entered data is correctly displayed in edit slideover
+    await page.locator("button[name='Edit Location']").first().click();
+
+    // Verify that Location Form combobox is disabled and has the correct location type
+    const locationFormCombobox = page.getByRole("combobox", {
+      name: "Location Form",
+    });
+    await expect(locationFormCombobox).toBeDisabled();
+    await expect(locationFormCombobox).toContainText(location);
+
+    // Verify that Name textbox contains the correct location name
+    const nameTextbox = page.getByRole("textbox", { name: "Name" });
+    await expect(nameTextbox).toHaveValue(locationName);
+
+    // Verify that Description textbox contains the description (since we filled it during creation)
+    const descriptionTextbox = page.getByRole("textbox", {
+      name: "Description",
+    });
+    await expect(descriptionTextbox).toHaveValue(locationDescription);
+
+    // Verify that Status combobox contains the correct status
+    const statusCombobox = page.getByRole("combobox", {
+      name: "Status",
+      exact: true,
+    });
+    await expect(statusCombobox).toContainText(status);
+
+    // Verify that Operational Status combobox contains the correct operational status
+    const operationalStatusCombobox = page.getByRole("combobox", {
+      name: "Operational Status",
+    });
+    await expect(operationalStatusCombobox).toContainText(operationalStatus);
   });
 
   test("Modify an existing location and verify its updates", async ({
     page,
   }) => {
     // Click the first edit button (pencil icon) to open edit form
-    await page.locator("button:has(.lucide-pen-line)").first().click();
+    await page.locator("button[name='Edit Location']").first().click();
 
     // Update location name with new random value
     await page.getByRole("textbox", { name: "Name" }).fill(locationName);
@@ -155,7 +221,7 @@ test.describe("Facility Location Creation", () => {
     // Submit the updated form
     await page.getByRole("button", { name: "Update" }).click();
 
-    // Search for the updated locationw to verify changes were saved
+    // Search for the updated location to verify changes were saved
     await page
       .getByRole("textbox", { name: "Search by name" })
       .fill(locationName);
@@ -164,6 +230,31 @@ test.describe("Facility Location Creation", () => {
     const tableBody = page.locator('[data-slot="table-body"]');
     await expect(tableBody).toContainText(locationName);
     await expect(tableBody).toContainText(status);
+
+    // Verify the updated data is correctly displayed in edit form
+    await page.locator("button[name='Edit Location']").first().click();
+
+    // Verify that all updated values are correctly saved and displayed
+    const updatedNameTextbox = page.getByRole("textbox", { name: "Name" });
+    await expect(updatedNameTextbox).toHaveValue(locationName);
+
+    const updatedDescriptionTextbox = page.getByRole("textbox", {
+      name: "Description",
+    });
+    await expect(updatedDescriptionTextbox).toHaveValue(locationDescription);
+
+    const updatedStatusCombobox = page.getByRole("combobox", {
+      name: "Status",
+      exact: true,
+    });
+    await expect(updatedStatusCombobox).toContainText(status);
+
+    const updatedOperationalStatusCombobox = page.getByRole("combobox", {
+      name: "Operational Status",
+    });
+    await expect(updatedOperationalStatusCombobox).toContainText(
+      operationalStatus,
+    );
   });
 
   test("Validate location create button is disabled when mandatory fields are empty", async ({
@@ -178,39 +269,5 @@ test.describe("Facility Location Creation", () => {
     // Verify that Create button is disabled when mandatory fields are empty
     const createButton = page.getByRole("button", { name: "Create" });
     await expect(createButton).toBeDisabled();
-  });
-
-  test("Verify the existing data are properly visible in edit form", async ({
-    page,
-  }) => {
-    await page.locator("button:has(.lucide-pen-line)").first().click();
-
-    // Check if the Location Form combobox is disabled
-    const locationFormCombobox = page.getByRole("combobox", {
-      name: "Location Form",
-    });
-    await expect(locationFormCombobox).toBeDisabled();
-
-    // Check if the Name textbox is filled with some existing location name (not empty)
-    const nameTextbox = page.getByRole("textbox", { name: "Name" });
-    await expect(nameTextbox).not.toHaveValue("");
-
-    // Check if the Status combobox has some value selected (not empty)
-    const statusCombobox = page.getByRole("combobox", {
-      name: "Status",
-      exact: true,
-    });
-    await expect(statusCombobox).not.toBeEmpty();
-
-    // Check if the Operational Status combobox has some value selected (not empty)
-    const operationalStatusCombobox = page.getByRole("combobox", {
-      name: "Operational Status",
-      exact: true,
-    });
-    await expect(operationalStatusCombobox).not.toBeEmpty();
-
-    // Check if the Update button is disabled unless there are changes
-    const updateButton = page.getByRole("button", { name: "Update" });
-    await expect(updateButton).toBeDisabled();
   });
 });

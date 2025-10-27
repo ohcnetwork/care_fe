@@ -242,6 +242,7 @@ export function LocationTable({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
+                                name="Edit Location"
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => onEdit(location)}
