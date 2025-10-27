@@ -35,7 +35,7 @@ interface Props {
 }
 
 function CodeDisplay({ code }: { code: Code | null }) {
-  if (!code) return null;
+  if (!code || !code.system || !code.code) return null;
   return (
     <div className="space-y-1">
       <p className="text-sm font-medium">{code.display}</p>
@@ -102,7 +102,7 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
                 {t(product.status)}
               </Badge>
             </div>
-            {product.code && (
+            {product.code && product.code.system && product.code.code && (
               <p className="mt-1 text-sm text-gray-600">
                 {product.code.system} | {product.code.code}
               </p>
