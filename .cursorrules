@@ -30,6 +30,7 @@ CARE is a Digital Public Good and Hospital Management Information System (HMIS) 
 - Use the "function" keyword for pure functions
 - Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements
 - Use declarative JSX
+- Export page components as default exports
 - Handle data with proper null checks and error boundaries
 
 ## UI and Styling
