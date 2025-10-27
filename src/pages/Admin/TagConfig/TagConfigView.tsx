@@ -97,10 +97,6 @@ export default function TagConfigView({
         queryKey: ["tagConfig", "children", tagId, facilityId],
       });
     },
-    onError: (error: any) => {
-      error.handled = true; // Mark as handled to prevent duplicate error toasts
-      toast.error(error?.message || t("failed_to_archive_child_tag"));
-    },
   });
 
   const handleEditSuccess = () => {

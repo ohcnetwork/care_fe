@@ -155,7 +155,6 @@ export function EditChargeItemSheet({
       setIsOpen(false);
     },
     onError: (error) => {
-      error.handled = true; // Mark as handled to prevent duplicate error toasts
       toast.error(error.message || t("error_updating_charge_item"));
     },
   });

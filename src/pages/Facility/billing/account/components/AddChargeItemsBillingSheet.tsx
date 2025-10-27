@@ -93,8 +93,7 @@ export default function AddChargeItemsBillingSheet({
       toast.success(t("charge_items_added_successfully"));
       setIsSubmitting(false);
     },
-    onError: (error) => {
-      error.handled = true; // Mark as handled to prevent duplicate error toasts
+    onError: () => {
       setIsSubmitting(false);
     },
   });

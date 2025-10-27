@@ -62,7 +62,6 @@ export default function EditUserRoleSheet({
       setOpen(false);
     },
     onError: (error) => {
-      error.handled = true; // Mark as handled to prevent duplicate error toasts
       const errorData = error.cause as { errors: { msg: string[] } };
       errorData.errors.msg.forEach((er) => {
         toast.error(er);
@@ -83,7 +82,6 @@ export default function EditUserRoleSheet({
       setOpen(false);
     },
     onError: (error) => {
-      error.handled = true; // Mark as handled to prevent duplicate error toasts
       const errorData = error.cause as { errors: { msg: string[] } };
       errorData.errors.msg.forEach((er) => {
         toast.error(er);
