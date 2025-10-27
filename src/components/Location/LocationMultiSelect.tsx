@@ -298,7 +298,9 @@ function SelectedLocationPill({
 }) {
   return (
     <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5">
-      <span className="text-sm font-medium">{location.name}</span>
+      <span className="text-sm font-medium text-nowrap truncate max-w-[100px] sm:max-w-none">
+        {location.name}
+      </span>
       <Button
         onClick={(e) => {
           e.preventDefault();
@@ -316,7 +318,7 @@ function SelectedLocationPill({
 
 function LoadingSkeleton() {
   return (
-    <div className="p-4">
+    <div className="p-4 h-72">
       <div className="space-y-2">
         {Array.from({ length: 3 }).map((_, i) => (
           <div
@@ -492,7 +494,7 @@ export default function LocationMultiSelect({
       }
 
       return (
-        <div className="p-4 text-sm text-gray-500">
+        <div className="p-4 text-sm text-gray-500 h-72 text-center">
           {t("no_locations_found")}
         </div>
       );
@@ -500,7 +502,7 @@ export default function LocationMultiSelect({
 
     if (topLevelLocations?.results && topLevelLocations.results.length > 0) {
       return (
-        <>
+        <div className="overflow-y-auto max-h-[55dvh] md:max-h-[50dvh] lg:max-h-[40dvh]">
           {topLevelLocations.results.map((location) => (
             <LocationTreeNode
               key={location.id}
@@ -513,7 +515,7 @@ export default function LocationMultiSelect({
               addLocationsToMap={addLocationsToMap}
             />
           ))}
-        </>
+        </div>
       );
     }
 
@@ -525,20 +527,18 @@ export default function LocationMultiSelect({
   };
 
   return (
-    <div className="h-full flex flex-col gap-2 overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden">
       {value.length > 0 && (
         <>
-          <ScrollArea className="max-h-32">
-            <div className="flex flex-wrap gap-2 px-3">
-              {value.map((location) => (
-                <SelectedLocationPill
-                  key={location.id}
-                  location={location}
-                  onRemove={handleRemove}
-                />
-              ))}
-            </div>
-          </ScrollArea>
+          <div className="flex flex-nowrap sm:flex-wrap gap-2 overflow-x-auto p-1.5 sm:max-h-32 mr-2">
+            {value.map((location) => (
+              <SelectedLocationPill
+                key={location.id}
+                location={location}
+                onRemove={handleRemove}
+              />
+            ))}
+          </div>
           <div className="flex flex-col border-b py-1" />
         </>
       )}
@@ -547,7 +547,7 @@ export default function LocationMultiSelect({
         <Input
           type="text"
           placeholder={t("search_locations")}
-          className="w-full rounded-md bg-background pl-8 py-2 text-sm focus-visible:ring-0"
+          className="w-full rounded-md bg-background pl-8 py-2 text-sm focus-visible:ring-0 text-base sm:text-sm"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />

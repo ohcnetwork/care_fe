@@ -1,12 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterSelect } from "@/components/ui/filter-select";
@@ -25,6 +23,8 @@ import {
   CardGridSkeleton,
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
+
+import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 
 import useFilters from "@/hooks/useFilters";
 
@@ -47,14 +47,14 @@ function ProductCard({
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="mb-4 flex flex-wrap flex-col md:flex-row items-start justify-between gap-2">
           <div>
             <div className="mb-2 flex items-center gap-2">
               <Badge variant={PRODUCT_STATUS_COLORS[product.status]}>
                 {t(product.status)}
               </Badge>
             </div>
-            <h3 className="font-medium text-gray-900 break-normal">
+            <h3 className="font-medium text-gray-900 break-normal text-lg">
               {product.product_knowledge.name}
             </h3>
             {product.batch?.lot_number && (
@@ -69,16 +69,9 @@ function ProductCard({
               </p>
             )}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              navigate(`/facility/${facilityId}/settings/product/${product.id}`)
-            }
-          >
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("see_details")}
-          </Button>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <ProductActions product={product} facilityId={facilityId} />
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -217,18 +210,12 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
                             : "-"}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              navigate(
-                                `/facility/${facilityId}/settings/product/${product.id}`,
-                              )
-                            }
-                          >
-                            <CareIcon icon="l-edit" className="size-4" />
-                            {t("see_details")}
-                          </Button>
+                          <div className="flex gap-2">
+                            <ProductActions
+                              product={product}
+                              facilityId={facilityId}
+                            />
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -246,5 +233,20 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
         )}
       </div>
     </Page>
+  );
+}
+
+function ProductActions({
+  product,
+  facilityId,
+}: {
+  product: ProductRead;
+  facilityId: string;
+}) {
+  return (
+    <ActionButtons
+      editPath={`/facility/${facilityId}/settings/product/${product.id}/edit`}
+      viewPath={`/facility/${facilityId}/settings/product/${product.id}`}
+    />
   );
 }
