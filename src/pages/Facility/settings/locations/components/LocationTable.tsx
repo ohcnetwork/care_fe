@@ -38,7 +38,7 @@ import { LocationList, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 // Animated version of TableRow
-const AnimatedTableRow = motion(TableRow);
+const AnimatedTableRow = motion.create(TableRow);
 
 interface Props {
   locations: LocationList[];
