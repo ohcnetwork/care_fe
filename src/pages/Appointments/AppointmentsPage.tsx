@@ -811,7 +811,8 @@ function AppointmentRow(props: {
     if (props.onCountChange) {
       props.onCountChange(data?.count ?? 0);
     }
-  }, [data?.count, props.onCountChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.count]);
 
   return (
     <div className="overflow-x-auto">
