@@ -1,6 +1,6 @@
-import { getFacilityId } from "@/tests/support/facilityId";
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
@@ -26,7 +26,7 @@ test.describe("Facility Location Creation", () => {
     "Unoccupied",
   ];
 
-  // Generate fresh faker constants for each test
+  // Generate the fresh faker constants for each test
   let location: string;
   let locationName: string;
   let locationDescription: string;
