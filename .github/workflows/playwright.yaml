@@ -11,13 +11,6 @@ on:
     branches: [main, develop, production, playwright-actions]
   pull_request:
     branches: [develop, production]
-    paths:
-      - "src/**"
-      - "tests/**"
-      - "package.json"
-      - "package-lock.json"
-      - "playwright.config.ts"
-      - ".github/workflows/playwright.yaml"
   workflow_dispatch:
 
 concurrency:
@@ -52,7 +45,7 @@ jobs:
 
   # Build application once and cache for all test shards
   build:
-    if: github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
+    if: always() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
     needs: changes
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -86,7 +79,7 @@ jobs:
 
   # Run E2E tests with backend integration
   test:
-    if: github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
+    if: always() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
     needs: [changes, build]
     timeout-minutes: 30
     runs-on: ubuntu-latest
@@ -192,17 +185,47 @@ jobs:
 
   # Aggregate results and create final report
   report:
-    if: always() && github.repository == 'ohcnetwork/care_fe' && needs.changes.outputs.tests == 'true'
+    if: always() && github.repository == 'ohcnetwork/care_fe'
     needs: [changes, test]
     runs-on: ubuntu-latest
     steps:
+      - name: Check if tests were skipped
+        id: skipped
+        run: |
+          if [ "${{ needs.changes.outputs.tests }}" != "true" ]; then
+            echo "skipped=true" >> $GITHUB_OUTPUT
+          else
+            echo "skipped=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate skipped comment
+        if: steps.skipped.outputs.skipped == 'true'
+        run: |
+          cat > pr-comment.md << 'EOF'
+          ## 🎭 Playwright Test Results
+
+          **Status:** ⏭️ Skipped
+
+          No test-related files were changed in this PR.
+
+          Tests are skipped when changes don't affect:
+          - `tests/**`
+          - `src/**`
+          - `package.json`
+          - `playwright.config.ts`
+
+          <sub>Run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})</sub>
+          EOF
+
       - name: Download all test results
+        if: steps.skipped.outputs.skipped == 'false'
         uses: actions/download-artifact@v4
         with:
           pattern: playwright-results-shard-*
           path: all-results
 
       - name: Merge test results
+        if: steps.skipped.outputs.skipped == 'false'
         id: merge
         run: |
           TOTAL_TESTS=0
@@ -244,6 +267,7 @@ jobs:
           fi
 
       - name: Upload final report
+        if: steps.skipped.outputs.skipped == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: playwright-final-report
@@ -251,7 +275,7 @@ jobs:
           retention-days: 14
 
       - name: Generate PR comment
-        if: always()
+        if: steps.skipped.outputs.skipped == 'false'
         run: |
           cat > pr-comment.md << 'EOF'
           ## 🎭 Playwright Test Results
@@ -294,7 +318,7 @@ jobs:
           retention-days: 1
 
       - name: Fail workflow if tests failed
-        if: needs.test.result == 'failure'
+        if: steps.skipped.outputs.skipped == 'false' && needs.test.result == 'failure'
         run: |
           echo "::error::One or more test shards failed"
           exit 1

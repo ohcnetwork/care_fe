@@ -56,3 +56,9 @@ jobs:
           issue-number: ${{ steps.pr.outputs.number }}
           edit-mode: replace
           body: ${{ steps.comment.outputs.body }}
+
+      - name: Fail if tests failed
+        if: github.event.workflow_run.conclusion == 'failure'
+        run: |
+          echo "::error::Playwright tests failed in the upstream workflow"
+          exit 1
