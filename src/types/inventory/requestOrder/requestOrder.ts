@@ -3,8 +3,8 @@ import { LocationDetail } from "@/types/location/location";
 import { Organization } from "@/types/organization/organization";
 
 export enum RequestOrderStatus {
-  draft = "draft",
   pending = "pending",
+  draft = "draft",
   completed = "completed",
   abandoned = "abandoned",
   entered_in_error = "entered_in_error",

@@ -3,8 +3,9 @@ import { LocationDetail } from "@/types/location/location";
 import { Organization } from "@/types/organization/organization";
 
 export enum DeliveryOrderStatus {
-  draft = "draft",
   pending = "pending",
+  in_progress = "in_progress",
+  draft = "draft",
   completed = "completed",
   abandoned = "abandoned",
   entered_in_error = "entered_in_error",
@@ -13,6 +14,7 @@ export enum DeliveryOrderStatus {
 export const DELIVERY_ORDER_STATUS_COLORS = {
   draft: "secondary",
   pending: "yellow",
+  in_progress: "blue",
   completed: "green",
   abandoned: "destructive",
   entered_in_error: "destructive",

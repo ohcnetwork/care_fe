@@ -3,6 +3,8 @@ import { ProductRead } from "@/types/inventory/product/product";
 import { SupplyRequestRead } from "@/types/inventory/supplyRequest/supplyRequest";
 
 export enum SupplyDeliveryStatus {
+  draft = "draft",
+  pending = "pending",
   in_progress = "in_progress",
   completed = "completed",
   abandoned = "abandoned",
@@ -10,6 +12,8 @@ export enum SupplyDeliveryStatus {
 }
 
 export const SUPPLY_DELIVERY_STATUS_COLORS = {
+  draft: "secondary",
+  pending: "yellow",
   in_progress: "blue",
   completed: "green",
   abandoned: "destructive",

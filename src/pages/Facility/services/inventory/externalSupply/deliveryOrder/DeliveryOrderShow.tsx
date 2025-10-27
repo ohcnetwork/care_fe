@@ -383,7 +383,10 @@ export function DeliveryOrderShow({
                 <Trans
                   i18nKey="delivery_request_from_to"
                   values={{
-                    from: deliveryOrder.origin?.name || t("origin"),
+                    from:
+                      deliveryOrder.origin?.name ||
+                      deliveryOrder.supplier?.name ||
+                      t("origin"),
                     to: deliveryOrder.destination?.name || t("destination"),
                   }}
                   components={{
@@ -497,7 +500,13 @@ export function DeliveryOrderShow({
         {/* Supply Deliveries Section */}
         <Card>
           <CardHeader className="text-lg flex flex-row justify-between">
-            <CardTitle>{t("supply_deliveries")}</CardTitle>
+            <CardTitle>
+              {isRequester
+                ? deliveryOrder.status === DeliveryOrderStatus.completed
+                  ? t("items_updated_stock")
+                  : t("items_to_receive")
+                : t("supply_deliveries")}
+            </CardTitle>
             <div className="flex gap-2">
               <div className="flex items-center">
                 <div>
@@ -537,7 +546,7 @@ export function DeliveryOrderShow({
                       >
                         {isUpsertingDeliveries
                           ? t("updating")
-                          : t("confirm_update_stock")}
+                          : t("receive_update_stock")}
                         <ShortcutBadge actionId="enter-action" />
                       </Button>
                       <DropdownMenu>
@@ -642,11 +651,7 @@ export function DeliveryOrderShow({
                     />
                   </div>
                 ) : (
-                  <EmptyState
-                    icon={<Truck className="size-5 text-primary-600" />}
-                    title={t("no_deliveries_found")}
-                    description={t("no_deliveries_found_description")}
-                  />
+                  <></>
                 )}
 
                 {/* Add New Supply Delivery Form - Always show when in draft mode */}
@@ -712,7 +717,7 @@ export function DeliveryOrderShow({
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t("confirm_update_stock")}</DialogTitle>
+              <DialogTitle>{t("receive_update_stock")}</DialogTitle>
               <DialogDescription>
                 {t("apply_updates_selected", {
                   count: selectedDeliveries.length,
