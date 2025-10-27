@@ -83,7 +83,7 @@ test.describe("Facility Location Creation", () => {
     await expect(tableBody).toContainText(status);
     await expect(tableBody).toContainText(location);
 
-    // assert that all entered data is correctly displayed in edit slideover
+    // Assert that all entered data is correctly displayed in edit slideover
     await page.locator("button[title='Edit Location']").first().click();
 
     // Verify that Location Form combobox is disabled and has the correct location type
