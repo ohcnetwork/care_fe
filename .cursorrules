@@ -41,7 +41,7 @@ CARE is a Digital Public Good and Hospital Management Information System (HMIS) 
 ## Data & API Guidelines
 
 - CARE uses TanStack Query for data fetching with query and mutate utilities (src/Utils/request/README.md)
-- APIs are defined in \*.Api.ts files under src/types/ directories
+- APIs are defined in *.Api.ts files under src/types/ directories
 - Use zod validation for all data inputs
 - Handle data with appropriate security measures
 
@@ -68,4 +68,4 @@ For Playwright testing guidelines, refer to tests/README.md for testing patterns
 
 ## Reference
 
-See .github/copilot-instructions.md and .cursor/rules/\*.mdc for comprehensive guidance.
+See .github/copilot-instructions.md and .cursor/rules/*.mdc for comprehensive guidance.
