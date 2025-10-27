@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { Check, ChevronDownIcon, LocateFixed, XIcon } from "lucide-react";
+import { Check, LocateFixed, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -28,11 +28,6 @@ import query from "@/Utils/request/query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import {
@@ -51,6 +46,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -68,6 +64,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
+import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 
 interface SelectedLocation {
@@ -527,6 +524,7 @@ export default function DispenseDrawer({
                     action={
                       <ProductKnowledgeSelect
                         onChange={(product) => {
+                          if (!product) return;
                           append({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,
@@ -654,233 +652,25 @@ export default function DispenseDrawer({
                                   <>
                                     <TableCell>
                                       <div className="space-y-2">
-                                        <Popover>
-                                          <PopoverTrigger>
-                                            <Button
-                                              variant="outline"
-                                              className="w-auto min-w-40 h-auto justify-between px-2 border-gray-300 border"
-                                              type="button"
-                                            >
-                                              <div className="flex flex-col min-w-40 items-start gap-1 w-full">
-                                                {(() => {
-                                                  const selectedLots = form
-                                                    .watch(
-                                                      `items.${index}.lots`,
-                                                    )
-                                                    .filter(
-                                                      (lot) =>
-                                                        lot.selectedInventoryId,
-                                                    );
-
-                                                  if (
-                                                    selectedLots.length === 0
-                                                  ) {
-                                                    return (
-                                                      <span className="text-gray-500">
-                                                        {t("select_stock")}
-                                                      </span>
-                                                    );
-                                                  }
-
-                                                  return selectedLots.map(
-                                                    (lot) => {
-                                                      const selectedInventory =
-                                                        productKnowledgeInventoriesMap[
-                                                          productKnowledge.id
-                                                        ]?.find(
-                                                          (inv) =>
-                                                            inv.id ===
-                                                            lot.selectedInventoryId,
-                                                        );
-
-                                                      return (
-                                                        <div
-                                                          key={
-                                                            lot.selectedInventoryId
-                                                          }
-                                                          className="flex items-center justify-between w-full bg-gray-50 px-px py-px border-gray-200 border-1 rounded-sm text-gray-950 gap-1"
-                                                        >
-                                                          <span className="font-medium text-sm ml-1">
-                                                            {
-                                                              selectedInventory
-                                                                ?.product.batch
-                                                                ?.lot_number
-                                                            }
-                                                          </span>
-                                                          <Badge
-                                                            variant={
-                                                              selectedInventory?.status ===
-                                                                "active" &&
-                                                              selectedInventory?.net_content >
-                                                                0
-                                                                ? "primary"
-                                                                : "destructive"
-                                                            }
-                                                            className="border-none rounded-sm"
-                                                          >
-                                                            {
-                                                              selectedInventory?.net_content
-                                                            }{" "}
-                                                            {selectedInventory
-                                                              ?.product
-                                                              .product_knowledge
-                                                              .base_unit
-                                                              .display ||
-                                                              t("units")}
-                                                          </Badge>
-                                                          {selectedInventory
-                                                            ?.product
-                                                            .expiration_date && (
-                                                            <Badge
-                                                              variant={
-                                                                selectedInventory.status ===
-                                                                  "active" &&
-                                                                new Date(
-                                                                  selectedInventory.product.expiration_date,
-                                                                ) >= new Date()
-                                                                  ? "primary"
-                                                                  : "destructive"
-                                                              }
-                                                            >
-                                                              {t("expiry")}:{" "}
-                                                              {selectedInventory
-                                                                .product
-                                                                .expiration_date
-                                                                ? formatDate(
-                                                                    selectedInventory
-                                                                      .product
-                                                                      .expiration_date,
-                                                                    "dd/MM/yyyy",
-                                                                  )
-                                                                : "-"}
-                                                            </Badge>
-                                                          )}
-                                                        </div>
-                                                      );
-                                                    },
-                                                  );
-                                                })()}
-                                              </div>
-                                              <ChevronDownIcon className="size-4 shrink-0" />
-                                            </Button>
-                                          </PopoverTrigger>
-                                          <PopoverContent className="w-auto p-0">
-                                            <div className="max-h-60 overflow-auto">
-                                              {productKnowledgeInventoriesMap[
-                                                productKnowledge.id
-                                              ]?.length ? (
-                                                productKnowledgeInventoriesMap[
-                                                  productKnowledge.id
-                                                ]?.map((inv) => {
-                                                  const currentLots =
-                                                    form.watch(
-                                                      `items.${index}.lots`,
-                                                    );
-                                                  const isSelected =
-                                                    currentLots.some(
-                                                      (lot) =>
-                                                        lot.selectedInventoryId ===
-                                                        inv.id,
-                                                    );
-
-                                                  return (
-                                                    <div
-                                                      key={inv.id}
-                                                      className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent"
-                                                      onClick={() => {
-                                                        const lots =
-                                                          form.getValues(
-                                                            `items.${index}.lots`,
-                                                          );
-
-                                                        if (isSelected) {
-                                                          form.setValue(
-                                                            `items.${index}.lots`,
-                                                            lots.filter(
-                                                              (lot) =>
-                                                                lot.selectedInventoryId !==
-                                                                inv.id,
-                                                            ),
-                                                          );
-                                                        } else {
-                                                          form.setValue(
-                                                            `items.${index}.lots`,
-                                                            [
-                                                              ...lots,
-                                                              {
-                                                                selectedInventoryId:
-                                                                  inv.id,
-                                                                quantity: 1,
-                                                              },
-                                                            ],
-                                                          );
-                                                        }
-                                                      }}
-                                                    >
-                                                      <Checkbox
-                                                        checked={isSelected}
-                                                        className="mr-2"
-                                                      />
-                                                      <div className="flex-1 flex items-center justify-between gap-1">
-                                                        <span>
-                                                          {
-                                                            inv.product.batch
-                                                              ?.lot_number
-                                                          }
-                                                        </span>
-                                                        <Badge
-                                                          variant={
-                                                            inv.status ===
-                                                              "active" &&
-                                                            inv.net_content > 0
-                                                              ? "primary"
-                                                              : "destructive"
-                                                          }
-                                                          className="ml-2"
-                                                        >
-                                                          {inv.net_content}{" "}
-                                                          {inv.product
-                                                            .product_knowledge
-                                                            .base_unit
-                                                            .display ||
-                                                            t("units")}
-                                                        </Badge>
-                                                        {inv.product
-                                                          ?.expiration_date && (
-                                                          <Badge
-                                                            variant={
-                                                              inv.status ===
-                                                                "active" &&
-                                                              new Date(
-                                                                inv.product.expiration_date,
-                                                              ) >= new Date()
-                                                                ? "primary"
-                                                                : "destructive"
-                                                            }
-                                                          >
-                                                            {t("expiry")}:{" "}
-                                                            {inv.product
-                                                              .expiration_date
-                                                              ? formatDate(
-                                                                  inv.product
-                                                                    .expiration_date,
-                                                                  "dd/MM/yyyy",
-                                                                )
-                                                              : "-"}
-                                                          </Badge>
-                                                        )}
-                                                      </div>
-                                                    </div>
-                                                  );
-                                                })
-                                              ) : (
-                                                <div className="p-4 text-center text-gray-500">
-                                                  {t("no_lots_found")}
-                                                </div>
-                                              )}
-                                            </div>
-                                          </PopoverContent>
-                                        </Popover>
+                                        <StockLotSelector
+                                          selectedLots={form.watch(
+                                            `items.${index}.lots`,
+                                          )}
+                                          availableInventories={
+                                            productKnowledgeInventoriesMap[
+                                              productKnowledge.id
+                                            ] || []
+                                          }
+                                          onLotSelectionChange={(lots) => {
+                                            form.setValue(
+                                              `items.${index}.lots`,
+                                              lots,
+                                            );
+                                          }}
+                                          placeholder={t("select_stock")}
+                                          showexpiry={false}
+                                          multiSelect={true}
+                                        />
                                       </div>
                                     </TableCell>
                                     <TableCell className="space-y-2">
@@ -1042,6 +832,8 @@ export default function DispenseDrawer({
                     <div className="my-4">
                       <ProductKnowledgeSelect
                         onChange={(product) => {
+                          if (!product) return;
+
                           append({
                             reference_id: crypto.randomUUID(),
                             productKnowledge: product,

@@ -151,9 +151,7 @@ export default function AdminOrganizationList({
                             <button type="button">{t("organizations")}</button>
                           </BreadcrumbLink>
                         </BreadcrumbItem>
-                        <BreadcrumbItem>
-                          <BreadcrumbSeparator />
-                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
                         {orgParents.reverse().map((parent) => (
                           <React.Fragment key={parent.id}>
                             <BreadcrumbItem>
@@ -165,9 +163,7 @@ export default function AdminOrganizationList({
                                 <button type="button">{parent.name}</button>
                               </BreadcrumbLink>
                             </BreadcrumbItem>
-                            <BreadcrumbItem key={`ellipsis-${parent.id}`}>
-                              <BreadcrumbSeparator />
-                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
                           </React.Fragment>
                         ))}
                         <BreadcrumbItem key={org?.id}>

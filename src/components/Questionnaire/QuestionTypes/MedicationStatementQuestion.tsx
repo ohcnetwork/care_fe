@@ -32,7 +32,7 @@ import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
 import { formatDosage } from "@/components/Medicine/utils";
-import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
+import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -384,7 +384,6 @@ export function MedicationStatementQuestion({
                   offset,
                   status:
                     "active,on_hold,draft,unknown,ended,completed,cancelled",
-                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response as PaginatedResponse<MedicationRequestRead>;
@@ -428,7 +427,6 @@ export function MedicationStatementQuestion({
                   offset,
                   status:
                     "active,on_hold,completed,stopped,unknown,not_taken,intended",
-                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response as PaginatedResponse<MedicationStatementRead>;
@@ -647,7 +645,7 @@ export function MedicationStatementQuestion({
           />
         </div>
       ) : (
-        <EntitySelectionSheet
+        <EntitySelectionDrawer
           open={!!newMedicationInSheet}
           onOpenChange={(open) => {
             if (!open) {
@@ -662,29 +660,27 @@ export function MedicationStatementQuestion({
           onConfirm={handleConfirmMedication}
           placeholder={addMedicationPlaceholder}
         >
-          <div className="space-y-4 p-3">
-            {newMedicationInSheet && (
-              <MedicationStatementGridRow
-                medication={newMedicationInSheet}
-                disabled={disabled}
-                onUpdate={(updates) => {
-                  setNewMedicationInSheet((prev) =>
-                    prev
-                      ? {
-                          ...prev,
-                          ...updates,
-                        }
-                      : null,
-                  );
-                }}
-                onRemove={() => {}}
-                index={-1}
-                questionId={question.id}
-                errors={errors}
-              />
-            )}
-          </div>
-        </EntitySelectionSheet>
+          {newMedicationInSheet && (
+            <MedicationStatementGridRow
+              medication={newMedicationInSheet}
+              disabled={disabled}
+              onUpdate={(updates) => {
+                setNewMedicationInSheet((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        ...updates,
+                      }
+                    : null,
+                );
+              }}
+              onRemove={() => {}}
+              index={-1}
+              questionId={question.id}
+              errors={errors}
+            />
+          )}
+        </EntitySelectionDrawer>
       )}
     </div>
   );
