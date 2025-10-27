@@ -175,7 +175,7 @@ test.describe("Facility Location Creation", () => {
     await expect(createButton).toBeDisabled();
   });
 
-  test("Verify the existing datas are properly visible in edit form", async ({
+  test("Verify the existing data are properly visible in edit form", async ({
     page,
   }) => {
     await page.locator("button:has(.lucide-pen-line)").first().click();
@@ -204,7 +204,7 @@ test.describe("Facility Location Creation", () => {
     });
     await expect(operationalStatusCombobox).not.toBeEmpty();
 
-    // Check if the Update button is enabled
+    // Check if the Update button is disabled unless there are changes
     const updateButton = page.getByRole("button", { name: "Update" });
     await expect(updateButton).toBeDisabled();
   });
