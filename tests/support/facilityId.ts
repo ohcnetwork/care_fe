@@ -37,7 +37,7 @@ export function getFacilityId(): string {
     return id;
   } catch (err) {
     throw new Error(
-      `Invalid facility-meta.json: ${err instanceof Error ? err.message : err}`,
+      `Invalid facilityMeta.json: ${err instanceof Error ? err.message : err}`,
     );
   }
 }
