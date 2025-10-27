@@ -24,17 +24,22 @@ test.describe("Facility Location Creation", () => {
     "Unoccupied",
   ];
 
-  // Common faker constants for all tests
-  const location = faker.helpers.arrayElement(locationTypes);
-  const locationName = faker.company.name();
-  const locationDescription = faker.lorem.sentence();
-  const status = faker.helpers.arrayElement(statusOptions);
-  const operationalStatus = faker.helpers.arrayElement(
-    operationalStatusOptions,
-  );
+  // Generate fresh faker constants for each test
+  let location: string;
+  let locationName: string;
+  let locationDescription: string;
+  let status: string;
+  let operationalStatus: string;
 
   // Common navigation before each test
   test.beforeEach(async ({ page }) => {
+    // Generate fresh faker values for each test
+    location = faker.helpers.arrayElement(locationTypes);
+    locationName = faker.company.name();
+    locationDescription = faker.lorem.sentence();
+    status = faker.helpers.arrayElement(statusOptions);
+    operationalStatus = faker.helpers.arrayElement(operationalStatusOptions);
+
     await page.goto("/");
     await page
       .getByRole("link", { name: /facility with patients/i })
@@ -150,7 +155,7 @@ test.describe("Facility Location Creation", () => {
     // Submit the updated form
     await page.getByRole("button", { name: "Update" }).click();
 
-    // Search for the updated location to verify changes were saved
+    // Search for the updated locationw to verify changes were saved
     await page
       .getByRole("textbox", { name: "Search by name" })
       .fill(locationName);
@@ -188,7 +193,7 @@ test.describe("Facility Location Creation", () => {
 
     // Check if the Name textbox is filled with some existing location name (not empty)
     const nameTextbox = page.getByRole("textbox", { name: "Name" });
-    await expect(nameTextbox).not.toBeEmpty();
+    await expect(nameTextbox).not.toHaveValue("");
 
     // Check if the Status combobox has some value selected (not empty)
     const statusCombobox = page.getByRole("combobox", {
