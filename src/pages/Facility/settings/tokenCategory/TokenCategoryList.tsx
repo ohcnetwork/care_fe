@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -134,15 +134,14 @@ export default function TokenCategoryList({
               </p>
             </div>
             {canWriteTokenCategory && (
-              <Button
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/token_category/new`,
-                  )
-                }
-              >
-                <CareIcon icon="l-plus" className="mr-2" />
-                {t("add_token_category")}
+              <Button>
+                <Link
+                  basePath="/"
+                  href={`/facility/${facilityId}/settings/token_category/new`}
+                >
+                  <CareIcon icon="l-plus" className="mr-2" />
+                  {t("add_token_category")}
+                </Link>
               </Button>
             )}
           </div>

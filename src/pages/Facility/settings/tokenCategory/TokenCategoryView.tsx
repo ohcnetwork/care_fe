@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -181,16 +181,14 @@ export default function TokenCategoryView({
               </Button>
             )}
             {canWriteTokenCategory && (
-              <Button
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/token_category/${tokenCategory.id}/edit`,
-                  )
-                }
-              >
-                <CareIcon icon="l-pen" className="mr-2 size-4" />
-                {t("edit")}
+              <Button variant="outline">
+                <Link
+                  basePath="/"
+                  href={`/facility/${facilityId}/settings/token_category/${tokenCategory.id}/edit`}
+                >
+                  <CareIcon icon="l-pen" className="mr-2 size-4" />
+                  {t("edit")}
+                </Link>
               </Button>
             )}
           </div>

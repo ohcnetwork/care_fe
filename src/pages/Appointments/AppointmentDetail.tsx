@@ -144,7 +144,6 @@ export default function AppointmentDetail(props: Props) {
     canViewAppointments,
     canWriteAppointment,
     canRescheduleAppointment,
-    canListTokens,
     canWriteToken,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
 
@@ -308,65 +307,63 @@ export default function AppointmentDetail(props: Props) {
             facility={facility}
           />
           <div className="mt-6 pl-0 md:pl-4 flex-1">
-            {canListTokens && (
-              <>
-                <h3 className="text-base font-semibold">{t("token")}</h3>
-                {appointment.token?.number ? (
-                  <>
-                    <div
-                      id="section-to-print"
-                      className="print:w-[400px] print:pt-4"
-                    >
-                      <TokenCard
-                        appointment={appointment}
-                        token={appointment.token}
-                        facility={facility}
+            <>
+              <h3 className="text-base font-semibold">{t("token")}</h3>
+              {appointment.token?.number ? (
+                <>
+                  <div
+                    id="section-to-print"
+                    className="print:w-[400px] print:pt-4"
+                  >
+                    <TokenCard
+                      appointment={appointment}
+                      token={appointment.token}
+                      facility={facility}
+                    />
+                  </div>
+                </>
+              ) : (
+                !["fulfilled"].includes(appointment.status) &&
+                canWriteToken && (
+                  <div className="bg-gray-100 border border-gray-200 rounded flex flex-col items-center justify-center text-center">
+                    <ReceiptText className="size-8 text-gray-500 mt-4" />
+                    <div className="mt-2">
+                      <h6 className="text-gray-900 text-sm font-semibold">
+                        {t("token_not_generated")}
+                      </h6>
+                      <p className="text-gray-900 text-sm">
+                        {t("token_not_generated_description")}
+                      </p>
+                    </div>
+                    <div className="mt-2 mb-4">
+                      <TokenGenerationSheet
+                        facilityId={facility.id}
+                        resourceType={appointment.resource_type}
+                        appointmentId={appointment.id}
+                        trigger={
+                          <Button
+                            variant="outline"
+                            className="px-6"
+                            disabled={AppointmentFinalStatuses.includes(
+                              appointment.status,
+                            )}
+                          >
+                            <PlusCircledIcon className="size-4 mr-2" />
+                            {t("generate_token")}
+                            <ShortcutBadge actionId="generate-token" />
+                          </Button>
+                        }
+                        onSuccess={() => {
+                          queryClient.invalidateQueries({
+                            queryKey: ["appointment", appointment.id],
+                          });
+                        }}
                       />
                     </div>
-                  </>
-                ) : (
-                  !["fulfilled"].includes(appointment.status) &&
-                  canWriteToken && (
-                    <div className="bg-gray-100 border border-gray-200 rounded flex flex-col items-center justify-center text-center">
-                      <ReceiptText className="size-8 text-gray-500 mt-4" />
-                      <div className="mt-2">
-                        <h6 className="text-gray-900 text-sm font-semibold">
-                          {t("token_not_generated")}
-                        </h6>
-                        <p className="text-gray-900 text-sm">
-                          {t("token_not_generated_description")}
-                        </p>
-                      </div>
-                      <div className="mt-2 mb-4">
-                        <TokenGenerationSheet
-                          facilityId={facility.id}
-                          resourceType={appointment.resource_type}
-                          appointmentId={appointment.id}
-                          trigger={
-                            <Button
-                              variant="outline"
-                              className="px-6"
-                              disabled={AppointmentFinalStatuses.includes(
-                                appointment.status,
-                              )}
-                            >
-                              <PlusCircledIcon className="size-4 mr-2" />
-                              {t("generate_token")}
-                              <ShortcutBadge actionId="generate-token" />
-                            </Button>
-                          }
-                          onSuccess={() => {
-                            queryClient.invalidateQueries({
-                              queryKey: ["appointment", appointment.id],
-                            });
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )
-                )}
-              </>
-            )}
+                  </div>
+                )
+              )}
+            </>
 
             {appointment.associated_encounter?.id && (
               <Card className="bg-white shadow-sm rounded-md p-1 mt-2">
