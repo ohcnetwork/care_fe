@@ -91,7 +91,7 @@ test.describe("Facility Location Creation", () => {
     await expect(tableBody).toContainText(location);
 
     // assert that all entered data is correctly displayed in edit slideover
-    await page.locator("button[name='Edit Location']").first().click();
+    await page.locator("button[title='Edit Location']").first().click();
 
     // Verify that Location Form combobox is disabled and has the correct location type
     const locationFormCombobox = page.getByRole("combobox", {
@@ -163,7 +163,7 @@ test.describe("Facility Location Creation", () => {
     await expect(tableBody).toContainText(location);
 
     // assert that all entered data is correctly displayed in edit slideover
-    await page.locator("button[name='Edit Location']").first().click();
+    await page.locator("button[title='Edit Location']").first().click();
 
     // Verify that Location Form combobox is disabled and has the correct location type
     const locationFormCombobox = page.getByRole("combobox", {
@@ -200,7 +200,7 @@ test.describe("Facility Location Creation", () => {
     page,
   }) => {
     // Click the first edit button (pencil icon) to open edit form
-    await page.locator("button[name='Edit Location']").first().click();
+    await page.locator("button[title='Edit Location']").first().click();
 
     // Update location name with new random value
     await page.getByRole("textbox", { name: "Name" }).fill(locationName);
@@ -232,7 +232,7 @@ test.describe("Facility Location Creation", () => {
     await expect(tableBody).toContainText(status);
 
     // Verify the updated data is correctly displayed in edit form
-    await page.locator("button[name='Edit Location']").first().click();
+    await page.locator("button[title='Edit Location']").first().click();
 
     // Verify that all updated values are correctly saved and displayed
     const updatedNameTextbox = page.getByRole("textbox", { name: "Name" });
