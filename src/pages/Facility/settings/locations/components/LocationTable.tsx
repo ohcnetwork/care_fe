@@ -79,6 +79,8 @@ export function LocationTable({
     },
     onSuccess: () => {
       // If this is the last item on the page and not the first page
+      // Todo: This following log is for debugging purposes only and should be removed later
+      console.log("locations.length", locations.length);
       if (locations.length === 1 && currentPage > 1 && setPage) {
         setPage(currentPage - 1);
       }
