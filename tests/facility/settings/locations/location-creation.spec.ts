@@ -52,7 +52,7 @@ test.describe("Facility Location Creation", () => {
   test("Add a new location with mandatory fields", async ({ page }) => {
     await page.getByRole("button", { name: "Add Location" }).click();
 
-    // Select location type (mandatory field)
+    // Select location form (mandatory field)
     await page.getByRole("combobox", { name: "Location Form" }).click();
     await page.getByRole("option", { name: location }).click();
 
@@ -86,7 +86,7 @@ test.describe("Facility Location Creation", () => {
     // Assert that all entered data is correctly displayed in edit slideover
     await page.locator("button[title='Edit Location']").first().click();
 
-    // Verify that Location Form combobox is disabled and has the correct location type
+    // Verify that Location Form combobox is disabled and has the correct location form
     const locationFormCombobox = page.getByRole("combobox", {
       name: "Location Form",
     });
@@ -121,7 +121,7 @@ test.describe("Facility Location Creation", () => {
     // Open the location creation form
     await page.getByRole("button", { name: "Add Location" }).click();
 
-    // Select location type (mandatory field)
+    // Select location form (mandatory field)
     await page.getByRole("combobox", { name: "Location Form" }).click();
     await page.getByRole("option", { name: location }).click();
 
@@ -158,7 +158,7 @@ test.describe("Facility Location Creation", () => {
     // Assert that all entered data is correctly displayed in edit slideover
     await page.locator("button[title='Edit Location']").first().click();
 
-    // Verify that Location Form combobox is disabled and has the correct location type
+    // Verify that Location Form combobox is disabled and has the correct location form
     const locationFormCombobox = page.getByRole("combobox", {
       name: "Location Form",
     });
