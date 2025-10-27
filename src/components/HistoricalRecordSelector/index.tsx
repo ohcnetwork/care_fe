@@ -436,7 +436,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
               <Button
                 variant="ghost"
                 onClick={handleLoadMore}
-                className="w-1/8 font-semibold underline p-0 justify-start"
+                className="font-semibold underline p-0 justify-start"
               >
                 {t("load_more")}
               </Button>
