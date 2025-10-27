@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -36,7 +35,7 @@ import {
   ProductStatusOptions,
 } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
-import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
 function ProductCard({
   product,
@@ -89,15 +88,6 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
       status: "active",
     },
   });
-  const [selectedProductKnowledge, setSelectedProductKnowledge] = useState<
-    ProductKnowledgeBase | undefined
-  >(undefined);
-
-  useEffect(() => {
-    if (!qParams.product_knowledge_slug) {
-      setSelectedProductKnowledge(undefined);
-    }
-  }, [qParams.product_knowledge_slug]);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["products", qParams],
@@ -112,6 +102,16 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
         product_knowledge: qParams.product_knowledge_slug,
       },
     }),
+  });
+
+  const { data: productKnowledge } = useQuery({
+    queryKey: ["productKnowledge", qParams.product_knowledge_slug],
+    queryFn: query.debounced(productKnowledgeApi.retrieveProductKnowledge, {
+      pathParams: {
+        slug: qParams.product_knowledge_slug,
+      },
+    }),
+    enabled: !!qParams.product_knowledge_slug,
   });
 
   const products = response?.results || [];
@@ -130,11 +130,8 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
             <div className="w-full sm:w-auto">
               <ProductKnowledgeSelect
-                value={selectedProductKnowledge}
-                onChange={(
-                  productKnowledge: ProductKnowledgeBase | undefined,
-                ) => {
-                  setSelectedProductKnowledge(productKnowledge);
+                value={productKnowledge}
+                onChange={(productKnowledge) => {
                   updateQuery({
                     product_knowledge_slug: productKnowledge?.slug || undefined,
                   });
