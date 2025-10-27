@@ -9,7 +9,7 @@ name: Playwright Tests
 on:
   push:
     branches: [main, develop, production]
-  pull_request:
+  pull_request_target:
     branches: [develop, production]
     paths:
       - "src/**"
@@ -39,6 +39,9 @@ jobs:
       tests: ${{ steps.filter.outputs.tests }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - uses: dorny/paths-filter@v3
         id: filter
@@ -61,6 +64,8 @@ jobs:
       - name: Checkout 📥
         uses: actions/checkout@v4
         with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -99,7 +104,9 @@ jobs:
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v4
-        with:
+        with:  
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
       - name: Set backend branch
