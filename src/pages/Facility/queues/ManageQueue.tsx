@@ -118,7 +118,7 @@ export function ManageQueuePage({
       hideTitleOnPage
     >
       <div className="flex flex-col gap-6">
-        <div className="flex justify-between gap-3">
+        <div className="flex flex-col sm:flex-row justify-between gap-3">
           <div className="flex gap-2 items-center">
             <BackButton
               // TODO: move queue index page for practitioner to similar pattern path
@@ -151,7 +151,7 @@ export function ManageQueuePage({
                       </Badge>
                     )}
                   </div>
-                  <span className="text-xs font-medium text-gray-500">
+                  <span className="text-xs font-medium text-gray-500 break-all">
                     {!queue.system_generated && `${queue.name} - `}
                     {formatDate(queue.date, "dd MMM yyyy")}
                   </span>
