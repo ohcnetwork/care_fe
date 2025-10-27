@@ -17,19 +17,18 @@ test.describe("Create an Encounter", () => {
       await page.getByRole("button", { name: "Patients", exact: true }).click();
       await page.getByRole("link", { name: "All Encounters" }).click();
 
-      // Wait for page load after navigation
-      await page.waitForLoadState("networkidle");
-
       await page.getByText("Date").click();
       await page.getByRole("button", { name: "Last 6 months" }).click();
 
-      await page.locator("html").click();
+      await page.keyboard.press("Escape");
 
       // Wait for the first patient entry to be visible and click
       await page.getByRole("link", { name: "Patient Home" }).first().click();
 
       // Wait for patient details to load
-      await page.waitForLoadState("networkidle");
+      await expect(
+        page.getByRole("button", { name: "Create Encounter" }),
+      ).toBeVisible();
 
       await page.getByRole("button", { name: "Create Encounter" }).click();
       await page.getByRole("button", { name: "Home Health" }).click();
@@ -55,16 +54,12 @@ test.describe("Create an Encounter", () => {
       await page.getByRole("link", { name: "All Encounters" }).click();
 
       // Wait for page load after navigation
-      await page.waitForLoadState("networkidle");
       await page.getByText("Date").click();
       await page.getByRole("button", { name: "Last 6 months" }).click();
-      await page.locator("html").click();
+      await page.keyboard.press("Escape");
 
       // Wait for the first patient entry to be visible and click
       await page.getByRole("link", { name: "Patient Home" }).first().click();
-
-      // Wait for patient details to load
-      await page.waitForLoadState("networkidle");
 
       // Click the first patient profile button and view profile
       await page
@@ -72,7 +67,6 @@ test.describe("Create an Encounter", () => {
         .first()
         .click();
       await page.getByRole("link", { name: "View Profile" }).click();
-      await page.waitForLoadState("networkidle");
 
       //find phone number and year of birth
       const phoneNumber = await page
@@ -94,8 +88,6 @@ test.describe("Create an Encounter", () => {
         .getByRole("textbox", { name: "Search by Patient Phone Number" })
         .fill(cleanPhoneNumber || "");
 
-      //wait for results to load
-      await page.waitForLoadState("networkidle");
       //select the first result
       await page
         .getByRole("cell", {
@@ -109,8 +101,9 @@ test.describe("Create an Encounter", () => {
 
       await page.getByRole("button", { name: "Verify" }).click();
 
-      //wait for patient details to load
-      await page.waitForLoadState("networkidle");
+      await expect(
+        page.getByRole("button", { name: "Create Encounter" }),
+      ).toBeVisible();
 
       await page.getByRole("button", { name: "Create Encounter" }).click();
       await page.getByRole("button", { name: "Home Health" }).click();
