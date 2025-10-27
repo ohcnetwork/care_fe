@@ -24,7 +24,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import Loading from "@/components/Common/Loading";
 import SearchInput from "@/components/Common/SearchInput";
 
 import { getPermissions } from "@/common/Permissions";
@@ -34,6 +33,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcuts, useShortcutSubContext } from "@/context/ShortcutContext";
 import { cn } from "@/lib/utils";
@@ -203,9 +203,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                 {!!identifierSearch.config && !!identifierSearch.value && (
                   <>
                     {isFetching || !patientList ? (
-                      <div className="flex items-center justify-center h-[200px]">
-                        <Loading />
-                      </div>
+                      <TableSkeleton count={5} />
                     ) : !patientList.results.length ? (
                       <div>
                         <div className="flex flex-col items-center justify-center py-10 text-center">
