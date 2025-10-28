@@ -49,6 +49,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { Avatar } from "@/components/Common/Avatar";
+import { formatDosage } from "@/components/Medicine/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import {
@@ -471,12 +472,13 @@ export function MedicationRequestQuestion({
               },
               {
                 key: "dosage_instruction",
-                label: t("frequency"),
+                label: t("dosage"),
                 render: (instructions) => {
+                  const dosage = formatDosage(instructions[0]) || "";
                   const frequency =
                     getFrequencyDisplay(instructions[0]?.timing)?.meaning ||
                     "-";
-                  return frequency;
+                  return `${dosage}\n${frequency}`;
                 },
               },
               {
@@ -530,7 +532,7 @@ export function MedicationRequestQuestion({
               },
               {
                 key: "dosage_text",
-                label: t("frequency"),
+                label: t("dosage"),
                 render: (dosage) => dosage,
               },
               {
