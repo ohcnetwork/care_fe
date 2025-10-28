@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
@@ -18,6 +19,9 @@ function generateProductKnowledgeData() {
       baseUnit: "tablet",
       dosageForm: "tablet",
     },
+    category: {
+      name: `Cat ${faker.commerce.department()}`,
+    },
   };
 }
 
@@ -25,53 +29,45 @@ test.describe(() => {
   let testData: ReturnType<typeof generateProductKnowledgeData> =
     generateProductKnowledgeData();
 
+  let facilityId: string;
+  facilityId = getFacilityId();
+
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    const targetUrl = `/facility/${facilityId}/settings/product_knowledge`;
+    await page.goto(targetUrl);
 
-    await page
-      .getByRole("link", { name: /facility with patients/i })
-      .first()
-      .click();
-
-    await test.step("Navigate to Product Knowledge", async () => {
-      await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-      await page.getByRole("button", { name: "Settings", exact: true }).click();
-      await page.getByRole("link", { name: /product knowledge/i }).click();
-
-      // Search for "Medical Products Category"
+    await test.step("Search for Test Category", async () => {
       await page
         .getByRole("textbox", { name: /search/i })
-        .fill("Medical Products Category");
-      await page
-        .locator("div", { hasText: /^Medical Products Category$/ })
-        .first()
-        .waitFor({ state: "visible", timeout: 5000 });
+        .fill(testData.category.name);
+
+      await page.waitForLoadState("networkidle");
     });
 
-    const testCategoryExists =
+    const CategoryExists =
       (await page
-        .locator("div")
-        .filter({ hasText: /^Medical Products Category$/ })
+        .locator("div", {
+          hasText: testData.category.name,
+        })
         .count()) > 0;
 
-    if (!testCategoryExists) {
-      await test.step("Create Medical Products Category", async () => {
+    if (!CategoryExists) {
+      await test.step("Create Test Category", async () => {
         await page.getByRole("button", { name: /add category/i }).click();
         await page
           .getByRole("textbox", { name: /name/i })
-          .fill("Medical Products Category");
+          .fill(testData.category.name);
         await page.getByRole("button", { name: /create/i }).click();
 
+        // Wait for success message
         await expect(
           page.getByText(/category.*created successfully/i),
         ).toBeVisible();
       });
     } else {
-      await test.step("Use existing Medical Products Category", async () => {
+      await test.step("Use existing Test Category", async () => {
         await page
-          .locator("div")
-          .filter({ hasText: /^Medical Products Category$/ })
-          .nth(3)
+          .getByRole("heading", { name: testData.category.name })
           .click();
       });
     }
@@ -124,7 +120,10 @@ test.describe(() => {
       await page
         .getByRole("textbox", { name: "Search products" })
         .fill(testData.productKnowledge.name);
-      await page.getByRole("link", { name: "View" }).nth(1).click();
+      await page
+        .getByRole("link", { name: "View" })
+        .waitFor({ state: "visible" });
+      await page.getByRole("link", { name: "View" }).click();
       await page.getByRole("button", { name: "Edit" }).click();
 
       // Edit some fields
@@ -139,7 +138,10 @@ test.describe(() => {
     await page
       .getByRole("textbox", { name: "Search products" })
       .fill(testData.productKnowledge.name);
-    await page.getByRole("link", { name: "View" }).nth(1).click();
+    await page
+      .getByRole("link", { name: "View" })
+      .waitFor({ state: "visible" });
+    await page.getByRole("link", { name: "View" }).click();
     await expect(page.getByRole("button", { name: "Delete" })).toBeVisible();
     await page.getByRole("button", { name: "Delete" }).click();
     await page.getByRole("button", { name: "Confirm" }).click();

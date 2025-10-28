@@ -1,10 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
-function generatePharmacyTestData() {
+function generateChargeItemDefinitionTestData() {
   return {
     chargeItemDefinition: {
       title: faker.commerce.productName(),
@@ -17,52 +18,44 @@ function generatePharmacyTestData() {
       purchasePrice: faker.commerce.price(),
       description: faker.commerce.productDescription(),
     },
+    category: {
+      name: `Test ${faker.commerce.department()}`,
+    },
   };
 }
 
 test.describe(() => {
-  let testData: ReturnType<typeof generatePharmacyTestData> =
-    generatePharmacyTestData();
+  let testData: ReturnType<typeof generateChargeItemDefinitionTestData> =
+    generateChargeItemDefinitionTestData();
+  let facilityId: string;
+  facilityId = getFacilityId();
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
-
-    await page
-      .getByRole("link", { name: /facility with patients/i })
-      .first()
-      .click();
+    const targetUrl = `/facility/${facilityId}/settings/charge_item_definitions`;
+    await page.goto(targetUrl);
 
     await test.step("Search for Test Category", async () => {
-      await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-      await page.getByRole("button", { name: "Settings", exact: true }).click();
-      await page
-        .getByRole("link", { name: /charge item definitions/i })
-        .click();
-
-      // Search for "Medi Category"
       await page
         .getByRole("textbox", { name: /search/i })
-        .fill("Medi Category");
-      await page
-        .locator("div", { hasText: /^Medi Category$/ })
-        .first()
-        .waitFor({ state: "visible", timeout: 5000 });
+        .fill(testData.category.name);
+
+      await page.waitForLoadState("networkidle");
     });
 
-    // If Test Category exists, use it; if not, create it
-    const testCategoryExists =
+    // Check if Test Category exists after search
+    const CategoryExists =
       (await page
-        .locator("div")
-        .filter({ hasText: /^Medi Category$/ })
+        .locator("div", {
+          hasText: testData.category.name,
+        })
         .count()) > 0;
 
-    if (!testCategoryExists) {
+    if (!CategoryExists) {
       await test.step("Create Test Category", async () => {
-        // Create new category
         await page.getByRole("button", { name: /add category/i }).click();
         await page
           .getByRole("textbox", { name: /name/i })
-          .fill("Medi Category");
+          .fill(testData.category.name);
         await page.getByRole("button", { name: /create/i }).click();
 
         // Wait for success message
@@ -73,9 +66,7 @@ test.describe(() => {
     } else {
       await test.step("Use existing Test Category", async () => {
         await page
-          .locator("div")
-          .filter({ hasText: /^Medi Category$/ })
-          .nth(3)
+          .getByRole("heading", { name: testData.category.name })
           .click();
       });
     }
@@ -136,7 +127,10 @@ test.describe(() => {
       await page
         .getByRole("textbox", { name: "Search definitions" })
         .fill(testData.chargeItemDefinition.title);
-      await page.getByRole("link", { name: "View" }).nth(1).click();
+      await page
+        .getByRole("link", { name: "View" })
+        .waitFor({ state: "visible" });
+      await page.getByRole("link", { name: "View" }).click();
       await page.getByRole("button", { name: "Edit" }).click();
       await page
         .getByRole("textbox", { name: "Description" })
@@ -150,7 +144,10 @@ test.describe(() => {
     await page
       .getByRole("textbox", { name: "Search definitions" })
       .fill(testData.chargeItemDefinition.title);
-    await page.getByRole("link", { name: "View" }).nth(1).click();
+    await page
+      .getByRole("link", { name: "View" })
+      .waitFor({ state: "visible" });
+    await page.getByRole("link", { name: "View" }).click();
     await expect(page.getByRole("button", { name: "Delete" })).toBeVisible();
     await page.getByRole("button", { name: "Delete" }).click();
     await page.getByRole("button", { name: "Confirm" }).click();
