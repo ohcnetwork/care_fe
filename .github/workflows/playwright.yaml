@@ -113,7 +113,7 @@ jobs:
           echo DISABLE_RATELIMIT=True >> docker/.local.env
           echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
           echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.local.env
-          docker compose -f docker-compose.yaml -f docker-compose.pre-built.yaml pull &
+          docker compose -f docker-compose.yaml -f docker-compose.pre-built.yaml pull backend &
           docker compose -f docker-compose.yaml up -d --wait db
           # load the db dump from the artifact if it exists else do the usual
           set -e
