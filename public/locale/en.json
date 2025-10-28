@@ -3870,6 +3870,7 @@
   "product_knowledge": "Product Knowledge",
   "product_knowledge_alternate_identifier": "HSN Code",
   "product_knowledge_created_successfully": "Product knowledge created successfully",
+  "product_knowledge_deleted_successfully": "Product knowledge deleted successfully",
   "product_knowledge_description": "Base information about this product",
   "product_knowledge_names_description": "Alternative names for the product",
   "product_knowledge_not_found": "Product Knowledge Not Found",

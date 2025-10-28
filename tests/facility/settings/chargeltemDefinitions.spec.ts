@@ -5,11 +5,10 @@ import { expect, test } from "@playwright/test";
 test.use({ storageState: "tests/.auth/user.json" });
 
 function generatePharmacyTestData() {
-  const timestamp = Date.now();
   return {
     chargeItemDefinition: {
       title: faker.commerce.productName(),
-      slug: `${faker.commerce.productName().toLowerCase().replace(/\s+/g, "-")}-${timestamp}`.slice(
+      slug: `${faker.commerce.productName().toLowerCase().replace(/\s+/g, "-")}`.slice(
         0,
         25,
       ),
