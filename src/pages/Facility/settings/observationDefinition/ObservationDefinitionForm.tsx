@@ -118,11 +118,11 @@ const formSchema = z
             .refine((data) => data.code && data.display && data.system, {
               message: "Required",
             }),
-          qualified_ranges: qualifiedRangeSchema,
+          qualified_ranges: qualifiedRangeSchema.default([]),
         }),
       )
       .default([]),
-    qualified_ranges: qualifiedRangeSchema,
+    qualified_ranges: qualifiedRangeSchema.default([]),
   })
   .refine(
     (data) => {

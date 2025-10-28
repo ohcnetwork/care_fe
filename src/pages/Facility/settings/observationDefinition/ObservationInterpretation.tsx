@@ -778,18 +778,22 @@ export function RenderConditionInput({
           typeof value === "object" && value !== null && "value_type" in value
             ? value.value_type
             : "years";
+        const currentValue =
+          typeof value === "object" && value !== null && "value" in value
+            ? value.value
+            : undefined;
         return (
           <div className="flex flex-col sm:flex-row gap-2">
             <FormField
               control={form.control}
               name={`${fieldName}.value.value` as any}
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormControl>
                     <Input
                       type="number"
                       placeholder={t("value")}
-                      value={field.value}
+                      value={currentValue}
                       onChange={(e) => {
                         handleSetValue(
                           {
@@ -817,6 +821,8 @@ export function RenderConditionInput({
           typeof value === "object" && value !== null && "min" in value
             ? (value as any)
             : { min: undefined, max: undefined, value_type: "years" };
+        const min = currentRange.min;
+        const max = currentRange.max;
         return (
           <div className="flex flex-col sm:flex-row gap-2">
             <FormField
@@ -826,10 +832,11 @@ export function RenderConditionInput({
                 <FormItem>
                   <FormControl>
                     <Input
+                      {...field}
                       type="number"
                       placeholder={t("min")}
                       className="w-full h-9"
-                      value={field.value}
+                      value={min}
                       onChange={(e) => {
                         handleSetValue(
                           {
@@ -856,10 +863,11 @@ export function RenderConditionInput({
                 <FormItem>
                   <FormControl>
                     <Input
+                      {...field}
                       type="number"
                       placeholder={t("max")}
                       className="w-full h-9"
-                      value={field.value}
+                      value={max}
                       onChange={(e) => {
                         handleSetValue(
                           {
@@ -887,6 +895,7 @@ export function RenderConditionInput({
     }
     default: {
       if (operation === ConditionOperation.equality) {
+        const value = condition.value as string;
         return (
           <FormField
             control={form.control}
@@ -895,9 +904,10 @@ export function RenderConditionInput({
               <FormItem>
                 <FormControl>
                   <Input
+                    {...field}
                     type="text"
                     placeholder={t("value")}
-                    value={field.value}
+                    value={value}
                     onChange={(e) => {
                       handleSetValue(e.target.value, index);
                     }}
@@ -914,6 +924,8 @@ export function RenderConditionInput({
           typeof value === "object" && value !== null && "min" in value
             ? (value as ConditionOperationInRangeValue)
             : { min: undefined, max: undefined };
+        const min = currentRange.min;
+        const max = currentRange.max;
         return (
           <div className="flex flex-col sm:flex-row gap-2">
             <FormField
@@ -923,10 +935,11 @@ export function RenderConditionInput({
                 <FormItem>
                   <FormControl>
                     <Input
+                      {...field}
                       type="number"
                       placeholder={t("min")}
                       className="w-full h-9"
-                      value={field.value}
+                      value={min}
                       onChange={(e) => {
                         handleSetValue(
                           {
@@ -952,10 +965,11 @@ export function RenderConditionInput({
                 <FormItem>
                   <FormControl>
                     <Input
+                      {...field}
                       type="number"
                       placeholder={t("max")}
                       className="w-full h-9"
-                      value={field.value}
+                      value={max}
                       onChange={(e) => {
                         handleSetValue(
                           {
@@ -1396,81 +1410,88 @@ function NumericRangeComponent<TFieldValues extends FieldValues = FieldValues>({
           {t("add_range")}
         </Button>
       </div>
-      {ranges.map((range, index) => (
-        <div
-          key={index}
-          className="flex flex-col gap-2 bg-gray-50 rounded-md p-3 border border-gray-200"
-        >
-          <div className="flex text-sm items-center justify-between">
-            {t("range")} {index + 1}
-            <Button
-              variant="ghost"
-              size="icon"
-              type="button"
-              onClick={() => handleRemoveRange(index)}
-            >
-              <Trash2 className="size-4" />
-            </Button>
-          </div>
+      {ranges.map((range, index) => {
+        const { min, max } = range;
+        return (
+          <div
+            key={index}
+            className="flex flex-col gap-2 bg-gray-50 rounded-md p-3 border border-gray-200"
+          >
+            <div className="flex text-sm items-center justify-between">
+              {t("range")} {index + 1}
+              <Button
+                variant="ghost"
+                size="icon"
+                type="button"
+                onClick={() => handleRemoveRange(index)}
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            </div>
 
-          <div className="flex flex-col gap-2">
-            {range?.interpretation && (
-              <InterpretationComponent
-                form={form}
-                interpretation={range.interpretation}
-                setInterpretation={(value) =>
-                  handleSetInterpretation(value, index)
-                }
-                fieldName={`${fieldName}.ranges.${index}.interpretation`}
-              />
-            )}
-            <div className="flex flex-row gap-2">
-              <div className="flex flex-col gap-2 flex-1">
-                <FormLabel className="text-sm">{t("min")}</FormLabel>
-                <FormField
-                  control={form.control}
-                  name={`${fieldName}.ranges.${index}.min` as any}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          value={field.value}
-                          className="h-9"
-                          onChange={(e) => handleSetMin(e.target.value, index)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            <div className="flex flex-col gap-2">
+              {range?.interpretation && (
+                <InterpretationComponent
+                  form={form}
+                  interpretation={range.interpretation}
+                  setInterpretation={(value) =>
+                    handleSetInterpretation(value, index)
+                  }
+                  fieldName={`${fieldName}.ranges.${index}.interpretation`}
                 />
-              </div>
-              <div className="flex flex-col gap-2 flex-1">
-                <FormLabel className="text-sm">{t("max")}</FormLabel>
-                <FormField
-                  control={form.control}
-                  name={`${fieldName}.ranges.${index}.max` as any}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          value={field.value}
-                          className="h-9"
-                          onChange={(e) => handleSetMax(e.target.value, index)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              )}
+              <div className="flex flex-row gap-2">
+                <div className="flex flex-col gap-2 flex-1">
+                  <FormLabel className="text-sm">{t("min")}</FormLabel>
+                  <FormField
+                    control={form.control}
+                    name={`${fieldName}.ranges.${index}.min` as any}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            value={min}
+                            className="h-9"
+                            onChange={(e) =>
+                              handleSetMin(e.target.value, index)
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col gap-2 flex-1">
+                  <FormLabel className="text-sm">{t("max")}</FormLabel>
+                  <FormField
+                    control={form.control}
+                    name={`${fieldName}.ranges.${index}.max` as any}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            value={max}
+                            className="h-9"
+                            onChange={(e) =>
+                              handleSetMax(e.target.value, index)
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
