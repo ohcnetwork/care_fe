@@ -23,11 +23,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
-    ? [
-        ["html"],
-        ["json", { outputFile: "test-results.json" }],
-        ["list"],
-      ]
+    ? [["html"], ["json", { outputFile: "test-results.json" }], ["list"]]
     : "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -84,6 +80,6 @@ export default defineConfig({
   webServer: {
     command: "npm run preview",
     url: "http://localhost:4000",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
   },
 });
