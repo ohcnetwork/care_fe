@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Users } from "lucide-react";
+import { Box, Calendar, Users } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +16,10 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
+import {
+  DashboardLinkContext,
+  processCustomDashboardLinks,
+} from "@/Utils/dashboardLinks";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import facilityApi from "@/types/facility/facilityApi";
@@ -42,7 +46,8 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     facilityData?.permissions ?? [],
   );
 
-  const shortcuts = [
+  // Default shortcuts
+  const defaultShortcuts = [
     {
       title: t("my_schedules"),
       description: t("manage_my_schedule"),
@@ -57,7 +62,36 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       href: `/facility/${facilityId}/encounters/patients/${careConfig.defaultEncounterType || "all"}`,
       visible: canListEncounters,
     },
+    {
+      title: t("services"),
+      description: t("view_services"),
+      icon: Box,
+      href: `/facility/${facilityId}/services`,
+      visible: true,
+    },
   ];
+
+  // Process custom dashboard links from environment
+  const iconMap = {
+    Calendar,
+    Users,
+    Box,
+  };
+
+  const context: DashboardLinkContext = {
+    facilityId,
+    userId: user?.id,
+    username: user?.username,
+  };
+
+  const customDashboardLinks = processCustomDashboardLinks(
+    careConfig.customShortcuts,
+    context,
+    iconMap,
+  );
+
+  // Combine default and custom dashboard links
+  const shortcuts = [...defaultShortcuts, ...customDashboardLinks];
 
   return (
     <Page title="">

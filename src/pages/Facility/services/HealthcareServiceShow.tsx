@@ -33,17 +33,17 @@ function LocationCard({
       case InternalType.pharmacy:
         return {
           text: t("view_prescriptions"),
-          link: `/facility/${facilityId}/locations/${locationId}/medication_requests/`,
+          link: `/facility/${facilityId}/locations/${locationId}/medication_requests`,
         };
       case InternalType.lab:
         return {
           text: t("view_requests"),
-          link: `/facility/${facilityId}/locations/${locationId}/service_requests/`,
+          link: `/facility/${facilityId}/locations/${locationId}/service_requests`,
         };
       default:
         return {
           text: t("view_appointments"),
-          link: `/facility/${facilityId}/locations/${locationId}/appointments/`,
+          link: `/facility/${facilityId}/locations/${locationId}/appointments`,
         };
     }
   };
