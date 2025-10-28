@@ -16,6 +16,10 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import { getPermissions } from "@/common/Permissions";
 
+import {
+  DashboardLinkContext,
+  processCustomDashboardLinks,
+} from "@/Utils/dashboardLinks";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import facilityApi from "@/types/facility/facilityApi";
@@ -42,7 +46,8 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     facilityData?.permissions ?? [],
   );
 
-  const shortcuts = [
+  // Default shortcuts
+  const defaultShortcuts = [
     {
       title: t("my_schedules"),
       description: t("manage_my_schedule"),
@@ -65,6 +70,28 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       visible: true,
     },
   ];
+
+  // Process custom dashboard links from environment
+  const iconMap = {
+    Calendar,
+    Users,
+    Box,
+  };
+
+  const context: DashboardLinkContext = {
+    facilityId,
+    userId: user?.id,
+    username: user?.username,
+  };
+
+  const customDashboardLinks = processCustomDashboardLinks(
+    careConfig.customShortcuts,
+    context,
+    iconMap,
+  );
+
+  // Combine default and custom dashboard links
+  const shortcuts = [...defaultShortcuts, ...customDashboardLinks];
 
   return (
     <Page title="">
