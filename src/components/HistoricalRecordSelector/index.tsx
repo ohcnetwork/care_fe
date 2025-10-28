@@ -14,6 +14,7 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -353,6 +354,9 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
             <SheetTitle className="text-lg font-medium text-center">
               {title || t("history")}
             </SheetTitle>
+            <SheetDescription className="sr-only">
+              {title || t("history")}
+            </SheetDescription>
           </SheetHeader>
           {structuredTypes.length > 1 && (
             <Tabs
