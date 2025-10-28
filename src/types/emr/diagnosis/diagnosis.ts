@@ -106,3 +106,9 @@ export const DIAGNOSIS_VERIFICATION_STATUS_COLORS = {
   refuted: "destructive",
   entered_in_error: "destructive",
 } as const;
+
+export const DIAGNOSIS_SEVERITY_COLORS = {
+  severe: "destructive",
+  moderate: "yellow",
+  mild: "blue",
+} as const;

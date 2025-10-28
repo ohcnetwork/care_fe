@@ -12,6 +12,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -905,19 +906,28 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                   </div>
                 </div>
                 {!isOpen && (
-                  <div className="text-sm text-gray-500">
-                    {t("diagnosed_on")}{" "}
-                    {diagnosis.onset?.onset_datetime
-                      ? format(
-                          new Date(diagnosis.onset.onset_datetime),
-                          "MMMM d, yyyy",
-                        )
-                      : ""}
-                    {" · "}
-                    {t(diagnosis.clinical_status)}
-                    {" · "}
-                    {t(diagnosis.verification_status)}
-                    {diagnosis.severity && ` · ${t(diagnosis.severity)}`}
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
+                    <span>
+                      {t("diagnosed_on")}{" "}
+                      {diagnosis.onset?.onset_datetime
+                        ? format(
+                            new Date(diagnosis.onset.onset_datetime),
+                            "MMMM d, yyyy",
+                          )
+                        : ""}
+                    </span>
+                    <span className="text-gray-300">|</span>
+                    <span>{t(diagnosis.clinical_status)}</span>
+                    <span className="text-gray-300">|</span>
+                    <span>{t(diagnosis.verification_status)}</span>
+                    {diagnosis.severity && (
+                      <>
+                        <span className="text-gray-300">|</span>
+                        <Badge variant="outline" className="py-0 font-medium">
+                          {t(diagnosis.severity)}
+                        </Badge>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
