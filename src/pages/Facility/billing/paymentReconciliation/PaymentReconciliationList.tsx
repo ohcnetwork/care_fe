@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 
 import Page from "@/components/Common/Page";
 
+import { useSidebar } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 import PaymentsData from "./PaymentsData";
 
 export function PaymentReconciliationList({
@@ -21,10 +23,18 @@ export function PaymentReconciliationList({
 
   // Use the prop accountId if provided, otherwise use from URL params
   const effectiveAccountId = accountId || urlAccountId;
+  const { open: isSidebarOpen } = useSidebar();
 
   return (
     <Page title={t("payment_reconciliations")} hideTitleOnPage>
-      <div className="container mx-auto">
+      <div
+        className={cn(
+          "w-full mt-3 overflow-y-auto",
+          isSidebarOpen
+            ? "md:max-w-[calc(100vw-21.5rem)]"
+            : "md:max-w-[calc(100vw-8rem)]",
+        )}
+      >
         <div className="mb-4">
           <div className="flex items-center justify-between">
             <div>
