@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +25,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import Loading from "@/components/Common/Loading";
 import SearchInput from "@/components/Common/SearchInput";
 
 import { getPermissions } from "@/common/Permissions";
@@ -37,11 +36,15 @@ import { PendingSyncBadge } from "@/OfflineSupport/pendingSyncbadge";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import { PLUGIN_Component } from "@/PluginEngine";
+
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 import query from "@/Utils/request/query";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePermissions } from "@/context/PermissionContext";
 import { useShortcuts, useShortcutSubContext } from "@/context/ShortcutContext";
+import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { PartialPatientModel, PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -212,7 +215,15 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
     <div>
       <div className="container max-w-5xl mx-auto py-6">
         {canCreatePatient && (
-          <div className="flex justify-center md:justify-end">
+          <div className="flex max-md:flex-col justify-center md:justify-end gap-4">
+            <PLUGIN_Component
+              __name="PatientSearchActions"
+              facilityId={facilityId}
+              className={cn(
+                buttonVariants({ variant: "primary_gradient" }),
+                "w-full",
+              )}
+            />
             <AddPatientButton
               facilityId={facilityId}
               identifierConfigs={
@@ -247,9 +258,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                 {!!identifierSearch.config && !!identifierSearch.value && (
                   <>
                     {isFetching || !patientList ? (
-                      <div className="flex items-center justify-center h-[200px]">
-                        <Loading />
-                      </div>
+                      <TableSkeleton count={5} />
                     ) : !patientList.results.length ? (
                       <div>
                         <div className="flex flex-col items-center justify-center py-10 text-center">

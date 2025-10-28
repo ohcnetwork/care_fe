@@ -780,7 +780,7 @@ const PatientBasicsContent = ({
               <RadioInput
                 {...field}
                 onValueChange={field.onChange}
-                value={field.value ?? undefined}
+                value={field.value ?? ""}
                 options={GENDER_TYPES.map((g) => ({
                   value: g.id,
                   label: t(`GENDER__${g.id}`),
@@ -1098,9 +1098,8 @@ const AdditionalDetailsContent = ({
           <p className="text-sm font-medium text-black">
             {t("deceased_status")}
           </p>
-          <div className="flex items-start gap-2">
+          <div className="flex items-center gap-2">
             <Checkbox
-              className="mt-2"
               checked={form.watch("is_deceased")}
               onCheckedChange={(checked) => {
                 form.setValue("is_deceased", !!checked);
