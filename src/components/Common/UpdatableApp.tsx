@@ -38,9 +38,10 @@ export const checkForUpdate = async () => {
       localStorage.removeItem(APP_UPDATED_KEY);
       return meta.version as string;
     }
-  } catch {
+  } catch (error) {
     console.warn(
-      `Skipped checking for updates. Error fetching '${META_URL}':dev`,
+      `Skipped checking for updates. Error fetching '${META_URL}'.`,
+      error,
     );
     return;
   }
