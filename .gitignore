@@ -65,7 +65,7 @@ cypress/fixtures/token.json
 /blob-report/
 /playwright/.cache/
 /tests/.auth/
-/tests/.cache/
+test-results.json
 
 # Care Apps
 /apps/*
