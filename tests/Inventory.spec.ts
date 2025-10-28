@@ -79,7 +79,7 @@ test.describe(() => {
           .getByRole("combobox")
           .filter({ hasText: "Select Location" })
           .click();
-        await page.getByRole("option", { name: "daniel" }).click();
+        await page.getByRole("option", { name: "Pharmacy" }).click();
       });
 
       await test.step("Save internal order", async () => {
