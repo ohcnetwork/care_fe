@@ -528,7 +528,7 @@ const PatientBasicsContent = ({
               <RadioInput
                 {...field}
                 onValueChange={field.onChange}
-                value={field.value ?? null}
+                value={field.value ?? ""}
                 options={GENDER_TYPES.map((g) => ({
                   value: g.id,
                   label: t(`GENDER__${g.id}`),

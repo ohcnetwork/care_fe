@@ -34,15 +34,15 @@ test("user can create a schedule template with weekdays", async ({ page }) => {
     .filter({ hasText: /^Valid FromPick a date$/ })
     .getByRole("button")
     .click();
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = tomorrow.toLocaleDateString("en-US", {
+  const inTwoDays = new Date();
+  inTwoDays.setDate(inTwoDays.getDate() + 2);
+  const inTwoDaysStr = inTwoDays.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
   });
   await page
-    .getByRole("button", { name: new RegExp(tomorrowStr, "i") })
+    .getByRole("button", { name: new RegExp(inTwoDaysStr, "i") })
     .click();
 
   // Select weekdays (Mon-Fri)
@@ -85,8 +85,15 @@ test("user can create a schedule template with weekdays", async ({ page }) => {
   // Save the template
   await page.getByRole("button", { name: "Save" }).click();
 
+  await expect(
+    page
+      .getByRole("region", { name: "Notifications alt+T" })
+      .getByRole("listitem")
+      .filter({ hasText: "Schedule template created successfully" }),
+  ).toBeVisible();
+
   // Assert that the schedule text is present anywhere on the page
   await expect(
-    page.getByText("Scheduled for: Mon, Tue, Wed, Thu, Fri").count(),
-  ).resolves.toBeGreaterThan(0);
+    page.getByText("Scheduled for: Mon, Tue, Wed, Thu, Fri").first(),
+  ).toBeVisible({ timeout: 10000 });
 });
