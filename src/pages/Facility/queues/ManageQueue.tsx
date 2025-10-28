@@ -1,3 +1,4 @@
+import { AnimatedCounter } from "@/components/Common/AnimatedCounter";
 import BackButton from "@/components/Common/BackButton";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -40,6 +41,7 @@ import {
   formatScheduleResourceName,
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
+import { TokenStatus } from "@/types/tokens/token/token";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
@@ -48,6 +50,7 @@ import { formatDate } from "date-fns";
 import { ChevronLeft, Edit3, InfoIcon, SettingsIcon } from "lucide-react";
 import { useNavigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
+import { getTokenQueueStatusCount } from "./utils";
 
 interface ManageQueuePageProps {
   facilityId: string;
@@ -76,6 +79,27 @@ export function ManageQueuePage({
       pathParams: { facility_id: facilityId, id: queueId },
     }),
   });
+
+  const { data: tokenData } = useQuery({
+    queryKey: ["token-queue-summary", facilityId, queueId],
+    queryFn: query(tokenQueueApi.summary, {
+      pathParams: { facility_id: facilityId, id: queueId },
+    }),
+  });
+
+  const onGoingCount = getTokenQueueStatusCount(
+    tokenData ?? {},
+    TokenStatus.UNFULFILLED,
+    TokenStatus.CREATED,
+    TokenStatus.IN_PROGRESS,
+  );
+
+  const finishedCount = getTokenQueueStatusCount(
+    tokenData ?? {},
+    TokenStatus.FULFILLED,
+    TokenStatus.CANCELLED,
+    TokenStatus.ENTERED_IN_ERROR,
+  );
 
   if (isQueueLoading || !queue) {
     // TODO: build appropriate loading skeleton...
@@ -196,6 +220,11 @@ export function ManageQueuePage({
           tabs={{
             ongoing: {
               label: t("ongoing"),
+              labelSuffix: (
+                <Badge variant="outline" className="px-2 py-1">
+                  <AnimatedCounter count={onGoingCount} />
+                </Badge>
+              ),
               component: (
                 <ManageQueueOngoingTab
                   facilityId={facilityId}
@@ -205,6 +234,11 @@ export function ManageQueuePage({
             },
             completed: {
               label: t("finished"),
+              labelSuffix: (
+                <Badge variant="outline" className="px-2 py-1">
+                  <AnimatedCounter count={finishedCount} />
+                </Badge>
+              ),
               component: (
                 <ManageQueueFinishedTab
                   facilityId={facilityId}

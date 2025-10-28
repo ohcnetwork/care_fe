@@ -93,6 +93,44 @@ For patient login via phone number:
 
 All strings must be encased in i18n translations. New translation strings must be specified in `src`->`Locale`->`en`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
 
+#### Remote i18n configuration (optional)
+
+CARE can load translation files from a remote URL and fall back to local files for any missing keys.
+
+- **Enable remote translations**: set `REACT_CUSTOM_REMOTE_I18N_URL` in your environment.
+- **Expected remote file path**: `${REACT_CUSTOM_REMOTE_I18N_URL}/{lang}.json` (for example: `https://cdn.example.com/i18n/en.json`).
+- **Local fallback path**: `/public/locale/{lang}.json` in this repository (served as `/locale/{lang}.json`).
+- **Merge behavior**: remote keys override local; any keys absent in remote are served from local.
+
+Example `.env.local`:
+
+```env
+# Load i18n from a CDN (per-language JSON files)
+REACT_CUSTOM_REMOTE_I18N_URL=https://cdn.example.com/i18n
+```
+
+Remote file example (`en.json`):
+
+```json
+{
+  "hello_care": "Hello Care Remote"
+}
+```
+
+Local file example (`public/locale/en.json`):
+
+```json
+{
+  "hello_care": "Hello Care Local",
+  "welcome_message": "Welcome to Care"
+}
+```
+
+With the above, the app serves:
+
+- `hello_care` -> "Hello Care Remote" (remote overrides local)
+- `welcome_message` -> "Welcome to Care" (falls back to local as remote is missing)
+
 ### Testing
 
 To ensure the quality of our pull requests, we use a variety of tools:
