@@ -548,7 +548,7 @@ const PatientBasicsContent = ({
               <FormLabel aria-required>{t("date_of_birth_or_age")}</FormLabel>
               <div className="flex gap-1 items-start">
                 <Tabs value={field.value} onValueChange={field.onChange}>
-                  <TabsList className="mt-0.25">
+                  <TabsList className="mt-1 md:mt-0.25">
                     <TabsTrigger value="dob">{t("date")}</TabsTrigger>
                     <TabsTrigger value="age">{t("age")}</TabsTrigger>
                   </TabsList>
@@ -580,23 +580,33 @@ const PatientBasicsContent = ({
                     control={form.control}
                     name="age"
                     render={({ field }) => (
-                      <FormItem className="w-full md:col-span-2">
+                      <FormItem className="w-full md:col-span-2 relative">
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            placeholder={t("age")}
-                            min={1}
-                            max={120}
-                            value={field.value ?? ""}
-                            onChange={(e) => {
-                              field.onChange(
-                                e.target.value ? Number(e.target.value) : null,
-                              );
-                            }}
-                          />
+                          <>
+                            <Input
+                              {...field}
+                              type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              placeholder={t("age")}
+                              min={1}
+                              max={120}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                field.onChange(
+                                  e.target.value
+                                    ? Number(e.target.value)
+                                    : null,
+                                );
+                              }}
+                            />
+                            {field.value && (
+                              <span className="text-xs text-gray-500 absolute right-9 top-3.25 md:top-2.5">
+                                {t("year_of_birth")}:{" "}
+                                {new Date().getFullYear() - Number(field.value)}
+                              </span>
+                            )}
+                          </>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
