@@ -1,38 +1,32 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
-import {
-  ResourceCategoryRead,
-  ResourceCategoryResourceType,
-} from "@/src/types/base/resourceCategory/resourceCategory";
-import type { FacilityRead } from "@/src/types/facility/facility";
-import { createResourceCategory, loadFacility } from "@/tests/helpers/helpers";
-
-interface TestSetup {
-  facility: FacilityRead;
-}
+import { getFacilityId } from "@/tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+// const categoryName = `${faker.lorem.word()} ${faker.string.uuid().slice(0, 8)}`;
+// const categorySlug = `${faker.lorem.word()}-${faker.string.uuid().slice(0, 8)}`;
+
 function generateCategoryData() {
   return {
-    name: `${faker.lorem.word()}_${faker.string.uuid().slice(0, 8)}`,
+    name: `${faker.lorem.word()} ${faker.string.uuid().slice(0, 8)}`,
     description: faker.lorem.sentence(),
+    slug: `${faker.lorem.word()}-${faker.string.uuid().slice(0, 8)}`,
   };
 }
 
-let setup: TestSetup;
+let testData: ReturnType<typeof generateCategoryData>;
+let facilityId: string;
 
-test.beforeAll(async () => {
-  const facility = loadFacility();
-  setup = { facility };
+test.beforeAll(() => {
+  testData = generateCategoryData();
+  facilityId = getFacilityId();
 });
 
-test.describe("category list", () => {
+test.describe.serial("category list", () => {
   test("should load page and verify initial state", async ({ page }) => {
-    await page.goto(
-      `/facility/${setup.facility.id}/settings/activity_definitions`,
-    );
+    await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
 
     await expect(
       page.getByRole("heading", { name: /activity definition/i }),
@@ -52,11 +46,7 @@ test.describe("category list", () => {
   });
 
   test("should create category and navigate to it", async ({ page }) => {
-    const testData = generateCategoryData();
-
-    await page.goto(
-      `/facility/${setup.facility.id}/settings/activity_definitions`,
-    );
+    await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
 
     await page.getByRole("button", { name: /add category/i }).click();
 
@@ -67,6 +57,8 @@ test.describe("category list", () => {
     ).toBeVisible();
 
     await dialog.getByRole("textbox", { name: /^name$/i }).fill(testData.name);
+
+    await dialog.getByRole("textbox", { name: /^slug$/i }).fill(testData.slug);
 
     await dialog
       .getByRole("textbox", { name: /^description$/i })
@@ -83,7 +75,7 @@ test.describe("category list", () => {
 
     await expect(page).toHaveURL(
       new RegExp(
-        `/facility/${setup.facility.id}/settings/activity_definitions/categories/f-${setup.facility.id}-.*`,
+        `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}`,
       ),
     );
 
@@ -91,45 +83,35 @@ test.describe("category list", () => {
   });
 
   test.describe("with existing category", () => {
-    let testCategory: ResourceCategoryRead;
-
-    test.beforeAll(async () => {
-      const categoryData = generateCategoryData();
-
-      testCategory = await createResourceCategory(setup.facility.id, {
-        name: categoryData.name,
-        description: categoryData.description,
-        resourceType: ResourceCategoryResourceType.activity_definition,
-      });
-    });
-
     test("should search for category", async ({ page }) => {
-      await page.goto(
-        `/facility/${setup.facility.id}/settings/activity_definitions`,
-      );
+      await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
 
       const searchInput = page.getByPlaceholder(/search categories/i);
       await expect(searchInput).toBeVisible();
 
-      await searchInput.fill(testCategory.title);
+      await searchInput.fill(testData.name);
 
-      await expect(page.getByText(testCategory.title)).toBeVisible();
+      await expect(page.getByText(testData.name)).toBeVisible();
     });
 
     test("should navigate into category", async ({ page }) => {
-      await page.goto(
-        `/facility/${setup.facility.id}/settings/activity_definitions`,
-      );
+      await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
 
-      await page.getByRole("heading", { name: testCategory.title }).click();
+      await expect(page.getByText(testData.name)).toBeVisible();
+
+      await page.getByRole("heading", { name: testData.name }).click();
 
       await expect(page).toHaveURL(
-        `/facility/${setup.facility.id}/settings/activity_definitions/categories/${testCategory.slug}`,
+        new RegExp(
+          `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}`,
+        ),
       );
 
       await expect(
         page.getByRole("heading", { name: /activity definition/i }),
       ).toBeVisible();
+
+      await expect(page.getByText(testData.name)).toBeVisible();
 
       const addActivityButton = page.getByRole("button", {
         name: /add activity definition/i,
@@ -141,17 +123,14 @@ test.describe("category list", () => {
     test("should edit category", async ({ page }) => {
       const updatedData = generateCategoryData();
 
-      await page.goto(
-        `/facility/${setup.facility.id}/settings/activity_definitions`,
-      );
+      await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
+
+      await expect(page.getByText(testData.name)).toBeVisible();
 
       const categoryCard = page
-        .locator('[class*="cursor-pointer"]')
-        .filter({ hasText: testCategory.title });
-
-      await expect(categoryCard).toBeVisible();
-
-      const editButton = categoryCard.getByRole("button").last();
+        .getByRole("heading", { name: testData.name })
+        .locator("xpath=ancestor::div[contains(@class, 'cursor-pointer')]");
+      const editButton = categoryCard.getByRole("button").first();
       await editButton.click();
 
       const dialog = page.getByRole("dialog");

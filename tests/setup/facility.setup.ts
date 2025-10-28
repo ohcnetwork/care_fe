@@ -12,7 +12,7 @@ test("enter facility via UI and save facility id", async ({ page }) => {
       .getByRole("link", { name: "Facility with Patient" })
       .first()
       .click();
-    await page.waitForURL(/\/facility\/([^/]+)\/overview$/, { timeout: 10000 });
+    await page.waitForURL(/\/facility\/([^/]+)\/overview$/);
 
     const id = page.url().match(/\/facility\/([^/]+)\/overview$/)?.[1];
     if (!id) {
