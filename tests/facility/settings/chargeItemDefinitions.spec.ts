@@ -46,8 +46,7 @@ test.describe(() => {
       await page
         .locator("div", { hasText: /^Medi Category$/ })
         .first()
-        .waitFor({ state: "visible", timeout: 5000 })
-        .catch(() => {});
+        .waitFor({ state: "visible", timeout: 5000 });
     });
 
     // If Test Category exists, use it; if not, create it

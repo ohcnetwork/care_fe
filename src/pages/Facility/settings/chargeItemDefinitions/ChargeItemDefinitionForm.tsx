@@ -93,25 +93,28 @@ interface MonetaryComponentSelectorProps {
   className?: string;
 }
 
-// Schema for a single price component
-const priceComponentSchema = z.object({
-  monetary_component_type: z.nativeEnum(MonetaryComponentType),
-  code: z
-    .object({
-      code: z.string(),
-      system: z.string(),
-      display: z.string(),
-    })
-    .optional(),
-  factor: z.number().gt(0).max(100).optional(),
-  amount: z
-    .string()
-    .refine((val) => !val || Number(val) > 0, {
-      message: "Amount must be greater than 0",
-    })
-    .optional(),
-  conditions: z.array(conditionSchema),
-});
+// Schema factory for a single price component
+const createPriceComponentSchema = (
+  t: (key: string, options?: Record<string, unknown>) => string,
+) =>
+  z.object({
+    monetary_component_type: z.nativeEnum(MonetaryComponentType),
+    code: z
+      .object({
+        code: z.string(),
+        system: z.string(),
+        display: z.string(),
+      })
+      .optional(),
+    factor: z.number().gt(0).max(100).optional(),
+    amount: z
+      .string()
+      .refine((val) => !val || Number(val) > 0, {
+        message: t("must_be_greater_than_value", { value: 0 }),
+      })
+      .optional(),
+    conditions: z.array(conditionSchema),
+  });
 
 interface ChargeItemDefinitionFormProps {
   facilityId: string;
@@ -574,41 +577,50 @@ export function ChargeItemDefinitionForm({
     queryFn: query(chargeItemDefinitionApi.listMetrics),
   });
 
-  // Main form schema (including basic information fields)
-  const formSchema = z.object({
-    title: z.string().min(1, { message: t("field_required") }),
-    slug_value: z
-      .string()
-      .trim()
-      .min(5, t("character_count_validation", { min: 5, max: 25 }))
-      .max(25, t("character_count_validation", { min: 5, max: 25 }))
-      .regex(/^[a-z0-9-]+$/, {
-        message: "slug_format_message",
-      }),
-    category: z.string().min(1, { message: t("field_required") }),
-    _categoryName: z.string().optional(),
-    status: z.nativeEnum(ChargeItemDefinitionStatus),
-    description: z.string().optional(),
-    purpose: z.string().optional(),
-    derived_from_uri: z
-      .string()
-      .optional()
-      .refine(
-        (val) => {
-          return !val || /^https?:\/\/.+/.test(val);
-        },
-        { message: t("invalid_url") },
-      ),
-    base_price: z
-      .string()
-      .refine((val) => !val || Number(val) > 0, {
-        message: t("must_be_greater_than_value", { value: 0 }),
-      })
-      .refine((val) => val && val !== "0", {
-        message: t("base_price_is_required"),
-      }),
-    price_components: z.array(priceComponentSchema),
-  });
+  const priceComponentSchema = createPriceComponentSchema(t);
+  const createFormSchema = (
+    t: (key: string, options?: Record<string, unknown>) => string,
+  ) =>
+    z.object({
+      title: z.string().min(1, { message: t("field_required") }),
+      slug_value: z
+        .string()
+        .trim()
+        .min(5, {
+          message: t("character_count_validation", { min: 5, max: 25 }),
+        })
+        .max(25, {
+          message: t("character_count_validation", { min: 5, max: 25 }),
+        })
+        .regex(/^[a-z0-9-]+$/, {
+          message: t("slug_format_message"),
+        }),
+      category: z.string().min(1, { message: t("field_required") }),
+      _categoryName: z.string().optional(),
+      status: z.nativeEnum(ChargeItemDefinitionStatus),
+      description: z.string().optional(),
+      purpose: z.string().optional(),
+      derived_from_uri: z
+        .string()
+        .optional()
+        .refine(
+          (val) => {
+            return !val || /^https?:\/\/.+/.test(val);
+          },
+          { message: t("invalid_url") },
+        ),
+      base_price: z
+        .string()
+        .refine((val) => !val || Number(val) > 0, {
+          message: t("must_be_greater_than_value", { value: 0 }),
+        })
+        .refine((val) => val && val !== "0", {
+          message: t("base_price_is_required"),
+        }),
+      price_components: z.array(priceComponentSchema),
+    });
+
+  const formSchema = createFormSchema(t);
 
   // Initialize form (with basic information fields)
   const form = useForm<z.infer<typeof formSchema>>({
@@ -864,14 +876,7 @@ export function ChargeItemDefinitionForm({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          form.handleSubmit(onSubmit as any)();
-        }}
-        className="space-y-6"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Information */}
         <div
           className={cn(
@@ -986,7 +991,7 @@ export function ChargeItemDefinitionForm({
             </CardHeader>
             <CardContent className="space-y-4">
               <FormField
-                control={form.control as any}
+                control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
@@ -1004,7 +1009,7 @@ export function ChargeItemDefinitionForm({
               />
 
               <FormField
-                control={form.control as any}
+                control={form.control}
                 name="purpose"
                 render={({ field }) => (
                   <FormItem>
@@ -1022,7 +1027,7 @@ export function ChargeItemDefinitionForm({
               />
 
               <FormField
-                control={form.control as any}
+                control={form.control}
                 name="derived_from_uri"
                 render={({ field }) => (
                   <FormItem>

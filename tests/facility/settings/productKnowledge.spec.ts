@@ -45,8 +45,7 @@ test.describe(() => {
       await page
         .locator("div", { hasText: /^Medical Products Category$/ })
         .first()
-        .waitFor({ state: "visible", timeout: 5000 })
-        .catch(() => {});
+        .waitFor({ state: "visible", timeout: 5000 });
     });
 
     const testCategoryExists =
