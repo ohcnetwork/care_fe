@@ -255,7 +255,7 @@ test.describe("Facility Location Creation", () => {
   }) => {
     await page.getByRole("button", { name: "Add Location" }).click();
 
-    // Verify that the name field is empty and only mandatory required field now
+    // Verify that the name field is empty and is the only mandatory required field now
     const nameTextbox = page.getByRole("textbox", { name: "Name" });
     await expect(nameTextbox).toHaveValue("");
 
