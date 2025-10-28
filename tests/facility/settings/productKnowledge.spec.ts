@@ -29,8 +29,7 @@ test.describe(() => {
   let testData: ReturnType<typeof generateProductKnowledgeData> =
     generateProductKnowledgeData();
 
-  let facilityId: string;
-  facilityId = getFacilityId();
+  let facilityId: string = getFacilityId();
 
   test.beforeEach(async ({ page }) => {
     const targetUrl = `/facility/${facilityId}/settings/product_knowledge`;

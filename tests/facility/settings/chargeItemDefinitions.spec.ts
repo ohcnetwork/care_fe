@@ -27,8 +27,7 @@ function generateChargeItemDefinitionTestData() {
 test.describe(() => {
   let testData: ReturnType<typeof generateChargeItemDefinitionTestData> =
     generateChargeItemDefinitionTestData();
-  let facilityId: string;
-  facilityId = getFacilityId();
+  let facilityId: string = getFacilityId();
 
   test.beforeEach(async ({ page }) => {
     const targetUrl = `/facility/${facilityId}/settings/charge_item_definitions`;
