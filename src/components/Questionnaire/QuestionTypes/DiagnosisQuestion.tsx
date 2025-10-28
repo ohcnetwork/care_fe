@@ -56,10 +56,12 @@ import { dateQueryString, formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import {
   DIAGNOSIS_CLINICAL_STATUS,
+  DIAGNOSIS_SEVERITY,
   DIAGNOSIS_VERIFICATION_STATUS,
   Diagnosis,
   DiagnosisClinicalStatus,
   DiagnosisRequest,
+  DiagnosisSeverity,
   Onset,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
@@ -84,10 +86,41 @@ const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   code: { code: "", display: "", system: "" },
   clinical_status: "active",
   verification_status: "confirmed",
+  severity: "moderate",
   category: "encounter_diagnosis",
   onset: { onset_datetime: dateQueryString(new Date()) },
   dirty: true,
 };
+
+function DiagnosisSeveritySelect({
+  severity,
+  onValueChange,
+  disabled,
+}: {
+  severity: DiagnosisSeverity;
+  onValueChange: (value: DiagnosisSeverity) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Select
+      value={severity}
+      onValueChange={(value) => onValueChange(value as DiagnosisSeverity)}
+      disabled={disabled}
+    >
+      <SelectTrigger className="h-8 md:h-9">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {DIAGNOSIS_SEVERITY.map((s) => (
+          <SelectItem key={s} value={s}>
+            {t(s)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
 
 function ClinicalStatusSelect({
   status,
@@ -237,6 +270,14 @@ function DiagnosisDetailsForm({
         />
       </div>
       <div className="space-y-2">
+        <Label className="text-sm">{t("severity")}</Label>
+        <DiagnosisSeveritySelect
+          severity={diagnosis.severity || "moderate"}
+          onValueChange={(value) => onUpdate({ severity: value })}
+          disabled={disabled}
+        />
+      </div>
+      <div className="space-y-2">
         <Label className="text-sm">{t("notes")}</Label>
         <DiagnosisNotesInput
           note={diagnosis.note}
@@ -254,6 +295,7 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
     code: diagnosis.code,
     clinical_status: diagnosis.clinical_status,
     verification_status: diagnosis.verification_status,
+    severity: diagnosis.severity,
     onset: diagnosis.onset
       ? {
           ...diagnosis.onset,
@@ -516,6 +558,12 @@ export function DiagnosisQuestion({
                     : "",
               },
               {
+                key: "severity",
+                label: t("severity"),
+                render: (severity: DiagnosisSeverity | null) =>
+                  severity ? t(severity) : "-",
+              },
+              {
                 key: "note",
                 label: t("notes"),
                 render: (note: string | undefined) => note || "-",
@@ -558,6 +606,9 @@ export function DiagnosisQuestion({
                   </TableHead>
                   <TableHead className="w-[15%] text-center">
                     {t("status")}
+                  </TableHead>
+                  <TableHead className="w-[15%] text-center">
+                    {t("severity")}
                   </TableHead>
                   <TableHead className="w-[15%] text-center">
                     {t("verification")}
@@ -698,6 +749,13 @@ const DiagnosisTableRow = ({
                 clinical_status: value as DiagnosisRequest["clinical_status"],
               })
             }
+            disabled={disabled}
+          />
+        </TableCell>
+        <TableCell className="py-1">
+          <DiagnosisSeveritySelect
+            severity={diagnosis.severity || "moderate"}
+            onValueChange={(value) => onUpdate?.({ severity: value })}
             disabled={disabled}
           />
         </TableCell>
@@ -859,6 +917,7 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                     {t(diagnosis.clinical_status)}
                     {" · "}
                     {t(diagnosis.verification_status)}
+                    {diagnosis.severity && ` · ${t(diagnosis.severity)}`}
                   </div>
                 )}
               </div>
