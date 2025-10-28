@@ -239,19 +239,15 @@ export function LocationTable({
 
                         {/* Edit button or spacer */}
                         {onEdit ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => onEdit(location)}
-                                data-cy="edit-location-button"
-                              >
-                                <PenLine className="size-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>{t("edit")}</TooltipContent>
-                          </Tooltip>
+                          <Button
+                            title="Edit Location"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onEdit(location)}
+                            data-cy="edit-location-button"
+                          >
+                            <PenLine className="size-4" />
+                          </Button>
                         ) : (
                           <div className="size-9"></div>
                         )}

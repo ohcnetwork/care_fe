@@ -151,7 +151,6 @@ export function LocationSelectorDialog({
         }),
         mode: "kind",
         ...(myLocations && !currentParentId && { mine: true }),
-        ordering: "sort_index",
         ...(searchValue && { name: searchValue }),
         limit: resultsPerPage,
         offset: (currentPage - 1) * resultsPerPage,
