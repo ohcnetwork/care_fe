@@ -89,6 +89,8 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     resolver: zodResolver(getFormSchema(t)),
     mode: "onSubmit",
     defaultValues: {
+      name: "",
+      blood_group: "Unknown" as BloodGroupChoices,
       is_deceased: false,
       deceased_datetime: null,
       phone_number: phone_number || "",
@@ -526,7 +528,7 @@ const PatientBasicsContent = ({
               <RadioInput
                 {...field}
                 onValueChange={field.onChange}
-                value={field.value ?? undefined}
+                value={field.value ?? null}
                 options={GENDER_TYPES.map((g) => ({
                   value: g.id,
                   label: t(`GENDER__${g.id}`),
@@ -778,6 +780,7 @@ const AdditionalDetailsContent = ({
             <FormControl>
               <Input
                 {...field}
+                value={field.value ?? ""}
                 placeholder={t("enter_pincode")}
                 onChange={(e) => {
                   const value = e.target.value
