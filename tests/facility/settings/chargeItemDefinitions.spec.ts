@@ -8,18 +8,15 @@ test.use({ storageState: "tests/.auth/user.json" });
 function generateChargeItemDefinitionTestData() {
   return {
     chargeItemDefinition: {
-      title: faker.commerce.productName(),
-      slug: `${faker.commerce.productName().toLowerCase().replace(/\s+/g, "-")}`.slice(
-        0,
-        25,
-      ),
+      title: "Medi Change Item",
+      slug: `${faker.commerce.productName().replace(/\s+/g, "-")}`.slice(0, 25),
       basePrice: faker.commerce.price(),
       mrp: faker.commerce.price(),
       purchasePrice: faker.commerce.price(),
       description: faker.commerce.productDescription(),
     },
     category: {
-      name: `Test ${faker.commerce.department()}`,
+      name: "Medications",
     },
   };
 }

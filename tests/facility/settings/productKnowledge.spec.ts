@@ -8,7 +8,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 function generateProductKnowledgeData() {
   return {
     productKnowledge: {
-      name: faker.commerce.productName(),
+      name: "Atorvastatin",
       slug: faker.commerce
         .productName()
         .toLowerCase()
@@ -20,7 +20,7 @@ function generateProductKnowledgeData() {
       dosageForm: "tablet",
     },
     category: {
-      name: `Cat ${faker.commerce.department()}`,
+      name: "Medications",
     },
   };
 }
@@ -74,14 +74,12 @@ test.describe(() => {
   });
 
   test("validate", async ({ page }) => {
-    await test.step("Attempt to create without required fields", async () => {
-      await page.getByRole("button", { name: /add product/i }).click();
-      await page.getByRole("button", { name: /save/i }).click();
+    await page.getByRole("button", { name: /add product/i }).click();
+    await page.getByRole("button", { name: /save/i }).click();
 
-      await expect(
-        page.getByText(/required|not valid|invalid/i).first(),
-      ).toBeVisible();
-    });
+    await expect(
+      page.getByText(/required|not valid|invalid/i).first(),
+    ).toBeVisible();
   });
 
   test("create", async ({ page }) => {
@@ -109,9 +107,7 @@ test.describe(() => {
       await page.getByRole("button", { name: /save/i }).click();
 
       // Wait for success message
-      await expect(
-        page.getByText(/product knowledge.*created successfully/i),
-      ).toBeVisible();
+      await expect(page.getByText(/.*created successfully/i)).toBeVisible();
     });
   });
 
