@@ -5,9 +5,6 @@ import { getFacilityId } from "@/tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-// const categoryName = `${faker.lorem.word()} ${faker.string.uuid().slice(0, 8)}`;
-// const categorySlug = `${faker.lorem.word()}-${faker.string.uuid().slice(0, 8)}`;
-
 function generateCategoryData() {
   return {
     name: `${faker.lorem.word()} ${faker.string.uuid().slice(0, 8)}`,
