@@ -20,7 +20,8 @@ function generatePatientData() {
       year: "2009",
     },
     bloodGroup: "A+",
-    state: "Rajasthan",
+    state: "Rajasthan", //not used currently
+    pincode: "302020",
     address: "123 Test Street, Test City",
     emergencyContact: {
       name: `Emergency Contact ${timestamp}`,
@@ -104,7 +105,9 @@ test.describe("Patient Registration", () => {
         .getByRole("button", { name: /register patient/i })
         .scrollIntoViewIfNeeded();
       // fill Pincode
-      await page.getByRole("spinbutton", { name: "PIN Code *" }).fill("302020");
+      await page
+        .getByRole("spinbutton", { name: "PIN Code *" })
+        .fill(patientData.pincode);
       // Scroll to the Register Patient button to ensure dropdown is visible
       await page
         .getByRole("button", { name: /register patient/i })
@@ -221,7 +224,9 @@ test.describe("Patient Registration", () => {
         .getByRole("textbox", { name: "Address" })
         .fill(patientData.address);
 
-      await page.getByRole("spinbutton", { name: "PIN Code *" }).fill("302020");
+      await page
+        .getByRole("spinbutton", { name: "PIN Code *" })
+        .fill(patientData.pincode);
 
       // Scroll to the Register Patient button to ensure dropdown is visible
       await page
@@ -350,7 +355,9 @@ test.describe("Patient Registration", () => {
         .getByRole("textbox", { name: "Address" })
         .fill(patientData.address);
 
-      await page.getByRole("spinbutton", { name: "PIN Code *" }).fill("302020");
+      await page
+        .getByRole("spinbutton", { name: "PIN Code *" })
+        .fill(patientData.pincode);
 
       // Scroll to the Register Patient button to ensure dropdown is visible
       await page
