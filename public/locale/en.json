@@ -828,6 +828,7 @@
   "base_price_explanation": "The starting point for pricing calculation",
   "base_price_is_required": "Base price is required",
   "base_unit": "Base Unit",
+  "base_unit_is_required": "base unit is required",
   "basic_details_of_the_activity": "Enter the basic details of the activity",
   "basic_details_of_the_healthcare_service": "Enter the basic details of the healthcare service",
   "basic_info": "Basic Information",

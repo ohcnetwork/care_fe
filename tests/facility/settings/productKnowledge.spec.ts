@@ -5,77 +5,55 @@ import { getFacilityId } from "tests/support/facilityId";
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
-function generateProductKnowledgeData() {
-  return {
-    productKnowledge: {
-      name: "Atorvastatin",
-      slug: faker.commerce
-        .productName()
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .slice(0, 25),
-      type: "medication",
-      description: "Test medicine for automated testing",
-      baseUnit: "tablet",
-      dosageForm: "tablet",
-    },
-    category: {
-      name: "Medications",
-    },
-  };
-}
-
 test.describe(() => {
-  let testData: ReturnType<typeof generateProductKnowledgeData> =
-    generateProductKnowledgeData();
-
   let facilityId: string;
+  let testData: {
+    name: string;
+    slug: string;
+    productType: string;
+    baseUnit: string;
+    hsnCode: string;
+    altNames: string;
+    storageGuidelines: string;
+  };
+
+  const productTypeOptions = [
+    "Medication",
+    "Nutritional Product",
+    "Consumable",
+  ];
+
+  const baseUnitOptions = [
+    "tablets",
+    "milligram",
+    "microgram",
+    "milliliter",
+    "drop",
+    "international unit",
+    "count",
+  ];
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    const targetUrl = `/facility/${facilityId}/settings/product_knowledge`;
-    await page.goto(targetUrl);
+    const productName = faker.commerce.productName();
+    testData = {
+      name: productName,
+      slug: productName.replace(/\s+/g, "-").slice(0, 25),
+      productType: faker.helpers.arrayElement(productTypeOptions),
+      baseUnit: faker.helpers.arrayElement(baseUnitOptions),
+      hsnCode: faker.phone.number(),
+      altNames: productName + "Alt",
+      storageGuidelines: faker.commerce.productDescription(),
+    };
 
-    await test.step("Search for Test Category", async () => {
-      await page
-        .getByRole("textbox", { name: /search/i })
-        .fill(testData.category.name);
-
-      await page.waitForLoadState("networkidle");
-    });
-
-    const CategoryExists =
-      (await page
-        .locator("div", {
-          hasText: testData.category.name,
-        })
-        .count()) > 0;
-
-    if (!CategoryExists) {
-      await test.step("Create Test Category", async () => {
-        await page.getByRole("button", { name: /add category/i }).click();
-        await page
-          .getByRole("textbox", { name: /name/i })
-          .fill(testData.category.name);
-        await page.getByRole("button", { name: /create/i }).click();
-
-        // Wait for success message
-        await expect(
-          page.getByText(/category.*created successfully/i),
-        ).toBeVisible();
-      });
-    } else {
-      await test.step("Use existing Test Category", async () => {
-        await page
-          .getByRole("heading", { name: testData.category.name })
-          .click();
-      });
-    }
+    await page.goto(
+      `/facility/${facilityId}/settings/product_knowledge/categories/f-${facilityId}-medications-product_knowledge`,
+    );
   });
 
   test("validate", async ({ page }) => {
     await page.getByRole("button", { name: /add product/i }).click();
-    await page.getByRole("button", { name: /save/i }).click();
+    await page.getByRole("button", { name: /create/i }).click();
 
     await expect(
       page.getByText(/required|not valid|invalid/i).first(),
@@ -83,61 +61,59 @@ test.describe(() => {
   });
 
   test("create", async ({ page }) => {
-    await test.step("Create new product knowledge", async () => {
-      await page.getByRole("button", { name: /add product/i }).click();
+    await page.getByRole("button", { name: /add product/i }).click();
 
-      await page
-        .getByRole("textbox", { name: /name/i })
-        .fill(testData.productKnowledge.name);
-      await page
-        .getByRole("textbox", { name: /slug/i })
-        .fill(testData.productKnowledge.slug);
-      await page.getByRole("combobox", { name: /product type/i }).click();
-      await page.getByRole("option", { name: "medication" }).click();
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Select base unit" })
-        .click();
-      await page.getByRole("option", { name: "tablets" }).click();
-      await page.getByRole("combobox", { name: "Dosage Form" }).click();
-      await page.getByRole("option").first().click();
-    });
+    // Basic details
+    await page.getByRole("textbox", { name: /name/i }).fill(testData.name);
+    await page.getByRole("textbox", { name: /slug/i }).fill(testData.slug);
+    await page.getByRole("combobox", { name: /product type/i }).click();
+    await page.getByRole("option", { name: testData.productType }).click();
+    await page.getByText(/Base Unit/).click();
+    await page.getByRole("option", { name: testData.baseUnit }).click();
+    await page
+      .getByRole("textbox", { name: "HSN Code" })
+      .fill(testData.hsnCode);
 
-    await test.step("Save product knowledge", async () => {
-      await page.getByRole("button", { name: /save/i }).click();
+    // Alternate names and storage guidelines
+    await page.getByRole("button", { name: "Add Name" }).click();
+    await page.locator('input[name="names.0.name"]').fill(testData.altNames);
 
-      // Wait for success message
-      await expect(page.getByText(/.*created successfully/i)).toBeVisible();
-    });
+    await page.getByRole("button", { name: "Add Guideline" }).click();
+    await page
+      .getByRole("textbox", { name: "Note" })
+      .fill(testData.storageGuidelines);
+    await page.getByRole("spinbutton", { name: "Duration Value" }).fill("2");
+
+    // Dosage form
+    await page.getByRole("combobox", { name: /dosage form/i }).click();
+    await page.getByRole("option").first().click();
+    await page.getByRole("button", { name: /create/i }).click();
+
+    await expect(page.getByText(/created successfully/i)).toBeVisible();
   });
 
   test("view and edit", async ({ page }) => {
-    await test.step("search for newly created product knowledge then edit it", async () => {
-      await page
-        .getByRole("textbox", { name: "Search products" })
-        .fill(testData.productKnowledge.name);
-      await page
-        .getByRole("link", { name: "View" })
-        .waitFor({ state: "visible" });
-      await page.getByRole("link", { name: "View" }).click();
-      await page.getByRole("button", { name: "Edit" }).click();
+    await page.getByRole("link", { name: "View" }).first().click();
+    await page.getByRole("button", { name: "Edit" }).click();
 
-      // Edit some fields
-      await page.getByRole("button", { name: "Remove Definition" }).click();
+    await page
+      .getByRole("textbox", { name: /name/i })
+      .first()
+      .fill(testData.name);
+    await page.getByRole("combobox", { name: /product type/i }).click();
+    await page.getByRole("option", { name: testData.productType }).click();
 
-      await page.getByRole("button", { name: /save/i }).click();
-      await expect(page.getByText(/updated successfully/i)).toBeVisible();
-    });
+    await page.getByText(/Base Unit/).click();
+    await page.getByRole("option", { name: testData.baseUnit }).click();
+    await page
+      .getByRole("textbox", { name: "HSN Code" })
+      .fill(testData.hsnCode);
+    await page.getByRole("button", { name: /update/i }).click();
+    await expect(page.getByText(/updated successfully/i)).toBeVisible();
   });
 
   test("delete", async ({ page }) => {
-    await page
-      .getByRole("textbox", { name: "Search products" })
-      .fill(testData.productKnowledge.name);
-    await page
-      .getByRole("link", { name: "View" })
-      .waitFor({ state: "visible" });
-    await page.getByRole("link", { name: "View" }).click();
+    await page.getByRole("link", { name: "View" }).first().click();
     await expect(page.getByRole("button", { name: "Delete" })).toBeVisible();
     await page.getByRole("button", { name: "Delete" }).click();
     await page.getByRole("button", { name: "Confirm" }).click();
