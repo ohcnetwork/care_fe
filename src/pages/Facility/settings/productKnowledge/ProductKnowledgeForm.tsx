@@ -8,6 +8,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import BackButton from "@/components/Common/BackButton";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -1028,17 +1030,17 @@ function ProductKnowledgeFormContent({
             </div>
 
             <div className="mt-6 flex justify-end space-x-4">
-              <Button type="button" variant="outline" asChild>
-                <Link
-                  href={
-                    isEditMode
-                      ? `/product_knowledge/${slug}`
-                      : `/product_knowledge/categories/${categorySlug}`
-                  }
-                >
+              {isEditMode ? (
+                <BackButton type="button" variant="outline">
                   {t("cancel")}
-                </Link>
-              </Button>
+                </BackButton>
+              ) : (
+                <Button type="button" variant="outline" asChild>
+                  <Link href={`/product_knowledge/categories/${categorySlug}`}>
+                    {t("cancel")}
+                  </Link>
+                </Button>
+              )}
               <Button type="submit" disabled={isPending}>
                 {isPending ? (
                   t("saving")
