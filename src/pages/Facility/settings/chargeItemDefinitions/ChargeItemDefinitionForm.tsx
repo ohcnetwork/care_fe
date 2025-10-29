@@ -324,7 +324,7 @@ export function MonetaryComponentSelector({
             <div key={`${key}`} className="flex flex-col gap-2">
               <div className="flex items-center gap-2 p-2">
                 <Component
-                  className="h-4 w-4 text-black/80"
+                  className="size-4 text-black/80"
                   strokeWidth={1.25}
                 />
                 <div className="text-sm font-semibold text-gray-900 uppercase">
@@ -419,7 +419,7 @@ export function MonetaryComponentSelector({
                       onClick={() => onComponentToggle(component, false, type)}
                       className="h-6 w-6 p-0"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="size-4" />
                     </Button>
                   </div>
 
@@ -491,14 +491,14 @@ export function MonetaryComponentSelector({
                 </span>
               )}
             </div>
-            <ChevronDown className="h-4 w-4 text-gray-400" />
+            <ChevronDown className="size-4 text-gray-400" />
           </div>
         </PopoverTrigger>
 
         <PopoverContent className="w-68 p-0" align="start">
           <div className="p-3 border-b">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -531,7 +531,7 @@ export function MonetaryComponentSelector({
               size="sm"
               className="flex-1 bg-green-600 hover:bg-green-700"
             >
-              <Check className="h-4 w-4 mr-1" />
+              <Check className="size-4 mr-1" />
               {t("done")}
             </Button>
           </div>
@@ -689,6 +689,8 @@ export function ChargeItemDefinitionForm({
       c.code?.code === PURCHASE_PRICE_CODE &&
       c.monetary_component_type === MonetaryComponentType.informational,
   )?.amount;
+
+  const { isDirty } = form.formState;
 
   // Handle form submission
   const { mutate: upsert, isPending } = useMutation({
@@ -1193,18 +1195,18 @@ export function ChargeItemDefinitionForm({
           <Button
             type="submit"
             size={minimal ? "sm" : "default"}
-            disabled={isPending}
+            disabled={isPending || (isUpdate && !isDirty)}
           >
             {isPending ? (
               <>
                 <Loader2
-                  className={`${minimal ? "mr-1" : "mr-2"} h-4 w-4 animate-spin`}
+                  className={`${minimal ? "mr-1" : "mr-2"} size-4 animate-spin`}
                 />
                 {t("saving")}
               </>
             ) : (
               <>
-                <CheckIcon className={`${minimal ? "mr-1" : "mr-2"} h-4 w-4`} />
+                <CheckIcon className={`${minimal ? "mr-1" : "mr-2"} size-4`} />
                 {isUpdate ? t("update") : t("create")}
               </>
             )}

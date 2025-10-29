@@ -8,7 +8,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 function generateChargeItemDefinitionTestData() {
   return {
     chargeItemDefinition: {
-      title: "Medi Change Item",
+      title: "Medi ChargeItem",
       slug: `${faker.commerce.productName().replace(/\s+/g, "-")}`.slice(0, 25),
       basePrice: faker.commerce.price(),
       mrp: faker.commerce.price(),
@@ -88,6 +88,10 @@ test.describe(() => {
       await page
         .getByRole("textbox", { name: /title/i })
         .fill(testData.chargeItemDefinition.title);
+
+      await page
+        .getByRole("textbox", { name: /slug/i })
+        .fill(testData.chargeItemDefinition.slug);
 
       await page
         .getByRole("textbox", { name: /description/i })
