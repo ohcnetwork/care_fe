@@ -1,5 +1,6 @@
 import { Menu } from "lucide-react";
-import { ActiveLink, navigate, useRoutes } from "raviger";
+import { ActiveLink, navigate, useFullPath, useRoutes } from "raviger";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -21,7 +22,6 @@ import { TaxCodeSettings } from "@/pages/Facility/settings/billing/tax/tax-codes
 import { TaxComponentSettings } from "@/pages/Facility/settings/billing/tax/tax-components/TaxComponentSettings";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
-import { useEffect } from "react";
 import { InformationalCodeSettings } from "./informational/InformationalCodeSettings";
 import { BillingSettings } from "./settings/BillingSettings";
 
@@ -93,11 +93,13 @@ export function BillingSettingsLayout() {
     routeProps: { facilityId },
   });
 
+  const path = useFullPath();
+
   useEffect(() => {
-    if (window.location.pathname === basePath) {
+    if (path === basePath) {
       navigate(`${basePath}/discount_codes`, { replace: true });
     }
-  });
+  }, [basePath]);
 
   return (
     <div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
