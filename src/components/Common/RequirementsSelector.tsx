@@ -27,6 +27,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { cn } from "@/lib/utils";
 
 type RequirementItem = {
   value: string;
@@ -50,6 +51,7 @@ interface RequirementsSelectorProps {
   canCreate?: boolean;
   createForm?: (onSuccess: () => void) => React.ReactNode;
   allowDuplicate?: boolean;
+  triggerBtnClassName?: string;
 }
 
 function SelectedItemCard({
@@ -265,6 +267,7 @@ export default function RequirementsSelector({
   canCreate,
   createForm,
   allowDuplicate = false,
+  triggerBtnClassName,
 }: RequirementsSelectorProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isCreateSheetOpen, setIsCreateSheetOpen] = React.useState(false);
@@ -293,7 +296,7 @@ export default function RequirementsSelector({
       variant="outline"
       role="combobox"
       aria-expanded={isOpen}
-      className="w-full justify-between"
+      className={cn("w-full justify-between", triggerBtnClassName)}
     >
       <div className="flex items-center gap-2 truncate">
         {value.length === 0 ? (
