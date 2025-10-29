@@ -182,7 +182,10 @@ export default function UserSummaryTab({
                     {t("delete_account_note")}
                   </p>
                 </div>
-                <UserDeleteDialog user={userData} />
+                <UserDeleteDialog
+                  user={userData}
+                  isOwnAccount={loggedInUsersProfile}
+                />
               </div>
             </CardContent>
           </Card>
