@@ -1,0 +1,64 @@
+name: Comment Playwright Results
+
+on:
+  workflow_run:
+    workflows: ["Playwright Tests"]
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.event == 'pull_request'
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          path: artifacts
+
+      - name: Read PR number
+        id: pr
+        run: |
+          if [ -f artifacts/pr-number/pr-number.txt ]; then
+            echo "number=$(cat artifacts/pr-number/pr-number.txt)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Read PR comment
+        id: comment
+        run: |
+          if [ -f artifacts/pr-comment/pr-comment.md ]; then
+            echo "body<<EOF" >> $GITHUB_OUTPUT
+            cat artifacts/pr-comment/pr-comment.md >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "body=⚠️ Test results unavailable" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        if: steps.pr.outputs.number
+        with:
+          issue-number: ${{ steps.pr.outputs.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "🎭 Playwright Test Results"
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v4
+        if: steps.pr.outputs.number
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ steps.pr.outputs.number }}
+          edit-mode: replace
+          body: ${{ steps.comment.outputs.body }}
+
+      - name: Fail if tests failed
+        if: github.event.workflow_run.conclusion == 'failure'
+        run: |
+          echo "::error::Playwright tests failed in the upstream workflow"
+          exit 1
