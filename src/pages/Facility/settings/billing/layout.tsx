@@ -1,5 +1,5 @@
 import { Menu } from "lucide-react";
-import { Link, useRoutes } from "raviger";
+import { ActiveLink, navigate, useRoutes } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ import { TaxCodeSettings } from "@/pages/Facility/settings/billing/tax/tax-codes
 import { TaxComponentSettings } from "@/pages/Facility/settings/billing/tax/tax-components/TaxComponentSettings";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
+import { useEffect } from "react";
 import { InformationalCodeSettings } from "./informational/InformationalCodeSettings";
 import { BillingSettings } from "./settings/BillingSettings";
 
@@ -85,9 +86,17 @@ export function BillingSettingsLayout() {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
 
+  const basePath = `/facility/${facilityId}/settings/billing`;
+
   const route = useRoutes(routes, {
-    basePath: `/facility/${facilityId}/settings/billing`,
+    basePath,
     routeProps: { facilityId },
+  });
+
+  useEffect(() => {
+    if (window.location.pathname === basePath) {
+      navigate(`${basePath}/discount_codes`, { replace: true });
+    }
   });
 
   return (
@@ -108,12 +117,13 @@ export function BillingSettingsLayout() {
                 </div>
                 {category.items.map((item) => (
                   <DropdownMenuItem key={item.href} asChild>
-                    <Link
+                    <ActiveLink
                       href={`/billing${item.href}`}
                       className="w-full cursor-pointer"
+                      activeClass="bg-gray-100 shadow-sm"
                     >
                       {item.title}
-                    </Link>
+                    </ActiveLink>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
@@ -134,16 +144,17 @@ export function BillingSettingsLayout() {
                 </h4>
                 <div className="space-y-1">
                   {category.items.map((item) => (
-                    <Link
+                    <ActiveLink
                       key={item.href}
                       href={`/billing${item.href}`}
                       className={cn(
                         buttonVariants({ variant: "ghost" }),
                         "w-full justify-start",
                       )}
+                      activeClass="bg-gray-100 shadow-sm text-black"
                     >
                       {item.title}
-                    </Link>
+                    </ActiveLink>
                   ))}
                 </div>
               </div>
