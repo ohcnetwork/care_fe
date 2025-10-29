@@ -5,6 +5,8 @@ import { getFacilityId } from "tests/support/facilityId";
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
+const SLUG_LENGTH = 5;
+
 test.describe("Specimen Definitions Management", () => {
   let facilityId: string;
 
@@ -22,7 +24,7 @@ test.describe("Specimen Definitions Management", () => {
     definitionTitle = faker.science.chemicalElement().name;
     definitionDescription = faker.lorem.sentence();
     const randomHex = faker.string
-      .hexadecimal({ length: 9, prefix: "" })
+      .hexadecimal({ length: SLUG_LENGTH, prefix: "" })
       .toLowerCase();
     definitionSlug = `${faker.science.chemicalElement().symbol.toLowerCase()}-${randomHex}`;
 
