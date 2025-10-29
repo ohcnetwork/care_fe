@@ -117,6 +117,55 @@ test.describe.serial("category list", () => {
       await expect(addActivityButton).toBeEnabled();
     });
 
+    test("should create nested category inside existing category", async ({
+      page,
+    }) => {
+      const childCategoryData = generateCategoryData();
+      console.log(testData.name);
+
+      await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
+
+      await expect(page.getByText(testData.name)).toBeVisible();
+
+      await page.getByRole("heading", { name: testData.name }).click();
+
+      await expect(page).toHaveURL(
+        new RegExp(
+          `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}`,
+        ),
+      );
+
+      const addCategoryButton = page.getByRole("button", {
+        name: /add category/i,
+      });
+      await expect(addCategoryButton).toBeVisible();
+      await addCategoryButton.click();
+
+      const dialog = page.getByRole("dialog");
+      await expect(dialog).toBeVisible();
+      await expect(
+        dialog.getByRole("heading", { name: /create category/i }),
+      ).toBeVisible();
+
+      const nameInput = dialog.getByRole("textbox", { name: /^name$/i });
+      await nameInput.fill(childCategoryData.name);
+
+      const descriptionInput = dialog.getByRole("textbox", {
+        name: /^description$/i,
+      });
+      await descriptionInput.fill(childCategoryData.description);
+
+      await dialog.getByRole("button", { name: /^create category$/i }).click();
+
+      await expect(
+        page.getByText(/category created successfully/i),
+      ).toBeVisible();
+
+      await expect(page.getByText(childCategoryData.name)).toBeVisible();
+
+      await expect(page.getByText(testData.name)).toBeVisible();
+    });
+
     test("should edit category", async ({ page }) => {
       const updatedData = generateCategoryData();
 
