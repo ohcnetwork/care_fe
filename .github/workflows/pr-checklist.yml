@@ -78,12 +78,40 @@ jobs:
                 state: 'closed'
               });
 
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: ['auto-closed-checklist']
+              });
+
               core.setFailed('Checklist incomplete. PR closed.');
-            } else if (checked.length > 0 && prState === 'closed') {
+            } 
+            else if (checked.length > 0 && prState === 'closed') {
+
+              const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number
+              });
+
+              const wasAutoClosed = labels.some(l => l.name === 'auto-closed-checklist');
+              if (!wasAutoClosed) {
+                  console.log('PR was manually closed — skipping reopen.');
+                  return;
+              }
+
               await github.rest.pulls.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: context.payload.pull_request.number,
                 state: 'open'
+              });
+
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                name: 'auto-closed-checklist'
               });
             }
