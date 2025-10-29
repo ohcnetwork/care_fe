@@ -39,20 +39,6 @@ export const PatientInfoHoverCard = ({
         <Button variant="outline" className="text-gray-950" asChild>
           <Link
             basePath="/"
-            href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
-              {
-                phone_number: patient.phone_number,
-                year_of_birth: patient.year_of_birth.toString(),
-                partial_id: patient.id.slice(0, 5),
-              },
-            ).toString()}`}
-          >
-            {t("patient_home")}
-          </Link>
-        </Button>
-        <Button variant="outline" className="text-gray-950" asChild>
-          <Link
-            basePath="/"
             href={
               facilityId
                 ? `/facility/${facilityId}/patient/${patient.id}`
