@@ -19,7 +19,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -135,7 +134,8 @@ export function ObservationInterpretation<
     );
   };
 
-  const handleTypeChange = (newType: InterpretationType) => {
+  // TODO: For handling type change (Valueset support/BE not ready yet)
+  const _handleTypeChange = (newType: InterpretationType) => {
     if (newType === selectedInterpretationType) return;
 
     if (hasExistingData() && qualifiedRanges.length > 1) {
@@ -513,7 +513,7 @@ export function ObservationInterpretation<
               onSave={handleSaveInterpretation}
               onCancel={handleCancelEdit}
               interpretationType={selectedInterpretationType}
-              handleTypeChange={handleTypeChange}
+              //handleTypeChange={handleTypeChange}
               fieldName={`${name}.${editedRange.id || 0}`}
             />
           )}
@@ -558,7 +558,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
   onSave,
   onCancel,
   interpretationType,
-  handleTypeChange,
+  //handleTypeChange,
   fieldName,
 }: {
   form: UseFormReturn<TFieldValues>;
@@ -571,7 +571,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
   onSave: () => void;
   onCancel: () => void;
   interpretationType: InterpretationType;
-  handleTypeChange: (newType: InterpretationType) => void;
+  //handleTypeChange: (newType: InterpretationType) => void;
   fieldName: string;
 }) {
   const { t } = useTranslation();
@@ -610,7 +610,8 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
           form={form}
           fieldName={`${fieldName}.conditions`}
         />
-        <div>
+        {/* TODO: Hide interpretation type selector until BE is ready*/}
+        {/*         <div>
           <div className="flex flex-col sm:flex-row justify-between gap-2 bg-gray-50 rounded-md px-2 pt-1 pb-2 border border-gray-200">
             <span className="text-sm font-medium mt-2">
               {t("interpretation_type")}
@@ -644,7 +645,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
               </RadioGroup>
             </div>
           </div>
-        </div>
+        </div> */}
         {interpretationType === InterpretationType.ranges ? (
           <NumericRangeComponent
             form={form}
