@@ -124,10 +124,10 @@ test.describe.serial("category list", () => {
 
       await expect(page.getByText(testData.name)).toBeVisible();
 
-      const categoryCard = page
-        .getByRole("heading", { name: testData.name })
-        .locator("xpath=ancestor::div[contains(@class, 'cursor-pointer')]");
-      const editButton = categoryCard.getByRole("button").first();
+      const categoryCard = page.locator('[data-slot="card"]').filter({
+        has: page.getByRole("heading", { name: testData.name }),
+      });
+      const editButton = categoryCard.locator('[data-slot="button"]');
       await editButton.click();
 
       const dialog = page.getByRole("dialog");

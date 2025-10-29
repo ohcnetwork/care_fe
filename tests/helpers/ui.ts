@@ -10,7 +10,7 @@ export async function selectFromLocationMultiSelect(
   }: { search?: string; index?: number; closeAfterSelect?: boolean } = {},
 ) {
   await trigger.waitFor({ state: "visible" });
-  await trigger.scrollIntoViewIfNeeded?.();
+  await trigger.scrollIntoViewIfNeeded();
   await trigger.click();
 
   const scope = page
@@ -87,7 +87,7 @@ export async function selectFromRequirements(
   { search, itemIndex = 0 }: SelectFromRequirementsOptions = {},
 ) {
   await trigger.waitFor({ state: "visible" });
-  await trigger.scrollIntoViewIfNeeded?.();
+  await trigger.scrollIntoViewIfNeeded();
 
   // Close any existing popovers before opening
   await closeAnyOpenPopovers(page);
@@ -160,7 +160,7 @@ export async function selectFromValueSet(
   { search, itemIndex = 0, tab = "search" }: SelectFromValueSetOptions = {},
 ) {
   await trigger.waitFor({ state: "visible" });
-  await trigger.scrollIntoViewIfNeeded?.();
+  await trigger.scrollIntoViewIfNeeded();
 
   // Close any existing popovers before opening
   await closeAnyOpenPopovers(page);
@@ -241,7 +241,7 @@ export async function selectFromCategoryPicker(
   }: SelectFromCategoryPickerOptions = {},
 ) {
   await trigger.waitFor({ state: "visible" });
-  await trigger.scrollIntoViewIfNeeded?.();
+  await trigger.scrollIntoViewIfNeeded();
 
   // Close any existing popovers before opening
   await closeAnyOpenPopovers(page);
