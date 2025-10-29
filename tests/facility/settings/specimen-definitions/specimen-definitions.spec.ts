@@ -192,15 +192,16 @@ test.describe("Specimen Definitions Management", () => {
 
     if (firstTitle) {
       // Find search textbox and search for the definition
-      const searchBox = page.getByRole("textbox").first();
-      await searchBox.fill(firstTitle);
+      await page
+        .getByRole("textbox", {
+          name: "Search definitions",
+        })
+        .fill(firstTitle);
 
       // Verify filtered results contain the search term
-      const tableBody = page.locator('[data-slot="table-body"]');
-      await expect(tableBody).toContainText(firstTitle);
-
-      // Clear search
-      await searchBox.clear();
+      await expect(page.locator('[data-slot="table-body"]')).toContainText(
+        firstTitle,
+      );
     }
   });
 
