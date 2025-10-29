@@ -42,7 +42,6 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
-import { PanelLeftClose } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -261,20 +260,11 @@ export const EncounterShow = (props: Props) => {
           SetIssRailOpen={setIsEncounterRailOpen}
         />
         <div className="w-full">
-          {isSelectedEncounterLoading ? (
-            <Skeleton className="h-10 w-md" />
-          ) : (
-            selectedEncounter && (
-              <div className="hidden lg:flex items-center text-gray-800">
-                {isEncounterRailOpen && (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => setIsEncounterRailOpen((open) => !open)}
-                  >
-                    <PanelLeftClose className="size-5" />
-                  </Button>
-                )}
+          <div className="hidden lg:block">
+            {isSelectedEncounterLoading ? (
+              <Skeleton className="h-10 w-md" />
+            ) : (
+              selectedEncounter && (
                 <div className="flex gap-2 items-center">
                   <h4 className="font-bold">
                     {t(
@@ -321,9 +311,9 @@ export const EncounterShow = (props: Props) => {
                     {t(`encounter_status__${selectedEncounter.status}`)}
                   </Badge>
                 </div>
-              </div>
-            )
-          )}
+              )
+            )}
+          </div>
 
           <NavTabs
             showMoreAfterIndex={showMoreAfterIndex}
