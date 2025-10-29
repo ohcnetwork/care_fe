@@ -12,6 +12,10 @@ import { defineConfig, devices } from "@playwright/test";
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  /* Global setup and teardown */
+  globalSetup: require.resolve("./scripts/playwright/global-setup"),
+  globalTeardown: require.resolve("./scripts/playwright/global-teardown"),
+
   testDir: "./tests",
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -23,11 +27,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
-    ? [
-        ["html"],
-        ["json", { outputFile: "test-results.json" }],
-        ["list"],
-      ]
+    ? [["html"], ["json", { outputFile: "test-results.json" }], ["list"]]
     : "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
