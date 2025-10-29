@@ -54,7 +54,6 @@ test.describe("Specimen Definitions Management", () => {
 
     // Select Type Collected (required field)
     await page.getByRole("combobox", { name: "Type Collected *" }).click();
-    await page.waitForTimeout(500); // Wait for options to populate
     await page.getByRole("option").first().click();
 
     // Submit form
