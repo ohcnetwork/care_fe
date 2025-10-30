@@ -101,6 +101,9 @@ function AllSupplyDeliveriesComponent({
         }
       : {
           supplier: deliveryOrder?.supplier?.id,
+          ...(isRequester
+            ? { destination: locationId }
+            : { destination: deliveryOrder.destination?.id }),
         }),
   };
 
@@ -195,6 +198,12 @@ export function DeliveryOrderShow({
       }),
       enabled: !!deliveryOrderId,
     });
+
+  const hasUnconfirmedDeliveries = Boolean(
+    supplyDeliveries?.results?.some(
+      (d) => d.status === SupplyDeliveryStatus.in_progress,
+    ),
+  );
 
   const { mutate: upsertSupplyDeliveries, isPending: isUpsertingDeliveries } =
     useMutation({
@@ -422,7 +431,7 @@ export function DeliveryOrderShow({
                       DeliveryOrderStatus.completed,
                     )
                   }
-                  disabled={isUpdating}
+                  disabled={isUpdating || hasUnconfirmedDeliveries}
                 >
                   {isUpdating ? t("updating") : t("mark_as_completed")}
                   <ShortcutBadge actionId="mark-as" />

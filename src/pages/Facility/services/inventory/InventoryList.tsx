@@ -134,7 +134,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                 <TableRow key={inventory.id}>
                   <TableCell className="font-semibold">
                     <Link
-                      href={`/facility/${facilityId}/settings/product_knowledge/${inventory.product.product_knowledge.slug}`}
+                      href={`/facility/${facilityId}/settings/product/${inventory.product.id}`}
                       basePath="/"
                       className="flex items-center gap-2"
                     >
