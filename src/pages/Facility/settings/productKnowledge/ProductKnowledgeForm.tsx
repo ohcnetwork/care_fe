@@ -101,7 +101,10 @@ const createFormSchema = (
               value: z.number().int().optional(),
               unit: codeSchema,
             })
-            .refine((data) => data.value !== undefined && data.value !== null),
+            .refine((data) => data.value !== undefined && data.value !== null, {
+              message: t("field_required"),
+              path: ["value"],
+            }),
         }),
       )
       .default([]),
@@ -236,6 +239,8 @@ function ProductKnowledgeFormContent({
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues(),
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
   React.useEffect(() => {
@@ -274,7 +279,7 @@ function ProductKnowledgeFormContent({
         toast.success(t("product_knowledge_created_successfully"));
         onSuccess();
         navigate(
-          `/facility/${facilityId}/settings/product_knowledge/categories/${productKnowledge.category.slug}`,
+          `/facility/${facilityId}/settings/product_knowledge/${productKnowledge.slug}`,
         );
       },
     },
@@ -507,17 +512,16 @@ function ProductKnowledgeFormContent({
                   <FormField
                     control={form.control}
                     name="base_unit"
-                    render={() => (
+                    render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel aria-required>{t("base_unit")}</FormLabel>
                         <Select
-                          value={form.watch("base_unit")?.code || ""}
+                          value={field.value?.code || ""}
                           onValueChange={(value) => {
                             const selectedUnit = DOSAGE_UNITS_CODES.find(
                               (unit) => unit.code === value,
                             );
-                            if (selectedUnit)
-                              form.setValue("base_unit", selectedUnit);
+                            if (selectedUnit) field.onChange(selectedUnit);
                           }}
                         >
                           <FormControl>
@@ -775,11 +779,7 @@ function ProductKnowledgeFormContent({
                                       }
                                     />
                                   </FormControl>
-                                  <FormMessage>
-                                    {form.formState.errors.storage_guidelines?.[
-                                      index
-                                    ]?.stability_duration && t("required")}
-                                  </FormMessage>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
@@ -801,14 +801,11 @@ function ProductKnowledgeFormContent({
                                           (unit) => unit.code === value,
                                         );
                                       if (selectedUnit)
-                                        form.setValue(
-                                          `storage_guidelines.${index}.stability_duration.unit`,
-                                          {
-                                            code: selectedUnit.code,
-                                            display: selectedUnit.display,
-                                            system: selectedUnit.system,
-                                          },
-                                        );
+                                        field.onChange({
+                                          code: selectedUnit.code,
+                                          display: selectedUnit.display,
+                                          system: selectedUnit.system,
+                                        });
                                     }}
                                   >
                                     <FormControl>
@@ -878,7 +875,13 @@ function ProductKnowledgeFormContent({
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => form.setValue("definitional", null)}
+                      onClick={() =>
+                        form.setValue("definitional", null, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                          shouldTouch: true,
+                        })
+                      }
                       className="w-full sm:w-auto flex items-center justify-center gap-1 "
                     >
                       <X className="size-4 " />
@@ -890,9 +893,17 @@ function ProductKnowledgeFormContent({
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        form.setValue("definitional", {
-                          intended_routes: [],
-                        })
+                        form.setValue(
+                          "definitional",
+                          {
+                            intended_routes: [],
+                          },
+                          {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                            shouldTouch: true,
+                          },
+                        )
                       }
                     >
                       <PlusCircle className="mr-2 size-4" />
@@ -907,7 +918,7 @@ function ProductKnowledgeFormContent({
                       <FormField
                         control={form.control}
                         name="definitional.dosage_form"
-                        render={() => (
+                        render={({ field }) => (
                           <FormItem className="flex flex-col">
                             <FormLabel aria-required>
                               {t("dosage_form")}
@@ -915,10 +926,10 @@ function ProductKnowledgeFormContent({
                             <FormControl>
                               <ValueSetSelect
                                 system="system-medication-form-codes"
-                                value={form.watch("definitional.dosage_form")}
+                                value={field.value}
                                 placeholder={t("dosage_form_placeholder")}
                                 onSelect={(code) => {
-                                  form.setValue("definitional.dosage_form", {
+                                  field.onChange({
                                     code: code.code,
                                     display: code.display,
                                     system: code.system,
