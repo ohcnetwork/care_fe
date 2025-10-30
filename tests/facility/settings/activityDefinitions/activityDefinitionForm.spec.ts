@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 
 import {
   closeAnyOpenPopovers,
+  expectToast,
   selectFromCategoryPicker,
   selectFromLocationMultiSelect,
   selectFromRequirements,
@@ -70,9 +71,7 @@ test.describe("activity definition form", () => {
     await closeAnyOpenPopovers(page);
     await page.getByRole("button", { name: /^create$/i }).click();
 
-    await expect(
-      page.getByText(/activity definition created successfully/i),
-    ).toBeVisible();
+    await expectToast(page, /activity definition created successfully/i);
 
     await expect(page).toHaveURL(
       `/facility/${facilityId}/settings/activity_definitions`,
@@ -206,9 +205,7 @@ test.describe("activity definition form", () => {
 
       await page.getByRole("button", { name: /^create$/i }).click();
 
-      await expect(
-        page.getByText(/activity definition created successfully/i),
-      ).toBeVisible();
+      await expectToast(page, /activity definition created successfully/i);
 
       await expect(page).toHaveURL(
         `/facility/${facilityId}/settings/activity_definitions`,
@@ -403,9 +400,7 @@ test.describe("activity definition form", () => {
 
       await page.getByRole("button", { name: "Save" }).click();
 
-      await expect(
-        page.getByText(/activity definition updated successfully/i),
-      ).toBeVisible();
+      await expectToast(page, /activity definition updated successfully/i);
 
       await expect(page).toHaveURL(
         new RegExp(`/facility/${facilityId}/settings/activity_definitions/.*`),
@@ -511,17 +506,15 @@ test.describe("activity definition form", () => {
     await test.step("delete activity definition", async () => {
       await page.getByRole("button", { name: /delete/i }).click();
 
-      const dialog = page.getByRole("dialog");
+      const dialog = page.getByRole("alertdialog");
       await expect(dialog).toBeVisible();
       await expect(
         dialog.getByText(/are you sure you want to delete/i),
       ).toBeVisible();
 
-      await dialog.getByRole("button", { name: /delete/i }).click();
+      await dialog.getByRole("button", { name: /confirm/i }).click();
 
-      await expect(
-        page.getByText(/activity definition deleted successfully/i),
-      ).toBeVisible();
+      await expectToast(page, /definition deleted successfully/i);
 
       await expect(page).toHaveURL(
         `/facility/${facilityId}/settings/activity_definitions`,

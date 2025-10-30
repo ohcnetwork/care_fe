@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
+import { expectToast } from "@/tests/helpers/ui";
 import { getFacilityId } from "@/tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -49,28 +50,24 @@ test.describe("category list", () => {
 
     await page.getByRole("button", { name: /add category/i }).click();
 
-    const dialog = page.getByRole("dialog", { name: /create category/i });
-    await expect(dialog).toBeVisible();
+    const sheet = page.locator('[data-slot="sheet-content"]');
+    await expect(sheet).toBeVisible();
     await expect(
-      dialog.getByRole("heading", { name: /create category/i }),
+      sheet.getByRole("heading", { name: /create category/i }),
     ).toBeVisible();
 
-    await dialog.getByRole("textbox", { name: /^name$/i }).fill(testData.name);
+    await sheet.getByLabel(/^name$/i).fill(testData.name);
 
-    await dialog.getByRole("textbox", { name: /^slug$/i }).fill(testData.slug);
+    await sheet.getByLabel(/^slug$/i).fill(testData.slug);
 
-    await dialog
-      .getByRole("textbox", { name: /^description$/i })
-      .fill(testData.description);
+    await sheet.getByLabel(/^description$/i).fill(testData.description);
 
-    await dialog.getByRole("combobox", { name: /resource sub type/i }).click();
+    await sheet.getByLabel(/resource sub type/i).click();
     await page.getByRole("option", { name: /^other$/i }).click();
 
-    await dialog.getByRole("button", { name: /^create category$/i }).click();
+    await sheet.getByRole("button", { name: /^create category$/i }).click();
 
-    await expect(
-      page.getByText(/category created successfully/i),
-    ).toBeVisible();
+    await expectToast(page, /category created successfully/i);
 
     await expect(page).toHaveURL(
       new RegExp(
@@ -143,25 +140,21 @@ test.describe("category list", () => {
       await expect(addCategoryButton).toBeVisible();
       await addCategoryButton.click();
 
-      const dialog = page.getByRole("dialog");
-      await expect(dialog).toBeVisible();
+      const sheet = page.locator('[data-slot="sheet-content"]');
+      await expect(sheet).toBeVisible();
       await expect(
-        dialog.getByRole("heading", { name: /create category/i }),
+        sheet.getByRole("heading", { name: /create category/i }),
       ).toBeVisible();
 
-      const nameInput = dialog.getByRole("textbox", { name: /^name$/i });
-      await nameInput.fill(childCategoryData.name);
+      await sheet.getByLabel(/^name$/i).fill(childCategoryData.name);
 
-      const descriptionInput = dialog.getByRole("textbox", {
-        name: /^description$/i,
-      });
-      await descriptionInput.fill(childCategoryData.description);
+      await sheet
+        .getByLabel(/^description$/i)
+        .fill(childCategoryData.description);
 
-      await dialog.getByRole("button", { name: /^create category$/i }).click();
+      await sheet.getByRole("button", { name: /^create category$/i }).click();
 
-      await expect(
-        page.getByText(/category created successfully/i),
-      ).toBeVisible();
+      await expectToast(page, /category created successfully/i);
 
       await expect(page.getByText(childCategoryData.name)).toBeVisible();
 
@@ -181,27 +174,21 @@ test.describe("category list", () => {
       const editButton = categoryCard.locator('[data-slot="button"]');
       await editButton.click();
 
-      const dialog = page.getByRole("dialog");
-      await expect(dialog).toBeVisible();
+      const sheet = page.locator('[data-slot="sheet-content"]');
+      await expect(sheet).toBeVisible();
       await expect(
-        dialog.getByRole("heading", { name: /edit category/i }),
+        sheet.getByRole("heading", { name: /edit category/i }),
       ).toBeVisible();
 
-      const nameInput = dialog.getByRole("textbox", { name: /^name$/i });
-      await nameInput.clear();
-      await nameInput.fill(updatedData.name);
+      await sheet.getByLabel(/^name$/i).clear();
+      await sheet.getByLabel(/^name$/i).fill(updatedData.name);
 
-      const descriptionInput = dialog.getByRole("textbox", {
-        name: /^description$/i,
-      });
-      await descriptionInput.clear();
-      await descriptionInput.fill(updatedData.description);
+      await sheet.getByLabel(/^description$/i).clear();
+      await sheet.getByLabel(/^description$/i).fill(updatedData.description);
 
-      await dialog.getByRole("button", { name: /^update category$/i }).click();
+      await sheet.getByRole("button", { name: /^update category$/i }).click();
 
-      await expect(
-        page.getByText(/category updated successfully/i),
-      ).toBeVisible();
+      await expectToast(page, /category updated successfully/i);
 
       await expect(page.getByText(updatedData.name)).toBeVisible();
     });

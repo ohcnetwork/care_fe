@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 export async function selectFromLocationMultiSelect(
   page: Page,
@@ -334,4 +334,19 @@ export async function selectFromCategoryPicker(
     await page.keyboard.press("Escape");
     await scope.waitFor({ state: "hidden" }).catch(() => {});
   }
+}
+
+/**
+ * Checks if a toast notification with the given text is visible
+ * @param page - Playwright page object
+ * @param text - Text to search for in the toast (can be string or RegExp)
+ * @param options - Additional options for the toast check
+ */
+export async function expectToast(
+  page: Page,
+  text: string | RegExp,
+  options: { timeout?: number } = {},
+) {
+  const toaster = page.locator(".toaster.group");
+  await expect(toaster.getByText(text)).toBeVisible(options);
 }
