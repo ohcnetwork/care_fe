@@ -190,7 +190,10 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col space-y-6 max-h-[calc(100vh-7rem)] overflow-y-auto"
+      >
         <FormField
           control={form.control}
           name="name"
