@@ -92,7 +92,6 @@ export default function InvoicesData({
           offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
           number: qParams.search,
           status: qParams.status,
-          ordering: "-created_date",
         },
       },
     ),

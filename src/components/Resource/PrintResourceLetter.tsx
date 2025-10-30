@@ -6,19 +6,18 @@ import PrintPreview from "@/CAREUI/misc/PrintPreview";
 import { Badge } from "@/components/ui/badge";
 
 import Loading from "@/components/Common/Loading";
-
-import routes from "@/Utils/request/api";
+import { getResourceRequestCategoryEnum } from "@/types/resourceRequest/resourceRequest";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import { getResourceRequestCategoryEnum } from "@/types/resourceRequest/resourceRequest";
 
 export default function PrintResourceLetter({ id }: { id: string }) {
   const { t } = useTranslation();
 
   const { data, isLoading } = useQuery({
     queryKey: ["resource_request_letter", id],
-    queryFn: query(routes.getResourceDetails, {
-      pathParams: { id: id },
+    queryFn: query(resourceRequestApi.get, {
+      pathParams: { resourceRequestId: id },
     }),
   });
 
@@ -75,10 +74,6 @@ export default function PrintResourceLetter({ id }: { id: string }) {
                   `resource_request_category__${getResourceRequestCategoryEnum(data.category)}`,
                 )}
               </div>
-              <div>
-                <span className="font-semibold">{t("quantity_required")}:</span>{" "}
-                {data.requested_quantity}
-              </div>
               <div className="mt-2">
                 <span className="font-semibold">
                   {t("reason_for_request")}:
@@ -91,7 +86,7 @@ export default function PrintResourceLetter({ id }: { id: string }) {
             <div className="mb-4">
               <span className="font-semibold">{t("current_status")}: </span>
               <Badge variant="secondary">
-                {t(`resource_status__${data.status}`)}
+                {t(`resource_request_status__${data.status}`)}
               </Badge>
             </div>
           </div>
@@ -101,7 +96,9 @@ export default function PrintResourceLetter({ id }: { id: string }) {
             <div>
               <div className="mb-20">
                 <div className="font-semibold">{t("requested_by")}:</div>
-                <div>{formatName(data.created_by)}</div>
+                <div>
+                  {data.created_by ? formatName(data.created_by) : "--"}
+                </div>
                 <div className="text-sm text-gray-600">
                   {formatDateTime(data.created_date)}
                 </div>
@@ -112,9 +109,11 @@ export default function PrintResourceLetter({ id }: { id: string }) {
               <div>
                 <div className="mb-20">
                   <div className="font-semibold">
-                    {t(`resource_status__${data.status}`)} {t("by")}:
+                    {t(`resource_request_status__${data.status}`)} {t("by")}:
                   </div>
-                  <div>{formatName(data.updated_by)}</div>
+                  <div>
+                    {data.updated_by ? formatName(data.updated_by) : "--"}
+                  </div>
                   <div className="text-sm text-gray-600">
                     {formatDateTime(data.modified_date)}
                   </div>
