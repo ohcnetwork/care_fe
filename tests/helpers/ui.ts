@@ -5,9 +5,9 @@ export async function selectFromLocationMultiSelect(
   trigger: Locator,
   {
     search,
-    index = 0,
+    itemIndex = 0,
     closeAfterSelect = true,
-  }: { search?: string; index?: number; closeAfterSelect?: boolean } = {},
+  }: { search?: string; itemIndex?: number; closeAfterSelect?: boolean } = {},
 ) {
   await trigger.waitFor({ state: "visible" });
   await trigger.scrollIntoViewIfNeeded();
@@ -28,20 +28,18 @@ export async function selectFromLocationMultiSelect(
 
   const plusButtons = scope.locator("button:has(svg.lucide-plus)");
   await plusButtons.first().waitFor({ state: "visible" });
-  await plusButtons.nth(index).click();
+  await plusButtons.nth(itemIndex).click();
 
   if (closeAfterSelect) {
     // Try to close via focused scope first; fallback to toggling the trigger
     await scope.press("Escape").catch(() => {});
-    const waitHidden = scope
-      .waitFor({ state: "hidden", timeout: 1000 })
-      .catch(() => null);
+    const waitHidden = scope.waitFor({ state: "hidden" }).catch(() => null);
     await waitHidden;
     const stillVisible = await scope.isVisible().catch(() => false);
     if (stillVisible) {
       // Fallback: click the trigger again to toggle close
       await trigger.click().catch(() => {});
-      await scope.waitFor({ state: "hidden", timeout: 1000 }).catch(() => {});
+      await scope.waitFor({ state: "hidden" }).catch(() => {});
     }
   }
 }
@@ -57,7 +55,7 @@ export async function closeAnyOpenPopovers(page: Page) {
     await page.keyboard.press("Escape").catch(() => {});
     await poppers
       .first()
-      .waitFor({ state: "hidden", timeout: 1000 })
+      .waitFor({ state: "hidden" })
       .catch(() => {});
   }
 }
@@ -100,7 +98,7 @@ export async function selectFromRequirements(
   const popper = page.locator("[data-radix-popper-content-wrapper]").last();
   const scope = hasDialog ? dialog : popper;
 
-  await scope.waitFor({ state: "visible", timeout: 5000 });
+  await scope.waitFor({ state: "visible" });
 
   // If search is provided, use the search input
   if (search) {
@@ -114,19 +112,19 @@ export async function selectFromRequirements(
 
   // Wait for options to load
   const options = scope.getByRole("option");
-  await options.first().waitFor({ state: "visible", timeout: 10000 });
+  await options.first().waitFor({ state: "visible" });
 
   const count = await options.count();
   if (count === 0) {
     throw new Error("No options found in requirements selector");
   }
 
-  // Find the Plus button inside the option at the specified index
+  // Find the Plus button inside the option at the specified itemIndex
   const targetOption = options.nth(itemIndex);
   const plusButton = targetOption.locator("button:has(svg.lucide-plus)");
 
   // Wait for the plus button and click it
-  await plusButton.waitFor({ state: "visible", timeout: 5000 });
+  await plusButton.waitFor({ state: "visible" });
   await plusButton.click();
 
   // Wait for selection to register (multi-select, so it stays open)
@@ -173,7 +171,7 @@ export async function selectFromValueSet(
   const popper = page.locator("[data-radix-popper-content-wrapper]").last();
   const scope = hasDialog ? dialog : popper;
 
-  await scope.waitFor({ state: "visible", timeout: 5000 });
+  await scope.waitFor({ state: "visible" });
 
   // Switch tabs if needed (mainly for mobile, but won't hurt on desktop)
   if (tab === "starred") {
@@ -194,7 +192,7 @@ export async function selectFromValueSet(
       // Wait for "Searching..." to appear and disappear
       const searching = scope.getByText(/searching/i);
       if (await searching.isVisible().catch(() => false)) {
-        await searching.waitFor({ state: "hidden", timeout: 10000 });
+        await searching.waitFor({ state: "hidden" });
       }
 
       // Additional wait for debounced results
@@ -204,7 +202,7 @@ export async function selectFromValueSet(
 
   // Wait for options to load
   const options = scope.getByRole("option");
-  await options.first().waitFor({ state: "visible", timeout: 10000 });
+  await options.first().waitFor({ state: "visible" });
 
   const count = await options.count();
   if (count === 0) {
@@ -216,7 +214,7 @@ export async function selectFromValueSet(
   await targetOption.click();
 
   // Auto-closes on selection, so wait for it to close
-  await scope.waitFor({ state: "hidden", timeout: 2000 }).catch(() => {});
+  await scope.waitFor({ state: "hidden" }).catch(() => {});
 }
 
 interface SelectFromCategoryPickerOptions {
@@ -229,6 +227,26 @@ interface SelectFromCategoryPickerOptions {
 /**
  * Helper for ResourceDefinitionCategoryPicker with hierarchical category navigation
  * This picker allows navigating through categories (folders) before selecting items
+ *
+ * @example
+ * // Navigate by category names
+ * await selectFromCategoryPicker(page, trigger, {
+ *   navigateCategories: ["Lab Tests", "Blood Tests"],
+ *   itemIndex: 0
+ * });
+ *
+ * @example
+ * // Search for an item directly (bypasses category navigation)
+ * await selectFromCategoryPicker(page, trigger, {
+ *   search: "Complete Blood Count",
+ *   itemIndex: 0
+ * });
+ *
+ * @example
+ * // Auto-navigate if first item is a folder
+ * await selectFromCategoryPicker(page, trigger, {
+ *   itemIndex: 0  // If item at index 0 is a folder, it will auto-navigate into it
+ * });
  */
 export async function selectFromCategoryPicker(
   page: Page,
@@ -254,7 +272,7 @@ export async function selectFromCategoryPicker(
   const popper = page.locator("[data-radix-popper-content-wrapper]").last();
   const scope = hasDialog ? dialog : popper;
 
-  await scope.waitFor({ state: "visible", timeout: 5000 });
+  await scope.waitFor({ state: "visible" });
 
   // Navigate through categories if specified
   for (const categoryTitle of navigateCategories) {
@@ -262,37 +280,35 @@ export async function selectFromCategoryPicker(
     const categoryItem = scope.getByRole("option", {
       name: new RegExp(categoryTitle, "i"),
     });
+    await categoryItem.waitFor({ state: "attached" });
     await categoryItem.waitFor({ state: "visible" });
     await categoryItem.click();
-
-    // Wait for navigation to complete
-    await page.waitForTimeout(300);
   }
 
-  // If search is provided, use search instead of navigation
+  // If search is provided, use search to filter items
+  // This bypasses category navigation and searches across all items
   if (search) {
     const input = scope.locator('[data-slot="command-input"]').first();
     if (await input.isVisible().catch(() => false)) {
       await input.fill("");
       await input.fill(search);
-      await page.waitForTimeout(500); // Wait for debounced search
     }
   }
 
-  // Wait for items to load - items should be visible after category navigation or search
-  // Items in this picker don't have icons like folders, so they appear after navigation
+  // Wait for items to load
   const items = scope.getByRole("option");
-  await items.first().waitFor({ state: "visible", timeout: 10000 });
+  await items.first().waitFor({ state: "attached" });
+  await items.first().waitFor({ state: "visible" });
 
   const count = await items.count();
   if (count === 0) {
     throw new Error("No items found in category picker");
   }
 
-  // If navigating through categories, we might see both folders and items
-  // We want to select an item, not a folder
-  // Items typically don't have ChevronRight icon
+  // Select item at itemIndex
   let targetItem = items.nth(itemIndex);
+  await targetItem.waitFor({ state: "attached" });
+  await targetItem.waitFor({ state: "visible" });
 
   // Check if the item has a chevron (indicates it's a folder/category)
   const hasChevron = await targetItem
@@ -300,25 +316,25 @@ export async function selectFromCategoryPicker(
     .isVisible()
     .catch(() => false);
 
-  if (hasChevron && navigateCategories.length === 0) {
-    // If no categories specified but we found a folder, click into it first
+  if (hasChevron && navigateCategories.length === 0 && !search) {
+    // If no categories specified and no search, but we found a folder, click into it first
     await targetItem.click();
-    await page.waitForTimeout(300);
 
-    // Now select the first item in this category
+    // Now select the item at itemIndex in this category
     const newItems = scope.getByRole("option");
+    await newItems.first().waitFor({ state: "attached" });
     await newItems.first().waitFor({ state: "visible" });
     targetItem = newItems.nth(itemIndex);
+    await targetItem.waitFor({ state: "attached" });
+    await targetItem.waitFor({ state: "visible" });
   }
 
-  // Click the item to select it
+  // Ensure the item is stable and clickable
+  await targetItem.scrollIntoViewIfNeeded();
   await targetItem.click();
 
   if (closeAfterSelect) {
     await page.keyboard.press("Escape");
-    await scope.waitFor({ state: "hidden", timeout: 1000 }).catch(() => {});
-  } else {
-    // For multi-select, just wait a bit for the selection to register
-    await page.waitForTimeout(200);
+    await scope.waitFor({ state: "hidden" }).catch(() => {});
   }
 }

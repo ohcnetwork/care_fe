@@ -21,7 +21,9 @@ test.beforeAll(() => {
   facilityId = getFacilityId();
 });
 
-test.describe.serial("category list", () => {
+test.describe("category list", () => {
+  test.describe.configure({ mode: "serial" });
+
   test("should load page and verify initial state", async ({ page }) => {
     await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
 
