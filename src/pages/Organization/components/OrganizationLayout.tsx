@@ -104,7 +104,9 @@ export default function OrganizationLayout({
       url: `${baseUrl}/${id}/facilities`,
       name: "Facilities",
       icon: <CareIcon icon="d-hospital" />,
-      visibility: hasPermission("can_read_facility", org.permissions),
+      visibility:
+        org.org_type === "govt" &&
+        hasPermission("can_read_facility", org.permissions),
     },
   ];
 
