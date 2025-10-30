@@ -38,14 +38,14 @@ test.describe("activity definition list", () => {
         .filter({ hasText: /active/i }),
     ).toBeVisible();
 
-    await expect(
-      page.getByText(/showing 4 of 4 activity definitions/i),
-    ).toBeVisible();
-
     const tableRows = page.locator(
       '[data-slot="table-body"] [data-slot="table-row"]',
     );
     await expect(tableRows).toHaveCount(4);
+
+    await expect(
+      page.getByText(/showing 4 of 4 activity definitions/i),
+    ).toBeVisible();
 
     await page.getByRole("link", { name: /view/i }).first().click();
 
@@ -78,16 +78,15 @@ test.describe("activity definition list", () => {
     const searchInput = page.getByPlaceholder(/search activity definitions/i);
     await searchInput.fill("Lipid Panel");
 
-    await expect(
-      page.getByText(/showing 1 of 1 activity definitions/i),
-    ).toBeVisible();
-
     const tableRows = page.locator(
       '[data-slot="table-body"] [data-slot="table-row"]',
     );
     await expect(tableRows).toHaveCount(1);
-
     await expect(tableRows.filter({ hasText: "Lipid Panel" })).toBeVisible();
+
+    await expect(
+      page.getByText(/showing 1 of 1 activity definitions/i),
+    ).toBeVisible();
   });
 
   test("should filter by status and clear filter", async ({ page }) => {
@@ -111,14 +110,15 @@ test.describe("activity definition list", () => {
       .first();
     await clearButton.click();
 
-    await expect(
-      page.getByText(/showing 4 of 4 activity definitions/i),
-    ).toBeVisible();
-
     const tableRows = page.locator(
       '[data-slot="table-body"] [data-slot="table-row"]',
     );
     await expect(tableRows).toHaveCount(4);
+
+    // Then verify count text
+    await expect(
+      page.getByText(/showing 4 of 4 activity definitions/i),
+    ).toBeVisible();
   });
 
   test("should filter by category/classification and change filters", async ({
@@ -144,13 +144,13 @@ test.describe("activity definition list", () => {
     await categoryFilterTriggerAgain.click();
     await page.getByRole("option", { name: /laboratory/i }).click();
 
-    await expect(
-      page.getByText(/showing 4 of 4 activity definitions/i),
-    ).toBeVisible();
-
     const tableRows = page.locator(
       '[data-slot="table-body"] [data-slot="table-row"]',
     );
     await expect(tableRows).toHaveCount(4);
+
+    await expect(
+      page.getByText(/showing 4 of 4 activity definitions/i),
+    ).toBeVisible();
   });
 });
