@@ -199,12 +199,6 @@ export function DeliveryOrderShow({
       enabled: !!deliveryOrderId,
     });
 
-  const hasUnconfirmedDeliveries = Boolean(
-    supplyDeliveries?.results?.some(
-      (d) => d.status === SupplyDeliveryStatus.in_progress,
-    ),
-  );
-
   const { mutate: upsertSupplyDeliveries, isPending: isUpsertingDeliveries } =
     useMutation({
       mutationFn: mutate(supplyDeliveryApi.upsertSupplyDelivery),
@@ -431,7 +425,7 @@ export function DeliveryOrderShow({
                       DeliveryOrderStatus.completed,
                     )
                   }
-                  disabled={isUpdating || hasUnconfirmedDeliveries}
+                  disabled={isUpdating || selectedDeliveries.length !== 0}
                 >
                   {isUpdating ? t("updating") : t("mark_as_completed")}
                   <ShortcutBadge actionId="mark-as" />
@@ -606,6 +600,10 @@ export function DeliveryOrderShow({
                     <SupplyDeliveryTable
                       deliveries={supplyDeliveries.results}
                       showCheckbox={
+                        deliveryOrder.status === DeliveryOrderStatus.pending &&
+                        isRequester
+                      }
+                      autoSelectOnMount={
                         deliveryOrder.status === DeliveryOrderStatus.pending &&
                         isRequester
                       }
