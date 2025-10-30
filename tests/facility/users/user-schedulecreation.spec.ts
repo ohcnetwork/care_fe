@@ -24,6 +24,8 @@ test.describe("Schedule Template Management", () => {
     const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
     const validFromOffset = 2; // days
     const validTillOffset = 2; // months
+    const numberOfSlots = 1; // Single slot per session
+    const displayTime = "10 AM - 3 PM"; // Expected time format
 
     // Calculate dates
     const validFromDate = new Date();
@@ -76,7 +78,7 @@ test.describe("Schedule Template Management", () => {
     await validTillLocator.click();
 
     const nextMonthBtn = page.getByRole("button", {
-      name: "Go to the Next Month",
+      name: "Next Month",
     });
     await expect(nextMonthBtn).toBeVisible();
 
@@ -108,6 +110,12 @@ test.describe("Schedule Template Management", () => {
       .getByRole("spinbutton", { name: "Patients per Slot *" })
       .fill(patientsPerSlot);
 
+    // Capture the auto-filled slot duration value from UI
+    const slotDurationInput = page.getByRole("spinbutton", {
+      name: "Slot duration (mins.)",
+    });
+    const slotDuration = await slotDurationInput.inputValue();
+
     // Save template
     await page.getByRole("button", { name: "Save" }).click();
 
@@ -119,13 +127,13 @@ test.describe("Schedule Template Management", () => {
         .filter({ hasText: "Schedule template created successfully" }),
     ).toBeVisible();
 
-    // Close date picker overlay
-    await page
-      .locator("div")
-      .filter({ hasText: /^Today$/ })
-      .getByRole("button")
-      .nth(2)
-      .click();
+    // Wait for the page to return to schedule list
+    await page.waitForLoadState("networkidle");
+
+    // Navigate to next month in calendar to find the created schedule
+    const nextMonthButton = page.locator('button[name="Next Month"]');
+    await expect(nextMonthButton).toBeVisible();
+    await nextMonthButton.click();
 
     // Verify template card on main page
     const scheduleCard = page
@@ -151,12 +159,12 @@ test.describe("Schedule Template Management", () => {
     ).toBeVisible();
 
     await expect(
-      scheduleCard.locator("span.text-sm", { hasText: "1 slots of 300 mins." }),
+      scheduleCard.locator("span.text-sm", {
+        hasText: `${numberOfSlots} slots of ${slotDuration} mins.`,
+      }),
     ).toBeVisible();
 
-    await expect(
-      scheduleCard.locator("span.text-sm", { hasText: "10 AM - 3 PM" }),
-    ).toBeVisible();
+    await expect(scheduleCard.getByText(displayTime)).toBeVisible();
 
     // Open edit form
     await scheduleCard
@@ -208,7 +216,7 @@ test.describe("Schedule Template Management", () => {
         hasText: "Slot Configuration",
       })
       .first();
-    await expect(slotConfig).toContainText("300");
+    await expect(slotConfig).toContainText(slotDuration.toString());
     await expect(slotConfig).toContainText("minutes");
     await expect(slotConfig).toContainText(patientsPerSlot);
     await expect(slotConfig).toContainText("Patients");
@@ -219,7 +227,7 @@ test.describe("Schedule Template Management", () => {
         hasText: "Session Capacity",
       })
       .first();
-    await expect(sessionCapacity).toContainText("1");
+    await expect(sessionCapacity).toContainText(numberOfSlots.toString());
     await expect(sessionCapacity).toContainText("Slots");
     await expect(sessionCapacity).toContainText(
       `${patientsPerSlot} Total Patients`,
@@ -229,7 +237,7 @@ test.describe("Schedule Template Management", () => {
     for (const day of weekdays) {
       const daySchedule = editSheet.locator("p", { hasText: day });
       await expect(daySchedule).toBeVisible();
-      await expect(daySchedule).toContainText("10 AM - 3 PM");
+      await expect(daySchedule).toContainText(displayTime);
     }
   });
 });
