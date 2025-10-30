@@ -33,6 +33,7 @@ import OrganizationLayoutSkeleton from "@/pages/Organization/components/Organiza
 import {
   Organization,
   OrganizationParent,
+  OrgType,
 } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -105,7 +106,7 @@ export default function OrganizationLayout({
       name: "Facilities",
       icon: <CareIcon icon="d-hospital" />,
       visibility:
-        org.org_type === "govt" &&
+        org.org_type === OrgType.GOVT &&
         hasPermission("can_read_facility", org.permissions),
     },
   ];
