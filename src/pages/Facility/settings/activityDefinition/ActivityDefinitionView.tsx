@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
+import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
@@ -118,16 +119,14 @@ export default function ActivityDefinitionView({
             <AlertTitle>{t("error_loading_definitions")}</AlertTitle>
             <AlertDescription>{t("definition_not_found")}</AlertDescription>
           </Alert>
-          <Button
+          <BackButton
             variant="outline"
             className="mt-4"
-            onClick={() =>
-              navigate(`/facility/${facilityId}/settings/activity_definitions`)
-            }
+            to={`/facility/${facilityId}/settings/activity_definitions`}
           >
             <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
             {t("back_to_list")}
-          </Button>
+          </BackButton>
         </div>
       </Page>
     );
@@ -136,17 +135,15 @@ export default function ActivityDefinitionView({
   return (
     <Page title={definition.title} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
-        <Button
+        <BackButton
           variant="outline"
           size="xs"
           className="mb-2"
-          onClick={() =>
-            navigate(`/facility/${facilityId}/settings/activity_definitions`)
-          }
+          to={`/facility/${facilityId}/settings/activity_definitions/categories/${definition.category.slug}`}
         >
           <CareIcon icon="l-arrow-left" className="size-4" />
           {t("back")}
-        </Button>
+        </BackButton>
 
         <div className="flex flex-row items-center justify-between gap-2 flex-wrap">
           <div>
