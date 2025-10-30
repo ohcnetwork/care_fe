@@ -61,8 +61,13 @@ test.describe("Schedule Template Management", () => {
       .getByRole("button", { name: new RegExp(validFromDateStr, "i") })
       .click();
 
-    // Capture the selected Valid From date from the UI
-    const selectedValidFromText = await validFromLocator.textContent();
+    // Capture both date formats for Valid From
+    const selectedValidFromDesktop = await validFromLocator
+      .locator("span.hidden.sm\\:block")
+      .textContent();
+    const selectedValidFromMobile = await validFromLocator
+      .locator("span.block.sm\\:hidden")
+      .textContent();
 
     // Select weekdays
     const formItemDiv = page.locator('div[data-slot="form-item"]');
@@ -96,8 +101,13 @@ test.describe("Schedule Template Management", () => {
       .getByRole("button", { name: new RegExp(validTillDateStr, "i") })
       .click();
 
-    // Capture the selected Valid Till date from the UI
-    const selectedValidTillText = await validTillLocator.textContent();
+    // Capture both date formats for Valid Till
+    const selectedValidTillDesktop = await validTillLocator
+      .locator("span.hidden.sm\\:block")
+      .textContent();
+    const selectedValidTillMobile = await validTillLocator
+      .locator("span.block.sm\\:hidden")
+      .textContent();
 
     // Fill session details
     await page
@@ -190,19 +200,31 @@ test.describe("Schedule Template Management", () => {
       templateName,
     );
 
-    // Verify Valid From date matches what was selected
+    // Verify Valid From date matches what was selected (desktop format)
     const validFromButton = editSheet
       .locator("label", { hasText: "Valid From" })
       .locator("..")
       .locator('button[data-slot="popover-trigger"]');
-    await expect(validFromButton).toHaveText(selectedValidFromText || "");
+    await expect(validFromButton.locator("span.hidden.sm\\:block")).toHaveText(
+      selectedValidFromDesktop || "",
+    );
+    // Also verify mobile format contains the 3-letter month
+    await expect(validFromButton.locator("span.block.sm\\:hidden")).toHaveText(
+      selectedValidFromMobile || "",
+    );
 
-    // Verify Valid Till date matches what was selected
+    // Verify Valid Till date matches what was selected (desktop format)
     const validTillButton = editSheet
       .locator("label", { hasText: "Valid Till" })
       .locator("..")
       .locator('button[data-slot="popover-trigger"]');
-    await expect(validTillButton).toHaveText(selectedValidTillText || "");
+    await expect(validTillButton.locator("span.hidden.sm\\:block")).toHaveText(
+      selectedValidTillDesktop || "",
+    );
+    // Also verify mobile format contains the 3-letter month
+    await expect(validTillButton.locator("span.block.sm\\:hidden")).toHaveText(
+      selectedValidTillMobile || "",
+    );
 
     await expect(editSheet.getByText(sessionTitle)).toBeVisible();
 
