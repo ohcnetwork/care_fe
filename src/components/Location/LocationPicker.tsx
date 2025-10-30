@@ -101,11 +101,11 @@ export function LocationPicker({
   useEffect(() => {
     if (open && value?.parent) {
       const breadcrumbChain: LocationBreadcrumb[] = [];
-      let current = value.parent as LocationList;
+      let current: LocationList | null = value.parent;
 
-      while (current && current.id) {
+      while (current?.id) {
         breadcrumbChain.unshift({ id: current.id, name: current.name });
-        current = current.parent as LocationList;
+        current = current.parent as LocationList | null;
       }
 
       setBreadcrumbs(breadcrumbChain);
