@@ -27,7 +27,7 @@ export default function RailPanel({
       </motion.div>
 
       <div className="relative flex items-center">
-        <div
+        <button
           aria-expanded={open}
           onClick={() => onOpenChange(!open)}
           className={cn(
@@ -41,7 +41,7 @@ export default function RailPanel({
               <GripVertical className="size-4 my-2" />
             </div>
           </div>
-        </div>
+        </button>
       </div>
     </div>
   );
