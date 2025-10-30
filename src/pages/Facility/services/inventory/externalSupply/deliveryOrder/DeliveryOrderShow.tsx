@@ -101,9 +101,7 @@ function AllSupplyDeliveriesComponent({
         }
       : {
           supplier: deliveryOrder?.supplier?.id,
-          ...(isRequester
-            ? { destination: locationId }
-            : { destination: deliveryOrder.destination?.id }),
+          destination: isRequester ? locationId : deliveryOrder.destination?.id,
         }),
   };
 
@@ -604,8 +602,7 @@ export function DeliveryOrderShow({
                         isRequester
                       }
                       autoSelectOnMount={
-                        deliveryOrder.status === DeliveryOrderStatus.pending &&
-                        isRequester
+                        deliveryOrder.status === DeliveryOrderStatus.pending
                       }
                       selectedDeliveries={selectedDeliveries}
                       onDeliverySelect={(deliveryId, checked) => {
