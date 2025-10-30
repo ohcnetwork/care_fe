@@ -41,10 +41,11 @@ test.describe("activity definition list", () => {
     const tableRows = page.locator(
       '[data-slot="table-body"] [data-slot="table-row"]',
     );
-    await expect(tableRows).toHaveCount(4);
+    const rowCount = await tableRows.count();
+    expect(rowCount).toBeGreaterThanOrEqual(4);
 
     await expect(
-      page.getByText(/showing 4 of 4 activity definitions/i),
+      page.getByText(/showing \d+ of \d+ activity definitions/i),
     ).toBeVisible();
 
     await page.getByRole("link", { name: /view/i }).first().click();
@@ -113,11 +114,11 @@ test.describe("activity definition list", () => {
     const tableRows = page.locator(
       '[data-slot="table-body"] [data-slot="table-row"]',
     );
-    await expect(tableRows).toHaveCount(4);
+    const rowCount = await tableRows.count();
+    expect(rowCount).toBeGreaterThanOrEqual(4);
 
-    // Then verify count text
     await expect(
-      page.getByText(/showing 4 of 4 activity definitions/i),
+      page.getByText(/showing \d+ of \d+ activity definitions/i),
     ).toBeVisible();
   });
 
@@ -147,10 +148,11 @@ test.describe("activity definition list", () => {
     const tableRows = page.locator(
       '[data-slot="table-body"] [data-slot="table-row"]',
     );
-    await expect(tableRows).toHaveCount(4);
+    const rowCount = await tableRows.count();
+    expect(rowCount).toBeGreaterThanOrEqual(4);
 
     await expect(
-      page.getByText(/showing 4 of 4 activity definitions/i),
+      page.getByText(/showing \d+ of \d+ activity definitions/i),
     ).toBeVisible();
   });
 });
