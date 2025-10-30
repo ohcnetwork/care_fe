@@ -473,6 +473,7 @@ export default function AppointmentDetail(props: Props) {
                 <div className="grid gap-1 grid-cols-1 md:grid-cols-2 mt-1">
                   {/* Start Consultation - For booked and checked in appointments */}
                   {["booked", "checked_in"].includes(currentStatus) &&
+                    canCheckIn &&
                     (appointment.associated_encounter?.id ? (
                       // When encounter exists: set status to in_consultation and redirect
                       <QuickAction
