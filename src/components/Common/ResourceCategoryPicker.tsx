@@ -23,12 +23,14 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { cn } from "@/lib/utils";
 
 import query from "@/Utils/request/query";
@@ -96,6 +98,7 @@ export function ResourceCategoryPicker({
     undefined,
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   // Fetch categories for current level
   const {
@@ -235,6 +238,220 @@ export function ResourceCategoryPicker({
     if (breadcrumbs.length === 0) return t("root");
     return breadcrumbs[breadcrumbs.length - 1]?.title || t("root");
   };
+  const triggerButton = (
+    <Button
+      variant="outline"
+      role="combobox"
+      aria-expanded={open}
+      className={cn(
+        "justify-between h-10 min-h-10 px-3 py-2",
+        "hover:bg-gray-50 hover:text-gray-900",
+        "focus:ring-2 focus:ring-gray-300 focus:ring-offset-2",
+        "transition-all duration-200",
+        disabled && "opacity-50 cursor-not-allowed",
+        className,
+      )}
+      disabled={disabled}
+    >
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        {getDisplayValue()}
+      </div>
+      <ChevronDown
+        className={cn(
+          "h-4 w-4 shrink-0 opacity-50 transition-transform duration-200",
+          open && "rotate-180",
+        )}
+      />
+    </Button>
+  );
+
+  const content = (
+    <div className="flex flex-col">
+      {/* Header with current location */}
+      <div className="px-4 py-3 border-b bg-gray-50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Home className="h-4 w-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-600">
+              {getCurrentLevelTitle()}
+            </span>
+            {breadcrumbs.length > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                {t("level")} {breadcrumbs.length + 1}
+              </Badge>
+            )}
+          </div>
+          {value && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearSelection}
+              className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
+            >
+              <X className="h-3 w-3 mr-1" />
+              {t("clear")}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Breadcrumb Navigation */}
+      {breadcrumbs.length > 0 && (
+        <div className="px-4 py-2 border-b bg-gray-100">
+          <div className="flex items-center gap-1 text-xs">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBackToRoot}
+              className="h-6 px-2 text-xs hover:bg-white"
+            >
+              <Home className="h-3 w-3 mr-1" />
+              {t("root")}
+            </Button>
+            {breadcrumbs.map((breadcrumb, index) => (
+              <div key={breadcrumb.slug} className="flex items-center">
+                <ChevronRight className="h-3 w-3 mx-1 text-gray-500" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleBreadcrumbClick(index)}
+                  className="h-6 px-2 text-xs hover:bg-white"
+                >
+                  {breadcrumb.title}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <Command className="border-0">
+        <div className="px-3 py-2 border-b">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <CommandInput
+              placeholder={t("search_categories")}
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+              className="pl-9 h-9 border-0 focus:ring-0 text-base"
+            />
+          </div>
+        </div>
+
+        <CommandList className="max-h-[300px]">
+          <CommandEmpty>
+            {isLoading ? (
+              <div className="p-6 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <div className="space-y-1 flex-1">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <div className="space-y-1 flex-1">
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-3 w-1/3" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <div className="space-y-1 flex-1">
+                    <Skeleton className="h-4 w-4/5" />
+                  </div>
+                </div>
+              </div>
+            ) : error ? (
+              <div className="p-6 text-center">
+                <div className="text-gray-500 text-sm">
+                  {t("failed_to_load_categories")}
+                </div>
+              </div>
+            ) : searchQuery ? (
+              <div className="p-6 text-center text-gray-500">
+                <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <div className="text-sm">
+                  {t("no_categories_found_for")} "{searchQuery}"
+                </div>
+              </div>
+            ) : (
+              <div className="p-6 text-center text-gray-500">
+                <Folder className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <div className="text-sm">{t("no_categories_found")}</div>
+              </div>
+            )}
+          </CommandEmpty>
+
+          <CommandGroup>
+            {filteredCategories.map((category) => (
+              <CommandItem
+                key={category.id}
+                value={category.title}
+                onSelect={() => handleCategorySelect(category)}
+                className={cn(
+                  "flex items-center justify-between px-3 py-3 cursor-pointer",
+                  "hover:bg-gray-50 hover:text-gray-900",
+                  "transition-colors duration-150",
+                  "border-b border-gray-200 last:border-b-0",
+                )}
+              >
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="flex-shrink-0">
+                    {category.has_children ? (
+                      <FolderOpen className="h-5 w-5 text-gray-500" />
+                    ) : (
+                      <Folder className="h-5 w-5 text-gray-500" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium text-sm truncate">
+                      {category.title}
+                    </div>
+                    {category.description && (
+                      <div className="text-xs text-gray-500 truncate mt-0.5">
+                        {category.description}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {value === category.slug && (
+                    <Check className="h-4 w-4 text-gray-700" />
+                  )}
+                  {category.has_children && (
+                    <ChevronRight className="h-4 w-4 text-gray-500" />
+                  )}
+                </div>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(newOpen) => {
+          setOpen(newOpen);
+          if (!newOpen) {
+            resetSearch();
+          }
+        }}
+      >
+        <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
+        <DrawerContent className="px-0 pt-2 min-h-[50vh] max-h-[85vh] rounded-t-lg">
+          <div className="mt-3 pb-[env(safe-area-inset-bottom)] px-2 overflow-y-auto">
+            {content}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Popover
@@ -246,202 +463,13 @@ export function ResourceCategoryPicker({
         }
       }}
     >
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn(
-            "justify-between h-10 min-h-10 px-3 py-2",
-            "hover:bg-gray-50 hover:text-gray-900",
-            "focus:ring-2 focus:ring-gray-300 focus:ring-offset-2",
-            "transition-all duration-200",
-            disabled && "opacity-50 cursor-not-allowed",
-            className,
-          )}
-          disabled={disabled}
-        >
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            {getDisplayValue()}
-          </div>
-          <ChevronDown
-            className={cn(
-              "h-4 w-4 shrink-0 opacity-50 transition-transform duration-200",
-              open && "rotate-180",
-            )}
-          />
-        </Button>
-      </PopoverTrigger>
-
+      <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
       <PopoverContent
         className="w-[420px] p-0 shadow-lg border-0"
         align="start"
         sideOffset={4}
       >
-        <div className="flex flex-col">
-          {/* Header with current location */}
-          <div className="px-4 py-3 border-b bg-gray-50">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Home className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-600">
-                  {getCurrentLevelTitle()}
-                </span>
-                {breadcrumbs.length > 0 && (
-                  <Badge variant="secondary" className="text-xs">
-                    {t("level")} {breadcrumbs.length + 1}
-                  </Badge>
-                )}
-              </div>
-              {value && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClearSelection}
-                  className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
-                >
-                  <X className="h-3 w-3 mr-1" />
-                  {t("clear")}
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Breadcrumb Navigation */}
-          {breadcrumbs.length > 0 && (
-            <div className="px-4 py-2 border-b bg-gray-100">
-              <div className="flex items-center gap-1 text-xs">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleBackToRoot}
-                  className="h-6 px-2 text-xs hover:bg-white"
-                >
-                  <Home className="h-3 w-3 mr-1" />
-                  {t("root")}
-                </Button>
-                {breadcrumbs.map((breadcrumb, index) => (
-                  <div key={breadcrumb.slug} className="flex items-center">
-                    <ChevronRight className="h-3 w-3 mx-1 text-gray-500" />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleBreadcrumbClick(index)}
-                      className="h-6 px-2 text-xs hover:bg-white"
-                    >
-                      {breadcrumb.title}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <Command className="border-0">
-            <div className="px-3 py-2 border-b">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <CommandInput
-                  placeholder={t("search_categories")}
-                  value={searchQuery}
-                  onValueChange={setSearchQuery}
-                  className="pl-9 h-9 border-0 focus:ring-0"
-                />
-              </div>
-            </div>
-
-            <CommandList className="max-h-[300px]">
-              <CommandEmpty>
-                {isLoading ? (
-                  <div className="p-6 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Skeleton className="h-4 w-4 rounded" />
-                      <div className="space-y-1 flex-1">
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-3 w-1/2" />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Skeleton className="h-4 w-4 rounded" />
-                      <div className="space-y-1 flex-1">
-                        <Skeleton className="h-4 w-2/3" />
-                        <Skeleton className="h-3 w-1/3" />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Skeleton className="h-4 w-4 rounded" />
-                      <div className="space-y-1 flex-1">
-                        <Skeleton className="h-4 w-4/5" />
-                      </div>
-                    </div>
-                  </div>
-                ) : error ? (
-                  <div className="p-6 text-center">
-                    <div className="text-gray-500 text-sm">
-                      {t("failed_to_load_categories")}
-                    </div>
-                  </div>
-                ) : searchQuery ? (
-                  <div className="p-6 text-center text-gray-500">
-                    <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <div className="text-sm">
-                      {t("no_categories_found_for")} "{searchQuery}"
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-6 text-center text-gray-500">
-                    <Folder className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <div className="text-sm">{t("no_categories_found")}</div>
-                  </div>
-                )}
-              </CommandEmpty>
-
-              <CommandGroup>
-                {filteredCategories.map((category) => (
-                  <CommandItem
-                    key={category.id}
-                    value={category.title}
-                    onSelect={() => handleCategorySelect(category)}
-                    className={cn(
-                      "flex items-center justify-between px-3 py-3 cursor-pointer",
-                      "hover:bg-gray-50 hover:text-gray-900",
-                      "transition-colors duration-150",
-                      "border-b border-gray-200 last:border-b-0",
-                    )}
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="flex-shrink-0">
-                        {category.has_children ? (
-                          <FolderOpen className="h-5 w-5 text-gray-500" />
-                        ) : (
-                          <Folder className="h-5 w-5 text-gray-500" />
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-medium text-sm truncate">
-                          {category.title}
-                        </div>
-                        {category.description && (
-                          <div className="text-xs text-gray-500 truncate mt-0.5">
-                            {category.description}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {value === category.slug && (
-                        <Check className="h-4 w-4 text-gray-700" />
-                      )}
-                      {category.has_children && (
-                        <ChevronRight className="h-4 w-4 text-gray-500" />
-                      )}
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </div>
+        {content}
       </PopoverContent>
     </Popover>
   );

@@ -29,8 +29,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import useBreakpoints from "@/hooks/useBreakpoints";
+import { cn } from "@/lib/utils";
 import {
   TagCategory,
   TagConfigRequest,
@@ -38,6 +38,9 @@ import {
   TagStatus,
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { isAppleDevice } from "@/Utils/utils";
 
 interface TagConfigFormProps {
   configId?: string;
@@ -56,6 +59,7 @@ export default function TagConfigForm({
   const queryClient = useQueryClient();
   const isEditing = Boolean(configId);
   const isCreatingChild = Boolean(parentId);
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const tagConfigSchema = z.object({
     display: z.string().trim().min(1, t("field_required")),
@@ -212,6 +216,7 @@ export default function TagConfigForm({
                   placeholder={t("enter_display_name")}
                   {...field}
                   disabled={isLoading}
+                  autoFocus={!isAppleDevice}
                 />
               </FormControl>
               <FormMessage />
@@ -435,7 +440,12 @@ export default function TagConfigForm({
           </div>
         )}
 
-        <div className="flex justify-end space-x-2">
+        <div
+          className={cn(
+            !isMobile && "flex justify-end space-x-2",
+            isMobile && "absolute top-8 right-4 z-10",
+          )}
+        >
           <Button type="submit" disabled={isLoading || !form.formState.isDirty}>
             {isLoading
               ? t("saving")
