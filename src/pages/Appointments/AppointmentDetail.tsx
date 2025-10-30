@@ -12,7 +12,7 @@ import {
   PlusCircledIcon,
 } from "@radix-ui/react-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { addDays, format, isBefore } from "date-fns";
+import { addDays, format, isWithinInterval, subDays } from "date-fns";
 import {
   BanIcon,
   CheckCircle2Icon,
@@ -198,10 +198,10 @@ export default function AppointmentDetail(props: Props) {
   }
   const currentStatus = appointment.status;
 
-  const canCheckIn = isBefore(
-    appointment.token_slot.start_datetime,
-    addDays(new Date(), 1),
-  );
+  const canCheckIn = isWithinInterval(new Date(), {
+    start: subDays(appointment.token_slot.start_datetime, 1),
+    end: addDays(appointment.token_slot.start_datetime, 1),
+  });
 
   return (
     <Page title={t("appointment_details")} hideTitleOnPage>
