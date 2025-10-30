@@ -61,8 +61,8 @@ test.describe("Schedule Template Management", () => {
       .getByRole("button", { name: new RegExp(validFromDateStr, "i") })
       .click();
 
-    // Capture the displayed Valid From text
-    const validFromText = await validFromLocator.textContent();
+    // Capture the selected Valid From date from the UI
+    const selectedValidFromText = await validFromLocator.textContent();
 
     // Select weekdays
     const formItemDiv = page.locator('div[data-slot="form-item"]');
@@ -96,8 +96,8 @@ test.describe("Schedule Template Management", () => {
       .getByRole("button", { name: new RegExp(validTillDateStr, "i") })
       .click();
 
-    // Capture the displayed Valid Till text
-    const validTillText = await validTillLocator.textContent();
+    // Capture the selected Valid Till date from the UI
+    const selectedValidTillText = await validTillLocator.textContent();
 
     // Fill session details
     await page
@@ -190,19 +190,19 @@ test.describe("Schedule Template Management", () => {
       templateName,
     );
 
-    await expect(
-      editSheet
-        .locator("label", { hasText: "Valid From" })
-        .locator("..")
-        .locator('button[data-slot="popover-trigger"]'),
-    ).toContainText(validFromText || "");
+    // Verify Valid From date matches what was selected
+    const validFromButton = editSheet
+      .locator("label", { hasText: "Valid From" })
+      .locator("..")
+      .locator('button[data-slot="popover-trigger"]');
+    await expect(validFromButton).toHaveText(selectedValidFromText || "");
 
-    await expect(
-      editSheet
-        .locator("label", { hasText: "Valid Till" })
-        .locator("..")
-        .locator('button[data-slot="popover-trigger"]'),
-    ).toContainText(validTillText || "");
+    // Verify Valid Till date matches what was selected
+    const validTillButton = editSheet
+      .locator("label", { hasText: "Valid Till" })
+      .locator("..")
+      .locator('button[data-slot="popover-trigger"]');
+    await expect(validTillButton).toHaveText(selectedValidTillText || "");
 
     await expect(editSheet.getByText(sessionTitle)).toBeVisible();
 
@@ -216,7 +216,7 @@ test.describe("Schedule Template Management", () => {
         hasText: "Slot Configuration",
       })
       .first();
-    await expect(slotConfig).toContainText(slotDuration.toString());
+    await expect(slotConfig).toContainText(slotDuration);
     await expect(slotConfig).toContainText("minutes");
     await expect(slotConfig).toContainText(patientsPerSlot);
     await expect(slotConfig).toContainText("Patients");
