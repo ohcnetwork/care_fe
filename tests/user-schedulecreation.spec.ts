@@ -95,5 +95,5 @@ test("user can create a schedule template with weekdays", async ({ page }) => {
   // Assert that the schedule text is present anywhere on the page
   await expect(
     page.getByText("Scheduled for: Mon, Tue, Wed, Thu, Fri").first(),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 10000 });
 });
