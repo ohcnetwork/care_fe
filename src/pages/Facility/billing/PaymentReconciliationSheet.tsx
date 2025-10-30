@@ -150,7 +150,7 @@ export function PaymentReconciliationSheet({
       note: "",
       account: accountId,
       is_credit_note: isCreditNote,
-      location: selectedLocationObject?.id || "",
+      location: selectedLocationObject?.id,
     },
   });
 
