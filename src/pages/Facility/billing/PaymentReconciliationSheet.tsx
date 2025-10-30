@@ -125,9 +125,8 @@ export function PaymentReconciliationSheet({
   const queryClient = useQueryClient();
   const [tenderAmount, setTenderAmount] = useState<string>("0");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
-  const [selectedLocationObject, setSelectedLocationObject] = useState<
-    LocationList | undefined
-  >(LocationCache.get(facilityId) || undefined);
+  const [selectedLocationObject, setSelectedLocationObject] =
+    useState<LocationList | null>(LocationCache.get(facilityId) || null);
   useShortcutSubContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -330,8 +329,8 @@ export function PaymentReconciliationSheet({
                         facilityId={facilityId}
                         value={selectedLocationObject}
                         onValueChange={(location) => {
-                          setSelectedLocationObject(location || undefined);
-                          field.onChange(location?.id || undefined);
+                          setSelectedLocationObject(location);
+                          field.onChange(location?.id);
                           if (location) {
                             LocationCache.set(location, facilityId);
                           }
