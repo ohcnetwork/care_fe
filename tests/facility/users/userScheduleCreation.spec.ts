@@ -125,7 +125,7 @@ test.describe("Schedule Template Management", () => {
     await page.waitForLoadState("networkidle");
 
     // Navigate to next month in calendar to find the created schedule
-    const nextMonthButton = page.getByRole("button", { name: "Next Month" });
+    const nextMonthButton = page.locator('button[name="Go to Next Month"]');
     await expect(nextMonthButton).toBeVisible();
     await nextMonthButton.click();
 
