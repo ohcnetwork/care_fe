@@ -12,14 +12,16 @@ test.beforeAll(() => {
   categorySlug = `f-${facilityId}-lab-tests-activity_definition`;
 });
 
+test.beforeEach(async ({ page }) => {
+  await page.goto(
+    `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
+  );
+});
+
 test.describe("activity definition list", () => {
   test("should display activity definitions list with correct initial state", async ({
     page,
   }) => {
-    await page.goto(
-      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
-    );
-
     await expect(
       page.locator('[data-slot="breadcrumb-link"]').filter({
         hasText: /activity definition/i,
@@ -41,6 +43,7 @@ test.describe("activity definition list", () => {
     const tableRows = page.locator(
       '[data-slot="table-body"] [data-slot="table-row"]',
     );
+    await expect(tableRows.nth(3)).toBeAttached();
     const rowCount = await tableRows.count();
     expect(rowCount).toBeGreaterThanOrEqual(4);
 
@@ -72,10 +75,6 @@ test.describe("activity definition list", () => {
   });
 
   test("should filter activity definitions by search", async ({ page }) => {
-    await page.goto(
-      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
-    );
-
     const searchInput = page.getByPlaceholder(/search activity definitions/i);
     await searchInput.fill("Lipid Panel");
 
@@ -91,10 +90,6 @@ test.describe("activity definition list", () => {
   });
 
   test("should filter by status and clear filter", async ({ page }) => {
-    await page.goto(
-      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
-    );
-
     const statusFilterTrigger = page
       .locator('[data-slot="select-trigger"]')
       .filter({ hasText: /status/i });
@@ -114,6 +109,7 @@ test.describe("activity definition list", () => {
     const tableRows = page.locator(
       '[data-slot="table-body"] [data-slot="table-row"]',
     );
+    await expect(tableRows.nth(3)).toBeAttached();
     const rowCount = await tableRows.count();
     expect(rowCount).toBeGreaterThanOrEqual(4);
 
@@ -125,10 +121,6 @@ test.describe("activity definition list", () => {
   test("should filter by category/classification and change filters", async ({
     page,
   }) => {
-    await page.goto(
-      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
-    );
-
     const categoryFilterTrigger = page
       .locator('[data-slot="select-trigger"]')
       .filter({ hasText: /category/i });
@@ -148,6 +140,7 @@ test.describe("activity definition list", () => {
     const tableRows = page.locator(
       '[data-slot="table-body"] [data-slot="table-row"]',
     );
+    await expect(tableRows.nth(3)).toBeAttached();
     const rowCount = await tableRows.count();
     expect(rowCount).toBeGreaterThanOrEqual(4);
 

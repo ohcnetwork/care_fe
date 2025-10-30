@@ -120,7 +120,6 @@ test.describe("category list", () => {
       page,
     }) => {
       const childCategoryData = generateCategoryData();
-      console.log(testData.name);
 
       await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
 
