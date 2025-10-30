@@ -60,7 +60,9 @@ export function ChargeItemDefinitionDetail({
       onSuccess: () => {
         toast.success(t("definition_deleted_successfully"));
         queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
-        navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
+        navigate(
+          `/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition?.category.slug}`,
+        );
       },
     });
 

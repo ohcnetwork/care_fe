@@ -30,7 +30,6 @@ test.describe(() => {
     "milliliter",
     "drop",
     "international unit",
-    "count",
   ];
 
   test.beforeEach(async ({ page }) => {
@@ -51,16 +50,61 @@ test.describe(() => {
     );
   });
 
-  test("validate", async ({ page }) => {
+  test("validate the basic fields", async ({ page }) => {
     await page.getByRole("button", { name: /add product/i }).click();
     await page.getByRole("button", { name: /create/i }).click();
 
+    await expect(page.getByText(/name.*required/i)).toBeVisible();
+    await expect(page.getByText(/slug.*required/i)).toBeVisible();
+    await expect(page.getByText(/base unit.*required/i)).toBeVisible();
+    await expect(page.getByText(/dosage form.*required/i)).toBeVisible();
+  });
+
+  test("validate all fields", async ({ page }) => {
+    await page.getByRole("button", { name: /add product/i }).click();
+    await page.getByRole("button", { name: "Add Guideline" }).click();
+    await page.getByRole("button", { name: "Add Name" }).click();
+
+    await page.getByRole("button", { name: /create/i }).click();
+
+    await expect(page.getByText(/slug.*required/i)).toBeVisible();
+    await expect(page.getByText(/base unit.*required/i)).toBeVisible();
+    await expect(page.getByText(/dosage form.*required/i)).toBeVisible();
+    await expect(page.getByText("name is required")).toBeVisible();
+    await expect(page.getByText(/note.*required/i)).toBeVisible();
+    await expect(page.getByText(/duration value.*required/i)).toBeVisible();
+  });
+
+  test("create a product knowledge with required fields only", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: /add product/i }).click();
+
+    // Basic details
+    await page.getByRole("textbox", { name: /name/i }).fill(testData.name);
+    await page.getByRole("textbox", { name: /slug/i }).fill(testData.slug);
+
+    // Scroll to Base Unit if not visible
+    await page.getByText(/Base Unit/).click();
+    await page.getByRole("option", { name: testData.baseUnit }).click();
+    await page.keyboard.press("Escape");
+
+    // Scroll to Dosage Form if not visible
+    await page
+      .getByRole("combobox", { name: /dosage form/i })
+      .scrollIntoViewIfNeeded();
+    await page.getByRole("combobox", { name: /dosage form/i }).click();
+    await page.getByRole("option").first().click();
+    await page.getByRole("button", { name: /create/i }).click();
+
+    await expect(page.getByText(/created successfully/i)).toBeVisible();
+
     await expect(
-      page.getByText(/required|not valid|invalid/i).first(),
+      page.getByRole("heading").getByText(testData.name),
     ).toBeVisible();
   });
 
-  test("create", async ({ page }) => {
+  test("create a product knowledge with all fields", async ({ page }) => {
     await page.getByRole("button", { name: /add product/i }).click();
 
     // Basic details
@@ -90,6 +134,10 @@ test.describe(() => {
     await page.getByRole("button", { name: /create/i }).click();
 
     await expect(page.getByText(/created successfully/i)).toBeVisible();
+
+    await expect(
+      page.getByRole("heading").getByText(testData.name),
+    ).toBeVisible();
   });
 
   test("view and edit", async ({ page }) => {
@@ -110,6 +158,9 @@ test.describe(() => {
       .fill(testData.hsnCode);
     await page.getByRole("button", { name: /update/i }).click();
     await expect(page.getByText(/updated successfully/i)).toBeVisible();
+    await expect(
+      page.getByRole("heading").getByText(testData.name),
+    ).toBeVisible();
   });
 
   test("delete", async ({ page }) => {

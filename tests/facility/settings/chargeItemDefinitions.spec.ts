@@ -66,10 +66,42 @@ test.describe(() => {
     await page
       .getByRole("textbox", { name: /purchase price/i })
       .fill(testData.purchasePrice);
+
+    await page
+      .locator("div")
+      .filter({ hasText: /^Add tax$/ })
+      .first()
+      .click();
+    await page.locator("div").filter({ hasText: /^9 %$/ }).first().click();
+    await page.locator("div").filter({ hasText: /^6 %$/ }).nth(2).click();
+    const doneButton = page.getByRole("button", { name: "Done" });
+    await doneButton.scrollIntoViewIfNeeded();
+    await doneButton.click();
+
+    await page
+      .locator("div")
+      .filter({ hasText: /^Add discount$/ })
+      .first()
+      .click();
+    await page.getByRole("checkbox").first().click();
+    await page.getByRole("button", { name: "Done" }).click();
+    await page.getByRole("button", { name: "Add Condition" }).click();
+    await page.getByRole("combobox").filter({ hasText: "Metric" }).click();
+    await page.getByRole("option", { name: "Patient Age" }).click();
+    await page.getByRole("combobox").filter({ hasText: "equality" }).click();
+    await page.getByRole("option", { name: "in_range" }).click();
+    await page.getByPlaceholder("Min Value").fill("60");
+    await page.getByPlaceholder("Max Value").fill("120");
+    await page.getByRole("button", { name: "Add" }).click();
+
     await page.getByRole("button", { name: /create/i }).click();
 
     await expect(
       page.getByText(/charge item definition.*created successfully/i),
+    ).toBeVisible();
+
+    await expect(
+      page.getByRole("table").getByText(testData.title),
     ).toBeVisible();
   });
 
@@ -95,6 +127,10 @@ test.describe(() => {
     await page.getByRole("button", { name: /update/i }).click();
 
     await expect(page.getByText(/updated successfully/i)).toBeVisible();
+
+    await expect(
+      page.getByRole("heading").getByText(testData.title + " - edited"),
+    ).toBeVisible();
   });
 
   test("delete charge item definition", async ({ page }) => {
