@@ -507,5 +507,30 @@ test.describe("activity definition form", () => {
         derivedFromCard.getByText(updatedData.derivedFromUri),
       ).toBeVisible();
     });
+
+    await test.step("delete activity definition", async () => {
+      await page.getByRole("button", { name: /delete/i }).click();
+
+      const dialog = page.getByRole("dialog");
+      await expect(dialog).toBeVisible();
+      await expect(
+        dialog.getByText(/are you sure you want to delete/i),
+      ).toBeVisible();
+
+      await dialog.getByRole("button", { name: /delete/i }).click();
+
+      await expect(
+        page.getByText(/activity definition deleted successfully/i),
+      ).toBeVisible();
+
+      await expect(page).toHaveURL(
+        `/facility/${facilityId}/settings/activity_definitions`,
+      );
+
+      await page.getByText(categoryName).click();
+
+      const activityRow = page.locator("tr", { hasText: updatedData.title });
+      await expect(activityRow).not.toBeVisible();
+    });
   });
 });

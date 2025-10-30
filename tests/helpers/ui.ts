@@ -194,9 +194,6 @@ export async function selectFromValueSet(
       if (await searching.isVisible().catch(() => false)) {
         await searching.waitFor({ state: "hidden" });
       }
-
-      // Additional wait for debounced results
-      await page.waitForTimeout(500);
     }
   }
 
@@ -219,8 +216,8 @@ export async function selectFromValueSet(
 
 interface SelectFromCategoryPickerOptions {
   search?: string;
-  navigateCategories?: string[]; // Array of category titles to navigate through
-  itemIndex?: number; // Index of item to select (default: 0)
+  navigateCategories?: string[];
+  itemIndex?: number;
   closeAfterSelect?: boolean;
 }
 
