@@ -8,8 +8,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import BackButton from "@/components/Common/BackButton";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -53,15 +51,19 @@ import {
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
 // Define a Code schema to match the API type
-const codeSchema = z.object({
-  code: z.string().min(1, "Code is required"),
-  display: z.string().min(1, "Display name is required"),
-  system: z.string().min(1, "System is required"),
-});
+const createCodeSchema = (
+  t: (key: string, options?: Record<string, unknown>) => string,
+) =>
+  z.object({
+    code: z.string().min(1, { message: t("field_required") }),
+    display: z.string().min(1, { message: t("field_required") }),
+    system: z.string().min(1, { message: t("field_required") }),
+  });
 
 const createFormSchema = (
   t: (key: string, options?: Record<string, unknown>) => string,
 ) => {
+  const codeSchema = createCodeSchema(t);
   return z.object({
     name: z.string().min(1, { message: t("name_is_required") }),
     slug_value: z
@@ -200,7 +202,8 @@ function ProductKnowledgeFormContent({
     system: "http://unitsofmeasure.org",
   };
 
-  // Handle form initialization with proper mapping of types
+  const formSchema = createFormSchema(t);
+
   const getDefaultValues = () => {
     if (isEditMode && existingData) {
       return {
@@ -234,8 +237,6 @@ function ProductKnowledgeFormContent({
     };
   };
 
-  const formSchema = createFormSchema(t);
-
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues(),
@@ -244,17 +245,11 @@ function ProductKnowledgeFormContent({
   });
 
   React.useEffect(() => {
-    if (isEditMode) return;
-
-    const subscription = form.watch((value, { name }) => {
-      if (name === "name") {
-        form.setValue("slug_value", generateSlug(value.name || ""), {
-          shouldValidate: true,
-        });
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form, isEditMode]);
+    if (isEditMode && existingData) {
+      form.reset(getDefaultValues());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingData?.slug, isEditMode]);
 
   const namesArray = useFieldArray({
     control: form.control,
@@ -274,12 +269,12 @@ function ProductKnowledgeFormContent({
   const { mutate: createProductKnowledge, isPending: isCreating } = useMutation(
     {
       mutationFn: mutate(productKnowledgeApi.createProductKnowledge),
-      onSuccess: (productKnowledge: ProductKnowledgeBase) => {
+      onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         toast.success(t("product_knowledge_created_successfully"));
         onSuccess();
         navigate(
-          `/facility/${facilityId}/settings/product_knowledge/${productKnowledge.slug}`,
+          `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
         );
       },
     },
@@ -309,6 +304,7 @@ function ProductKnowledgeFormContent({
   );
 
   const isPending = isCreating || isUpdating;
+  const { isDirty } = form.formState;
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     // Convert null to undefined where needed to match API types
@@ -433,8 +429,8 @@ function ProductKnowledgeFormContent({
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("product_type")}</FormLabel>
                         <Select
+                          value={field.value}
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger ref={field.ref}>
@@ -553,8 +549,8 @@ function ProductKnowledgeFormContent({
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("status")}</FormLabel>
                         <Select
+                          value={field.value}
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger ref={field.ref}>
@@ -638,8 +634,8 @@ function ProductKnowledgeFormContent({
                                 <FormItem className="flex flex-col">
                                   <FormLabel>{t("name_type")}</FormLabel>
                                   <Select
+                                    value={field.value}
                                     onValueChange={field.onChange}
-                                    defaultValue={field.value}
                                   >
                                     <FormControl>
                                       <SelectTrigger ref={field.ref}>
@@ -794,7 +790,6 @@ function ProductKnowledgeFormContent({
                                   </FormLabel>
                                   <Select
                                     value={field.value.code}
-                                    defaultValue={field.value.code}
                                     onValueChange={(value) => {
                                       const selectedUnit =
                                         UCUM_TIME_UNITS_CODES.find(
@@ -1041,18 +1036,21 @@ function ProductKnowledgeFormContent({
             </div>
 
             <div className="mt-6 flex justify-end space-x-4">
-              {isEditMode ? (
-                <BackButton type="button" variant="outline">
+              <Button type="button" variant="outline" asChild>
+                <Link
+                  href={
+                    isEditMode
+                      ? `/product_knowledge/${slug}`
+                      : `/product_knowledge/categories/${categorySlug}`
+                  }
+                >
                   {t("cancel")}
-                </BackButton>
-              ) : (
-                <Button type="button" variant="outline" asChild>
-                  <Link href={`/product_knowledge/categories/${categorySlug}`}>
-                    {t("cancel")}
-                  </Link>
-                </Button>
-              )}
-              <Button type="submit" disabled={isPending}>
+                </Link>
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending || (isEditMode && !isDirty)}
+              >
                 {isPending ? (
                   t("saving")
                 ) : (

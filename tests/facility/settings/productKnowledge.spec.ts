@@ -15,6 +15,7 @@ test.describe(() => {
     hsnCode: string;
     altNames: string;
     storageGuidelines: string;
+    categoryName: string;
   };
 
   const productTypeOptions = [
@@ -43,11 +44,11 @@ test.describe(() => {
       hsnCode: faker.phone.number(),
       altNames: productName + "Alt",
       storageGuidelines: faker.commerce.productDescription(),
+      categoryName: "Medications",
     };
 
-    await page.goto(
-      `/facility/${facilityId}/settings/product_knowledge/categories/f-${facilityId}-medications-product_knowledge`,
-    );
+    await page.goto(`/facility/${facilityId}/settings/product_knowledge`);
+    await page.getByRole("heading", { name: testData.categoryName }).click();
   });
 
   test("validate the basic fields", async ({ page }) => {
@@ -99,9 +100,22 @@ test.describe(() => {
 
     await expect(page.getByText(/created successfully/i)).toBeVisible();
 
+    await page
+      .getByRole("textbox", { name: "Search products" })
+      .fill(testData.name);
+    await expect(
+      page.getByRole("table").getByText(testData.name),
+    ).toBeVisible();
+
+    await page.getByRole("link", { name: "View" }).first().click();
     await expect(
       page.getByRole("heading").getByText(testData.name),
     ).toBeVisible();
+
+    await page.getByRole("button", { name: "Edit" }).first().click();
+    await expect(
+      page.getByRole("textbox", { name: /name/i }).first(),
+    ).toHaveValue(testData.name);
   });
 
   test("create a product knowledge with all fields", async ({ page }) => {
@@ -135,12 +149,20 @@ test.describe(() => {
 
     await expect(page.getByText(/created successfully/i)).toBeVisible();
 
+    await page
+      .getByRole("textbox", { name: "Search products" })
+      .fill(testData.name);
+    await expect(
+      page.getByRole("table").getByText(testData.name),
+    ).toBeVisible();
+
+    await page.getByRole("link", { name: "View" }).first().click();
     await expect(
       page.getByRole("heading").getByText(testData.name),
     ).toBeVisible();
   });
 
-  test("view and edit", async ({ page }) => {
+  test("view and edit and confirm", async ({ page }) => {
     await page.getByRole("link", { name: "View" }).first().click();
     await page.getByRole("button", { name: "Edit" }).click();
 
@@ -158,8 +180,17 @@ test.describe(() => {
       .fill(testData.hsnCode);
     await page.getByRole("button", { name: /update/i }).click();
     await expect(page.getByText(/updated successfully/i)).toBeVisible();
+
     await expect(
       page.getByRole("heading").getByText(testData.name),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Back" }).click();
+
+    await page
+      .getByRole("textbox", { name: "Search products" })
+      .fill(testData.name);
+    await expect(
+      page.getByRole("table").getByText(testData.name),
     ).toBeVisible();
   });
 

@@ -137,7 +137,9 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
   return (
     <Page title={product.name} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
-        <BackButton>
+        <BackButton
+          to={`/facility/${facilityId}/settings/product_knowledge/categories/${product.category.slug}`}
+        >
           <ArrowLeft />
           {t("back")}
         </BackButton>

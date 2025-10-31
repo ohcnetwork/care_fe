@@ -15,6 +15,7 @@ test.describe(() => {
     description: string;
     purpose: string;
     url: string;
+    categoryName: string;
   };
 
   test.beforeEach(async ({ page }) => {
@@ -29,11 +30,16 @@ test.describe(() => {
       description: faker.commerce.productDescription(),
       purpose: faker.commerce.productAdjective(),
       url: faker.internet.url(),
+      categoryName: "Medications",
     };
 
     await page.goto(
-      `/facility/${facilityId}/settings/charge_item_definitions/categories/f-${facilityId}-medications-charge_item_definition`,
+      `/facility/${facilityId}/settings/charge_item_definitions/`,
     );
+    await page
+      .getByRole("textbox", { name: "Search categories..." })
+      .fill(testData.categoryName);
+    await page.getByRole("heading", { name: testData.categoryName }).click();
   });
 
   test("validate required fields", async ({ page }) => {
@@ -45,10 +51,42 @@ test.describe(() => {
     // Slug required/length
     await expect(page.getByText(/slug.*atleast 5.*atmost 25/i)).toBeVisible();
     // Base Price required/invalid
-    await expect(page.getByText(/base price.*greater than 0/i)).toBeVisible();
+    await expect(page.getByText(/base price.*required/i)).toBeVisible();
   });
 
-  test("create charge item definition", async ({ page }) => {
+  test("create charge item definition with required fields only", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: /add definition/i }).click();
+    await page.getByRole("textbox", { name: /title/i }).fill(testData.title);
+    await page.getByRole("textbox", { name: /slug/i }).fill(testData.slug);
+    await page
+      .getByRole("textbox", { name: /base price/i })
+      .fill(testData.basePrice);
+
+    await page.getByRole("button", { name: /create/i }).click();
+
+    await expect(
+      page.getByText(/charge item definition.*created successfully/i),
+    ).toBeVisible();
+
+    await page.getByRole("textbox", { name: /search/i }).fill(testData.title);
+    await expect(
+      page.getByRole("table").getByText(testData.title),
+    ).toBeVisible();
+
+    await page.getByRole("link", { name: "View" }).click();
+    await expect(
+      page.getByRole("heading", { name: testData.title }),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "Edit" }).first().click();
+    await expect(page.getByRole("textbox", { name: /title/i })).toHaveValue(
+      testData.title,
+    );
+  });
+
+  test("create charge item definition with all fields", async ({ page }) => {
     await page.getByRole("button", { name: /add definition/i }).click();
     await page.getByRole("textbox", { name: /title/i }).fill(testData.title);
     await page.getByRole("textbox", { name: /slug/i }).fill(testData.slug);
@@ -130,6 +168,15 @@ test.describe(() => {
 
     await expect(
       page.getByRole("heading").getByText(testData.title + " - edited"),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "Back" }).click();
+
+    await page
+      .getByRole("textbox", { name: /search/i })
+      .fill(testData.title + " - edited");
+    await expect(
+      page.getByRole("table").getByText(testData.title + " - edited"),
     ).toBeVisible();
   });
 
