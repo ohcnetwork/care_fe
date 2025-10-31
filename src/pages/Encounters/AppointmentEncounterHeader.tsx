@@ -288,7 +288,7 @@ export const AppointmentEncounterHeader = ({
               onClick={() => handleStartEncounter()}
               disabled={
                 isPending ||
-                isWithinInterval(new Date(), {
+                !isWithinInterval(new Date(), {
                   start: subDays(appointment.token_slot.start_datetime, 1),
                   end: addDays(appointment.token_slot.start_datetime, 1),
                 })
