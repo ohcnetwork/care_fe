@@ -28,6 +28,7 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatPatientAge } from "@/Utils/utils";
 
 const methodMap: Record<PaymentReconciliationPaymentMethod, string> = {
   cash: "Cash",
@@ -153,9 +154,9 @@ export function PaymentReconciliationShow({
               <CardTitle>{t("payment_details")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {/* Amount section */}
-                <div className="col-span-2 md:col-span-3">
+                <div className="col-span-2 md:col-span-4">
                   <div className="flex justify-between items-center py-3 border-b">
                     <div className="text-gray-500">{t("amount")}</div>
                     <MonetaryDisplay
@@ -185,10 +186,6 @@ export function PaymentReconciliationShow({
                       value={payment.reference_number}
                     />
                   )}
-                  <InfoItem
-                    label={t("patient_name")}
-                    value={payment.account?.patient?.name}
-                  />
                 </div>
 
                 {/* Middle column */}
@@ -236,6 +233,34 @@ export function PaymentReconciliationShow({
                       value={payment.disposition}
                     />
                   )}
+                </div>
+
+                {/* Patient Details column */}
+                <div>
+                  <InfoItem
+                    label={t("patient_name")}
+                    value={payment.account?.patient?.name}
+                  />
+                  <InfoItem
+                    label={t("age")}
+                    value={
+                      payment.account?.patient
+                        ? formatPatientAge(payment.account.patient, true)
+                        : null
+                    }
+                  />
+                  <InfoItem
+                    label={t("sex")}
+                    value={
+                      payment.account?.patient?.gender
+                        ? t(`GENDER__${payment.account.patient.gender}`)
+                        : null
+                    }
+                  />
+                  <InfoItem
+                    label={t("address")}
+                    value={payment.account?.patient?.address}
+                  />
                 </div>
               </div>
 

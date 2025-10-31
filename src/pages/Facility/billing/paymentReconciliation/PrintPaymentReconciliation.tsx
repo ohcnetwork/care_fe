@@ -19,7 +19,6 @@ import {
 
 import Loading from "@/components/Common/Loading";
 
-import query from "@/Utils/request/query";
 import {
   PAYMENT_RECONCILIATION_OUTCOME_COLORS,
   PAYMENT_RECONCILIATION_STATUS_COLORS,
@@ -28,6 +27,8 @@ import {
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import query from "@/Utils/request/query";
+import { formatPatientAge } from "@/Utils/utils";
 
 const statusMap: Record<
   PaymentReconciliationStatus,
@@ -165,14 +166,33 @@ export function PrintPaymentReconciliation({
             )}
           </div>
 
-          {/* Patient Information */}
-          {payment.account?.patient?.name && (
-            <div className="mb-6 text-sm">
-              <div className="font-semibold text-gray-500 mb-1">
-                {t("patient_name")}
-              </div>
-              <div>
-                <p className="font-medium">{payment.account?.patient?.name}</p>
+          {/* Patient Information - Similar to PrintInvoice */}
+          {payment.account?.patient && (
+            <div className="mb-6 text-sm space-y-2">
+              <div className="flex justify-between">
+                <div>
+                  <span className="text-gray-600">{t("name")}: </span>
+                  <span className="font-medium">
+                    {payment.account.patient.name.toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">
+                    {t("age")} / {t("sex")}:{" "}
+                  </span>
+                  <span className="font-medium">
+                    {formatPatientAge(payment.account.patient, true)},{" "}
+                    {t(`GENDER__${payment.account.patient.gender}`)}
+                  </span>
+                </div>
+                {payment.account.patient.address && (
+                  <div>
+                    <span className="text-gray-600">{t("address")}: </span>
+                    <span className="font-medium">
+                      {payment.account.patient.address}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}
