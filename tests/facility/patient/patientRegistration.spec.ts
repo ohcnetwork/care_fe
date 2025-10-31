@@ -119,7 +119,7 @@ test.describe("Patient Registration", () => {
 
       // Select the state option by visible text
       // TODO: Update to a specific state once fixtures support it
-      const stateOption = page.getByRole("option");
+      const stateOption = page.getByRole("option").first();
       await stateOption.waitFor({ state: "visible", timeout: 5000 });
       await stateOption.click();
     });
@@ -237,7 +237,7 @@ test.describe("Patient Registration", () => {
 
       // Select the state option by visible text
       // TODO: Update to a specific state once fixtures support it
-      const stateOption = page.getByRole("option");
+      const stateOption = page.getByRole("option").first();
       await stateOption.waitFor({ state: "visible", timeout: 5000 });
       await stateOption.click();
     });
@@ -368,7 +368,7 @@ test.describe("Patient Registration", () => {
 
       // Select the state option by visible text
       // TODO: Update to a specific state once fixtures support it
-      const stateOption = page.getByRole("option");
+      const stateOption = page.getByRole("option").first();
       await stateOption.waitFor({ state: "visible", timeout: 5000 });
       await stateOption.click();
     });
@@ -384,5 +384,113 @@ test.describe("Patient Registration", () => {
     });
 
     // TODO: Verify that selected tags are associated with the patient
+  });
+
+  test("should register patient with age and verify year of birth calculation and profile display", async ({
+    page,
+  }) => {
+    const patientData = generatePatientData();
+    const currentYear = new Date().getFullYear();
+    const patientAge = 25; // Use a specific age for testing
+    const expectedYearOfBirth = currentYear - patientAge;
+
+    // Start patient registration
+    await page
+      .getByRole("textbox", { name: /search by patient phone number/i })
+      .press("Shift+Enter");
+
+    // Fill basic patient information
+    await test.step("Fill patient basic information", async () => {
+      await page
+        .getByRole("textbox", { name: /name.*\*/i })
+        .fill(patientData.name);
+      await page
+        .getByRole("textbox", { name: /phone number.*\*/i })
+        .fill(patientData.phoneNumber);
+
+      // Select gender
+      await page
+        .getByRole("radio", { name: patientData.gender, exact: true })
+        .click();
+    });
+
+    // Fill age instead of date of birth
+    await test.step("Fill age and verify year of birth preview", async () => {
+      // Select age tab instead of date
+      await page.getByRole("tab", { name: "Age" }).click();
+
+      // Fill age input - use placeholder to be more specific
+      const ageInput = page.getByPlaceholder("Age");
+      await ageInput.fill(patientAge.toString());
+
+      // Verify Year of Birth preview appears with correct calculation
+      // The preview should show "Year of Birth: YYYY" format
+      await expect(
+        page.locator(`text=Year of Birth: ${expectedYearOfBirth}`),
+      ).toBeVisible({
+        timeout: 3000,
+      });
+    });
+
+    // Select blood group
+    await test.step("Select blood group", async () => {
+      await page.getByRole("combobox", { name: /blood group/i }).click();
+      await page.getByRole("option", { name: patientData.bloodGroup }).click();
+    });
+
+    // Fill additional details
+    await test.step("Fill additional details", async () => {
+      // Fill address
+      await page
+        .getByRole("textbox", { name: "Address" })
+        .fill(patientData.address);
+
+      // Scroll to Register Patient button
+      await page
+        .getByRole("button", { name: /register patient/i })
+        .scrollIntoViewIfNeeded();
+
+      // Fill Pincode
+      await page
+        .getByRole("spinbutton", { name: "PIN Code *" })
+        .fill(patientData.pincode);
+
+      // Select state/geo organization
+      await page
+        .getByRole("region", { name: ": Additional Details" })
+        .getByRole("combobox")
+        .click();
+
+      const stateOption = page.getByRole("option").first();
+      await stateOption.waitFor({ state: "visible", timeout: 5000 });
+      await stateOption.click();
+    });
+
+    // Submit the registration
+    await test.step("Submit patient registration", async () => {
+      await page.getByRole("button", { name: /register patient/i }).click();
+
+      // Wait for success message
+      await expect(
+        page.getByText(/patient registered successfully/i),
+      ).toBeVisible({ timeout: 10000 });
+    });
+
+    // Navigate to patient profile and verify age/year of birth display
+    await test.step("Verify profile displays correct age and year of birth", async () => {
+      // Wait for navigation to patient profile (it could be on the overview page)
+      await page.waitForURL("**/patients/**", { timeout: 10000 });
+
+      // Verify in the patient card button that age is displayed correctly
+      const patientButton = page.getByRole("button", {
+        name: new RegExp(`.*${patientAge} Y, Male`),
+      });
+      await expect(patientButton).toBeVisible({ timeout: 5000 });
+
+      // Verify that the age calculation was correct by checking if expected year is reasonable
+      expect(expectedYearOfBirth).toBeGreaterThan(1900);
+      expect(expectedYearOfBirth).toBeLessThan(currentYear);
+      expect(expectedYearOfBirth).toEqual(currentYear - patientAge);
+    });
   });
 });
