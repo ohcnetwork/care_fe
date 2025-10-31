@@ -4,6 +4,30 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+// Helper function to get ordinal suffix for dates
+const ordinalSuffix = (day: number) => {
+  if (day > 3 && day < 21) return "th";
+  switch (day % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+};
+
+// Helper function to format date with ordinal suffix for calendar selection
+const formatDateWithOrdinal = (date: Date) => {
+  const day = date.getDate();
+  const month = date.toLocaleDateString("en-US", { month: "long" });
+  const year = date.getFullYear();
+  const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
+  return `${weekday}, ${month} ${day}${ordinalSuffix(day)}, ${year}`;
+};
+
 test.describe("Schedule Template Management", () => {
   let facilityId: string;
 
@@ -27,6 +51,12 @@ test.describe("Schedule Template Management", () => {
     const numberOfSlots = 1; // Single slot per session
     const displayTime = "10 AM - 3 PM"; // Expected time format
 
+    // Calculate dates
+    const validFromDate = new Date();
+    validFromDate.setDate(validFromDate.getDate() + validFromOffset);
+    const validTillDate = new Date();
+    validTillDate.setMonth(validTillDate.getMonth() + validTillOffset);
+
     // Start creating schedule template
     await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Create Template" }).click();
@@ -46,16 +76,16 @@ test.describe("Schedule Template Management", () => {
       .locator('button[data-slot="popover-trigger"]');
     await validFromLocator.click();
 
-    // Click a date in the future (offset days from today)
-    const validFromDate = new Date();
-    validFromDate.setDate(validFromDate.getDate() + validFromOffset);
-    const validFromDateStr = validFromDate.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
+    const validFromNextMonthBtn = page.getByRole("button", {
+      name: "Next Month",
     });
+    await expect(validFromNextMonthBtn).toBeVisible();
+    await validFromNextMonthBtn.click();
+
     await page
-      .getByRole("button", { name: new RegExp(validFromDateStr, "i") })
+      .getByRole("button", {
+        name: formatDateWithOrdinal(validFromDate),
+      })
       .click();
 
     // Select weekdays
@@ -81,16 +111,10 @@ test.describe("Schedule Template Management", () => {
       await nextMonthBtn.click({ force: true });
     }
 
-    // Click a date in the future (offset months from today)
-    const validTillDate = new Date();
-    validTillDate.setMonth(validTillDate.getMonth() + validTillOffset);
-    const validTillDateStr = validTillDate.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    });
     await page
-      .getByRole("button", { name: new RegExp(validTillDateStr, "i") })
+      .getByRole("button", {
+        name: formatDateWithOrdinal(validTillDate),
+      })
       .click();
 
     // Fill session details
@@ -125,7 +149,9 @@ test.describe("Schedule Template Management", () => {
     await page.waitForLoadState("networkidle");
 
     // Navigate to next month in calendar to find the created schedule
-    const nextMonthButton = page.locator('button[name="Go to Next Month"]');
+    const nextMonthButton = page.getByRole("button", {
+      name: "Next Month",
+    });
     await expect(nextMonthButton).toBeVisible();
     await nextMonthButton.click();
 
@@ -184,7 +210,7 @@ test.describe("Schedule Template Management", () => {
       templateName,
     );
 
-    // Verify Valid From date is present
+    // Verify Valid From date is present (not verifying exact date due to timezone differences)
     const validFromButton = editSheet
       .locator("label", { hasText: "Valid From" })
       .locator("..")
@@ -192,7 +218,7 @@ test.describe("Schedule Template Management", () => {
     await expect(validFromButton).toBeVisible();
     await expect(validFromButton).not.toBeEmpty();
 
-    // Verify Valid Till date is present
+    // Verify Valid Till date is present (not verifying exact date due to timezone differences)
     const validTillButton = editSheet
       .locator("label", { hasText: "Valid Till" })
       .locator("..")
