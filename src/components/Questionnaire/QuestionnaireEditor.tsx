@@ -278,6 +278,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   >(new Map());
   const [expandPath, setExpandPath] = useState<string[]>([]);
   const questionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
 
   const isMobile = useBreakpoints({ default: true, md: false });
 
@@ -535,11 +536,14 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       string,
       Set<{ question: Question; path: string[] }>
     >();
+    const allQuestionIds = new Set<string>();
+
     const processQuestions = (
       questions: Question[],
       currentPath: string[] = [],
     ) => {
       questions.forEach((question) => {
+        allQuestionIds.add(question.link_id);
         question.enable_when?.forEach(({ question: dependentQuestionId }) => {
           const deps =
             newEnableWhenDependencies.get(dependentQuestionId) || new Set();
@@ -560,6 +564,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
     processQuestions(rootQuestions);
     setEnableWhenDependencies(newEnableWhenDependencies);
+
+    // Expand all questions by default
+    setExpandedQuestions(allQuestionIds);
   }, [rootQuestions]);
 
   const handleEnableWhenDependentClick = (path: string[], targetId: string) => {
@@ -992,18 +999,23 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                       question.type === "group" &&
                       question.questions &&
                       question.questions.length > 0;
+                    const isActive = activeQuestionId === question.link_id;
                     return (
                       <div key={question.link_id} className="space-y-1">
                         <button
                           onClick={() => {
                             scrollToQuestion(question.link_id);
                             toggleQuestionExpanded(question.link_id);
+                            setActiveQuestionId(question.link_id);
                           }}
-                          className={`w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-200 flex items-center gap-2 ${
-                            expandedQuestions.has(question.link_id)
-                              ? "bg-accent"
-                              : ""
-                          }`}
+                          className={cn(
+                            "w-full text-left px-3 py-2 text-sm rounded-md flex items-center gap-2 transition-colors",
+                            isActive
+                              ? "bg-primary-100 border-l-4 border-primary-700 font-semibold text-primary-900"
+                              : expandedQuestions.has(question.link_id)
+                                ? "bg-accent hover:bg-gray-200"
+                                : "hover:bg-gray-200",
+                          )}
                         >
                           <span className="font-medium text-gray-500">
                             {index + 1}.
@@ -1014,31 +1026,44 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                         </button>
                         {hasSubQuestions && question.questions && (
                           <div className="ml-6 border-l-2 border-gray-200 pl-2 space-y-1">
-                            {question.questions.map((subQuestion, subIndex) => (
-                              <button
-                                key={subQuestion.id}
-                                onClick={() => {
-                                  if (
-                                    !expandedQuestions.has(question.link_id)
-                                  ) {
-                                    toggleQuestionExpanded(question.link_id);
-                                    setTimeout(() => {
+                            {question.questions.map((subQuestion, subIndex) => {
+                              const isSubActive =
+                                activeQuestionId === subQuestion.link_id;
+                              return (
+                                <button
+                                  key={subQuestion.id}
+                                  onClick={() => {
+                                    if (
+                                      !expandedQuestions.has(question.link_id)
+                                    ) {
+                                      toggleQuestionExpanded(question.link_id);
+                                      setTimeout(() => {
+                                        scrollToQuestion(subQuestion.link_id);
+                                        setActiveQuestionId(
+                                          subQuestion.link_id,
+                                        );
+                                      }, 100);
+                                    } else {
                                       scrollToQuestion(subQuestion.link_id);
-                                    }, 100);
-                                  } else {
-                                    scrollToQuestion(subQuestion.link_id);
-                                  }
-                                }}
-                                className="w-full text-left px-3 py-1.5 text-sm rounded-md hover:bg-accent flex items-center gap-2 hover:bg-gray-200 "
-                              >
-                                <span className="font-medium text-gray-500">
-                                  {index + 1}.{subIndex + 1}
-                                </span>
-                                <span className="flex-1 truncate">
-                                  {subQuestion.text || "Untitled Question"}
-                                </span>
-                              </button>
-                            ))}
+                                      setActiveQuestionId(subQuestion.link_id);
+                                    }
+                                  }}
+                                  className={cn(
+                                    "w-full text-left px-3 py-1.5 text-sm rounded-md flex items-center gap-2 transition-colors",
+                                    isSubActive
+                                      ? "bg-primary-100 border-l-4 border-primary-700 font-semibold text-primary-900"
+                                      : "hover:bg-gray-200",
+                                  )}
+                                >
+                                  <span className="font-medium text-gray-500">
+                                    {index + 1}.{subIndex + 1}
+                                  </span>
+                                  <span className="flex-1 truncate">
+                                    {subQuestion.text || "Untitled Question"}
+                                  </span>
+                                </button>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -1194,7 +1219,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                             ref={(el) => {
                               questionRefs.current[question.link_id] = el;
                             }}
-                            className="relative bg-white rounded-lg shadow-md"
+                            className={cn(
+                              "relative rounded-lg shadow-md transition-all duration-200",
+                              activeQuestionId === question.link_id
+                                ? "bg-white ring-2 ring-primary-500 ring-offset-2"
+                                : "bg-white",
+                            )}
                           >
                             <QuestionEditor
                               name={`questions.${index}`}
@@ -1261,6 +1291,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                               expandPath={expandPath}
                               questionRefs={questionRefs}
                               totalSiblings={rootQuestions.length}
+                              activeQuestionId={activeQuestionId}
+                              setActiveQuestionId={setActiveQuestionId}
                             />
                           </div>
                         ))}
@@ -1771,6 +1803,8 @@ interface QuestionEditorProps {
   expandPath?: string[];
   questionRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
   totalSiblings?: number;
+  activeQuestionId?: string | null;
+  setActiveQuestionId?: (id: string | null) => void;
 }
 
 function QuestionEditor({
@@ -1797,6 +1831,8 @@ function QuestionEditor({
   expandPath,
   questionRefs,
   totalSiblings,
+  activeQuestionId,
+  setActiveQuestionId,
 }: QuestionEditorProps): React.ReactElement {
   const { t } = useTranslation();
   const {
@@ -1832,6 +1868,23 @@ function QuestionEditor({
   const [enableWhenQuestionAnswers, setEnableWhenQuestionAnswers] = useState<
     Record<number, Question[]>
   >({});
+
+  // Expand all sub-questions by default
+  useEffect(() => {
+    if (questions && questions.length > 0) {
+      const allSubQuestionIds = new Set<string>();
+      const collectAllSubQuestionIds = (questions: Question[]) => {
+        questions.forEach((q) => {
+          allSubQuestionIds.add(q.link_id);
+          if (q.questions && q.questions.length > 0) {
+            collectAllSubQuestionIds(q.questions);
+          }
+        });
+      };
+      collectAllSubQuestionIds(questions);
+      setExpandedSubQuestions(allSubQuestionIds);
+    }
+  }, [questions]);
 
   const updateField = <K extends keyof Question>(
     field: K,
@@ -2073,7 +2126,14 @@ function QuestionEditor({
       onOpenChange={onToggleExpand}
       className={`rounded-lg p-1 bg-card text-card-foreground`}
     >
-      <div className={cn("flex items-center p-2", isExpanded && "bg-gray-50")}>
+      <div
+        className={cn("flex items-center p-2", isExpanded && "bg-gray-50")}
+        onClick={() => {
+          if (setActiveQuestionId) {
+            setActiveQuestionId(question.link_id);
+          }
+        }}
+      >
         {depth > 0 && (
           <Checkbox
             checked={selectedQuestions.has(question.id)}
@@ -2153,7 +2213,14 @@ function QuestionEditor({
       </div>
 
       <CollapsibleContent>
-        <div className="p-2 pt-0 space-y-4 mt-2">
+        <div
+          className="p-2 pt-0 space-y-4 mt-2"
+          onClick={() => {
+            if (setActiveQuestionId) {
+              setActiveQuestionId(question.link_id);
+            }
+          }}
+        >
           <div className="flex gap-4">
             <div className="flex-1">
               <FormField
@@ -2843,7 +2910,12 @@ function QuestionEditor({
                   <div
                     key={subQuestion.id}
                     id={`question-${subQuestion.link_id}`}
-                    className="relative bg-white rounded-lg shadow-md"
+                    className={cn(
+                      "relative rounded-lg shadow-md transition-all duration-200",
+                      activeQuestionId === subQuestion.link_id
+                        ? "bg-white ring-2 ring-primary-500 ring-offset-2"
+                        : "bg-white",
+                    )}
                     ref={(el) => {
                       questionRefs.current[subQuestion.link_id] = el;
                     }}
@@ -2902,6 +2974,8 @@ function QuestionEditor({
                       expandPath={expandPath?.slice(1)}
                       questionRefs={questionRefs}
                       totalSiblings={questions?.length || 0}
+                      activeQuestionId={activeQuestionId}
+                      setActiveQuestionId={setActiveQuestionId}
                     />
                   </div>
                 ))}
