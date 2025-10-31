@@ -174,6 +174,22 @@ const careConfig = {
       false,
     ),
   },
+
+  i18nUrl: env.REACT_CUSTOM_REMOTE_I18N_URL,
+  
+  /**
+   * Custom shortcuts configuration from environment variables
+   * Format: JSON string with array of shortcut objects
+   * Each shortcut can have: title, description, href, icon (optional)
+   * Placeholders like {facilityId}, {userId} will be replaced at runtime
+   */
+  customShortcuts: env.REACT_CUSTOM_SHORTCUTS
+    ? JSON.parse(env.REACT_CUSTOM_SHORTCUTS)
+    : [],
+  /**
+   * System identifier for patient phone number configuration
+   */
+  phoneNumberConfigSystem: "system.care.ohc.network/patient-phone-number",
 } as const;
 
 export default careConfig;

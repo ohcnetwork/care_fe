@@ -55,6 +55,7 @@ export interface BaseFilterConfig {
   ) => React.ReactNode;
   getOperations?: (selected: FilterValues) => Operation[];
   mode?: FilterMode;
+  disableClear?: boolean;
 }
 
 export interface CommandFilterConfig extends BaseFilterConfig {
@@ -127,18 +128,31 @@ export function createFilterConfig(
   label: string,
   type: "command" | "tag" | "date",
   options: FilterOption[],
-  resource?: TagResource,
-  renderSelected?: (
-    selected: FilterValues,
-    filter?: FilterConfig,
-    onFilterChange?: (filterKey: string, values: FilterValues) => void,
-  ) => React.ReactNode,
-  getOperations?: (selected: FilterValues) => Operation[],
-  mode: FilterMode = "single",
-  icon?: React.ReactNode,
-  dateRangeOptions?: DateRangeOption[],
-  operationKey?: string,
+  meta?: {
+    resource?: TagResource;
+    renderSelected?: (
+      selected: FilterValues,
+      filter?: FilterConfig,
+      onFilterChange?: (filterKey: string, values: FilterValues) => void,
+    ) => React.ReactNode;
+    getOperations?: (selected: FilterValues) => Operation[];
+    mode?: FilterMode;
+    icon?: React.ReactNode;
+    dateRangeOptions?: DateRangeOption[];
+    operationKey?: string;
+    disableClear?: boolean;
+  },
 ): FilterConfig {
+  const {
+    resource,
+    renderSelected,
+    getOperations,
+    mode,
+    icon,
+    dateRangeOptions,
+    operationKey,
+    disableClear,
+  } = meta || {};
   const baseConfig: BaseFilterConfig = {
     key,
     label,
@@ -148,6 +162,7 @@ export function createFilterConfig(
     mode: mode || "single",
     icon,
     operationKey,
+    disableClear,
   };
   switch (type) {
     case "date":

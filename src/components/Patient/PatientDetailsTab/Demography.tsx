@@ -144,7 +144,7 @@ export const Demography = (props: PatientProps) => {
   const data: Data[] = [
     {
       id: "general-info",
-      allowEdit: canWritePatient,
+      allowEdit: canWritePatient && !!props.facilityId,
       details: [
         <PLUGIN_Component
           key="patient_details_tab__demography__general_info"
@@ -237,10 +237,12 @@ export const Demography = (props: PatientProps) => {
     {
       id: "identifiers",
       allowEdit: false,
-      details: patientData.instance_identifiers?.map((i) => ({
-        label: i.config.config.display,
-        value: i.value,
-      })),
+      details: patientData.instance_identifiers
+        ?.filter(({ config }) => !config.config.auto_maintained)
+        .map((i) => ({
+          label: i.config.config.display,
+          value: i.value,
+        })),
     },
     {
       id: "tags",

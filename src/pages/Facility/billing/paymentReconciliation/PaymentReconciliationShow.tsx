@@ -75,8 +75,8 @@ export function PaymentReconciliationShow({
     enabled: !!paymentReconciliationId,
   });
 
-  const updatePaymentMutation = useMutation({
-    mutationFn: mutate(paymentReconciliationApi.updatePaymentReconciliation, {
+  const { mutate: cancelPayment, isPending } = useMutation({
+    mutationFn: mutate(paymentReconciliationApi.cancelPaymentReconciliation, {
       pathParams: { facilityId, paymentReconciliationId },
     }),
     onSuccess: () => {
@@ -414,12 +414,11 @@ export function PaymentReconciliationShow({
                         className="w-full flex items-center relative"
                         variant="outline"
                         onClick={() =>
-                          updatePaymentMutation.mutate({
-                            ...payment,
-                            status: PaymentReconciliationStatus.cancelled,
+                          cancelPayment({
+                            reason: PaymentReconciliationStatus.cancelled,
                           })
                         }
-                        disabled={updatePaymentMutation.isPending}
+                        disabled={isPending}
                       >
                         <CareIcon icon="l-ban" className="mr-2 size-4" />
                         {t("mark_as_cancelled")}
@@ -429,13 +428,12 @@ export function PaymentReconciliationShow({
                         className="w-full flex items-center relative"
                         variant="outline"
                         onClick={() =>
-                          updatePaymentMutation.mutate({
-                            ...payment,
-                            status:
+                          cancelPayment({
+                            reason:
                               PaymentReconciliationStatus.entered_in_error,
                           })
                         }
-                        disabled={updatePaymentMutation.isPending}
+                        disabled={isPending}
                       >
                         <CareIcon
                           icon="l-exclamation-triangle"

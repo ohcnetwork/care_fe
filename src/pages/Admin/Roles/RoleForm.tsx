@@ -3,7 +3,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { Permission } from "@/types/emr/permission/permission";
@@ -30,6 +31,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { ref, inView } = useInView();
+  const [searchPermission, setSearchPermission] = useState("");
 
   const [formData, setFormData] = React.useState({
     name: role?.name || "",
@@ -37,9 +39,10 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
     permissions: role?.permissions.map((p: Permission) => p.slug) || [],
   });
 
-  const getQueryParams = (pageParam: number) => ({
+  const getQueryParams = (pageParam: number, name: string) => ({
     limit: String(PAGE_LIMIT),
     offset: String(pageParam),
+    name: name,
   });
 
   const {
@@ -48,10 +51,10 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
     hasNextPage,
     isFetching,
   } = useInfiniteQuery({
-    queryKey: ["permissions"],
+    queryKey: ["permissions", searchPermission],
     queryFn: async ({ pageParam = 0, signal }) => {
       const response = await query.debounced(permissionApi.listPermissions, {
-        queryParams: getQueryParams(pageParam),
+        queryParams: getQueryParams(pageParam, searchPermission),
       })({ signal });
       return response;
     },
@@ -148,7 +151,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
       </div>
 
       <Card className="flex flex-col min-h-80">
-        <CardHeader>
+        <CardHeader className="flex flex-col">
           <div className="flex items-center justify-between">
             <CardTitle>{t("permissions")}</CardTitle>
             <div className="flex gap-2">
@@ -179,6 +182,20 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                 {t("clear")}
               </Button>
             </div>
+          </div>
+          <div className="relative">
+            <CareIcon
+              icon="l-search"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
+            />
+            <Input
+              placeholder={t("search_permissions")}
+              value={searchPermission}
+              onChange={(e) => {
+                setSearchPermission(e.target.value);
+              }}
+              className="w-full pl-8"
+            />
           </div>
         </CardHeader>
         <CardContent className="overflow-auto">
@@ -211,8 +228,14 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
                 </Label>
               </div>
             ))}
-            {isFetching && (
+            {isFetching ? (
               <div className="text-center text-sm">{t("loading")}</div>
+            ) : (
+              permissions.length == 0 && (
+                <div className="text-center text-sm">
+                  {t("no_matching_permissions")}
+                </div>
+              )
             )}
           </div>
         </CardContent>
