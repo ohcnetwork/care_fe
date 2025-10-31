@@ -4,6 +4,21 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+// Helper function to get ordinal suffix for dates
+const ordinalSuffix = (day: number) => {
+  if (day > 3 && day < 21) return "th";
+  switch (day % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+};
+
 test.describe("Schedule Template Management", () => {
   let facilityId: string;
 
@@ -27,6 +42,12 @@ test.describe("Schedule Template Management", () => {
     const numberOfSlots = 1; // Single slot per session
     const displayTime = "10 AM - 3 PM"; // Expected time format
 
+    // Calculate dates
+    const validFromDate = new Date();
+    validFromDate.setDate(validFromDate.getDate() + validFromOffset);
+    const validTillDate = new Date();
+    validTillDate.setMonth(validTillDate.getMonth() + validTillOffset);
+
     // Start creating schedule template
     await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Create Template" }).click();
@@ -46,17 +67,28 @@ test.describe("Schedule Template Management", () => {
       .locator('button[data-slot="popover-trigger"]');
     await validFromLocator.click();
 
-    // Click a date in the future (offset days from today)
-    const validFromDate = new Date();
-    validFromDate.setDate(validFromDate.getDate() + validFromOffset);
-    const validFromDateStr = validFromDate.toLocaleDateString("en-US", {
-      weekday: "long",
+    const validFromNextMonthBtn = page.getByRole("button", {
+      name: "Next Month",
+    });
+    await expect(validFromNextMonthBtn).toBeVisible();
+    await validFromNextMonthBtn.click();
+
+    const validFromDay = validFromDate.getDate();
+    const validFromMonth = validFromDate.toLocaleDateString("en-US", {
       month: "long",
-      day: "numeric",
+    });
+    const validFromYear = validFromDate.getFullYear();
+    const validFromWeekday = validFromDate.toLocaleDateString("en-US", {
+      weekday: "long",
     });
     await page
-      .getByRole("button", { name: new RegExp(validFromDateStr, "i") })
+      .getByRole("button", {
+        name: `${validFromWeekday}, ${validFromMonth} ${validFromDay}${ordinalSuffix(validFromDay)}, ${validFromYear}`,
+      })
       .click();
+
+    // Capture the displayed Valid From text
+    const validFromText = await validFromLocator.textContent();
 
     // Select weekdays
     const formItemDiv = page.locator('div[data-slot="form-item"]');
@@ -81,17 +113,22 @@ test.describe("Schedule Template Management", () => {
       await nextMonthBtn.click({ force: true });
     }
 
-    // Click a date in the future (offset months from today)
-    const validTillDate = new Date();
-    validTillDate.setMonth(validTillDate.getMonth() + validTillOffset);
-    const validTillDateStr = validTillDate.toLocaleDateString("en-US", {
-      weekday: "long",
+    const validTillDay = validTillDate.getDate();
+    const validTillMonth = validTillDate.toLocaleDateString("en-US", {
       month: "long",
-      day: "numeric",
+    });
+    const validTillYear = validTillDate.getFullYear();
+    const validTillWeekday = validTillDate.toLocaleDateString("en-US", {
+      weekday: "long",
     });
     await page
-      .getByRole("button", { name: new RegExp(validTillDateStr, "i") })
+      .getByRole("button", {
+        name: `${validTillWeekday}, ${validTillMonth} ${validTillDay}${ordinalSuffix(validTillDay)}, ${validTillYear}`,
+      })
       .click();
+
+    // Capture the displayed Valid Till text
+    const validTillText = await validTillLocator.textContent();
 
     // Fill session details
     await page
@@ -125,7 +162,9 @@ test.describe("Schedule Template Management", () => {
     await page.waitForLoadState("networkidle");
 
     // Navigate to next month in calendar to find the created schedule
-    const nextMonthButton = page.locator('button[name="Go to Next Month"]');
+    const nextMonthButton = page.getByRole("button", {
+      name: "Next Month",
+    });
     await expect(nextMonthButton).toBeVisible();
     await nextMonthButton.click();
 
@@ -184,21 +223,19 @@ test.describe("Schedule Template Management", () => {
       templateName,
     );
 
-    // Verify Valid From date is present
-    const validFromButton = editSheet
-      .locator("label", { hasText: "Valid From" })
-      .locator("..")
-      .locator('button[data-slot="popover-trigger"]');
-    await expect(validFromButton).toBeVisible();
-    await expect(validFromButton).not.toBeEmpty();
+    await expect(
+      editSheet
+        .locator("label", { hasText: "Valid From" })
+        .locator("..")
+        .locator('button[data-slot="popover-trigger"]'),
+    ).toContainText(validFromText || "");
 
-    // Verify Valid Till date is present
-    const validTillButton = editSheet
-      .locator("label", { hasText: "Valid Till" })
-      .locator("..")
-      .locator('button[data-slot="popover-trigger"]');
-    await expect(validTillButton).toBeVisible();
-    await expect(validTillButton).not.toBeEmpty();
+    await expect(
+      editSheet
+        .locator("label", { hasText: "Valid Till" })
+        .locator("..")
+        .locator('button[data-slot="popover-trigger"]'),
+    ).toContainText(validTillText || "");
 
     await expect(editSheet.getByText(sessionTitle)).toBeVisible();
 
@@ -212,7 +249,7 @@ test.describe("Schedule Template Management", () => {
         hasText: "Slot Configuration",
       })
       .first();
-    await expect(slotConfig).toContainText(slotDuration);
+    await expect(slotConfig).toContainText(slotDuration.toString());
     await expect(slotConfig).toContainText("minutes");
     await expect(slotConfig).toContainText(patientsPerSlot);
     await expect(slotConfig).toContainText("Patients");
