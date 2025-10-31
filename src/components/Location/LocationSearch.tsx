@@ -67,7 +67,7 @@ export function LocationSearch({
       <CommandInput
         placeholder="Search locations..."
         value={search}
-        className="outline-hidden border-none ring-0 shadow-none"
+        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
         onValueChange={setSearch}
         autoFocus
       />
