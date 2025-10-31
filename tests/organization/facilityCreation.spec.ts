@@ -262,7 +262,7 @@ test.describe("Facility Creation", () => {
 
     // Verify no facility features are selected
     const featuresButton = editDialog.getByRole("button", {
-      name: /Select Facility Features|Features/,
+      name: /^(Select Facility Features|Features)$/,
     });
     await expect(featuresButton).toBeVisible();
 
