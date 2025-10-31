@@ -193,7 +193,7 @@ test.describe("Facility Location Creation", () => {
     page,
   }) => {
     // Click the first edit button (pencil icon) to open edit form
-    await page.locator("button[title='Edit Location']").first().click();
+    await page.locator("button[title='Edit Locationaassdads']").first().click();
 
     // Update location name with new random value
     await page.getByRole("textbox", { name: "Name" }).fill(locationName);
