@@ -19,6 +19,15 @@ const ordinalSuffix = (day: number) => {
   }
 };
 
+// Helper function to format date with ordinal suffix for calendar selection
+const formatDateWithOrdinal = (date: Date) => {
+  const day = date.getDate();
+  const month = date.toLocaleDateString("en-US", { month: "long" });
+  const year = date.getFullYear();
+  const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
+  return `${weekday}, ${month} ${day}${ordinalSuffix(day)}, ${year}`;
+};
+
 test.describe("Schedule Template Management", () => {
   let facilityId: string;
 
@@ -73,17 +82,9 @@ test.describe("Schedule Template Management", () => {
     await expect(validFromNextMonthBtn).toBeVisible();
     await validFromNextMonthBtn.click();
 
-    const validFromDay = validFromDate.getDate();
-    const validFromMonth = validFromDate.toLocaleDateString("en-US", {
-      month: "long",
-    });
-    const validFromYear = validFromDate.getFullYear();
-    const validFromWeekday = validFromDate.toLocaleDateString("en-US", {
-      weekday: "long",
-    });
     await page
       .getByRole("button", {
-        name: `${validFromWeekday}, ${validFromMonth} ${validFromDay}${ordinalSuffix(validFromDay)}, ${validFromYear}`,
+        name: formatDateWithOrdinal(validFromDate),
       })
       .click();
 
@@ -113,17 +114,9 @@ test.describe("Schedule Template Management", () => {
       await nextMonthBtn.click({ force: true });
     }
 
-    const validTillDay = validTillDate.getDate();
-    const validTillMonth = validTillDate.toLocaleDateString("en-US", {
-      month: "long",
-    });
-    const validTillYear = validTillDate.getFullYear();
-    const validTillWeekday = validTillDate.toLocaleDateString("en-US", {
-      weekday: "long",
-    });
     await page
       .getByRole("button", {
-        name: `${validTillWeekday}, ${validTillMonth} ${validTillDay}${ordinalSuffix(validTillDay)}, ${validTillYear}`,
+        name: formatDateWithOrdinal(validTillDate),
       })
       .click();
 
