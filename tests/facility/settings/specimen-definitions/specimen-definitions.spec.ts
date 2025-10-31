@@ -210,14 +210,47 @@ test.describe("Specimen Definitions Management", () => {
     // Click save without filling any required fields
     await page.getByRole("button", { name: /save/i }).click();
 
-    // Verify validation error messages are displayed for all required fields
-    // Each required field shows just "Required" as the error message
-    const requiredErrors = page.getByText("Required");
-    await expect(requiredErrors).toHaveCount(4); // Title, Slug, Description, Type Collected
+    // Verify validation error messages are displayed for each required field
+    // Check that each field has a "Required" error message below it
+
+    // Title field validation error
+    await expect(
+      page
+        .getByRole("textbox", { name: "Title *" })
+        .locator("..")
+        .locator('[data-slot="form-message"]'),
+    ).toBeVisible();
+
+    // Slug field validation error
+    await expect(
+      page
+        .getByRole("textbox", { name: "Slug *" })
+        .locator("..")
+        .locator('[data-slot="form-message"]'),
+    ).toBeVisible();
+
+    // Description field validation error
+    await expect(
+      page
+        .getByRole("textbox", { name: "Description *" })
+        .locator("..")
+        .locator('[data-slot="form-message"]'),
+    ).toBeVisible();
+
+    // Type Collected field validation error
+    await expect(
+      page
+        .getByRole("combobox", { name: "Type Collected *" })
+        .locator("..")
+        .locator('[data-slot="form-message"]'),
+    ).toBeVisible();
   });
 
   test("should be able to delete specimen definition", async ({ page }) => {
-    const status = faker.helpers.arrayElement(STATUS_OPTIONS);
+    // Exclude "Retired" since retired specimens cannot be deleted
+    const status = faker.helpers.arrayElement(
+      STATUS_OPTIONS.filter((s) => s !== DELETED_STATUS),
+    );
 
     // CREATE: First create a specimen definition to delete
     await createSpecimenDefinition(page, {
