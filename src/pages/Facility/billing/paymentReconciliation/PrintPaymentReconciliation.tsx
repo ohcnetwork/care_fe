@@ -165,6 +165,18 @@ export function PrintPaymentReconciliation({
             )}
           </div>
 
+          {/* Patient Information */}
+          {payment.account?.patient?.name && (
+            <div className="mb-6 text-sm">
+              <div className="font-semibold text-gray-500 mb-1">
+                {t("patient_name")}
+              </div>
+              <div>
+                <p className="font-medium">{payment.account.patient.name}</p>
+              </div>
+            </div>
+          )}
+
           <Separator className="my-6" />
 
           {/* Related Invoice */}

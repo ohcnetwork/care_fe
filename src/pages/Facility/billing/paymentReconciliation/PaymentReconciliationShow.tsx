@@ -185,6 +185,10 @@ export function PaymentReconciliationShow({
                       value={payment.reference_number}
                     />
                   )}
+                  <InfoItem
+                    label={t("patient_name")}
+                    value={payment.account?.patient?.name}
+                  />
                 </div>
 
                 {/* Middle column */}
