@@ -148,4 +148,42 @@ test.describe("activity definition list", () => {
       page.getByText(/showing \d+ of \d+ activity definitions/i),
     ).toBeVisible();
   });
+
+  test("should display correct content in a table row", async ({ page }) => {
+    const tableRows = page.locator(
+      '[data-slot="table-body"] [data-slot="table-row"]',
+    );
+    await expect(tableRows.first()).toBeVisible();
+
+    const lipidPanelRow = tableRows.filter({ hasText: "Lipid Panel" });
+    await expect(lipidPanelRow).toBeVisible();
+
+    await test.step("verify title and description", async () => {
+      await expect(lipidPanelRow.getByText("Lipid Panel")).toBeVisible();
+      await expect(
+        lipidPanelRow.getByText(/comprehensive blood test measuring/i),
+      ).toBeVisible();
+    });
+
+    await test.step("verify classification", async () => {
+      await expect(lipidPanelRow.getByText("Laboratory")).toBeVisible();
+    });
+
+    await test.step("verify status", async () => {
+      await expect(lipidPanelRow.getByText("Active")).toBeVisible();
+    });
+
+    await test.step("verify kind", async () => {
+      await expect(lipidPanelRow.getByText("Service Request")).toBeVisible();
+    });
+
+    await test.step("verify action buttons", async () => {
+      await expect(
+        lipidPanelRow.getByRole("link", { name: /view/i }),
+      ).toBeVisible();
+      await expect(
+        lipidPanelRow.getByRole("link", { name: /edit/i }),
+      ).toBeVisible();
+    });
+  });
 });
