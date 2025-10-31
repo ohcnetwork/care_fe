@@ -85,6 +85,7 @@ export default function Calendar(props: Props) {
             </span>
           </Button>
           <Button
+            name="Go to Previous Month"
             variant="outline"
             size="lg"
             onClick={handlePrevMonth}
@@ -93,6 +94,7 @@ export default function Calendar(props: Props) {
             <CareIcon icon="l-angle-left" />
           </Button>
           <Button
+            name="Go to Next Month"
             variant="outline"
             size="lg"
             onClick={handleNextMonth}
