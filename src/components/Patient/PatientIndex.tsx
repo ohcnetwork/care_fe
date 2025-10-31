@@ -218,7 +218,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                                 facility,
                               ).find(
                                 (opt) => opt.key === identifierSearch.config,
-                              )?.type,
+                              )?.display,
                             })}
                           </p>
                           <AddPatientButton
