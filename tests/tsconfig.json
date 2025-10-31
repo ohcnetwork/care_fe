@@ -2,10 +2,10 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "baseUrl": "../",
+    "types": [],
     "paths": {
-      "@/*": ["./*"]
-    },
-    "types": ["@playwright/test", "node"]
+      "tests/*": ["./tests/*"]
+    }
   },
   "include": [
     "./**/*.ts",
