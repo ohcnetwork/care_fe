@@ -192,7 +192,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col space-y-6 max-h-[calc(100vh-7rem)] overflow-y-auto"
+        className="flex flex-col space-y-6 max-h-[calc(100vh-7rem)]"
       >
         <FormField
           control={form.control}
