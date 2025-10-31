@@ -1056,9 +1056,8 @@ export function RenderConditionInput({
                         selected={selectedTags}
                         resource={TagResource.ENCOUNTER}
                         onChange={(tags) => {
-                          handleSetValue(
+                          handleSetTagValue(
                             tags.map((tag) => tag.id).join(","),
-                            index,
                           );
                         }}
                         className={errorMessage ? "border-red-500" : ""}
