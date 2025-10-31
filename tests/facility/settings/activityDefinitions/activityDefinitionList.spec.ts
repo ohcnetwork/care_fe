@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { getFacilityId } from "@/tests/support/facilityId";
+import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 

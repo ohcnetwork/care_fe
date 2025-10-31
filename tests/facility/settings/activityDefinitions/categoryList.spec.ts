@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
-import { expectToast } from "@/tests/helpers/ui";
-import { getFacilityId } from "@/tests/support/facilityId";
+import { expectToast } from "tests/helpers/ui";
+import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
