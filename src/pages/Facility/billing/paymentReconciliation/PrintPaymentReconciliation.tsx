@@ -172,7 +172,7 @@ export function PrintPaymentReconciliation({
                 {t("patient_name")}
               </div>
               <div>
-                <p className="font-medium">{payment.account.patient.name}</p>
+                <p className="font-medium">{payment.account?.patient?.name}</p>
               </div>
             </div>
           )}
