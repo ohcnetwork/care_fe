@@ -238,7 +238,7 @@ test.describe("Schedule Template Management", () => {
         hasText: "Slot Configuration",
       })
       .first();
-    await expect(slotConfig).toContainText(slotDuration.toString());
+    await expect(slotConfig).toContainText(slotDuration);
     await expect(slotConfig).toContainText("minutes");
     await expect(slotConfig).toContainText(patientsPerSlot);
     await expect(slotConfig).toContainText("Patients");
