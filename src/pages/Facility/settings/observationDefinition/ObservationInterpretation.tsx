@@ -1054,7 +1054,7 @@ export function RenderConditionInput({
                     <FormControl>
                       <TagSelectorPopover
                         selected={selectedTags}
-                        resource={TagResource.ENCOUNTER}
+                        resource={tagType}
                         onChange={(tags) => {
                           handleSetTagValue(
                             tags.map((tag) => tag.id).join(","),
@@ -1229,7 +1229,9 @@ export function ConditionComponent<
                               }}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select a metric" />
+                                <SelectValue
+                                  placeholder={t("select_a_metric")}
+                                />
                               </SelectTrigger>
                               <SelectContent>
                                 {metrics?.map((metric: Metrics) => (
@@ -1267,7 +1269,9 @@ export function ConditionComponent<
                               }}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select an operation" />
+                                <SelectValue
+                                  placeholder={t("select_an_operation")}
+                                />
                               </SelectTrigger>
                               <SelectContent>
                                 {metric.allowed_operations.map(

@@ -54,6 +54,7 @@ export const qualifiedRangeSchema = z.array(
           .refine(
             (data) => {
               if (data.min !== undefined || data.max !== undefined) return true;
+              return false;
             },
             {
               message: "Either min or max value is required",

@@ -130,25 +130,23 @@ export function ConditionOperationSummary({
   })
     .map(({ data }) => data)
     .filter(Boolean) as TagConfig[];
+  const valueType =
+    typeof condition.value === "object" && "value_type" in condition.value
+      ? condition?.value.value_type
+      : "";
   switch (condition.operation) {
     case ConditionOperation.equality: {
       const value =
         typeof condition.value === "object" && "value" in condition.value
           ? condition.value.value
           : condition.value;
-      let valueDisplay = typeof value === "string" ? value : value;
+      let valueDisplay = value.toString();
       if (condition.metric === "patient_gender") {
         valueDisplay = t(`GENDER__${value}`);
       }
-      const valueType =
-        typeof condition.value === "object" && "value_type" in condition.value
-          ? condition?.value.value_type
-          : "";
       return `${conditionName} is equal to ${valueDisplay} ${valueType}`;
     }
     case ConditionOperation.in_range: {
-      const valueType =
-        "value_type" in condition.value ? condition?.value.value_type : "";
       return `${conditionName} is in range ${condition.value.min} to ${condition.value.max} ${valueType}`;
     }
     case ConditionOperation.has_tag: {

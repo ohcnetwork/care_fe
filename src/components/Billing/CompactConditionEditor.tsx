@@ -69,7 +69,7 @@ function TagSelector({
   };
 
   return (
-    <div className="flex gap-1 items-center">
+    <div className="flex flex-col sm:flex-row gap-2 items-center">
       <Select
         value={tagType}
         onValueChange={(value) => {
@@ -96,7 +96,7 @@ function TagSelector({
         selected={selectedTags}
         resource={tagType}
         onChange={handleChange}
-        className="h-9"
+        className="h-9 w-full sm:w-fit"
       />
     </div>
   );
@@ -166,7 +166,7 @@ function RenderInput({
                     const newValue = Number(e.target.value);
                     field.onChange(newValue);
                   }}
-                  className="grow-1 h-9!"
+                  className="grow h-9!"
                 />
               </FormControl>
             </FormItem>
@@ -222,7 +222,7 @@ function RenderInput({
                     const min = Number(e.target.value);
                     field.onChange(min);
                   }}
-                  className="grow-1"
+                  className="grow"
                 />
               </FormControl>
             </FormItem>
@@ -243,7 +243,7 @@ function RenderInput({
                     const max = Number(e.target.value);
                     field.onChange(max);
                   }}
-                  className="grow-1"
+                  className="grow"
                 />
               </FormControl>
             </FormItem>
@@ -463,7 +463,7 @@ export function CompactConditionEditor({
               return (
                 <div
                   key={index}
-                  className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
+                  className="flex gap-2 items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
                 >
                   <ConditionOperationSummary condition={condition} />
                   <Button
@@ -484,12 +484,12 @@ export function CompactConditionEditor({
         {/* Add new condition */}
         {isAdding ? (
           <div className="space-y-3 p-3 bg-gray-50 rounded border">
-            <div className="flex flex-row gap-2 items-center">
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
               <FormField
                 control={form.control}
                 name="metric"
                 render={({ field }) => (
-                  <FormItem className="w-56!">
+                  <FormItem className="w-full sm:w-56!">
                     <FormControl>
                       <Select
                         value={field.value}
@@ -518,7 +518,7 @@ export function CompactConditionEditor({
                 control={form.control}
                 name="operation"
                 render={({ field }) => (
-                  <FormItem className="flex-1 max-w-[200px]">
+                  <FormItem className="flex-1 w-full sm:max-w-[200px]">
                     <FormControl>
                       <Select
                         value={field.value}
@@ -528,7 +528,7 @@ export function CompactConditionEditor({
                           resetValue(value as ConditionOperation);
                         }}
                       >
-                        <SelectTrigger className="grow-1">
+                        <SelectTrigger className="grow">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
