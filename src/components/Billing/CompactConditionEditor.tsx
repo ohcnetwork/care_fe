@@ -22,12 +22,15 @@ import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import {
   AgeOperationInRangeValue,
   Condition,
+  CONDITION_AGE_VALUE_TYPES,
   ConditionOperation,
   ConditionOperationSummary,
   conditionSchema,
+  extractTagInformation,
   getConditionValue,
   getDefaultCondition,
   Metrics,
+  TagOperationValue,
 } from "@/types/base/condition/condition";
 
 interface CompactConditionEditorProps {
@@ -42,15 +45,16 @@ function TagSelector({
   value,
   onChange,
 }: {
-  value: string;
-  onChange: (value: string) => void;
+  value: TagOperationValue;
+  onChange: (value: TagOperationValue) => void;
 }) {
-  const tagIds = value || "";
-  const tagArray = tagIds ? tagIds.split(",") : [];
+  const { t } = useTranslation();
+  const { tagIds, tagResource } = extractTagInformation(value);
+  const [tagType, setTagType] = useState<TagResource>(tagResource);
 
   const tagQueries = useTagConfigs({
-    ids: tagArray,
-    disabled: !tagArray,
+    ids: tagIds,
+    disabled: !tagIds,
   });
 
   const selectedTags = tagQueries
@@ -58,15 +62,43 @@ function TagSelector({
     .filter(Boolean) as TagConfig[];
 
   const handleChange = (tags: TagConfig[]) => {
-    onChange(tags.map((tag) => tag.id).join(","));
+    onChange({
+      value: tags.map((tag) => tag.id).join(","),
+      value_type: tagResource,
+    });
   };
 
   return (
-    <TagSelectorPopover
-      selected={selectedTags}
-      resource={TagResource.ENCOUNTER}
-      onChange={handleChange}
-    />
+    <div className="flex gap-1 items-center">
+      <Select
+        value={tagType}
+        onValueChange={(value) => {
+          setTagType(value as TagResource);
+          onChange({
+            value: "",
+            value_type: value as TagResource,
+          });
+        }}
+      >
+        <SelectTrigger className="w-fit min-w-[200px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={TagResource.ENCOUNTER}>
+            {t("encounter_tags")}
+          </SelectItem>
+          <SelectItem value={TagResource.PATIENT}>
+            {t("patient_tags")}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+      <TagSelectorPopover
+        selected={selectedTags}
+        resource={tagType}
+        onChange={handleChange}
+        className="h-9"
+      />
+    </div>
   );
 }
 
@@ -119,7 +151,7 @@ function RenderInput({
   // For patient_age with equality operation
   if (metric === "patient_age" && operation === ConditionOperation.equality) {
     return (
-      <div className="flex gap-1 justify-between">
+      <div className="flex flex-1 gap-1 justify-between">
         <FormField
           control={form.control}
           name="value.value"
@@ -134,7 +166,7 @@ function RenderInput({
                     const newValue = Number(e.target.value);
                     field.onChange(newValue);
                   }}
-                  className="grow-1"
+                  className="grow-1 h-9!"
                 />
               </FormControl>
             </FormItem>
@@ -145,7 +177,7 @@ function RenderInput({
           control={form.control}
           name="value.value_type"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex-1">
               <FormControl>
                 <Select
                   value={field.value || "years"}
@@ -153,13 +185,13 @@ function RenderInput({
                     field.onChange(value_type);
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9!">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {["years", "months", "days"].map((type) => (
+                    {CONDITION_AGE_VALUE_TYPES.map((type) => (
                       <SelectItem key={type} value={type}>
-                        {t(type)}
+                        {t(`condition_age_value_type__${type}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -234,9 +266,9 @@ function RenderInput({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {["years", "months", "days"].map((type) => (
+                    {CONDITION_AGE_VALUE_TYPES.map((type) => (
                       <SelectItem key={type} value={type}>
-                        {t(type)}
+                        {t(`condition_age_value_type__${type}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -259,7 +291,7 @@ function RenderInput({
           <FormItem className="flex-1">
             <FormControl>
               <TagSelector
-                value={field.value as string}
+                value={field.value as TagOperationValue}
                 onChange={(value) => {
                   field.onChange(value);
                 }}
@@ -472,7 +504,7 @@ export function CompactConditionEditor({
                         <SelectContent>
                           {availableMetrics.map((metric) => (
                             <SelectItem key={metric.name} value={metric.name}>
-                              {metric.verbose_name}
+                              {t(`condition_metric__${metric.name}`)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -486,7 +518,7 @@ export function CompactConditionEditor({
                 control={form.control}
                 name="operation"
                 render={({ field }) => (
-                  <FormItem className="flex-1">
+                  <FormItem className="flex-1 max-w-[200px]">
                     <FormControl>
                       <Select
                         value={field.value}
@@ -503,7 +535,7 @@ export function CompactConditionEditor({
                           {selectedMetric?.allowed_operations.map(
                             (operation) => (
                               <SelectItem key={operation} value={operation}>
-                                {operation}
+                                {t(`condition_operation__${operation}`)}
                               </SelectItem>
                             ),
                           )}

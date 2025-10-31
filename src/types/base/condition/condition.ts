@@ -1,5 +1,5 @@
 import { GENDERS } from "@/common/constants";
-import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -32,6 +32,11 @@ export interface AgeOperationInRangeValue {
   value_type: string;
 }
 
+export interface TagOperationValue {
+  value: string;
+  value_type: TagResource;
+}
+
 export type Condition =
   | (ConditionBase & {
       operation: ConditionOperation.equality;
@@ -43,7 +48,7 @@ export type Condition =
     })
   | (ConditionBase & {
       operation: ConditionOperation.has_tag;
-      value: string;
+      value: TagOperationValue;
     })
   | (ConditionBase & {
       metric: "patient_age";
@@ -102,7 +107,10 @@ export const conditionSchema = z.discriminatedUnion("_conditionType", [
   z.object({
     metric: z.literal("encounter_tag"),
     operation: z.literal(ConditionOperation.has_tag),
-    value: z.string().min(1, "Value is required"),
+    value: z.object({
+      value: z.string().trim().min(1, "Tags are required"),
+      value_type: z.enum([TagResource.ENCOUNTER, TagResource.PATIENT]),
+    }),
     _conditionType: z.literal("encounter_tag_has_tag"),
   }),
 ]) as z.ZodType<Condition>;
@@ -113,9 +121,8 @@ export function ConditionOperationSummary({
   condition: Condition;
 }) {
   const { t } = useTranslation();
-  const conditionName = t(`observation_metric__${condition.metric}`);
-  const tagIds =
-    typeof condition.value === "string" ? condition.value.split(",") : [];
+  const conditionName = t(`condition_metric__${condition.metric}`);
+  const { tagIds, tagResource } = extractTagInformation(condition.value);
   const tags = useTagConfigs({
     ids: tagIds,
     disabled:
@@ -146,7 +153,7 @@ export function ConditionOperationSummary({
     }
     case ConditionOperation.has_tag: {
       const tagDisplay = tags.map((tag) => tag.display).join(", ");
-      return `${conditionName} has following tag: ${tagDisplay}`;
+      return `Has any of the following ${tagResource} tag(s): ${tagDisplay}`;
     }
   }
 }
@@ -175,7 +182,7 @@ export function getConditionValue(
       }
       break;
     case ConditionOperation.has_tag:
-      conditionValue = "";
+      conditionValue = { value: "", value_type: TagResource.ENCOUNTER };
       break;
   }
   return conditionValue;
@@ -195,3 +202,26 @@ export const getDefaultCondition = (metrics: Metrics[]) => {
   } as Condition;
   return newCondition;
 };
+
+export const extractTagInformation = (
+  value:
+    | string
+    | TagOperationValue
+    | ConditionOperationInRangeValue
+    | AgeOperationEqualityValue
+    | AgeOperationInRangeValue,
+) => {
+  const tagIds =
+    typeof value === "object" &&
+    "value" in value &&
+    typeof value.value === "string"
+      ? value.value.split(",")
+      : [];
+  const tagResource =
+    typeof value === "object" && "value_type" in value
+      ? (value.value_type as TagResource)
+      : TagResource.ENCOUNTER;
+  return { tagIds, tagResource };
+};
+
+export const CONDITION_AGE_VALUE_TYPES = ["years", "months", "days"] as const;

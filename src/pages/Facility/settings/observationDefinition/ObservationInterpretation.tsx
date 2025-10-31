@@ -33,16 +33,20 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 import {
   AgeOperationEqualityValue,
   AgeOperationInRangeValue,
   Condition,
+  CONDITION_AGE_VALUE_TYPES,
   ConditionOperation,
   ConditionOperationInRangeValue,
   ConditionOperationSummary,
+  extractTagInformation,
   getConditionValue,
   getDefaultCondition,
   Metrics,
+  TagOperationValue,
 } from "@/types/base/condition/condition";
 import {
   COLOR_OPTIONS,
@@ -64,8 +68,6 @@ import { AlertTriangle, Edit, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FieldValues, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-
-const AGE_TYPES = ["years", "months", "days"];
 
 export function ObservationInterpretation<
   TFieldValues extends FieldValues = FieldValues,
@@ -320,6 +322,7 @@ export function ObservationInterpretation<
     onCancel?.();
     handleSheetState(false);
     setEditedRange(null);
+    form.clearErrors(`${name}.${editedRange?.id || 0}` as any);
   };
 
   const getInterpretationSummary = (range: QualifiedRange, index: number) => {
@@ -460,41 +463,49 @@ export function ObservationInterpretation<
         </p>
       ) : (
         <div className="space-y-4">
-          {qualifiedRanges?.map((range, index) => (
-            <div
-              key={index}
-              className={`flex flex-col sm:flex-row gap-2 items-center justify-between p-3 rounded-md border ${
-                wouldBeAffectedByTypeChange(range, index)
-                  ? "bg-red-50 border-red-300"
-                  : "bg-gray-50 border-gray-200"
-              }`}
-            >
-              {getInterpretationSummary(range, index)}
-              {wouldBeAffectedByTypeChange(range, index) && (
-                <span className="text-sm text-red-500">
-                  {t("type_changed_values_need_to_be_updated")}
-                </span>
-              )}
-              <div className="flex flex-row justify-between gap-1 w-full sm:w-auto">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleEditInterpretation(index)}
-                >
-                  <Edit className="size-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemoveInterpretation(index)}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
+          {qualifiedRanges?.map((range, index) => {
+            const errors = form.getFieldState(
+              `${name}.${index}` as any,
+              form.formState,
+            ).error;
+            return (
+              <div
+                key={index}
+                className={cn(
+                  "flex flex-col sm:flex-row gap-2 items-center justify-between p-3 rounded-md border",
+                  wouldBeAffectedByTypeChange(range, index)
+                    ? "bg-red-50 border-red-300"
+                    : "bg-gray-50 border-gray-200",
+                  errors ? "border border-red-500" : "",
+                )}
+              >
+                {getInterpretationSummary(range, index)}
+                {wouldBeAffectedByTypeChange(range, index) && (
+                  <span className="text-sm text-red-500">
+                    {t("type_changed_values_need_to_be_updated")}
+                  </span>
+                )}
+                <div className="flex flex-row justify-between gap-1 w-full sm:w-auto">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditInterpretation(index)}
+                  >
+                    <Edit className="size-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveInterpretation(index)}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -685,7 +696,11 @@ export function RenderConditionInput({
   condition: Condition;
   index: number;
   handleSetValue: (
-    value: string | ConditionOperationInRangeValue | AgeOperationEqualityValue,
+    value:
+      | string
+      | ConditionOperationInRangeValue
+      | AgeOperationEqualityValue
+      | TagOperationValue,
     index: number,
   ) => void;
   handleSetValueType: (value: string, index: number) => void;
@@ -696,11 +711,12 @@ export function RenderConditionInput({
   const operation = condition.operation;
   const value =
     "value" in condition ? condition.value : { min: undefined, max: undefined };
-  const tagIds = typeof value === "string" ? value.split(",") : [];
+  const { tagIds, tagResource } = extractTagInformation(value);
   const tagQueries = useTagConfigs({
     ids: tagIds,
     disabled: operation !== ConditionOperation.has_tag,
   });
+  const [tagType, setTagType] = useState<TagResource>(tagResource);
   switch (condition.metric) {
     case "patient_gender": {
       if (operation === ConditionOperation.equality) {
@@ -738,7 +754,7 @@ export function RenderConditionInput({
       break;
     }
     case "patient_age": {
-      const renderAgeType = () => {
+      function AgeTypeSelector() {
         const valueType =
           typeof value === "object" && value !== null && "value_type" in value
             ? (value.value_type as string)
@@ -748,7 +764,7 @@ export function RenderConditionInput({
             control={form.control}
             name={`${fieldName}.value.value_type` as any}
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex-1">
                 <FormControl>
                   <Select
                     value={field.value || valueType}
@@ -756,13 +772,13 @@ export function RenderConditionInput({
                       handleSetValueType(value, index);
                     }}
                   >
-                    <SelectTrigger className="sm:w-28!">
+                    <SelectTrigger>
                       <SelectValue placeholder={t("select_a_value")} />
                     </SelectTrigger>
                     <SelectContent>
-                      {AGE_TYPES.map((age) => (
+                      {CONDITION_AGE_VALUE_TYPES.map((age) => (
                         <SelectItem key={age} value={age}>
-                          {t(age)}
+                          {t(`condition_age_value_type__${age}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -773,7 +789,7 @@ export function RenderConditionInput({
             )}
           />
         );
-      };
+      }
       if (operation === ConditionOperation.equality) {
         const currentValueType =
           typeof value === "object" && value !== null && "value_type" in value
@@ -814,7 +830,7 @@ export function RenderConditionInput({
                 </FormItem>
               )}
             />
-            {renderAgeType()}
+            <AgeTypeSelector />
           </div>
         );
       } else if (operation === ConditionOperation.in_range) {
@@ -888,7 +904,7 @@ export function RenderConditionInput({
                 </FormItem>
               )}
             />
-            {renderAgeType()}
+            <AgeTypeSelector />
           </div>
         );
       }
@@ -995,14 +1011,65 @@ export function RenderConditionInput({
         const selectedTags = tagQueries
           .map((query) => query.data)
           .filter(Boolean) as TagConfig[];
+        const handleSetTagValue = (value: string) => {
+          handleSetValue(
+            {
+              value: value,
+              value_type: tagType,
+            },
+            index,
+          );
+        };
         return (
-          <TagSelectorPopover
-            selected={selectedTags}
-            resource={TagResource.ENCOUNTER}
-            onChange={(tags) => {
-              handleSetValue(tags.map((tag) => tag.id).join(","), index);
-            }}
-          />
+          <>
+            <Select
+              value={tagType}
+              onValueChange={(value) => {
+                setTagType(value as TagResource);
+                handleSetTagValue("");
+              }}
+            >
+              <SelectTrigger className="w-fit min-w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={TagResource.ENCOUNTER}>
+                  {t("encounter_tags")}
+                </SelectItem>
+                <SelectItem value={TagResource.PATIENT}>
+                  {t("patient_tags")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <FormField
+              control={form.control}
+              name={`${fieldName}.value.value` as any}
+              render={() => {
+                const errorMessage = form.getFieldState(
+                  `${fieldName}.value.value`,
+                  form.formState,
+                ).error?.message;
+                return (
+                  <FormItem>
+                    <FormControl>
+                      <TagSelectorPopover
+                        selected={selectedTags}
+                        resource={TagResource.ENCOUNTER}
+                        onChange={(tags) => {
+                          handleSetValue(
+                            tags.map((tag) => tag.id).join(","),
+                            index,
+                          );
+                        }}
+                        className={errorMessage ? "border-red-500" : ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+          </>
         );
       }
       break;
@@ -1078,6 +1145,7 @@ export function ConditionComponent<
       | string
       | ConditionOperationInRangeValue
       | AgeOperationEqualityValue
+      | TagOperationValue
       | string[],
     index: number,
   ) => {
@@ -1170,7 +1238,7 @@ export function ConditionComponent<
                                     key={metric.name}
                                     value={metric.name}
                                   >
-                                    {t(`observation_metric__${metric.name}`)}
+                                    {t(`condition_metric__${metric.name}`)}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -1209,7 +1277,7 @@ export function ConditionComponent<
                                       key={operation}
                                       value={operation}
                                     >
-                                      {t(operation)}
+                                      {t(`condition_operation__${operation}`)}
                                     </SelectItem>
                                   ),
                                 )}
