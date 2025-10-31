@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -9,6 +9,11 @@ const MIN_SLUG_LENGTH = 5;
 const MAX_SLUG_LENGTH = 25;
 const STATUS_OPTIONS = ["Draft", "Active", "Retired"] as const;
 const DELETED_STATUS = "Retired";
+
+// Helper function to get field error message
+function getFieldErrorMessage(fieldLocator: Locator): Locator {
+  return fieldLocator.locator("..").locator('[data-slot="form-message"]');
+}
 
 // Helper function to create a specimen definition
 async function createSpecimenDefinition(
@@ -215,34 +220,26 @@ test.describe("Specimen Definitions Management", () => {
 
     // Title field validation error
     await expect(
-      page
-        .getByRole("textbox", { name: "Title *" })
-        .locator("..")
-        .locator('[data-slot="form-message"]'),
+      getFieldErrorMessage(page.getByRole("textbox", { name: "Title *" })),
     ).toBeVisible();
 
     // Slug field validation error
     await expect(
-      page
-        .getByRole("textbox", { name: "Slug *" })
-        .locator("..")
-        .locator('[data-slot="form-message"]'),
+      getFieldErrorMessage(page.getByRole("textbox", { name: "Slug *" })),
     ).toBeVisible();
 
     // Description field validation error
     await expect(
-      page
-        .getByRole("textbox", { name: "Description *" })
-        .locator("..")
-        .locator('[data-slot="form-message"]'),
+      getFieldErrorMessage(
+        page.getByRole("textbox", { name: "Description *" }),
+      ),
     ).toBeVisible();
 
     // Type Collected field validation error
     await expect(
-      page
-        .getByRole("combobox", { name: "Type Collected *" })
-        .locator("..")
-        .locator('[data-slot="form-message"]'),
+      getFieldErrorMessage(
+        page.getByRole("combobox", { name: "Type Collected *" }),
+      ),
     ).toBeVisible();
   });
 
