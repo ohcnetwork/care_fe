@@ -618,22 +618,19 @@ export function ChargeItemDefinitionForm({
       base_price: z
         .string()
         .min(1, { message: t("base_price_is_required") })
-        .refine((val) => val !== "0", {
-          message: t("base_price_is_required"),
-        })
         .refine((val) => Number(val) > 0, {
           message: t("must_be_greater_than_value", { value: 0 }),
         }),
       mrp: z
         .string()
         .optional()
-        .refine((val) => !val || Number(val) >= 0, {
+        .refine((val) => !val || Number(val) > 0, {
           message: t("must_be_greater_than_value", { value: 0 }),
         }),
       purchase_price: z
         .string()
         .optional()
-        .refine((val) => !val || Number(val) >= 0, {
+        .refine((val) => !val || Number(val) > 0, {
           message: t("must_be_greater_than_value", { value: 0 }),
         }),
       price_components: z.array(priceComponentSchema),
@@ -675,7 +672,7 @@ export function ChargeItemDefinitionForm({
       base_price:
         initialData?.price_components
           .find((c) => c.monetary_component_type === MonetaryComponentType.base)
-          ?.amount?.toString() || "0",
+          ?.amount?.toString() || "",
 
       // MRP and Purchase Price
       mrp: mrpComponent?.amount?.toString() || "",
