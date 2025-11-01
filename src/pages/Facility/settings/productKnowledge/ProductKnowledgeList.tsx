@@ -44,7 +44,6 @@ export default function ProductKnowledgeList({
         onCreateItem={onCreateItem}
         createItemLabel={t("add_product_knowledge")}
         createItemIcon="l-plus"
-        createItemTooltip={t("products_can_only_be_added_to_leaf_categories")}
       >
         {categorySlug && (
           <ProductKnowledgeListComponent

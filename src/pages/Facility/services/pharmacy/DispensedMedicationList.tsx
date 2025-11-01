@@ -33,8 +33,10 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import ViewDefaultAccountButton from "@/pages/Facility/billing/account/ViewDefaultAccountButton";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import {
@@ -283,6 +285,7 @@ export default function DispensedMedicationList({
   locationId,
   status,
 }: Props) {
+  useShortcutSubContext("facility:pharmacy");
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedMedications, setSelectedMedications] = useState<string[]>([]);
@@ -414,6 +417,7 @@ export default function DispensedMedicationList({
                 >
                   <PillIcon className="size-4" />
                   {t("prescriptions")}
+                  <ShortcutBadge actionId="view-prescriptions" />
                 </Link>
               </Button>
               {status === MedicationDispenseStatus.preparation &&
@@ -427,6 +431,7 @@ export default function DispensedMedicationList({
                     }}
                   >
                     {t("bill_medication")}
+                    <ShortcutBadge actionId="billing-action" />
                   </Button>
                 )}
               <ViewDefaultAccountButton
@@ -445,6 +450,7 @@ export default function DispensedMedicationList({
               disabled={isPending}
             >
               {t("complete_dispense")}
+              <ShortcutBadge actionId="dispense-button" />
             </Button>
           )}
         </div>
