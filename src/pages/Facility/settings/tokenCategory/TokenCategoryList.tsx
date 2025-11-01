@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, navigate } from "raviger";
+import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
