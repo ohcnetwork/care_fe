@@ -3437,6 +3437,8 @@
   "oral_issue_for_non_oral_nutrition_route_error": "Can be specified only if nutrition route is set to Oral",
   "order": "Order",
   "order_created": "Order created successfully",
+  "order_marked_as_approved_successfully": "Order marked as approved successfully.",
+  "order_marked_as_completed_successfully": "Order marked as completed successfully.",
   "order_updated": "Order updated successfully",
   "order_updated_successfully": "Order updated successfully",
   "ordered": "Ordered",

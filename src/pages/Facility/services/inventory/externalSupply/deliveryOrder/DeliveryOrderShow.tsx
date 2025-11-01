@@ -222,7 +222,13 @@ export function DeliveryOrderShow({
       queryClient.invalidateQueries({
         queryKey: ["deliveryOrders", deliveryOrderId],
       });
-      toast.success(t("order_updated_successfully"));
+      toast.success(
+        deliveryOrder?.status === DeliveryOrderStatus.draft
+          ? t("order_marked_as_approved_successfully")
+          : deliveryOrder?.status === DeliveryOrderStatus.pending
+            ? t("order_marked_as_completed_successfully")
+            : t("order_updated_successfully"),
+      );
     },
     onError: (_error) => {
       toast.error(t("error_updating_order"));

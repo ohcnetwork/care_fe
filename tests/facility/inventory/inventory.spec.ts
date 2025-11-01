@@ -67,7 +67,13 @@ test.describe("Part of External flow", () => {
     await page.getByRole("option").first().click();
 
     await page.getByRole("button", { name: "Add Items" }).click();
+
+    await expect(page.getByText(/Supply Delivery Created/i)).toBeVisible();
     await page.getByRole("button", { name: "Mark as Approved" }).click();
+
+    await expect(
+      page.getByText(/Order marked as approved successfully/i),
+    ).toBeVisible();
 
     await expect(
       page.getByRole("button", { name: /Mark as Completed/i }),
@@ -91,5 +97,9 @@ test.describe("Part of External flow", () => {
     await page.getByRole("button", { name: "Confirm & Update Stock" }).click();
     await page.getByRole("button", { name: "Confirm" }).click();
     await page.getByRole("button", { name: "Mark as Completed" }).click();
+
+    await expect(
+      page.getByText(/Order marked as completed successfully/i),
+    ).toBeVisible();
   });
 });
