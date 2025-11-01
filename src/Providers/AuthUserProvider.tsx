@@ -10,6 +10,7 @@ import { AuthUserContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
+import FiltersCache from "@/Utils/FiltersCache";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { userAtom } from "@/atoms/user-atom";
@@ -164,6 +165,9 @@ export default function AuthUserProvider({
     localStorage.removeItem(LocalStorageKeys.patientTokenKey);
     setAccessToken(null);
     setPatientToken(null);
+
+    // Clear all filters on logout
+    FiltersCache.invalidateAll();
 
     await queryClient.resetQueries({ queryKey: ["currentUser"] });
 
