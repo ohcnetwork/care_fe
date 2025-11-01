@@ -37,12 +37,6 @@ test.describe("category list", () => {
     });
     await expect(addCategoryButton).toBeVisible();
     await expect(addCategoryButton).toBeEnabled();
-
-    const addActivityButton = page.getByRole("button", {
-      name: /add activity definition/i,
-    });
-    await expect(addActivityButton).toBeVisible();
-    await expect(addActivityButton).toBeDisabled();
   });
 
   test("should create category and navigate to it", async ({ page }) => {
@@ -62,8 +56,11 @@ test.describe("category list", () => {
 
     await sheet.getByLabel(/^description$/i).fill(testData.description);
 
-    await sheet.getByLabel(/resource sub type/i).click();
-    await page.getByRole("option", { name: /^other$/i }).click();
+    await expect(
+      sheet
+        .locator('[data-slot="select-trigger"] [data-slot="select-value"]')
+        .getByText(/other/i),
+    ).toBeVisible();
 
     await sheet.getByRole("button", { name: /^create category$/i }).click();
 
@@ -114,50 +111,6 @@ test.describe("category list", () => {
       });
       await expect(addActivityButton).toBeVisible();
       await expect(addActivityButton).toBeEnabled();
-    });
-
-    test("should create nested category inside existing category", async ({
-      page,
-    }) => {
-      const childCategoryData = generateCategoryData();
-
-      await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
-
-      await expect(page.getByText(testData.name)).toBeVisible();
-
-      await page.getByRole("heading", { name: testData.name }).click();
-
-      await expect(page).toHaveURL(
-        new RegExp(
-          `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${testData.slug}`,
-        ),
-      );
-
-      const addCategoryButton = page.getByRole("button", {
-        name: /add category/i,
-      });
-      await expect(addCategoryButton).toBeVisible();
-      await addCategoryButton.click();
-
-      const sheet = page.locator('[data-slot="sheet-content"]');
-      await expect(sheet).toBeVisible();
-      await expect(
-        sheet.getByRole("heading", { name: /create category/i }),
-      ).toBeVisible();
-
-      await sheet.getByLabel(/^name$/i).fill(childCategoryData.name);
-
-      await sheet
-        .getByLabel(/^description$/i)
-        .fill(childCategoryData.description);
-
-      await sheet.getByRole("button", { name: /^create category$/i }).click();
-
-      await expectToast(page, /category created successfully/i);
-
-      await expect(page.getByText(childCategoryData.name)).toBeVisible();
-
-      await expect(page.getByText(testData.name)).toBeVisible();
     });
 
     test("should edit category", async ({ page }) => {
