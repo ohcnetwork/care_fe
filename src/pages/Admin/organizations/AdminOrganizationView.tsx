@@ -58,9 +58,6 @@ function OrganizationCard({
       });
       toast.success(t("organization_deleted_successfully"));
     },
-    onError: () => {
-      toast.error(t("something_went_wrong"));
-    },
   });
 
   const canDelete = parentId ? true : !org.has_children;
