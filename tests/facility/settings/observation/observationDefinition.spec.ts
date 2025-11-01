@@ -1,24 +1,24 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { getFacilityId } from "../../../support/facilityId";
 import { generateObservationDefinitionData } from "../../../support/observationDefinition";
 
 // Reuse authenticated storage state
 test.use({ storageState: "tests/.auth/user.json" });
 
-async function navigateToObservationDefinitions(page) {
+async function navigateToObservationDefinitions(page: Page) {
   const facilityId = getFacilityId();
   await page.goto(`/facility/${facilityId}/settings/observation_definitions`);
   return facilityId;
 }
 
-async function openCreateForm(page, facilityId: string) {
+async function openCreateForm(page: Page, facilityId: string) {
   await page.goto(`/facility/${facilityId}/settings/observation_definitions`);
   await page.getByRole("button", { name: /add definition/i }).click();
   await expect(page.getByRole("heading", { name: /create/i })).toBeVisible();
 }
 
 async function fillMandatoryFields(
-  page,
+  page: Page,
   data: ReturnType<typeof generateObservationDefinitionData>,
 ) {
   await page.locator('input[name="title"]').fill(data.title);
@@ -57,7 +57,7 @@ async function fillMandatoryFields(
 }
 
 // Helper to assert notification by text
-async function expectToast(page, text: RegExp | string) {
+async function expectToast(page: Page, text: RegExp | string) {
   await expect(page.getByText(text)).toBeVisible({ timeout: 10000 });
 }
 
