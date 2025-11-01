@@ -1,4 +1,56 @@
 import {
+  ScheduleResourceFormState,
+  ScheduleResourceSelector,
+} from "@/components/Schedule/ResourceSelector";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  ENCOUNTER_CLASSES_COLORS,
+  ENCOUNTER_PRIORITY_COLORS,
+  ENCOUNTER_STATUS_COLORS,
+} from "@/types/emr/encounter/encounter";
+import {
+  APPOINTMENT_STATUS_COLORS,
+  Appointment,
+  AppointmentFinalStatuses,
+  AppointmentRead,
+  AppointmentStatus,
+  AppointmentUpdateRequest,
+  SchedulableResourceType,
+  formatScheduleResourceName,
+} from "@/types/scheduling/schedule";
+import {
+  formatName,
+  getReadableDuration,
+  stringifyNestedObject,
+} from "@/Utils/utils";
+import {
   AvatarIcon,
   CalendarIcon,
   CheckCircledIcon,
@@ -29,101 +81,41 @@ import { navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
-import { useShortcutSubContext } from "@/context/ShortcutContext";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
-import { toast } from "sonner";
-
+import { getPermissions } from "@/common/Permissions";
 import { ChargeItemsSection } from "@/components/Billing/ChargeItems/ChargeItemsSection";
-import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
-
-import { cn } from "@/lib/utils";
-
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Textarea } from "@/components/ui/textarea";
-
+import { Avatar } from "@/components/Common/Avatar";
+import BackButton from "@/components/Common/BackButton";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
 import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
-import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
-
-import useAppHistory from "@/hooks/useAppHistory";
-
-import { getPermissions } from "@/common/Permissions";
-
-import { usePermissions } from "@/context/PermissionContext";
-import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import {
-  ENCOUNTER_CLASSES_COLORS,
-  ENCOUNTER_PRIORITY_COLORS,
-  ENCOUNTER_STATUS_COLORS,
-} from "@/types/emr/encounter/encounter";
-import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
-import { FacilityRead } from "@/types/facility/facility";
-import {
-  Appointment,
-  APPOINTMENT_STATUS_COLORS,
-  AppointmentFinalStatuses,
-  AppointmentRead,
-  AppointmentStatus,
-  AppointmentUpdateRequest,
-  formatScheduleResourceName,
-  SchedulableResourceType,
-} from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApi";
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import {
-  formatName,
-  getReadableDuration,
-  stringifyNestedObject,
-} from "@/Utils/utils";
-
-import { Avatar } from "@/components/Common/Avatar";
-import BackButton from "@/components/Common/BackButton";
 import { PatientDeceasedInfo } from "@/components/Patient/PatientHeader";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import { formatPatientAddress } from "@/components/Patient/utils";
-import {
-  ScheduleResourceFormState,
-  ScheduleResourceSelector,
-} from "@/components/Schedule/ResourceSelector";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import TagBadge from "@/components/Tags/TagBadge";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { usePermissions } from "@/context/PermissionContext";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
+import useAppHistory from "@/hooks/useAppHistory";
+import { cn } from "@/lib/utils";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
+import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
+import { FacilityRead } from "@/types/facility/facility";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
+import { toast } from "sonner";
 
 interface Props {
   appointmentId: string;
@@ -413,13 +405,13 @@ export default function AppointmentDetail(props: Props) {
                       <div className="text-sm">
                         <div className="flex flex-wrap gap-1">
                           {appointment.associated_encounter.tags.map((tag) => (
-                            <Badge
-                              variant="outline"
+                            <TagBadge
                               key={tag.id}
+                              tag={tag}
+                              hierarchyDisplay
                               className="text-xs"
-                            >
-                              {getTagHierarchyDisplay(tag)}
-                            </Badge>
+                              variant="outline"
+                            />
                           ))}
                         </div>
                       </div>

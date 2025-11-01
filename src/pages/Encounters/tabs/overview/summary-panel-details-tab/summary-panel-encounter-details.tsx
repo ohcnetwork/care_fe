@@ -1,4 +1,3 @@
-import { Badge, badgeVariants } from "@/components/ui/badge";
 import {
   EncounterClassBadge,
   StatusBadge,
@@ -12,6 +11,8 @@ import { Signal, SquarePen } from "lucide-react";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
 import { Avatar } from "@/components/Common/Avatar";
+import TagBadge from "@/components/Tags/TagBadge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { OverviewSidebarSheet } from "@/pages/Encounters/tabs/overview/overview-sidebar-sheet";
@@ -19,7 +20,6 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import accountApi from "@/types/billing/account/accountApi";
 import { ENCOUNTER_PRIORITY_COLORS } from "@/types/emr/encounter/encounter";
 import { useQuery } from "@tanstack/react-query";
-import { VariantProps } from "class-variance-authority";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
@@ -136,18 +136,7 @@ export const SummaryPanelEncounterDetails = () => {
                   {encounter.tags.length > 0 ? (
                     <>
                       {encounter.tags.map((tag) => (
-                        <Badge
-                          key={tag.id}
-                          variant={
-                            (tag.meta.variant as VariantProps<
-                              typeof badgeVariants
-                            >["variant"]) || "secondary"
-                          }
-                          className="capitalize"
-                          title={tag.description}
-                        >
-                          {tag.display}
-                        </Badge>
+                        <TagBadge key={tag.id} tag={tag} />
                       ))}
                     </>
                   ) : (
