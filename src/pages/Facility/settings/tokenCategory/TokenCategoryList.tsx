@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -29,6 +29,9 @@ import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { getPermissions } from "@/common/Permissions";
+import { usePermissions } from "@/context/PermissionContext";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { SCHEDULABLE_RESOURCE_TYPE_COLORS } from "@/types/scheduling/schedule";
 import { TokenCategoryRead } from "@/types/tokens/tokenCategory/tokenCategory";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
@@ -89,6 +92,12 @@ export default function TokenCategoryList({
       status: "active",
     },
   });
+  const { facility } = useCurrentFacility();
+  const { hasPermission } = usePermissions();
+  const { canWriteTokenCategory } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["tokenCategories", qParams],
@@ -120,14 +129,17 @@ export default function TokenCategoryList({
                 {t("manage_token_categories")}
               </p>
             </div>
-            <Button
-              onClick={() =>
-                navigate(`/facility/${facilityId}/settings/token_category/new`)
-              }
-            >
-              <CareIcon icon="l-plus" className="mr-2" />
-              {t("add_token_category")}
-            </Button>
+            {canWriteTokenCategory && (
+              <Button>
+                <Link
+                  basePath="/"
+                  href={`/facility/${facilityId}/settings/token_category/new`}
+                >
+                  <CareIcon icon="l-plus" className="mr-2" />
+                  {t("add_token_category")}
+                </Link>
+              </Button>
+            )}
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">

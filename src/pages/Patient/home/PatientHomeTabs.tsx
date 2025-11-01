@@ -13,7 +13,7 @@ interface PatientHomeTabsProps {
   facilityPermissions: string[];
   canListEncounters: boolean;
   canWriteAppointment: boolean;
-  canCreateToken: boolean;
+  canListTokens: boolean;
 }
 
 export default function PatientHomeTabs({
@@ -22,7 +22,7 @@ export default function PatientHomeTabs({
   facilityPermissions,
   canListEncounters,
   canWriteAppointment,
-  canCreateToken,
+  canListTokens,
 }: PatientHomeTabsProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("encounters");
@@ -35,7 +35,7 @@ export default function PatientHomeTabs({
       label: t("appointments"),
       visible: canWriteAppointment,
     },
-    { id: "tokens", label: t("tokens"), visible: canCreateToken && isTab },
+    { id: "tokens", label: t("tokens"), visible: canListTokens && isTab },
   ].filter((tab) => tab.alwaysVisible || tab.visible);
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function PatientHomeTabs({
           <BookingsList patientId={patientId} facilityId={facility.id} />
         )}
 
-        {activeTab === "tokens" && canCreateToken && isTab && (
+        {activeTab === "tokens" && canListTokens && isTab && (
           <PatientTokensList patientId={patientId} facility={facility} />
         )}
       </div>
