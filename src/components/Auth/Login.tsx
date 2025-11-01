@@ -38,7 +38,6 @@ import { useAuthContext } from "@/hooks/useAuthUser";
 
 import { LocalStorageKeys } from "@/common/constants";
 
-import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
@@ -243,7 +242,6 @@ const Login = (props: LoginProps) => {
     const validated = validateData();
     if (!validated) return;
 
-    FiltersCache.invalidateAll();
     try {
       await signIn(validated);
     } catch (error) {
