@@ -20,7 +20,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import { Code, CodeConceptMinimal } from "@/types/base/code/code";
-import { DEFAULT_EXPAND_REQUEST_LANGUAGE } from "@/types/valueSet/valueSet";
 import valueSetApi from "@/types/valueSet/valueSetApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -105,7 +104,6 @@ export default function ValueSetSearchContent({
       body: {
         count,
         search: search + searchPostFix,
-        language: DEFAULT_EXPAND_REQUEST_LANGUAGE,
       },
     }),
   });
