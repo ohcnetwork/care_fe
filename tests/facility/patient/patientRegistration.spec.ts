@@ -119,7 +119,7 @@ test.describe("Patient Registration", () => {
 
       // Select the state option by visible text
       // TODO: Update to a specific state once fixtures support it
-      const stateOption = page.getByRole("option");
+      const stateOption = page.getByRole("option").first();
       await stateOption.waitFor({ state: "visible", timeout: 5000 });
       await stateOption.click();
     });
@@ -237,7 +237,7 @@ test.describe("Patient Registration", () => {
 
       // Select the state option by visible text
       // TODO: Update to a specific state once fixtures support it
-      const stateOption = page.getByRole("option");
+      const stateOption = page.getByRole("option").first();
       await stateOption.waitFor({ state: "visible", timeout: 5000 });
       await stateOption.click();
     });
@@ -368,7 +368,7 @@ test.describe("Patient Registration", () => {
 
       // Select the state option by visible text
       // TODO: Update to a specific state once fixtures support it
-      const stateOption = page.getByRole("option");
+      const stateOption = page.getByRole("option").first();
       await stateOption.waitFor({ state: "visible", timeout: 5000 });
       await stateOption.click();
     });
@@ -384,5 +384,74 @@ test.describe("Patient Registration", () => {
     });
 
     // TODO: Verify that selected tags are associated with the patient
+  });
+
+  test("should register patient with age and verify year of birth calculation and profile display", async ({
+    page,
+  }) => {
+    const currentYear = new Date().getFullYear();
+    const patientAge = 25;
+    const expectedYearOfBirth = currentYear - patientAge;
+
+    // Generate minimal test data
+    const timestamp = Date.now();
+    const patientName = `Age Test Patient ${timestamp}`;
+    const phoneNumber = `9${Math.floor(Math.random() * 1000000000)
+      .toString()
+      .padStart(9, "0")}`;
+
+    // Start patient registration - inherit navigation from beforeEach
+    await page
+      .getByRole("textbox", { name: /search by patient phone number/i })
+      .press("Shift+Enter");
+
+    // Fill only the essential required fields
+    await page.getByRole("textbox", { name: /name.*\*/i }).fill(patientName);
+    await page
+      .getByRole("textbox", { name: /phone number.*\*/i })
+      .fill(phoneNumber);
+    await page.getByRole("radio", { name: "Male", exact: true }).click();
+
+    // Test the age input functionality
+    await page.getByRole("tab", { name: "Age" }).click();
+    await page.getByPlaceholder("Age").fill(patientAge.toString());
+
+    // Verify Year of Birth preview calculation
+    await expect(
+      page.locator(`text=Year of Birth: ${expectedYearOfBirth}`),
+    ).toBeVisible({ timeout: 3000 });
+
+    // Fill minimal required fields to complete registration
+    await page.getByRole("combobox", { name: /blood group/i }).click();
+    await page.getByRole("option", { name: "A+" }).click();
+    await page
+      .getByRole("textbox", { name: "Address" })
+      .fill("123 Test Street");
+    await page.getByRole("spinbutton", { name: "PIN Code *" }).fill("302020");
+
+    // Select state - scroll to make dropdown visible
+    await page
+      .getByRole("button", { name: /register patient/i })
+      .scrollIntoViewIfNeeded();
+    await page
+      .getByRole("region", { name: ": Additional Details" })
+      .getByRole("combobox")
+      .click();
+    await page.getByRole("option").first().click();
+
+    // Submit and verify registration
+    await page.getByRole("button", { name: /register patient/i }).click();
+    await expect(
+      page.getByText(/patient registered successfully/i),
+    ).toBeVisible({ timeout: 10000 });
+
+    // Verify profile display
+    await page.waitForURL("**/patients/**", { timeout: 10000 });
+    await expect(
+      page.getByRole("button", { name: new RegExp(`.*${patientAge} Y, Male`) }),
+    ).toBeVisible({ timeout: 5000 });
+
+    // Validate calculation
+    expect(expectedYearOfBirth).toEqual(currentYear - patientAge);
   });
 });
