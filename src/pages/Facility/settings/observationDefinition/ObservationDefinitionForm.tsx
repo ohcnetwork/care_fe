@@ -492,6 +492,7 @@ function ObservationDefinitionFormContent({
                         field.onChange(value)
                       }
                     />
+                    <FormMessage />
                   </FormItem>
                 );
               }}

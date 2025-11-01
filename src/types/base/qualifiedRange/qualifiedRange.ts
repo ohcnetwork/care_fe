@@ -40,66 +40,70 @@ const interpretationSchema = z.object({
   icon: z.string().optional(),
   color: z.string().optional(),
 });
-export const qualifiedRangeSchema = z.array(
-  z
-    .object({
-      conditions: z.array(conditionSchema),
-      ranges: z.array(
-        z.object({
-          interpretation: interpretationSchema,
-          min: z.number().optional(),
-          max: z.number().optional(),
-        }),
-      ),
-      normal_coded_value_set: z.string().optional(),
-      critical_coded_value_set: z.string().optional(),
-      abnormal_coded_value_set: z.string().optional(),
-      valueset_interpretation: z
-        .array(
+export const qualifiedRangeSchema = z
+  .array(
+    z
+      .object({
+        conditions: z.array(conditionSchema),
+        ranges: z.array(
           z.object({
             interpretation: interpretationSchema,
-            valueset: z.string().min(1, "Value set is required"),
+            min: z.number().optional(),
+            max: z.number().optional(),
           }),
-        )
-        .optional(),
-      _interpretation_type: z.enum([
-        InterpretationType.ranges,
-        InterpretationType.valuesets,
-      ]),
-    })
-    .superRefine((data, ctx) => {
-      if (
-        data.ranges?.length &&
-        data.ranges.length > 0 &&
-        data.valueset_interpretation?.length &&
-        data.valueset_interpretation.length > 0
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Ranges and value sets cannot be used together",
-        });
-      }
-      if (
-        data._interpretation_type === InterpretationType.ranges &&
-        (!data.ranges || data.ranges.length === 0)
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Ranges are required",
-        });
-      }
-      if (
-        data._interpretation_type === InterpretationType.valuesets &&
-        (!data.valueset_interpretation ||
-          data.valueset_interpretation.length === 0)
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Value sets are required",
-        });
-      }
-    }),
-) as z.ZodType<QualifiedRange[]>;
+        ),
+        normal_coded_value_set: z.string().optional(),
+        critical_coded_value_set: z.string().optional(),
+        abnormal_coded_value_set: z.string().optional(),
+        valueset_interpretation: z
+          .array(
+            z.object({
+              interpretation: interpretationSchema,
+              valueset: z.string().min(1, "Value set is required"),
+            }),
+          )
+          .optional(),
+        _interpretation_type: z.enum([
+          InterpretationType.ranges,
+          InterpretationType.valuesets,
+        ]),
+      })
+      .superRefine((data, ctx) => {
+        if (
+          data.ranges?.length &&
+          data.ranges.length > 0 &&
+          data.valueset_interpretation?.length &&
+          data.valueset_interpretation.length > 0
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Ranges and value sets cannot be used together",
+          });
+        }
+        if (
+          data._interpretation_type === InterpretationType.ranges &&
+          (!data.ranges || data.ranges.length === 0)
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Ranges are required",
+          });
+        }
+        if (
+          data._interpretation_type === InterpretationType.valuesets &&
+          (!data.valueset_interpretation ||
+            data.valueset_interpretation.length === 0)
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Value sets are required",
+          });
+        }
+      }),
+  )
+  .min(1, "At least one interpretation is required") as z.ZodType<
+  QualifiedRange[]
+>;
 
 export const getRangeSummary = (range: NumericRange) => {
   if (!range.min && !range.max) {
