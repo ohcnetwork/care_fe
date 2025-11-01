@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-test.describe("Queue Creating & Management", () => {
+test.describe("Queue Creation & Editing", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page
@@ -75,7 +75,6 @@ test.describe("Queue Creating & Management", () => {
 
   test("should not allow editing queue name when invalid", async ({ page }) => {
     const uniqueQueueName = `Test Queue ${Date.now()}`;
-    const emptyQueueName = "";
     await page.getByRole("button", { name: "Create Queue" }).click();
     await page
       .getByRole("textbox", { name: "Queue Name" })
@@ -89,9 +88,7 @@ test.describe("Queue Creating & Management", () => {
     });
     await row.locator("td").last().getByRole("button").click();
     await page.getByRole("menuitem", { name: "Edit queue name" }).click();
-    await page
-      .getByRole("textbox", { name: "Queue Name" })
-      .fill(emptyQueueName);
+    await page.getByRole("textbox", { name: "Queue Name" }).fill("");
     await page.getByRole("button", { name: "Update Queue" }).click();
     await expect(page.getByText("Queue name is required")).toBeVisible();
   });
