@@ -12,8 +12,8 @@ import {
 import query from "@/Utils/request/query";
 import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
 import {
-  Appointment,
   AvailabilityHeatmapResponse,
+  PublicAppointment,
   SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -117,7 +117,7 @@ const getInfiniteAvailabilityHeatmap = ({
   return result;
 };
 
-export const formatAppointmentSlotTime = (appointment: Appointment) => {
+export const formatAppointmentSlotTime = (appointment: PublicAppointment) => {
   if (!appointment.token_slot?.start_datetime) {
     return "";
   }
