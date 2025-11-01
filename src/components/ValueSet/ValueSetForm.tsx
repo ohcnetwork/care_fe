@@ -41,7 +41,6 @@ import { generateSlug } from "@/Utils/utils";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
 
-// Create a schema for form validation
 interface ValueSetFormProps {
   initialData?: ValueSetRead;
   onSubmit: (data: ValueSetBase) => void;
