@@ -263,7 +263,7 @@ export function EncounterProvider({
           }}
           encounter={selectedEncounter}
           canWrite={canWriteSelectedEncounter}
-          trigger={<></>}
+          trigger={null}
         />
       )}
 
@@ -277,7 +277,7 @@ export function EncounterProvider({
           setOpen={(open) => {
             setActiveAction(open ? EncounterAction.ManageDepartments : null);
           }}
-          trigger={<></>}
+          trigger={null}
         />
       )}
 
