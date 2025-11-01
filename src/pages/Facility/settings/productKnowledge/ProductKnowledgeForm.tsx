@@ -36,7 +36,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
-import { Code } from "@/types/base/code/code";
+import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import {
@@ -50,56 +50,6 @@ import {
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
-// Define a Code schema to match the API type
-const codeSchema = z.object({
-  code: z.string().min(1, "Code is required"),
-  display: z.string().min(1, "Display name is required"),
-  system: z.string().min(1, "System is required"),
-});
-
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  slug_value: z.string().min(1, "Slug is required"),
-  product_type: z.nativeEnum(ProductKnowledgeType),
-  status: z.nativeEnum(ProductKnowledgeStatus),
-  alternate_identifier: z.string().trim().optional(),
-  category: z.string(),
-  code: codeSchema.nullable(),
-  base_unit: codeSchema.nullable(),
-  names: z
-    .array(
-      z.object({
-        name_type: z.nativeEnum(ProductNameTypes),
-        name: z.string().min(1, "Name is required"),
-      }),
-    )
-    .default([]),
-  storage_guidelines: z
-    .array(
-      z.object({
-        note: z.string().min(1, "Note is required"),
-        stability_duration: z
-          .object({
-            value: z.number().int().optional(),
-            unit: codeSchema,
-          })
-          .refine((data) => data.value !== undefined && data.value !== null),
-      }),
-    )
-    .default([]),
-  definitional: z
-    .object({
-      dosage_form: codeSchema.optional(),
-      intended_routes: z.array(codeSchema).default([]),
-    })
-    .nullable()
-    .optional()
-    .refine((data) => {
-      if (!data) return true; // definitional is optional
-      return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
-    }),
-});
-
 export default function ProductKnowledgeForm({
   facilityId,
   slug,
@@ -112,6 +62,7 @@ export default function ProductKnowledgeForm({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
+
   const isEditMode = Boolean(slug);
 
   const { data: existingData, isFetching } = useQuery({
@@ -168,6 +119,53 @@ function ProductKnowledgeFormContent({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
+
+  const formSchema = z.object({
+    name: z.string().min(1, t("field_required")),
+    slug_value: z
+      .string()
+      .min(1, t("field_required"))
+      .max(25, t("character_count_validation", { min: 1, max: 25 })),
+    product_type: z.nativeEnum(ProductKnowledgeType),
+    status: z.nativeEnum(ProductKnowledgeStatus),
+    alternate_identifier: z.string().trim().optional(),
+    category: z.string(),
+    code: CodeSchema.nullable(),
+    base_unit: CodeSchema.nullable(),
+    names: z
+      .array(
+        z.object({
+          name_type: z.nativeEnum(ProductNameTypes),
+          name: z.string().min(1, t("field_required")),
+        }),
+      )
+      .default([]),
+    storage_guidelines: z
+      .array(
+        z.object({
+          note: z.string().min(1, t("field_required")),
+          stability_duration: z
+            .object({
+              value: z.number().int().optional(),
+              unit: CodeSchema,
+            })
+            .refine((data) => data.value !== undefined && data.value !== null),
+        }),
+      )
+      .default([]),
+    definitional: z
+      .object({
+        dosage_form: CodeSchema.optional(),
+        intended_routes: z.array(CodeSchema).default([]),
+      })
+      .nullable()
+      .optional()
+      .refine((data) => {
+        if (!data) return true; // definitional is optional
+        return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
+      }),
+  });
+
   const queryClient = useQueryClient();
   const isEditMode = Boolean(slug);
 
@@ -222,7 +220,7 @@ function ProductKnowledgeFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "name") {
-        form.setValue("slug_value", generateSlug(value.name || ""), {
+        form.setValue("slug_value", generateSlug(value.name || "", 25), {
           shouldValidate: true,
         });
       }
@@ -359,7 +357,7 @@ function ProductKnowledgeFormContent({
                               if (!isEditMode) {
                                 form.setValue(
                                   "slug_value",
-                                  generateSlug(e.target.value || ""),
+                                  generateSlug(e.target.value || "", 25),
                                   {
                                     shouldValidate: true,
                                   },
@@ -691,7 +689,7 @@ function ProductKnowledgeFormContent({
                       });
                     }}
                   >
-                    <PlusCircle className="mr-2 size-4" />
+                    <PlusCircle className="size-4" />
                     {t("add_guideline")}
                   </Button>
                 </div>
@@ -833,8 +831,8 @@ function ProductKnowledgeFormContent({
 
             {/* Product Definition Section */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div>
                     <h2 className="text-base font-medium text-gray-900">
                       {t("product_definition")}
@@ -849,8 +847,9 @@ function ProductKnowledgeFormContent({
                       variant="outline"
                       size="sm"
                       onClick={() => form.setValue("definitional", null)}
+                      className="w-full sm:w-auto flex items-center justify-center gap-1 "
                     >
-                      <X className="mr-2 size-4" />
+                      <X className="size-4 " />
                       {t("remove_definition")}
                     </Button>
                   ) : (

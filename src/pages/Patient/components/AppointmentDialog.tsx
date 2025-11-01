@@ -30,15 +30,15 @@ import { Label } from "@/components/ui/label";
 
 import { usePatientContext } from "@/hooks/usePatientUser";
 
-import mutate from "@/Utils/request/mutate";
-import { formatPatientAge } from "@/Utils/utils";
 import { formatAppointmentSlotTime } from "@/pages/Appointments/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
-  Appointment,
   AppointmentFinalStatuses,
   formatScheduleResourceName,
+  PublicAppointment,
 } from "@/types/scheduling/schedule";
+import mutate from "@/Utils/request/mutate";
+import { formatPatientAge } from "@/Utils/utils";
 
 function AppointmentDialog({
   appointment,
@@ -46,7 +46,7 @@ function AppointmentDialog({
   onOpenChange,
   setAppointmentDialogOpen,
 }: {
-  appointment: Appointment | undefined;
+  appointment: PublicAppointment | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   setAppointmentDialogOpen: Dispatch<SetStateAction<boolean>>;
@@ -56,7 +56,7 @@ function AppointmentDialog({
   const patient = usePatientContext();
   const tokenData = patient?.tokenData;
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
-  const handleRescheduleAppointment = (appointment: Appointment) => {
+  const handleRescheduleAppointment = (appointment: PublicAppointment) => {
     // TODO: I am pretty sure this is not correct
     navigate(
       `/facility/${appointment.facility.id}/appointments/${appointment.resource.id}/reschedule/${appointment.id}`,
