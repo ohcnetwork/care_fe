@@ -1,9 +1,62 @@
+import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 import { getFacilityId } from "../../../support/facilityId";
-import { generateObservationDefinitionData } from "../../../support/observationDefinition";
 
 // Reuse authenticated storage state
 test.use({ storageState: "tests/.auth/user.json" });
+
+// Test data constants and generator
+const CATEGORIES = [
+  "Social History",
+  "Vital Signs",
+  "Imaging",
+  "Laboratory",
+  "Procedure",
+  "Survey",
+  "Exam",
+  "Therapy",
+  "Activity",
+];
+
+const DATA_TYPES = [
+  "Boolean",
+  "Decimal",
+  "Integer",
+  "DateTime",
+  "Time",
+  "String",
+];
+
+const STATUSES = ["Active", "Draft", "Retired"];
+
+const LOINC_CODES = [
+  "Acyclovir",
+  "Cefoperazone",
+  "DBG Ab",
+  "R wave duration in lead AVR",
+];
+
+interface ObservationDefinitionTestData {
+  title: string;
+  slug: string;
+  description: string;
+  category: string;
+  dataType: string;
+  status: string;
+  loincCode: string;
+}
+
+function generateObservationDefinitionData(): ObservationDefinitionTestData {
+  return {
+    title: faker.lorem.words(3),
+    slug: faker.string.alphanumeric(8).toLowerCase(),
+    description: faker.lorem.sentence(),
+    category: faker.helpers.arrayElement(CATEGORIES),
+    dataType: faker.helpers.arrayElement(DATA_TYPES),
+    status: faker.helpers.arrayElement(STATUSES),
+    loincCode: faker.helpers.arrayElement(LOINC_CODES),
+  };
+}
 
 async function navigateToObservationDefinitions(page: Page) {
   const facilityId = getFacilityId();
@@ -21,9 +74,11 @@ async function fillMandatoryFields(
   page: Page,
   data: ReturnType<typeof generateObservationDefinitionData>,
 ) {
-  await page.locator('input[name="title"]').fill(data.title);
-  await page.locator('input[name="slug_value"]').fill(data.slug);
-  await page.locator('textarea[name="description"]').fill(data.description);
+  await page.getByRole("textbox", { name: /title/i }).fill(data.title);
+  await page.getByRole("textbox", { name: /slug/i }).fill(data.slug);
+  await page
+    .getByRole("textbox", { name: /description/i })
+    .fill(data.description);
 
   // Category select
   await page.getByLabel(/category/i).click();
@@ -134,8 +189,10 @@ test.describe("Observation Definition Workflow", () => {
     const updatedTitle = `${data.title} Updated`;
     const updatedDescription = `${data.description} (modified)`;
 
-    await page.locator('input[name="title"]').fill(updatedTitle);
-    await page.locator('textarea[name="description"]').fill(updatedDescription);
+    await page.getByRole("textbox", { name: /title/i }).fill(updatedTitle);
+    await page
+      .getByRole("textbox", { name: /description/i })
+      .fill(updatedDescription);
 
     // Submit update (Looking for Save or Update button)
     const updateButton = page.getByRole("button", { name: /save|update/i });
