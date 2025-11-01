@@ -1,10 +1,5 @@
-import careConfig from "@careConfig";
-import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { useTranslation } from "react-i18next";
-
 import PrintPreview from "@/CAREUI/misc/PrintPreview";
-
+import { CardContent } from "@/components/ui/card";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -15,6 +10,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatPatientAge } from "@/Utils/utils";
+import careConfig from "@careConfig";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/Common/Loading";
 
@@ -23,9 +23,7 @@ import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import query from "@/Utils/request/query";
 
-import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import { formatPatientAge } from "@/Utils/utils";
 
 type PrintInvoiceProps = {
   facilityId: string;
@@ -47,29 +45,6 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
   if (isInvoiceLoading || isFacilityLoading || !invoice || !facility) {
     return <Loading />;
   }
-  interface DetailRowProps {
-    label: string;
-    value?: string | null;
-    isStrong?: boolean;
-    className?: string;
-  }
-
-  const DetailRow = ({
-    label,
-    value,
-    isStrong = false,
-    className = "",
-  }: DetailRowProps) => {
-    return (
-      <div className="flex">
-        <span className={cn("text-gray-600", className)}>{label}</span>
-        <span className="text-gray-600">: </span>
-        <span className={`ml-1 ${isStrong ? "font-semibold" : ""}`}>
-          {value || "-"}
-        </span>
-      </div>
-    );
-  };
 
   const patient = invoice.account.patient;
 
@@ -132,39 +107,41 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
           </div>
         </div>
 
-        {/* Invoice Information */}
-        <div>
-          {/* Bill To Section */}
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              {/* <h5 className="text-gray-500 font-semibold mb-2">{t("bill_to")}</h5> */}
-              <DetailRow label={t("inv_no")} value={invoice.number} />
-              <DetailRow
-                label={t("date")}
-                value={
-                  invoice.issue_date
-                    ? format(
-                        new Date(invoice.issue_date),
-                        "dd MMM, yyyy h:mm a",
-                      )
-                    : "-"
-                }
-              />
+        <CardContent className="px-2 py-4 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+            <div className="flex flex-col space-y-1 mb-2 sm:mb-0">
+              <h2 className="text-sm font-semibold text-gray-700">
+                {t("bill_to")}
+              </h2>
+              <p className="text-sm text-gray-700">
+                {patient.name?.toUpperCase() || "-"}
+              </p>
+              <p className="text-sm text-gray-700 leading-snug">
+                {t("address")}: {patient.address || t("no_address_provided")}
+              </p>
+              <p className="text-sm text-gray-700">
+                {t("phone")}: {patient.phone_number || "-"}
+              </p>
+              <div className="flex gap-4 text-sm text-gray-700">
+                <p>
+                  {t("age")}: {formatPatientAge(patient, true)}
+                </p>
+                <p>
+                  {t("sex")}: {t(`GENDER__${patient.gender}`)}
+                </p>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <DetailRow label={t("name")} value={patient.name.toUpperCase()} />
-              <DetailRow
-                label={`${t("age")} / ${t("sex")}`}
-                value={
-                  patient
-                    ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
-                    : undefined
-                }
-              />
-              <DetailRow label={t("address")} value={patient.address} />
+
+            <div className="flex justify-end items-center space-x-1 whitespace-nowrap">
+              <span className="text-sm text-gray-900">{t("date")}:</span>
+              <span className="text-sm text-gray-900">
+                {invoice.issue_date
+                  ? format(new Date(invoice.issue_date), "dd MMM, yyyy h:mm a")
+                  : "-"}
+              </span>
             </div>
           </div>
-        </div>
+        </CardContent>
 
         {/* Items Table */}
         <div className="overflow-x-auto mt-4">
