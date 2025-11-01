@@ -277,7 +277,6 @@ export function EncounterProvider({
           setOpen={(open) => {
             setActiveAction(open ? EncounterAction.ManageDepartments : null);
           }}
-          trigger={null}
         />
       )}
 
