@@ -36,7 +36,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
-import { Code } from "@/types/base/code/code";
+import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import {
@@ -69,6 +69,7 @@ export default function ProductKnowledgeForm({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
+
   const isEditMode = Boolean(slug);
 
   const { data: existingData, isFetching } = useQuery({
@@ -125,6 +126,53 @@ function ProductKnowledgeFormContent({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
+
+  const formSchema = z.object({
+    name: z.string().min(1, t("field_required")),
+    slug_value: z
+      .string()
+      .min(1, t("field_required"))
+      .max(25, t("character_count_validation", { min: 1, max: 25 })),
+    product_type: z.nativeEnum(ProductKnowledgeType),
+    status: z.nativeEnum(ProductKnowledgeStatus),
+    alternate_identifier: z.string().trim().optional(),
+    category: z.string(),
+    code: CodeSchema.nullable(),
+    base_unit: CodeSchema.nullable(),
+    names: z
+      .array(
+        z.object({
+          name_type: z.nativeEnum(ProductNameTypes),
+          name: z.string().min(1, t("field_required")),
+        }),
+      )
+      .default([]),
+    storage_guidelines: z
+      .array(
+        z.object({
+          note: z.string().min(1, t("field_required")),
+          stability_duration: z
+            .object({
+              value: z.number().int().optional(),
+              unit: CodeSchema,
+            })
+            .refine((data) => data.value !== undefined && data.value !== null),
+        }),
+      )
+      .default([]),
+    definitional: z
+      .object({
+        dosage_form: CodeSchema.optional(),
+        intended_routes: z.array(CodeSchema).default([]),
+      })
+      .nullable()
+      .optional()
+      .refine((data) => {
+        if (!data) return true; // definitional is optional
+        return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
+      }),
+  });
+
   const queryClient = useQueryClient();
   const isEditMode = Boolean(slug);
 
@@ -225,7 +273,7 @@ function ProductKnowledgeFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "name") {
-        form.setValue("slug_value", generateSlug(value.name || ""), {
+        form.setValue("slug_value", generateSlug(value.name || "", 25), {
           shouldValidate: true,
         });
       }
@@ -362,7 +410,7 @@ function ProductKnowledgeFormContent({
                               if (!isEditMode) {
                                 form.setValue(
                                   "slug_value",
-                                  generateSlug(e.target.value || ""),
+                                  generateSlug(e.target.value || "", 25),
                                   {
                                     shouldValidate: true,
                                   },

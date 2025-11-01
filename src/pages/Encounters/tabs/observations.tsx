@@ -33,7 +33,7 @@ function formatDisplayDate(dateStr: string) {
   yesterday.setHours(0, 0, 0, 0);
   date.setHours(0, 0, 0, 0);
 
-  const formattedDate = date.toLocaleDateString("en-US", {
+  const formattedDate = date.toLocaleDateString("default", {
     year: "numeric",
     month: "long",
     day: "numeric",
