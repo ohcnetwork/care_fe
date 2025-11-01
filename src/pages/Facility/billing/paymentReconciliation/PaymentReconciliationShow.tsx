@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { BanIcon, TriangleAlertIcon } from "lucide-react";
 import { Link } from "raviger";
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -13,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { Separator } from "@/components/ui/separator";
 
+import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -65,6 +67,8 @@ export function PaymentReconciliationShow({
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const queryClient = useQueryClient();
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
 
   useShortcutSubContext("facility:payment");
 
@@ -85,8 +89,22 @@ export function PaymentReconciliationShow({
       queryClient.invalidateQueries({
         queryKey: ["paymentReconciliation", paymentReconciliationId],
       });
+      setCancelDialogOpen(false);
+      setErrorDialogOpen(false);
     },
   });
+
+  const handleCancelPayment = () => {
+    cancelPayment({
+      reason: PaymentReconciliationStatus.cancelled,
+    });
+  };
+
+  const handleMarkAsError = () => {
+    cancelPayment({
+      reason: PaymentReconciliationStatus.entered_in_error,
+    });
+  };
 
   if (isLoading) {
     return <TableSkeleton count={5} />;
@@ -433,38 +451,71 @@ export function PaymentReconciliationShow({
                   payment.status !==
                     PaymentReconciliationStatus.entered_in_error && (
                     <>
-                      <Button
-                        className="w-full flex items-center relative"
-                        variant="outline"
-                        onClick={() =>
-                          cancelPayment({
-                            reason: PaymentReconciliationStatus.cancelled,
-                          })
+                      <CriticalActionConfirmationDialog
+                        trigger={
+                          <Button
+                            className="w-full flex items-center relative"
+                            variant="outline"
+                            disabled={isPending}
+                          >
+                            <CareIcon icon="l-ban" className="mr-2 size-4" />
+                            {t("mark_as_cancelled")}
+                            <ShortcutBadge actionId="mark-payment-cancelled" />
+                          </Button>
                         }
-                        disabled={isPending}
-                      >
-                        <CareIcon icon="l-ban" className="mr-2 size-4" />
-                        {t("mark_as_cancelled")}
-                        <ShortcutBadge actionId="mark-payment-cancelled" />
-                      </Button>
-                      <Button
-                        className="w-full flex items-center relative"
-                        variant="outline"
-                        onClick={() =>
-                          cancelPayment({
-                            reason:
-                              PaymentReconciliationStatus.entered_in_error,
-                          })
+                        title={t("confirm_cancel_payment")}
+                        description={
+                          <>
+                            <p>{t("cancel_payment_confirmation_message")}</p>
+                            <p className="mt-3 font-semibold">
+                              {t("this_action_cannot_be_undone")}
+                            </p>
+                          </>
                         }
-                        disabled={isPending}
-                      >
-                        <CareIcon
-                          icon="l-exclamation-triangle"
-                          className="mr-2 size-4"
-                        />
-                        {t("mark_as_entered_in_error")}
-                        <ShortcutBadge actionId="mark-payment-error" />
-                      </Button>
+                        confirmationText={t("cancel_payment_confirmation_text")}
+                        actionButtonText={t("proceed")}
+                        onConfirm={handleCancelPayment}
+                        isLoading={isPending}
+                        open={cancelDialogOpen}
+                        onOpenChange={setCancelDialogOpen}
+                        variant="destructive"
+                        icon={<BanIcon className="size-4 text-red-500" />}
+                      />
+                      <CriticalActionConfirmationDialog
+                        trigger={
+                          <Button
+                            className="w-full flex items-center relative"
+                            variant="outline"
+                            disabled={isPending}
+                          >
+                            <CareIcon
+                              icon="l-exclamation-triangle"
+                              className="mr-2 size-4"
+                            />
+                            {t("mark_as_entered_in_error")}
+                            <ShortcutBadge actionId="mark-payment-error" />
+                          </Button>
+                        }
+                        title={t("confirm_mark_as_error")}
+                        description={
+                          <>
+                            <p>{t("mark_as_error_confirmation_message")}</p>
+                            <p className="mt-3 font-semibold">
+                              {t("this_action_cannot_be_undone")}
+                            </p>
+                          </>
+                        }
+                        confirmationText={t("mark_as_error_confirmation_text")}
+                        actionButtonText={t("proceed")}
+                        onConfirm={handleMarkAsError}
+                        isLoading={isPending}
+                        open={errorDialogOpen}
+                        onOpenChange={setErrorDialogOpen}
+                        variant="destructive"
+                        icon={
+                          <TriangleAlertIcon className="size-4 text-red-500" />
+                        }
+                      />
                     </>
                   )}
                 <Button
