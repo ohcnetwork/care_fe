@@ -4,7 +4,7 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-test.describe("Part of External flow", () => {
+test.describe("Inventory Module (Currently direct Purchase Delivery only)", () => {
   let facilityId: string;
   let testData: {
     orderName: string;
