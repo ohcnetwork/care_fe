@@ -449,7 +449,7 @@ export function PaymentReconciliationShow({
                             </p>
                           </>
                         }
-                        confirmationText="Cancel Payment"
+                        confirmationText={t("cancel_payment_confirmation_text")}
                         actionButtonText={t("proceed")}
                         onConfirm={handleCancelPayment}
                         isLoading={isPending}
@@ -482,7 +482,7 @@ export function PaymentReconciliationShow({
                             </p>
                           </>
                         }
-                        confirmationText="Mark as Error"
+                        confirmationText={t("mark_as_error_confirmation_text")}
                         actionButtonText={t("proceed")}
                         onConfirm={handleMarkAsError}
                         isLoading={isPending}
