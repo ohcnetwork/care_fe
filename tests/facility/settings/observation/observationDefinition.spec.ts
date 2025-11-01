@@ -64,8 +64,8 @@ async function navigateToObservationDefinitions(page: Page) {
   return facilityId;
 }
 
-async function openCreateForm(page: Page, facilityId: string) {
-  await page.goto(`/facility/${facilityId}/settings/observation_definitions`);
+async function openCreateForm(page: Page) {
+  await navigateToObservationDefinitions(page);
   await page.getByRole("button", { name: /add definition/i }).click();
   await expect(page.getByRole("heading", { name: /create/i })).toBeVisible();
 }
@@ -103,11 +103,13 @@ async function fillMandatoryFields(
   await loincInput.click();
   await loincInput.fill(data.loincCode);
   // If a dropdown appears, select matching option; ignore if not present
-  const candidate = page.getByRole("option", {
-    name: new RegExp(data.loincCode, "i"),
-  });
-  if (await candidate.first().isVisible()) {
-    await candidate.first().click();
+  const candidateOption = page
+    .getByRole("option", {
+      name: new RegExp(data.loincCode, "i"),
+    })
+    .first();
+  if (await candidateOption.isVisible()) {
+    await candidateOption.click();
   }
 }
 
@@ -128,8 +130,7 @@ test.describe("Observation Definition Workflow", () => {
   test("should show validation errors for empty create form", async ({
     page,
   }) => {
-    const facilityId = getFacilityId();
-    await openCreateForm(page, facilityId);
+    await openCreateForm(page);
 
     // Submit without filling
     await page.getByRole("button", { name: /create/i }).click();
