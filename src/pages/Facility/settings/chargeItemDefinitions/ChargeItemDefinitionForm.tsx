@@ -109,7 +109,7 @@ const createPriceComponentSchema = (
     factor: z.number().gt(0).max(100).optional(),
     amount: z
       .string()
-      .refine((val) => !val || (val !== "" && Number(val) > 0), {
+      .refine((val) => !val || Number(val) > 0, {
         message: t("must_be_greater_than_value", { value: 0 }),
       })
       .optional(),
