@@ -25,7 +25,7 @@ import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading"
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import BackButton from "@/components/Common/BackButton";
-import { Code } from "@/types/base/code/code";
+import { Code, isCodePresent } from "@/types/base/code/code";
 import {
   PRODUCT_KNOWLEDGE_STATUS_COLORS,
   ProductKnowledgeStatus,
@@ -40,7 +40,7 @@ interface Props {
 }
 
 function CodeDisplay({ code }: { code: Code | null }) {
-  if (!code) return null;
+  if (!isCodePresent(code)) return null;
   return (
     <div className="space-y-1">
       <p className="text-sm font-medium">{code.display}</p>
@@ -152,7 +152,7 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
                 {t(product.status)}
               </Badge>
             </div>
-            {product.code?.code && (
+            {isCodePresent(product.code) && (
               <p className="mt-1 text-sm text-gray-600">
                 {product.code.system} | {product.code.code}
               </p>

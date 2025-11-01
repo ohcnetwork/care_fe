@@ -136,6 +136,7 @@ export default function ProductKnowledgeForm({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
+
   const isEditMode = Boolean(slug);
 
   const { data: existingData, isFetching } = useQuery({
@@ -192,6 +193,7 @@ function ProductKnowledgeFormContent({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
+
   const queryClient = useQueryClient();
   const isEditMode = Boolean(slug);
 
@@ -381,7 +383,7 @@ function ProductKnowledgeFormContent({
                               if (!isEditMode) {
                                 form.setValue(
                                   "slug_value",
-                                  generateSlug(e.target.value || ""),
+                                  generateSlug(e.target.value || "", 25),
                                   {
                                     shouldValidate: true,
                                   },
