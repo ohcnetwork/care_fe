@@ -25,3 +25,12 @@ export type ValueSetSystem =
   | "system-body-site-observation"
   | "system-collection-method"
   | "system-ucum-units";
+
+/**
+ * Helper function to check if a Code object is valid and has all required properties
+ * @param code - The Code object to validate (can be null or undefined)
+ * @returns true if code exists and has both system and code properties, false otherwise
+ */
+export function isCodePresent(code: Code | null | undefined): code is Code {
+  return !!(code && code.system && code.code);
+}
