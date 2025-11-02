@@ -61,7 +61,7 @@ import {
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
-import valuesetApi from "@/types/valueset/valuesetApi";
+import valueSetApi from "@/types/valueSet/valueSetApi";
 import query from "@/Utils/request/query";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Edit, Trash2, X } from "lucide-react";
@@ -1584,8 +1584,8 @@ function CustomValueSetInterpretationComponent<
   const { t } = useTranslation();
 
   const { data: valuesets } = useQuery({
-    queryKey: ["valusets"],
-    queryFn: query(valuesetApi.list),
+    queryKey: ["valuesets"],
+    queryFn: query(valueSetApi.list),
   });
 
   const handleSetValueset = (valueset: string, index: number) => {

@@ -32,9 +32,6 @@ import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +43,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { CodeSchema } from "@/types/base/code/code";
 import {
   InterpretationType,
   QualifiedRange,
@@ -60,87 +58,10 @@ import {
   QuestionType,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { generateSlug } from "@/Utils/utils";
 import { ObservationInterpretation } from "./ObservationInterpretation";
-
-const formSchema = z
-  .object({
-    title: z.string().min(1, "Title is required"),
-    slug_value: z.string().min(1, "Slug is required"),
-    description: z.string().min(1, "Description is required"),
-    status: z.enum(OBSERVATION_DEFINITION_STATUS),
-    category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]]),
-    permitted_data_type: z.nativeEnum(QuestionType),
-    code: z.object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    }),
-    body_site: z
-      .object({
-        code: z.string().min(1, "Code is required"),
-        display: z.string().min(1, "Display name is required"),
-        system: z.string().min(1, "System is required"),
-      })
-      .nullable(),
-    method: z
-      .object({
-        code: z.string().min(1, "Code is required"),
-        display: z.string().min(1, "Display name is required"),
-        system: z.string().min(1, "System is required"),
-      })
-      .nullable(),
-    permitted_unit: z
-      .object({
-        code: z.string().min(1, "Code is required"),
-        display: z.string().min(1, "Display name is required"),
-        system: z.string().min(1, "System is required"),
-      })
-      .nullable(),
-    component: z
-      .array(
-        z.object({
-          code: z
-            .object({
-              code: z.string(),
-              display: z.string(),
-              system: z.string(),
-            })
-            .refine((data) => data.code && data.display && data.system, {
-              message: "Required",
-            }),
-          permitted_data_type: z.nativeEnum(QuestionType),
-          permitted_unit: z
-            .object({
-              code: z.string(),
-              display: z.string(),
-              system: z.string(),
-            })
-            .refine((data) => data.code && data.display && data.system, {
-              message: "Required",
-            }),
-          qualified_ranges: qualifiedRangeSchema.default([]),
-        }),
-      )
-      .default([]),
-    qualified_ranges: qualifiedRangeSchema.default([]),
-  })
-  .refine(
-    (data) => {
-      const hasRootQualifiedRanges =
-        data.qualified_ranges && data.qualified_ranges.length > 0;
-      const hasComponentQualifiedRanges = data.component.some(
-        (c) => c.qualified_ranges && c.qualified_ranges.length > 0,
-      );
-
-      // Valid if only one level has qualified ranges, or neither has any
-      return !(hasRootQualifiedRanges && hasComponentQualifiedRanges);
-    },
-    {
-      message:
-        "Either root-level or component-level observation interpretations can be added, not both",
-      path: ["qualified_ranges"],
-    },
-  );
 
 export default function ObservationDefinitionForm({
   facilityId,
@@ -206,6 +127,54 @@ function ObservationDefinitionFormContent({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
+
+  const formSchema = z
+    .object({
+      title: z.string().min(1, t("field_required")),
+      slug_value: z
+        .string()
+        .min(1, t("field_required"))
+        .max(25, t("character_count_validation", { min: 1, max: 25 })),
+      description: z.string().min(1, t("field_required")),
+      status: z.enum(OBSERVATION_DEFINITION_STATUS),
+      category: z.enum(
+        OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]],
+      ),
+      permitted_data_type: z.nativeEnum(QuestionType),
+      code: CodeSchema,
+      body_site: CodeSchema.nullable(),
+      method: CodeSchema.nullable(),
+      permitted_unit: CodeSchema.nullable(),
+      component: z
+        .array(
+          z.object({
+            code: CodeSchema,
+            permitted_data_type: z.nativeEnum(QuestionType),
+            permitted_unit: CodeSchema,
+            qualified_ranges: qualifiedRangeSchema.default([]),
+          }),
+        )
+        .default([]),
+      qualified_ranges: qualifiedRangeSchema.default([]),
+    })
+    .refine(
+      (data) => {
+        const hasRootQualifiedRanges =
+          data.qualified_ranges && data.qualified_ranges.length > 0;
+        const hasComponentQualifiedRanges = data.component.some(
+          (c) => c.qualified_ranges && c.qualified_ranges.length > 0,
+        );
+
+        // Valid if only one level has qualified ranges, or neither has any
+        return !(hasRootQualifiedRanges && hasComponentQualifiedRanges);
+      },
+      {
+        message:
+          "Either root-level or component-level observation interpretations can be added, not both",
+        path: ["qualified_ranges"],
+      },
+    );
+
   const queryClient = useQueryClient();
   const isEditMode = Boolean(observationSlug);
   const [
@@ -281,7 +250,7 @@ function ObservationDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || "", 25), {
           shouldValidate: true,
         });
       }

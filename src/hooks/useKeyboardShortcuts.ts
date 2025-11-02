@@ -220,6 +220,9 @@ export function useKeyboardShortcuts(
         return;
       }
 
+      // Guard against keyboard events without a key property, which can occur during component initialization or in certain browser edge cases.
+      if (!event.key) return;
+
       const key = event.key.toLowerCase();
       const modifiedShortcut = Object.entries(
         categorizedShortcuts.modified,
