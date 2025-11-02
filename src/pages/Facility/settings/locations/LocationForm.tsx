@@ -30,8 +30,10 @@ import { Textarea } from "@/components/ui/textarea";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import type { BatchRequestResponse } from "@/types/base/batch/batch";
-import { BatchRequestBody } from "@/types/base/batch/batch";
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
 import {
   LocationFormOptions,
