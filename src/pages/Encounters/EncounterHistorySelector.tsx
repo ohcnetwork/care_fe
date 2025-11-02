@@ -436,9 +436,9 @@ const EncounterSheetTrigger = () => {
 
   return (
     <Card className="relative rounded-md cursor-pointer w-full lg:w-80 bg-white border-primary-600">
-      <CardContent className="flex flex-col px-3 py-2 gap-1">
+      <CardContent className="flex flex-col px-4 py-3 gap-1">
         <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start w-full">
           <div className="flex flex-col items-start gap-1">
             <span className="text-base font-semibold">
               {t(`encounter_class__${encounter.encounter_class}`)}
@@ -448,7 +448,7 @@ const EncounterSheetTrigger = () => {
             </span>
           </div>
           <div className="flex gap-1 items-center justify-center">
-            <div className="flex flex-col gap-1 items-end ">
+            <div className="flex flex-col gap-1 items-end">
               <span className="text-sm text-gray-600 whitespace-nowrap">
                 {encounter.period.start && (
                   <span>
@@ -472,7 +472,7 @@ const EncounterSheetTrigger = () => {
               <Badge
                 variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
                 size="sm"
-                className=" whitespace-nowrap"
+                className="whitespace-nowrap"
               >
                 {t(`encounter_status__${encounter.status}`)}
               </Badge>
