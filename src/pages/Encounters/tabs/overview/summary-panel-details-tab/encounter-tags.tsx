@@ -1,16 +1,11 @@
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import TagBadge from "@/components/Tags/TagBadge";
+import { Button } from "@/components/ui/button";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { SquarePen } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-
-import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
-
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
-
 import { EmptyState } from "./empty-state";
 
 export const EncounterTags = () => {
@@ -49,14 +44,7 @@ export const EncounterTags = () => {
         {encounter.tags.length > 0 ? (
           <>
             {encounter.tags.map((tag) => (
-              <Badge
-                key={tag.id}
-                variant="secondary"
-                className="capitalize"
-                title={tag.description}
-              >
-                {getTagHierarchyDisplay(tag)}
-              </Badge>
+              <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
             ))}
           </>
         ) : (
