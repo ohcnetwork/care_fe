@@ -24,7 +24,7 @@ type Props = {
 };
 
 export default function PrintPreview(props: Props) {
-  const initialScale = useBreakpoints({ default: 1 });
+  const initialScale = useBreakpoints({ default: 0.44, md: 1 });
   const { goBack } = useAppHistory();
   const { t } = useTranslation();
   useShortcutSubContext();
