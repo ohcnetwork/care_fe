@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -13,6 +13,9 @@ import Page from "@/components/Common/Page";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { getPermissions } from "@/common/Permissions";
+import { usePermissions } from "@/context/PermissionContext";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { SCHEDULABLE_RESOURCE_TYPE_COLORS } from "@/types/scheduling/schedule";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 
@@ -84,6 +87,12 @@ export default function TokenCategoryView({
       });
     },
   });
+  const { facility } = useCurrentFacility();
+  const { hasPermission } = usePermissions();
+  const { canWriteTokenCategory } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
 
   const handleSetDefault = () => {
     setDefault({});
@@ -171,17 +180,17 @@ export default function TokenCategoryView({
                   : t("set_as_default")}
               </Button>
             )}
-            <Button
-              variant="outline"
-              onClick={() =>
-                navigate(
-                  `/facility/${facilityId}/settings/token_category/${tokenCategory.id}/edit`,
-                )
-              }
-            >
-              <CareIcon icon="l-pen" className="mr-2 size-4" />
-              {t("edit")}
-            </Button>
+            {canWriteTokenCategory && (
+              <Button variant="outline">
+                <Link
+                  basePath="/"
+                  href={`/facility/${facilityId}/settings/token_category/${tokenCategory.id}/edit`}
+                >
+                  <CareIcon icon="l-pen" className="mr-2 size-4" />
+                  {t("edit")}
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
 
