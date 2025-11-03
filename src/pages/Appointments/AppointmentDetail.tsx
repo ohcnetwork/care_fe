@@ -140,10 +140,12 @@ export default function AppointmentDetail(props: Props) {
 
   useShortcutSubContext("facility:appointment");
 
-  const { canViewAppointments, canWriteAppointment } = getPermissions(
-    hasPermission,
-    facility?.permissions ?? [],
-  );
+  const {
+    canViewAppointments,
+    canWriteAppointment,
+    canRescheduleAppointment,
+    canWriteToken,
+  } = getPermissions(hasPermission, facility?.permissions ?? []);
 
   const { data: appointment } = useQuery({
     queryKey: ["appointment", props.appointmentId],
@@ -291,6 +293,7 @@ export default function AppointmentDetail(props: Props) {
                     canCheckIn={canCheckIn}
                     canMarkFulfilledOrNoShow={canMarkFulfilledOrNoShow}
                     currentStatus={currentStatus}
+                    canRescheduleAppointment={canRescheduleAppointment}
                   />
                 </div>
               )
@@ -326,7 +329,8 @@ export default function AppointmentDetail(props: Props) {
                 </div>
               </>
             ) : (
-              !["fulfilled"].includes(appointment.status) && (
+              !["fulfilled"].includes(appointment.status) &&
+              canWriteToken && (
                 <div className="bg-gray-100 border border-gray-200 rounded flex flex-col items-center justify-center text-center">
                   <ReceiptText className="size-8 text-gray-500 mt-4" />
                   <div className="mt-2">
@@ -765,6 +769,7 @@ interface AppointmentActionsProps {
   canCheckIn: boolean;
   canMarkFulfilledOrNoShow: boolean;
   currentStatus: AppointmentStatus;
+  canRescheduleAppointment: boolean;
 }
 
 const AppointmentActions = ({
@@ -774,6 +779,7 @@ const AppointmentActions = ({
   isUpdating,
   canCheckIn,
   canMarkFulfilledOrNoShow,
+  canRescheduleAppointment,
   currentStatus,
 }: AppointmentActionsProps) => {
   const { t } = useTranslation();
@@ -879,173 +885,176 @@ const AppointmentActions = ({
             <DropdownMenuSeparator />
 
             {/* Reschedule */}
-            {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
-              <>
-                <AlertDialog
-                  open={isRescheduleReasonOpen}
-                  onOpenChange={setIsRescheduleReasonOpen}
-                >
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                      <CalendarIcon className="size-4 mr-2" />
-                      {t("reschedule")}
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        {t("reschedule_appointment")}
-                      </AlertDialogTitle>
-                      <Label>{t("note")}</Label>
-                      <Textarea
-                        value={oldNote}
-                        onChange={(e) => setRescheduleReason(e.target.value)}
-                      />
-                      <AlertDialogDescription>
-                        <Alert variant="destructive">
-                          <AlertTitle>{t("warning")}</AlertTitle>
-                          <AlertDescription>
-                            {t("reschedule_appointment_warning")}
-                          </AlertDescription>
-                        </Alert>
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel
-                        onClick={() => setIsRescheduleReasonOpen(false)}
-                      >
-                        {t("cancel")}
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => {
-                          setIsRescheduleReasonOpen(false);
-                          setIsRescheduleOpen(true);
-                        }}
-                        disabled={!oldNote.trim()}
-                      >
-                        {t("continue")}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-
-                <Sheet
-                  open={isRescheduleOpen}
-                  onOpenChange={setIsRescheduleOpen}
-                >
-                  <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
-                    <SheetHeader>
-                      <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
-                    </SheetHeader>
-
-                    <div className="mt-6 flex-1">
-                      <div className="text-sm">
-                        <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-                          <Label className="font-medium">
-                            {t("tags", { count: 2 })}
-                          </Label>
-                          <TagAssignmentSheet
-                            entityType="appointment"
-                            entityId={appointment.id}
-                            facilityId={facilityId}
-                            currentTags={appointment.tags}
-                            onUpdate={() => {
-                              queryClient.invalidateQueries({
-                                queryKey: ["appointment", appointment.id],
-                              });
-                            }}
-                            canWrite={true}
-                          />
-                        </div>
-                        {appointment.tags?.length > 0 ? (
-                          <p className="text-gray-600 flex flex-wrap gap-1">
-                            {appointment.tags.map((tag) => (
-                              <Badge key={tag.id} variant="secondary">
-                                {tag.parent ? `${tag.parent.display}: ` : ""}
-                                {tag.display}
-                              </Badge>
-                            ))}
-                          </p>
-                        ) : (
-                          <p className="text-gray-600 md:-mt-2">
-                            {t("no_tags_assigned")}
-                          </p>
-                        )}
-                      </div>
-                      <Label className="mb-2 aria-required mt-8">
-                        {t("note")}
-                      </Label>
-                      <Textarea
-                        placeholder={t("appointment_note")}
-                        value={newNote}
-                        onChange={(e) => setNewVisitReason(e.target.value)}
-                      />
-                      <div className="my-4 space-y-4">
-                        <div className="flex flex-col">
-                          <Label className="mb-2 text-sm font-medium text-gray-950">
-                            {t(
-                              `schedulable_resource__${selectedResource.resource_type}`,
-                            )}
-                          </Label>
-                          <ScheduleResourceSelector
-                            selectedResource={selectedResource}
-                            facilityId={facilityId}
-                            setSelectedResource={setSelectedResource}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-4">
-                        <AppointmentDateSelection
-                          facilityId={facilityId}
-                          resourceId={selectedResource.resource?.id}
-                          resourceType={selectedResource.resource_type}
-                          currentAppointment={appointment}
-                          setSelectedDate={setSelectedDate}
-                          selectedDate={selectedDate}
+            {appointment.status !== AppointmentStatus.IN_CONSULTATION &&
+              canRescheduleAppointment && (
+                <>
+                  <AlertDialog
+                    open={isRescheduleReasonOpen}
+                    onOpenChange={setIsRescheduleReasonOpen}
+                  >
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <CalendarIcon className="size-4 mr-2" />
+                        {t("reschedule")}
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          {t("reschedule_appointment")}
+                        </AlertDialogTitle>
+                        <Label>{t("note")}</Label>
+                        <Textarea
+                          value={oldNote}
+                          onChange={(e) => setRescheduleReason(e.target.value)}
                         />
-                        <AppointmentSlotPicker
-                          selectedDate={selectedDate}
-                          facilityId={facilityId}
-                          resourceId={selectedResource.resource?.id}
-                          resourceType={selectedResource.resource_type}
-                          selectedSlotId={selectedSlotId}
-                          onSlotSelect={setSelectedSlotId}
-                          currentAppointment={appointment}
-                        />
-                      </div>
-
-                      <div className="flex justify-end gap-2 mt-6">
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setIsRescheduleOpen(false);
-                            setSelectedSlotId(undefined);
-                          }}
+                        <AlertDialogDescription>
+                          <Alert variant="destructive">
+                            <AlertTitle>{t("warning")}</AlertTitle>
+                            <AlertDescription>
+                              {t("reschedule_appointment_warning")}
+                            </AlertDescription>
+                          </Alert>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel
+                          onClick={() => setIsRescheduleReasonOpen(false)}
                         >
                           {t("cancel")}
-                        </Button>
-                        <Button
-                          variant="default"
-                          disabled={!selectedSlotId || isRescheduling}
+                        </AlertDialogCancel>
+                        <AlertDialogAction
                           onClick={() => {
-                            if (selectedSlotId) {
-                              rescheduleAppointment({
-                                new_slot: selectedSlotId,
-                                previous_booking_note: oldNote,
-                                new_booking_note: newNote,
-                                tags: appointment.tags.map((tag) => tag.id),
-                              });
-                            }
+                            setIsRescheduleReasonOpen(false);
+                            setIsRescheduleOpen(true);
                           }}
+                          disabled={!oldNote.trim()}
                         >
-                          {isRescheduling ? t("rescheduling") : t("reschedule")}
-                        </Button>
+                          {t("continue")}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
+                  <Sheet
+                    open={isRescheduleOpen}
+                    onOpenChange={setIsRescheduleOpen}
+                  >
+                    <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+                      <SheetHeader>
+                        <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
+                      </SheetHeader>
+
+                      <div className="mt-6 flex-1">
+                        <div className="text-sm">
+                          <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
+                            <Label className="font-medium">
+                              {t("tags", { count: 2 })}
+                            </Label>
+                            <TagAssignmentSheet
+                              entityType="appointment"
+                              entityId={appointment.id}
+                              facilityId={facilityId}
+                              currentTags={appointment.tags}
+                              onUpdate={() => {
+                                queryClient.invalidateQueries({
+                                  queryKey: ["appointment", appointment.id],
+                                });
+                              }}
+                              canWrite={true}
+                            />
+                          </div>
+                          {appointment.tags?.length > 0 ? (
+                            <p className="text-gray-600 flex flex-wrap gap-1">
+                              {appointment.tags.map((tag) => (
+                                <Badge key={tag.id} variant="secondary">
+                                  {tag.parent ? `${tag.parent.display}: ` : ""}
+                                  {tag.display}
+                                </Badge>
+                              ))}
+                            </p>
+                          ) : (
+                            <p className="text-gray-600 md:-mt-2">
+                              {t("no_tags_assigned")}
+                            </p>
+                          )}
+                        </div>
+                        <Label className="mb-2 aria-required mt-8">
+                          {t("note")}
+                        </Label>
+                        <Textarea
+                          placeholder={t("appointment_note")}
+                          value={newNote}
+                          onChange={(e) => setNewVisitReason(e.target.value)}
+                        />
+                        <div className="my-4 space-y-4">
+                          <div className="flex flex-col">
+                            <Label className="mb-2 text-sm font-medium text-gray-950">
+                              {t(
+                                `schedulable_resource__${selectedResource.resource_type}`,
+                              )}
+                            </Label>
+                            <ScheduleResourceSelector
+                              selectedResource={selectedResource}
+                              facilityId={facilityId}
+                              setSelectedResource={setSelectedResource}
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <AppointmentDateSelection
+                            facilityId={facilityId}
+                            resourceId={selectedResource.resource?.id}
+                            resourceType={selectedResource.resource_type}
+                            currentAppointment={appointment}
+                            setSelectedDate={setSelectedDate}
+                            selectedDate={selectedDate}
+                          />
+                          <AppointmentSlotPicker
+                            selectedDate={selectedDate}
+                            facilityId={facilityId}
+                            resourceId={selectedResource.resource?.id}
+                            resourceType={selectedResource.resource_type}
+                            selectedSlotId={selectedSlotId}
+                            onSlotSelect={setSelectedSlotId}
+                            currentAppointment={appointment}
+                          />
+                        </div>
+
+                        <div className="flex justify-end gap-2 mt-6">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setIsRescheduleOpen(false);
+                              setSelectedSlotId(undefined);
+                            }}
+                          >
+                            {t("cancel")}
+                          </Button>
+                          <Button
+                            variant="default"
+                            disabled={!selectedSlotId || isRescheduling}
+                            onClick={() => {
+                              if (selectedSlotId) {
+                                rescheduleAppointment({
+                                  new_slot: selectedSlotId,
+                                  previous_booking_note: oldNote,
+                                  new_booking_note: newNote,
+                                  tags: appointment.tags.map((tag) => tag.id),
+                                });
+                              }
+                            }}
+                          >
+                            {isRescheduling
+                              ? t("rescheduling")
+                              : t("reschedule")}
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              </>
-            )}
+                    </SheetContent>
+                  </Sheet>
+                </>
+              )}
 
             {/* Mark as No Show */}
             {[AppointmentStatus.BOOKED, AppointmentStatus.CHECKED_IN].includes(

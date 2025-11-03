@@ -183,7 +183,7 @@ export default function PaymentsData({
           </Select>
           <div className="w-full sm:w-fit">
             <Select
-              value={qParams.ordering}
+              value={qParams.ordering || ""}
               onValueChange={(value) => {
                 updateQuery({ ordering: value });
               }}

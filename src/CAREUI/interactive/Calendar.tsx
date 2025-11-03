@@ -86,6 +86,7 @@ export default function Calendar(props: Props) {
           </Button>
           <Button
             name="Go to Previous Month"
+            aria-label="Previous Month"
             variant="outline"
             size="lg"
             onClick={handlePrevMonth}
@@ -95,6 +96,7 @@ export default function Calendar(props: Props) {
           </Button>
           <Button
             name="Go to Next Month"
+            aria-label="Next Month"
             variant="outline"
             size="lg"
             onClick={handleNextMonth}
