@@ -98,6 +98,7 @@ export default function TokenCategoryList({
     hasPermission,
     facility?.permissions ?? [],
   );
+  console.log(canWriteTokenCategory);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["tokenCategories", qParams],
