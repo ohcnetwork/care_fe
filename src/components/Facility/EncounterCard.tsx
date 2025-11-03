@@ -8,7 +8,6 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getPermissions } from "@/common/Permissions";
 
 import { formatDateTime } from "@/common/utils";
-import TagBadge from "@/components/Tags/TagBadge";
 import { usePermissions } from "@/context/PermissionContext";
 import { cn } from "@/lib/utils";
 import {
@@ -18,6 +17,7 @@ import {
   ENCOUNTER_STATUS_ICONS,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { useState } from "react";
 
 interface TimelineEncounterCardProps {
@@ -130,7 +130,9 @@ export function TimelineEncounterCard({
               </div>
               <div className="flex flex-wrap gap-1">
                 {encounter.tags.map((tag) => (
-                  <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
+                  <Badge variant="secondary" key={tag.id}>
+                    {getTagHierarchyDisplay(tag)}
+                  </Badge>
                 ))}
               </div>
             </div>
