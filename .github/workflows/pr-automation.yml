@@ -9,6 +9,7 @@ on:
       - closed
       - assigned
       - unassigned
+      - review_requested
   pull_request_review:
     types:
       - submitted
@@ -21,6 +22,8 @@ permissions:
 jobs:
   assign-pr:
     runs-on: ubuntu-24.04-arm
+    # Skip workflow for PRs created by bots
+    if: ${{ github.event.pull_request.user.type != 'Bot' }}
 
     steps:
       - name: Generate token
@@ -241,6 +244,17 @@ jobs:
           gh pr edit $PR_NUMBER --remove-label "needs review" --repo $REPO 2>/dev/null || true
           gh pr edit $PR_NUMBER --remove-label "needs testing" --repo $REPO 2>/dev/null || true
           gh pr edit $PR_NUMBER --add-label "changes required" --repo $REPO
+
+      - name: Handle Review Re-Request
+        if: github.event.action == 'review_requested'
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh pr edit $PR_NUMBER --remove-label "changes required" --repo $REPO 2>/dev/null || true
+          gh pr edit $PR_NUMBER --add-label "needs testing" --repo $REPO
+          gh pr edit $PR_NUMBER --add-label "needs review" --repo $REPO
 
       - name: Update Team Field Based on Assignees Roles
         if: github.event.action == 'opened' || github.event.action == 'assigned' || github.event.action == 'unassigned'
