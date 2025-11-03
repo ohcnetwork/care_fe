@@ -227,7 +227,7 @@ test.describe("Facility Location Creation", () => {
     // Verify the updated data is correctly displayed in edit form
     await page.locator("button[title='Edit Location']").first().click();
 
-    // Verify that all updated values are correctly saved and displayed
+    // Verify all updated values are correctly saved and displayed
     const updatedNameTextbox = page.getByRole("textbox", { name: "Name" });
     await expect(updatedNameTextbox).toHaveValue(locationName);
 
