@@ -103,6 +103,11 @@ const careConfig = {
     ),
   },
 
+  /**
+   * Flag to make location field mandatory for payment reconciliation
+   */
+  paymentLocationRequired: boolean("REACT_PAYMENT_LOCATION_REQUIRED", true),
+
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
         const [module, cdn] = app.split("@");

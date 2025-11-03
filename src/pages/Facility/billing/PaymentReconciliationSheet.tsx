@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
+import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -9,6 +10,8 @@ import { toast } from "sonner";
 import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import careConfig from "@careConfig";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +46,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
+import { locationAtomFamily } from "@/atoms/location-atom";
 import { LocationPicker } from "@/components/Location/LocationPicker";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
@@ -56,9 +60,7 @@ import {
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
-import { LocationList } from "@/types/location/location";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import LocationCache from "@/Utils/LocationCache";
 import mutate from "@/Utils/request/mutate";
 
 interface PaymentReconciliationSheetProps {
@@ -105,7 +107,9 @@ const formSchema = z
     note: z.string().optional(),
     account: z.string(),
     is_credit_note: z.boolean().optional(),
-    location: z.string().optional(),
+    location: careConfig.paymentLocationRequired
+      ? z.string().min(1)
+      : z.string().optional(),
   })
   .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
     message: t("tender_amount_cannot_be_less_than_payment_amount"),
@@ -125,8 +129,9 @@ export function PaymentReconciliationSheet({
   const queryClient = useQueryClient();
   const [tenderAmount, setTenderAmount] = useState<string>("0");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
-  const [selectedLocationObject, setSelectedLocationObject] =
-    useState<LocationList | null>(LocationCache.get(facilityId) || null);
+  const [selectedLocationObject, setSelectedLocationObject] = useAtom(
+    locationAtomFamily(facilityId),
+  );
   useShortcutSubContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -331,9 +336,6 @@ export function PaymentReconciliationSheet({
                         onValueChange={(location) => {
                           setSelectedLocationObject(location);
                           field.onChange(location?.id);
-                          if (location) {
-                            LocationCache.set(location, facilityId);
-                          }
                         }}
                         placeholder={t("select_location")}
                         className="w-full border-gray-300"
