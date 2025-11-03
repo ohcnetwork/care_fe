@@ -53,7 +53,7 @@ function CustomDateRange({
         label={t("custom_date_range")}
         onBack={() => setView("options")}
       />
-      <div className="flex flex-col max-h-[30vh] overflow-y-auto">
+      <div className="w-full flex flex-col max-h-[30vh] overflow-y-auto">
         <Calendar
           mode="range"
           selected={{ from: dateFrom, to: dateTo }}
@@ -62,7 +62,6 @@ function CustomDateRange({
               handleDateChange(date);
             }
           }}
-          className="w-full"
           styles={{
             day: {
               width: "40px",
@@ -78,7 +77,11 @@ function CustomDateRange({
               padding: "0.5rem",
             },
           }}
+          className="w-full"
+          captionLayout="dropdown"
+          endMonth={new Date(2100, 11, 31)}
           monthCaptionClassName="self-center"
+          rangeMiddleClassName="bg-primary/10 [&>button]:rounded-md"
         />
         <div className="my-2">
           <Separator orientation="horizontal" className="bg-gray-200 h-px" />
