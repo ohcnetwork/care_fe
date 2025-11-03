@@ -19,6 +19,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import batchApi from "@/types/base/batch/batchApi";
+import { EncounterEdit } from "@/types/emr/encounter/encounter";
 import { MedicationRequestCreate } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/file";
@@ -42,6 +43,7 @@ import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
 import { QuestionRenderer } from "./QuestionRenderer";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
+import { validateEncounterQuestion } from "./QuestionTypes/EncounterQuestion";
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
 import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationRequestQuestion";
 import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
@@ -296,6 +298,10 @@ const STRUCTURED_TYPE_VALIDATORS = {
       questionId,
       required ?? false,
     );
+  },
+  encounter: (response: ResponseValue | undefined, questionId: string) => {
+    const encounterData = (response?.value as EncounterEdit[]) || [];
+    return validateEncounterQuestion(encounterData[0], questionId);
   },
   medication_statement: (
     response: ResponseValue | undefined,

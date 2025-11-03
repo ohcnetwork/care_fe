@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,11 +36,17 @@ import {
   type EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
+import {
+  FieldDefinitions,
+  useFieldError,
+  validateFields,
+} from "@/types/questionnaire/validation";
 import careConfig from "@careConfig";
 
 interface EncounterQuestionProps {
@@ -55,6 +63,32 @@ interface EncounterQuestionProps {
   organizations?: string[];
   patientId?: string;
   facilityId: string;
+  errors?: QuestionValidationError[];
+}
+
+const ENCOUNTER_FIELDS: FieldDefinitions = {
+  DISCHARGE_DISPOSITION: {
+    key: "hospitalization.discharge_disposition",
+    required: true,
+  },
+} as const;
+
+export function validateEncounterQuestion(
+  value: EncounterEdit | undefined,
+  questionId: string,
+): QuestionValidationError[] {
+  const errors: QuestionValidationError[] = [];
+
+  if (
+    careConfig.enforceDischargeDisposition &&
+    value?.status === "discharged" &&
+    ["imp", "obsenc", "emer"].includes(value.encounter_class) &&
+    !value?.hospitalization?.discharge_disposition
+  ) {
+    errors.push(...validateFields(value, questionId, ENCOUNTER_FIELDS));
+  }
+
+  return errors;
 }
 
 export function EncounterQuestion({
@@ -65,6 +99,7 @@ export function EncounterQuestion({
   encounterId,
   patientId = "",
   facilityId,
+  errors = [],
 }: EncounterQuestionProps) {
   // Fetch encounter data
   const { data: encounterData, isLoading } = useQuery({
@@ -76,6 +111,7 @@ export function EncounterQuestion({
     enabled: !!encounterId,
   });
   const { t } = useTranslation();
+  const { hasError } = useFieldError(questionnaireResponse.question_id, errors);
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
     status: "unknown",
@@ -366,7 +402,12 @@ export function EncounterQuestion({
               encounter.hospitalization?.discharge_disposition) && (
               <>
                 <div className="space-y-2">
-                  <Label>{t("discharge_disposition")}</Label>
+                  <Label>
+                    {t("discharge_disposition")}
+                    {careConfig.enforceDischargeDisposition && (
+                      <span className="text-red-500">*</span>
+                    )}
+                  </Label>
                   <Select
                     value={encounter.hospitalization?.discharge_disposition}
                     onValueChange={(value: EncounterDischargeDisposition) => {
@@ -380,7 +421,15 @@ export function EncounterQuestion({
                     }}
                     disabled={disabled}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger
+                      className={cn(
+                        !encounter.hospitalization?.discharge_disposition &&
+                          hasError(
+                            ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key,
+                          ) &&
+                          "ring-1 ring-red-500",
+                      )}
+                    >
                       <SelectValue
                         placeholder={t("select_discharge_disposition")}
                       />
@@ -393,6 +442,11 @@ export function EncounterQuestion({
                       ))}
                     </SelectContent>
                   </Select>
+                  {hasError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key) && (
+                    <p className="text-red-500 text-sm">
+                      {t("field_required")}
+                    </p>
+                  )}
                 </div>
 
                 {encounter.status === "discharged" && (
