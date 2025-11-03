@@ -50,12 +50,14 @@ test.describe("Inventory Module (Currently direct Purchase Delivery only)", () =
     await page
       .locator("div")
       .filter({ hasText: /^Gloves$/ })
+      .first()
       .click();
     await page.getByRole("button", { name: "Add Another Item" }).click();
     await page.getByPlaceholder("Search Product Knowledge").fill("Ibuprofen");
     await page
       .locator("div")
       .filter({ hasText: /^Ibuprofen$/ })
+      .first()
       .click();
 
     await page.getByRole("combobox").nth(2).click();
