@@ -197,12 +197,11 @@ test.describe("Token Category Creation", () => {
     const settingsSection = page.getByRole("button", { name: "Settings" });
     await settingsSection.click();
 
-    // Wait for settings submenu to expand and click on Token Category
-    await page.waitForTimeout(500); // Small delay for animation
+    // Wait for the Token Category link to become visible in the expanded submenu
     const tokenCategoryLink = page.getByRole("link", {
       name: "Token Category",
     });
-    await expect(tokenCategoryLink).toBeVisible();
+    await tokenCategoryLink.waitFor({ state: "visible" });
     await tokenCategoryLink.click();
 
     // Verify navigation to token category list page

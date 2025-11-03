@@ -43,7 +43,6 @@ test.describe("Token Category - Volunteer Access Verification", () => {
     if (await settingsSection.isVisible()) {
       // If Settings exists, click it to expand
       await settingsSection.click();
-      await page.waitForTimeout(500); // Small delay for animation
 
       // Verify that Token Category link is NOT present in the sidebar
       const tokenCategoryLink = page.getByRole("link", {
@@ -61,7 +60,9 @@ test.describe("Token Category - Volunteer Access Verification", () => {
     await page.goto(`/facility/${facilityId}/settings/token_category`);
 
     // Wait a moment for the page to load and show access denied
-    await page.waitForTimeout(2000);
+    await expect(
+      page.locator("text=Access Denied to Token Category"),
+    ).toBeVisible();
 
     // Volunteer can reach the page but should see access denied notification
     const currentUrl = page.url();
@@ -100,8 +101,18 @@ test.describe("Token Category - Volunteer Access Verification", () => {
     // Try to directly access token category creation page
     await page.goto(`/facility/${facilityId}/settings/token_category/new`);
 
-    // Wait a moment for any redirect to complete
-    await page.waitForTimeout(2000);
+    await Promise.race([
+      page
+        .waitForURL(
+          (url) => !url.pathname.endsWith("/settings/token_category/new"),
+          { timeout: 5000 },
+        )
+        .catch(() => {}),
+      page
+        .getByRole("textbox", { name: "Name" })
+        .waitFor({ state: "visible", timeout: 5000 })
+        .catch(() => {}),
+    ]);
 
     // Check what happened after trying to access the creation page
     const currentUrl = page.url();
