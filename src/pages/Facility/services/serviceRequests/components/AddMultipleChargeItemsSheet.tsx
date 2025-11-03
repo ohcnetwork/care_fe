@@ -176,7 +176,9 @@ export default function AddMultipleChargeItemsSheet({
           </label>
           <ChargeItemDefinitionPicker
             facilityId={facilityId}
-            resourceSubType={ResourceCategorySubType.location}
+            resourceSubType={
+              ResourceCategorySubType.charge_item_definition_schedule_location
+            }
             value={selectedDefinitionSlug}
             onValueChange={setSelectedDefinitionSlug}
             placeholder={t("select_charge_item_definition")}
