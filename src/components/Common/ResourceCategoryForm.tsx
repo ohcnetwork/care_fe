@@ -19,13 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select } from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -48,13 +42,7 @@ import {
   ResourceCategoryUpdate,
 } from "@/types/base/resourceCategory/resourceCategory";
 import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryApi";
-
-const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug_value: z.string().min(5, "Slug should have atleast 5 characters"),
-  description: z.string().optional(),
-  resource_sub_type: z.nativeEnum(ResourceCategorySubType),
-});
+import { ResourceSubTypePicker } from "./ResourceSubTypePicker";
 
 interface ResourceCategoryFormProps {
   facilityId: string;
@@ -78,6 +66,16 @@ export function ResourceCategoryForm({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isEditing = !!categorySlug;
+
+  const formSchema = z.object({
+    title: z.string().min(1, t("field_required")),
+    slug_value: z
+      .string()
+      .min(5, t("character_count_validation", { min: 5, max: 25 }))
+      .max(25, t("character_count_validation", { min: 5, max: 25 })),
+    description: z.string().optional(),
+    resource_sub_type: z.nativeEnum(ResourceCategorySubType),
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -110,13 +108,24 @@ export function ResourceCategoryForm({
     }
   }, [categoryData, form]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      form.reset({
+        title: "",
+        slug_value: "",
+        description: "",
+        resource_sub_type: ResourceCategorySubType.other,
+      });
+    }
+  }, [isOpen, form]);
+
   // Auto-generate slug from name when creating new category
   useEffect(() => {
     if (isEditing) return;
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || "", 25), {
           shouldValidate: true,
         });
       }
@@ -220,7 +229,7 @@ export function ResourceCategoryForm({
                         if (!isEditing) {
                           form.setValue(
                             "slug_value",
-                            generateSlug(e.target.value || ""),
+                            generateSlug(e.target.value || "", 25),
                             {
                               shouldValidate: true,
                             },
@@ -286,20 +295,11 @@ export function ResourceCategoryForm({
                 <FormItem>
                   <FormLabel>{t("resource_sub_type")}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={t("select_resource_sub_type")}
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.values(ResourceCategorySubType).map((subType) => (
-                        <SelectItem key={subType} value={subType}>
-                          {t(subType)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
+                    <ResourceSubTypePicker
+                      resourceType={resourceType}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    />
                   </Select>
                   <FormDescription>
                     {t("resource_sub_type_help")}

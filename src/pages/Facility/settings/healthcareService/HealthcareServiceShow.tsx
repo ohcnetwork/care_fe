@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -19,6 +19,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import query from "@/Utils/request/query";
+import BackButton from "@/components/Common/BackButton";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 
 type DuoToneIconName = keyof typeof duoToneIcons;
@@ -95,14 +96,7 @@ export default function HealthcareServiceShow({
             {t("healthcare_service_details")}
           </h1>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() =>
-                navigate(`/facility/${facilityId}/settings/healthcare_services`)
-              }
-            >
-              {t("back_to_list")}
-            </Button>
+            <BackButton>{t("back_to_list")}</BackButton>
             <Button
               onClick={() =>
                 navigate(
@@ -160,27 +154,22 @@ export default function HealthcareServiceShow({
               ) : (
                 <div className="grid gap-2">
                   {healthcareService.locations.map((location) => (
-                    <div
+                    <Link
                       key={location.id}
-                      className="flex items-center justify-between rounded-lg border p-3"
+                      href={`/facility/${facilityId}/locations/${location.id}/medication_requests`}
+                      basePath="/"
                     >
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {location.name}
-                        </p>
+                      <div className="flex items-center justify-between rounded-lg border p-3">
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {location.name}
+                          </p>
+                        </div>
+                        <div className="p-2 flex items-center justify-center">
+                          <CareIcon icon="l-arrow-right" className="size-4" />
+                        </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/locations/${location.id}/medication_requests`,
-                          )
-                        }
-                      >
-                        <CareIcon icon="l-arrow-right" className="size-4" />
-                      </Button>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}
