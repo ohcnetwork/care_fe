@@ -29,7 +29,7 @@ interface TagBadgeProps
 export default function TagBadge({
   tag,
   className,
-  hierarchyDisplay = true,
+  hierarchyDisplay = false,
   variant = "secondary",
   ...props
 }: TagBadgeProps) {
