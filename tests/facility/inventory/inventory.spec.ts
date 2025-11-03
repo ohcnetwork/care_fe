@@ -21,8 +21,8 @@ test.describe("Inventory Module (Currently direct Purchase Delivery only)", () =
   });
 
   test("Create a purchase delivery (direct)", async ({ page }) => {
-    await page.getByRole("button", { name: "View Details" }).nth(1).click();
-    await page.getByRole("button", { name: "View Prescriptions" }).click();
+    await page.getByRole("link", { name: /Main Pharmacy/i }).click();
+    await page.getByRole("link", { name: /View Prescriptions/i }).click();
     await page.getByRole("button", { name: "Toggle Sidebar" }).click();
     await page.getByRole("button", { name: "Inventory" }).click();
     await page.getByRole("link", { name: "Purchase Deliveries" }).click();
