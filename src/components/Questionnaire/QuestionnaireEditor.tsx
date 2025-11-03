@@ -751,6 +751,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     if (id) {
       updateQuestionnaire({
         ...form.getValues(),
+        version: String(questionnaire.version),
         questions: rootQuestions,
       });
     } else {
