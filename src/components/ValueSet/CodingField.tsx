@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
+import { ValueSetLookupResponse } from "@/types/valueSet/valueSet";
+import valueSetApi from "@/types/valueSet/valueSetApi";
 import mutate from "@/Utils/request/mutate";
-import { ValuesetLookupResponse } from "@/types/valueset/valueset";
-import valuesetApi from "@/types/valueset/valuesetApi";
 
 type CodingFieldProps = {
   system: string;
@@ -42,8 +42,8 @@ export const CodingField = ({
     isPending: isLookupPending,
     reset: resetVerified,
   } = useMutation({
-    mutationFn: mutate(valuesetApi.lookup, { silent: true }),
-    onSuccess: (response: ValuesetLookupResponse) => {
+    mutationFn: mutate(valueSetApi.lookup, { silent: true }),
+    onSuccess: (response: ValueSetLookupResponse) => {
       if (response.metadata) {
         form.setValue(`${name}.display`, response.metadata.display, {
           shouldValidate: true,

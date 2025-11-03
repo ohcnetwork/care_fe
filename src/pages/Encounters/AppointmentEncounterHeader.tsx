@@ -26,6 +26,7 @@ import {
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { addDays, isWithinInterval, subDays } from "date-fns";
 import { ChevronDown, ExternalLinkIcon } from "lucide-react";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -285,7 +286,13 @@ export const AppointmentEncounterHeader = ({
             <Button
               variant="outline"
               onClick={() => handleStartEncounter()}
-              disabled={isPending}
+              disabled={
+                isPending ||
+                !isWithinInterval(new Date(), {
+                  start: subDays(appointment.token_slot.start_datetime, 1),
+                  end: addDays(appointment.token_slot.start_datetime, 1),
+                })
+              }
               className="space-y-2 space-x-1 w-full sm:w-auto"
             >
               {t("start_encounter")}
