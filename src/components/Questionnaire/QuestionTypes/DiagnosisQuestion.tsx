@@ -113,9 +113,9 @@ function DiagnosisSeveritySelect({
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {DIAGNOSIS_SEVERITY.map((s) => (
-          <SelectItem key={s} value={s}>
-            {t(s)}
+        {DIAGNOSIS_SEVERITY.map((severity) => (
+          <SelectItem key={severity} value={severity}>
+            {t(severity)}
           </SelectItem>
         ))}
       </SelectContent>
