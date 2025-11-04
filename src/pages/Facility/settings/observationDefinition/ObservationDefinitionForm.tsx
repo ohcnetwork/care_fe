@@ -206,7 +206,10 @@ function ObservationDefinitionFormContent({
                   c.qualified_ranges?.map((range, index) => ({
                     ...range,
                     id: index,
-                    conditions: range?.conditions,
+                    conditions: range?.conditions.map((condition) => ({
+                      ...condition,
+                      _conditionType: `${condition.metric}_${condition.operation}`,
+                    })),
                     _interpretation_type:
                       range?.ranges?.length > 0
                         ? InterpretationType.ranges
@@ -217,7 +220,10 @@ function ObservationDefinitionFormContent({
               existingData.qualified_ranges?.map((range, index) => ({
                 ...range,
                 id: index,
-                conditions: range?.conditions,
+                conditions: range?.conditions.map((condition) => ({
+                  ...condition,
+                  _conditionType: `${condition.metric}_${condition.operation}`,
+                })),
                 _interpretation_type:
                   range?.ranges?.length > 0
                     ? InterpretationType.ranges

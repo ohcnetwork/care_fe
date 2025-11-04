@@ -147,7 +147,7 @@ export const COLOR_OPTIONS = {
   primary: {
     label: "Primary",
     class: "bg-primary-400",
-    hex: "#4ad80",
+    hex: "#4ad80e",
   },
   secondary: {
     label: "Secondary",

@@ -38,20 +38,24 @@ export function DiagnosticReportResultsTable({
 
   const renderInterpretation = (interpetationValue: string) => {
     const jsonString = interpetationValue.replace(/'/g, '"');
-    const interpretation = JSON.parse(jsonString) as unknown as Interpretation;
-    const color = interpretation.color || "#000000";
-    return (
-      <div className="flex items-center gap-1 text-gray-500">
-        <span
-          className="capitalize"
-          style={{
-            color: color,
-          }}
-        >
-          {interpretation.display}
-        </span>
-      </div>
-    );
+    if (jsonString.startsWith("{")) {
+      const interpretation = JSON.parse(jsonString) as Interpretation;
+      const color = interpretation.color || "#000000";
+      return (
+        <div className="flex items-center gap-1">
+          <span className="capitalize" style={{ color: color }}>
+            {interpretation.display}
+          </span>
+        </div>
+      );
+    } else {
+      const interpretation = interpetationValue;
+      return (
+        <div className="flex items-center gap-1 text-gray-500">
+          <span className="capitalize">{interpretation}</span>
+        </div>
+      );
+    }
   };
 
   const renderObservationComponents = (components: ObservationComponent[]) => {
@@ -61,7 +65,7 @@ export function DiagnosticReportResultsTable({
         className={cn(
           "bg-gray-50/50 border-0 text-sm text-gray-950",
           index === components.length - 1 && "border-b",
-          component.interpretation == "abnormal" && "font-semibold",
+          component.interpretation !== "Normal" && "font-semibold",
         )}
       >
         <TableCell className="pl-4 border-r border-b border-gray-300">
@@ -101,7 +105,7 @@ export function DiagnosticReportResultsTable({
           className={cn(
             "divide-x divide-gray-300 text-sm text-gray-950",
             hasComponents && "border-b-0",
-            observation.interpretation == "abnormal" && "font-semibold",
+            observation.interpretation !== "Normal" && "font-semibold",
           )}
         >
           <TableCell>
