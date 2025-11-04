@@ -627,6 +627,7 @@ export function CreateInvoicePage({
                 }
               >
                 {t("dispense_now")}
+                <ShortcutBadge actionId="view-prescriptions" />
               </Button>
             )}
             <Button

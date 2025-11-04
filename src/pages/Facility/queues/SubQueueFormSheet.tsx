@@ -37,12 +37,12 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
 const createSubQueueFormSchema = z.object({
-  name: z.string().min(1, "Service point name is required"),
+  name: z.string().trim().min(1, "Service point name is required"),
   status: z.nativeEnum(TokenSubQueueStatus),
 });
 
 const editSubQueueFormSchema = z.object({
-  name: z.string().min(1, "Service point name is required"),
+  name: z.string().trim().min(1, "Service point name is required"),
   status: z.nativeEnum(TokenSubQueueStatus),
 });
 
@@ -110,7 +110,7 @@ export default function SubQueueFormSheet({
         status: TokenSubQueueStatus.ACTIVE,
       });
     }
-  }, [isOpen, form]);
+  }, [isOpen, form, isEditMode]);
 
   const { mutate: createSubQueue, isPending: isCreating } = useMutation({
     mutationFn: mutate(tokenSubQueueApi.create, {
@@ -239,7 +239,13 @@ export default function SubQueueFormSheet({
                 >
                   {t("cancel")}
                 </Button>
-                <Button type="submit" disabled={isPending} className="flex-1">
+                <Button
+                  type="submit"
+                  disabled={
+                    isPending || (isEditMode && !form.formState.isDirty)
+                  }
+                  className="flex-1"
+                >
                   {isPending
                     ? t("saving")
                     : isEditMode

@@ -48,7 +48,7 @@ export class Questionnaire {
     cy.typeAndVerifyOptionNotPresent(
       '[data-cy="add-questionnaire-button"]',
       questionnaireName,
-      "No questionnaires found",
+      "No Results Found",
     );
     return this;
   }
