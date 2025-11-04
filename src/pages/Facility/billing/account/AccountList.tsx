@@ -233,26 +233,19 @@ export function AccountList({
             <TableBody>
               {accounts.map((account: AccountRead) => (
                 <TableRow key={account.id}>
-                  <TableCell>
+                  <TableCell className="whitespace-normal">
                     <div className="flex items-center gap-3">
-                      <Avatar name={account.name} className="size-8" />
-                      <div>
-                        <div className="text-base font-semibold leading-6">
+                      <Avatar
+                        name={account.name}
+                        className="size-8 flex-shrink-0"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="text-base font-semibold leading-6 break-words">
                           {account.name}
                         </div>
                         {!hidePatientName && (
-                          <div className="flex items-center gap-1 text-sm text-gray-600">
-                            <span
-                              className="inline-flex text-sm text-gray-600 cursor-pointer underline"
-                              onClick={() =>
-                                navigate(
-                                  `/facility/${facilityId}/patient/${account.patient.id}`,
-                                )
-                              }
-                            >
-                              {account.patient.name}
-                              <ArrowUpRightSquare className="size-4 ml-1 mt-0.5" />
-                            </span>
+                          <div className="flex items-center gap-1 text-sm text-gray-600 break-words">
+                            {account.patient.name}
                           </div>
                         )}
                       </div>
@@ -291,10 +284,11 @@ export function AccountList({
                         ` - ${formatDate(account.service_period?.end)}`}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
+                  <TableCell className="whitespace-normal">
+                    <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
                       <Button
                         variant="ghost"
+                        size="sm"
                         className="font-semibold"
                         onClick={() => {
                           setEditingAccount(account);
@@ -306,6 +300,7 @@ export function AccountList({
                       </Button>
                       <Button
                         variant="outline"
+                        size="sm"
                         className="font-semibold"
                         onClick={() =>
                           navigate(

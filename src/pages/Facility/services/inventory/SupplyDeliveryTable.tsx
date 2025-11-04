@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -46,6 +47,7 @@ interface SupplyDeliveryTableProps {
   internal?: boolean;
   onDeliveryClick?: (delivery: SupplyDeliveryRead) => void;
   deliveryOrderStatus?: DeliveryOrderStatus;
+  autoSelectOnMount?: boolean;
 }
 
 export function SupplyDeliveryTable({
@@ -57,6 +59,7 @@ export function SupplyDeliveryTable({
   internal = false,
   onDeliveryClick,
   deliveryOrderStatus,
+  autoSelectOnMount = false,
 }: SupplyDeliveryTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -101,6 +104,22 @@ export function SupplyDeliveryTable({
     showCheckbox &&
     deliveries.some((d) => d.status === SupplyDeliveryStatus.in_progress);
 
+  const didAutoSelectRef = useRef(false);
+  useEffect(() => {
+    if (!autoSelectOnMount) return;
+    if (!showAllCheckbox) return;
+    if (didAutoSelectRef.current) return;
+    if (selectedDeliveries.length > 0) return;
+
+    onSelectAll?.(true);
+    didAutoSelectRef.current = true;
+  }, [
+    autoSelectOnMount,
+    showAllCheckbox,
+    onSelectAll,
+    selectedDeliveries.length,
+  ]);
+
   return (
     <Table>
       <TableHeader>
@@ -127,9 +146,10 @@ export function SupplyDeliveryTable({
           <TableHead>{t("disc")}</TableHead>
           <TableHead>{t("status")}</TableHead>
           <TableHead>{t("condition")}</TableHead>
-          {deliveryOrderStatus === DeliveryOrderStatus.draft && (
-            <TableHead>{t("actions")}</TableHead>
-          )}
+          {deliveryOrderStatus === DeliveryOrderStatus.draft &&
+            deliveries.some(
+              (d) => d.status === SupplyDeliveryStatus.in_progress,
+            ) && <TableHead>{t("actions")}</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -221,7 +241,7 @@ export function SupplyDeliveryTable({
             </TableCell>
             {delivery.status === SupplyDeliveryStatus.in_progress &&
               deliveryOrderStatus === DeliveryOrderStatus.draft && (
-                <TableCell className="text-center">
+                <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="icon">
