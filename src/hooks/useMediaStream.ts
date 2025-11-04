@@ -24,15 +24,17 @@ export const useMediaStream = ({
     useState<MediaStreamState>("loading");
 
   useEffect(() => {
-    navigator.mediaDevices.addEventListener("devicechange", getCameraDevices);
+    const handleDeviceChange = async () => {
+      const updatedDevices = await getCameraDevices();
+      setDevices(updatedDevices);
+    };
+
+    navigator.mediaDevices.ondevicechange = handleDeviceChange;
 
     return () => {
-      navigator.mediaDevices.removeEventListener(
-        "devicechange",
-        getCameraDevices,
-      );
+      navigator.mediaDevices.ondevicechange = null;
     };
-  }, [getCameraDevices]);
+  }, []);
 
   const startStream = useCallback(async () => {
     try {
