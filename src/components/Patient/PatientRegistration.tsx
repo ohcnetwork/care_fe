@@ -217,6 +217,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   );
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
+    mutationKey: ["create_patient"],
     mutationFn: mutate(patientApi.addPatient),
     onSuccess: (resp: PatientRead) => {
       toast.success(t("patient_registration_success"));
