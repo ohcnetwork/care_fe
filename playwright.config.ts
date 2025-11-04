@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import { defineConfig, devices } from "@playwright/test";
 
 /**
@@ -36,12 +38,19 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
-    // Setup project
-    { name: "setup", testMatch: /.*\.setup\.ts/ },
+    {
+      name: "setup-auth",
+      testMatch: /.*\/auth\.setup\.ts/,
+    },
+    {
+      name: "setup-facility",
+      testMatch: /.*\/facility\.setup\.ts/,
+      dependencies: ["setup-auth"],
+    },
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      dependencies: ["setup"],
+      dependencies: ["setup-facility"],
     },
     // {
     //   name: "firefox",
