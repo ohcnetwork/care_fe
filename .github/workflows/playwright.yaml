@@ -92,8 +92,6 @@ jobs:
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set backend branch
         id: backend-branch
@@ -125,7 +123,7 @@ jobs:
             make load-db
             echo "✅ Loaded cached care-db-dump"
             make docker_config_file=docker-compose.pre-built.yaml up || \
-            docker compose -f docker-compose.yaml -f docker-compose.pre-built.yaml logs
+            (docker compose -f docker-compose.yaml -f docker-compose.pre-built.yaml logs && false)
           } || {
             echo "⚠️ Failed to load cached care-db-dump, falling back to loading fixtures."
             make docker_config_file=docker-compose.local.yaml up load-fixtures || \
@@ -160,6 +158,7 @@ jobs:
           echo "Build directory verified ✓"
 
       - name: Cache Playwright browsers
+        id: playwright-cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
@@ -169,6 +168,7 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Run Playwright tests (Shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }})
