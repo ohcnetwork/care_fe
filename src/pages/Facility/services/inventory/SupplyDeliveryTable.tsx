@@ -1,4 +1,5 @@
 import { formatDate } from "date-fns";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,7 @@ interface SupplyDeliveryTableProps {
   onSelectAll?: (checked: boolean) => void;
   internal?: boolean;
   onDeliveryClick?: (delivery: SupplyDeliveryRead) => void;
+  autoSelectOnMount?: boolean;
 }
 
 export function SupplyDeliveryTable({
@@ -41,6 +43,7 @@ export function SupplyDeliveryTable({
   onSelectAll,
   internal = false,
   onDeliveryClick,
+  autoSelectOnMount = false,
 }: SupplyDeliveryTableProps) {
   const { t } = useTranslation();
 
@@ -55,6 +58,22 @@ export function SupplyDeliveryTable({
   const showAllCheckbox =
     showCheckbox &&
     deliveries.some((d) => d.status === SupplyDeliveryStatus.in_progress);
+
+  const didAutoSelectRef = useRef(false);
+  useEffect(() => {
+    if (!autoSelectOnMount) return;
+    if (!showAllCheckbox) return;
+    if (didAutoSelectRef.current) return;
+    if (selectedDeliveries.length > 0) return;
+
+    onSelectAll?.(true);
+    didAutoSelectRef.current = true;
+  }, [
+    autoSelectOnMount,
+    showAllCheckbox,
+    onSelectAll,
+    selectedDeliveries.length,
+  ]);
 
   return (
     <div className="rounded-md overflow-x-auto border-2 border-white shadow-md">
