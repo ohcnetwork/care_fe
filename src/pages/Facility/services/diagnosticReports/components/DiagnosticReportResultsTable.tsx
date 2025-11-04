@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import {
   ObservationComponent,
   ObservationRead,
@@ -29,8 +30,25 @@ export function DiagnosticReportResultsTable({
     return (
       <div className="flex items-center gap-1 text-gray-500">
         <span>
-          {range.low?.value} - {range.high?.value}{" "}
-          {range.low?.unit?.display || range.high?.unit?.display}
+          {range.min} - {range.max}
+        </span>
+      </div>
+    );
+  };
+
+  const renderInterpretation = (interpetationValue: string) => {
+    const jsonString = interpetationValue.replace(/'/g, '"');
+    const interpretation = JSON.parse(jsonString) as unknown as Interpretation;
+    const color = interpretation.color || "#000000";
+    return (
+      <div className="flex items-center gap-1 text-gray-500">
+        <span
+          className="capitalize"
+          style={{
+            color: color,
+          }}
+        >
+          {interpretation.display}
         </span>
       </div>
     );
@@ -66,9 +84,7 @@ export function DiagnosticReportResultsTable({
           {renderReferenceRange(component.reference_range)}
         </TableCell>
         <TableCell className="border-b border-gray-300">
-          <span className="capitalize">
-            {t(component.interpretation || "")}
-          </span>
+          {renderInterpretation(component.interpretation || "")}
         </TableCell>
       </TableRow>
     ));
@@ -109,11 +125,9 @@ export function DiagnosticReportResultsTable({
               renderReferenceRange(observation.reference_range)}
           </TableCell>
           <TableCell>
-            {!hasComponents && observation.interpretation && (
-              <span className="capitalize">
-                {t(observation.interpretation)}
-              </span>
-            )}
+            {!hasComponents &&
+              observation.interpretation &&
+              renderInterpretation(observation.interpretation)}
           </TableCell>
         </TableRow>
         {hasComponents &&

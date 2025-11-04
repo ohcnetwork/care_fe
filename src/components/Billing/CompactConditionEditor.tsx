@@ -216,7 +216,7 @@ function RenderInput({
               <FormControl>
                 <Input
                   type="number"
-                  placeholder={t("min_value")}
+                  placeholder={t("min")}
                   value={field.value}
                   onChange={(e) => {
                     const min = Number(e.target.value);
@@ -237,7 +237,7 @@ function RenderInput({
               <FormControl>
                 <Input
                   type="number"
-                  placeholder={t("max_value")}
+                  placeholder={t("max")}
                   value={field.value}
                   onChange={(e) => {
                     const max = Number(e.target.value);
