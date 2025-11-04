@@ -233,6 +233,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   });
 
   const { mutate: updatePatient, isPending: isUpdatingPatient } = useMutation({
+    mutationKey: ["update_patient"],
     mutationFn: mutate(patientApi.updatePatient, {
       pathParams: { id: patientId || "" },
     }),
