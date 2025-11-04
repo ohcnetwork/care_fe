@@ -113,9 +113,13 @@ jobs:
           echo DISABLE_RATELIMIT=True >> docker/.local.env
           echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
           echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.local.env
+          echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
+          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.prebuilt.env
+          echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.prebuilt.env
+          # start pulling backend image and db first to speed up
           docker compose -f docker-compose.yaml -f docker-compose.pre-built.yaml pull backend &
           docker compose -f docker-compose.yaml up -d --wait db
-          # load the db dump from the artifact if it exists else do the usual
+          # load the db dump from the artifact if it exists
           set -e
           {
             archive_download_url=$(curl -sf "https://api.github.com/repos/ohcnetwork/care/actions/artifacts?name=care-db-dump" | jq -r '.artifacts[0].archive_download_url')
@@ -124,7 +128,8 @@ jobs:
             make load-db
             make docker_config_file=docker-compose.pre-built.yaml up
           } || {
-            make docker_config_file=docker-compose.pre-built.yaml up load-fixtures
+          # fallback to normal startup if no artifact found
+            make docker_config_file=docker-compose.local.yaml up load-fixtures
           }
           cd ..
         env:
@@ -189,12 +194,6 @@ jobs:
             test-results/
             test-results.json
           retention-days: 7
-
-      - name: Stop backend services
-        if: always()
-        run: |
-          cd care
-          make docker_config_file=docker-compose.local.yaml down || true
 
   # Aggregate results and create final report
   report:
