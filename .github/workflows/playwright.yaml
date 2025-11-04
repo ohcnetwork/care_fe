@@ -110,12 +110,10 @@ jobs:
       - name: Start care docker containers 🐳
         run: |
           cd care
-          echo DISABLE_RATELIMIT=True >> docker/.local.env
-          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.local.env
-          echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.local.env
-          echo DISABLE_RATELIMIT=True >> docker/.prebuilt.env
-          echo JWKS_BASE64=\"$(cat ../.github/runner-files/jwks.b64.txt)\" >> docker/.prebuilt.env
-          echo MAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500 >> docker/.prebuilt.env
+          SHARED_CONFIG=$(printf 'DISABLE_RATELIMIT=True\nJWKS_BASE64="%s"\nMAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500\nCORS_ALLOWED_ORIGINS="[\"http://localhost:4000\"]"' \
+            "$(cat ../.github/runner-files/jwks.b64.txt)")
+          printf '%s' "$SHARED_CONFIG" > docker/.local.env
+          printf '%s' "$SHARED_CONFIG" > docker/.prebuilt.env
           # start pulling backend image and db first to speed up
           docker compose -f docker-compose.yaml -f docker-compose.pre-built.yaml pull backend &
           docker compose -f docker-compose.yaml up -d --wait db
@@ -127,9 +125,11 @@ jobs:
             unzip care-db-dump.zip
             make load-db
             make docker_config_file=docker-compose.pre-built.yaml up
+            echo "✅ Loaded cached care-db-dump and started containers."
           } || {
           # fallback to normal startup if no artifact found
-            make docker_config_file=docker-compose.local.yaml up load-fixtures
+            make docker_config_file=docker-compose.local.yaml up load-fixtures 
+            echo "⚠️ Failed to load cached care-db-dump, falling back to loading fixtures."
           }
           cd ..
         env:
