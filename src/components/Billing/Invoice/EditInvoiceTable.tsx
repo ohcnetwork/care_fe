@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { conditionSchema } from "@/types/base/condition/condition";
 import {
   MonetaryComponent,
   MonetaryComponentType,
@@ -58,6 +59,26 @@ interface EditInvoiceTableProps {
   enableShortcut?: boolean;
 }
 
+// Schema for a single price component
+const priceComponentSchema = z.object({
+  monetary_component_type: z.nativeEnum(MonetaryComponentType),
+  code: z
+    .object({
+      code: z.string(),
+      system: z.string(),
+      display: z.string(),
+    })
+    .optional(),
+  factor: z.number().gt(0).max(100).optional(),
+  amount: z
+    .string()
+    .refine((val) => !val || Number(val) > 0, {
+      message: "Amount must be greater than 0",
+    })
+    .optional(),
+  conditions: z.array(conditionSchema).optional(),
+});
+
 const chargeItemBaseSchema = z.object({
   baseAmount: z
     .string()
@@ -71,7 +92,7 @@ const chargeItemBaseSchema = z.object({
       (val) => !isNaN(parseFloat(val)) && parseFloat(val) >= 0,
       "Quantity must be a positive number",
     ),
-  taxComponents: z.array(z.any()).optional(),
+  taxComponents: z.array(priceComponentSchema).optional(),
   discountComponentKey: z.string().optional(),
   discountCode: z
     .object({
@@ -80,6 +101,7 @@ const chargeItemBaseSchema = z.object({
       display: z.string(),
     })
     .optional(),
+  discountConditions: z.array(conditionSchema).optional(),
   discountType: z.enum(["amount", "percentage"]),
   discountValue: z.string().refine((val) => {
     const num = parseFloat(val);
@@ -200,6 +222,7 @@ export function EditInvoiceTable({
           taxComponents,
           discountComponentKey: getDiscountComponentKey(discountComponent),
           discountCode: discountComponent?.code,
+          discountConditions: discountComponent?.conditions || [],
           discountType: isPercentage ? "percentage" : "amount",
           discountValue,
         };
@@ -250,7 +273,7 @@ export function EditInvoiceTable({
                   item.discountType === "percentage"
                     ? parseFloat(item.discountValue)
                     : undefined,
-                conditions: [],
+                conditions: item.discountConditions || [],
               },
             ]
           : []),
@@ -285,6 +308,10 @@ export function EditInvoiceTable({
 
       form.setValue(`items.${index}.discountComponentKey`, componentKey);
       form.setValue(`items.${index}.discountCode`, selectedComponent.code);
+      form.setValue(
+        `items.${index}.discountConditions`,
+        selectedComponent.conditions || [],
+      );
       form.setValue(
         `items.${index}.discountType`,
         isPercentage ? "percentage" : "amount",
@@ -431,6 +458,10 @@ export function EditInvoiceTable({
                                       form.setValue(
                                         `items.${index}.discountCode`,
                                         undefined,
+                                      );
+                                      form.setValue(
+                                        `items.${index}.discountConditions`,
+                                        [],
                                       );
                                       form.setValue(
                                         `items.${index}.discountValue`,
