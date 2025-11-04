@@ -109,7 +109,7 @@ jobs:
       - name: Start care docker containers 🐳
         run: |
           cd care
-          SHARED_CONFIG=$(printf 'DISABLE_RATELIMIT=True\nJWKS_BASE64="%s"\nMAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500\nCORS_ALLOWED_ORIGINS="[\"http://localhost:4000\"]"' \
+          SHARED_CONFIG=$(printf 'DISABLE_RATELIMIT=True\nJWKS_BASE64="%s"\nMAX_QUESTIONNAIRE_TEXT_RESPONSE_SIZE=500\nCORS_ALLOWED_ORIGINS=["http://localhost:4000"]' \
             "$(cat ../.github/runner-files/jwks.b64.txt)")
           printf '%s' "$SHARED_CONFIG" >> docker/.local.env
           printf '%s' "$SHARED_CONFIG" >> docker/.prebuilt.env
