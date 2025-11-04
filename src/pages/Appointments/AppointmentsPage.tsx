@@ -408,6 +408,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
             placeholder={t("search_patients")}
             className="w-full sm:w-auto"
             patientId={qParams.patient}
+            level="facility"
           />
         </div>
       </div>
