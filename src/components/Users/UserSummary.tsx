@@ -40,9 +40,9 @@ export default function UserSummaryTab({
     username: userData.username,
     permissions,
   };
-  const loggedInUsersProfile = authUser.username === userData.username;
-  const canEditUser = authUser.is_superuser || loggedInUsersProfile;
-  const canResetPassword = loggedInUsersProfile;
+  const isOwnAccount = authUser.username === userData.username;
+  const canEditUser = authUser.is_superuser || isOwnAccount;
+  const canResetPassword = isOwnAccount;
 
   const renderBasicInformation = () => {
     return (
@@ -182,7 +182,7 @@ export default function UserSummaryTab({
                     {t("delete_account_note")}
                   </p>
                 </div>
-                <UserDeleteDialog user={userData} />
+                <UserDeleteDialog user={userData} isOwnAccount={isOwnAccount} />
               </div>
             </CardContent>
           </Card>

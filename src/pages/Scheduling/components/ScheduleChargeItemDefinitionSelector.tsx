@@ -93,7 +93,9 @@ export default function ScheduleChargeItemDefinitionSelector({
                 <div className="mt-2 flex gap-2 flex-row">
                   <ChargeItemDefinitionPicker
                     facilityId={facilityId}
-                    resourceSubType={ResourceCategorySubType.practitioner}
+                    resourceSubType={
+                      ResourceCategorySubType.charge_item_definition_schedule_practitioner
+                    }
                     value={selectedCSlug}
                     onValueChange={setSelectedCSlug}
                     placeholder={t("select_charge_item_definition")}
@@ -123,7 +125,9 @@ export default function ScheduleChargeItemDefinitionSelector({
                 <div className="mt-2 flex gap-2 flex-row">
                   <ChargeItemDefinitionPicker
                     facilityId={facilityId}
-                    resourceSubType={ResourceCategorySubType.practitioner}
+                    resourceSubType={
+                      ResourceCategorySubType.charge_item_definition_schedule_practitioner
+                    }
                     value={reVisitCSlug}
                     onValueChange={setReVisitCSlug}
                     placeholder={t("select_charge_item_definition")}
