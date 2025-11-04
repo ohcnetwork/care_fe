@@ -103,14 +103,6 @@ const careConfig = {
     ),
   },
 
-  /**
-   * Flag to enforce discharge disposition during patient discharge
-   */
-  enforceDischargeDisposition: boolean(
-    "REACT_ENFORCE_DISCHARGE_DISPOSITION",
-    false,
-  ),
-
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
         const [module, cdn] = app.split("@");

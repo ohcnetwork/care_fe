@@ -569,7 +569,7 @@ export default function QuestionnaireResponsesList({
             )}
           >
             <div className="text-lg font-medium text-gray-500">
-              {t("no_questionnaire_responses")}
+              {t("no_responses_found")}
             </div>
           </Card>
         ) : (
