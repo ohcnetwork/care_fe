@@ -328,7 +328,11 @@ export function PaymentReconciliationSheet({
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("location")}</FormLabel>
+                    <FormLabel
+                      aria-required={careConfig.paymentLocationRequired}
+                    >
+                      {t("location")}
+                    </FormLabel>
                     <FormControl>
                       <LocationPicker
                         facilityId={facilityId}
