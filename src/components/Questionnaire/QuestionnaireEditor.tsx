@@ -462,7 +462,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           title: "",
           description: "",
           status: "draft",
-          version: "1.0",
           subject_type: "encounter",
           questions: [],
           slug: "",
@@ -481,7 +480,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       questions: questionnaire?.questions,
       status: questionnaire?.status,
       subject_type: questionnaire?.subject_type,
-      version: questionnaire?.version,
       tags: questionnaire?.tags,
     },
     mode: "onChange",
@@ -498,7 +496,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
         questions: initialQuestionnaire.questions,
         status: initialQuestionnaire.status,
         subject_type: initialQuestionnaire.subject_type,
-        version: initialQuestionnaire.version,
         tags: initialQuestionnaire.tags,
       };
 
@@ -751,7 +748,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     if (id) {
       updateQuestionnaire({
         ...form.getValues(),
-        version: String(questionnaire.version), //TODO: remove when backend is fixed
         questions: rootQuestions,
       });
     } else {
@@ -803,7 +799,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       title: importedData.title,
       description: importedData.description,
       status: importedData.status,
-      version: "1.0",
       subject_type: importedData.subject_type || "encounter",
       questions:
         importedData.questions?.map((q: Question) => ({
@@ -826,7 +821,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       slug: mappedData.slug || "",
       description: mappedData.description || "",
       status: mappedData.status || "draft",
-      version: mappedData.version || "1.0",
       subject_type: mappedData.subject_type || "encounter",
     });
     updateQuestions(mappedData.questions || []);
