@@ -432,10 +432,7 @@ function HealthcareServiceFormContent({
               <div className="space-y-4">
                 <div>
                   <h2 className="text-base font-medium text-gray-900">
-                    {t("styling")}{" "}
-                    <span className="text-sm font-normal text-gray-500">
-                      ({t("optional")})
-                    </span>
+                    {t("styling")}
                   </h2>
                   <p className="mt-0.5 text-sm text-gray-500">
                     {t("Customize how this service appears in the UI")}
