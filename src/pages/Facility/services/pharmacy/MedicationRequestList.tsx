@@ -272,6 +272,7 @@ export default function MedicationRequestList({
             placeholder={t("filter_by_identifier")}
             className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
             patientId={qParams.patient_external_id}
+            level="facility"
           />
         </div>
       </div>
