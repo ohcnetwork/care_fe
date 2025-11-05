@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
@@ -12,26 +13,10 @@ test.describe.serial("Patient Identifier Config Management", () => {
   const identifierValue = `T${faker.string.numeric(8)}`;
   let facilityId: string;
 
-  test.beforeAll(async ({ browser }) => {
-    // Get facility ID from the "Facility with Patient" facility
-    const context = await browser.newContext({
-      storageState: "tests/.auth/user.json",
-    });
-    const page = await context.newPage();
-    await page.goto("/");
-    await page
-      .getByRole("link", { name: "Facility with Patient" })
-      .first()
-      .click();
-    await page.waitForURL(/\/facility\/([^/]+)\//, { timeout: 10000 });
-    const match = page.url().match(/\/facility\/([^/]+)\//);
-    if (match) {
-      facilityId = match[1];
-    }
-    await context.close();
-  });
-
   test.beforeEach(async ({ page }) => {
+    // Get facility ID for each test run
+    facilityId = getFacilityId();
+
     // Navigate to admin dashboard
     await page.goto("/");
     await page.getByRole("link", { name: "Admin Dashboard" }).click();
