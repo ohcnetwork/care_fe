@@ -104,12 +104,9 @@ const careConfig = {
   },
 
   /**
-   * Flag to enforce discharge disposition during patient discharge
+   * Flag to make location field mandatory for payment reconciliation
    */
-  enforceDischargeDisposition: boolean(
-    "REACT_ENFORCE_DISCHARGE_DISPOSITION",
-    false,
-  ),
+  paymentLocationRequired: boolean("REACT_PAYMENT_LOCATION_REQUIRED", true),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
@@ -198,6 +195,7 @@ const careConfig = {
    * System identifier for patient phone number configuration
    */
   phoneNumberConfigSystem: "system.care.ohc.network/patient-phone-number",
+  patientNameConfigSystem: "system.care.ohc.network/patient-name",
 } as const;
 
 export default careConfig;

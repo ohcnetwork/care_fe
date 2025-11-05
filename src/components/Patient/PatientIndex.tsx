@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -31,6 +31,7 @@ import { GENDER_TYPES } from "@/common/constants";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { PLUGIN_Component } from "@/PluginEngine";
+import { usePatientIdentifierConfigs } from "@/Utils/identifier-config";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -62,17 +63,9 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 
   const { facility } = useCurrentFacility();
 
-  // Combine instance and facility identifier configs
-  const allIdentifierConfigs = useMemo(
-    () => [
-      ...(facility?.patient_instance_identifier_configs || []),
-      ...(facility?.patient_facility_identifier_configs || []),
-    ],
-    [
-      facility?.patient_instance_identifier_configs,
-      facility?.patient_facility_identifier_configs,
-    ],
-  );
+  const allIdentifierConfigs = usePatientIdentifierConfigs({
+    level: "instance",
+  });
 
   const { canCreatePatient } = getPermissions(
     hasPermission,
