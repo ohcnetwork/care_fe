@@ -227,15 +227,29 @@ test.describe.serial("Patient Identifier Config Management", () => {
 
       // Select our custom identifier as search method
       await page.getByRole("button", { name: updatedDisplayName }).click();
-      await page.waitForTimeout(500);
+
+      // Wait for the search input to be ready
+      const searchInput = page.getByRole("textbox").first();
+      await searchInput.waitFor({ state: "visible" });
 
       // Search using the identifier value
-      const searchInput = page.getByRole("textbox").first();
       await searchInput.fill(identifierValue);
+
+      // Wait for network request to complete after pressing Enter
+      const responsePromise = page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/v1/patient/") &&
+          response.status() === 200,
+        { timeout: 10000 },
+      );
       await searchInput.press("Enter");
 
-      // Wait for search results to load
-      await page.waitForTimeout(2000);
+      try {
+        await responsePromise;
+      } catch {
+        // If no response, wait for network to be idle
+        await page.waitForLoadState("networkidle");
+      }
 
       // Verify the patient appears in search results
       const patientResult = page
