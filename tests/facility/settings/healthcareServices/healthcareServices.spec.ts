@@ -137,10 +137,9 @@ test.describe.serial("Healthcare Services Management", () => {
     await page.getByRole("textbox", { name: "Name" }).fill(updatedName);
 
     // Update the description
-    await page.getByRole("textbox", { name: "Extra Details" }).clear();
-    await page
-      .getByRole("textbox", { name: "Extra Details" })
-      .fill(updatedDescription);
+    const detailsField = page.getByRole("textbox", { name: "Extra Details" });
+    await detailsField.clear();
+    await detailsField.fill(updatedDescription);
 
     // Change the icon - find the combobox that shares the same parent as the "Icon" label
     await page
