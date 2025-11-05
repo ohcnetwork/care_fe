@@ -1,6 +1,6 @@
-import { getFacilityId } from "@/tests/support/facilityId";
 import { test } from "@playwright/test";
 import fs from "fs";
+import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
