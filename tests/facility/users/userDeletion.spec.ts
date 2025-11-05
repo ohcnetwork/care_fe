@@ -26,8 +26,13 @@ test.describe("User Deletion Access Control", () => {
       // Wait for successful login and navigate to facility
       await expect(page).toHaveURL(/(?!.*login)/, { timeout: 15000 });
 
-      // Navigate to facility users page
-      await page.getByRole("link", { name: "Sen, Palla and Vig View" }).click();
+      // Navigate to first available facility
+      const firstFacilityLink = page
+        .getByRole("link")
+        .filter({ hasText: "View" })
+        .first();
+      await expect(firstFacilityLink).toBeVisible({ timeout: 10000 });
+      await firstFacilityLink.click();
       await page.getByRole("button", { name: "Toggle Sidebar" }).click();
       await page.getByRole("link", { name: "Users" }).click();
 
@@ -69,8 +74,13 @@ test.describe("User Deletion Access Control", () => {
       // Wait for successful login
       await expect(page).toHaveURL(/(?!.*login)/, { timeout: 15000 });
 
-      // Navigate to facility users page
-      await page.getByRole("link", { name: "Sen, Palla and Vig View" }).click();
+      // Navigate to first available facility
+      const firstFacilityLink = page
+        .getByRole("link")
+        .filter({ hasText: "View" })
+        .first();
+      await expect(firstFacilityLink).toBeVisible({ timeout: 10000 });
+      await firstFacilityLink.click();
       await page.getByRole("button", { name: "Toggle Sidebar" }).click();
       await page.getByRole("link", { name: "Users" }).click();
 
