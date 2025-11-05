@@ -1,8 +1,8 @@
-import { getEncounterId } from "@/tests/support/encounterId";
-import { getFacilityId } from "@/tests/support/facilityId";
-import { getPatientId } from "@/tests/support/patientId";
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { getEncounterId } from "tests/support/encounterId";
+import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
