@@ -1,72 +1,101 @@
 import { expect, test } from "@playwright/test";
 
+/**
+ * User Deletion Access Control Tests
+ *
+ * Tests verify that delete account functionality is properly restricted
+ * based on user permissions:
+ * - Admin users: Can see and access delete account button
+ * - Staff users: Cannot see delete account button (no permission)
+ */
+
 test.describe("User Deletion Access Control", () => {
-  test("admin user should have access to delete account button", async ({
-    page,
-  }) => {
-    // Navigate to login page
-    await page.goto("/");
-    await page.getByRole("button", { name: "Log in as Staff" }).click();
+  test.describe("Admin User Access", () => {
+    test("admin should see delete account button for users", async ({
+      page,
+    }) => {
+      // Navigate to the application
+      await page.goto("http://localhost:4000/");
 
-    // Login as admin
-    await page.getByRole("textbox", { name: "Username" }).fill("admin");
-    await page.getByRole("textbox", { name: "Password" }).fill("admin");
-    await page.getByRole("button", { name: "Login" }).click();
+      // Login as admin user
+      await page.getByRole("button", { name: "Log in as Staff" }).click();
+      await page.getByRole("textbox", { name: "Username" }).fill("admin");
+      await page.getByRole("textbox", { name: "Password" }).fill("admin");
+      await page.getByRole("button", { name: "Login" }).click();
 
-    // Navigate to facility (assuming this is required to access user profile)
-    await page
-      .getByRole("link", { name: "FACILITY WITH PATIENTS View" })
-      .click();
+      // Wait for successful login and navigate to facility
+      await expect(page).toHaveURL(/(?!.*login)/, { timeout: 15000 });
 
-    // Open sidebar and navigate to profile
-    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-    await page.getByRole("button", { name: "Admin User admin" }).click();
-    await page.getByRole("menuitem", { name: "Profile" }).click();
+      // Navigate to facility users page
+      await page.getByRole("link", { name: "Sen, Palla and Vig View" }).click();
+      await page.getByRole("button", { name: "Toggle Sidebar" }).click();
+      await page.getByRole("link", { name: "Users" }).click();
 
-    // Verify delete account button is visible and accessible for admin
-    const deleteButton = page.getByRole("button", { name: "Delete Account" });
-    await expect(deleteButton).toBeVisible();
-    await expect(deleteButton).toBeEnabled();
+      // Wait for users page to load
+      await page.waitForLoadState("networkidle");
+
+      // Find and click on the first user's "See Details" button
+      const seeDetailsButton = page
+        .getByRole("button", { name: "See Details" })
+        .first(); // Take the first user card
+
+      await expect(seeDetailsButton).toBeVisible({ timeout: 10000 });
+      await seeDetailsButton.click();
+
+      // Verify that delete account button is visible for admin
+      const deleteButton = page.getByRole("button", { name: "Delete Account" });
+      await expect(deleteButton).toBeVisible({ timeout: 10000 });
+
+      // Verify the button is clickable (not disabled)
+      await expect(deleteButton).toBeEnabled();
+    });
   });
 
-  test("staff user should not have access to delete account button", async ({
-    page,
-  }) => {
-    // Navigate to login page
-    await page.goto("/");
-    await page.getByRole("button", { name: "Log in as Staff" }).click();
+  test.describe("Staff User Access", () => {
+    test("staff should not see delete account button for users", async ({
+      page,
+    }) => {
+      // Navigate to the application
+      await page.goto("http://localhost:4000/");
 
-    // Login as staff user
-    await page.getByRole("textbox", { name: "Username" }).fill("staff_2_0");
-    await page
-      .getByRole("textbox", { name: "Password" })
-      .fill("Coronasafe@123");
-    await page.getByRole("button", { name: "Login" }).click();
+      // Login as staff user
+      await page.getByRole("button", { name: "Log in as Staff" }).click();
+      await page.getByRole("textbox", { name: "Username" }).fill("staff_2_0");
+      await page
+        .getByRole("textbox", { name: "Password" })
+        .fill("Coronasafe@123");
+      await page.getByRole("button", { name: "Login" }).click();
 
-    // Wait for successful login
-    await page.waitForURL(/(?!.*login)/, { timeout: 15000 });
+      // Wait for successful login
+      await expect(page).toHaveURL(/(?!.*login)/, { timeout: 15000 });
 
-    // Navigate to facility (assuming this is required to access user profile)
-    // Note: The link text might be different for staff users
-    await page
-      .getByRole("link", { name: "Sen, Palla and Vig View" })
-      .first()
-      .click();
+      // Navigate to facility users page
+      await page.getByRole("link", { name: "Sen, Palla and Vig View" }).click();
+      await page.getByRole("button", { name: "Toggle Sidebar" }).click();
+      await page.getByRole("link", { name: "Users" }).click();
 
-    // Open sidebar and navigate to profile
-    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
+      // Wait for users page to load
+      await page.waitForLoadState("networkidle");
 
-    // Look for user profile button - might have different text for staff
-    const profileButton = page.getByRole("button", {
-      name: "Oscar Borde staff_2_0",
+      // Find and click on the first user's "See Details" button
+      const seeDetailsButton = page
+        .getByRole("button", { name: "See Details" })
+        .first(); // Take the first user card
+
+      await expect(seeDetailsButton).toBeVisible({ timeout: 10000 });
+      await seeDetailsButton.click();
+
+      // Verify that delete account button is NOT visible for staff
+      const deleteButton = page.getByRole("button", { name: "Delete Account" });
+
+      // Use toBeHidden() or check that the button doesn't exist
+      await expect(deleteButton).toBeHidden();
+
+      // Alternative check: ensure the button is not in the DOM at all
+      const deleteButtonCount = await page
+        .getByRole("button", { name: "Delete Account" })
+        .count();
+      expect(deleteButtonCount).toBe(0);
     });
-    await expect(profileButton).toBeVisible();
-    await profileButton.click();
-
-    await page.getByRole("menuitem", { name: "Profile" }).click();
-
-    // Verify delete account button is NOT visible for staff user
-    const deleteButton = page.getByRole("button", { name: "Delete Account" });
-    await expect(deleteButton).not.toBeVisible();
   });
 });
