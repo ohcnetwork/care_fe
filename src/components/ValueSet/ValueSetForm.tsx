@@ -31,19 +31,19 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import {
   TERMINOLOGY_SYSTEMS,
-  UpdateValuesetModel,
-  ValuesetFormType,
-} from "@/types/valueset/valueset";
+  ValueSetBase,
+  ValueSetRead,
+  ValueSetStatus,
+} from "@/types/valueSet/valueSet";
+import { valuesOf } from "@/Utils/utils";
 
 import { generateSlug } from "@/Utils/utils";
 import { CodingField } from "./CodingField";
 import { ValueSetPreview } from "./ValueSetPreview";
 
-// Create a schema for form validation
-
 interface ValueSetFormProps {
-  initialData?: UpdateValuesetModel;
-  onSubmit: (data: ValuesetFormType) => void;
+  initialData?: ValueSetRead;
+  onSubmit: (data: ValueSetBase) => void;
   isSubmitting?: boolean;
   isSystemDefined?: boolean;
 }
@@ -56,7 +56,7 @@ function ConceptFields({
 }: {
   nestIndex: number;
   type: "include" | "exclude";
-  parentForm: ReturnType<typeof useForm<ValuesetFormType>>;
+  parentForm: ReturnType<typeof useForm<ValueSetBase>>;
   disabled?: boolean;
 }) {
   const { t } = useTranslation(); // Add translation hook
@@ -67,7 +67,7 @@ function ConceptFields({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h4 className="text-sm font-medium">{t("concepts")}</h4>
         <Button
           type="button"
@@ -75,6 +75,7 @@ function ConceptFields({
           size="sm"
           onClick={() => append({ code: "", display: "" })}
           disabled={disabled}
+          className="w-full sm:w-auto"
         >
           <PlusIcon className="size-4 mr-2" />
           {t("add_concept")}
@@ -87,16 +88,9 @@ function ConceptFields({
             name={`compose.${type}.${nestIndex}.concept.${index}`}
             form={parentForm}
             className="flex-1"
+            onRemove={() => remove(index)}
+            removeDisabled={disabled}
           />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => remove(index)}
-            disabled={disabled}
-          >
-            <TrashIcon className="size-4" />
-          </Button>
         </div>
       ))}
     </div>
@@ -112,7 +106,7 @@ function FilterFields({
   nestIndex: number;
   type: "include" | "exclude";
   disabled?: boolean;
-  parentForm: ReturnType<typeof useForm<ValuesetFormType>>;
+  parentForm: ReturnType<typeof useForm<ValueSetBase>>;
 }) {
   const { t } = useTranslation();
   const { fields, append, remove } = useFieldArray({
@@ -122,7 +116,7 @@ function FilterFields({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h4 className="text-sm font-medium">{t("filters")}</h4>
         <Button
           type="button"
@@ -130,6 +124,7 @@ function FilterFields({
           size="sm"
           onClick={() => append({ property: "", op: "", value: "" })}
           disabled={disabled}
+          className="w-full sm:w-auto"
         >
           <PlusIcon className="size-4 mr-2" />
           {t("add_filter")}
@@ -137,54 +132,56 @@ function FilterFields({
       </div>
       {fields.map((field, index) => (
         <div key={field.id} className="flex gap-4 items-start">
-          <FormField
-            control={parentForm.control}
-            name={`compose.${type}.${nestIndex}.filter.${index}.property`}
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={t("property")}
-                    disabled={disabled}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={parentForm.control}
-            name={`compose.${type}.${nestIndex}.filter.${index}.op`}
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={t("operator")}
-                    disabled={disabled}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={parentForm.control}
-            name={`compose.${type}.${nestIndex}.filter.${index}.value`}
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={t("value")}
-                    disabled={disabled}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 flex-1">
+            <FormField
+              control={parentForm.control}
+              name={`compose.${type}.${nestIndex}.filter.${index}.property`}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder={t("property")}
+                      disabled={disabled}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={parentForm.control}
+              name={`compose.${type}.${nestIndex}.filter.${index}.op`}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder={t("operator")}
+                      disabled={disabled}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={parentForm.control}
+              name={`compose.${type}.${nestIndex}.filter.${index}.value`}
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder={t("value")}
+                      disabled={disabled}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <Button
             type="button"
             variant="ghost"
@@ -206,7 +203,7 @@ function RuleFields({
   disabled,
 }: {
   type: "include" | "exclude";
-  form: ReturnType<typeof useForm<ValuesetFormType>>;
+  form: ReturnType<typeof useForm<ValueSetBase>>;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -217,7 +214,7 @@ function RuleFields({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 pb-2 p-4 sm:p-6">
         <CardTitle className="text-lg font-medium">
           {type === "include" ? t("include_rules") : t("exclude_rules")}
         </CardTitle>
@@ -233,15 +230,16 @@ function RuleFields({
             })
           }
           disabled={disabled}
+          className="w-full sm:w-auto"
         >
           <PlusIcon className="size-4 mr-2" />
           {t("add_rule")}
         </Button>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 p-4 sm:p-6 pt-0">
         {fields.map((field, index) => (
           <div key={field.id} className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-end gap-4">
               <FormField
                 control={form.control}
                 name={`compose.${type}.${index}.system`}
@@ -272,7 +270,6 @@ function RuleFields({
                 )}
               />
               <Button
-                className="mt-5"
                 type="button"
                 variant="ghost"
                 size="icon"
@@ -317,7 +314,12 @@ export function ValueSetForm({
       .max(25, t("character_count_validation", { min: 5, max: 25 }))
       .regex(/^[-\w]+$/, { message: t("slug_format_message") }),
     description: z.string(),
-    status: z.enum(["active", "draft", "retired", "unknown"]),
+    status: z.enum([
+      ValueSetStatus.ACTIVE,
+      ValueSetStatus.DRAFT,
+      ValueSetStatus.RETIRED,
+      ValueSetStatus.UNKNOWN,
+    ]),
     is_system_defined: z.boolean(),
     compose: z.object({
       include: z.array(
@@ -375,7 +377,7 @@ export function ValueSetForm({
       name: initialData?.name || "",
       slug: initialData?.slug || "",
       description: initialData?.description || "",
-      status: initialData?.status || "active",
+      status: initialData?.status || ValueSetStatus.ACTIVE,
       is_system_defined: initialData?.is_system_defined || false,
       compose: {
         include: initialData?.compose?.include || [],
@@ -480,10 +482,11 @@ export function ValueSetForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="active">{t("active")}</SelectItem>
-                  <SelectItem value="draft">{t("draft")}</SelectItem>
-                  <SelectItem value="retired">{t("retired")}</SelectItem>
-                  <SelectItem value="unknown">{t("unknown")}</SelectItem>
+                  {valuesOf(ValueSetStatus).map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {t(status)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />

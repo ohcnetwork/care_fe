@@ -81,8 +81,8 @@ export function QuestionnaireSearch({
   const content = (
     <Command filter={() => 1}>
       <CommandInput
-        placeholder={t("search_questionnaires")}
-        className="outline-hidden border-none ring-0 shadow-none text-base"
+        placeholder={t("search_forms")}
+        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
         onValueChange={setSearch}
         autoFocus={!isAppleDevice}
       />
@@ -95,7 +95,7 @@ export function QuestionnaireSearch({
               <Skeleton className="h-8 w-full" />
             </div>
           ) : (
-            t("no_questionnaires_found")
+            t("no_results_found")
           )}
         </CommandEmpty>
 
@@ -138,7 +138,7 @@ export function QuestionnaireSearch({
                   {t("loading")}
                 </>
               ) : (
-                <span>{placeholder || t("add_questionnaire")}</span>
+                <span>{placeholder || t("add_forms")}</span>
               )}
               <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
             </Button>
@@ -146,7 +146,7 @@ export function QuestionnaireSearch({
         </DrawerTrigger>
 
         <DrawerContent className="min-h-[50vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
-          <DrawerTitle className="sr-only">{t("questionnaire")}</DrawerTitle>
+          <DrawerTitle className="sr-only">{t("forms")}</DrawerTitle>
           <div className="mt-6 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto">
             {content}
           </div>
@@ -178,7 +178,7 @@ export function QuestionnaireSearch({
             ) : (
               <div className="flex justify-start items-center gap-2 text-primary-800 w-full">
                 <Plus className="size-4" />
-                <span>{placeholder || t("add_questionnaire")}</span>
+                <span>{placeholder || t("add_forms")}</span>
               </div>
             )}
           </Button>

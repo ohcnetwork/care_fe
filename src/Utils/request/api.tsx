@@ -1,16 +1,4 @@
 import { PaginatedResponse } from "@/Utils/request/types";
-import {
-  BatchRequestBody,
-  BatchRequestResponse,
-} from "@/types/base/batch/batch";
-import { Code } from "@/types/base/code/code";
-import { PlugConfig } from "@/types/plugConfig";
-import {
-  CommentModel,
-  CreateResourceRequest,
-  ResourceRequest,
-  UpdateResourceRequest,
-} from "@/types/resourceRequest/resourceRequest";
 import { UserReadMinimal } from "@/types/user/user";
 
 /**
@@ -53,90 +41,6 @@ const routes = {
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
     TRes: Type<PaginatedResponse<UserReadMinimal>>(),
-  },
-
-  // Request
-  createResource: {
-    path: "/api/v1/resource/",
-    method: "POST",
-    TRes: Type<ResourceRequest>(),
-    TBody: Type<CreateResourceRequest>(),
-  },
-  updateResource: {
-    path: "/api/v1/resource/{id}/",
-    method: "PUT",
-    TRes: Type<ResourceRequest>(),
-    TBody: Type<UpdateResourceRequest>(),
-  },
-  listResourceRequests: {
-    path: "/api/v1/resource/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<ResourceRequest>>(),
-  },
-  getResourceDetails: {
-    path: "/api/v1/resource/{id}/",
-    method: "GET",
-    TRes: Type<ResourceRequest>(),
-  },
-  getResourceComments: {
-    path: "/api/v1/resource/{id}/comment/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<CommentModel>>(),
-  },
-  addResourceComments: {
-    path: "/api/v1/resource/{id}/comment/",
-    method: "POST",
-    TRes: Type<CommentModel>(),
-    TBody: Type<Partial<CommentModel>>(),
-  },
-
-  valueset: {
-    expand: {
-      path: "/api/v1/valueset/{system}/expand/",
-      method: "POST",
-      TBody: Type<{ search: string; count: number }>(),
-      TRes: Type<{ results: Code[] }>(),
-    },
-  },
-
-  batchRequest: {
-    path: "/api/v1/batch_requests/",
-    method: "POST",
-    TRes: Type<{
-      results: BatchRequestResponse[];
-    }>(),
-    TBody: Type<BatchRequestBody>(),
-  },
-
-  plugConfig: {
-    listPlugConfigs: {
-      path: "/api/v1/plug_config/",
-      method: "GET",
-      TRes: Type<{ configs: PlugConfig[] }>(),
-    },
-    getPlugConfig: {
-      path: "/api/v1/plug_config/{slug}/",
-      method: "GET",
-      TRes: Type<PlugConfig>(),
-    },
-    createPlugConfig: {
-      path: "/api/v1/plug_config/",
-      method: "POST",
-      TReq: Type<PlugConfig>(),
-      TRes: Type<PlugConfig>(),
-    },
-    updatePlugConfig: {
-      path: "/api/v1/plug_config/{slug}/",
-      method: "PATCH",
-      TReq: Type<PlugConfig>(),
-      TRes: Type<PlugConfig>(),
-    },
-    deletePlugConfig: {
-      path: "/api/v1/plug_config/{slug}/",
-      method: "DELETE",
-      TRes: Type<Record<string, never>>(),
-      TBody: Type<void>(),
-    },
   },
 } as const;
 

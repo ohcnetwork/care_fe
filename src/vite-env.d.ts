@@ -22,6 +22,7 @@ interface ImportMetaEnv {
   readonly REACT_DEFAULT_ENCOUNTER_TYPE?: string;
   readonly REACT_ENCOUNTER_DEFAULT_DATE_FILTER?: string;
   readonly REACT_APPOINTMENTS_DEFAULT_DATE_FILTER?: string;
+  readonly REACT_PAYMENT_LOCATION_REQUIRED?: string;
   readonly REACT_ALLOWED_ENCOUNTER_CLASSES?: string;
   readonly REACT_ALLOWED_LOCALES?: string;
   readonly REACT_ENABLED_APPS?: string;
@@ -29,6 +30,7 @@ interface ImportMetaEnv {
   readonly REACT_APP_MAX_IMAGE_UPLOAD_SIZE_MB?: string;
   readonly REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION?: string;
   readonly REACT_DISABLE_PATIENT_LOGIN?: string;
+  readonly REACT_CUSTOM_REMOTE_I18N_URL?: string;
 
   // Plugins related envs...
   readonly REACT_SENTRY_DSN?: string;
