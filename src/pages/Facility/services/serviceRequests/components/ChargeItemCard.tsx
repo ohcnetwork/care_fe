@@ -77,7 +77,10 @@ export function ChargeItemCard({
                 <PopoverTrigger>
                   <InfoIcon className="size-4 text-gray-700 cursor-pointer" />
                 </PopoverTrigger>
-                <PopoverContent side="right" className="p-0">
+                <PopoverContent
+                  side="right"
+                  className="p-0 w-auto max-w-[calc(100vw-2rem)]"
+                >
                   <ChargeItemPriceDisplay
                     priceComponents={chargeItem.total_price_components}
                   />

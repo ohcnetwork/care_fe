@@ -88,22 +88,24 @@ export default function ChargeItemPriceDisplay({
   };
 
   return (
-    <div className="p-3">
+    <div className="p-3 min-w-[200px]">
       <p className="font-medium text-sm mb-2">
         {t("component_wise_breakdown")}
       </p>
       <div className="space-y-1 text-xs">
-        <div className="flex justify-between">
-          <span>{t("base_amount")}</span>
+        <div className="flex justify-between gap-2">
+          <span className="truncate">{t("base_amount")}</span>
           <MonetaryDisplay amount={String(baseAmount)} />
         </div>
 
         {surchargeComponents.map((component, index) => (
           <div
             key={`surcharge-${index}`}
-            className="flex justify-between text-gray-500"
+            className="flex justify-between gap-2 text-gray-500"
           >
-            <span>{component.code?.display || t("surcharge")}</span>
+            <span className="truncate">
+              {component.code?.display || t("surcharge")}
+            </span>
             {renderComponentValue(component, "+")}
           </div>
         ))}
@@ -111,9 +113,11 @@ export default function ChargeItemPriceDisplay({
         {discountComponents.map((component, index) => (
           <div
             key={`discount-${index}`}
-            className="flex justify-between text-gray-500"
+            className="flex justify-between gap-2 text-gray-500"
           >
-            <span>{component.code?.display || t("discount")}</span>
+            <span className="truncate">
+              {component.code?.display || t("discount")}
+            </span>
             {renderComponentValue(component, "-")}
           </div>
         ))}
@@ -121,23 +125,25 @@ export default function ChargeItemPriceDisplay({
         {taxComponents.map((component, index) => (
           <div
             key={`tax-${index}`}
-            className="flex justify-between text-gray-500"
+            className="flex justify-between gap-2 text-gray-500"
           >
-            <span>{component.code?.display || t("tax")}</span>
+            <span className="truncate">
+              {component.code?.display || t("tax")}
+            </span>
             {renderComponentValue(component, "+")}
           </div>
         ))}
 
         {mrpAmount && (
-          <div className="flex justify-between text-gray-500">
-            <span>{t("mrp")}</span>
+          <div className="flex justify-between gap-2 text-gray-500">
+            <span className="truncate">{t("mrp")}</span>
             <MonetaryDisplay amount={mrpAmount} />
           </div>
         )}
 
         {purchasePriceAmount && (
-          <div className="flex justify-between text-gray-500">
-            <span>{t("purchase_price")}</span>
+          <div className="flex justify-between gap-2 text-gray-500">
+            <span className="truncate">{t("purchase_price")}</span>
             <MonetaryDisplay amount={purchasePriceAmount} />
           </div>
         )}
