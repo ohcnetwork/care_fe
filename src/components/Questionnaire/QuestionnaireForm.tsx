@@ -45,7 +45,6 @@ import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
 import { validateMedicationRequestQuestion } from "./QuestionTypes/MedicationRequestQuestion";
 import { validateMedicationStatementQuestion } from "./QuestionTypes/MedicationStatementQuestion";
-import { isQuestionEnabled } from "./QuestionTypes/QuestionGroup";
 import { QuestionnaireSearch } from "./QuestionnaireSearch";
 import { FIXED_QUESTIONNAIRES } from "./data/StructuredFormData";
 import { getStructuredRequests } from "./structured/handlers";
@@ -575,7 +574,7 @@ export function QuestionnaireForm({
           return;
         }
 
-        if (q.required) {
+        if (q.required && q._is_enabled) {
           // Handle appointment validation
           const response = form.responses.find((r) => r.question_id === q.id);
           const hasValue = response?.values?.some(
@@ -603,7 +602,7 @@ export function QuestionnaireForm({
           }
         }
 
-        if (q.type === "structured" && q.structured_type) {
+        if (q.type === "structured" && q.structured_type && q._is_enabled) {
           const response = form.responses.find((r) => r.question_id === q.id);
           const validator =
             STRUCTURED_TYPE_VALIDATORS[
@@ -687,15 +686,13 @@ export function QuestionnaireForm({
             encounter: encounterId,
             patient: patientId,
             results: validResponses
-              .filter((response) =>
-                isQuestionEnabled(
-                  findQuestionById(
-                    form.questionnaire.questions,
-                    response.question_id,
-                  ) as Question,
-                  form.responses,
-                ),
-              )
+              .filter((response) => {
+                const question = findQuestionById(
+                  form.questionnaire.questions,
+                  response.question_id,
+                ) as Question;
+                return question?._is_enabled ?? true;
+              })
               .map((response) => ({
                 question_id: response.question_id,
                 values: response.values.map((value) => {
