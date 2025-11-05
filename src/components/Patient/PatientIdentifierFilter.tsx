@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -40,7 +40,6 @@ import {
   PatientRead,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
-import { usePatientIdentifierConfigs } from "@/Utils/identifier-config";
 import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 
@@ -49,7 +48,6 @@ interface Props {
   placeholder?: string;
   className?: string;
   patientId?: string;
-  level?: "facility" | "instance";
 }
 
 export default function PatientIdentifierFilter({
@@ -57,10 +55,9 @@ export default function PatientIdentifierFilter({
   placeholder,
   className,
   patientId,
-  level = "instance",
 }: Props) {
   const { t } = useTranslation();
-  const { facilityId } = useCurrentFacility();
+  const { facility, facilityId } = useCurrentFacility();
   const [open, setOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<
     PatientRead | PartialPatientModel | null
@@ -83,7 +80,17 @@ export default function PatientIdentifierFilter({
     }
   }, [patientId, selectedPatient]);
 
-  const allIdentifierConfigs = usePatientIdentifierConfigs({ level });
+  // Combine instance and facility identifier configs
+  const allIdentifierConfigs = useMemo(
+    () => [
+      ...(facility?.patient_instance_identifier_configs || []),
+      ...(facility?.patient_facility_identifier_configs || []),
+    ],
+    [
+      facility?.patient_instance_identifier_configs,
+      facility?.patient_facility_identifier_configs,
+    ],
+  );
 
   // Set default search type to first identifier config (prioritize phone number)
   useEffect(() => {

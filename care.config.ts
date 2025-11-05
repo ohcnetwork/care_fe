@@ -190,7 +190,6 @@ const careConfig = {
    * System identifier for patient phone number configuration
    */
   phoneNumberConfigSystem: "system.care.ohc.network/patient-phone-number",
-  patientNameConfigSystem: "system.care.ohc.network/patient-name",
 } as const;
 
 export default careConfig;
