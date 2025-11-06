@@ -1,5 +1,21 @@
 import { z } from "zod";
 
+export interface Designation {
+  language?: string;
+  use?: {
+    system: string;
+    code: string;
+  };
+  value?: string;
+}
+
+export interface CodeConceptMinimal {
+  code: string;
+  display: string;
+  system: string;
+  designation: Designation[];
+}
+
 export interface Code {
   system: string;
   code: string;
