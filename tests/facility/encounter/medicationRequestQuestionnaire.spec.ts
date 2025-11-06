@@ -282,15 +282,21 @@ test.describe("Medication Request Questionnaire", () => {
     // Open Medication History
     await page.getByRole("button", { name: "Medication History" }).click();
 
-    // Verify the added medication appears in the history
-    const medicationRow = page.getByRole("row", {
-      name: new RegExp(
-        `${addedMedication.medicationName}.*` +
-          `${addedMedication.dosageQuantity}.*` +
-          `${addedMedication.dosageUnit}.*` +
-          `${addedMedication.frequency.replace(/[()]/g, "\\$&")}`,
-      ),
+    const historyDialog = page.getByRole("dialog", {
+      name: "Medication History",
     });
+    await historyDialog.waitFor({ state: "visible" });
+
+    // Verify the diagnosis appears in history
+    const tableBody = historyDialog.locator('[data-slot="table-body"]');
+
+    // Verify the added medication appears in the history
+    const medicationRow = tableBody
+      .getByRole("row")
+      .filter({ hasText: addedMedication.medicationName })
+      .filter({ hasText: addedMedication.dosageQuantity.toString() })
+      .filter({ hasText: addedMedication.dosageUnit })
+      .filter({ hasText: addedMedication.frequency });
 
     await expect(medicationRow).toBeVisible();
   });
