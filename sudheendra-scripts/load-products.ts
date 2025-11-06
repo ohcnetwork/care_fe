@@ -1,4 +1,4 @@
-import { format, parse } from "date-fns";
+import { addDays, format, parse } from "date-fns";
 import dotenv from "dotenv";
 import {
   batchRequest,
@@ -44,20 +44,22 @@ dotenv.config({ path: [".env.local", ".env"] });
 
 const logger = getLogger();
 
-const GOOGLE_SHEET_ID = "1CB3rqqc2MBaR8e0_oFjEh7KRTOWMamAExNHJ5qGZJpE";
+const GOOGLE_SHEET_ID = "17K-R8i8sVzjzQ4ralQU3S3hCB__143qo";
 const SHEET_NAME = "Sheet1";
 const FACILITY_ID = process.env.FACILITY_ID;
 const LOCATION_ID = process.env.LOCATION_ID;
 
+const GENERATE_KEY = "$generate";
+
 const HEADERS_MAP = {
-  item: "Item",
-  hsnCode: "HSN Code",
-  batchNumber: "Batch No..",
-  expiryDate: "Exp Date",
-  quantity: "Qty",
-  purchasePrice: "P/Rate",
-  sellingPrice: "S/Rate",
-  taxRate: "RATE",
+  item: "ITEM",
+  hsnCode: "HSN CODE",
+  batchNumber: GENERATE_KEY,
+  expiryDate: GENERATE_KEY,
+  quantity: "QUANTITY",
+  purchasePrice: "RATE",
+  sellingPrice: "MRP",
+  taxRate: "GST%",
 } as const;
 
 const BASE_UNIT = {
@@ -133,7 +135,7 @@ async function buildProductKnowledges(datapoints: Datapoints) {
     ([item, { name, hsnCode, baseUnit }]) =>
       ({
         name,
-        slug_value: createSlug(item),
+        slug_value: item,
         alternate_identifier: hsnCode,
         facility: FACILITY_ID!,
         product_type: ProductKnowledgeType.medication,
@@ -141,7 +143,7 @@ async function buildProductKnowledges(datapoints: Datapoints) {
         names: [],
         storage_guidelines: [],
         base_unit: baseUnit,
-        category: "pk-medicines",
+        category: `f-${FACILITY_ID}-pk-medicines`,
       }) satisfies ProductKnowledgeCreate,
   );
 
@@ -231,7 +233,7 @@ async function buildChargeItemDefinitions(datapoints: Datapoints) {
               },
               ...getTaxComponents(datapoint),
             ],
-            category: "cid-medications",
+            category: `f-${FACILITY_ID}-cid-medications`,
           } satisfies ChargeItemDefinitionCreate,
         ];
       }),
@@ -284,10 +286,10 @@ async function buildProducts(datapoints: Datapoints) {
               "yyyy-MM-dd",
             )
           : undefined,
-        product_knowledge: createSlug(datapoint.item),
-        charge_item_definition: createSlug(
+        product_knowledge: `f-${FACILITY_ID}-${createSlug(datapoint.item)}`,
+        charge_item_definition: `f-${FACILITY_ID}-${createSlug(
           `${datapoint.item}-${datapoint.batchNumber}`,
-        ),
+        )}`,
       } satisfies ProductCreate;
     }),
 
@@ -360,7 +362,14 @@ async function buildInventoryItems(
 
 async function main() {
   const csvContent = await fetchCsvFromGoogleSheet(GOOGLE_SHEET_ID, SHEET_NAME);
-  let datapoints = transformCsvToObjects(csvContent, HEADERS_MAP);
+  let datapoints = transformCsvToObjects(csvContent, HEADERS_MAP, {
+    batchNumber: () => {
+      return `BATCH-${new Date().toISOString()}-${Math.floor(Math.random() * 1000000)}`;
+    },
+    expiryDate: () => {
+      return format(addDays(new Date(), 365), "M/dd/yyyy");
+    },
+  });
 
   // cleanup: exclude rows without items without required fields
   datapoints = datapoints.filter((row) =>
@@ -376,14 +385,14 @@ async function main() {
 
   logger(`Found ${datapoints.length} products to be created`);
 
-  const resourceCategories = await ensureResourceCategories();
-  logger(`Created ${resourceCategories.length} resource categories`);
+  // const resourceCategories = await ensureResourceCategories();
+  // logger(`Created ${resourceCategories.length} resource categories`);
 
-  const productKnowledges = await buildProductKnowledges(datapoints);
-  logger(`Created ${productKnowledges.length} product knowledges`);
+  // const productKnowledges = await buildProductKnowledges(datapoints);
+  // logger(`Created ${productKnowledges.length} product knowledges`);
 
-  const chargeItemDefinitions = await buildChargeItemDefinitions(datapoints);
-  logger(`Created ${chargeItemDefinitions.length} charge item definitions`);
+  // const chargeItemDefinitions = await buildChargeItemDefinitions(datapoints);
+  // logger(`Created ${chargeItemDefinitions.length} charge item definitions`);
 
   const products = await buildProducts(datapoints);
   logger(`Created ${products.length} products`);

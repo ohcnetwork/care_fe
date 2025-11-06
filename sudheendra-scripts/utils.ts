@@ -173,12 +173,18 @@ export const fetchCsvFromGoogleSheet = async (
 export const transformCsvToObjects = <T extends string>(
   [headerRow, ...dataRows]: string[][],
   headerMap: Record<T, string | number>,
+  generateFns?: Partial<Record<T, () => string>>,
 ): Record<T, string>[] => {
   // Get the indexes of the headers
-  const headerIndex = Object.fromEntries(
+  console.log({ headerRow, headerMap });
+  const headerRetriever = Object.fromEntries(
     keysOf(headerMap).map((rKey) => {
       if (typeof headerMap[rKey] === "number") {
         return [rKey, headerMap[rKey]];
+      }
+
+      if (generateFns?.[rKey]) {
+        return [rKey, generateFns[rKey]!];
       }
 
       const index = headerRow.indexOf(headerMap[rKey]);
@@ -187,12 +193,17 @@ export const transformCsvToObjects = <T extends string>(
       }
       return [rKey, index];
     }),
-  ) as Record<T, number>;
+  ) as Record<T, number | (() => string)>;
 
   // Transform the data rows to objects
   return dataRows.map((row) => {
     return Object.fromEntries(
-      keysOf(headerMap).map((rKey) => [rKey, row[headerIndex[rKey]]]),
+      keysOf(headerMap).map((rKey) => [
+        rKey,
+        typeof headerRetriever[rKey] === "function"
+          ? headerRetriever[rKey]()
+          : row[headerRetriever[rKey] as number],
+      ]),
     ) as Record<T, string>;
   });
 };
@@ -240,14 +251,17 @@ export interface BaseConfig {
 
 // Utility function to create slug from name
 export function createSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9\s_-]/g, "") // Keep letters, numbers, spaces, underscores, and hyphens
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/-+/g, "-") // Replace multiple hyphens with single
-    .trim()
-    .slice(0, 20)
-    .padEnd(5, "-");
+  return (
+    "b-" +
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s_-]/g, "") // Keep letters, numbers, spaces, underscores, and hyphens
+      .replace(/\s+/g, "-") // Replace spaces with hyphens
+      .replace(/-+/g, "-") // Replace multiple hyphens with single
+      .trim()
+      .slice(0, 18)
+      .padEnd(5, "-")
+  );
 }
 
 /**
