@@ -1,15 +1,11 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { ChevronDown, Tags } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
-
-import { cn } from "@/lib/utils";
-
-import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   HoverCard,
   HoverCardContent,
@@ -20,36 +16,33 @@ import {
   encounterStatusFilter,
   tagFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
-import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
-import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-
-import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
   completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
-import encounterApi from "@/types/emr/encounter/encounterApi";
-import {
-  TagConfig,
-  TagResource,
-  getTagHierarchyDisplay,
-} from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import { ChevronDown, Tags } from "lucide-react";
+import React, { useEffect, useState } from "react";
+
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { dateTimeQueryString } from "@/Utils/utils";
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+import TagBadge from "@/components/Tags/TagBadge";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
 
 interface EncounterCardProps {
   encounter: EncounterRead;
@@ -138,14 +131,7 @@ function EncounterCard({
         {encounter.tags.length > 0 && (
           <div className="md:hidden flex flex-wrap gap-2">
             {encounter.tags.map((tag) => (
-              <Badge
-                key={tag.id}
-                variant="secondary"
-                className="capitalize"
-                title={tag.description}
-              >
-                {getTagHierarchyDisplay(tag)}
-              </Badge>
+              <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
             ))}
           </div>
         )}
@@ -498,14 +484,7 @@ const EncounterTagHoverCard = ({ encounter }: { encounter: EncounterRead }) => {
         {encounter.tags.length > 0 ? (
           <>
             {encounter.tags.map((tag) => (
-              <Badge
-                key={tag.id}
-                variant="secondary"
-                className="capitalize"
-                title={tag.description}
-              >
-                {getTagHierarchyDisplay(tag)}
-              </Badge>
+              <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
             ))}
           </>
         ) : (

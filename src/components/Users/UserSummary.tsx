@@ -167,7 +167,7 @@ export default function UserSummaryTab({
             />
           </>
         )}
-        {canEditUser && (
+        {authUser.is_superuser && (
           <Card className="border-red-500">
             <CardHeader className="px-4 sm:px-6">
               <CardTitle className="text-destructive">
