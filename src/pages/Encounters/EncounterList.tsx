@@ -278,7 +278,6 @@ export function EncounterList({
                   placeholder={t("filter_by_identifier")}
                   className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
                   patientId={qParams.patient_filter}
-                  level="facility"
                 />
                 <MultiFilter
                   selectedFilters={selectedFilters}
