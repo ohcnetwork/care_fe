@@ -2198,6 +2198,7 @@
   "failed_to_link_abha_number": "Failed to link ABHA Number. Please try again later.",
   "failed_to_load_categories": "Failed to load categories",
   "failed_to_load_definitions": "Failed to load definitions",
+  "failed_to_load_locations": "Failed to load locations",
   "failed_to_remove_charge_item": "Failed to remove charge item",
   "failed_to_remove_tags": "Failed to remove the tag",
   "failed_to_send_message": "Failed to send message",
