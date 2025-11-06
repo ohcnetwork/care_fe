@@ -404,7 +404,7 @@ test.describe("Facility Creation", () => {
     expect(href).toMatch(/^tel:\+91\s\d{5}\s\d{5}$/);
   });
 
-  test("Add location to a existing facility and verify Show on Map link redirection", async ({
+  test("Add location to an existing facility and verify Show on Map link redirection", async ({
     page,
   }) => {
     // Generate a random city name using faker
