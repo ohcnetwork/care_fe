@@ -34,6 +34,19 @@ test.describe("Facility Creation", () => {
     "X-Ray",
   ];
 
+  const CITIES = [
+    "Mumbai",
+    "Delhi",
+    "Bangalore",
+    "Hyderabad",
+    "Chennai",
+    "Kolkata",
+    "Pune",
+    "Ahmedabad",
+    "Jaipur",
+    "Kochi",
+  ];
+
   let facilityType: string;
   let facilityName: string;
   let facilityFeatures: string[];
@@ -70,7 +83,8 @@ test.describe("Facility Creation", () => {
   test.beforeEach(async ({ page }) => {
     // Generate unique test data for each test run
     facilityType = faker.helpers.arrayElement(FACILITY_TYPES);
-    facilityName = `${faker.company.name()} ${faker.location.city()}`;
+    const cityName = faker.helpers.arrayElement(CITIES);
+    facilityName = `${faker.company.name()} ${cityName}`;
     facilityFeatures = faker.helpers.arrayElements(FACILITY_FEATURES, 2);
     description = faker.lorem.sentence();
     phoneNumber = `987${faker.string.numeric(7)}`.replace(
@@ -407,8 +421,8 @@ test.describe("Facility Creation", () => {
   test("Add location to an existing facility and verify Show on Map link redirection", async ({
     page,
   }) => {
-    // Generate a random city name using faker
-    const cityName = faker.location.city();
+    // Generate a random city name
+    const cityName = faker.helpers.arrayElement(CITIES);
 
     // Click on the first View Facility link to open a random facility
     await page.getByRole("link", { name: "View Facility" }).first().click();
