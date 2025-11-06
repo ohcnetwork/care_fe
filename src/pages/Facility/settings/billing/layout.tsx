@@ -1,6 +1,5 @@
 import { Menu } from "lucide-react";
-import { ActiveLink, navigate, useFullPath, useRoutes } from "raviger";
-import { useEffect } from "react";
+import { ActiveLink, Redirect, useRoutes } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -24,16 +23,6 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 
 import { InformationalCodeSettings } from "./informational/InformationalCodeSettings";
 import { BillingSettings } from "./settings/BillingSettings";
-
-const routes = {
-  "/discount_components": () => <DiscountComponentSettings />,
-  "/discount_codes": () => <DiscountCodeSettings />,
-  "/tax_codes": () => <TaxCodeSettings />,
-  "/tax_components": () => <TaxComponentSettings />,
-  "/informational_codes": () => <InformationalCodeSettings />,
-  "/settings": () => <BillingSettings />,
-  "*": () => <ErrorPage />,
-};
 
 const sidebarNavItems = [
   {
@@ -88,18 +77,21 @@ export function BillingSettingsLayout() {
 
   const basePath = `/facility/${facilityId}/settings/billing`;
 
+  const routes = {
+    "/": () => <Redirect to={`${basePath}/discount_codes`} />,
+    "/discount_components": () => <DiscountComponentSettings />,
+    "/discount_codes": () => <DiscountCodeSettings />,
+    "/tax_codes": () => <TaxCodeSettings />,
+    "/tax_components": () => <TaxComponentSettings />,
+    "/informational_codes": () => <InformationalCodeSettings />,
+    "/settings": () => <BillingSettings />,
+    "*": () => <ErrorPage />,
+  };
+
   const route = useRoutes(routes, {
     basePath,
     routeProps: { facilityId },
   });
-
-  const path = useFullPath();
-
-  useEffect(() => {
-    if (path === basePath) {
-      navigate(`${basePath}/discount_codes`, { replace: true });
-    }
-  }, []);
 
   return (
     <div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
