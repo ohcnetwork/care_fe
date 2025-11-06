@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -43,7 +43,7 @@ test.describe("Facility Creation", () => {
   let address: string;
 
   // Helper function to create a facility with mandatory fields only
-  const createFacilityWithMandatoryFields = async (page: any) => {
+  const createFacilityWithMandatoryFields = async (page: Page) => {
     await page.getByRole("button", { name: "Add Facility" }).click();
     await page
       .getByRole("combobox")
@@ -461,8 +461,6 @@ test.describe("Facility Creation", () => {
     await test.step("Create facility with mandatory fields", async () => {
       await createFacilityWithMandatoryFields(page);
     });
-
-    // Verify facility was created successfully
 
     // Navigate to the created facility
     await page
