@@ -1,28 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { Signal, SquarePen } from "lucide-react";
-import { useTranslation } from "react-i18next";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-
-import query from "@/Utils/request/query";
-import { Avatar } from "@/components/Common/Avatar";
 import {
   EncounterClassBadge,
   StatusBadge,
 } from "@/pages/Encounters/EncounterProperties";
-import { OverviewSidebarSheet } from "@/pages/Encounters/tabs/overview/overview-sidebar-sheet";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   AccountBillingStatus,
   AccountStatus,
 } from "@/types/billing/account/Account";
+import { Signal, SquarePen } from "lucide-react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import query from "@/Utils/request/query";
+import { Avatar } from "@/components/Common/Avatar";
+import TagBadge from "@/components/Tags/TagBadge";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { OverviewSidebarSheet } from "@/pages/Encounters/tabs/overview/overview-sidebar-sheet";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import accountApi from "@/types/billing/account/accountApi";
 import { ENCOUNTER_PRIORITY_COLORS } from "@/types/emr/encounter/encounter";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 export const SummaryPanelEncounterDetails = () => {
   const { t } = useTranslation();
@@ -137,14 +136,7 @@ export const SummaryPanelEncounterDetails = () => {
                   {encounter.tags.length > 0 ? (
                     <>
                       {encounter.tags.map((tag) => (
-                        <Badge
-                          key={tag.id}
-                          variant="secondary"
-                          className="capitalize"
-                          title={tag.description}
-                        >
-                          {tag.display}
-                        </Badge>
+                        <TagBadge key={tag.id} tag={tag} />
                       ))}
                     </>
                   ) : (
