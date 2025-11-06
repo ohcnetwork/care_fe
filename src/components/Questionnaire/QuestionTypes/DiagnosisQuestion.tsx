@@ -87,7 +87,7 @@ const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   code: { code: "", display: "", system: "" },
   clinical_status: "active",
   verification_status: "confirmed",
-  severity: "moderate",
+  severity: null,
   category: "encounter_diagnosis",
   onset: { onset_datetime: dateQueryString(new Date()) },
   dirty: true,
@@ -98,19 +98,19 @@ function DiagnosisSeveritySelect({
   onValueChange,
   disabled,
 }: {
-  severity: DiagnosisSeverity;
+  severity: DiagnosisSeverity | null;
   onValueChange: (value: DiagnosisSeverity) => void;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
   return (
     <Select
-      value={severity}
+      value={severity ?? undefined}
       onValueChange={(value) => onValueChange(value as DiagnosisSeverity)}
       disabled={disabled}
     >
       <SelectTrigger className="h-8 md:h-9">
-        <SelectValue />
+        <SelectValue placeholder={t("choose_severity")} />
       </SelectTrigger>
       <SelectContent>
         {DIAGNOSIS_SEVERITY.map((severity) => (
@@ -273,7 +273,7 @@ function DiagnosisDetailsForm({
       <div className="space-y-2">
         <Label className="text-sm">{t("severity")}</Label>
         <DiagnosisSeveritySelect
-          severity={diagnosis.severity || "moderate"}
+          severity={diagnosis.severity ?? null}
           onValueChange={(value) => onUpdate({ severity: value })}
           disabled={disabled}
         />
@@ -755,7 +755,7 @@ const DiagnosisTableRow = ({
         </TableCell>
         <TableCell className="py-1">
           <DiagnosisSeveritySelect
-            severity={diagnosis.severity || "moderate"}
+            severity={diagnosis.severity}
             onValueChange={(value) => onUpdate?.({ severity: value })}
             disabled={disabled}
           />

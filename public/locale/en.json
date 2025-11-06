@@ -1029,6 +1029,7 @@
   "choose_other_search_type": "Choose other search types",
   "choose_resource": "Choose practitioner/location/healthcare service to see availability.",
   "choose_service_point_to_call_patient": "Choose a service point to call {{patientName}} ({{tokenNumber}}) to.",
+  "choose_severity": "Choose severity",
   "choose_state": "Choose State",
   "choose_your_login_method_to_continue": "Choose your login method to continue",
   "chosen_encounter": "Chosen Encounter",
