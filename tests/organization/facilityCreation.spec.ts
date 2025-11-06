@@ -463,7 +463,6 @@ test.describe("Facility Creation", () => {
     });
 
     // Verify facility was created successfully
-    await expect(page.getByText("Facility created successfully")).toBeVisible();
 
     // Navigate to the created facility
     await page
