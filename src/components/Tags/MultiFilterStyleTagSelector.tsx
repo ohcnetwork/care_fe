@@ -415,9 +415,14 @@ export function MultiFilterStyleTagSelector({
             <div className="p-0">
               {/* Header */}
               <div className="flex items-center gap-2 p-2 border-b border-gray-200">
-                <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 hover:bg-gray-100 hover:text-gray-900 rounded-md text-xs h-6 w-6 p-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setOpen(false)}
+                  className="h-6 w-6 p-0"
+                >
                   <ArrowLeft className="h-4 w-4" />
-                </button>
+                </Button>
                 <span className="text-sm font-medium">
                   {t("tags", { count: selected.length })}
                 </span>
@@ -633,7 +638,7 @@ export function MultiFilterStyleTagSelector({
 
               {/* Footer Navigation */}
               <div className="bg-gray-200 h-px"></div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center h-11">
                 <div className="flex gap-1 my-3.5 mx-4">
                   <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
                     <ArrowUp className="size-3" />
