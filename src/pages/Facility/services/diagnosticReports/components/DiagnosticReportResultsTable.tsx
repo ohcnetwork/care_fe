@@ -36,26 +36,44 @@ export function DiagnosticReportResultsTable({
     );
   };
 
-  const renderInterpretation = (interpetationValue: string) => {
-    const jsonString = interpetationValue.replace(/'/g, '"');
-    if (jsonString.startsWith("{")) {
-      const interpretation = JSON.parse(jsonString) as Interpretation;
-      const color = interpretation.color || "#000000";
+  const parseInterpretationValue = (value: string): Interpretation | string => {
+    if (typeof value === "object") {
+      return value as Interpretation;
+    }
+
+    if (typeof value === "string" && value.startsWith("{")) {
+      try {
+        const jsonString = value.replace(/'/g, '"');
+        return JSON.parse(jsonString) as Interpretation;
+      } catch {
+        return value;
+      }
+    }
+
+    return value;
+  };
+
+  const renderInterpretation = (interpretationValue: string) => {
+    if (!interpretationValue) return "-";
+
+    const parsedInterpretation = parseInterpretationValue(interpretationValue);
+
+    if (typeof parsedInterpretation === "object") {
+      const { display, color = "#000000" } = parsedInterpretation;
       return (
         <div className="flex items-center gap-1">
-          <span className="capitalize" style={{ color: color }}>
-            {interpretation.display}
+          <span className="capitalize" style={{ color }}>
+            {display}
           </span>
         </div>
       );
-    } else {
-      const interpretation = interpetationValue;
-      return (
-        <div className="flex items-center gap-1 text-gray-500">
-          <span className="capitalize">{interpretation}</span>
-        </div>
-      );
     }
+
+    return (
+      <div className="flex items-center gap-1 text-gray-500">
+        <span className="capitalize">{parsedInterpretation}</span>
+      </div>
+    );
   };
 
   const renderObservationComponents = (components: ObservationComponent[]) => {
@@ -65,7 +83,7 @@ export function DiagnosticReportResultsTable({
         className={cn(
           "bg-gray-50/50 border-0 text-sm text-gray-950",
           index === components.length - 1 && "border-b",
-          component.interpretation !== "Normal" && "font-semibold",
+          component.interpretation && "font-semibold",
         )}
       >
         <TableCell className="pl-4 border-r border-b border-gray-300">
@@ -105,7 +123,7 @@ export function DiagnosticReportResultsTable({
           className={cn(
             "divide-x divide-gray-300 text-sm text-gray-950",
             hasComponents && "border-b-0",
-            observation.interpretation !== "Normal" && "font-semibold",
+            observation.interpretation && "font-semibold",
           )}
         >
           <TableCell>
