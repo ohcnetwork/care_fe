@@ -412,7 +412,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                     </Table>
                   ) : (
                     <div className="pb-4 text-center text-sm text-gray-500">
-                      No records found
+                      {t("no_records_found")}
                     </div>
                   )}
                 </div>
