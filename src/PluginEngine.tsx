@@ -1,6 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import {
-  __federation_method_getRemote,
-  __federation_method_setRemote, // @ts-expect-error __federation__ is not typed
+  __federation_method_getRemote as getFederationRemote,
+  __federation_method_setRemote as setFederationRemote,
 } from "__federation__";
 import React, { Suspense, useEffect, useState } from "react";
 
@@ -8,19 +9,11 @@ import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 
 import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
+import query from "@/Utils/request/query";
 
 import { PluginManifest, SupportedPluginComponents } from "@/pluginTypes";
-
-async function enabledPlugins() {
-  // this would be a call to the care backend
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  return [
-    {
-      name: "care_doctor_connect_fe",
-      url: "http://localhost:6173/assets/remoteEntry.js",
-    },
-  ];
-}
+import plugConfigApi from "@/types/plugConfig/plugConfigApi";
+import { toast } from "sonner";
 
 // Import the remote component synchronously
 export default function PluginEngine({
@@ -30,28 +23,45 @@ export default function PluginEngine({
 }) {
   const [pluginManifests, setPluginManifests] = useState<PluginManifest[]>([]);
 
+  // Fetch enabled plugins from the backend API
+  const { data: enabledPlugins } = useQuery({
+    queryKey: ["enabled-plugins"],
+    queryFn: query(plugConfigApi.list),
+  });
+
   useEffect(() => {
-    const fetchEnabledPlugins = async () => {
-      const plugins = await enabledPlugins();
+    const fetchPluginManifests = async () => {
+      if (!enabledPlugins) return;
 
       const manifests = await Promise.all(
-        plugins.map(async (plugin) => {
-          __federation_method_setRemote(plugin.name, {
-            url: () => Promise.resolve(plugin.url),
+        enabledPlugins.configs.map(async (plugin) => {
+          if (!plugin.meta.url) {
+            toast.error(`Plugin ${plugin.slug} is missing a URL in meta`);
+            return undefined;
+          }
+          setFederationRemote(plugin.slug, {
+            url: () => Promise.resolve(plugin.meta.url),
             format: "esm",
             from: "vite",
             externalType: "promise",
           });
 
-          return await __federation_method_getRemote(plugin.name, "./manifest");
+          return await getFederationRemote(plugin.slug, "./manifest").catch(
+            () =>
+              console.error(
+                `There was an error enabling the app ${plugin.slug}`,
+              ),
+          );
         }),
       );
 
-      setPluginManifests(manifests);
+      setPluginManifests(
+        manifests.filter((m): m is PluginManifest => m !== undefined),
+      );
     };
 
-    fetchEnabledPlugins();
-  }, []);
+    fetchPluginManifests();
+  }, [enabledPlugins]);
 
   return (
     <Suspense fallback={<Loading />}>
