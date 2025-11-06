@@ -115,18 +115,16 @@ export function ToReceive({ facilityId, locationId, internal, tab }: Props) {
             },
           }}
           currentTab={currentTab}
-          onTabChange={
-            (value) =>
-              navigate(
-                getInventoryBasePath(
-                  facilityId,
-                  locationId,
-                  internal,
-                  value === "orders",
-                  true,
-                ),
-              )
-            //setCurrentTab(value as "orders" | "deliveries")
+          onTabChange={(value) =>
+            navigate(
+              getInventoryBasePath(
+                facilityId,
+                locationId,
+                internal,
+                value === "orders",
+                true,
+              ),
+            )
           }
         />
       </div>

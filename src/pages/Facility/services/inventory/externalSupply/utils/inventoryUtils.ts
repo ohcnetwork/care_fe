@@ -18,8 +18,8 @@ export const getInventoryBasePath = (
 
   if (internal) {
     const type = isRequester ? "receive" : "dispatch";
-    return `${base}/internal/${type}/${resourceType}/${tail ? `${tail}` : ""}`;
+    return `${base}/internal/${type}/${resourceType}/${tail}`;
   } else {
-    return `${base}/external/${resourceType}/${tab}${tail ? `/${tail}` : ""}`;
+    return `${base}/external/${resourceType}/${tab}/${tail}`;
   }
 };
