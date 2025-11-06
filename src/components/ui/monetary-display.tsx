@@ -73,7 +73,7 @@ function MonetaryAmountInput(props: React.ComponentProps<typeof Input>) {
 
   return (
     <div className="flex items-center space-x-2">
-      <span className="text-lg font-medium">₹</span>
+      <span className="text-lg font-medium">{CURRENCY_SYMBOL}</span>
       <Input
         type="text"
         inputMode="decimal"

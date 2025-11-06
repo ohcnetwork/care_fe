@@ -88,22 +88,7 @@ const typeTestedSchema = z.object({
   single_use: z.boolean().nullable(),
 });
 
-const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug_value: z.string().min(1, "Slug is required"),
-  status: z.nativeEnum(SpecimenDefinitionStatus),
-  description: z.string().min(1, t("field_required")),
-  derived_from_uri: z
-    .string()
-    .url({ message: "Please enter a valid URL" })
-    .optional(),
-  type_collected: CodeSchema,
-  patient_preparation: z.array(CodeSchema).min(0),
-  collection: CodeSchema.optional(),
-  type_tested: typeTestedSchema.optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<any>;
 
 interface SpecimenDefinitionFormProps {
   initialData?: SpecimenDefinitionRead;
@@ -118,9 +103,27 @@ export function SpecimenDefinitionForm({
 }: SpecimenDefinitionFormProps) {
   const { t } = useTranslation();
 
+  const formSchema = z.object({
+    title: z.string().min(1, t("field_required")),
+    slug_value: z
+      .string()
+      .min(1, t("field_required"))
+      .max(25, t("character_count_validation", { min: 1, max: 25 })),
+    status: z.nativeEnum(SpecimenDefinitionStatus),
+    description: z.string().min(1, t("field_required")),
+    derived_from_uri: z
+      .string()
+      .url({ message: t("field_required") })
+      .optional(),
+    type_collected: CodeSchema,
+    patient_preparation: z.array(CodeSchema).min(0),
+    collection: CodeSchema.optional(),
+    type_tested: typeTestedSchema.optional(),
+  });
+
   const { facilityId } = useCurrentFacility();
 
-  const form = useForm<FormValues>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: initialData?.title,
@@ -158,7 +161,7 @@ export function SpecimenDefinitionForm({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || "", 25), {
           shouldValidate: true,
         });
       }
@@ -207,7 +210,8 @@ export function SpecimenDefinitionForm({
     onSubmit({
       ...data,
       patient_preparation:
-        data.patient_preparation?.filter((item) => item && item.code) || [],
+        data.patient_preparation?.filter((item: Code) => item && item.code) ||
+        [],
       type_tested: data.type_tested
         ? {
             ...data.type_tested,
@@ -241,9 +245,7 @@ export function SpecimenDefinitionForm({
                   name="title"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>
-                        {t("title")} <span className="text-red-500">*</span>
-                      </FormLabel>
+                      <FormLabel aria-required>{t("title")}</FormLabel>
                       <FormControl>
                         <Input placeholder={t("title")} {...field} />
                       </FormControl>
@@ -257,9 +259,7 @@ export function SpecimenDefinitionForm({
                   name="slug_value"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>
-                        {t("slug")} <span className="text-red-500">*</span>
-                      </FormLabel>
+                      <FormLabel aria-required>{t("slug")}</FormLabel>
                       <FormControl>
                         <Input
                           placeholder={t("unique_identifier")}
@@ -287,9 +287,7 @@ export function SpecimenDefinitionForm({
                   name="status"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>
-                        {t("status")} <span className="text-red-500">*</span>
-                      </FormLabel>
+                      <FormLabel aria-required>{t("status")}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -334,9 +332,7 @@ export function SpecimenDefinitionForm({
                 name="description"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>
-                      {t("description")} <span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel aria-required>{t("description")}</FormLabel>
                     <FormControl>
                       <Textarea placeholder={t("description")} {...field} />
                     </FormControl>
@@ -355,16 +351,13 @@ export function SpecimenDefinitionForm({
                   name="type_collected"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>
-                        {t("type_collected")}{" "}
-                        <span className="text-red-500">*</span>
-                      </FormLabel>
+                      <FormLabel aria-required>{t("type_collected")}</FormLabel>
                       <FormControl>
                         <ValueSetSelect
+                          {...field}
                           system="system-specimen_type-code"
                           placeholder={t("select_type_collected")}
                           onSelect={handleTypeCollectedSelect}
-                          value={field.value}
                           disabled={isLoading}
                         />
                       </FormControl>
@@ -381,10 +374,10 @@ export function SpecimenDefinitionForm({
                       <FormLabel>{t("collection")}</FormLabel>
                       <FormControl>
                         <ValueSetSelect
+                          {...field}
                           system="system-specimen_collection_code"
                           placeholder={t("select_collection")}
                           onSelect={handleCollectionMethodSelect}
-                          value={field.value}
                           disabled={isLoading}
                         />
                       </FormControl>
@@ -605,10 +598,10 @@ export function SpecimenDefinitionForm({
                           <FormLabel>{t("cap")}</FormLabel>
                           <FormControl>
                             <ValueSetSelect
+                              {...field}
                               system="system-container_cap-code"
                               placeholder={t("select_cap")}
                               onSelect={handleCapTypeSelect}
-                              value={field.value}
                               disabled={isLoading}
                             />
                           </FormControl>

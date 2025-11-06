@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -29,11 +29,13 @@ import {
 } from "@/components/ui/table";
 
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
+import { ChargeItemDefinitionPicker } from "@/components/Common/ChargeItemDefinitionPicker";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { ResourceCategorySubType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   ApplyChargeItemDefinitionRequest,
   ChargeItemServiceResource,
@@ -75,18 +77,17 @@ export default function AddMultipleChargeItemsSheet({
   const [selectedItems, setSelectedItems] = useState<
     ApplyChargeItemDefinitionRequestWithObject[]
   >([]);
-  const [search, setSearch] = useState("");
-  const [selectedDefinitionId, setSelectedDefinitionId] = useState<
-    string | null
-  >(null);
+  const [selectedDefinitionSlug, setSelectedDefinitionSlug] = useState<
+    string | undefined
+  >(undefined);
 
-  const { data: chargeItemDefinitions, isLoading } = useQuery({
-    queryKey: ["chargeItemDefinitions", search],
-    queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
-      pathParams: { facilityId },
-      queryParams: { limit: 100, status: "active", title: search },
+  // Fetch selected definition details when a definition is selected
+  const { data: selectedDefinition } = useQuery({
+    queryKey: ["chargeItemDefinition", facilityId, selectedDefinitionSlug],
+    queryFn: query(chargeItemDefinitionApi.retrieveChargeItemDefinition, {
+      pathParams: { facilityId, slug: selectedDefinitionSlug! },
     }),
-    enabled: open,
+    enabled: !!selectedDefinitionSlug,
   });
 
   // Unified request data
@@ -102,37 +103,39 @@ export default function AddMultipleChargeItemsSheet({
     },
   });
 
-  const handleSelectChargeItem = (value: string) => {
-    if (!value) return;
-    setSelectedDefinitionId(value);
-  };
-
   useEffect(() => {
-    if (selectedDefinitionId) {
-      const selectedCID = chargeItemDefinitions?.results.find(
-        (cid) => cid.id === selectedDefinitionId,
+    if (selectedDefinitionSlug && selectedDefinition) {
+      // Check if this definition is already in the selected items
+      const isAlreadySelected = selectedItems.some(
+        (item) => item.charge_item_definition === selectedDefinitionSlug,
       );
-      if (!selectedCID) return;
 
-      setSelectedItems([
-        ...selectedItems,
-        {
-          quantity: "1",
-          encounter: encounterId,
-          patient: patientId,
-          charge_item_definition: selectedCID.slug,
-          charge_item_definition_object: selectedCID,
-          service_resource: serviceResourceType as ChargeItemServiceResource,
-          service_resource_id: serviceResourceId,
-        },
-      ]);
-      setSelectedDefinitionId(null);
+      if (!isAlreadySelected) {
+        setSelectedItems((prevItems) => [
+          ...prevItems,
+          {
+            quantity: "1",
+            encounter: encounterId,
+            patient: patientId,
+            charge_item_definition: selectedDefinition.slug,
+            charge_item_definition_object: selectedDefinition,
+            service_resource: serviceResourceType as ChargeItemServiceResource,
+            service_resource_id: serviceResourceId,
+          },
+        ]);
+      }
+
+      // Clear the selection to allow selecting the same item again if needed
+      setSelectedDefinitionSlug(undefined);
     }
   }, [
-    selectedDefinitionId,
-    chargeItemDefinitions,
+    selectedDefinitionSlug,
+    selectedDefinition,
+    selectedItems,
     serviceResourceType,
+    serviceResourceId,
     encounterId,
+    patientId,
   ]);
 
   const handleRemoveItem = (index: number) => {
@@ -161,194 +164,211 @@ export default function AddMultipleChargeItemsSheet({
     });
   };
 
+  const content = (
+    <>
+      <SheetHeader>
+        <SheetTitle>{t("add_charge_items")}</SheetTitle>
+      </SheetHeader>
+      <div className="mt-6 space-y-6">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            {t("select_charge_item_definition")}
+          </label>
+          <ChargeItemDefinitionPicker
+            facilityId={facilityId}
+            resourceSubType={
+              ResourceCategorySubType.charge_item_definition_schedule_location
+            }
+            value={selectedDefinitionSlug}
+            onValueChange={setSelectedDefinitionSlug}
+            placeholder={t("select_charge_item_definition")}
+            disabled={disabled}
+            className="w-full"
+          />
+        </div>
+
+        {selectedItems.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="text-base font-medium">{t("selected_items")}</h3>
+            {isMobile ? (
+              <div className="space-y-4">
+                {selectedItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className="bg-white rounded-lg border p-4 space-y-3"
+                  >
+                    {/* Title and Remove Button */}
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-medium text-base flex-1">
+                        {item.charge_item_definition_object.title}
+                      </h4>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleRemoveItem(index)}
+                        className="shrink-0"
+                      >
+                        <Trash2Icon className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    {/* Quantity and Price */}
+                    <div className="flex flex-wrap gap-4 items-center">
+                      <div className="space-y-1">
+                        <label className="text-sm text-gray-500">
+                          {t("quantity")}
+                        </label>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={item.quantity}
+                          onChange={(e) =>
+                            handleUpdateQuantity(index, e.target.value)
+                          }
+                          className="w-24"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-sm text-gray-500">
+                          {t("price")}
+                        </label>
+                        <div className="flex items-center gap-1">
+                          <span>
+                            {item.charge_item_definition_object
+                              .price_components?.[0]?.amount || 0}{" "}
+                            {item.charge_item_definition_object
+                              .price_components?.[0]?.code?.code || "INR"}
+                          </span>
+                          {item.charge_item_definition_object.price_components
+                            ?.length > 0 && (
+                            <Popover>
+                              <PopoverTrigger>
+                                <InfoIcon className="h-4 w-4 text-gray-700 cursor-pointer" />
+                              </PopoverTrigger>
+                              <PopoverContent
+                                side="right"
+                                className="p-0"
+                                align="start"
+                              >
+                                <ChargeItemPriceDisplay
+                                  priceComponents={
+                                    item.charge_item_definition_object
+                                      .price_components
+                                  }
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("name")}</TableHead>
+                    <TableHead>{t("quantity")}</TableHead>
+                    <TableHead>{t("price")}</TableHead>
+                    <TableHead className="w-[100px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {selectedItems.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="whitespace-pre-wrap">
+                        {item.charge_item_definition_object.title}
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={item.quantity}
+                          onChange={(e) =>
+                            handleUpdateQuantity(index, e.target.value)
+                          }
+                          className="w-20"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <span>
+                            {item.charge_item_definition_object
+                              .price_components?.[0]?.amount || 0}{" "}
+                            {item.charge_item_definition_object
+                              .price_components?.[0]?.code?.code || "INR"}
+                          </span>
+                          {item.charge_item_definition_object.price_components
+                            ?.length > 0 && (
+                            <Popover>
+                              <PopoverTrigger>
+                                <InfoIcon className="size-4 text-gray-700 cursor-pointer" />
+                              </PopoverTrigger>
+                              <PopoverContent side="right" className="p-0">
+                                <ChargeItemPriceDisplay
+                                  priceComponents={
+                                    item.charge_item_definition_object
+                                      .price_components
+                                  }
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleRemoveItem(index)}
+                        >
+                          <Trash2Icon className="size-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        )}
+
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isPending}
+          >
+            {t("cancel")}
+          </Button>
+          <Button onClick={handleSubmit} disabled={isPending || disabled}>
+            {t("add_items")}
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="px-0 pt-2 min-h-[55vh] max-h-[85vh] rounded-t-lg">
+          <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex-1 overflow-y-auto px-4">
+            {content}
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-3xl p-2">
         <ScrollArea className="h-full my-6 pb-12 pr-6 p-4">
-          <SheetHeader>
-            <SheetTitle>{t("add_charge_items")}</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6 space-y-6">
-            <div className="space-y-2">
-              <Autocomplete
-                options={
-                  chargeItemDefinitions?.results?.map((cid) => ({
-                    label: cid.title,
-                    value: cid.id,
-                  })) || []
-                }
-                value=""
-                onChange={handleSelectChargeItem}
-                onSearch={setSearch}
-                placeholder={t("select_charge_item_definition")}
-                isLoading={isLoading}
-                noOptionsMessage={t("no_charge_item_definitions_found")}
-                disabled={disabled}
-              />
-            </div>
-
-            {selectedItems.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-base font-medium">{t("selected_items")}</h3>
-                {isMobile ? (
-                  <div className="space-y-4">
-                    {selectedItems.map((item, index) => (
-                      <div
-                        key={index}
-                        className="bg-white rounded-lg border p-4 space-y-3"
-                      >
-                        {/* Title and Remove Button */}
-                        <div className="flex items-start justify-between gap-2">
-                          <h4 className="font-medium text-base flex-1">
-                            {item.charge_item_definition_object.title}
-                          </h4>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleRemoveItem(index)}
-                            className="shrink-0"
-                          >
-                            <Trash2Icon className="h-4 w-4" />
-                          </Button>
-                        </div>
-
-                        {/* Quantity and Price */}
-                        <div className="flex flex-wrap gap-4 items-center">
-                          <div className="space-y-1">
-                            <label className="text-sm text-gray-500">
-                              {t("quantity")}
-                            </label>
-                            <Input
-                              type="number"
-                              min={1}
-                              value={item.quantity}
-                              onChange={(e) =>
-                                handleUpdateQuantity(index, e.target.value)
-                              }
-                              className="w-24"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-sm text-gray-500">
-                              {t("price")}
-                            </label>
-                            <div className="flex items-center gap-1">
-                              <span>
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.amount || 0}{" "}
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.code?.code || "INR"}
-                              </span>
-                              {item.charge_item_definition_object
-                                .price_components?.length > 0 && (
-                                <Popover>
-                                  <PopoverTrigger>
-                                    <InfoIcon className="h-4 w-4 text-gray-700 cursor-pointer" />
-                                  </PopoverTrigger>
-                                  <PopoverContent
-                                    side="right"
-                                    className="p-0"
-                                    align="start"
-                                  >
-                                    <ChargeItemPriceDisplay
-                                      priceComponents={
-                                        item.charge_item_definition_object
-                                          .price_components
-                                      }
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>{t("name")}</TableHead>
-                        <TableHead>{t("quantity")}</TableHead>
-                        <TableHead>{t("price")}</TableHead>
-                        <TableHead className="w-[100px]"></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {selectedItems.map((item, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="whitespace-pre-wrap">
-                            {item.charge_item_definition_object.title}
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              type="number"
-                              min={1}
-                              value={item.quantity}
-                              onChange={(e) =>
-                                handleUpdateQuantity(index, e.target.value)
-                              }
-                              className="w-20"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <span>
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.amount || 0}{" "}
-                                {item.charge_item_definition_object
-                                  .price_components?.[0]?.code?.code || "INR"}
-                              </span>
-                              {item.charge_item_definition_object
-                                .price_components?.length > 0 && (
-                                <Popover>
-                                  <PopoverTrigger>
-                                    <InfoIcon className="size-4 text-gray-700 cursor-pointer" />
-                                  </PopoverTrigger>
-                                  <PopoverContent side="right" className="p-0">
-                                    <ChargeItemPriceDisplay
-                                      priceComponents={
-                                        item.charge_item_definition_object
-                                          .price_components
-                                      }
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleRemoveItem(index)}
-                            >
-                              <Trash2Icon className="size-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </div>
-            )}
-
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isPending}
-              >
-                {t("cancel")}
-              </Button>
-              <Button onClick={handleSubmit} disabled={isPending || disabled}>
-                {t("add_items")}
-              </Button>
-            </div>
-          </div>
+          {content}
         </ScrollArea>
       </SheetContent>
     </Sheet>

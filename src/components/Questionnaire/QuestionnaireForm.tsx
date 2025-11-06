@@ -33,6 +33,7 @@ import type {
 } from "@/types/questionnaire/form";
 import {
   type Question,
+  AnswerOption,
   findQuestionById,
 } from "@/types/questionnaire/question";
 import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
@@ -326,10 +327,23 @@ const initializeResponses = (
     if (q.type === "group" && q.questions) {
       q.questions.forEach(processQuestion);
     } else {
+      let defaultValues: ResponseValue[] = [];
+      if (q.answer_option && q.answer_option.length > 0) {
+        const defaultOptions: AnswerOption[] = q.answer_option.filter(
+          (o) => o.initial_selected === true,
+        );
+        if (defaultOptions.length > 0) {
+          defaultValues = defaultOptions.map((opt) => ({
+            type: "string",
+            value: opt.value,
+            coding: opt.code ?? undefined,
+          }));
+        }
+      }
       responses.push({
         question_id: q.id,
         link_id: q.link_id,
-        values: [],
+        values: defaultValues,
         structured_type: q.structured_type ?? null,
       });
     }
@@ -953,7 +967,7 @@ export function QuestionnaireForm({
 
         <DebugPreview
           data={questionnaireForms}
-          title={t("from")}
+          title={t("questionnaire_form")}
           className="p-4 space-y-6 max-w-4xl m-2"
         />
       </div>

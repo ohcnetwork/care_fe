@@ -6,18 +6,19 @@ import Autocomplete from "@/components/ui/autocomplete";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { ValueSetBase } from "@/types/valueSet/valueSet";
+import valueSetApi from "@/types/valueSet/valueSetApi";
 import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
-import { ValuesetFormType } from "@/types/valueset/valueset";
-import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface ValueSetPreviewProps {
-  valueset: ValuesetFormType;
+  valueset: ValueSetBase;
   trigger: React.ReactNode;
 }
 
@@ -25,15 +26,16 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState("");
 
   const { data: searchQuery, isFetching } = useQuery({
-    queryKey: ["valueset", "preview_search", search, valueset.compose],
-    queryFn: query.debounced(valuesetApi.preview_search, {
+    queryKey: ["valueset", "previewSearch", search, valueset.compose],
+    queryFn: query.debounced(valueSetApi.previewSearch, {
       queryParams: { search, count: 20 },
       body: {
         ...valueset,
-        name: valueset.name,
-        slug: valueset.slug,
+        name: valueset.name || "Preview",
+        slug: valueset.slug || "preview-slug",
         compose: valueset.compose.include[0]?.system
           ? valueset.compose
           : {
@@ -53,9 +55,9 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
           <SheetTitle className="text-xl font-semibold">
             {t("valueset_preview")}
           </SheetTitle>
-          <p className="text-sm text-gray-500">
+          <SheetDescription>
             {t("valueset_preview_description")}
-          </p>
+          </SheetDescription>
         </SheetHeader>
         <div className="px-1 mt-6">
           <Autocomplete
@@ -65,8 +67,8 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
                 value: option.code,
               })) ?? [],
             )}
-            value={search}
-            onChange={setSearch}
+            value={selected}
+            onChange={setSelected}
             onSearch={setSearch}
             placeholder={t("search_concept")}
             noOptionsMessage={

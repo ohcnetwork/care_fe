@@ -35,6 +35,7 @@ import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDe
 import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
+import { CodeSchema } from "@/types/base/code/code";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 
 import mutate from "@/Utils/request/mutate";
@@ -56,95 +57,6 @@ import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefini
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import { SpecimenDefinitionStatus } from "@/types/emr/specimenDefinition/specimenDefinition";
 import specimenDefinitionApi from "@/types/emr/specimenDefinition/specimenDefinitionApi";
-
-const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug_value: z.string().min(1, "Slug is required"),
-  description: z.string().min(1, "Description is required"),
-  usage: z.string().min(1, "Usage is required"),
-  derived_from_uri: z.string().nullable(),
-  status: z.nativeEnum(Status),
-  classification: z.nativeEnum(Classification),
-  kind: z.nativeEnum(Kind),
-  healthcare_service: z.string().nullable(),
-  code: z.object({
-    code: z.string().min(1, "Code is required"),
-    display: z.string().min(1, "Display name is required"),
-    system: z.string().min(1, "System is required"),
-  }),
-  body_site: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  diagnostic_report_codes: z
-    .array(
-      z.object({
-        code: z.string().min(1, "Code is required"),
-        display: z.string().min(1, "Display name is required"),
-        system: z.string().min(1, "System is required"),
-      }),
-    )
-    .default([]),
-  specimen_requirements: z
-    .array(
-      z.object({
-        value: z.string(),
-        label: z.string(),
-        details: z.array(
-          z
-            .object({
-              label: z.string(),
-              value: z
-                .string()
-                .optional()
-                .transform((v) => v ?? undefined),
-            })
-            .transform((obj) => ({
-              ...obj,
-              value: obj.value ?? undefined,
-            })),
-        ),
-      }),
-    )
-    .default([]),
-  observation_result_requirements: z
-    .array(
-      z.object({
-        value: z.string(),
-        label: z.string(),
-        details: z.array(
-          z
-            .object({
-              label: z.string(),
-              value: z
-                .string()
-                .optional()
-                .transform((v) => v ?? undefined),
-            })
-            .transform((obj) => ({
-              ...obj,
-              value: obj.value ?? undefined,
-            })),
-        ),
-      }),
-    )
-    .default([]),
-  charge_item_definitions: z
-    .array(z.custom<ChargeItemDefinitionBase>())
-    .default([]),
-  locations: z
-    .array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-      }),
-    )
-    .default([]),
-  category: z.string(),
-});
 
 export default function ActivityDefinitionForm({
   facilityId,
@@ -211,6 +123,81 @@ function ActivityDefinitionFormContent({
   categorySlug?: string;
 }) {
   const { t } = useTranslation();
+
+  const formSchema = z.object({
+    title: z.string().min(1, t("field_required")),
+    slug_value: z
+      .string()
+      .min(1, t("field_required"))
+      .max(25, t("character_count_validation", { min: 1, max: 25 })),
+    description: z.string().min(1, t("field_required")),
+    usage: z.string().min(1, t("field_required")),
+    derived_from_uri: z.string().nullable(),
+    status: z.nativeEnum(Status),
+    classification: z.nativeEnum(Classification),
+    kind: z.nativeEnum(Kind),
+    healthcare_service: z.string().nullable(),
+    code: CodeSchema,
+    body_site: CodeSchema.nullable(),
+    diagnostic_report_codes: z.array(CodeSchema).default([]),
+    specimen_requirements: z
+      .array(
+        z.object({
+          value: z.string(),
+          label: z.string(),
+          details: z.array(
+            z
+              .object({
+                label: z.string(),
+                value: z
+                  .string()
+                  .optional()
+                  .transform((v) => v ?? undefined),
+              })
+              .transform((obj) => ({
+                ...obj,
+                value: obj.value ?? undefined,
+              })),
+          ),
+        }),
+      )
+      .default([]),
+    observation_result_requirements: z
+      .array(
+        z.object({
+          value: z.string(),
+          label: z.string(),
+          details: z.array(
+            z
+              .object({
+                label: z.string(),
+                value: z
+                  .string()
+                  .optional()
+                  .transform((v) => v ?? undefined),
+              })
+              .transform((obj) => ({
+                ...obj,
+                value: obj.value ?? undefined,
+              })),
+          ),
+        }),
+      )
+      .default([]),
+    charge_item_definitions: z
+      .array(z.custom<ChargeItemDefinitionBase>())
+      .default([]),
+    locations: z
+      .array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+        }),
+      )
+      .default([]),
+    category: z.string(),
+  });
+
   const queryClient = useQueryClient();
   const isEditMode = Boolean(activityDefinitionSlug);
   const [specimenSearch, setSpecimenSearch] = React.useState("");
@@ -345,7 +332,7 @@ function ActivityDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || "", 25), {
           shouldValidate: true,
         });
       }
@@ -419,12 +406,6 @@ function ActivityDefinitionFormContent({
       );
     }
   }
-
-  React.useEffect(() => {
-    console.log("form.getValues()", form.getValues());
-    //log errors on submit
-    console.log("form.formState.errors", form.formState.errors);
-  }, [form.getValues(), form.formState.errors]);
 
   return (
     <Page
@@ -612,7 +593,9 @@ function ActivityDefinitionFormContent({
                               ResourceCategoryResourceType.activity_definition
                             }
                             value={field.value}
-                            onValueChange={field.onChange}
+                            onValueChange={(category) =>
+                              field.onChange(category?.slug || "")
+                            }
                             placeholder={t("select_resource_category")}
                             className="w-full"
                           />
@@ -673,13 +656,11 @@ function ActivityDefinitionFormContent({
                     name="code"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel>
-                          {t("code")} <span className="text-red-500">*</span>
-                        </FormLabel>
-                        <div className="mt-2">
+                        <FormLabel aria-required>{t("code")}</FormLabel>
+                        <FormControl>
                           <ValueSetSelect
+                            {...field}
                             system="activity-definition-procedure-code"
-                            value={field.value}
                             placeholder={t("search_for_activity_codes")}
                             onSelect={(code) => {
                               field.onChange({
@@ -690,7 +671,7 @@ function ActivityDefinitionFormContent({
                             }}
                             showCode={true}
                           />
-                        </div>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -711,24 +692,31 @@ function ActivityDefinitionFormContent({
                   </h2>
                 </div>
 
-                <div>
-                  <FormLabel>{t("body_site")}</FormLabel>
-                  <div className="mt-2">
-                    <ValueSetSelect
-                      system="system-body-site"
-                      value={form.watch("body_site")}
-                      placeholder={t("select_body_site")}
-                      onSelect={(code) => {
-                        form.setValue("body_site", {
-                          code: code.code,
-                          display: code.display,
-                          system: code.system,
-                        });
-                      }}
-                      showCode={true}
-                    />
-                  </div>
-                </div>
+                <FormField
+                  control={form.control}
+                  name="body_site"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("body_site")}</FormLabel>
+                      <FormControl>
+                        <ValueSetSelect
+                          {...field}
+                          system="system-body-site"
+                          placeholder={t("select_body_site")}
+                          onSelect={(code) => {
+                            form.setValue("body_site", {
+                              code: code.code,
+                              display: code.display,
+                              system: code.system,
+                            });
+                          }}
+                          showCode={true}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 
@@ -905,6 +893,11 @@ function ActivityDefinitionFormContent({
                             "no_charge_item_definitions_found_for",
                           noItemsFound: "no_charge_item_definitions_found",
                         }}
+                        mapper={(item) => ({
+                          id: item.id,
+                          title: item.title,
+                          slug: item.slug,
+                        })}
                       />
                     </div>
                   </div>

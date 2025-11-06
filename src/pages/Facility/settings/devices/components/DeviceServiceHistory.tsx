@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   ExpandableText,
   ExpandableTextContent,
@@ -31,6 +32,7 @@ import query from "@/Utils/request/query";
 import { ServiceHistory } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import AddServiceHistorySheet from "./AddServiceHistorySheet";
 import EditServiceHistorySheet from "./EditServiceHistorySheet";
 
@@ -86,6 +88,11 @@ export default function DeviceServiceHistory({
       <CardContent>
         {isLoading ? (
           <TableSkeleton count={5} />
+        ) : serviceHistory?.results?.length === 0 ? (
+          <EmptyState
+            icon={<CareIcon icon="l-wrench" className="size-6 text-primary" />}
+            title={t("service_records_none")}
+          />
         ) : (
           <div>
             <Table>
@@ -97,44 +104,36 @@ export default function DeviceServiceHistory({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {serviceHistory?.results?.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={3} className="text-center">
-                      {t("service_records_none")}
+                {serviceHistory?.results.map((service: ServiceHistory) => (
+                  <TableRow key={service.id}>
+                    <TableCell className="font-medium">
+                      {format(new Date(service.serviced_on), "PPP")}
+                    </TableCell>
+                    <TableCell className="max-w-md whitespace-normal">
+                      <ExpandableText>
+                        <ExpandableTextContent>
+                          {service.note}
+                        </ExpandableTextContent>
+                        <ExpandableTextExpandButton>
+                          {t("read_more")}
+                        </ExpandableTextExpandButton>
+                      </ExpandableText>
+                    </TableCell>
+                    <TableCell className="text-right ">
+                      <EditServiceHistorySheet
+                        facilityId={facilityId}
+                        deviceId={deviceId}
+                        serviceRecord={service}
+                        onServiceUpdated={handleServiceUpdated}
+                        trigger={
+                          <Button variant="ghost" size="icon">
+                            <Edit className="size-4" />
+                          </Button>
+                        }
+                      />
                     </TableCell>
                   </TableRow>
-                ) : (
-                  serviceHistory?.results.map((service: ServiceHistory) => (
-                    <TableRow key={service.id}>
-                      <TableCell className="font-medium">
-                        {format(new Date(service.serviced_on), "PPP")}
-                      </TableCell>
-                      <TableCell className="max-w-md whitespace-normal">
-                        <ExpandableText>
-                          <ExpandableTextContent>
-                            {service.note}
-                          </ExpandableTextContent>
-                          <ExpandableTextExpandButton>
-                            {t("read_more")}
-                          </ExpandableTextExpandButton>
-                        </ExpandableText>
-                      </TableCell>
-                      <TableCell className="text-right ">
-                        <EditServiceHistorySheet
-                          facilityId={facilityId}
-                          deviceId={deviceId}
-                          serviceRecord={service}
-                          onServiceUpdated={handleServiceUpdated}
-                          trigger={
-                            <Button variant="ghost" size="icon">
-                              <Edit className="size-4" />
-                            </Button>
-                          }
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                ))}
               </TableBody>
             </Table>
             <div className="flex w-full items-center justify-center mt-4">

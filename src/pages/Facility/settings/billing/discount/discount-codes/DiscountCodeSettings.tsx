@@ -4,18 +4,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -26,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
@@ -99,20 +90,17 @@ export function DiscountCodeSettings() {
 
   return (
     <>
-      <Page
-        title={t("discount_codes")}
-        options={
-          <div className="flex flex-col lg:flex-row items-center gap-2 ">
-            <Input
-              placeholder={t("search")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full lg:w-[300px]"
-            />
-            <CreateDiscountCodeSheet />
-          </div>
-        }
-      >
+      <Page title={t("discount_codes")}>
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-start lg:justify-between gap-2 mt-2 px-3 lg:px-0">
+          <Input
+            placeholder={t("search")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full lg:w-[300px]"
+          />
+          <CreateDiscountCodeSheet />
+        </div>
+
         <div className="rounded-md border overflow-hidden mt-4">
           <Table>
             <TableHeader>
@@ -172,28 +160,17 @@ export function DiscountCodeSettings() {
         </div>
       </Page>
 
-      <AlertDialog
+      <ConfirmActionDialog
         open={codeToDelete !== undefined}
-        onOpenChange={(open) => !open && setCodeToDelete(undefined)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("confirm_delete")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("billing_delete_discount_code_confirmation")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDeleteCode}
-              className={buttonVariants({ variant: "destructive" })}
-            >
-              {t("confirm")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onOpenChange={(open) => {
+          if (!open) setCodeToDelete(undefined);
+        }}
+        title={t("confirm_delete")}
+        description={t("billing_delete_discount_code_confirmation")}
+        onConfirm={confirmDeleteCode}
+        confirmText={t("confirm")}
+        variant="destructive"
+      />
     </>
   );
 }

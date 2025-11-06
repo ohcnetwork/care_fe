@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -17,7 +17,9 @@ import {
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import query from "@/Utils/request/query";
+import BackButton from "@/components/Common/BackButton";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
 
 type DuoToneIconName = keyof typeof duoToneIcons;
@@ -94,14 +96,7 @@ export default function HealthcareServiceShow({
             {t("healthcare_service_details")}
           </h1>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() =>
-                navigate(`/facility/${facilityId}/settings/healthcare_services`)
-              }
-            >
-              {t("back_to_list")}
-            </Button>
+            <BackButton>{t("back_to_list")}</BackButton>
             <Button
               onClick={() =>
                 navigate(
@@ -159,32 +154,64 @@ export default function HealthcareServiceShow({
               ) : (
                 <div className="grid gap-2">
                   {healthcareService.locations.map((location) => (
-                    <div
+                    <Link
                       key={location.id}
-                      className="flex items-center justify-between rounded-lg border p-3"
+                      href={`/facility/${facilityId}/locations/${location.id}/medication_requests`}
+                      basePath="/"
                     >
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {location.name}
-                        </p>
+                      <div className="flex items-center justify-between rounded-lg border p-3">
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {location.name}
+                          </p>
+                        </div>
+                        <div className="p-2 flex items-center justify-center">
+                          <CareIcon icon="l-arrow-right" className="size-4" />
+                        </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/locations/${location.id}/medication_requests`,
-                          )
-                        }
-                      >
-                        <CareIcon icon="l-arrow-right" className="size-4" />
-                      </Button>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}
             </CardContent>
           </Card>
+
+          {/* Managing Organization Section */}
+          {!isLoading && healthcareService?.managing_organization && (
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {t("managing_organization")}
+              </h2>
+              <Card className="transition-all duration-200 rounded-md">
+                <CardContent className="flex items-start gap-3 py-3 px-4">
+                  <div className="shrink-0 relative size-10 rounded-sm flex p-4 items-center justify-center">
+                    <ColoredIndicator
+                      id={healthcareService.managing_organization.id}
+                      className="absolute inset-0 rounded-sm opacity-20"
+                    />
+                    <CareIcon
+                      icon="l-building"
+                      className="size-6 relative z-10"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold truncate text-gray-900 text-base">
+                      {healthcareService.managing_organization.name}
+                    </h3>
+                    {healthcareService.managing_organization.description && (
+                      <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">
+                        {healthcareService.managing_organization.description}
+                      </p>
+                    )}
+                    <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+                      <CareIcon icon="l-tag" className="size-3" />
+                      <span>{t("organization")}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
     </Page>

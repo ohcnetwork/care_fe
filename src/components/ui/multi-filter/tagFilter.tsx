@@ -47,6 +47,7 @@ function TreeViewItem({
   resource,
   getColorForTag,
   level = 0,
+  facilityId,
 }: {
   tag: TagConfig;
   selectedTags: TagConfig[];
@@ -54,6 +55,7 @@ function TreeViewItem({
   resource: TagResource;
   getColorForTag: (tagId: string, index: number) => string;
   level?: number;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -64,14 +66,14 @@ function TreeViewItem({
         resource,
         parent: tag.id,
         status: "active",
-        ordering: "priority",
+        facility: facilityId,
       },
     }),
     enabled: tag.has_children && expanded,
   });
 
   const isSelected = selectedTags.some((t) => t.id === tag.id);
-  const isRootLevel = tag.has_children && (children?.results?.length ?? 0) > 0;
+  const isRootLevel = tag.has_children;
   const allChildrenSelected =
     children?.results?.every((childTag: TagConfig) =>
       selectedTags.some((t) => t.id === childTag.id),
@@ -136,6 +138,7 @@ function TreeViewItem({
                   resource={resource}
                   getColorForTag={getColorForTag}
                   level={level + 1}
+                  facilityId={facilityId}
                 />
               );
             }
@@ -151,6 +154,7 @@ function TagFilterDropdown({
   onTagsChange,
   resource,
   placeholder: _placeholder,
+  facilityId,
   handleBack,
 }: {
   selectedTags: TagConfig[];
@@ -158,6 +162,7 @@ function TagFilterDropdown({
   resource: TagResource;
   placeholder?: string;
   handleBack?: () => void;
+  facilityId?: string;
 }) {
   const [search, setSearch] = useState("");
   const { t } = useTranslation();
@@ -174,7 +179,7 @@ function TagFilterDropdown({
         resource,
         parent_is_null: true,
         status: "active",
-        ordering: "priority",
+        ...(facilityId ? { facility: facilityId } : {}),
         ...(search ? { search } : {}),
       },
     }),
@@ -220,7 +225,7 @@ function TagFilterDropdown({
   );
 
   return (
-    <div className="p-3 max-h-[calc(100vh-28rem)] overflow-y-auto">
+    <div className="p-3 max-h-[30vh] overflow-y-auto">
       <Input
         placeholder="Search tags..."
         value={search}
@@ -243,7 +248,10 @@ function TagFilterDropdown({
                 }}
                 className="flex items-center gap-2 px-2 py-1 cursor-pointer"
               >
-                <Checkbox checked={true} className="h-4 w-4" />
+                <Checkbox
+                  checked={true}
+                  className="data-[state=checked]:border-primary-700 text-white"
+                />
                 <div className="flex items-center gap-2 max-w-xs truncate">
                   {tag.parent && (
                     <Component
@@ -291,6 +299,7 @@ function TagFilterDropdown({
                     onTagToggle={handleTagToggle}
                     resource={resource}
                     getColorForTag={getColorForTag}
+                    facilityId={facilityId}
                   />
                 ))
               : // Desktop submenu view
@@ -302,6 +311,7 @@ function TagFilterDropdown({
                     onTagToggle={handleTagToggle}
                     resource={resource}
                     getColorForTag={getColorForTag}
+                    facilityId={facilityId}
                     onSubMenuOpen={(open) => {
                       setHasOpenSubmenu(open);
                     }}
@@ -363,6 +373,7 @@ function GroupSubmenu({
   onTagToggle,
   resource,
   getColorForTag,
+  facilityId,
   onSubMenuOpen,
 }: {
   group: TagConfig;
@@ -370,6 +381,7 @@ function GroupSubmenu({
   onTagToggle: (tag: TagConfig) => void;
   resource: TagResource;
   getColorForTag: (tagId: string, index: number) => string;
+  facilityId?: string;
   onSubMenuOpen: (isOpen: boolean) => void;
 }) {
   const { t } = useTranslation();
@@ -381,7 +393,7 @@ function GroupSubmenu({
         resource,
         parent: group.id,
         status: "active",
-        ordering: "priority",
+        ...(facilityId ? { facility: facilityId } : {}),
       },
     }),
     enabled: true,
@@ -472,6 +484,7 @@ export default function RenderTagFilter({
   selectedTags,
   onFilterChange,
   handleBack,
+  facilityId,
 }: {
   filter: FilterConfig;
   selectedTags: TagConfig[];
@@ -480,6 +493,7 @@ export default function RenderTagFilter({
     values: string[] | TagConfig[] | FilterDateRange,
   ) => void;
   handleBack?: () => void;
+  facilityId?: string;
 }) {
   return (
     <div className="p-0">
@@ -492,6 +506,7 @@ export default function RenderTagFilter({
         resource={(filter.meta as TagFilterMeta).resource}
         placeholder={filter.placeholder}
         handleBack={handleBack}
+        facilityId={facilityId}
       />
     </div>
   );

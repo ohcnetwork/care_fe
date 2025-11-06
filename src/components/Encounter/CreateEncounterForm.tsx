@@ -40,7 +40,7 @@ import {
 
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import { useFacilityShortcuts } from "@/hooks/useFacilityShortcuts";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 import {
   ENCOUNTER_CLASS_ICONS,
@@ -76,7 +76,7 @@ export default function CreateEncounterForm({
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
-  useFacilityShortcuts();
+  useShortcutSubContext();
 
   const encounterFormSchema = z.object({
     status: z.enum(["planned", "in_progress", "on_hold"] as const),
@@ -363,23 +363,17 @@ export default function CreateEncounterForm({
                   form.reset();
                 }}
                 className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
-                data-shortcut-id={isOpen ? "cancel-action" : undefined}
               >
                 {t("cancel")}
-                <ShortcutBadge actionId="cancel-action" alwaysShow />
+                <ShortcutBadge actionId="cancel-action" />
               </Button>
               <Button
                 data-cy="create-encounter-button"
                 type="submit"
                 disabled={isPending || !form.watch("organizations").length}
-                data-shortcut-id={isOpen ? "submit-action" : undefined}
               >
                 {isPending ? t("creating") : t("create_encounter")}
-                <ShortcutBadge
-                  actionId="submit-action"
-                  alwaysShow
-                  className="bg-white"
-                />
+                <ShortcutBadge actionId="submit-action" className="bg-white" />
               </Button>
             </div>
           </form>

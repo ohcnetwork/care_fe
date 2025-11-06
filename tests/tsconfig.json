@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "../",
+    "types": [],
+    "paths": {
+      "tests/*": ["./tests/*"]
+    }
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/*.spec.ts",
+    "./**/*.setup.ts",
+    "../playwright.config.ts"
+  ]
+}

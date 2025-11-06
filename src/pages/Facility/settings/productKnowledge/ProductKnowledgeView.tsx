@@ -20,12 +20,14 @@ import Page from "@/components/Common/Page";
 import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
-import { Code } from "@/types/base/code/code";
+import BackButton from "@/components/Common/BackButton";
+import { Code, isCodePresent } from "@/types/base/code/code";
 import {
   PRODUCT_KNOWLEDGE_STATUS_COLORS,
   ProductName,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
+import { ArrowLeft } from "lucide-react";
 
 interface Props {
   facilityId: string;
@@ -33,7 +35,7 @@ interface Props {
 }
 
 function CodeDisplay({ code }: { code: Code | null }) {
-  if (!code) return null;
+  if (!isCodePresent(code)) return null;
   return (
     <div className="space-y-1">
       <p className="text-sm font-medium">{code.display}</p>
@@ -75,16 +77,10 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
               {t("product_knowledge_not_found")}
             </AlertDescription>
           </Alert>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={() =>
-              navigate(`/facility/${facilityId}/settings/product_knowledge`)
-            }
-          >
-            <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
+          <BackButton>
+            <ArrowLeft />
             {t("back_to_list")}
-          </Button>
+          </BackButton>
         </div>
       </Page>
     );
@@ -93,17 +89,10 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
   return (
     <Page title={product.name} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
-        <Button
-          variant="outline"
-          size="xs"
-          className="mb-2"
-          onClick={() =>
-            navigate(`/facility/${facilityId}/settings/product_knowledge`)
-          }
-        >
-          <CareIcon icon="l-arrow-left" className="size-4" />
+        <BackButton>
+          <ArrowLeft />
           {t("back")}
-        </Button>
+        </BackButton>
 
         <div className="flex items-center justify-between">
           <div>
@@ -113,13 +102,14 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
                 {t(product.status)}
               </Badge>
             </div>
-            {product.code && (
+            {isCodePresent(product.code) && (
               <p className="mt-1 text-sm text-gray-600">
                 {product.code.system} | {product.code.code}
               </p>
             )}
           </div>
           <Button
+            className="mb-6"
             variant="outline"
             onClick={() =>
               navigate(

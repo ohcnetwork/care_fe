@@ -45,7 +45,7 @@ import {
 } from "@/components/ui/table";
 
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
-import { EntitySelectionSheet } from "@/components/Questionnaire/EntitySelectionSheet";
+import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -349,6 +349,7 @@ const SymptomRow = React.memo(function SymptomRow({
             }
             onChange={handleDateChange}
             disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+            blockDate={(date) => date > new Date()}
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </div>
@@ -494,6 +495,7 @@ const SymptomRow = React.memo(function SymptomRow({
                     }
                     onChange={handleDateChange}
                     disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+                    blockDate={(date) => date > new Date()}
                     buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
                   />
                 </div>
@@ -564,6 +566,7 @@ const SymptomRow = React.memo(function SymptomRow({
             }
             onChange={handleDateChange}
             disabled={disabled || (!isSymptomInSheet && !!symptom.id)}
+            blockDate={(date) => date > new Date()}
             buttonClassName="h-8 md:h-9 w-full justify-start font-normal"
           />
         </TableCell>
@@ -835,7 +838,6 @@ export function SymptomQuestion({
                   offset,
                   limit,
                   exclude_verification_status: "entered_in_error",
-                  ordering: "-created_date",
                 },
               })({ signal: new AbortController().signal });
               return response;
@@ -913,7 +915,7 @@ export function SymptomQuestion({
       )}
 
       {isMobile ? (
-        <EntitySelectionSheet
+        <EntitySelectionDrawer
           open={showSymptomSelection}
           onOpenChange={setShowSymptomSelection}
           system="system-condition-code"
@@ -923,18 +925,16 @@ export function SymptomQuestion({
           onConfirm={handleConfirmSymptom}
           placeholder={addSymptomPlaceholder}
         >
-          <div className="space-y-4 p-3">
-            <SymptomRow
-              symptom={newSymptom as SymptomRequest}
-              index={-1}
-              disabled={disabled}
-              onUpdate={(_, updates) => {
-                setNewSymptom((prev) => ({ ...prev, ...updates }));
-              }}
-              onRemove={() => {}}
-            />
-          </div>
-        </EntitySelectionSheet>
+          <SymptomRow
+            symptom={newSymptom as SymptomRequest}
+            index={-1}
+            disabled={disabled}
+            onUpdate={(_, updates) => {
+              setNewSymptom((prev) => ({ ...prev, ...updates }));
+            }}
+            onRemove={() => {}}
+          />
+        </EntitySelectionDrawer>
       ) : (
         <ValueSetSelect
           system="system-condition-code"

@@ -25,13 +25,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import mutate from "@/Utils/request/mutate";
 import { Code } from "@/types/base/code/code";
 import {
   TERMINOLOGY_SYSTEMS,
-  ValuesetLookupResponse,
-} from "@/types/valueset/valueset";
-import valuesetApi from "@/types/valueset/valuesetApi";
+  ValueSetLookupResponse,
+} from "@/types/valueSet/valueSet";
+import valueSetApi from "@/types/valueSet/valueSetApi";
+import mutate from "@/Utils/request/mutate";
 
 interface CodingEditorProps {
   code?: Code;
@@ -47,8 +47,8 @@ export function CodingEditor({
   name,
 }: CodingEditorProps) {
   const { mutate: verifyCode, isPending } = useMutation({
-    mutationFn: mutate(valuesetApi.lookup),
-    onSuccess: (response: ValuesetLookupResponse) => {
+    mutationFn: mutate(valueSetApi.lookup),
+    onSuccess: (response: ValueSetLookupResponse) => {
       if (response.metadata && code) {
         onChange({
           ...code,
@@ -93,7 +93,7 @@ export function CodingEditor({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center w-full justify-between">
-          <Label className="text-base font-medium">Coding Details</Label>
+          <Label className="text-base font-medium">{t("coding_details")}</Label>
           <Button
             variant="ghost"
             size="sm"

@@ -6,7 +6,7 @@ import { Time } from "@/Utils/types";
 import { formatName } from "@/Utils/utils";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { PatientRead } from "@/types/emr/patient/patient";
+import { PatientRead, PublicPatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
@@ -139,34 +139,48 @@ export interface AvailabilityHeatmapResponse {
   [date: string]: { total_slots: number; booked_slots: number };
 }
 
-export const AppointmentNonCancelledStatuses = [
-  "proposed",
-  "pending",
-  "booked",
-  "arrived",
-  "fulfilled",
-  "noshow",
-  "checked_in",
-  "waitlist",
-  "in_consultation",
-] as const;
+export enum AppointmentStatus {
+  PROPOSED = "proposed",
+  PENDING = "pending",
+  BOOKED = "booked",
+  ARRIVED = "arrived",
+  CHECKED_IN = "checked_in",
+  WAITLIST = "waitlist",
+  IN_CONSULTATION = "in_consultation",
+  FULFILLED = "fulfilled",
+  NO_SHOW = "noshow",
+  CANCELLED = "cancelled",
+  ENTERED_IN_ERROR = "entered_in_error",
+  RESCHEDULED = "rescheduled",
+}
 
-export const AppointmentCancelledStatuses = [
-  "cancelled",
-  "entered_in_error",
-  "rescheduled",
-] as const;
+export const UpcomingAppointmentStatuses = [
+  AppointmentStatus.PROPOSED,
+  AppointmentStatus.PENDING,
+  AppointmentStatus.BOOKED,
+  AppointmentStatus.ARRIVED,
+  AppointmentStatus.CHECKED_IN,
+  AppointmentStatus.WAITLIST,
+  AppointmentStatus.IN_CONSULTATION,
+];
 
-export const AppointmentStatuses = [
-  ...AppointmentNonCancelledStatuses,
-  ...AppointmentCancelledStatuses,
-] as const;
+export const PastAppointmentStatuses = [
+  ...UpcomingAppointmentStatuses,
+  AppointmentStatus.FULFILLED,
+  AppointmentStatus.NO_SHOW,
+];
 
-export const AppointmentFinalStatuses: AppointmentStatus[] = [
-  "fulfilled",
-  "cancelled",
-  "entered_in_error",
-  "rescheduled",
+export const CancelledAppointmentStatuses = [
+  AppointmentStatus.CANCELLED,
+  AppointmentStatus.ENTERED_IN_ERROR,
+  AppointmentStatus.RESCHEDULED,
+  AppointmentStatus.NO_SHOW,
+];
+
+export const AppointmentFinalStatuses = [
+  ...CancelledAppointmentStatuses,
+  AppointmentStatus.FULFILLED,
+  AppointmentStatus.NO_SHOW,
 ];
 
 export const APPOINTMENT_STATUS_COLORS = {
@@ -186,14 +200,6 @@ export const APPOINTMENT_STATUS_COLORS = {
   AppointmentStatus,
   React.ComponentProps<typeof Badge>["variant"]
 >;
-
-export type AppointmentNonCancelledStatus =
-  (typeof AppointmentNonCancelledStatuses)[number];
-
-export type AppointmentCancelledStatus =
-  (typeof AppointmentCancelledStatuses)[number];
-
-export type AppointmentStatus = (typeof AppointmentStatuses)[number];
 
 type LocationResource = {
   resource: LocationList;
@@ -215,17 +221,24 @@ export type ScheduleResource =
   | LocationResource
   | HealthcareServiceResource;
 
-export type Appointment = {
+export type AppointmentBase = {
   id: string;
   token_slot: TokenSlot;
-  patient: PatientRead;
   booked_on: string;
-  status: AppointmentNonCancelledStatus;
+  status: AppointmentStatus;
   note: string;
-  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
   token: TokenRead | null;
+  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
 } & ScheduleResource;
+
+export type Appointment = AppointmentBase & {
+  patient: PatientRead;
+};
+
+export type PublicAppointment = AppointmentBase & {
+  patient: PublicPatientRead;
+};
 
 export type AppointmentRead = Appointment & {
   tags: TagConfig[];

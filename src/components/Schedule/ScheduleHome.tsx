@@ -1,6 +1,7 @@
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
 import Calendar from "@/CAREUI/interactive/Calendar";
-import Loading from "@/components/Common/Loading";
+import { getPermissions } from "@/common/Permissions";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -13,8 +14,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { usePermissions } from "@/context/PermissionContext";
 import { cn } from "@/lib/utils";
 import { useAvailabilityHeatmap } from "@/pages/Appointments/utils";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import CreateScheduleExceptionSheet from "@/pages/Scheduling/components/CreateScheduleExceptionSheet";
 import CreateScheduleTemplateSheet from "@/pages/Scheduling/components/CreateScheduleTemplateSheet";
 import ScheduleExceptions from "@/pages/Scheduling/ScheduleExceptions";
@@ -64,7 +67,12 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
   const [qParams, setQParams] = useQueryParams<ScheduleHomeQueryParams>();
   const view = qParams.tab || "schedule";
   const [month, setMonth] = useState(new Date());
-
+  const { facility } = useCurrentFacility();
+  const { hasPermission } = usePermissions();
+  const { canWriteSchedule } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
   const templatesQuery = useQuery({
     queryKey: ["schedule", facilityId, { resourceType, resourceId, month }],
     queryFn: query(scheduleApi.templates.list, {
@@ -96,7 +104,7 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
   });
 
   if (!templatesQuery.data || !exceptionsQuery.data) {
-    return <Loading />;
+    return <TableSkeleton count={3} />;
   }
 
   return (
@@ -161,15 +169,13 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
                       {date.getDate()}
                     </span>
                     <div className="flex justify-center gap-0.5">
-                      {templates
-                        ?.slice(0, 5)
-                        .map((template) => (
-                          <ColoredIndicator
-                            key={template.id}
-                            id={template.id}
-                            className="size-1.5 rounded-full"
-                          />
-                        ))}
+                      {templates?.slice(0, 5).map((template) => (
+                        <ColoredIndicator
+                          key={template.id}
+                          id={template.id}
+                          className="size-1.5 rounded-full"
+                        />
+                      ))}
                     </div>
                   </div>
                   <div />
@@ -183,6 +189,7 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
                 resourceId={resourceId}
                 facilityId={facilityId}
                 resourceType={resourceType}
+                canWriteSchedule={canWriteSchedule}
               />
             </Popover>
           );
@@ -213,14 +220,14 @@ export function ScheduleHome({ resourceType, resourceId, facilityId }: Props) {
               {t("exceptions")}
             </Button>
           </div>
-          {view === "schedule" && (
+          {view === "schedule" && canWriteSchedule && (
             <CreateScheduleTemplateSheet
               facilityId={facilityId}
               resourceType={resourceType}
               resourceId={resourceId}
             />
           )}
-          {view === "exceptions" && (
+          {view === "exceptions" && canWriteSchedule && (
             <CreateScheduleExceptionSheet
               facilityId={facilityId}
               resourceType={resourceType}
@@ -273,6 +280,7 @@ function DayDetailsPopover({
   resourceId,
   facilityId,
   resourceType,
+  canWriteSchedule,
 }: {
   date: Date;
   templates: ScheduleTemplate[];
@@ -281,6 +289,7 @@ function DayDetailsPopover({
   resourceId: string;
   facilityId: string;
   resourceType: SchedulableResourceType;
+  canWriteSchedule: boolean;
 }) {
   const { t } = useTranslation();
   const { data: heatmapData } = useAvailabilityHeatmap({
@@ -301,7 +310,7 @@ function DayDetailsPopover({
             year: "numeric",
           })}
         </p>
-        {!dayjs(date).isBefore(dayjs(), "day") && (
+        {!dayjs(date).isBefore(dayjs(), "day") && canWriteSchedule && (
           <Button
             variant="outline"
             size="sm"

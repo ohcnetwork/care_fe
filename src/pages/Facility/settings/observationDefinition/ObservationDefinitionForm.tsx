@@ -32,9 +32,7 @@ import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
+import { CodeSchema } from "@/types/base/code/code";
 import {
   InterpretationType,
   QualifiedRange,
@@ -49,69 +47,10 @@ import {
   QuestionType,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { generateSlug } from "@/Utils/utils";
 import { ObservationInterpretation } from "./ObservationInterpretation";
-
-const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug_value: z.string().min(1, "Slug is required"),
-  description: z.string().min(1, "Description is required"),
-  status: z.enum(OBSERVATION_DEFINITION_STATUS),
-  category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]]),
-  permitted_data_type: z.nativeEnum(QuestionType),
-  code: z.object({
-    code: z.string().min(1, "Code is required"),
-    display: z.string().min(1, "Display name is required"),
-    system: z.string().min(1, "System is required"),
-  }),
-  body_site: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  method: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  permitted_unit: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  component: z
-    .array(
-      z.object({
-        code: z
-          .object({
-            code: z.string(),
-            display: z.string(),
-            system: z.string(),
-          })
-          .refine((data) => data.code && data.display && data.system, {
-            message: "Required",
-          }),
-        permitted_data_type: z.nativeEnum(QuestionType),
-        permitted_unit: z
-          .object({
-            code: z.string(),
-            display: z.string(),
-            system: z.string(),
-          })
-          .refine((data) => data.code && data.display && data.system, {
-            message: "Required",
-          }),
-        qualified_ranges: qualifiedRangeSchema,
-      }),
-    )
-    .default([]),
-  qualified_ranges: qualifiedRangeSchema,
-});
 
 export default function ObservationDefinitionForm({
   facilityId,
@@ -177,6 +116,50 @@ function ObservationDefinitionFormContent({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
+
+  const formSchema = z.object({
+    title: z.string().min(1, t("field_required")),
+    slug_value: z
+      .string()
+      .min(1, t("field_required"))
+      .max(25, t("character_count_validation", { min: 1, max: 25 })),
+    description: z.string().min(1, t("field_required")),
+    status: z.enum(OBSERVATION_DEFINITION_STATUS),
+    category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]]),
+    permitted_data_type: z.nativeEnum(QuestionType),
+    code: CodeSchema,
+    body_site: CodeSchema.nullable(),
+    method: CodeSchema.nullable(),
+    permitted_unit: CodeSchema.nullable(),
+    component: z
+      .array(
+        z.object({
+          code: z
+            .object({
+              code: z.string(),
+              display: z.string(),
+              system: z.string(),
+            })
+            .refine((data) => data.code && data.display && data.system, {
+              message: t("field_required"),
+            }),
+          permitted_data_type: z.nativeEnum(QuestionType),
+          permitted_unit: z
+            .object({
+              code: z.string(),
+              display: z.string(),
+              system: z.string(),
+            })
+            .refine((data) => data.code && data.display && data.system, {
+              message: t("field_required"),
+            }),
+          qualified_ranges: qualifiedRangeSchema,
+        }),
+      )
+      .default([]),
+    qualified_ranges: qualifiedRangeSchema,
+  });
+
   const queryClient = useQueryClient();
   const isEditMode = Boolean(observationSlug);
 
@@ -233,7 +216,7 @@ function ObservationDefinitionFormContent({
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || "", 25), {
           shouldValidate: true,
         });
       }
@@ -467,28 +450,32 @@ function ObservationDefinitionFormContent({
                     }}
                   />
 
-                  <FormItem className="flex flex-col">
-                    <FormLabel aria-required>{t("loinc_code")}</FormLabel>
-                    <div>
-                      <ValueSetSelect
-                        system="system-observation"
-                        value={form.watch("code")}
-                        placeholder={t("search_for_observation_codes")}
-                        onSelect={(code) => {
-                          form.setValue("code", {
-                            code: code.code,
-                            display: code.display,
-                            system: code.system,
-                          });
-                          form.clearErrors("code");
-                        }}
-                        showCode={true}
-                      />
-                      <FormMessage className="mt-2">
-                        {form.formState.errors.code?.message}
-                      </FormMessage>
-                    </div>
-                  </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel aria-required>{t("loinc_code")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            ref={field.ref}
+                            system="system-observation"
+                            value={field.value}
+                            placeholder={t("search_for_observation_codes")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
             </div>
@@ -526,56 +513,84 @@ function ObservationDefinitionFormContent({
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
-                  <FormItem className="flex flex-col">
-                    <FormLabel>{t("body_site")}</FormLabel>
-                    <ValueSetSelect
-                      system="system-body-site"
-                      value={form.watch("body_site")}
-                      placeholder={t("select_body_site")}
-                      onSelect={(code) => {
-                        form.setValue("body_site", {
-                          code: code.code,
-                          display: code.display,
-                          system: code.system,
-                        });
-                      }}
-                      showCode={true}
-                    />
-                  </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="body_site"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t("body_site")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            ref={field.ref}
+                            system="system-body-site"
+                            value={field.value}
+                            placeholder={t("select_body_site")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  <FormItem className="flex flex-col">
-                    <FormLabel>{t("method")}</FormLabel>
-                    <ValueSetSelect
-                      system="system-collection-method"
-                      value={form.watch("method")}
-                      placeholder={t("method_placeholder")}
-                      onSelect={(code) => {
-                        form.setValue("method", {
-                          code: code.code,
-                          display: code.display,
-                          system: code.system,
-                        });
-                      }}
-                      showCode={true}
-                    />
-                  </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="method"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t("method")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            {...field}
+                            system="system-collection-method"
+                            placeholder={t("method_placeholder")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  <FormItem className="flex flex-col">
-                    <FormLabel>{t("unit")}</FormLabel>
-                    <ValueSetSelect
-                      system="system-ucum-units"
-                      value={form.watch("permitted_unit")}
-                      placeholder={t("unit_placeholder")}
-                      onSelect={(code) => {
-                        form.setValue("permitted_unit", {
-                          code: code.code,
-                          display: code.display,
-                          system: code.system,
-                        });
-                      }}
-                      showCode={true}
-                    />
-                  </FormItem>
+                  <FormField
+                    control={form.control}
+                    name="permitted_unit"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-1">
+                        <FormLabel>{t("unit")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            {...field}
+                            system="system-ucum-units"
+                            placeholder={t("unit_placeholder")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
             </div>
@@ -693,15 +708,15 @@ function ObservationDefinitionFormContent({
                             control={form.control}
                             name={`component.${index}.code`}
                             render={({ field }) => (
-                              <FormItem>
+                              <FormItem className="flex flex-col">
                                 <FormLabel aria-required>{t("code")}</FormLabel>
                                 <FormControl>
                                   <ValueSetSelect
+                                    {...field}
                                     system="system-observation"
                                     placeholder={t(
                                       "search_for_observation_codes",
                                     )}
-                                    value={field.value}
                                     showCode={true}
                                     onSelect={(code) => {
                                       field.onChange({
@@ -758,9 +773,9 @@ function ObservationDefinitionFormContent({
                                   </FormLabel>
                                   <FormControl>
                                     <ValueSetSelect
+                                      {...field}
                                       system="system-ucum-units"
                                       placeholder={t("search_for_units")}
-                                      value={field.value}
                                       showCode={true}
                                       onSelect={(code) => {
                                         field.onChange({

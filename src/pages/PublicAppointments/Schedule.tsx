@@ -30,7 +30,7 @@ import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
-  Appointment,
+  PublicAppointment,
   SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -57,7 +57,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
 
   if (!staffId) {
     toast.error(t("staff_username_not_found"));
-    navigate(`/facility/${facilityId}/`);
+    navigate(`/facility/${facilityId}`);
   } else if (!tokenData) {
     toast.error(t("phone_number_not_found"));
     navigate(`/facility/${facilityId}/appointments/${staffId}/otp/send`);
@@ -160,7 +160,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           Authorization: `Bearer ${tokenData.token}`,
         },
       }),
-      onSuccess: (data: Appointment) => {
+      onSuccess: (data: PublicAppointment) => {
         toast.success(t("appointment_created_success"));
         queryClient.invalidateQueries({
           queryKey: [
@@ -181,7 +181,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           Authorization: `Bearer ${tokenData.token}`,
         },
       }),
-      onSuccess: (appointment: Appointment) => {
+      onSuccess: (appointment: PublicAppointment) => {
         toast.success(t("appointment_cancelled"));
         queryClient.invalidateQueries({
           queryKey: ["appointment", tokenData.phoneNumber],
@@ -193,7 +193,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       },
     });
 
-  const handleRescheduleAppointment = (appointment: Appointment) => {
+  const handleRescheduleAppointment = (appointment: PublicAppointment) => {
     cancelAppointment({
       appointment: appointment.id,
       patient: appointment.patient.id,

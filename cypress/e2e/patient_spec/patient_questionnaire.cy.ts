@@ -89,7 +89,7 @@ describe("All combination of questionnaire submissions", () => {
       cy.get('[data-cy="add-questionnaire-button"]').click();
     });
     cy.typeAndSelectOption(
-      "input[placeholder='Search Questionnaires']",
+      "input[placeholder='Search Forms']",
       questionnaireName,
       false,
     );
@@ -109,7 +109,7 @@ describe("All combination of questionnaire submissions", () => {
     cy.verifyNotification("Questionnaire submitted successfully");
 
     // Verify the allergy information appears in the patient overview
-    cy.verifyContentPresence("[data-slot='accordion']", [
+    cy.verifyContentPresence("[data-slot='collapsible']", [
       "Allergies",
       allergyName,
       "Active",
@@ -172,9 +172,9 @@ describe("All combination of questionnaire submissions", () => {
     cy.get("a").contains("View Profile").click();
     cy.get("[role='tablist']").contains("Updates").click();
     cy.get("a").contains("Add Patient Updates").click();
-    cy.get("button").contains("Add Questionnaire").click();
+    cy.get("button").contains("Add Forms").click();
     cy.typeAndSelectOption(
-      "input[placeholder='Search Questionnaires']",
+      "input[placeholder='Search Forms']",
       questionnaireName,
       false,
     );

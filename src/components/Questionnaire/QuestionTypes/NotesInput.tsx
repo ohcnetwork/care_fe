@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,8 @@ export function NotesInput({
   disabled,
   className,
 }: NotesInputProps) {
+  const { t } = useTranslation();
+
   const [open, setOpen] = useState(false);
   const notes = questionnaireResponse.note || "";
   const hasNotes = notes.length > 0;
@@ -45,7 +48,7 @@ export function NotesInput({
             ) : (
               <span className=" text-base">+</span>
             )}
-            {hasNotes ? "View Note" : "Add Note"}
+            {hasNotes ? t("view_note") : t("add_notes")}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="bg-yellow-100 border border-yellow-200 text-gray-900 shadow-lg p-2">
@@ -53,7 +56,7 @@ export function NotesInput({
             value={notes}
             onChange={(e) => handleUpdateNote(e.target.value)}
             className=" border-yellow-200 focus-visible:border-yellow-300 focus-visible:ring-yellow-300"
-            placeholder="Add notes..."
+            placeholder={t("add_notes")}
             disabled={disabled}
             data-cy="notes-textarea"
           />

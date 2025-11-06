@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -32,10 +33,11 @@ export default function BookAppointmentSheet({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="!w-[90%] !max-w-none h-full overflow-y-auto">
+      <SheetContent className="md:w-[90%] !max-w-none h-full overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("book_appointment")}</SheetTitle>
         </SheetHeader>
+        <SheetDescription />
         <div className="flex flex-col gap-4 mt-6">
           <Tabs defaultValue="appointment">
             <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">

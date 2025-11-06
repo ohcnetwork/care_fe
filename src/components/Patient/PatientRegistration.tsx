@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import DateField from "@/components/ui/date-field";
 import {
   Form,
   FormControl,
@@ -34,10 +35,12 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAppHistory from "@/hooks/useAppHistory";
 import { tzAwareDateTime } from "@/lib/validators";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
+import { PLUGIN_Component } from "@/PluginEngine";
 import {
   BloodGroupChoices,
   PatientIdentifierCreate,
@@ -53,6 +56,7 @@ import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import careConfig from "@careConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -69,6 +73,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
+  useShortcutSubContext();
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
@@ -172,7 +177,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
         !data.date_of_birth && data.year_of_birth
           ? new Date().getFullYear() - data.year_of_birth
           : undefined,
-      blood_group: data.blood_group,
+      blood_group: data.blood_group || undefined,
       tags: [], // This is only used for create patient
 
       address: data.address || "",
@@ -212,6 +217,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   );
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
+    mutationKey: ["create_patient"],
     mutationFn: mutate(patientApi.addPatient),
     onSuccess: (resp: PatientRead) => {
       toast.success(t("patient_registration_success"));
@@ -227,6 +233,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   });
 
   const { mutate: updatePatient, isPending: isUpdatingPatient } = useMutation({
+    mutationKey: ["update_patient"],
     mutationFn: mutate(patientApi.updatePatient, {
       pathParams: { id: patientId || "" },
     }),
@@ -261,9 +268,11 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     const basePayload = {
       ...values,
 
-      age: values.age_or_dob === "dob" ? undefined : values.age,
+      age: values.age_or_dob === "dob" ? undefined : values.age || undefined,
       date_of_birth:
-        values.age_or_dob === "dob" ? values.date_of_birth : undefined,
+        values.age_or_dob === "dob"
+          ? values.date_of_birth || undefined
+          : undefined,
 
       emergency_phone_number: values.emergency_phone_number_same_as_phone_number
         ? values.phone_number
@@ -305,7 +314,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     <Page title={pageTitle} hideTitleOnPage>
       <div className="flex flex-col gap-4 max-w-2xl mx-auto">
         <div>
-          <BackButton>
+          <BackButton data-shortcut-id="go-back">
             <ArrowLeft />
             {t("back")}
           </BackButton>
@@ -332,6 +341,12 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
                   : ["patient-basics", "additional-details"]
               }
             >
+              <PLUGIN_Component
+                __name="PatientRegistrationForm"
+                form={form}
+                facilityId={facilityId}
+                patientId={patientId}
+              />
               <AccordionItem
                 value="patient-basics"
                 className="bg-white flex flex-col gap-4 p-6 shadow rounded-md"
@@ -370,15 +385,11 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
               <div className="max-w-2xl mx-auto flex justify-end">
                 <Button
                   variant="primary_gradient"
-                  data-shortcut-id="submit-action"
                   // TODO: disable button if basic info not fille
                 >
                   <CheckIcon />
                   {patientId ? t("update") : t("register_patient")}
-                  <ShortcutBadge
-                    actionId="submit-action"
-                    className="bg-gray-200"
-                  />
+                  <ShortcutBadge actionId="submit-action" />
                 </Button>
               </div>
             </div>
@@ -435,6 +446,7 @@ const PatientBasicsContent = ({
                 tabIndex={0}
                 placeholder={t("type_name")}
                 {...field}
+                value={field.value ?? ""}
               />
             </FormControl>
             <FormMessage />
@@ -517,11 +529,12 @@ const PatientBasicsContent = ({
               <RadioInput
                 {...field}
                 onValueChange={field.onChange}
-                value={field.value ?? undefined}
+                value={field.value ?? ""}
                 options={GENDER_TYPES.map((g) => ({
                   value: g.id,
                   label: t(`GENDER__${g.id}`),
                 }))}
+                required={true}
               />
             </FormControl>
             <FormMessage />
@@ -529,16 +542,16 @@ const PatientBasicsContent = ({
         )}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-6 items-start">
         <FormField
           control={form.control}
           name="age_or_dob"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="md:col-span-4">
               <FormLabel aria-required>{t("date_of_birth_or_age")}</FormLabel>
               <div className="flex gap-1 items-start">
                 <Tabs value={field.value} onValueChange={field.onChange}>
-                  <TabsList className="mt-0.25">
+                  <TabsList className="mt-1 md:mt-0.25">
                     <TabsTrigger value="dob">{t("date")}</TabsTrigger>
                     <TabsTrigger value="age">{t("age")}</TabsTrigger>
                   </TabsList>
@@ -550,7 +563,15 @@ const PatientBasicsContent = ({
                     render={({ field }) => (
                       <FormItem className="w-full">
                         <FormControl>
-                          <Input {...field} type="date" />
+                          <DateField
+                            date={
+                              field.value ? new Date(field.value) : undefined
+                            }
+                            onChange={(date) =>
+                              field.onChange(dateQueryString(date))
+                            }
+                            hideLabels
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -562,26 +583,33 @@ const PatientBasicsContent = ({
                     control={form.control}
                     name="age"
                     render={({ field }) => (
-                      <FormItem className="w-full">
+                      <FormItem className="w-full md:col-span-2 relative">
                         <FormControl>
-                          <Input
-                            type="number"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            placeholder={t("age")}
-                            min={1}
-                            max={120}
-                            {...field}
-                            onChange={(e) =>
-                              form.setValue(
-                                "age",
-                                e.target.value
-                                  ? Number(e.target.value)
-                                  : (null as unknown as number),
-                                { shouldDirty: true },
-                              )
-                            }
-                          />
+                          <>
+                            <Input
+                              {...field}
+                              type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              placeholder={t("age")}
+                              min={1}
+                              max={120}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                field.onChange(
+                                  e.target.value
+                                    ? Number(e.target.value)
+                                    : null,
+                                );
+                              }}
+                            />
+                            {field.value && (
+                              <span className="text-xs text-gray-500 absolute right-9 top-3.25 md:top-2.5">
+                                {t("year_of_birth")}:{" "}
+                                {new Date().getFullYear() - Number(field.value)}
+                              </span>
+                            )}
+                          </>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -589,6 +617,7 @@ const PatientBasicsContent = ({
                   />
                 )}
               </div>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -600,6 +629,7 @@ const PatientBasicsContent = ({
               <FormLabel>{t("blood_group")}</FormLabel>
               <Select
                 {...field}
+                value={field.value ?? ""}
                 onValueChange={field.onChange}
                 defaultValue={field.value}
               >
@@ -633,7 +663,11 @@ const PatientBasicsContent = ({
                 <FormLabel aria-required>{config.display}</FormLabel>
                 <FormDescription>{config.description}</FormDescription>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_identifier_value")} />
+                  <Input
+                    {...field}
+                    value={field.value ?? ""}
+                    placeholder={t("enter_identifier_value")}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -725,7 +759,9 @@ const AdditionalDetailsContent = ({
                   onCheckedChange={(value) => field.onChange(!value)}
                 />
               </FormControl>
-              <FormLabel>{t("permanent_address_is_different")}</FormLabel>
+              <FormLabel>
+                {t("permanent_address_is_different_from_current_address")}
+              </FormLabel>
             </FormItem>
           )}
         />
@@ -760,6 +796,7 @@ const AdditionalDetailsContent = ({
             <FormControl>
               <Input
                 {...field}
+                value={field.value ?? ""}
                 placeholder={t("enter_pincode")}
                 onChange={(e) => {
                   const value = e.target.value
@@ -810,7 +847,11 @@ const AdditionalDetailsContent = ({
                 <FormLabel>{config.display}</FormLabel>
                 <FormDescription>{config.description}</FormDescription>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_identifier_value")} />
+                  <Input
+                    {...field}
+                    value={field.value ?? ""}
+                    placeholder={t("enter_identifier_value")}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -823,9 +864,8 @@ const AdditionalDetailsContent = ({
           <p className="text-sm font-medium text-black">
             {t("deceased_status")}
           </p>
-          <div className="flex items-start gap-2">
+          <div className="flex items-center gap-2">
             <Checkbox
-              className="mt-2"
               checked={form.watch("is_deceased")}
               onCheckedChange={(checked) => {
                 form.setValue("is_deceased", !!checked);
@@ -895,6 +935,9 @@ const AdditionalDetailsContent = ({
 const getRequiredIdentifierConfigs = (facility: FacilityRead) => {
   const configs = facility.patient_instance_identifier_configs;
   return configs.filter(({ config }) => {
+    if (config.auto_maintained) {
+      return false;
+    }
     const isAutogenerated = !!config.default_value;
     const isRequired = config.required && !isAutogenerated;
     return isRequired;
@@ -904,6 +947,9 @@ const getRequiredIdentifierConfigs = (facility: FacilityRead) => {
 const getOptionalIdentifierConfigs = (facility: FacilityRead) => {
   const configs = facility.patient_instance_identifier_configs;
   return configs.filter(({ config }) => {
+    if (config.auto_maintained) {
+      return false;
+    }
     const isAutogenerated = !!config.default_value;
     const isOptional = !config.required && !isAutogenerated;
     return isOptional;
@@ -913,6 +959,9 @@ const getOptionalIdentifierConfigs = (facility: FacilityRead) => {
 const getAutogeneratedIdentifierConfigs = (facility: FacilityRead) => {
   const configs = facility.patient_instance_identifier_configs;
   return configs.filter(({ config }) => {
+    if (config.auto_maintained) {
+      return false;
+    }
     const isAutogenerated = !!config.default_value;
     return isAutogenerated;
   });
@@ -949,8 +998,9 @@ const getFormSchema = (t: TFunction) => {
         .string()
         .date()
         .refine((date) => !isFuture(date), t("date_cannot_be_future"))
-        .optional(),
-      age: validators().age.optional(),
+        .optional()
+        .nullable(),
+      age: validators().age.optional().nullable(),
       blood_group: z.nativeEnum(BloodGroupChoices).optional(),
       tags: z.array(z.string()),
 
@@ -994,14 +1044,14 @@ const getFormSchema = (t: TFunction) => {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("field_required"),
-          path: ["date_of_birth"],
+          path: ["age_or_dob"],
         });
       }
       if (data.age_or_dob === "age" && !data.age) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("field_required"),
-          path: ["age"],
+          path: ["age_or_dob"],
         });
       }
 
@@ -1034,6 +1084,11 @@ const getEditableIdentifiers = (
     const config = facility.patient_instance_identifier_configs.find(
       (c) => c.id === identifier.config,
     );
+
+    if (config?.config.auto_maintained) {
+      return false;
+    }
+
     return !config?.config.default_value;
   }) as PatientIdentifierCreate[];
 };

@@ -20,9 +20,12 @@ import Page from "@/components/Common/Page";
 import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
+import BackButton from "@/components/Common/BackButton";
 import { PRODUCT_STATUS_COLORS } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import { PRODUCT_KNOWLEDGE_TYPE_COLORS } from "@/types/inventory/productKnowledge/productKnowledge";
+import { ArrowLeft } from "lucide-react";
+import { Link } from "raviger";
 
 interface Props {
   facilityId: string;
@@ -75,15 +78,10 @@ export default function ProductView({ facilityId, productId }: Props) {
   return (
     <Page title={`Product: ${product.id}`} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
-        <Button
-          variant="outline"
-          size="xs"
-          className="mb-2"
-          onClick={() => navigate(`/facility/${facilityId}/settings/product`)}
-        >
-          <CareIcon icon="l-arrow-left" className="size-4" />
-          {t("back")}
-        </Button>
+        <BackButton>
+          <ArrowLeft />
+          {t("back_to_list")}
+        </BackButton>
 
         <div className="flex items-center justify-between">
           <div>
@@ -206,17 +204,14 @@ export default function ProductView({ facilityId, productId }: Props) {
                       {product.charge_item_definition.slug}
                     </p>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/settings/charge_item_definitions/${product.charge_item_definition.slug}`,
-                      )
-                    }
-                  >
-                    <CareIcon icon="l-eye" className="mr-2 size-4" />
-                    {t("view_details")}
+                  <Button variant="outline" size="sm" asChild>
+                    <Link
+                      basePath="/"
+                      href={`/facility/${facilityId}/settings/charge_item_definitions/${product.charge_item_definition.slug}`}
+                    >
+                      <CareIcon icon="l-eye" className="mr-2 size-4" />
+                      {t("view_details")}
+                    </Link>
                   </Button>
                 </div>
               </div>

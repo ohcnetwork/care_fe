@@ -1,23 +1,26 @@
 import { ChevronDown, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "@/lib/utils";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { isAppleDevice } from "@/Utils/utils";
 
 import { Code } from "@/types/base/code/code";
 
@@ -49,30 +52,40 @@ function InstructionContentSection({
   return (
     <div className="space-y-3">
       {currentInstructions.length > 0 && (
-        <div className="max-h-32 overflow-y-auto p-1">
-          <div className="flex flex-wrap gap-2 mb-1">
-            {currentInstructions.map((instruction) => (
-              <Badge
-                key={instruction.code}
-                variant="secondary"
-                className="flex items-center gap-1 break-words"
-              >
-                <span className="whitespace-normal">{instruction.display}</span>
-                {!isReadOnly && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="size-4 p-0 rounded-full"
-                    onClick={() => removeInstruction(instruction.code)}
-                    disabled={disabled}
-                  >
-                    <X className="size-3" />
-                    <span className="sr-only">{t("remove")}</span>
-                  </Button>
+        <div
+          className={cn(
+            "flex flex-nowrap overflow-x-auto p-2 sm:flex-wrap sm:max-h-32 sm:overflow-y-auto gap-2 mb-1",
+            isReadOnly && "h-auto overflow-y-auto flex-wrap overflow-x-hidden",
+          )}
+        >
+          {currentInstructions.map((instruction) => (
+            <Badge
+              key={instruction.code}
+              variant="secondary"
+              className="flex items-center gap-1 break-words"
+            >
+              <span
+                className={cn(
+                  "whitespace-nowrap",
+                  isReadOnly && "whitespace-normal",
                 )}
-              </Badge>
-            ))}
-          </div>
+              >
+                {instruction.display}
+              </span>
+              {!isReadOnly && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="size-4 p-0 rounded-full"
+                  onClick={() => removeInstruction(instruction.code)}
+                  disabled={disabled}
+                >
+                  <X className="size-3" />
+                  <span className="sr-only">{t("remove")}</span>
+                </Button>
+              )}
+            </Badge>
+          ))}
         </div>
       )}
 
@@ -82,7 +95,6 @@ function InstructionContentSection({
             system="system-additional-instruction"
             value={null}
             hideTrigger={true}
-            controlledOpen={true}
             onSelect={(instruction: Code) => {
               if (instruction) addInstruction(instruction);
             }}
@@ -107,9 +119,12 @@ const TriggerButton = (
   const { t } = useTranslation();
   return (
     <Button
-      variant="outline"
+      variant="white"
       data-cy="instructions"
-      className="w-full justify-between"
+      className={cn(
+        "w-full justify-between border-gray-300 font-normal shadow-xs h-auto",
+        currentInstructions.length === 0 && "text-gray-500 hover:bg-white",
+      )}
       disabled={disabledButton}
     >
       <span className="truncate block max-w-full">
@@ -139,23 +154,25 @@ export default function InstructionsPopover({
 
   if (isMobile) {
     return (
-      <Sheet>
-        <SheetTrigger asChild>
+      <Drawer repositionInputs={!isAppleDevice}>
+        <DrawerTrigger asChild>
           {TriggerButton(currentInstructions, disabledButton)}
-        </SheetTrigger>
-        <SheetContent side="bottom" className="p-4">
-          <SheetHeader className="mb-2">
-            {t("additional_instructions")}
-          </SheetHeader>
-          <InstructionContentSection
-            currentInstructions={currentInstructions}
-            isReadOnly={isReadOnly}
-            disabled={disabled}
-            removeInstruction={removeInstruction}
-            addInstruction={addInstruction}
-          />
-        </SheetContent>
-      </Sheet>
+        </DrawerTrigger>
+        <DrawerContent className="min-h-[60vh] max-h-[85vh] px-0 pt-2 pb-0 rounded-t-lg">
+          <div className="pb-[env(safe-area-inset-bottom)]">
+            <DrawerHeader className="sticky top-0 z-10 bg-white p-0 mt-1.5">
+              {t("additional_instructions")}
+            </DrawerHeader>
+            <InstructionContentSection
+              currentInstructions={currentInstructions}
+              isReadOnly={isReadOnly}
+              disabled={disabled}
+              removeInstruction={removeInstruction}
+              addInstruction={addInstruction}
+            />
+          </div>
+        </DrawerContent>
+      </Drawer>
     );
   }
 

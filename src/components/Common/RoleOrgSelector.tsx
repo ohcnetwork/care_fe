@@ -22,11 +22,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Organization } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -146,7 +146,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
     props.optional,
   ]);
 
-  const renderOrganizationPopover = (className?: string) => {
+  const renderOrganizationCommand = (className?: string) => {
     return (
       <Command className={className}>
         <div className="flex flex-col px-3 py-2 border-b sticky top-0 bg-white z-10">
@@ -162,13 +162,10 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
             placeholder={t("search_organizations")}
             onValueChange={setOrgSearchQuery}
             value={orgSearchQuery}
-            className="border-none focus:ring-0"
+            className="border-none focus:ring-0 text-base sm:text-sm"
           />
         </div>
-        <CommandList
-          className="max-h-[calc(100vh-30rem)]"
-          onWheel={(e) => e.stopPropagation()}
-        >
+        <CommandList onWheel={(e) => e.stopPropagation()}>
           <CommandEmpty>
             {isLoadingAvailableOrganizations ? (
               <div className="flex items-center justify-center py-6">
@@ -297,8 +294,8 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
               (singleSelection && selectedOrganizations.length < 1)) &&
               (isMobile ? (
                 <>
-                  <Sheet open={open} onOpenChange={setOpen}>
-                    <SheetTrigger asChild>
+                  <Drawer open={open} onOpenChange={setOpen}>
+                    <DrawerTrigger asChild>
                       <Button
                         variant="outline"
                         role="combobox"
@@ -315,11 +312,11 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                         </span>
                         <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
-                    </SheetTrigger>
-                    <SheetContent className="p-0" side="bottom">
-                      {renderOrganizationPopover("mb-12")}
-                    </SheetContent>
-                  </Sheet>
+                    </DrawerTrigger>
+                    <DrawerContent className="min-h-[50vh] max-h-[85vh]">
+                      {renderOrganizationCommand()}
+                    </DrawerContent>
+                  </Drawer>
                 </>
               ) : (
                 <Popover open={open} onOpenChange={handleOpenChange}>
@@ -344,7 +341,7 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                     sideOffset={4}
                     className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
                   >
-                    {renderOrganizationPopover()}
+                    {renderOrganizationCommand()}
                   </PopoverContent>
                 </Popover>
               ))}
