@@ -50,6 +50,7 @@ test.describe("Facility Creation", () => {
   let facilityType: string;
   let facilityName: string;
   let facilityFeatures: string[];
+  let locationName: string;
   let description: string;
   let phoneNumber: string;
   let pinCode: string;
@@ -83,8 +84,8 @@ test.describe("Facility Creation", () => {
   test.beforeEach(async ({ page }) => {
     // Generate unique test data for each test run
     facilityType = faker.helpers.arrayElement(FACILITY_TYPES);
-    const cityName = faker.helpers.arrayElement(CITIES);
-    facilityName = `${faker.company.name()} ${cityName}`;
+    locationName = faker.helpers.arrayElement(CITIES);
+    facilityName = `${faker.company.name()} ${locationName}`;
     facilityFeatures = faker.helpers.arrayElements(FACILITY_FEATURES, 2);
     description = faker.lorem.sentence();
     phoneNumber = `987${faker.string.numeric(7)}`.replace(
@@ -421,9 +422,6 @@ test.describe("Facility Creation", () => {
   test("Add location to an existing facility and verify Show on Map link redirection", async ({
     page,
   }) => {
-    // Generate a random city name
-    const cityName = faker.helpers.arrayElement(CITIES);
-
     // Click on the first View Facility link to open a random facility
     await page.getByRole("link", { name: "View Facility" }).first().click();
 
@@ -439,7 +437,7 @@ test.describe("Facility Creation", () => {
       .getByRole("combobox")
       .filter({ hasText: "Search for a location" })
       .click();
-    await page.getByPlaceholder("Search option...").fill(cityName);
+    await page.getByPlaceholder("Search option...").fill(locationName);
     // Select the first location option that appears from the search results
     const locationOption = page.getByRole("option").first();
     await locationOption.waitFor({ state: "visible" });
