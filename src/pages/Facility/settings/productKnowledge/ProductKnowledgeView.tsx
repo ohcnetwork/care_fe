@@ -275,7 +275,7 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
             </Card>
           )}
 
-        {product.definitional && (
+        {product.definitional?.dosage_form && (
           <Card>
             <CardHeader>
               <CardTitle>{t("product_definition")}</CardTitle>

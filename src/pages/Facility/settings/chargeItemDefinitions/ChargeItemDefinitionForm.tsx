@@ -37,6 +37,7 @@ import Loading from "@/components/Common/Loading";
 import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
 
 import { cn } from "@/lib/utils";
+import { CodeSchema } from "@/types/base/code/code";
 import {
   Condition,
   conditionSchema,
@@ -99,13 +100,7 @@ const createPriceComponentSchema = (
 ) =>
   z.object({
     monetary_component_type: z.nativeEnum(MonetaryComponentType),
-    code: z
-      .object({
-        code: z.string(),
-        system: z.string(),
-        display: z.string(),
-      })
-      .optional(),
+    code: CodeSchema.optional(),
     factor: z.number().gt(0).max(100).optional(),
     amount: z
       .string()
@@ -900,7 +895,14 @@ export function ChargeItemDefinitionForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit(onSubmit)(e);
+        }}
+        className="space-y-6"
+      >
         {/* Basic Information */}
         <div
           className={cn(

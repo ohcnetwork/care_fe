@@ -36,7 +36,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
-import { Code } from "@/types/base/code/code";
+import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import {
@@ -50,20 +50,9 @@ import {
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
-// Define a Code schema to match the API type
-const createCodeSchema = (
-  t: (key: string, options?: Record<string, unknown>) => string,
-) =>
-  z.object({
-    code: z.string().min(1, { message: t("field_required") }),
-    display: z.string().min(1, { message: t("field_required") }),
-    system: z.string().min(1, { message: t("field_required") }),
-  });
-
 const createFormSchema = (
   t: (key: string, options?: Record<string, unknown>) => string,
 ) => {
-  const codeSchema = createCodeSchema(t);
   return z.object({
     name: z.string().min(1, { message: t("name_is_required") }),
     slug_value: z
@@ -82,8 +71,8 @@ const createFormSchema = (
     status: z.nativeEnum(ProductKnowledgeStatus),
     alternate_identifier: z.string().trim().optional(),
     category: z.string(),
-    code: codeSchema.nullable(),
-    base_unit: codeSchema.optional().refine((val) => val !== undefined, {
+    code: CodeSchema.nullable(),
+    base_unit: CodeSchema.optional().refine((val) => val !== undefined, {
       message: t("base_unit_is_required"),
     }),
     names: z
@@ -101,7 +90,7 @@ const createFormSchema = (
           stability_duration: z
             .object({
               value: z.number().int().optional(),
-              unit: codeSchema,
+              unit: CodeSchema,
             })
             .refine((data) => data.value !== undefined && data.value !== null, {
               message: t("field_required"),
@@ -112,8 +101,8 @@ const createFormSchema = (
       .default([]),
     definitional: z
       .object({
-        dosage_form: codeSchema.optional(),
-        intended_routes: z.array(codeSchema).default([]),
+        dosage_form: CodeSchema.nullable().optional(),
+        intended_routes: z.array(CodeSchema),
       })
       .nullable()
       .optional()
@@ -313,14 +302,7 @@ function ProductKnowledgeFormContent({
     const formattedData = {
       ...data,
       code: data.code || undefined,
-      definitional: data.definitional
-        ? {
-            ...data.definitional,
-            ingredients: [],
-            nutrients: [],
-            drug_characteristic: [],
-          }
-        : undefined,
+      definitional: data.definitional || null,
     };
 
     if (isEditMode && slug) {
