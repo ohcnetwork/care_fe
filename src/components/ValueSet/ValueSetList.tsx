@@ -1,14 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArchiveIcon,
-  Eye,
-  FileCheckIcon,
-  HelpCircle,
-  NotepadTextDashedIcon,
-  Pencil,
-  PlusIcon,
-  Search,
-} from "lucide-react";
+import { Eye, Pencil, PlusIcon, Search } from "lucide-react";
 import { Link, useNavigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -46,12 +37,15 @@ import {
 
 import useFilters from "@/hooks/useFilters";
 
-import query from "@/Utils/request/query";
 import {
   VALUESET_STATUS_COLORS,
-  ValuesetBase,
-} from "@/types/valueset/valueset";
-import valuesetApi from "@/types/valueset/valuesetApi";
+  VALUESET_STATUS_ICONS,
+  ValueSetRead,
+  ValueSetStatus,
+} from "@/types/valueSet/valueSet";
+import valueSetApi from "@/types/valueSet/valueSetApi";
+import query from "@/Utils/request/query";
+import { valuesOf } from "@/Utils/utils";
 
 function EmptyState() {
   const { t } = useTranslation();
@@ -72,7 +66,7 @@ const RenderCard = ({
   valuesets,
   isLoading,
 }: {
-  valuesets: ValuesetBase[];
+  valuesets: ValueSetRead[];
   isLoading: boolean;
 }) => {
   const { t } = useTranslation();
@@ -195,7 +189,7 @@ const RenderTable = ({
   valuesets,
   isLoading,
 }: {
-  valuesets: ValuesetBase[];
+  valuesets: ValueSetRead[];
   isLoading: boolean;
 }) => {
   const { t } = useTranslation();
@@ -309,12 +303,12 @@ export function ValueSetList() {
   });
   const { data: response, isLoading } = useQuery({
     queryKey: ["valuesets", qParams],
-    queryFn: query.debounced(valuesetApi.list, {
+    queryFn: query.debounced(valueSetApi.list, {
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         name: qParams.name,
-        status: qParams.status || "active",
+        status: qParams.status || ValueSetStatus.ACTIVE,
       },
     }),
   });
@@ -338,22 +332,19 @@ export function ValueSetList() {
             >
               <div className="min-w-[480px]">
                 <TabsList className="flex w-full">
-                  <TabsTrigger value="active" className="flex-1">
-                    <FileCheckIcon className="size-4" />
-                    {t("active")}
-                  </TabsTrigger>
-                  <TabsTrigger value="draft" className="flex-1">
-                    <NotepadTextDashedIcon className="size-4" />
-                    {t("draft")}
-                  </TabsTrigger>
-                  <TabsTrigger value="retired" className="flex-1">
-                    <ArchiveIcon className="size-4" />
-                    {t("retired")}
-                  </TabsTrigger>
-                  <TabsTrigger value="unknown" className="flex-1">
-                    <HelpCircle className="size-4" />
-                    {t("unknown")}
-                  </TabsTrigger>
+                  {valuesOf(ValueSetStatus).map((status) => {
+                    const IconComponent = VALUESET_STATUS_ICONS[status];
+                    return (
+                      <TabsTrigger
+                        key={status}
+                        value={status}
+                        className="flex-1"
+                      >
+                        <IconComponent className="size-4" />
+                        {t(status)}
+                      </TabsTrigger>
+                    );
+                  })}
                 </TabsList>
               </div>
             </Tabs>
