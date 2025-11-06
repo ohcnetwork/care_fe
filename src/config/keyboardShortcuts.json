@@ -58,7 +58,9 @@
 
   "facility:pharmacy": [
     { "key": "d", "action": "dispense-button", "description": "Dispense Medication", "when": "always" },
-    { "key": "b", "action": "billing-action", "description": "Billing related action", "when": "always" }
+    { "key": "b", "action": "billing-action", "description": "Billing related action", "when": "always" },
+    { "key": "shift+p", "action": "view-prescriptions", "description": "View Prescription", "when": "always" },
+    { "key": "a", "action": "view-account", "description": "View Account", "when": "always" }
   ],
 
 "facility:pharmacy:supply-delivery": [

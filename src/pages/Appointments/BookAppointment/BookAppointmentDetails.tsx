@@ -56,9 +56,6 @@ export const BookAppointmentDetails = ({
         `/facility/${facilityId}/patient/${patientId}/appointments/${data.id}?showSuccess=true`,
       );
     },
-    onError: (error) => {
-      toast.error(error.message);
-    },
   });
 
   const handleSubmit = async () => {
