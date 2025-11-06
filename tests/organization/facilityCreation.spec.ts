@@ -43,7 +43,7 @@ test.describe("Facility Creation", () => {
   let address: string;
 
   // Helper function to create a facility with mandatory fields only
-  const createFacilityWithMandatoryFields = async (page: Page) => {
+  async function createFacilityWithMandatoryFields(page: Page) {
     await page.getByRole("button", { name: "Add Facility" }).click();
     await page
       .getByRole("combobox")
@@ -65,7 +65,7 @@ test.describe("Facility Creation", () => {
 
     // Verify facility was created successfully
     await expect(page.getByText("Facility created successfully")).toBeVisible();
-  };
+  }
 
   test.beforeEach(async ({ page }) => {
     // Generate unique test data for each test run
