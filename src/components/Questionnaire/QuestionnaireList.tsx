@@ -285,7 +285,7 @@ export function QuestionnaireList() {
             <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
             <Input
               data-cy="questionnaire-search"
-              placeholder={t("search_questionnaires")}
+              placeholder={t("search_forms")}
               className="pl-10 w-full"
               value={qParams.title || ""}
               onChange={(e) => updateQuery({ title: e.target.value })}

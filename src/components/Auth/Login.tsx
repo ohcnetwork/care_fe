@@ -42,6 +42,7 @@ import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
+import { invalidateAllLocationCaches } from "@/atoms/location-atom";
 import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/otp/otp";
 import otpApi from "@/types/otp/otpApi";
@@ -244,6 +245,7 @@ const Login = (props: LoginProps) => {
     if (!validated) return;
 
     FiltersCache.invalidateAll();
+    invalidateAllLocationCaches();
     try {
       await signIn(validated);
     } catch (error) {
@@ -702,6 +704,7 @@ const Login = (props: LoginProps) => {
                             </Label>
                             <div className="flex justify-center">
                               <InputOTP
+                                id="otp"
                                 value={otp}
                                 maxLength={5}
                                 pattern={REGEXP_ONLY_DIGITS}

@@ -76,12 +76,6 @@ export default function LinkUserSheet({
       setSelectedUser(undefined);
       setSelectedRole(undefined);
     },
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string }[] };
-      errorData.errors.forEach((er) => {
-        toast.error(er.msg);
-      });
-    },
   });
 
   const handleAddUser = () => {
