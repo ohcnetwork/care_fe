@@ -10,7 +10,6 @@ import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 import { VitalsList } from "@/components/Patient/vitals/list";
 
-import { cn } from "@/lib/utils";
 import { ClinicalHistoryOverview } from "@/pages/Encounters/tabs/overview/clinical-history-overview";
 import { QuickActions } from "@/pages/Encounters/tabs/overview/quick-actions";
 import { SummaryPanel } from "@/pages/Encounters/tabs/overview/summary-panel";
@@ -24,7 +23,6 @@ export const EncounterOverviewTab = () => {
     selectedEncounterId: encounterId,
     canReadSelectedEncounter: canAccess,
     canWriteSelectedEncounter: canWrite,
-    showAppointmentEncounterHeader,
   } = useEncounter();
 
   const { data: plotsConfig } = useQuery<ObservationPlotConfig>({
@@ -37,14 +35,7 @@ export const EncounterOverviewTab = () => {
 
   return (
     <div className="flex gap-3 @max-md:w-full">
-      <div
-        className={cn(
-          "flex-1 xl:pr-3 overflow-y-auto",
-          showAppointmentEncounterHeader
-            ? "xl:h-[calc(100vh-17rem)]"
-            : "xl:h-[calc(100vh-14rem)]",
-        )}
-      >
+      <div className="flex-1 xl:pr-3 overflow-y-auto xl:h-[calc(100vh-14rem-var(--encounter-header-offset))]">
         <div className="flex flex-col gap-6">
           {canWrite && <QuickActions />}
           <ClinicalHistoryOverview />
@@ -89,14 +80,7 @@ export const EncounterOverviewTab = () => {
         </div>
       </div>
 
-      <ScrollArea
-        className={cn(
-          "w-72 hidden xl:block",
-          showAppointmentEncounterHeader
-            ? "h-[calc(100vh-17rem)]"
-            : "h-[calc(100vh-14rem)]",
-        )}
-      >
+      <ScrollArea className="w-72 hidden xl:block h-[calc(100vh-14rem-var(--encounter-header-offset))]">
         <SummaryPanel />
       </ScrollArea>
     </div>

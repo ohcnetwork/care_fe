@@ -46,8 +46,6 @@ type EncounterContextType = {
   canWriteSelectedEncounter: boolean;
   canWriteClinicalData: boolean;
 
-  showAppointmentEncounterHeader: boolean;
-
   actions: {
     markAsCompleted: () => void;
     assignLocation: () => void;
@@ -226,9 +224,6 @@ export function EncounterProvider({
             setActiveAction(EncounterAction.Dispense);
           },
         },
-        showAppointmentEncounterHeader: !!(
-          primaryEncounter?.appointment?.id && canWritePrimaryEncounter
-        ),
       }}
     >
       {children}

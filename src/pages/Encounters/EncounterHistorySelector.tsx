@@ -381,7 +381,6 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 export default function EncounterHistorySelector() {
   const [isRailOpen, setIsRailOpen] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const { showAppointmentEncounterHeader } = useEncounter();
 
   const { t } = useTranslation();
 
@@ -409,14 +408,7 @@ export default function EncounterHistorySelector() {
       </div>
       <div className="hidden lg:block pr-3">
         <RailPanel open={isRailOpen} onOpenChange={setIsRailOpen}>
-          <ScrollArea
-            className={cn(
-              "pr-3",
-              showAppointmentEncounterHeader
-                ? "h-[calc(100vh-12rem)]"
-                : "h-[calc(100vh-9rem)]",
-            )}
-          >
+          <ScrollArea className="pr-3 h-[calc(100vh-9rem-var(--encounter-header-offset))]">
             <EncounterHistoryList />
           </ScrollArea>
         </RailPanel>
