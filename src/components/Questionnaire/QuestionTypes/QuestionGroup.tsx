@@ -113,7 +113,6 @@ export const QuestionGroup = memo(function QuestionGroup({
   isSubQuestion = false,
 }: QuestionGroupProps) {
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
-  question._is_enabled = isEnabled;
 
   const clearDependentQuestionResponse = (dependentQuestion: Question) => {
     const dependentQuestionResponse = questionnaireResponses.find(

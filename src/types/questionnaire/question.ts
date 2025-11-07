@@ -155,7 +155,6 @@ export interface Question {
   unit?: Code;
   questions?: Question[];
   formula?: string;
-  _is_enabled?: boolean;
 }
 
 export const findQuestionById = (
