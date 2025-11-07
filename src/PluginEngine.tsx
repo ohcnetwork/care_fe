@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   __federation_method_getRemote as getFederationRemote,
   __federation_method_setRemote as setFederationRemote,
+  __federation_method_unwrapDefault as unwrapModule,
 } from "__federation__";
 import React, { Suspense, useEffect, useState } from "react";
 
@@ -13,7 +14,6 @@ import query from "@/Utils/request/query";
 
 import { PluginManifest, SupportedPluginComponents } from "@/pluginTypes";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
-import { toast } from "sonner";
 
 // Import the remote component synchronously
 export default function PluginEngine({
@@ -36,7 +36,7 @@ export default function PluginEngine({
       const manifests = await Promise.all(
         enabledPlugins.configs.map(async (plugin) => {
           if (!plugin.meta.url) {
-            toast.error(`Plugin ${plugin.slug} is missing a URL in meta`);
+            console.error(`Plugin ${plugin.slug} is missing a URL in meta`);
             return undefined;
           }
           setFederationRemote(plugin.slug, {
@@ -46,18 +46,28 @@ export default function PluginEngine({
             externalType: "promise",
           });
 
-          return await getFederationRemote(plugin.slug, "./manifest").catch(
-            () =>
+          return await getFederationRemote(plugin.slug, "./manifest")
+            .then((manifest) => {
+              return manifest;
+            })
+            .catch(() =>
               console.error(
                 `There was an error enabling the app ${plugin.slug}`,
               ),
-          );
+            );
         }),
       );
-
-      setPluginManifests(
-        manifests.filter((m): m is PluginManifest => m !== undefined),
+      const filteredManifests = manifests.filter(
+        (m): m is PluginManifest => m !== undefined,
       );
+      const availablePlugins = filteredManifests.map((manifest) =>
+        unwrapModule(manifest),
+      );
+      console.log(
+        `Loading ${filteredManifests.length} plugins; available plugins`,
+        availablePlugins,
+      );
+      setPluginManifests(availablePlugins);
     };
 
     fetchPluginManifests();

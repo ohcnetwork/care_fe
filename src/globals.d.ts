@@ -14,4 +14,5 @@ declare module "__federation__" {
       externalType: string;
     },
   ) => void;
+  export const __federation_method_unwrapDefault: <T>(module: T) => T;
 }
