@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
+import { getFieldErrorMessage } from "tests/utils/formUtils";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
@@ -9,11 +10,6 @@ const MIN_SLUG_LENGTH = 5;
 const MAX_SLUG_LENGTH = 25;
 const STATUS_OPTIONS = ["Draft", "Active", "Retired"] as const;
 const DELETED_STATUS = "Retired";
-
-// Helper function to get field error message
-function getFieldErrorMessage(fieldLocator: Locator): Locator {
-  return fieldLocator.locator("..").locator('[data-slot="form-message"]');
-}
 
 // Helper function to create a specimen definition
 async function createSpecimenDefinition(
@@ -358,18 +354,35 @@ test.describe("Specimen Definitions Management", () => {
       name: "Notifications alt+T",
     });
     await expect(notificationsRegion.getByRole("listitem")).toBeVisible();
-    await expect(notificationsRegion).toContainText(/slug/i);
+    await expect(notificationsRegion).toContainText(/at least 5 characters/i);
+
+    // Refresh page to clear toast notifications
+    await page.reload();
+
+    // Fill required fields again
+    await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
+    await page
+      .getByRole("textbox", { name: "Description *" })
+      .fill(definitionDescription);
 
     // Test: Slug too long (more than 25 characters)
     const longSlug = faker.string.alphanumeric(MAX_SLUG_LENGTH + 1);
     await page.getByRole("textbox", { name: "Slug *" }).fill(longSlug);
+
+    // Select status
+    await page.getByRole("combobox", { name: "Status *" }).click();
+    await page.getByRole("option", { name: "Draft" }).click();
+
+    // Select Type Collected
+    await page.getByRole("combobox", { name: "Type Collected *" }).click();
+    await page.getByRole("option").first().click();
 
     // Try to submit
     await page.getByRole("button", { name: /save/i }).click();
 
     // Verify validation error appears in notifications region
     await expect(notificationsRegion.getByRole("listitem")).toBeVisible();
-    await expect(notificationsRegion).toContainText(/slug/i);
+    await expect(notificationsRegion).toContainText(/at most 25 characters/i);
 
     // Test: Valid slug (between 5 and 25 characters)
     const validSlug = faker.string.alphanumeric(
