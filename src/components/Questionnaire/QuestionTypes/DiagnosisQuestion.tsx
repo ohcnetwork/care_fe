@@ -532,7 +532,12 @@ export function DiagnosisQuestion({
   };
 
   return (
-    <div className="space-y-4">
+    <div
+      className={cn(
+        "space-y-4",
+        sortedDiagnoses.length > 0 ? "md:max-w-fit" : "max-w-4xl",
+      )}
+    >
       <HistoricalRecordSelector<DiagnosisRequest>
         title={t("diagnosis_history")}
         structuredTypes={[
