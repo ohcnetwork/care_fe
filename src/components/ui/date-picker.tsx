@@ -73,6 +73,8 @@ export function DatePicker({
             onChange?.(date);
             setOpen(false);
           }}
+          captionLayout="dropdown"
+          endMonth={new Date(2100, 11, 31)}
           autoFocus
           disabled={disabled}
         />

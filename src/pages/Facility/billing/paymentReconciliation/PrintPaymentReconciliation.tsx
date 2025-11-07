@@ -19,7 +19,6 @@ import {
 
 import Loading from "@/components/Common/Loading";
 
-import query from "@/Utils/request/query";
 import {
   PAYMENT_RECONCILIATION_OUTCOME_COLORS,
   PAYMENT_RECONCILIATION_STATUS_COLORS,
@@ -28,6 +27,8 @@ import {
   PaymentReconciliationStatus,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import query from "@/Utils/request/query";
+import { formatPatientAge } from "@/Utils/utils";
 
 const statusMap: Record<
   PaymentReconciliationStatus,
@@ -121,59 +122,59 @@ export function PrintPaymentReconciliation({
               </h2>
             </div>
           </div>
-
-          {/* Payment Information */}
-          <div className="flex justify-between items-start mb-6 text-sm">
-            <div>
-              <div className="font-semibold text-gray-500 mb-1">
-                {t("payment_date")}
-              </div>
+          <div className="text-sm space-y-2">
+            <div className="flex justify-between">
               <div>
-                <p>
+                <span className="text-gray-600">{t("payment_date")}: </span>
+                <span className="font-medium">
                   {payment.payment_datetime
                     ? format(new Date(payment.payment_datetime), "MMM dd, yyyy")
                     : format(new Date(), "MMM dd, yyyy")}
-                </p>
-              </div>
-            </div>
-            <div className="text-left sm:text-right">
-              <div className="font-semibold text-gray-500 mb-1">
-                {t("payment_method")}
+                </span>
               </div>
               <div>
-                <p className="font-medium">{methodMap[payment.method]}</p>
+                <span className="text-gray-600">{t("payment_method")}: </span>
+                <span className="font-medium">{methodMap[payment.method]}</span>
               </div>
             </div>
-            {(payment.reference_number || payment.authorization) && (
-              <div>
-                <div className="font-semibold text-gray-500 mb-1">
-                  {t("reference_details")}
+          </div>
+          {/* Patient Information - Similar to PrintInvoice */}
+          {payment.account?.patient && (
+            <div className="text-sm space-y-2">
+              <div className="flex justify-between">
+                <div>
+                  <span className="text-gray-600">{t("name")}: </span>
+                  <span className="font-medium">
+                    {payment.account.patient.name.toUpperCase()}
+                  </span>
                 </div>
                 <div>
-                  {payment.reference_number && (
-                    <p>
-                      {t("reference")}: {payment.reference_number}
-                    </p>
-                  )}
-                  {payment.authorization && (
-                    <p>
-                      {t("authorization")}: {payment.authorization}
-                    </p>
-                  )}
+                  <span className="text-gray-600">
+                    {t("age")} / {t("sex")}:{" "}
+                  </span>
+                  <span className="font-medium">
+                    {formatPatientAge(payment.account.patient, true)},{" "}
+                    {t(`GENDER__${payment.account.patient.gender}`)}
+                  </span>
                 </div>
+                {payment.account.patient.address && (
+                  <div>
+                    <span className="text-gray-600">{t("address")}: </span>
+                    <span className="font-medium">
+                      {payment.account.patient.address}
+                    </span>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          <Separator className="my-6" />
+          <Separator className="mt-4 mb-2" />
 
           {/* Related Invoice */}
           {payment.target_invoice && (
             <>
-              <h3 className="font-medium text-lg mb-2">
-                {t("related_invoice")}
-              </h3>
-              <div className="overflow-x-auto mb-6">
+              <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -197,43 +198,42 @@ export function PrintPaymentReconciliation({
                   </TableBody>
                 </Table>
               </div>
+              <Separator className="mb-4" />
             </>
           )}
 
           {/* Additional Details */}
-          <div className="mb-6">
-            <h3 className="font-medium text-lg mb-2">{t("payment_details")}</h3>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("type")}</TableHead>
-                    <TableHead>{t("kind")}</TableHead>
-                    <TableHead>{t("issuer_type")}</TableHead>
-                    <TableHead className="text-right">{t("amount")}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>
-                      {payment.reconciliation_type.charAt(0).toUpperCase() +
-                        payment.reconciliation_type.slice(1)}
-                    </TableCell>
-                    <TableCell>
-                      {payment.kind.charAt(0).toUpperCase() +
-                        payment.kind.slice(1)}
-                    </TableCell>
-                    <TableCell>
-                      {payment.issuer_type.charAt(0).toUpperCase() +
-                        payment.issuer_type.slice(1)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <MonetaryDisplay amount={payment.amount} />
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
+
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("type")}</TableHead>
+                  <TableHead>{t("kind")}</TableHead>
+                  <TableHead>{t("issuer_type")}</TableHead>
+                  <TableHead className="text-right">{t("amount")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>
+                    {payment.reconciliation_type.charAt(0).toUpperCase() +
+                      payment.reconciliation_type.slice(1)}
+                  </TableCell>
+                  <TableCell>
+                    {payment.kind.charAt(0).toUpperCase() +
+                      payment.kind.slice(1)}
+                  </TableCell>
+                  <TableCell>
+                    {payment.issuer_type.charAt(0).toUpperCase() +
+                      payment.issuer_type.slice(1)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <MonetaryDisplay amount={payment.amount} />
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
 
           {/* Totals */}
