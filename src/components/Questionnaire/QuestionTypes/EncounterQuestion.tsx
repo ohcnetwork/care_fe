@@ -123,7 +123,7 @@ export function EncounterQuestion({
     hospitalization: {
       re_admission: false,
       admit_source: "other",
-      discharge_disposition: "home",
+      discharge_disposition: careConfig.defaultDischargeDisposition,
       diet_preference: "none",
     },
     facility: "",
@@ -196,6 +196,24 @@ export function EncounterQuestion({
     const newEncounter = { ...encounter, ...updates };
     if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
       newEncounter.hospitalization = {};
+    }
+
+    if (
+      ["imp", "obsenc", "emer"].includes(encounter.encounter_class) &&
+      newEncounter.status === "discharged"
+    ) {
+      newEncounter.hospitalization = {
+        ...newEncounter.hospitalization,
+        discharge_disposition:
+          newEncounter.hospitalization?.discharge_disposition ??
+          careConfig.defaultDischargeDisposition,
+      };
+    } else if ("hospitalization" in newEncounter) {
+      newEncounter.hospitalization = {
+        ...newEncounter.hospitalization,
+        discharge_disposition:
+          encounterData?.hospitalization?.discharge_disposition,
+      };
     }
 
     // Create the full encounter request object
@@ -407,7 +425,10 @@ export function EncounterQuestion({
                     <span className="text-red-500">*</span>
                   </Label>
                   <Select
-                    value={encounter.hospitalization?.discharge_disposition}
+                    value={
+                      encounter.hospitalization?.discharge_disposition ??
+                      careConfig.defaultDischargeDisposition
+                    }
                     onValueChange={(value: EncounterDischargeDisposition) => {
                       if (!encounter.hospitalization) return;
                       handleUpdateEncounter({
