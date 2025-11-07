@@ -522,6 +522,7 @@ export function DiagnosisQuestion({
       ...sortedDiagnoses,
       ...nonDuplicateDiagnoses.map(({ id: _id, ...diagnosis }) => ({
         ...diagnosis,
+        severity: diagnosis.severity ?? "moderate",
         dirty: true,
       })),
     ];
