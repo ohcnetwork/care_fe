@@ -6,7 +6,6 @@ on:
       - opened
       - converted_to_draft
       - ready_for_review
-      - closed
       - assigned
       - unassigned
       - review_requested
@@ -33,128 +32,6 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PEM }}
 
-      - name: Get project data
-        env:
-          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
-          ORGANIZATION: ohcnetwork
-          PROJECT_NUMBER: 4
-        run: |
-          gh api graphql -f query='
-            query($org: String!, $number: Int!) {
-              organization(login: $org) {
-                projectV2(number: $number) {
-                  id
-                  fields(first: 20) {
-                    nodes {
-                      ... on ProjectV2Field {
-                        id
-                        name
-                      }
-                      ... on ProjectV2SingleSelectField {
-                        id
-                        name
-                        options {
-                          id
-                          name
-                        }
-                      }
-                      ... on ProjectV2IterationField {
-                        id
-                        name
-                        configuration {
-                          iterations {
-                            id
-                            title
-                            startDate
-                            duration
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
-
-          echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
-          echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'TEAM_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'SPRINT_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Sprint") | .id' project_data.json) >> $GITHUB_ENV
-
-          echo 'IN_PROGRESS_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="In Progress") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'DONE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Done") | .id' project_data.json) >> $GITHUB_ENV
-
-          echo 'TEAM_CORE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .options[] | select(.name=="Core") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'TEAM_INTERNS_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .options[] | select(.name=="Interns") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'TEAM_COMMUNITY_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name=="Team") | .options[] | select(.name=="Community") | .id' project_data.json) >> $GITHUB_ENV
-
-      - name: Add PR to Project
-        env:
-          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
-          PR_ID: ${{ github.event.pull_request.node_id }}
-        run: |
-          item_id="$( gh api graphql -f query='
-            mutation($project:ID!, $pr:ID!) {
-              addProjectV2ItemById(input: {projectId: $project, contentId: $pr}) {
-                item {
-                  id
-                }
-              }
-            }' -f project=$PROJECT_ID -f pr=$PR_ID --jq '.data.addProjectV2ItemById.item.id' 2>&1 || true )"
-
-          if [[ -z "$item_id" || "$item_id" == "null" ]]; then
-            item_id="$( gh api graphql -f query='
-              query($project:ID!, $pr:ID!) {
-                node(id: $pr) {
-                  ... on PullRequest {
-                    projectItems(first: 10) {
-                      nodes {
-                        id
-                        project {
-                          id
-                        }
-                      }
-                    }
-                  }
-                }
-              }' -f project=$PROJECT_ID -f pr=$PR_ID --jq ".data.node.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id" | head -n 1 )"
-          fi
-
-          echo 'ITEM_ID='$item_id >> $GITHUB_ENV
-
-      - name: Set Sprint to Current
-        if: github.event.action == 'opened'
-        env:
-          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
-        run: |
-          current_date=$(date -u +%Y-%m-%d)
-
-          current_iteration_id=$(jq -r --arg current_date "$current_date" '
-            .data.organization.projectV2.fields.nodes[] |
-            select(.name=="Sprint") |
-            .configuration.iterations[] |
-            select(.startDate <= $current_date) |
-            .id
-          ' project_data.json | tail -n 1)
-
-          if [[ -n "$current_iteration_id" && "$current_iteration_id" != "null" ]]; then
-            gh api graphql -f query='
-              mutation($project: ID!, $item: ID!, $sprint_field: ID!, $iteration_id: String!) {
-                updateProjectV2ItemFieldValue(input: {
-                  projectId: $project
-                  itemId: $item
-                  fieldId: $sprint_field
-                  value: {
-                    iterationId: $iteration_id
-                  }
-                }) {
-                  projectV2Item {
-                    id
-                  }
-                }
-              }' -f project=$PROJECT_ID -f item=$ITEM_ID -f sprint_field=$SPRINT_FIELD_ID -f iteration_id="$current_iteration_id"
-          fi
-
       - name: Assign PR Author
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
@@ -163,74 +40,23 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           gh api --method POST repos/$REPO/issues/$PR_NUMBER/assignees -f assignees[]="$AUTHOR" || echo "Warning: Could not assign $AUTHOR"
+
       - name: Update PR Status and Labels
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           IS_DRAFT: ${{ github.event.pull_request.draft }}
-          IS_MERGED: ${{ github.event.pull_request.merged }}
           REPO: ${{ github.repository }}
         run: |
           if [[ "${{ github.event.action }}" == "opened" || "${{ github.event.action }}" == "ready_for_review" || "${{ github.event.action }}" == "converted_to_draft" ]]; then
             if [[ "$IS_DRAFT" == "true" ]]; then
-              gh api graphql -f query='
-                mutation($project: ID!, $item: ID!, $status_field: ID!, $status_value: String!) {
-                  updateProjectV2ItemFieldValue(input: {
-                    projectId: $project
-                    itemId: $item
-                    fieldId: $status_field
-                    value: {
-                      singleSelectOptionId: $status_value
-                    }
-                  }) {
-                    projectV2Item {
-                      id
-                    }
-                  }
-                }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=${{ env.IN_PROGRESS_OPTION_ID }}
-
               gh pr edit $PR_NUMBER --remove-label "needs testing" --repo $REPO 2>/dev/null || true
               gh pr edit $PR_NUMBER --remove-label "needs review" --repo $REPO 2>/dev/null || true
               gh pr edit $PR_NUMBER --add-label "work in progress" --repo $REPO
             else
-              gh api graphql -f query='
-                mutation($project: ID!, $item: ID!, $status_field: ID!, $status_value: String!) {
-                  updateProjectV2ItemFieldValue(input: {
-                    projectId: $project
-                    itemId: $item
-                    fieldId: $status_field
-                    value: {
-                      singleSelectOptionId: $status_value
-                    }
-                  }) {
-                    projectV2Item {
-                      id
-                    }
-                  }
-                }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=${{ env.IN_PROGRESS_OPTION_ID }}
-
               gh pr edit $PR_NUMBER --remove-label "work in progress" --repo $REPO 2>/dev/null || true
               gh pr edit $PR_NUMBER --add-label "needs testing" --repo $REPO
               gh pr edit $PR_NUMBER --add-label "needs review" --repo $REPO
-            fi
-
-          elif [[ "${{ github.event.action }}" == "closed" ]]; then
-            if [[ "$IS_MERGED" == "true" ]]; then
-              gh api graphql -f query='
-                mutation($project: ID!, $item: ID!, $status_field: ID!, $status_value: String!) {
-                  updateProjectV2ItemFieldValue(input: {
-                    projectId: $project
-                    itemId: $item
-                    fieldId: $status_field
-                    value: {
-                      singleSelectOptionId: $status_value
-                    }
-                  }) {
-                    projectV2Item {
-                      id
-                    }
-                  }
-                }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=${{ env.DONE_OPTION_ID }}
             fi
           fi
 
@@ -255,69 +81,3 @@ jobs:
           gh pr edit $PR_NUMBER --remove-label "changes required" --repo $REPO 2>/dev/null || true
           gh pr edit $PR_NUMBER --add-label "needs testing" --repo $REPO
           gh pr edit $PR_NUMBER --add-label "needs review" --repo $REPO
-
-      - name: Update Team Field Based on Assignees Roles
-        if: github.event.action == 'opened' || github.event.action == 'assigned' || github.event.action == 'unassigned'
-        env:
-          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPO: ${{ github.repository }}
-        run: |
-          ASSIGNEES=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.assignees[].login')
-
-          FOUND_CORE=false
-          FOUND_INTERN=false
-          FOUND_CONTRIBUTOR=false
-
-          for ASSIGNEE in $ASSIGNEES; do
-            ASSIGNEE_DATA=$(curl -s "https://raw.githubusercontent.com/ohcnetwork/leaderboard-data/main/contributors/${ASSIGNEE}.md")
-
-            if echo "$ASSIGNEE_DATA" | grep -q "role: core"; then
-              FOUND_CORE=true
-              break
-            elif echo "$ASSIGNEE_DATA" | grep -q "role: intern"; then
-              FOUND_INTERN=true
-            elif echo "$ASSIGNEE_DATA" | grep -q "role: contributor"; then
-              FOUND_CONTRIBUTOR=true
-            fi
-          done
-
-          if [[ "$FOUND_CORE" == "true" ]]; then
-            TEAM_OPTION_ID=${{ env.TEAM_CORE_OPTION_ID }}
-          elif [[ "$FOUND_INTERN" == "true" ]]; then
-            TEAM_OPTION_ID=${{ env.TEAM_INTERNS_OPTION_ID }}
-          elif [[ "$FOUND_CONTRIBUTOR" == "true" ]]; then
-            TEAM_OPTION_ID=${{ env.TEAM_COMMUNITY_OPTION_ID }}
-          else
-            if [[ -z "$ASSIGNEES" ]]; then
-              gh api graphql -f query='
-                mutation($project: ID!, $item: ID!, $team_field: ID!) {
-                  clearProjectV2ItemFieldValue(input: {
-                    projectId: $project
-                    itemId: $item
-                    fieldId: $team_field
-                  }) {
-                    projectV2Item {
-                      id
-                    }
-                  }
-                }' -f project=$PROJECT_ID -f item=$ITEM_ID -f team_field=$TEAM_FIELD_ID
-            fi
-            exit 0
-          fi
-
-          gh api graphql -f query='
-            mutation($project: ID!, $item: ID!, $team_field: ID!, $team_value: String!) {
-              updateProjectV2ItemFieldValue(input: {
-                projectId: $project
-                itemId: $item
-                fieldId: $team_field
-                value: {
-                  singleSelectOptionId: $team_value
-                }
-              }) {
-                projectV2Item {
-                  id
-                }
-              }
-            }' -f project=$PROJECT_ID -f item=$ITEM_ID -f team_field=$TEAM_FIELD_ID -f team_value=$TEAM_OPTION_ID
