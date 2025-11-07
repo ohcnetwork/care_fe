@@ -124,8 +124,8 @@ function ProductKnowledgeFormContent({
     name: z.string().min(1, t("field_required")),
     slug_value: z
       .string()
-      .min(1, t("field_required"))
-      .max(25, t("character_count_validation", { min: 1, max: 25 })),
+      .min(5, t("character_count_validation", { min: 5, max: 25 }))
+      .max(25, t("character_count_validation", { min: 5, max: 25 })),
     product_type: z.nativeEnum(ProductKnowledgeType),
     status: z.nativeEnum(ProductKnowledgeStatus),
     alternate_identifier: z.string().trim().optional(),
@@ -384,7 +384,9 @@ function ProductKnowledgeFormContent({
                               const sanitizedValue = e.target.value
                                 .toLowerCase()
                                 .replace(/[^a-z0-9_-]/g, "");
-                              field.onChange(sanitizedValue);
+                              form.setValue("slug_value", sanitizedValue, {
+                                shouldValidate: true,
+                              });
                             }}
                           />
                         </FormControl>
