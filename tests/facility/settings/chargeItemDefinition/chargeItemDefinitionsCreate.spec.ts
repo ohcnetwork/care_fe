@@ -4,7 +4,7 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-test.describe(() => {
+test.describe("Charge Item Definition Creation", () => {
   let facilityId: string;
   let testData: {
     title: string;

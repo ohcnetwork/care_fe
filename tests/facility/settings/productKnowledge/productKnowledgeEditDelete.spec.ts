@@ -5,7 +5,7 @@ import { getFacilityId } from "tests/support/facilityId";
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
-test.describe(() => {
+test.describe("Product Knowledge Edit/Delete operations", () => {
   let facilityId: string;
   let testData: {
     name: string;

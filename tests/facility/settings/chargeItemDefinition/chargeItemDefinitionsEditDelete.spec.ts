@@ -4,7 +4,7 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-test.describe(() => {
+test.describe("Charge Item Definition Edit/Delete operations", () => {
   let facilityId: string;
   let testData: {
     title: string;
@@ -24,9 +24,9 @@ test.describe(() => {
     testData = {
       title: chargeItemName,
       slug: chargeItemName.replace(/\s+/g, "-").slice(0, 25),
-      basePrice: faker.commerce.price(),
-      mrp: faker.commerce.price(),
-      purchasePrice: faker.commerce.price(),
+      basePrice: faker.commerce.price({ dec: 0 }),
+      mrp: faker.commerce.price({ dec: 0 }),
+      purchasePrice: faker.commerce.price({ dec: 0 }),
       description: faker.commerce.productDescription(),
       purpose: faker.commerce.productAdjective(),
       url: faker.internet.url(),
