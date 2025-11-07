@@ -418,6 +418,7 @@ export const request = async <TResponse = unknown>(
     body: JSON.stringify(body),
     headers: {
       "Content-Type": "application/json",
+      Accept: "application/json",
       Authorization:
         process.env.AUTHORIZATION ??
         `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
@@ -430,7 +431,7 @@ export const request = async <TResponse = unknown>(
       return request(url, method, body, false);
     }
     throw new Error(
-      `Failed to make request to ${url}: ${response.statusText}\n${await response.text()}`,
+      `Failed to make request to ${url}: ${response.status} ${response.statusText}\n${await response.text()}`,
     );
   }
 
