@@ -78,19 +78,16 @@ export function AppointmentSlotPicker({
     }
   };
 
-  const slotGroups = useMemo(
-    () => groupSlotsByAvailability(slotsQuery.data || []),
-    [slotsQuery.data],
-  );
+  const { slotGroups, availableSlots } = useMemo(() => {
+    const slotGroups = groupSlotsByAvailability(slotsQuery.data || []);
+    const availableSlots = slotGroups.flatMap((group) => group.slots);
+    return { slotGroups, availableSlots };
+  }, [slotsQuery.data]);
 
   // Pre-select the first slot for current date if there are any slots available
   useEffect(() => {
-    const availableSlots = slotGroups.flatMap((group) => group.slots);
-
-    if (availableSlots.length > 0) {
-      onSlotSelect(availableSlots[0].id);
-    }
-  }, [slotGroups, onSlotSelect, slotsQuery.data]);
+    onSlotSelect(availableSlots?.[0]?.id);
+  }, [availableSlots, onSlotSelect]);
 
   return (
     <div
@@ -105,7 +102,7 @@ export function AppointmentSlotPicker({
         </span>
         {!!slotsQuery.data?.length && (
           <span className="text-sm font-medium text-gray-700">
-            {slotGroups.length} {t("available_time_slots")}
+            {availableSlots.length} {t("available_time_slots")}
           </span>
         )}
       </div>
