@@ -21,6 +21,8 @@ interface DatePickerProps {
   className?: string;
   disablePicker?: boolean;
   dateFormat?: string;
+  minDate?: Date;
+  maxDate?: Date;
 }
 
 export function DatePicker({
@@ -30,10 +32,19 @@ export function DatePicker({
   className,
   disablePicker,
   dateFormat = "PPP",
+  minDate,
+  maxDate,
 }: DatePickerProps) {
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
+
+  function isDateDisabled(day: Date): boolean {
+    if (disabled && disabled(day)) return true;
+    if (minDate && day < minDate) return true;
+    if (maxDate && day > maxDate) return true;
+    return false;
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -69,14 +80,15 @@ export function DatePicker({
         <Calendar
           mode="single"
           selected={date}
-          onSelect={(date) => {
-            onChange?.(date);
+          onSelect={(selectedDate) => {
+            onChange?.(selectedDate);
             setOpen(false);
           }}
           captionLayout="dropdown"
-          endMonth={new Date(2100, 11, 31)}
+          endMonth={maxDate ?? new Date(2100, 11, 31)}
+          startMonth={minDate}
           autoFocus
-          disabled={disabled}
+          disabled={isDateDisabled}
         />
       </PopoverContent>
     </Popover>

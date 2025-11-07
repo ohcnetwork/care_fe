@@ -138,6 +138,16 @@ export default function CreateEncounterForm({
     createEncounter(encounterRequest);
   }
 
+  const currentStatus = form.watch("status");
+
+  function isDateDisabled(day: Date): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (currentStatus !== "planned" && day > today) return true;
+    return false;
+  }
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
@@ -189,6 +199,7 @@ export default function CreateEncounterForm({
                             field.onChange(updatedDate.toISOString());
                           }}
                           className="h-9"
+                          disabled={isDateDisabled}
                         />
                         <Input
                           type="time"
