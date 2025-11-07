@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const keyboardShortcutBadgeVariants = cva(
-  "h-5 min-w-5 flex justify-center px-1 rounded border font-medium text-xs",
+  "h-5 min-w-5 flex justify-center px-1 rounded border font-medium text-xs inline-flex items-center",
   {
     variants: {
       variant: {
@@ -16,10 +16,10 @@ const keyboardShortcutBadgeVariants = cva(
         secondary: "bg-gray-50 text-gray-700",
       },
       position: {
-        "top-right": "absolute top-1 right-1",
-        "bottom-right": "absolute bottom-1 right-1",
-        "top-left": "absolute top-1 left-1",
-        "bottom-left": "absolute bottom-1 left-1",
+        "top-right": "absolute top-1 right-1 translate-x-0 translate-y-0",
+        "bottom-right": "absolute bottom-1 right-1 translate-x-0 translate-y-0",
+        "top-left": "absolute top-1 left-1 translate-x-0 translate-y-0",
+        "bottom-left": "absolute bottom-1 left-1 translate-x-0 translate-y-0",
       },
     },
     defaultVariants: {
