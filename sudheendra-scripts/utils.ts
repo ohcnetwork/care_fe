@@ -176,7 +176,6 @@ export const transformCsvToObjects = <T extends string>(
   generateFns?: Partial<Record<T, () => string>>,
 ): Record<T, string>[] => {
   // Get the indexes of the headers
-  console.log({ headerRow, headerMap });
   const headerRetriever = Object.fromEntries(
     keysOf(headerMap).map((rKey) => {
       if (typeof headerMap[rKey] === "number") {

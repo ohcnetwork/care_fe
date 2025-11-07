@@ -391,8 +391,8 @@ async function main() {
   // const productKnowledges = await buildProductKnowledges(datapoints);
   // logger(`Created ${productKnowledges.length} product knowledges`);
 
-  // const chargeItemDefinitions = await buildChargeItemDefinitions(datapoints);
-  // logger(`Created ${chargeItemDefinitions.length} charge item definitions`);
+  const chargeItemDefinitions = await buildChargeItemDefinitions(datapoints);
+  logger(`Created ${chargeItemDefinitions.length} charge item definitions`);
 
   const products = await buildProducts(datapoints);
   logger(`Created ${products.length} products`);
