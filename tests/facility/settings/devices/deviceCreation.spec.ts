@@ -119,9 +119,7 @@ test.describe("Facility Devices Management", () => {
     await expect(page.getByText(partNumber)).toBeVisible();
     await expect(page.getByText(status)).toBeVisible();
     await expect(
-      page
-        .locator('span[data-slot="badge"]')
-        .filter({ hasText: availabilityStatus }),
+      page.getByText(availabilityStatus, { exact: true }),
     ).toBeVisible();
 
     // Verify contact information in the Contact Information card
