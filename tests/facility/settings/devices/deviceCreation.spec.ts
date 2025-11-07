@@ -74,7 +74,6 @@ test.describe("Facility Devices Management", () => {
       .fill(userFriendlyName);
 
     // Select status
-
     await page.getByRole("combobox", { name: "Status *", exact: true }).click();
     await page
       .getByRole("listbox")
