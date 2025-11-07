@@ -261,7 +261,7 @@ export const EncounterShow = (props: Props) => {
         />
         <PatientDeceasedInfo patient={patient} />
       </div>
-      <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4 max-h-[calc(100vh-9rem)]">
+      <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
         <EncounterHistorySelector />
         <div className="w-full">
           <div className="hidden lg:block">
