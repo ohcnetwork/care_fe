@@ -258,7 +258,7 @@ export function SupplyDeliveryTable({
                               SupplyDeliveryStatus.entered_in_error,
                             )
                           }
-                          className="w-full flex flex-row self-center"
+                          className="w-full flex justify-stretch"
                         >
                           <CareIcon icon="l-exclamation-circle" />
                           <span>{t("mark_as_entered_in_error")}</span>
@@ -273,10 +273,10 @@ export function SupplyDeliveryTable({
                               SupplyDeliveryStatus.abandoned,
                             )
                           }
-                          className="w-full flex flex-row justify-stretch items-center"
+                          className="w-full flex justify-stretch"
                         >
                           <CareIcon icon="l-ban" />
-                          {t("mark_as_abandoned")}
+                          <span>{t("mark_as_abandoned")}</span>
                         </Button>
                       </DropdownMenuItem>
                     </DropdownMenuContent>

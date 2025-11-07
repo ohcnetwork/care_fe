@@ -13,6 +13,7 @@ import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import BackButton from "@/components/Common/BackButton";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +47,9 @@ import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/Prod
 import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
+  DeliveryOrderRetrieve,
   DeliveryOrderStatus,
+  DeliveryOrderUpdate,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
@@ -167,6 +170,13 @@ export function DeliveryOrderShow({
     useState<ProductKnowledgeBase>();
   const [selectedProductKnowledgeDrawer, setSelectedProductKnowledgeDrawer] =
     useState<ProductKnowledgeBase>();
+  const [deliveryOrderStatusDialog, setDeliveryOrderStatusDialog] = useState<{
+    open: boolean;
+    status: DeliveryOrderStatus | null;
+  }>({
+    open: false,
+    status: null,
+  });
 
   const { data: deliveryOrder, isLoading } = useQuery({
     queryKey: ["deliveryOrders", deliveryOrderId],
@@ -218,27 +228,41 @@ export function DeliveryOrderShow({
       },
     });
 
-  const { mutate: updateDeliveryOrder, isPending: isUpdating } = useMutation({
+  const { mutate: updateDeliveryOrder, isPending: isUpdating } = useMutation<
+    DeliveryOrderRetrieve,
+    Error,
+    DeliveryOrderUpdate
+  >({
     mutationFn: mutate(deliveryOrderApi.updateDeliveryOrder, {
       pathParams: {
         facilityId: facilityId,
         deliveryOrderId: deliveryOrderId,
       },
     }),
-    onSuccess: () => {
+    onSuccess: (updatedDeliveryOrder: DeliveryOrderRetrieve) => {
       queryClient.invalidateQueries({
         queryKey: ["deliveryOrders", deliveryOrderId],
       });
+
+      const statusMessages: Partial<Record<DeliveryOrderStatus, string>> = {
+        [DeliveryOrderStatus.pending]: t(
+          "order_marked_as_approved_successfully",
+        ),
+        [DeliveryOrderStatus.completed]: t(
+          "order_marked_as_completed_successfully",
+        ),
+        [DeliveryOrderStatus.entered_in_error]: t(
+          "order_marked_as_entered_in_error_successfully",
+        ),
+        [DeliveryOrderStatus.abandoned]: t(
+          "order_marked_as_abandoned_successfully",
+        ),
+      };
+
       toast.success(
-        deliveryOrder?.status === DeliveryOrderStatus.draft
-          ? t("order_marked_as_approved_successfully")
-          : deliveryOrder?.status === DeliveryOrderStatus.pending
-            ? t("order_marked_as_completed_successfully")
-            : t("order_updated_successfully"),
+        statusMessages[updatedDeliveryOrder.status] ||
+          t("order_updated_successfully"),
       );
-    },
-    onError: (_error) => {
-      toast.error(t("error_updating_order"));
     },
   });
 
@@ -456,9 +480,10 @@ export function DeliveryOrderShow({
                     <Button
                       variant="ghost"
                       onClick={() =>
-                        handleUpdateDeliveryOrderStatus(
-                          DeliveryOrderStatus.entered_in_error,
-                        )
+                        setDeliveryOrderStatusDialog({
+                          open: true,
+                          status: DeliveryOrderStatus.entered_in_error,
+                        })
                       }
                       disabled={isUpdating}
                       className="w-full flex flex-row self-center"
@@ -471,9 +496,10 @@ export function DeliveryOrderShow({
                     <Button
                       variant="ghost"
                       onClick={() =>
-                        handleUpdateDeliveryOrderStatus(
-                          DeliveryOrderStatus.abandoned,
-                        )
+                        setDeliveryOrderStatusDialog({
+                          open: true,
+                          status: DeliveryOrderStatus.abandoned,
+                        })
                       }
                       disabled={isUpdating}
                       className="w-full flex flex-row justify-stretch items-center"
@@ -884,6 +910,34 @@ export function DeliveryOrderShow({
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <ConfirmActionDialog
+          open={deliveryOrderStatusDialog.open}
+          onOpenChange={(open) =>
+            setDeliveryOrderStatusDialog((prev) => ({ ...prev, open }))
+          }
+          title={
+            deliveryOrderStatusDialog.status ===
+            DeliveryOrderStatus.entered_in_error
+              ? t("mark_as_entered_in_error")
+              : t("mark_as_abandoned")
+          }
+          description={
+            deliveryOrderStatusDialog.status ===
+            DeliveryOrderStatus.entered_in_error
+              ? t("mark_order_as_entered_in_error_confirmation_description")
+              : t("mark_order_as_abandoned_confirmation_description")
+          }
+          confirmText={t("confirm")}
+          variant="destructive"
+          onConfirm={() => {
+            if (deliveryOrderStatusDialog.status) {
+              handleUpdateDeliveryOrderStatus(deliveryOrderStatusDialog.status);
+            }
+            setDeliveryOrderStatusDialog({ open: false, status: null });
+          }}
+          disabled={isUpdating}
+        />
       </div>
     </Page>
   );
