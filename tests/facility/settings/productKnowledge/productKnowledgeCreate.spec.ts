@@ -16,6 +16,7 @@ test.describe("Product Knowledge Creation", () => {
     altNames: string;
     storageGuidelines: string;
     categoryName: string;
+    dosageForm: string;
   };
 
   const productTypeOptions = [
@@ -33,6 +34,14 @@ test.describe("Product Knowledge Creation", () => {
     "international unit",
   ];
 
+  const dosageFormOptions = [
+    "Prolonged-release intracameral implant",
+    "Powder for conventional release intravesical solution and solution for injection",
+    "Conventional release intravesical solution and solution for injection",
+    "Prolonged-release intravitreal implant",
+    "Chewable and/or dispersible oral tablet",
+  ];
+
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     const productName = faker.commerce.productName();
@@ -41,7 +50,8 @@ test.describe("Product Knowledge Creation", () => {
       slug: productName.replace(/\s+/g, "-").slice(0, 25),
       productType: faker.helpers.arrayElement(productTypeOptions),
       baseUnit: faker.helpers.arrayElement(baseUnitOptions),
-      hsnCode: faker.phone.number(),
+      dosageForm: faker.helpers.arrayElement(dosageFormOptions),
+      hsnCode: faker.string.numeric({ length: 8 }),
       altNames: productName + "Alt",
       storageGuidelines: faker.commerce.productDescription(),
       categoryName: "Medications",
@@ -95,6 +105,7 @@ test.describe("Product Knowledge Creation", () => {
       .getByRole("combobox", { name: /dosage form/i })
       .scrollIntoViewIfNeeded();
     await page.getByRole("combobox", { name: /dosage form/i }).click();
+    await page.getByPlaceholder("Select Dosage Form").fill(testData.dosageForm);
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: /create/i }).click();
 
@@ -148,6 +159,7 @@ test.describe("Product Knowledge Creation", () => {
 
     // Dosage form
     await page.getByRole("combobox", { name: /dosage form/i }).click();
+    await page.getByPlaceholder("Select Dosage Form").fill(testData.dosageForm);
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: /create/i }).click();
 
@@ -170,5 +182,6 @@ test.describe("Product Knowledge Creation", () => {
     await expect(page.getByText(testData.productType)).toBeVisible();
     await expect(page.getByText(testData.baseUnit)).toBeVisible();
     await expect(page.getByText(testData.hsnCode)).toBeVisible();
+    await expect(page.getByText(testData.dosageForm)).toBeVisible();
   });
 });

@@ -41,7 +41,7 @@ test.describe("Product Knowledge Edit/Delete operations", () => {
       slug: productName.replace(/\s+/g, "-").slice(0, 25),
       productType: faker.helpers.arrayElement(productTypeOptions),
       baseUnit: faker.helpers.arrayElement(baseUnitOptions),
-      hsnCode: faker.phone.number(),
+      hsnCode: faker.string.numeric({ length: 8 }),
       altNames: productName + "Alt",
       storageGuidelines: faker.commerce.productDescription(),
       categoryName: "Medications",
