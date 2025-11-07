@@ -325,7 +325,7 @@ test.describe("Token Category Edit - Permission Tests", () => {
       // Wait for the view page to load
       await page.waitForLoadState("networkidle");
 
-      // Step 9: Verify Edit button is visible on the view page
+      // Step 9: Verify Edit button is NOT visible on the view page
       const editButtonOnViewPage = page.getByRole("link", { name: "Edit" });
       await expect(editButtonOnViewPage).not.toBeVisible();
 
