@@ -78,9 +78,12 @@ export function AppointmentSlotPicker({
     }
   };
 
+  // Pre-select the first slot for current date if there are any slots available
   useEffect(() => {
-    onSlotSelect(undefined);
-  }, [selectedDate]);
+    if (slotsQuery.data) {
+      onSlotSelect(slotsQuery.data[0]?.id);
+    }
+  }, [slotsQuery.data]);
 
   const totalSlots = groupSlotsByAvailability(slotsQuery.data || []).flatMap(
     (group) => group.slots,
