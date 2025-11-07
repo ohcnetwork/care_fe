@@ -344,6 +344,8 @@ test.describe("Specimen Definitions Management", () => {
 
     // Select Type Collected
     await page.getByRole("combobox", { name: "Type Collected *" }).click();
+    await page.getByRole("option").first().waitFor({ state: "visible" });
+
     await page.getByRole("option").first().click();
 
     // Try to submit
@@ -358,6 +360,7 @@ test.describe("Specimen Definitions Management", () => {
 
     // Refresh page to clear toast notifications
     await page.reload();
+    await page.waitForLoadState("networkidle");
 
     // Fill required fields again
     await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
@@ -375,14 +378,18 @@ test.describe("Specimen Definitions Management", () => {
 
     // Select Type Collected
     await page.getByRole("combobox", { name: "Type Collected *" }).click();
+    await page.getByRole("option").first().waitFor({ state: "visible" });
     await page.getByRole("option").first().click();
 
     // Try to submit
     await page.getByRole("button", { name: /save/i }).click();
 
-    // Verify validation error appears in notifications region
-    await expect(notificationsRegion.getByRole("listitem")).toBeVisible();
-    await expect(notificationsRegion).toContainText(/at most 25 characters/i);
+    // Get fresh reference to notifications region after page reload
+    const notificationsRegion2 = page.getByRole("region", {
+      name: "Notifications alt+T",
+    });
+    await expect(notificationsRegion2.getByRole("listitem")).toBeVisible();
+    await expect(notificationsRegion2).toContainText(/at most 25 characters/i);
 
     // Test: Valid slug (between 5 and 25 characters)
     const validSlug = faker.string.alphanumeric(
