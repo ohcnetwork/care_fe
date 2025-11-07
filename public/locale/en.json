@@ -3209,7 +3209,7 @@
   "no_patient_is_finished": "No tokens have been finished",
   "no_patient_is_waiting": "No patient is waiting in this queue",
   "no_patient_record_found": "No Patient Records Found",
-  "no_patient_record_text": "No existing records found with this phone number. Would you like to register a new patient?",
+  "no_patient_record_text": "No existing records found with this {{text}}. Would you like to register a new patient?",
   "no_patients": "No patients found",
   "no_patients_found": "No Patients Found",
   "no_patients_found_phone_number": "No patients found with this phone number. Please create a new patient to proceed with booking appointment.",
