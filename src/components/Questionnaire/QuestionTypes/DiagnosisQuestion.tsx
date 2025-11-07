@@ -87,7 +87,7 @@ const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   code: { code: "", display: "", system: "" },
   clinical_status: "active",
   verification_status: "confirmed",
-  severity: null,
+  severity: "moderate",
   category: "encounter_diagnosis",
   onset: { onset_datetime: dateQueryString(new Date()) },
   dirty: true,
