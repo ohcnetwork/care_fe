@@ -38,8 +38,14 @@ test.describe("Facility Devices Management", () => {
 
     // Verify device details on the device page with default values
     await expect(page.getByRole("heading", { name: deviceName })).toBeVisible();
-    await expect(page.getByText("Active")).toBeVisible();
-    await expect(page.getByText("Available")).toBeVisible();
+
+    // Verify status and availability badges
+    await expect(
+      page.locator('[data-slot="badge"]').filter({ hasText: "Active" }),
+    ).toBeVisible();
+    await expect(
+      page.locator('[data-slot="badge"]').filter({ hasText: "Available" }),
+    ).toBeVisible();
   });
 
   test("Add a new device with all fields and verify", async ({ page }) => {
@@ -50,7 +56,7 @@ test.describe("Facility Devices Management", () => {
     const serialNumber = faker.string.alphanumeric(12);
     const modelNumber = faker.string.alphanumeric(6);
     const partNumber = faker.string.alphanumeric(8);
-    const phoneNumber = "98" + faker.string.numeric(8);
+    const phoneNumber = "98" + faker.string.numeric(8); // Indian mobile format: 98XXXXXXXX
 
     const statusOptions = ["Active", "Inactive", "Entered in Error"];
     const availabilityOptions = ["Available", "Destroyed", "Damaged", "Lost"];
@@ -70,15 +76,18 @@ test.describe("Facility Devices Management", () => {
     // Select status
 
     await page.getByRole("combobox", { name: "Status *", exact: true }).click();
-    await page.getByRole("option", { name: status }).first().click();
+    await page
+      .getByRole("listbox")
+      .getByRole("option", { name: status })
+      .click();
 
     // Select availability status
     await page
       .getByRole("combobox", { name: "Availability Status *", exact: true })
       .click();
     await page
+      .getByRole("listbox")
       .getByRole("option", { name: availabilityStatus })
-      .first()
       .click();
 
     // Fill device details
