@@ -114,18 +114,8 @@ export function TokenCategoryFormContent({
   tokenCategoryId,
   existingData,
   containerClassName,
-  onSuccess = (tokenCategory) =>
-    tokenCategory?.id
-      ? navigate(
-          `/facility/${facilityId}/settings/token_category/${tokenCategory.id}`,
-        )
-      : navigate(`/facility/${facilityId}/settings/token_category`),
-  onCancel = () =>
-    tokenCategoryId
-      ? navigate(
-          `/facility/${facilityId}/settings/token_category/${tokenCategoryId}`,
-        )
-      : navigate(`/facility/${facilityId}/settings/token_category`),
+  onSuccess = () => navigate(`/facility/${facilityId}/settings/token_category`),
+  onCancel = () => navigate(`/facility/${facilityId}/settings/token_category`),
   disableButtons = false,
   externalSubmitRef,
 }: {
@@ -192,9 +182,7 @@ export function TokenCategoryFormContent({
         queryKey: ["tokenCategory", tokenCategoryId],
       });
       toast.success(t("token_category_updated_successfully"));
-      navigate(
-        `/facility/${facilityId}/settings/token_category/${tokenCategoryId}`,
-      );
+      navigate(`/facility/${facilityId}/settings/token_category`);
     },
   });
 
