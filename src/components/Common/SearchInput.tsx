@@ -113,7 +113,7 @@ const SearchInputFieldRenderer = ({
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value;
       setSearchValue(value);
-      onSearch(selectedOption.key, value);
+      onSearch(selectedOption.key, value.trim());
     },
     [selectedOption.key, onSearch, setSearchValue],
   );
@@ -194,7 +194,9 @@ export default function SearchInput({
       }
       setSelectedOptionIndex(index);
       const option = safeOptions[index];
+      option.value = "";
       setSearchValue(option.value || "");
+      onSearch(selectedOption.key, "");
       setFocusedIndex(safeOptions.findIndex((op) => op.key === option.key));
       setOpen(false);
       inputRef.current?.focus();
@@ -239,6 +241,7 @@ export default function SearchInput({
           setOpen(false);
         } else {
           setSearchValue("");
+          onSearch(selectedOption.key, "");
         }
       }
 
@@ -365,15 +368,15 @@ export default function SearchInput({
                             return (
                               <CommandItem
                                 key={option.key}
-                                onSelect={() =>
+                                onSelect={() => {
                                   handleOptionChange(
                                     safeOptions.findIndex(
                                       (option) =>
                                         option.key ===
                                         unselectedOptions[index].key,
                                     ),
-                                  )
-                                }
+                                  );
+                                }}
                                 className={cn(
                                   "flex items-center p-2 rounded-md cursor-pointer",
                                   {
@@ -450,6 +453,7 @@ export default function SearchInput({
           className="w-full flex items-center justify-center text-gray-500"
           onClick={() => {
             setSearchValue("");
+            onSearch(selectedOption.key, "");
             inputRef.current?.focus();
           }}
         >
