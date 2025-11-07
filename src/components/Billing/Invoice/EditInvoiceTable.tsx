@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -10,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  MonetaryAmountInput,
   getCurrencySymbol,
+  MonetaryAmountInput,
+  MonetaryDisplay,
 } from "@/components/ui/monetary-display";
 import {
   Select,
@@ -29,12 +29,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { conditionSchema } from "@/types/base/condition/condition";
@@ -46,6 +40,8 @@ import {
   ChargeItemRead,
   ChargeItemStatus,
   ChargeItemUpdate,
+  getComponentsFromChargeItem,
+  PriceComponentType,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -103,56 +99,22 @@ const chargeItemBaseSchema = z.object({
     .optional(),
   discountConditions: z.array(conditionSchema).optional(),
   discountType: z.enum(["amount", "percentage"]),
-  discountValue: z.string().refine((val) => {
-    const num = parseFloat(val);
-    return !isNaN(num) && num >= 0;
-  }, "Discount must be a positive number"),
+  discountValue: z.string(),
 });
 
 const formSchema = z.object({
   items: z.array(
-    z
-      .object({
-        id: z.string(),
-        title: z.string(),
-        status: z.nativeEnum(ChargeItemStatus),
-        description: z
-          .string()
-          .optional()
-          .nullable()
-          .transform((val) => (val === "" ? null : val)),
-        ...chargeItemBaseSchema.shape,
-      })
-      .refine(
-        (data) => {
-          const value = parseFloat(data.discountValue);
-          if (isNaN(value)) return true;
-          if (data.discountType === "percentage") {
-            return value >= 0 && value <= 100;
-          }
-          return true;
-        },
-        {
-          message: "Invalid Percentage",
-          path: ["discountValue"],
-        },
-      )
-      .refine(
-        (data) => {
-          const discountValue = parseFloat(data.discountValue);
-          const baseAmount = parseFloat(data.baseAmount);
-
-          if (isNaN(discountValue) || isNaN(baseAmount)) return true;
-          if (data.discountType === "amount") {
-            return discountValue <= baseAmount;
-          }
-          return true;
-        },
-        {
-          message: "Discount amount cannot be greater than unit price",
-          path: ["discountValue"],
-        },
-      ),
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      status: z.nativeEnum(ChargeItemStatus),
+      description: z
+        .string()
+        .optional()
+        .nullable()
+        .transform((val) => (val === "" ? null : val)),
+      ...chargeItemBaseSchema.shape,
+    }),
   ),
 });
 
@@ -168,7 +130,6 @@ export function EditInvoiceTable({
   const { t } = useTranslation();
   useShortcutSubContext("facility:billing:invoice:show");
 
-  // Helper function to create a unique key for discount component
   const getDiscountComponentKey = (
     component: MonetaryComponent | undefined,
   ) => {
@@ -176,36 +137,24 @@ export function EditInvoiceTable({
     return component.code.code;
   };
 
-  // Helper function to get available discount components for a charge item
-  const getAvailableDiscounts = (chargeItem: ChargeItemRead) => {
-    return (
-      chargeItem?.charge_item_definition?.price_components?.filter(
-        (component) =>
-          component.monetary_component_type === MonetaryComponentType.discount,
-      ) || []
-    );
-  };
-
-  const getTaxComponents = (chargeItem: ChargeItemRead) => {
-    return (
-      chargeItem?.charge_item_definition?.price_components?.filter(
-        (component) =>
-          component.monetary_component_type === MonetaryComponentType.tax,
-      ) || []
-    );
-  };
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       items: chargeItems.map((item) => {
-        const baseComponent = item.unit_price_components.find(
-          (c) => c.monetary_component_type === MonetaryComponentType.base,
+        const baseComponent = getComponentsFromChargeItem(
+          item,
+          MonetaryComponentType.base,
+          PriceComponentType.unit_price,
+        )[0];
+        const discountComponent = getComponentsFromChargeItem(
+          item,
+          MonetaryComponentType.discount,
+          PriceComponentType.total_price,
+        )[0];
+        const taxComponents = getComponentsFromChargeItem(
+          item.charge_item_definition,
+          MonetaryComponentType.tax,
         );
-        const discountComponent = item.total_price_components.find(
-          (c) => c.monetary_component_type === MonetaryComponentType.discount,
-        );
-        const taxComponents = getTaxComponents(item);
 
         const isPercentage = discountComponent?.factor !== undefined;
         const discountValue = isPercentage
@@ -295,7 +244,10 @@ export function EditInvoiceTable({
     const chargeItem = chargeItems[index];
     if (!chargeItem) return;
 
-    const availableDiscounts = getAvailableDiscounts(chargeItem);
+    const availableDiscounts = getComponentsFromChargeItem(
+      chargeItem.charge_item_definition,
+      MonetaryComponentType.discount,
+    );
     const selectedComponent = availableDiscounts.find(
       (c) => getDiscountComponentKey(c) === componentKey,
     );
@@ -326,32 +278,9 @@ export function EditInvoiceTable({
     form.setValue(`items.${index}.discountValue`, "0");
   };
 
-  // Get validation errors for a specific row
-  const getRowErrors = (index: number): string[] => {
-    const errors = form.formState.errors.items?.[index];
-    if (!errors || typeof errors !== "object") return [];
-
-    const errorMessages: string[] = [];
-    Object.entries(errors).forEach(([field, error]) => {
-      if (error && typeof error === "object" && "message" in error) {
-        const fieldLabel =
-          field === "baseAmount"
-            ? t("unit_price")
-            : field === "quantity"
-              ? t("quantity")
-              : field === "discountValue"
-                ? t("discount")
-                : field;
-        errorMessages.push(`${fieldLabel}: ${error.message}`);
-      }
-    });
-    return errorMessages;
-  };
-
-  // Check if there are any errors in any row
-  const hasAnyErrors = form
-    .watch("items")
-    .some((_, index) => getRowErrors(index).length > 0);
+  if (chargeItems.length === 0) {
+    return <div>{t("no_charge_items_found")}</div>;
+  }
 
   return (
     <Form {...form}>
@@ -375,9 +304,6 @@ export function EditInvoiceTable({
                 <TableHead className="border-r border-gray-200 font-semibold text-center min-w-[300px]">
                   {t("discount")}
                 </TableHead>
-                {hasAnyErrors && (
-                  <TableHead className="font-semibold text-center w-12" />
-                )}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -437,7 +363,10 @@ export function EditInvoiceTable({
                         render={({ field }) => {
                           const chargeItem = chargeItems[index];
                           const availableDiscounts =
-                            getAvailableDiscounts(chargeItem);
+                            getComponentsFromChargeItem(
+                              chargeItem.charge_item_definition,
+                              MonetaryComponentType.discount,
+                            );
 
                           // Get the current discount component to show its name
                           const currentDiscount = availableDiscounts.find(
@@ -479,13 +408,10 @@ export function EditInvoiceTable({
                                     <SelectValue>
                                       {currentDiscount ? (
                                         <>
-                                          {currentDiscount.code?.display} @{" "}
-                                          {currentDiscount.factor ??
-                                            currentDiscount.amount ??
-                                            0}
-                                          {currentDiscount.factor != null
-                                            ? "%"
-                                            : "₹"}
+                                          {currentDiscount.code?.display} @
+                                          <MonetaryDisplay
+                                            {...currentDiscount}
+                                          />
                                         </>
                                       ) : (
                                         <span className="text-gray-500">
@@ -503,16 +429,10 @@ export function EditInvoiceTable({
                                     {availableDiscounts.map((component) => {
                                       const key =
                                         getDiscountComponentKey(component);
-                                      const value =
-                                        component.factor ??
-                                        component.amount ??
-                                        0;
-                                      const suffix =
-                                        component.factor != null ? "%" : "₹";
                                       return (
                                         <SelectItem key={key} value={key || ""}>
-                                          {component.code?.display} @ {value}
-                                          {suffix}
+                                          {component.code?.display} @
+                                          <MonetaryDisplay {...component} />
                                         </SelectItem>
                                       );
                                     })}
@@ -583,31 +503,6 @@ export function EditInvoiceTable({
                       />
                     </div>
                   </TableCell>
-                  {hasAnyErrors && (
-                    <TableCell className="text-center w-12">
-                      {getRowErrors(index).length > 0 && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <AlertCircle className="h-5 w-5 text-red-500 cursor-help mx-auto" />
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="left"
-                              className="max-w-xs bg-red-50 text-red-900 border border-red-200"
-                            >
-                              <div className="space-y-1">
-                                {getRowErrors(index).map((error, idx) => (
-                                  <div key={idx} className="text-xs">
-                                    • {error}
-                                  </div>
-                                ))}
-                              </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                    </TableCell>
-                  )}
                 </TableRow>
               ))}
             </TableBody>
