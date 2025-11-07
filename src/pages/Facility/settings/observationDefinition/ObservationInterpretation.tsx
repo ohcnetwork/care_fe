@@ -46,7 +46,6 @@ import {
   getConditionValue,
   getDefaultCondition,
   Metrics,
-  TagOperationValue,
 } from "@/types/base/condition/condition";
 import {
   COLOR_OPTIONS,
@@ -696,11 +695,7 @@ export function RenderConditionInput({
   condition: Condition;
   index: number;
   handleSetValue: (
-    value:
-      | string
-      | ConditionOperationInRangeValue
-      | AgeOperationEqualityValue
-      | TagOperationValue,
+    value: string | ConditionOperationInRangeValue | AgeOperationEqualityValue,
     index: number,
   ) => void;
   handleSetValueType: (value: string, index: number) => void;
@@ -711,12 +706,11 @@ export function RenderConditionInput({
   const operation = condition.operation;
   const value =
     "value" in condition ? condition.value : { min: undefined, max: undefined };
-  const { tagIds, tagResource } = extractTagInformation(value);
+  const tagIds = extractTagInformation(value);
   const tagQueries = useTagConfigs({
     ids: tagIds,
     disabled: operation !== ConditionOperation.has_tag,
   });
-  const [tagType, setTagType] = useState<TagResource>(tagResource);
   switch (condition.metric) {
     case "patient_gender": {
       if (operation === ConditionOperation.equality) {
@@ -1011,42 +1005,14 @@ export function RenderConditionInput({
         const selectedTags = tagQueries
           .map((query) => query.data)
           .filter(Boolean) as TagConfig[];
-        const handleSetTagValue = (value: string) => {
-          handleSetValue(
-            {
-              value: value,
-              value_type: tagType,
-            },
-            index,
-          );
-        };
         return (
           <>
-            <Select
-              value={tagType}
-              onValueChange={(value) => {
-                setTagType(value as TagResource);
-                handleSetTagValue("");
-              }}
-            >
-              <SelectTrigger className="w-fit min-w-[200px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={TagResource.ENCOUNTER}>
-                  {t("encounter_tags")}
-                </SelectItem>
-                <SelectItem value={TagResource.PATIENT}>
-                  {t("patient_tags")}
-                </SelectItem>
-              </SelectContent>
-            </Select>
             <FormField
               control={form.control}
-              name={`${fieldName}.value.value` as any}
+              name={`${fieldName}.value` as any}
               render={() => {
                 const errorMessage = form.getFieldState(
-                  `${fieldName}.value.value`,
+                  `${fieldName}.value`,
                   form.formState,
                 ).error?.message;
                 return (
@@ -1054,10 +1020,11 @@ export function RenderConditionInput({
                     <FormControl>
                       <TagSelectorPopover
                         selected={selectedTags}
-                        resource={tagType}
+                        resource={TagResource.ENCOUNTER}
                         onChange={(tags) => {
-                          handleSetTagValue(
+                          handleSetValue(
                             tags.map((tag) => tag.id).join(","),
+                            index,
                           );
                         }}
                         className={errorMessage ? "border-red-500" : ""}
@@ -1090,10 +1057,12 @@ export function ConditionComponent<
   fieldName: string;
 }) {
   const { t } = useTranslation();
-  const { data: metrics } = useQuery({
+  const { data } = useQuery({
     queryKey: ["metrics"],
     queryFn: query(observationDefinitionApi.getAllMetrics),
   });
+
+  const metrics = data?.filter((m) => m.name !== "patient_tag");
 
   useEffect(() => {
     if (metrics?.[0] && conditions.length === 0) {
@@ -1140,12 +1109,7 @@ export function ConditionComponent<
   };
 
   const handleSetValue = (
-    value:
-      | string
-      | ConditionOperationInRangeValue
-      | AgeOperationEqualityValue
-      | TagOperationValue
-      | string[],
+    value: string | ConditionOperationInRangeValue | AgeOperationEqualityValue,
     index: number,
   ) => {
     let updatedCondition = conditions[index];

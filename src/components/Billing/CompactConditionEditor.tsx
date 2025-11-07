@@ -30,7 +30,6 @@ import {
   getConditionValue,
   getDefaultCondition,
   Metrics,
-  TagOperationValue,
 } from "@/types/base/condition/condition";
 
 interface CompactConditionEditorProps {
@@ -44,13 +43,13 @@ interface CompactConditionEditorProps {
 function TagSelector({
   value,
   onChange,
+  resource,
 }: {
-  value: TagOperationValue;
-  onChange: (value: TagOperationValue) => void;
+  value: string;
+  onChange: (value: string) => void;
+  resource: TagResource;
 }) {
-  const { t } = useTranslation();
-  const { tagIds, tagResource } = extractTagInformation(value);
-  const [tagType, setTagType] = useState<TagResource>(tagResource);
+  const tagIds = extractTagInformation(value);
 
   const tagQueries = useTagConfigs({
     ids: tagIds,
@@ -62,43 +61,16 @@ function TagSelector({
     .filter(Boolean) as TagConfig[];
 
   const handleChange = (tags: TagConfig[]) => {
-    onChange({
-      value: tags.map((tag) => tag.id).join(","),
-      value_type: tagResource,
-    });
+    onChange(tags.map((tag) => tag.id).join(","));
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2 items-center">
-      <Select
-        value={tagType}
-        onValueChange={(value) => {
-          setTagType(value as TagResource);
-          onChange({
-            value: "",
-            value_type: value as TagResource,
-          });
-        }}
-      >
-        <SelectTrigger className="w-fit min-w-[200px]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={TagResource.ENCOUNTER}>
-            {t("encounter_tags")}
-          </SelectItem>
-          <SelectItem value={TagResource.PATIENT}>
-            {t("patient_tags")}
-          </SelectItem>
-        </SelectContent>
-      </Select>
-      <TagSelectorPopover
-        selected={selectedTags}
-        resource={tagType}
-        onChange={handleChange}
-        className="h-9 w-full sm:w-fit"
-      />
-    </div>
+    <TagSelectorPopover
+      selected={selectedTags}
+      resource={resource}
+      onChange={handleChange}
+      className="h-9 w-full"
+    />
   );
 }
 
@@ -283,6 +255,8 @@ function RenderInput({
 
   // For has_tag operation
   if (operation === ConditionOperation.has_tag) {
+    const resource =
+      metric === "encounter_tag" ? TagResource.ENCOUNTER : TagResource.PATIENT;
     return (
       <FormField
         control={form.control}
@@ -291,10 +265,11 @@ function RenderInput({
           <FormItem className="flex-1">
             <FormControl>
               <TagSelector
-                value={field.value as TagOperationValue}
+                value={field.value as string}
                 onChange={(value) => {
                   field.onChange(value);
                 }}
+                resource={resource}
               />
             </FormControl>
           </FormItem>
@@ -381,11 +356,14 @@ export function CompactConditionEditor({
   const { t } = useTranslation();
   const [isAdding, setIsAdding] = useState(false);
 
+  const metrics =
+    availableMetrics?.filter((m) => m.name !== "encounter_tag") || [];
+
   // Set up form with zod validation
   const form = useForm({
     resolver: zodResolver(conditionSchema),
     defaultValues: {
-      ...getDefaultCondition(availableMetrics),
+      ...getDefaultCondition(metrics),
     },
   });
 
@@ -417,11 +395,11 @@ export function CompactConditionEditor({
   };
 
   // Use the watched metric value to find the selected metric
-  const selectedMetric = availableMetrics.find((m) => m.name === metric);
+  const selectedMetric = metrics.find((m) => m.name === metric);
 
   const handleSetMetric = (metricName: string) => {
     form.clearErrors();
-    const newMetric = availableMetrics?.find((m) => m.name === metricName);
+    const newMetric = metrics?.find((m) => m.name === metricName);
     const firstOperation = newMetric
       ?.allowed_operations?.[0] as ConditionOperation;
 
@@ -502,7 +480,7 @@ export function CompactConditionEditor({
                           <SelectValue placeholder={t("metric")} />
                         </SelectTrigger>
                         <SelectContent>
-                          {availableMetrics.map((metric) => (
+                          {metrics.map((metric) => (
                             <SelectItem key={metric.name} value={metric.name}>
                               {t(`condition_metric__${metric.name}`)}
                             </SelectItem>

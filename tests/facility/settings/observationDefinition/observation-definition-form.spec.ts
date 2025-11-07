@@ -72,7 +72,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
       // Select metric type
       await conditionSelector
         .getByRole("combobox")
-        .filter({ hasText: /^Tag$/ })
+        .filter({ hasText: "Encounter Tags" })
         .click();
 
       await page.getByRole("option", { name: "Patient Gender" }).click();

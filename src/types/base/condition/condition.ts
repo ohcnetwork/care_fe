@@ -48,7 +48,7 @@ export type Condition =
     })
   | (ConditionBase & {
       operation: ConditionOperation.has_tag;
-      value: TagOperationValue;
+      value: string;
     })
   | (ConditionBase & {
       metric: "patient_age";
@@ -107,11 +107,14 @@ export const conditionSchema = z.discriminatedUnion("_conditionType", [
   z.object({
     metric: z.literal("encounter_tag"),
     operation: z.literal(ConditionOperation.has_tag),
-    value: z.object({
-      value: z.string().trim().min(1, "Tags are required"),
-      value_type: z.enum([TagResource.ENCOUNTER, TagResource.PATIENT]),
-    }),
+    value: z.string().trim().min(1, "Tags are required"),
     _conditionType: z.literal("encounter_tag_has_tag"),
+  }),
+  z.object({
+    metric: z.literal("patient_tag"),
+    operation: z.literal(ConditionOperation.has_tag),
+    value: z.string().trim().min(1, "Tags are required"),
+    _conditionType: z.literal("patient_tag_has_tag"),
   }),
 ]) as z.ZodType<Condition>;
 
@@ -122,7 +125,7 @@ export function ConditionOperationSummary({
 }) {
   const { t } = useTranslation();
   const conditionName = t(`condition_metric__${condition.metric}`);
-  const { tagIds, tagResource } = extractTagInformation(condition.value);
+  const tagIds = extractTagInformation(condition.value);
   const tags = useTagConfigs({
     ids: tagIds,
     disabled:
@@ -151,7 +154,7 @@ export function ConditionOperationSummary({
     }
     case ConditionOperation.has_tag: {
       const tagDisplay = tags.map((tag) => tag.display).join(", ");
-      return `Has any of the following ${tagResource} tag(s): ${tagDisplay}`;
+      return `Has any of the following ${conditionName}: ${tagDisplay}`;
     }
   }
 }
@@ -180,7 +183,7 @@ export function getConditionValue(
       }
       break;
     case ConditionOperation.has_tag:
-      conditionValue = { value: "", value_type: TagResource.ENCOUNTER };
+      conditionValue = "";
       break;
   }
   return conditionValue;
@@ -204,22 +207,12 @@ export const getDefaultCondition = (metrics: Metrics[]) => {
 export const extractTagInformation = (
   value:
     | string
-    | TagOperationValue
     | ConditionOperationInRangeValue
     | AgeOperationEqualityValue
     | AgeOperationInRangeValue,
 ) => {
-  const tagIds =
-    typeof value === "object" &&
-    "value" in value &&
-    typeof value.value === "string"
-      ? value.value.split(",")
-      : [];
-  const tagResource =
-    typeof value === "object" && "value_type" in value
-      ? (value.value_type as TagResource)
-      : TagResource.ENCOUNTER;
-  return { tagIds, tagResource };
+  const tagIds = typeof value === "string" ? value.split(",") : [];
+  return tagIds;
 };
 
 export const CONDITION_AGE_VALUE_TYPES = ["years", "months", "days"] as const;
