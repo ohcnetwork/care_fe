@@ -380,10 +380,10 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 
 export default function EncounterHistorySelector({
   isRailOpen,
-  SetIssRailOpen,
+  setIssRailOpen,
 }: {
   isRailOpen: boolean;
-  SetIssRailOpen: (open: boolean) => void;
+  setIssRailOpen: (open: boolean) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -412,7 +412,7 @@ export default function EncounterHistorySelector({
         </Drawer>
       </div>
       <div className="hidden lg:block pr-3">
-        <RailPanel open={isRailOpen} onOpenChange={SetIssRailOpen}>
+        <RailPanel open={isRailOpen} onOpenChange={setIssRailOpen}>
           <ScrollArea className="h-[calc(100vh-9rem)] pr-3">
             <EncounterHistoryList />
           </ScrollArea>
