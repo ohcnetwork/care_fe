@@ -111,7 +111,7 @@
     "jotai": "^2.12.3",
     "jspdf": "^3.0.2",
     "libphonenumber-js": "^1.11.18",
-    "lucide-react": "^0.503.0",
+    "lucide-react": "^0.548.0",
     "markdown-it": "^14.1.0",
     "next-themes": "^0.4.3",
     "normalize-wheel": "^1.0.1",
@@ -201,8 +201,8 @@
   "optionalDependencies": {
     "@esbuild/linux-arm64": "latest",
     "@esbuild/linux-x64": "latest",
-    "@rollup/rollup-linux-arm64-gnu": "4.52.3",
-    "@rollup/rollup-linux-x64-gnu": "4.52.3"
+    "@rollup/rollup-linux-arm64-gnu": "4.52.5",
+    "@rollup/rollup-linux-x64-gnu": "4.52.5"
   },
   "browserslist": {
     "production": [
