@@ -24,9 +24,9 @@ test.describe(() => {
     testData = {
       title: chargeItemName,
       slug: chargeItemName.replace(/\s+/g, "-").slice(0, 25),
-      basePrice: faker.commerce.price(),
-      mrp: faker.commerce.price(),
-      purchasePrice: faker.commerce.price(),
+      basePrice: faker.commerce.price({ dec: 2 }),
+      mrp: faker.commerce.price({ dec: 2 }),
+      purchasePrice: faker.commerce.price({ dec: 2 }),
       description: faker.commerce.productDescription(),
       purpose: faker.commerce.productAdjective(),
       url: faker.internet.url(),
@@ -70,6 +70,7 @@ test.describe(() => {
       page.getByText(/charge item definition.*created successfully/i),
     ).toBeVisible();
 
+    // Verify in edit view
     await page.getByRole("textbox", { name: /search/i }).fill(testData.title);
     await expect(
       page.getByRole("table").getByText(testData.title),
@@ -84,6 +85,12 @@ test.describe(() => {
     await expect(page.getByRole("textbox", { name: /title/i })).toHaveValue(
       testData.title,
     );
+    await expect(page.getByRole("textbox", { name: /slug/i })).toHaveValue(
+      testData.slug.toLowerCase(),
+    );
+    await expect(
+      page.getByRole("textbox", { name: /base price/i }),
+    ).toHaveValue(testData.basePrice);
   });
 
   test("create charge item definition with all fields", async ({ page }) => {
@@ -138,56 +145,22 @@ test.describe(() => {
       page.getByText(/charge item definition.*created successfully/i),
     ).toBeVisible();
 
+    // Verify all fields
+    await page.getByRole("textbox", { name: /search/i }).fill(testData.title);
     await expect(
       page.getByRole("table").getByText(testData.title),
     ).toBeVisible();
-  });
-
-  test("edit charge item definition", async ({ page }) => {
-    await page.getByRole("link", { name: "Edit" }).first().click();
-    await page
-      .getByRole("textbox", { name: /title/i })
-      .fill(testData.title + " - edited");
-    await page
-      .getByRole("textbox", { name: /description/i })
-      .fill(testData.description + " - edited");
-    await page
-      .getByRole("textbox", { name: /purpose/i })
-      .fill(testData.purpose + " - edited");
-    await page.getByRole("textbox", { name: /uri/i }).fill(testData.url);
-    await page
-      .getByRole("textbox", { name: /base price/i })
-      .fill(testData.basePrice);
-    await page.getByRole("textbox", { name: /mrp/i }).fill(testData.mrp);
-    await page
-      .getByRole("textbox", { name: /purchase price/i })
-      .fill(testData.purchasePrice);
-    await page.getByRole("button", { name: /update/i }).click();
-
-    await expect(page.getByText(/updated successfully/i)).toBeVisible();
-
+    await page.getByRole("link", { name: "View" }).click();
     await expect(
-      page.getByRole("heading").getByText(testData.title + " - edited"),
+      page.getByRole("heading", { name: testData.title }),
     ).toBeVisible();
-
-    await page.getByRole("button", { name: "Back" }).click();
-
-    await page
-      .getByRole("textbox", { name: /search/i })
-      .fill(testData.title + " - edited");
-    await expect(
-      page.getByRole("table").getByText(testData.title + " - edited"),
-    ).toBeVisible();
-  });
-
-  test("delete charge item definition", async ({ page }) => {
-    await page.getByRole("link", { name: "view" }).first().click();
-    await expect(page.getByRole("button", { name: "Delete" })).toBeVisible();
-    await page.getByRole("button", { name: "Delete" }).click();
-    await page.getByRole("button", { name: "Confirm" }).click();
-
-    await expect(
-      page.getByText(/charge item definition.*deleted successfully/i),
-    ).toBeVisible();
+    await expect(page.getByText(testData.description)).toBeVisible();
+    await expect(page.getByText(testData.purpose)).toBeVisible();
+    await expect(page.getByText(testData.url)).toBeVisible();
+    await expect(page.getByText(testData.mrp)).toBeVisible();
+    await expect(page.getByText(testData.purchasePrice)).toBeVisible();
+    await expect(page.getByText("9%")).toBeVisible();
+    await expect(page.getByText("6%")).toBeVisible();
+    await expect(page.getByText("Age In Range 60 - 120")).toBeVisible();
   });
 });

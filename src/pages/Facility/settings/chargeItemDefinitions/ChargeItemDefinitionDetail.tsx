@@ -297,10 +297,8 @@ export function ChargeItemDefinitionDetail({
                                   className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
                                 >
                                   <span>
-                                    {condition.metric}{" "}
-                                    <span className="font-mono pr-2 ">
-                                      {condition.operation}
-                                    </span>
+                                    {t(condition.metric)}{" "}
+                                    <span>{t(condition.operation)}</span>{" "}
                                     {getConditionValue(condition)}
                                   </span>
                                 </div>

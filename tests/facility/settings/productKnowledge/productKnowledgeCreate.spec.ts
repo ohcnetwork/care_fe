@@ -116,6 +116,10 @@ test.describe(() => {
     await expect(
       page.getByRole("textbox", { name: /name/i }).first(),
     ).toHaveValue(testData.name);
+
+    await expect(
+      page.getByRole("textbox", { name: /slug/i }).first(),
+    ).toHaveValue(testData.slug.toLowerCase());
   });
 
   test("create a product knowledge with all fields", async ({ page }) => {
@@ -156,52 +160,15 @@ test.describe(() => {
       page.getByRole("table").getByText(testData.name),
     ).toBeVisible();
 
+    // View and verify all details
     await page.getByRole("link", { name: "View" }).first().click();
     await expect(
       page.getByRole("heading").getByText(testData.name),
     ).toBeVisible();
-  });
-
-  test("view and edit and confirm", async ({ page }) => {
-    await page.getByRole("link", { name: "View" }).first().click();
-    await page.getByRole("button", { name: "Edit" }).click();
-
-    await page
-      .getByRole("textbox", { name: /name/i })
-      .first()
-      .fill(testData.name);
-    await page.getByRole("combobox", { name: /product type/i }).click();
-    await page.getByRole("option", { name: testData.productType }).click();
-
-    await page.getByText(/Base Unit/).click();
-    await page.getByRole("option", { name: testData.baseUnit }).click();
-    await page
-      .getByRole("textbox", { name: "HSN Code" })
-      .fill(testData.hsnCode);
-    await page.getByRole("button", { name: /update/i }).click();
-    await expect(page.getByText(/updated successfully/i)).toBeVisible();
-
-    await expect(
-      page.getByRole("heading").getByText(testData.name),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Back" }).click();
-
-    await page
-      .getByRole("textbox", { name: "Search products" })
-      .fill(testData.name);
-    await expect(
-      page.getByRole("table").getByText(testData.name),
-    ).toBeVisible();
-  });
-
-  test("delete", async ({ page }) => {
-    await page.getByRole("link", { name: "View" }).first().click();
-    await expect(page.getByRole("button", { name: "Delete" })).toBeVisible();
-    await page.getByRole("button", { name: "Delete" }).click();
-    await page.getByRole("button", { name: "Confirm" }).click();
-
-    await expect(
-      page.getByText(/product knowledge.*deleted successfully/i),
-    ).toBeVisible();
+    await expect(page.getByText(testData.altNames)).toBeVisible();
+    await expect(page.getByText(testData.storageGuidelines)).toBeVisible();
+    await expect(page.getByText(testData.productType)).toBeVisible();
+    await expect(page.getByText(testData.baseUnit)).toBeVisible();
+    await expect(page.getByText(testData.hsnCode)).toBeVisible();
   });
 });

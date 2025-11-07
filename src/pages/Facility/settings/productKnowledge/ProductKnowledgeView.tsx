@@ -72,7 +72,7 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
   const { mutate: updateProductKnowledge, isPending: isDeleting } = useMutation(
     {
       mutationFn: mutate(productKnowledgeApi.updateProductKnowledge, {
-        pathParams: { slug: slug },
+        pathParams: { slug },
       }),
       onSuccess: () => {
         toast.success(t("product_knowledge_deleted_successfully"));
