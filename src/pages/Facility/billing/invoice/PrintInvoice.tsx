@@ -137,10 +137,10 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
           {/* Bill To Section */}
           <div className="space-y-6">
             <div className="flex flex-wrap justify-between gap-2">
-              <div className="flex-1 min-w-[140px]">
+              <div className="flex-1 min-w-1/4">
                 <DetailRow label={t("inv_no")} value={invoice.number} />
               </div>
-              <div className="text-right min-w-[140px]">
+              <div className="text-right min-w-1/6">
                 <DetailRow
                   label={t("date")}
                   value={
