@@ -76,7 +76,6 @@ export const EncounterShow = (props: Props) => {
 
   useSidebarAutoCollapse({ restore: false });
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [isEncounterRailOpen, setIsEncounterRailOpen] = useState(true);
   const getShortcutDisplay = useEncounterShortcutDisplays();
 
   const { t } = useTranslation();
@@ -254,11 +253,8 @@ export const EncounterShow = (props: Props) => {
         />
         <PatientDeceasedInfo patient={patient} />
       </div>
-      <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
-        <EncounterHistorySelector
-          isRailOpen={isEncounterRailOpen}
-          setIssRailOpen={setIsEncounterRailOpen}
-        />
+      <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4 max-h-[calc(100vh-9rem)]">
+        <EncounterHistorySelector />
         <div className="w-full">
           <div className="hidden lg:block">
             {isSelectedEncounterLoading ? (
@@ -318,7 +314,12 @@ export const EncounterShow = (props: Props) => {
           <NavTabs
             showMoreAfterIndex={showMoreAfterIndex}
             className="@container w-full"
-            tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-14rem)]"
+            tabContentClassName={cn(
+              "flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto",
+              primaryEncounter?.appointment?.id
+                ? "lg:h-[calc(100vh-17rem)]"
+                : "lg:h-[calc(100vh-14rem)]",
+            )}
             tabs={tabs}
             currentTab={props.tab}
             tabTriggerClassName="max-w-36"
