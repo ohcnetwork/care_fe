@@ -381,7 +381,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
 export default function EncounterHistorySelector() {
   const [isRailOpen, setIsRailOpen] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const { primaryEncounter } = useEncounter();
+  const { showAppointmentEncounterHeader } = useEncounter();
 
   const { t } = useTranslation();
 
@@ -412,7 +412,7 @@ export default function EncounterHistorySelector() {
           <ScrollArea
             className={cn(
               "pr-3",
-              primaryEncounter?.appointment?.id
+              showAppointmentEncounterHeader
                 ? "h-[calc(100vh-12rem)]"
                 : "h-[calc(100vh-9rem)]",
             )}

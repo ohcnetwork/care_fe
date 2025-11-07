@@ -72,6 +72,7 @@ export const EncounterShow = (props: Props) => {
     isPatientLoading,
     canWriteSelectedEncounter,
     canWritePrimaryEncounter,
+    showAppointmentEncounterHeader,
   } = useEncounter();
 
   useSidebarAutoCollapse({ restore: false });
@@ -316,7 +317,7 @@ export const EncounterShow = (props: Props) => {
             className="@container w-full"
             tabContentClassName={cn(
               "flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto",
-              primaryEncounter?.appointment?.id
+              showAppointmentEncounterHeader
                 ? "lg:h-[calc(100vh-17rem)]"
                 : "lg:h-[calc(100vh-14rem)]",
             )}

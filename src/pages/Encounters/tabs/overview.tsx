@@ -24,7 +24,7 @@ export const EncounterOverviewTab = () => {
     selectedEncounterId: encounterId,
     canReadSelectedEncounter: canAccess,
     canWriteSelectedEncounter: canWrite,
-    primaryEncounter,
+    showAppointmentEncounterHeader,
   } = useEncounter();
 
   const { data: plotsConfig } = useQuery<ObservationPlotConfig>({
@@ -40,7 +40,7 @@ export const EncounterOverviewTab = () => {
       <div
         className={cn(
           "flex-1 xl:pr-3 overflow-y-auto",
-          primaryEncounter?.appointment?.id
+          showAppointmentEncounterHeader
             ? "xl:h-[calc(100vh-17rem)]"
             : "xl:h-[calc(100vh-14rem)]",
         )}
@@ -92,7 +92,7 @@ export const EncounterOverviewTab = () => {
       <ScrollArea
         className={cn(
           "w-72 hidden xl:block",
-          primaryEncounter?.appointment?.id
+          showAppointmentEncounterHeader
             ? "h-[calc(100vh-17rem)]"
             : "h-[calc(100vh-14rem)]",
         )}
