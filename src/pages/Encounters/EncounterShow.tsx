@@ -7,6 +7,7 @@ import {
   useEncounterShortcutDisplays,
   useEncounterShortcuts,
 } from "@/hooks/useEncounterShortcuts";
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
 
 import { getPermissions } from "@/common/Permissions";
@@ -14,8 +15,10 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { Badge } from "@/components/ui/badge";
 import { CommandShortcut } from "@/components/ui/command";
 import { NavTabs } from "@/components/ui/nav-tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { usePermissions } from "@/context/PermissionContext";
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -33,7 +36,10 @@ import { EncounterPlotsTab } from "@/pages/Encounters/tabs/plots";
 import { EncounterResponsesTab } from "@/pages/Encounters/tabs/responses";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { PLUGIN_Component } from "@/PluginEngine";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import {
+  ENCOUNTER_STATUS_COLORS,
+  EncounterRead,
+} from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
 import { navigate } from "raviger";
@@ -58,6 +64,7 @@ export const EncounterShow = (props: Props) => {
     facilityId,
     primaryEncounter,
     selectedEncounter,
+    isSelectedEncounterLoading,
     primaryEncounterId,
     selectedEncounterId,
     isPrimaryEncounterLoading,
@@ -69,6 +76,7 @@ export const EncounterShow = (props: Props) => {
 
   useSidebarAutoCollapse({ restore: false });
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [isEncounterRailOpen, setIsEncounterRailOpen] = useState(true);
   const getShortcutDisplay = useEncounterShortcutDisplays();
 
   const { t } = useTranslation();
@@ -247,23 +255,83 @@ export const EncounterShow = (props: Props) => {
         <PatientDeceasedInfo patient={patient} />
       </div>
       <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
-        <EncounterHistorySelector />
-        <NavTabs
-          showMoreAfterIndex={showMoreAfterIndex}
-          className="@container w-full"
-          tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-12rem)]"
-          tabs={tabs}
-          currentTab={props.tab}
-          tabTriggerClassName="max-w-36"
-          onTabChange={(tab) =>
-            navigate(tab, {
-              query:
-                primaryEncounterId !== selectedEncounterId
-                  ? { selectedEncounter: selectedEncounterId }
-                  : undefined,
-            })
-          }
+        <EncounterHistorySelector
+          isRailOpen={isEncounterRailOpen}
+          SetIssRailOpen={setIsEncounterRailOpen}
         />
+        <div className="w-full">
+          <div className="hidden lg:block">
+            {isSelectedEncounterLoading ? (
+              <Skeleton className="h-10 w-md" />
+            ) : (
+              selectedEncounter && (
+                <div className="flex gap-2 items-center">
+                  <h4 className="font-bold">
+                    {t(
+                      `encounter_class__${selectedEncounter?.encounter_class}`,
+                    )}
+                  </h4>
+                  <div className="text-sm text-gray-700 space-x-2">
+                    <span className="">{selectedEncounter?.facility.name}</span>
+
+                    <span>|</span>
+
+                    <span className="whitespace-nowrap">
+                      {selectedEncounter.period.start && (
+                        <span>
+                          {format(
+                            new Date(selectedEncounter.period.start!),
+                            "dd MMM",
+                          )}
+                        </span>
+                      )}
+                      {selectedEncounter.period.end &&
+                        selectedEncounter.period.start && <span>{" - "}</span>}
+                      {selectedEncounter.period.end ? (
+                        <span>
+                          {format(
+                            new Date(selectedEncounter.period.end),
+                            "dd MMM",
+                          )}
+                        </span>
+                      ) : (
+                        <span>
+                          {" - "}
+                          {t("ongoing")}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+
+                  <Badge
+                    variant={ENCOUNTER_STATUS_COLORS[selectedEncounter.status]}
+                    size="sm"
+                    className="whitespace-nowrap"
+                  >
+                    {t(`encounter_status__${selectedEncounter.status}`)}
+                  </Badge>
+                </div>
+              )
+            )}
+          </div>
+
+          <NavTabs
+            showMoreAfterIndex={showMoreAfterIndex}
+            className="@container w-full"
+            tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-14rem)]"
+            tabs={tabs}
+            currentTab={props.tab}
+            tabTriggerClassName="max-w-36"
+            onTabChange={(tab) =>
+              navigate(tab, {
+                query:
+                  primaryEncounterId !== selectedEncounterId
+                    ? { selectedEncounter: selectedEncounterId }
+                    : undefined,
+              })
+            }
+          />
+        </div>
       </div>
     </Page>
   );

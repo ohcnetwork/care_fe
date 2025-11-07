@@ -16,6 +16,15 @@ import {
   encounterStatusFilter,
   tagFilter,
 } from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+
+import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
+
+import RailPanel from "@/components/Common/RailPanel";
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
@@ -25,20 +34,14 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import { ChevronDown, Tags } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { dateTimeQueryString } from "@/Utils/utils";
-import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
-import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { dateTimeQueryString } from "@/Utils/utils";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
@@ -375,7 +378,13 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   );
 };
 
-export default function EncounterHistorySelector() {
+export default function EncounterHistorySelector({
+  isRailOpen,
+  SetIssRailOpen,
+}: {
+  isRailOpen: boolean;
+  SetIssRailOpen: (open: boolean) => void;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   const { t } = useTranslation();
@@ -403,9 +412,11 @@ export default function EncounterHistorySelector() {
         </Drawer>
       </div>
       <div className="hidden lg:block pr-3">
-        <ScrollArea className="h-[calc(100vh-9rem)] pr-3">
-          <EncounterHistoryList />
-        </ScrollArea>
+        <RailPanel open={isRailOpen} onOpenChange={SetIssRailOpen}>
+          <ScrollArea className="h-[calc(100vh-9rem)] pr-3">
+            <EncounterHistoryList />
+          </ScrollArea>
+        </RailPanel>
       </div>
     </>
   );
