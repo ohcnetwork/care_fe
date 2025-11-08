@@ -63,29 +63,101 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
   const queryClient = useQueryClient();
   const pluginDevices = usePluginDevices();
 
+  // Maximum length constants for validation
+  const MAX_LENGTHS = {
+    registered_name: 255,
+    user_friendly_name: 255,
+    identifier: 100,
+    manufacturer: 255,
+    lot_number: 100,
+    serial_number: 100,
+    model_number: 100,
+    part_number: 100,
+  } as const;
+
+  // Minimum date for manufacture date (1900-01-01)
+  const MIN_MANUFACTURE_DATE = new Date("1900-01-01");
+  // Maximum date for expiration date (100 years from now)
+  const MAX_EXPIRATION_DATE = (() => {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() + 100);
+    return date;
+  })();
+
+  // Helper function to transform empty strings to undefined
+  const optionalString = (maxLength: number) =>
+    z
+      .string()
+      .trim()
+      .max(maxLength, {
+        message: t("max_length_exceeded", { max: maxLength }),
+      })
+      .optional()
+      .transform((val) => (val && val.length > 0 ? val : undefined));
+
   const formSchema = z
     .object({
-      identifier: z.string().optional(),
+      identifier: optionalString(MAX_LENGTHS.identifier),
       status: z.enum(DeviceStatuses),
       availability_status: z.enum(DeviceAvailabilityStatuses),
-      manufacturer: z.string().optional(),
+      manufacturer: optionalString(MAX_LENGTHS.manufacturer),
       manufacture_date: z
         .date()
         .optional()
         .refine(
-          (date) => !date || !isFuture(date),
-          t("manufacture_date_cannot_be_in_future"),
+          (date) => {
+            if (!date) return true;
+            return !isFuture(date) && date >= MIN_MANUFACTURE_DATE;
+          },
+          {
+            message: t("manufacture_date_invalid_range"),
+          },
         ),
-      expiration_date: z.date().optional(),
-      lot_number: z.string().optional(),
-      serial_number: z.string().optional(),
+      expiration_date: z
+        .date()
+        .optional()
+        .refine(
+          (date) => {
+            if (!date) return true;
+            return date <= MAX_EXPIRATION_DATE;
+          },
+          {
+            message: t("expiration_date_too_far_future"),
+          },
+        ),
+      lot_number: z
+        .string()
+        .trim()
+        .max(MAX_LENGTHS.lot_number, {
+          message: t("max_length_exceeded", { max: MAX_LENGTHS.lot_number }),
+        })
+        .optional()
+        .transform((val) => (val && val.length > 0 ? val : undefined)),
+      serial_number: z
+        .string()
+        .trim()
+        .max(MAX_LENGTHS.serial_number, {
+          message: t("max_length_exceeded", {
+            max: MAX_LENGTHS.serial_number,
+          }),
+        })
+        .regex(/^[A-Za-z0-9\-_]*$/, {
+          message: t("serial_number_invalid_format"),
+        })
+        .optional()
+        .transform((val) => (val && val.length > 0 ? val : undefined)),
       registered_name: z
         .string()
         .trim()
-        .min(1, { message: t("field_required") }),
-      user_friendly_name: z.string().optional(),
-      model_number: z.string().optional(),
-      part_number: z.string().optional(),
+        .min(1, { message: t("field_required") })
+        .max(MAX_LENGTHS.registered_name, {
+          message: t("max_length_exceeded", {
+            max: MAX_LENGTHS.registered_name,
+          }),
+        }),
+      user_friendly_name: optionalString(MAX_LENGTHS.user_friendly_name),
+      model_number: optionalString(MAX_LENGTHS.model_number),
+      part_number: optionalString(MAX_LENGTHS.part_number),
       contact: z.array(contactPointSchema()).superRefine((contacts, ctx) => {
         const valueMap = new Map();
         contacts.forEach((contact, index) => {

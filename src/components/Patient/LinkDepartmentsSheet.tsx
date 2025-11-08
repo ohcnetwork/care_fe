@@ -105,13 +105,15 @@ function getMutationParams(
 function getInvalidateQueries(
   entityType: "encounter" | "location" | "device",
   entityId: string,
+  facilityId?: string,
 ) {
   if (entityType === "encounter") {
     return ["encounter", entityId];
   } else if (entityType === "location") {
     return ["location", entityId, "organizations"];
   }
-  return ["device", entityId, "organizations"];
+  // For devices, invalidate the device query with facilityId
+  return facilityId ? ["device", facilityId, entityId] : ["device", entityId];
 }
 
 function DeleteOrganizationButton({
@@ -141,17 +143,23 @@ function DeleteOrganizationButton({
       );
       return mutate(route, {
         pathParams,
-        body: { organization: organizationId },
-      })({ organization: organizationId });
+        body:
+          entityType === "device"
+            ? { managing_organization: organizationId }
+            : { organization: organizationId },
+      })(
+        entityType === "device"
+          ? { managing_organization: organizationId }
+          : { organization: organizationId },
+      );
     },
     onSuccess: () => {
-      const { queryKey } = getMutationParams(
+      const invalidateQueries = getInvalidateQueries(
         entityType,
         entityId,
         facilityId,
-        false,
       );
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: invalidateQueries });
       toast.success(t("organization_removed_successfully"));
       onSuccess?.();
     },
@@ -209,7 +217,11 @@ export default function LinkDepartmentsSheet({
   const { mutate: submitBatch, isPending: isAdding } = useMutation({
     mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
-      const invalidateQueries = getInvalidateQueries(entityType, entityId);
+      const invalidateQueries = getInvalidateQueries(
+        entityType,
+        entityId,
+        facilityId,
+      );
       queryClient.invalidateQueries({ queryKey: invalidateQueries });
       toast.success(t("organization_added_successfully"));
       setSelectedOrgs(null);
