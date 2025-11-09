@@ -751,6 +751,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     if (id) {
       updateQuestionnaire({
         ...form.getValues(),
+        version: String(questionnaire.version), //TODO: remove when backend is fixed
         questions: rootQuestions,
       });
     } else {

@@ -19,6 +19,7 @@ import DischargeConfirmationDialog from "@/components/Patient/DischargeConfirmat
 
 import query from "@/Utils/request/query";
 import {
+  DEFAULT_DISCHARGE_DISPOSITION,
   ENCOUNTER_ADMIT_SOURCE,
   ENCOUNTER_DIET_PREFERENCE,
   ENCOUNTER_DISCHARGE_DISPOSITION,
@@ -88,7 +89,7 @@ export function EncounterQuestion({
     hospitalization: {
       re_admission: false,
       admit_source: "other",
-      discharge_disposition: "home",
+      discharge_disposition: DEFAULT_DISCHARGE_DISPOSITION,
       diet_preference: "none",
     },
     discharge_summary_advice: null,
@@ -143,7 +144,9 @@ export function EncounterQuestion({
   }, [encounterData]);
 
   useEffect(() => {
-    const formStateValue = (questionnaireResponse.values[0]?.value as any)?.[0];
+    const formStateValue = (
+      questionnaireResponse.values[0]?.value as EncounterEdit[]
+    )?.[0];
     if (formStateValue) {
       setEncounter(() => ({
         ...formStateValue,
@@ -156,6 +159,18 @@ export function EncounterQuestion({
     const newEncounter = { ...encounter, ...updates };
     if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
       newEncounter.hospitalization = {};
+    }
+
+    if (
+      ["imp", "obsenc", "emer"].includes(encounter.encounter_class) &&
+      newEncounter.status === "discharged"
+    ) {
+      newEncounter.hospitalization = {
+        ...newEncounter.hospitalization,
+        discharge_disposition:
+          newEncounter.hospitalization?.discharge_disposition ??
+          DEFAULT_DISCHARGE_DISPOSITION,
+      };
     }
 
     // Create the full encounter request object
@@ -363,7 +378,10 @@ export function EncounterQuestion({
                 <div className="space-y-2">
                   <Label>{t("discharge_disposition")}</Label>
                   <Select
-                    value={encounter.hospitalization?.discharge_disposition}
+                    value={
+                      encounter.hospitalization?.discharge_disposition ??
+                      DEFAULT_DISCHARGE_DISPOSITION
+                    }
                     onValueChange={(value: EncounterDischargeDisposition) => {
                       if (!encounter.hospitalization) return;
                       handleUpdateEncounter({

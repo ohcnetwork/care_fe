@@ -217,6 +217,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   );
 
   const { mutate: createPatient, isPending: isCreatingPatient } = useMutation({
+    mutationKey: ["create_patient"],
     mutationFn: mutate(patientApi.create),
     onSuccess: (resp: PatientRead) => {
       toast.success(t("patient_registration_success"));
@@ -232,6 +233,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   });
 
   const { mutate: updatePatient, isPending: isUpdatingPatient } = useMutation({
+    mutationKey: ["update_patient"],
     mutationFn: mutate(patientApi.update, {
       pathParams: { id: patientId || "" },
     }),
@@ -443,6 +445,7 @@ const PatientBasicsContent = ({
                 tabIndex={0}
                 placeholder={t("type_name")}
                 {...field}
+                value={field.value ?? ""}
               />
             </FormControl>
             <FormMessage />
@@ -547,7 +550,7 @@ const PatientBasicsContent = ({
               <FormLabel aria-required>{t("date_of_birth_or_age")}</FormLabel>
               <div className="flex gap-1 items-start">
                 <Tabs value={field.value} onValueChange={field.onChange}>
-                  <TabsList className="mt-0.25">
+                  <TabsList className="mt-1 md:mt-0.25">
                     <TabsTrigger value="dob">{t("date")}</TabsTrigger>
                     <TabsTrigger value="age">{t("age")}</TabsTrigger>
                   </TabsList>
@@ -579,23 +582,33 @@ const PatientBasicsContent = ({
                     control={form.control}
                     name="age"
                     render={({ field }) => (
-                      <FormItem className="w-full md:col-span-2">
+                      <FormItem className="w-full md:col-span-2 relative">
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            placeholder={t("age")}
-                            min={1}
-                            max={120}
-                            value={field.value ?? ""}
-                            onChange={(e) => {
-                              field.onChange(
-                                e.target.value ? Number(e.target.value) : null,
-                              );
-                            }}
-                          />
+                          <>
+                            <Input
+                              {...field}
+                              type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              placeholder={t("age")}
+                              min={1}
+                              max={120}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                field.onChange(
+                                  e.target.value
+                                    ? Number(e.target.value)
+                                    : null,
+                                );
+                              }}
+                            />
+                            {field.value && (
+                              <span className="text-xs text-gray-500 absolute right-9 top-3.25 md:top-2.5">
+                                {t("year_of_birth")}:{" "}
+                                {new Date().getFullYear() - Number(field.value)}
+                              </span>
+                            )}
+                          </>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -615,6 +628,7 @@ const PatientBasicsContent = ({
               <FormLabel>{t("blood_group")}</FormLabel>
               <Select
                 {...field}
+                value={field.value ?? ""}
                 onValueChange={field.onChange}
                 defaultValue={field.value}
               >
@@ -648,7 +662,11 @@ const PatientBasicsContent = ({
                 <FormLabel aria-required>{config.display}</FormLabel>
                 <FormDescription>{config.description}</FormDescription>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_identifier_value")} />
+                  <Input
+                    {...field}
+                    value={field.value ?? ""}
+                    placeholder={t("enter_identifier_value")}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -777,6 +795,7 @@ const AdditionalDetailsContent = ({
             <FormControl>
               <Input
                 {...field}
+                value={field.value ?? ""}
                 placeholder={t("enter_pincode")}
                 onChange={(e) => {
                   const value = e.target.value
@@ -827,7 +846,11 @@ const AdditionalDetailsContent = ({
                 <FormLabel>{config.display}</FormLabel>
                 <FormDescription>{config.description}</FormDescription>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_identifier_value")} />
+                  <Input
+                    {...field}
+                    value={field.value ?? ""}
+                    placeholder={t("enter_identifier_value")}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

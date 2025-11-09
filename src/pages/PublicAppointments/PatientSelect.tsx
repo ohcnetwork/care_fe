@@ -158,9 +158,6 @@ export default function PatientSelect({
         replace: true,
       });
     },
-    onError: (error) => {
-      toast.error(error?.message || t("failed_to_create_appointment"));
-    },
   });
 
   const patients = patientData?.results;

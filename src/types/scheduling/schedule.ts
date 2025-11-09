@@ -232,11 +232,11 @@ export type AppointmentBase = {
   note: string;
   facility: FacilityBareMinimum;
   token: TokenRead | null;
+  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
 } & ScheduleResource;
 
 export type Appointment = AppointmentBase & {
   patient: PatientListRead;
-  booked_by: UserReadMinimal | null;
 };
 
 export type PublicAppointment = AppointmentBase & {
