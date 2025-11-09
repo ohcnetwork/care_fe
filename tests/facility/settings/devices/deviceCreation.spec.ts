@@ -57,7 +57,8 @@ test.describe("Facility Devices Management", () => {
     const modelNumber = faker.string.alphanumeric(6);
     const partNumber = faker.string.alphanumeric(8);
     const phoneNumber =
-      faker.helpers.arrayElement(["6", "7", "8", "9"]) + faker.string.numeric(9); // Indian mobile format: XXXXXXXXXX (starts with 6-9)
+      faker.helpers.arrayElement(["6", "7", "8", "9"]) +
+      faker.string.numeric(9); // Indian mobile format: XXXXXXXXXX (starts with 6-9)
 
     const statusOptions = ["Active", "Inactive", "Entered in Error"];
     const availabilityOptions = ["Available", "Destroyed", "Damaged", "Lost"];

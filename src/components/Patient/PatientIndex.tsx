@@ -360,6 +360,7 @@ const getSearchOptions = (
     value:
       searchIdentifier.config === c.id ? (searchIdentifier.value ?? "") : "",
     display: c.config.display,
+    regex: c.config.regex,
   }));
 };
 

@@ -36,6 +36,7 @@ interface SearchOption {
   value: string;
   component?: React.ComponentType<HTMLDivElement>;
   display: string;
+  regex?: string;
 }
 
 interface SearchInputProps
@@ -112,10 +113,20 @@ const SearchInputFieldRenderer = ({
   const handleTextChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value;
+
+      // Apply regex validation if provided
+      if (selectedOption.regex && value) {
+        const regex = new RegExp(selectedOption.regex);
+        if (!regex.test(value)) {
+          // Don't update if the value doesn't match the regex pattern
+          return;
+        }
+      }
+
       setSearchValue(value);
       onSearch(selectedOption.key, value);
     },
-    [selectedOption.key, onSearch, setSearchValue],
+    [selectedOption.key, selectedOption.regex, onSearch, setSearchValue],
   );
 
   switch (selectedOption.type) {
