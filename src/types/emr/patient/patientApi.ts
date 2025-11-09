@@ -128,12 +128,12 @@ export default {
     path: "/api/v1/patient/{external_id}/set_instance_tags/",
     method: HttpMethod.POST,
     TBody: Type<{ tags: string[] }>(),
-    TRes: Type<unknown>(),
+    TRes: Type<PatientRead>(),
   },
   removeInstanceTags: {
     path: "/api/v1/patient/{external_id}/remove_instance_tags/",
     method: HttpMethod.POST,
     TBody: Type<{ tags: string[] }>(),
-    TRes: Type<unknown>(),
+    TRes: Type<PatientRead>(),
   },
 } as const;
