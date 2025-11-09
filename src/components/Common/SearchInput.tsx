@@ -115,11 +115,26 @@ const SearchInputFieldRenderer = ({
       const value = event.target.value;
 
       // Apply regex validation if provided
+      // For progressive typing, we need to allow partial matches
+      // Extract the character class from the regex to validate each character
       if (selectedOption.regex && value) {
-        const regex = new RegExp(selectedOption.regex);
-        if (!regex.test(value)) {
-          // Don't update if the value doesn't match the regex pattern
-          return;
+        try {
+          // Test if adding this character still allows for a valid final result
+          // We'll use a simple approach: extract character classes and validate
+          const charClassMatch =
+            selectedOption.regex.match(/\[([^\]]+)\]|\\\w/);
+          if (charClassMatch) {
+            // If we have a character class like [0-9] or \d, validate each character
+            const charPattern = charClassMatch[0];
+            const charRegex = new RegExp(`^${charPattern}+$`);
+            if (!charRegex.test(value)) {
+              // Don't update if the value doesn't match the character pattern
+              return;
+            }
+          }
+        } catch (e) {
+          // If regex parsing fails, allow the input (fail open for better UX)
+          console.warn("Invalid regex pattern:", selectedOption.regex, e);
         }
       }
 
