@@ -114,7 +114,9 @@ export const ObservationHistoryTable = ({
         <TableBody>
           {data?.pages.map((page, _pageIndex) =>
             page.results.map((observation: ObservationListRead) => {
-              const name = `${observation.data_entered_by?.first_name} ${observation.data_entered_by?.last_name}`;
+              const name = observation.data_entered_by
+                ? `${observation.data_entered_by.first_name} ${observation.data_entered_by.last_name}`
+                : t("unknown");
 
               return (
                 <TableRow key={observation.id}>

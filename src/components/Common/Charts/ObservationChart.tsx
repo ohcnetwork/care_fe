@@ -204,7 +204,9 @@ export const ObservationVisualizer = ({
         if (!isNaN(value) && timestamp in processedData && code.display) {
           const details: ObservationDetails = {
             value,
-            enteredBy: `${observation.data_entered_by?.first_name} ${observation.data_entered_by?.last_name}`,
+            enteredBy: observation.data_entered_by
+              ? `${observation.data_entered_by.first_name} ${observation.data_entered_by.last_name}`
+              : t("unknown"),
             enteredAt: formatChartDate(observation.effective_datetime).display,
             note: observation.note || undefined,
             status: observation.status,
