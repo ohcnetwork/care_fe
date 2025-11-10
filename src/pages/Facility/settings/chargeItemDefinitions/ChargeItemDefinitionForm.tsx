@@ -575,7 +575,7 @@ export function ChargeItemDefinitionForm({
 
   // Main form schema (including basic information fields)
   const formSchema = z.object({
-    title: z.string().min(1, { message: "field_required" }),
+    title: z.string().min(1, { message: t("field_required") }),
     slug_value: z
       .string()
       .trim()
@@ -584,7 +584,7 @@ export function ChargeItemDefinitionForm({
       .regex(/^[a-z0-9_-]+$/, {
         message: t("slug_format_message"),
       }),
-    category: z.string().min(1, { message: "field_required" }),
+    category: z.string().min(1, { message: t("field_required") }),
     _categoryName: z.string().optional(),
     status: z.nativeEnum(ChargeItemDefinitionStatus),
     description: z.string().optional(),
