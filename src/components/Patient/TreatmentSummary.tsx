@@ -466,6 +466,7 @@ export default function TreatmentSummary({
                     headers={[
                       { key: "diagnosis" },
                       { key: "status" },
+                      { key: "severity" },
                       { key: "verification" },
                       { key: "onset" },
                       { key: "notes" },
@@ -474,6 +475,9 @@ export default function TreatmentSummary({
                     rows={diagnoses?.results.map((diagnosis) => ({
                       diagnosis: diagnosis.code.display,
                       status: t(diagnosis.clinical_status),
+                      severity: diagnosis.severity
+                        ? t(diagnosis.severity)
+                        : "-",
                       verification: t(diagnosis.verification_status),
                       onset: diagnosis.onset?.onset_datetime
                         ? new Date(

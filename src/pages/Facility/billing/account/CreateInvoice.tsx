@@ -62,6 +62,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 
+import BackButton from "@/components/Common/BackButton";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 
@@ -82,6 +83,7 @@ interface CreateInvoicePageProps {
   preSelectedChargeItems?: ChargeItemRead[];
   redirectInNewTab?: boolean;
   onSuccess?: () => void;
+  onCancel?: () => void;
   showHeader?: boolean;
   sourceUrl?: string;
   locationId?: string;
@@ -138,6 +140,7 @@ export function CreateInvoicePage({
   preSelectedChargeItems,
   redirectInNewTab = false,
   onSuccess,
+  onCancel,
   showHeader = true,
   sourceUrl,
   locationId,
@@ -606,16 +609,16 @@ export function CreateInvoicePage({
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Button
+            <BackButton
               type="button"
               variant="ghost"
               className="text-base font-semibold"
-              onClick={() => window.history.back()}
+              {...(onCancel && { onClick: onCancel })}
               disabled={createMutation.isPending}
               data-shortcut-id="go-back"
             >
               <span className="underline">{t("cancel")}</span>
-            </Button>
+            </BackButton>
             {showDispenseNowButton && (
               <Button
                 type="button"
