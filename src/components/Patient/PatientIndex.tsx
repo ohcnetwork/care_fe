@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate, useQueryParams } from "raviger";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -44,7 +44,6 @@ import {
   PatientRead,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
-import { FacilityRead } from "@/types/facility/facility";
 import { PatientIdentifierConfig } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import careConfig from "@careConfig";
 import { TFunction } from "i18next";
@@ -62,6 +61,18 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
   const { hasPermission } = usePermissions();
 
   const { facility } = useCurrentFacility();
+
+  // Combine instance and facility identifier configs
+  const allIdentifierConfigs = useMemo(
+    () => [
+      ...(facility?.patient_instance_identifier_configs || []),
+      ...(facility?.patient_facility_identifier_configs || []),
+    ],
+    [
+      facility?.patient_instance_identifier_configs,
+      facility?.patient_facility_identifier_configs,
+    ],
+  );
 
   const { canCreatePatient } = getPermissions(
     hasPermission,
@@ -127,9 +138,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
       return;
     }
 
-    const phoneNumberConfig = getPhoneNumberConfig(
-      facility.patient_instance_identifier_configs,
-    );
+    const phoneNumberConfig = getPhoneNumberConfig(allIdentifierConfigs);
 
     if (qParams.phone_number && phoneNumberConfig) {
       setIdentifierSearch({
@@ -137,7 +146,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
         value: qParams.phone_number,
       });
     }
-  }, [qParams.phone_number, facility]);
+  }, [qParams.phone_number, facility, allIdentifierConfigs]);
 
   const handleVerify = () => {
     if (!selectedPatient || !yearOfBirth || yearOfBirth.length !== 4) {
@@ -171,9 +180,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
             />
             <AddPatientButton
               facilityId={facilityId}
-              identifierConfigs={
-                facility?.patient_instance_identifier_configs || []
-              }
+              identifierConfigs={allIdentifierConfigs}
               identifierSearch={identifierSearch}
             />
           </div>
@@ -193,7 +200,11 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
           <div>
             <div className="space-y-6">
               <SearchInput
-                options={getSearchOptions(t, identifierSearch, facility)}
+                options={getSearchOptions(
+                  t,
+                  identifierSearch,
+                  allIdentifierConfigs,
+                )}
                 onSearch={handleSearch}
                 className="w-full"
                 autoFocus
@@ -211,15 +222,20 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                             {t("no_patient_record_found")}
                           </h3>
                           <p className="text-sm text-gray-500 mb-6">
-                            {t("no_patient_record_text")}
+                            {t("no_patient_record_text", {
+                              text: getSearchOptions(
+                                t,
+                                identifierSearch,
+                                allIdentifierConfigs,
+                              ).find(
+                                (opt) => opt.key === identifierSearch.config,
+                              )?.display,
+                            })}
                           </p>
                           <AddPatientButton
                             facilityId={facilityId}
                             outline
-                            identifierConfigs={
-                              facility?.patient_instance_identifier_configs ||
-                              []
-                            }
+                            identifierConfigs={allIdentifierConfigs}
                             identifierSearch={identifierSearch}
                           />
                         </div>
@@ -316,14 +332,8 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
 const getSearchOptions = (
   t: TFunction,
   searchIdentifier: { config?: string; value?: string },
-  facility?: FacilityRead,
+  configs: PatientIdentifierConfig[],
 ) => {
-  if (!facility) {
-    return [];
-  }
-
-  const { patient_instance_identifier_configs: configs } = facility;
-
   // Phone number configs first, followed by auto-maintained configs, and then non-auto-maintained configs
   return [
     // Phone number configs
