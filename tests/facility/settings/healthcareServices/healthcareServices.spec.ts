@@ -9,7 +9,7 @@ test.describe.serial("Healthcare Services Management", () => {
   let facilityId: string;
 
   // Common faker option arrays
-  const internalTypes = ["Pharmacy", "Lab", "scheduling"];
+  const internalTypes = ["Pharmacy", "Lab"];
   const iconOptions = [
     "people",
     "bell",
@@ -122,6 +122,16 @@ test.describe.serial("Healthcare Services Management", () => {
     await expect(page.getByText(serviceDescription)).toBeVisible();
   });
 
+  test("Verify the service details page displays correct information", async ({
+    page,
+  }) => {
+    // Click on the created service to view details
+    await page.getByRole("link", { name: serviceName }).first().click();
+    // Verify the details are correct
+    await expect(page.getByText(serviceName)).toBeVisible();
+    await expect(page.getByText(serviceDescription)).toBeVisible();
+  });
+
   test("Update an existing healthcare service", async ({ page }) => {
     // Click on the created service to view details
     await page.getByRole("link", { name: serviceName }).first().click();
@@ -129,17 +139,37 @@ test.describe.serial("Healthcare Services Management", () => {
     // Click Edit button
     await page.getByRole("button", { name: "Edit" }).click();
 
+    // Verify that the form is prefilled with existing values
+    await expect(page.getByRole("textbox", { name: "Name" })).toHaveValue(
+      serviceName,
+    );
+    await expect(
+      page.getByRole("textbox", { name: "Extra Details" }),
+    ).toHaveValue(serviceDescription);
+
+    // Verify the internal type is preselected
+    const internalTypeCombobox = page
+      .getByRole("combobox")
+      .filter({ hasText: internalType });
+    await expect(internalTypeCombobox).toBeVisible();
+
+    // Verify the icon is preselected
+    const iconCombobox = page
+      .locator('label:has-text("Icon")')
+      .locator("..")
+      .getByRole("combobox");
+    await expect(iconCombobox).toContainText(selectedIcon);
+
     // Update the service name
     const updatedName = `Updated ${serviceName}`;
     const updatedDescription = `Updated ${serviceDescription}`;
 
-    await page.getByRole("textbox", { name: "Name" }).clear();
     await page.getByRole("textbox", { name: "Name" }).fill(updatedName);
 
     // Update the description
-    const detailsField = page.getByRole("textbox", { name: "Extra Details" });
-    await detailsField.clear();
-    await detailsField.fill(updatedDescription);
+    await page
+      .getByRole("textbox", { name: "Extra Details" })
+      .fill(updatedDescription);
 
     // Change the icon - find the combobox that shares the same parent as the "Icon" label
     await page
@@ -201,9 +231,59 @@ test.describe.serial("Healthcare Services Management", () => {
     await page.getByRole("button", { name: "Create" }).click();
 
     // The form should not submit and should show validation errors
-    // We should still be on the create page
+    // expect name and location errors to be visible
+    await expect(page.getByText("Name is required")).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Create Healthcare Service" }),
+      page.getByText("At least one location is required"),
+    ).toBeVisible();
+  });
+
+  test("Verify that a healthcare service is created without optional fields", async ({
+    page,
+  }) => {
+    const minimalServiceName = `Minimal ${faker.commerce.department()} Service`;
+
+    // Click Add Healthcare Service button
+    await page.getByRole("button", { name: "Add Healthcare Service" }).click();
+
+    // Fill in only the required service name
+    await page.getByRole("textbox", { name: "Name" }).fill(minimalServiceName);
+
+    // Select a location
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Select locations" })
+      .click();
+
+    // Wait for the dialog to appear and select the first available location
+    await page.waitForSelector('[role="dialog"]');
+
+    // Click the add button for the first location (the button with empty text next to location name)
+    await page
+      .locator('[role="dialog"] button')
+      .filter({ hasText: /^$/ })
+      .first()
+      .click();
+
+    // Close the location dialog
+    await page.keyboard.press("Escape");
+
+    // Submit the form
+    await page.getByRole("button", { name: "Create" }).click();
+
+    // Verify success notification (appears before navigation)
+    await expect(
+      page.getByText("Healthcare service created successfully"),
+    ).toBeVisible({ timeout: 10000 });
+
+    // Wait for navigation back to list page
+    await page.waitForURL(/\/settings\/healthcare_services/, {
+      timeout: 10000,
+    });
+
+    // Verify the service appears in the list
+    await expect(
+      page.getByRole("heading", { name: minimalServiceName }),
     ).toBeVisible();
   });
 });

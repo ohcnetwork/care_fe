@@ -140,8 +140,8 @@ function HealthcareServiceFormContent({
         ? {
             name: existingData.name,
             // service_type: existingData.service_type,
-            styling_metadata: existingData.styling_metadata || {
-              careIcon: undefined,
+            styling_metadata: {
+              careIcon: existingData.styling_metadata?.careIcon,
             },
             extra_details: existingData.extra_details,
             internal_type: existingData.internal_type || undefined,
@@ -446,9 +446,7 @@ function HealthcareServiceFormContent({
                         <IconPicker
                           value={field.value || ""}
                           onChange={(value) => {
-                            form.setValue("styling_metadata", {
-                              careIcon: value,
-                            });
+                            field.onChange(value);
                           }}
                         />
                       </FormControl>

@@ -10,7 +10,6 @@ export interface StylingMetadata {
 export enum InternalType {
   pharmacy = "pharmacy",
   lab = "lab",
-  scheduling = "scheduling",
 }
 
 export interface BaseHealthcareServiceSpec {
