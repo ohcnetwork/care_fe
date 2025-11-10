@@ -222,43 +222,47 @@ export function ChargeItemDefinitionDetail({
             disabled={isDeleting}
           />
 
-          <Card className="mb-4">
-            <CardHeader>
-              <CardTitle>{t("details")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {chargeItemDefinition.description && (
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">
-                    {t("description")}
-                  </h3>
-                  <p className="whitespace-pre-wrap">
-                    {chargeItemDefinition.description}
-                  </p>
-                </div>
-              )}
-              {chargeItemDefinition.purpose && (
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">
-                    {t("purpose")}
-                  </h3>
-                  <p className="whitespace-pre-wrap">
-                    {chargeItemDefinition.purpose}
-                  </p>
-                </div>
-              )}
-              {chargeItemDefinition.derived_from_uri && (
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">
-                    {t("derived_from")}
-                  </h3>
-                  <p className="font-mono text-sm">
-                    {chargeItemDefinition.derived_from_uri}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {(chargeItemDefinition.description ||
+            chargeItemDefinition.purpose ||
+            chargeItemDefinition.derived_from_uri) && (
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle>{t("details")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {chargeItemDefinition.description && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-medium text-gray-500">
+                      {t("description")}
+                    </h3>
+                    <p className="whitespace-pre-wrap">
+                      {chargeItemDefinition.description}
+                    </p>
+                  </div>
+                )}
+                {chargeItemDefinition.purpose && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-medium text-gray-500">
+                      {t("purpose")}
+                    </h3>
+                    <p className="whitespace-pre-wrap">
+                      {chargeItemDefinition.purpose}
+                    </p>
+                  </div>
+                )}
+                {chargeItemDefinition.derived_from_uri && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-medium text-gray-500">
+                      {t("derived_from")}
+                    </h3>
+                    <p className="font-mono text-sm">
+                      {chargeItemDefinition.derived_from_uri}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

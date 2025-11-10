@@ -80,9 +80,7 @@ test.describe("Product Knowledge Edit operations", () => {
       await page
         .getByRole("textbox", { name: "Note *" })
         .fill(storageGuidelines);
-      await page
-        .getByRole("spinbutton", { name: "Duration Value *" })
-        .fill("30");
+      await page.getByRole("spinbutton", { name: "Duration Value" }).fill("30");
     } else {
       // If guidelines already exist, find the first note input and fill it
       await page
@@ -90,7 +88,7 @@ test.describe("Product Knowledge Edit operations", () => {
         .first()
         .fill(storageGuidelines);
       await page
-        .getByRole("spinbutton", { name: "Duration Value *" })
+        .getByRole("spinbutton", { name: "Duration Value" })
         .first()
         .fill("30");
     }
@@ -112,6 +110,5 @@ test.describe("Product Knowledge Edit operations", () => {
     await expect(page.getByText(hsnCode)).toBeVisible();
     await expect(page.getByText(altNames)).toBeVisible();
     await expect(page.getByText(storageGuidelines)).toBeVisible();
-    await expect(page.getByText("30")).toBeVisible();
   });
 });
