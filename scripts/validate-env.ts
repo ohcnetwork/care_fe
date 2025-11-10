@@ -1,6 +1,11 @@
-import { z } from "zod";
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
-import { ENCOUNTER_CLASS } from "../src/types/emr/encounter/encounter";
+import {
+  ENCOUNTER_CLASS,
+  ENCOUNTER_DISCHARGE_DISPOSITION,
+  EncounterDischargeDisposition,
+} from "../src/types/emr/encounter/encounter";
+
+import { z } from "zod";
 
 const logoSchema = z.object({
   light: z.string().url(),
@@ -120,6 +125,19 @@ const envSchema = z
         code: z.ZodIssueCode.custom,
         message: "Encounter class not in allowed encounter classes",
         path: ["REACT_DEFAULT_ENCOUNTER_TYPE"],
+      });
+    }
+
+    if (
+      data.REACT_DEFAULT_DISCHARGE_DISPOSITION &&
+      !ENCOUNTER_DISCHARGE_DISPOSITION.includes(
+        data.REACT_DEFAULT_DISCHARGE_DISPOSITION as EncounterDischargeDisposition,
+      )
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid discharge disposition",
+        path: ["REACT_DEFAULT_DISCHARGE_DISPOSITION"],
       });
     }
 

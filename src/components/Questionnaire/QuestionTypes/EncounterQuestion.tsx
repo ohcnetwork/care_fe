@@ -460,7 +460,7 @@ export function EncounterQuestion({
                   </Select>
                   {hasError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key) && (
                     <p className="text-red-500 text-sm">
-                      {t("field_required")}
+                      {t("discharge_disposition_required")}
                     </p>
                   )}
                 </div>
