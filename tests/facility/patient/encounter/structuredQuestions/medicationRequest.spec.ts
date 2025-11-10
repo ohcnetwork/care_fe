@@ -124,7 +124,7 @@ test.describe("Medication Request Questionnaire", () => {
     dosageUnit = faker.helpers.arrayElement(DOSAGE_UNITS);
     frequency = faker.helpers.arrayElement(FREQUENCY_OPTIONS);
     durationUnit = faker.helpers.arrayElement(DURATION_UNITS);
-    duration = faker.number.int(INT_MAX);
+    duration = faker.number.int({ min: 1, max: INT_MAX });
 
     questionnaireUrl = `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/medication_request`;
 
