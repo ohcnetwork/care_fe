@@ -575,7 +575,7 @@ export function QuestionnaireForm({
           return;
         }
 
-        if (q.required) {
+        if (q.required && isQuestionEnabled(q, form.responses)) {
           // Handle appointment validation
           const response = form.responses.find((r) => r.question_id === q.id);
           const hasValue = response?.values?.some(
@@ -603,7 +603,11 @@ export function QuestionnaireForm({
           }
         }
 
-        if (q.type === "structured" && q.structured_type) {
+        if (
+          q.type === "structured" &&
+          q.structured_type &&
+          isQuestionEnabled(q, form.responses)
+        ) {
           const response = form.responses.find((r) => r.question_id === q.id);
           const validator =
             STRUCTURED_TYPE_VALIDATORS[
