@@ -220,6 +220,13 @@ export function useKeyboardShortcuts(
         return;
       }
 
+      const hasOpenOverlay = document.querySelector(
+        '[data-state="open"][data-slot="sheet-overlay"], [data-state="open"][data-slot="dialog-overlay"]',
+      );
+      if (hasOpenOverlay && contexts.includes("encounter")) {
+        return;
+      }
+
       // Guard against keyboard events without a key property, which can occur during component initialization or in certain browser edge cases.
       if (!event.key) return;
 

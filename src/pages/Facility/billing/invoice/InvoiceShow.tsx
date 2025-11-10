@@ -297,7 +297,9 @@ export function InvoiceShow({
     ? t("medication_dispense_invoice_alert")
     : sourceUrl?.includes("services_requests")
       ? t("service_request_invoice_alert")
-      : t("appointment_invoice_alert");
+      : sourceUrl?.includes("encounter")
+        ? t("back_to_encounter")
+        : t("appointment_invoice_alert");
 
   const isInvoiceRecordPaymentPluginsPresent = useCareApps().some(
     (plugin) => plugin.components?.InvoiceRecordPaymentOptions,

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { Check, LocateFixed, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -11,8 +11,20 @@ import { z } from "zod";
 
 import { CaretSortIcon } from "@radix-ui/react-icons";
 
+import { buildEncounterUrl } from "@/pages/Encounters/utils/utils";
+import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import batchApi from "@/types/base/batch/batchApi";
+import {
+  AccountBillingStatus,
+  AccountStatus,
+} from "@/types/billing/account/Account";
+import accountApi from "@/types/billing/account/accountApi";
+import {
+  ChargeItemBatchResponse,
+  ChargeItemRead,
+  extractChargeItemsFromBatchResponse,
+} from "@/types/billing/chargeItem/chargeItem";
 import {
   MedicationDispenseCategory,
   MedicationDispenseCreate,
@@ -115,7 +127,7 @@ type FormValues = z.infer<ReturnType<typeof createFormSchema>>;
 export default function DispenseDrawer({
   open,
   onOpenChange,
-  patientId: _patientId,
+  patientId,
   encounterId,
   selectedLocation,
 }: Props) {
@@ -143,6 +155,23 @@ export default function DispenseDrawer({
   const [isLocationWarningOpen, setIsLocationWarningOpen] = useState(false);
   const [productKnowledgeInventoriesMap, setProductKnowledgeInventoriesMap] =
     useState<Record<string, InventoryRead[] | undefined>>({});
+  const [isInvoiceSheetOpen, setIsInvoiceSheetOpen] = useState(false);
+  const [extractedChargeItems, setExtractedChargeItems] = useState<
+    ChargeItemRead[]
+  >([]);
+
+  const { data: account } = useQuery({
+    queryKey: ["accounts", patientId],
+    queryFn: query(accountApi.listAccount, {
+      pathParams: { facilityId },
+      queryParams: {
+        patient: patientId,
+        status: AccountStatus.active,
+        billing_status: AccountBillingStatus.open,
+      },
+    }),
+    enabled: !!facilityId && !!patientId,
+  });
 
   const formSchema = useMemo(() => createFormSchema(), []);
 
@@ -209,12 +238,26 @@ export default function DispenseDrawer({
 
   const { mutate: dispense, isPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: () => {
+    onSuccess: (response) => {
       toast.success(t("items_dispensed_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["inventory", currentLocation.id],
       });
-      onOpenChange(false);
+
+      const chargeItems = extractChargeItemsFromBatchResponse(
+        response as unknown as ChargeItemBatchResponse,
+      );
+
+      setExtractedChargeItems(chargeItems);
+
+      if (chargeItems.length > 0) {
+        queryClient.invalidateQueries({
+          queryKey: ["accounts", patientId],
+        });
+        setIsInvoiceSheetOpen(true);
+      } else {
+        onOpenChange(false);
+      }
     },
   });
 
@@ -937,6 +980,31 @@ export default function DispenseDrawer({
         setOpen={setIsLocationSelectorOpen}
         onLocationSelect={handleLocationChange}
       />
+
+      {account?.results[0] && (
+        <CreateInvoiceSheet
+          facilityId={facilityId}
+          accountId={account.results[0].id}
+          open={isInvoiceSheetOpen}
+          onOpenChange={(open) => {
+            setIsInvoiceSheetOpen(open);
+            if (!open) {
+              onOpenChange(false);
+            }
+          }}
+          preSelectedChargeItems={extractedChargeItems}
+          onSuccess={() => {
+            setIsInvoiceSheetOpen(false);
+            onOpenChange(false);
+          }}
+          sourceUrl={buildEncounterUrl(
+            patientId,
+            `/encounter/${encounterId}/updates`,
+            facilityId,
+          )}
+          patientId={patientId}
+        />
+      )}
     </Sheet>
   );
 }
