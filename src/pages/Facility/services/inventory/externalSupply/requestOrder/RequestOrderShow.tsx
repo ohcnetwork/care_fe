@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Box, ChevronLeft, Edit, Truck } from "lucide-react";
 import { Link } from "raviger";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -39,8 +39,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { cn } from "@/lib/utils";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
+import { ProductRead } from "@/types/inventory/product/product";
 import {
   REQUEST_ORDER_PRIORITY_COLORS,
   REQUEST_ORDER_STATUS_COLORS,
@@ -59,6 +61,7 @@ interface AllSupplyDeliveriesProps {
   requestOrderId: string;
   selectedProductKnowledge?: ProductKnowledgeBase;
   internal: boolean;
+  isRequester: boolean;
 }
 
 function AllSupplyDeliveriesComponent({
@@ -66,6 +69,7 @@ function AllSupplyDeliveriesComponent({
   requestOrderId,
   selectedProductKnowledge,
   internal,
+  isRequester,
 }: AllSupplyDeliveriesProps) {
   const { t } = useTranslation();
 
@@ -102,6 +106,7 @@ function AllSupplyDeliveriesComponent({
         <SupplyDeliveryTable
           deliveries={allSupplyDeliveries.results}
           internal={internal}
+          isRequester={isRequester}
         />
       ) : (
         <EmptyState
@@ -134,11 +139,6 @@ export function RequestOrderShow({
   const [currentTab, setCurrentTab] = useState<
     "requested-items" | "deliveries" | "items-summary"
   >("requested-items");
-  const addItemsFormRef = useRef<{
-    addItem: (product: ProductKnowledgeBase) => void;
-  }>({
-    addItem: () => {},
-  });
 
   const showMoreAfterIndex = useBreakpoints({
     default: 1,
@@ -169,33 +169,38 @@ export function RequestOrderShow({
     },
   );
 
-  const { data: deliveryOrders, isLoading: isLoadingDeliveryOrders } = useQuery(
-    {
-      queryKey: ["deliveryOrders", requestOrderId],
+  const qParams = {
+    request_order: requestOrderId,
+    ...(isRequester && {
+      status: [
+        DeliveryOrderStatus.pending,
+        DeliveryOrderStatus.in_progress,
+        DeliveryOrderStatus.completed,
+      ].join(","),
+    }),
+  };
+
+  const { data: deliveryOrdersData, isLoading: isLoadingDeliveryOrders } =
+    useQuery({
+      queryKey: ["deliveryOrders", qParams],
       queryFn: query(supplyDeliveryApi.deliveryOrders, {
-        queryParams: {
-          request_order: requestOrderId,
-          ...(isRequester && {
-            status: [
-              DeliveryOrderStatus.pending,
-              DeliveryOrderStatus.in_progress,
-              DeliveryOrderStatus.completed,
-            ].join(","),
-          }),
-        },
+        queryParams: qParams,
       }),
       enabled: !!requestOrderId,
-    },
-  );
+    });
+
+  const deliveryOrders = deliveryOrdersData?.results || [];
 
   const pendingDeliveryOrderCount =
-    deliveryOrders?.results?.filter(
-      (deliveryOrder) => deliveryOrder.status === DeliveryOrderStatus.pending,
-    )?.length || 0;
+    deliveryOrders.filter(
+      (deliveryOrder) =>
+        deliveryOrder.status === DeliveryOrderStatus.pending ||
+        deliveryOrder.status === DeliveryOrderStatus.draft,
+    ).length || 0;
 
   const pendingDeliveryOrderCountBadge =
     pendingDeliveryOrderCount > 0 ? (
-      <Badge variant="yellow" size="sm" className="text-xs px-2 py-1">
+      <Badge variant="yellow" size="sm" className="text-xs px-2">
         {pendingDeliveryOrderCount}
       </Badge>
     ) : (
@@ -219,6 +224,49 @@ export function RequestOrderShow({
       toast.error(t("error_updating_order"));
     },
   });
+
+  const { data: allSupplyDeliveries } = useQuery({
+    queryKey: ["allSupplyDeliveries", requestOrderId],
+    queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
+      queryParams: {
+        facility: facilityId,
+        request_order: requestOrderId,
+      },
+    }),
+    enabled: !!requestOrderId,
+  });
+
+  const supplyDeliveriesGroupedByItem = allSupplyDeliveries?.results?.reduce(
+    (acc, delivery) => {
+      acc[
+        delivery.supplied_inventory_item?.product?.product_knowledge?.id || ""
+      ] = {
+        quantity:
+          (acc[
+            delivery.supplied_inventory_item?.product?.product_knowledge?.id ||
+              ""
+          ]?.quantity || 0) + delivery.supplied_item_quantity,
+        product: delivery.supplied_inventory_item?.product,
+      };
+      return acc;
+    },
+    {} as Record<
+      string,
+      { quantity: number; product: ProductRead | undefined }
+    >,
+  );
+
+  const supplyRequestsWithDeliveries = supplyRequests?.results?.map(
+    (supplyRequest) => {
+      const dispatchedQuantity =
+        supplyDeliveriesGroupedByItem?.[supplyRequest.item.id]?.quantity || 0;
+      return {
+        ...supplyRequest,
+        dispatched_quantity: dispatchedQuantity,
+        remaining_quantity: supplyRequest.quantity - dispatchedQuantity,
+      };
+    },
+  );
 
   function handleSupplyRequestSuccess() {
     queryClient.invalidateQueries({
@@ -261,11 +309,6 @@ export function RequestOrderShow({
   }
 
   const canAddSupplyRequests = requestOrder.status === RequestOrderStatus.draft;
-
-  const handleAddItem = (product: ProductKnowledgeBase | undefined) => {
-    if (!product) return;
-    addItemsFormRef.current.addItem(product);
-  };
 
   return (
     <Page
@@ -530,61 +573,68 @@ export function RequestOrderShow({
                   : t("items_to_dispatch"),
                 component: (
                   <div className="space-y-2 p-2 bg-gray-100 rounded-md border border-gray-200">
-                    <p className="font-bold">{t("your_request_order_list")}</p>
                     {isLoadingSupplyRequests ? (
                       <TableSkeleton count={3} />
                     ) : (
                       <div className="flex flex-col gap-4">
                         {/* Supply Requests Table */}
-                        {supplyRequests?.results &&
-                        supplyRequests.results.length > 0 ? (
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>{t("item")}</TableHead>
-                                <TableHead>{t("quantity")}</TableHead>
-                                <TableHead>{t("status")}</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {supplyRequests.results.map((supplyRequest) => (
-                                <TableRow key={supplyRequest.id}>
-                                  <TableCell>
-                                    {supplyRequest.item.name}
-                                  </TableCell>
-                                  <TableCell>
-                                    {supplyRequest.quantity}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Badge
-                                      variant={
-                                        SUPPLY_REQUEST_STATUS_COLORS[
-                                          supplyRequest.status
-                                        ]
-                                      }
-                                    >
-                                      {t(supplyRequest.status)}
-                                    </Badge>
-                                  </TableCell>
+                        {supplyRequestsWithDeliveries &&
+                          supplyRequestsWithDeliveries.length > 0 && (
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>{t("item")}</TableHead>
+                                  <TableHead>{t("quantity")}</TableHead>
+                                  <TableHead>
+                                    {t("dispatched_quantity")}
+                                  </TableHead>
+                                  <TableHead>
+                                    {t("remaining_quantity")}
+                                  </TableHead>
+                                  <TableHead>{t("status")}</TableHead>
                                 </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        ) : (
-                          <EmptyState
-                            icon={<Box className="text-primary size-5" />}
-                            title={t("no_supply_requests_found")}
-                            description={t("add_items_to_get_started")}
-                            action={
-                              <ProductKnowledgeSelect
-                                onChange={handleAddItem}
-                                className="text-primary-800 border-primary-600"
-                                placeholder={t("add_from_item_list")}
-                                disableFavorites
-                              />
-                            }
-                          />
-                        )}
+                              </TableHeader>
+                              <TableBody>
+                                {supplyRequestsWithDeliveries.map(
+                                  (supplyRequest) => (
+                                    <TableRow key={supplyRequest.id}>
+                                      <TableCell>
+                                        {supplyRequest.item.name}
+                                      </TableCell>
+                                      <TableCell>
+                                        {supplyRequest.quantity}
+                                      </TableCell>
+                                      <TableCell>
+                                        {supplyRequest.dispatched_quantity}
+                                      </TableCell>
+                                      <TableCell
+                                        className={cn(
+                                          supplyRequest.remaining_quantity > 0
+                                            ? "text-red-500"
+                                            : "text-green-500",
+                                        )}
+                                      >
+                                        {supplyRequest.remaining_quantity > 0
+                                          ? supplyRequest.remaining_quantity
+                                          : `(${supplyRequest.remaining_quantity * -1})`}
+                                      </TableCell>
+                                      <TableCell>
+                                        <Badge
+                                          variant={
+                                            SUPPLY_REQUEST_STATUS_COLORS[
+                                              supplyRequest.status
+                                            ]
+                                          }
+                                        >
+                                          {t(supplyRequest.status)}
+                                        </Badge>
+                                      </TableCell>
+                                    </TableRow>
+                                  ),
+                                )}
+                              </TableBody>
+                            </Table>
+                          )}
 
                         {/* Add New Items Form - Always show when in draft mode */}
                         {canAddSupplyRequests && (
@@ -592,10 +642,12 @@ export function RequestOrderShow({
                             <AddItemsForm
                               requestOrderId={requestOrderId}
                               onSuccess={handleSupplyRequestSuccess}
-                              ref={addItemsFormRef}
                               updateOrderStatus={updateOrderStatus}
                               disableApproveButton={
                                 isUpdating ||
+                                supplyRequests?.results.length === 0
+                              }
+                              showEmptyState={
                                 supplyRequests?.results.length === 0
                               }
                             />
@@ -610,7 +662,7 @@ export function RequestOrderShow({
               deliveries: {
                 label: isRequester
                   ? t("deliveries_received")
-                  : t("deliveries_dispatched"),
+                  : t("deliveries_created"),
                 labelSuffix: !isRequester ? (
                   pendingDeliveryOrderCountBadge
                 ) : (
@@ -620,15 +672,14 @@ export function RequestOrderShow({
                   <div>
                     {isLoadingDeliveryOrders ? (
                       <TableSkeleton count={3} />
-                    ) : deliveryOrders?.results &&
-                      deliveryOrders.results.length > 0 ? (
+                    ) : deliveryOrders && deliveryOrders.length > 0 ? (
                       <DeliveryOrderTable
-                        deliveries={deliveryOrders.results}
+                        deliveries={deliveryOrders}
                         isLoading={false}
                         facilityId={facilityId}
                         locationId={requestOrder?.destination.id || ""}
                         internal={true}
-                        isRequester={false}
+                        isRequester={isRequester}
                       />
                     ) : (
                       <EmptyState
@@ -655,6 +706,7 @@ export function RequestOrderShow({
                         }}
                         placeholder={t("filter_by_product")}
                         disableFavorites
+                        alignContent="end"
                       />
                     </div>
                     <AllSupplyDeliveriesComponent
@@ -662,6 +714,7 @@ export function RequestOrderShow({
                       requestOrderId={requestOrderId}
                       internal={internal}
                       selectedProductKnowledge={selectedProductKnowledge}
+                      isRequester={isRequester}
                     />
                   </div>
                 ),

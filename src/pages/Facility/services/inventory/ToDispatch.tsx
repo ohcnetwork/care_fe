@@ -12,10 +12,7 @@ import Page from "@/components/Common/Page";
 
 import useFilters from "@/hooks/useFilters";
 
-import {
-  RequestOrderPriority,
-  RequestOrderStatus,
-} from "@/types/inventory/requestOrder/requestOrder";
+import { RequestOrderPriority } from "@/types/inventory/requestOrder/requestOrder";
 import query from "@/Utils/request/query";
 
 import { FilterSelect } from "@/components/ui/filter-select";
@@ -23,7 +20,6 @@ import { NavTabs } from "@/components/ui/nav-tabs";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import DeliveryOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/DeliveryOrderTable";
 import RequestOrderTable from "@/pages/Facility/services/inventory/externalSupply/components/RequestOrderTable";
-import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -125,9 +121,14 @@ function IncomingOrdersTab({
     disableCache: true,
   });
 
+  const EFFECTIVE_STATUSES = [
+    { value: "pending", label: "pending" },
+    { value: "completed", label: "completed" },
+  ];
+
   useEffect(() => {
     if (!qParams.status) {
-      updateQuery({ status: RequestOrderStatus.pending });
+      updateQuery({ status: EFFECTIVE_STATUSES[0].value });
     }
   }, [qParams.status]);
 
@@ -153,13 +154,13 @@ function IncomingOrdersTab({
       <div className="flex flex-col md:flex-row gap-4 justify-between">
         <Tabs value={qParams.status}>
           <TabsList>
-            {Object.values(RequestOrderStatus).map((status) => (
+            {EFFECTIVE_STATUSES.map((status) => (
               <TabsTrigger
-                key={status}
-                value={status}
-                onClick={() => updateQuery({ status: status })}
+                key={status.value}
+                value={status.value}
+                onClick={() => updateQuery({ status: status.value })}
               >
-                {t(`${status}`)}
+                {t(status.label)}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -209,9 +210,14 @@ function OutgoingDeliveriesTab({
     disableCache: true,
   });
 
+  const EFFECTIVE_STATUSES = [
+    { value: "draft,pending", label: "created" },
+    { value: "completed,abandoned,entered_in_error", label: "completed" },
+  ];
+
   useEffect(() => {
     if (!qParams.status) {
-      updateQuery({ status: DeliveryOrderStatus.pending });
+      updateQuery({ status: EFFECTIVE_STATUSES[0].value });
     }
   }, [qParams.status]);
 
@@ -237,13 +243,13 @@ function OutgoingDeliveriesTab({
       <div className="flex flex-col md:flex-row gap-4 justify-between">
         <Tabs value={qParams.status}>
           <TabsList>
-            {Object.values(DeliveryOrderStatus).map((status) => (
+            {EFFECTIVE_STATUSES.map((status) => (
               <TabsTrigger
-                key={status}
-                value={status}
-                onClick={() => updateQuery({ status: status })}
+                key={status.value}
+                value={status.value}
+                onClick={() => updateQuery({ status: status.value })}
               >
-                {t(`${status}`)}
+                {t(status.label)}
               </TabsTrigger>
             ))}
           </TabsList>

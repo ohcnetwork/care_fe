@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import { Separator } from "@/components/ui/separator";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { RequestOrderStatus } from "@/types/inventory/requestOrder/requestOrder";
@@ -32,8 +33,7 @@ import { SupplyRequestStatus } from "@/types/inventory/supplyRequest/supplyReque
 import supplyRequestApi from "@/types/inventory/supplyRequest/supplyRequestApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
-import { Check, Trash2 } from "lucide-react";
-import { useImperativeHandle } from "react";
+import { Box, Check, Trash2 } from "lucide-react";
 
 const supplyRequestFormSchema = z.object({
   requests: z.array(
@@ -52,19 +52,17 @@ type SupplyRequestFormValues = z.infer<typeof supplyRequestFormSchema>;
 interface AddItemsFormProps {
   requestOrderId: string;
   onSuccess: () => void;
-  ref?: React.RefObject<{
-    addItem: (product: ProductKnowledgeBase) => void;
-  }>;
   updateOrderStatus: (status: RequestOrderStatus) => void;
   disableApproveButton: boolean;
+  showEmptyState: boolean;
 }
 
 export function AddItemsForm({
   requestOrderId,
   onSuccess,
-  ref,
   updateOrderStatus,
   disableApproveButton,
+  showEmptyState,
 }: AddItemsFormProps) {
   const { t } = useTranslation();
 
@@ -112,12 +110,6 @@ export function AddItemsForm({
     createSupplyRequests(data.requests);
   }
 
-  useImperativeHandle(ref, () => ({
-    addItem: (product: ProductKnowledgeBase) => {
-      handleAddItem(product);
-    },
-  }));
-
   function handleAddItem(product: ProductKnowledgeBase | undefined) {
     if (!product) return;
 
@@ -131,7 +123,22 @@ export function AddItemsForm({
   }
 
   return (
-    <>
+    <div className="space-y-2">
+      {showEmptyState && fields.length === 0 && (
+        <EmptyState
+          icon={<Box className="text-primary size-5" />}
+          title={t("no_supply_requests_found")}
+          description={t("add_items_to_get_started")}
+          action={
+            <ProductKnowledgeSelect
+              onChange={handleAddItem}
+              className="text-primary-800 border-primary-600"
+              placeholder={t("add_from_item_list")}
+              disableFavorites
+            />
+          }
+        />
+      )}
       <div className="space-y-4">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmitSupplyRequests)}>
@@ -174,9 +181,7 @@ export function AddItemsForm({
                                       min={1}
                                       {...field}
                                       onChange={(e) =>
-                                        field.onChange(
-                                          parseInt(e.target.value) || 1,
-                                        )
+                                        field.onChange(parseInt(e.target.value))
                                       }
                                       className="w-20"
                                     />
@@ -262,6 +267,6 @@ export function AddItemsForm({
           </form>
         </Form>
       </div>
-    </>
+    </div>
   );
 }
