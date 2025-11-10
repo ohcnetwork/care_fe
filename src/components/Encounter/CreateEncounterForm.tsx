@@ -242,7 +242,7 @@ export default function CreateEncounterForm({
                               <div className="text-sm font-bold">
                                 {t(`encounter_class__${value}`)}
                               </div>
-                              <div className="text-wrap text-center text-xs text-gray-500">
+                              <div className="whitespace-normal break-words text-center text-xs text-gray-500">
                                 {t(`encounter_class_description__${value}`)}
                               </div>
                             </div>
