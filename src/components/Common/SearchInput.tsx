@@ -192,22 +192,29 @@ export default function SearchInput({
       if (index < 0 || index >= safeOptions.length) {
         return;
       }
-      setSelectedOptionIndex(index);
-      const option = safeOptions[index];
-      option.value = "";
-      setSearchValue(option.value || "");
-      onSearch(selectedOption.key, "");
-      setFocusedIndex(safeOptions.findIndex((op) => op.key === option.key));
-      setOpen(false);
-      inputRef.current?.focus();
 
-      // Only call onSearch if there's a value to search
-      if (option.value) {
-        onSearch(option.key, option.value);
+      if (index === selectedOptionIndex) {
+        setOpen(false);
+        inputRef.current?.focus();
+        return;
       }
-      onFieldChange?.(safeOptions[index]);
+
+      const previousOption = safeOptions[selectedOptionIndex];
+      const nextOption = safeOptions[index];
+      if (!nextOption) {
+        return;
+      }
+
+      if (previousOption) {
+        onSearch(previousOption.key, "");
+      }
+
+      setSelectedOptionIndex(index);
+      setSearchValue("");
+      setFocusedIndex(index);
+      onFieldChange?.({ ...nextOption, value: "" });
     },
-    [onSearch, safeOptions, onFieldChange],
+    [onFieldChange, onSearch, safeOptions, selectedOptionIndex],
   );
 
   useEffect(() => {

@@ -335,7 +335,7 @@ const getSearchOptions = (
   configs: PatientIdentifierConfig[],
 ) => {
   // Phone number configs first, followed by auto-maintained configs, and then non-auto-maintained configs
-  return [
+  const options = [
     // Phone number configs
     ...configs.filter(
       ({ config }) =>
@@ -361,6 +361,12 @@ const getSearchOptions = (
       searchIdentifier.config === c.id ? (searchIdentifier.value ?? "") : "",
     display: c.config.display,
   }));
+  const uniqueOptions = options.filter(
+    (opt, index, self) =>
+      index === self.findIndex((o) => o.display === opt.display),
+  );
+
+  return uniqueOptions;
 };
 
 const getPhoneNumberConfig = (identifierConfigs: PatientIdentifierConfig[]) => {
