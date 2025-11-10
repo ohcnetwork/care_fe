@@ -223,7 +223,7 @@ export default function DispenseDrawer({
       });
 
       const chargeItems = extractChargeItemsFromBatchResponse(
-        response as unknown as ChargeItemBatchResponse,
+        response as ChargeItemBatchResponse,
       );
 
       if (chargeItems.length > 0 && onDispenseComplete) {
