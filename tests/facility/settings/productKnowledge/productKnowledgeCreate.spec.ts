@@ -7,17 +7,16 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Product Knowledge Creation", () => {
   let facilityId: string;
-  let testData: {
-    name: string;
-    slug: string;
-    productType: string;
-    baseUnit: string;
-    hsnCode: string;
-    altNames: string;
-    storageGuidelines: string;
-    categoryName: string;
-    dosageForm: string;
-  };
+
+  let name: string;
+  let slug: string;
+  let productType: string;
+  let baseUnit: string;
+  let hsnCode: string;
+  let altNames: string;
+  let storageGuidelines: string;
+  let categoryName: string;
+  let dosageForm: string;
 
   const productTypeOptions = [
     "Medication",
@@ -45,20 +44,19 @@ test.describe("Product Knowledge Creation", () => {
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
     const productName = faker.commerce.productName();
-    testData = {
-      name: productName,
-      slug: productName.replace(/\s+/g, "-").slice(0, 25),
-      productType: faker.helpers.arrayElement(productTypeOptions),
-      baseUnit: faker.helpers.arrayElement(baseUnitOptions),
-      dosageForm: faker.helpers.arrayElement(dosageFormOptions),
-      hsnCode: faker.string.numeric({ length: 8 }),
-      altNames: productName + "Alt",
-      storageGuidelines: faker.commerce.productDescription(),
-      categoryName: "Medications",
-    };
+
+    name = productName;
+    slug = productName.replace(/\s+/g, "-").slice(0, 25);
+    productType = faker.helpers.arrayElement(productTypeOptions);
+    baseUnit = faker.helpers.arrayElement(baseUnitOptions);
+    dosageForm = faker.helpers.arrayElement(dosageFormOptions);
+    hsnCode = faker.string.numeric({ length: 8 });
+    altNames = productName + "Alt";
+    storageGuidelines = faker.commerce.productDescription();
+    categoryName = "Medications";
 
     await page.goto(`/facility/${facilityId}/settings/product_knowledge`);
-    await page.getByRole("heading", { name: testData.categoryName }).click();
+    await page.getByRole("heading", { name: categoryName }).click();
   });
 
   test("validate the basic fields", async ({ page }) => {
@@ -92,12 +90,12 @@ test.describe("Product Knowledge Creation", () => {
     await page.getByRole("button", { name: /add product/i }).click();
 
     // Basic details
-    await page.getByRole("textbox", { name: /name/i }).fill(testData.name);
-    await page.getByRole("textbox", { name: /slug/i }).fill(testData.slug);
+    await page.getByRole("textbox", { name: /name/i }).fill(name);
+    await page.getByRole("textbox", { name: /slug/i }).fill(slug);
 
     // Scroll to Base Unit if not visible
     await page.getByText(/Base Unit/).click();
-    await page.getByRole("option", { name: testData.baseUnit }).click();
+    await page.getByRole("option", { name: baseUnit }).click();
     await page.keyboard.press("Escape");
 
     // Scroll to Dosage Form if not visible
@@ -105,83 +103,67 @@ test.describe("Product Knowledge Creation", () => {
       .getByRole("combobox", { name: /dosage form/i })
       .scrollIntoViewIfNeeded();
     await page.getByRole("combobox", { name: /dosage form/i }).click();
-    await page.getByPlaceholder("Select Dosage Form").fill(testData.dosageForm);
+    await page.getByPlaceholder("Select Dosage Form").fill(dosageForm);
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: /create/i }).click();
 
     await expect(page.getByText(/created successfully/i)).toBeVisible();
 
-    await page
-      .getByRole("textbox", { name: "Search products" })
-      .fill(testData.name);
-    await expect(
-      page.getByRole("table").getByText(testData.name),
-    ).toBeVisible();
+    await page.getByRole("textbox", { name: "Search products" }).fill(name);
+    await expect(page.getByRole("table").getByText(name)).toBeVisible();
 
     await page.getByRole("link", { name: "View" }).first().click();
-    await expect(
-      page.getByRole("heading").getByText(testData.name),
-    ).toBeVisible();
+    await expect(page.getByRole("heading").getByText(name)).toBeVisible();
 
     await page.getByRole("button", { name: "Edit" }).first().click();
     await expect(
       page.getByRole("textbox", { name: /name/i }).first(),
-    ).toHaveValue(testData.name);
+    ).toHaveValue(name);
 
     await expect(
       page.getByRole("textbox", { name: /slug/i }).first(),
-    ).toHaveValue(testData.slug.toLowerCase());
+    ).toHaveValue(slug.toLowerCase());
   });
 
   test("create a product knowledge with all fields", async ({ page }) => {
     await page.getByRole("button", { name: /add product/i }).click();
 
     // Basic details
-    await page.getByRole("textbox", { name: /name/i }).fill(testData.name);
-    await page.getByRole("textbox", { name: /slug/i }).fill(testData.slug);
+    await page.getByRole("textbox", { name: /name/i }).fill(name);
+    await page.getByRole("textbox", { name: /slug/i }).fill(slug);
     await page.getByRole("combobox", { name: /product type/i }).click();
-    await page.getByRole("option", { name: testData.productType }).click();
+    await page.getByRole("option", { name: productType }).click();
     await page.getByText(/Base Unit/).click();
-    await page.getByRole("option", { name: testData.baseUnit }).click();
-    await page
-      .getByRole("textbox", { name: "HSN Code" })
-      .fill(testData.hsnCode);
+    await page.getByRole("option", { name: baseUnit }).click();
+    await page.getByRole("textbox", { name: "HSN Code" }).fill(hsnCode);
 
     // Alternate names and storage guidelines
     await page.getByRole("button", { name: "Add Name" }).click();
-    await page.locator('input[name="names.0.name"]').fill(testData.altNames);
+    await page.locator('input[name="names.0.name"]').fill(altNames);
 
     await page.getByRole("button", { name: "Add Guideline" }).click();
-    await page
-      .getByRole("textbox", { name: "Note" })
-      .fill(testData.storageGuidelines);
+    await page.getByRole("textbox", { name: "Note" }).fill(storageGuidelines);
     await page.getByRole("spinbutton", { name: "Duration Value" }).fill("2");
 
     // Dosage form
     await page.getByRole("combobox", { name: /dosage form/i }).click();
-    await page.getByPlaceholder("Select Dosage Form").fill(testData.dosageForm);
+    await page.getByPlaceholder("Select Dosage Form").fill(dosageForm);
     await page.getByRole("option").first().click();
     await page.getByRole("button", { name: /create/i }).click();
 
     await expect(page.getByText(/created successfully/i)).toBeVisible();
 
-    await page
-      .getByRole("textbox", { name: "Search products" })
-      .fill(testData.name);
-    await expect(
-      page.getByRole("table").getByText(testData.name),
-    ).toBeVisible();
+    await page.getByRole("textbox", { name: "Search products" }).fill(name);
+    await expect(page.getByRole("table").getByText(name)).toBeVisible();
 
     // View and verify all details
     await page.getByRole("link", { name: "View" }).first().click();
-    await expect(
-      page.getByRole("heading").getByText(testData.name),
-    ).toBeVisible();
-    await expect(page.getByText(testData.altNames)).toBeVisible();
-    await expect(page.getByText(testData.storageGuidelines)).toBeVisible();
-    await expect(page.getByText(testData.productType)).toBeVisible();
-    await expect(page.getByText(testData.baseUnit)).toBeVisible();
-    await expect(page.getByText(testData.hsnCode)).toBeVisible();
-    await expect(page.getByText(testData.dosageForm)).toBeVisible();
+    await expect(page.getByRole("heading").getByText(name)).toBeVisible();
+    await expect(page.getByText(altNames)).toBeVisible();
+    await expect(page.getByText(storageGuidelines)).toBeVisible();
+    await expect(page.getByText(productType)).toBeVisible();
+    await expect(page.getByText(baseUnit)).toBeVisible();
+    await expect(page.getByText(hsnCode)).toBeVisible();
+    await expect(page.getByText(dosageForm)).toBeVisible();
   });
 });
