@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PermissionType } from "@/common/Permissions";
 import PatientTokensList from "@/components/Tokens/PatientTokensList";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { BookingsList } from "@/pages/Appointments/BookAppointment/BookingsList";
@@ -10,7 +11,7 @@ import PatientHomeEncounters from "./PatientHomeEncounters";
 interface PatientHomeTabsProps {
   patientId: string;
   facility: FacilityRead;
-  facilityPermissions: string[];
+  facilityPermissions: PermissionType[];
   canListEncounters: boolean;
   canWriteAppointment: boolean;
   canListTokens: boolean;
