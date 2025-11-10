@@ -26,7 +26,12 @@ export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
   }[] = [];
 
   for (const slot of slots) {
+    // skip past slots
     if (isPast(slot.end_datetime)) {
+      continue;
+    }
+    // skip fully allocated slots
+    if (slot.allocated === slot.availability.tokens_per_slot) {
       continue;
     }
     const availability = slot.availability;
