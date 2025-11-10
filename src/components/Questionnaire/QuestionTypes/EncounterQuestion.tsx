@@ -109,7 +109,10 @@ export function EncounterQuestion({
     enabled: !!encounterId,
   });
   const { t } = useTranslation();
-  const { hasError } = useFieldError(questionnaireResponse.question_id, errors);
+  const { hasError, getError } = useFieldError(
+    questionnaireResponse.question_id,
+    errors,
+  );
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
     status: "unknown",
@@ -460,7 +463,10 @@ export function EncounterQuestion({
                   </Select>
                   {hasError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key) && (
                     <p className="text-red-500 text-sm">
-                      {t("discharge_disposition_required")}
+                      {
+                        getError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key)
+                          ?.msg
+                      }
                     </p>
                   )}
                 </div>
