@@ -293,11 +293,18 @@ export function InvoiceShow({
 
   const [{ sourceUrl }] = useQueryParams();
 
-  const alertButtonText = sourceUrl?.includes("medication_dispense")
-    ? t("medication_dispense_invoice_alert")
-    : sourceUrl?.includes("services_requests")
-      ? t("service_request_invoice_alert")
-      : t("appointment_invoice_alert");
+  const alertButtonText = (() => {
+    if (sourceUrl?.includes("medication_dispense")) {
+      return t("medication_dispense_invoice_alert");
+    }
+    if (sourceUrl?.includes("services_requests")) {
+      return t("service_request_invoice_alert");
+    }
+    if (sourceUrl?.includes("encounter")) {
+      return t("back_to_encounter");
+    }
+    return t("appointment_invoice_alert");
+  })();
 
   const isInvoiceRecordPaymentPluginsPresent = useCareApps().some(
     (plugin) => plugin.components?.InvoiceRecordPaymentOptions,
