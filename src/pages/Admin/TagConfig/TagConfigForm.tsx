@@ -1,12 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import RoleOrgSelector from "@/components/Common/RoleOrgSelector";
+import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,9 +29,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
+import useBreakpoints from "@/hooks/useBreakpoints";
+import { cn } from "@/lib/utils";
 import {
   TagCategory,
   TagConfigRequest,
@@ -37,6 +38,9 @@ import {
   TagStatus,
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { isAppleDevice } from "@/Utils/utils";
 
 interface TagConfigFormProps {
   configId?: string;
@@ -55,14 +59,14 @@ export default function TagConfigForm({
   const queryClient = useQueryClient();
   const isEditing = Boolean(configId);
   const isCreatingChild = Boolean(parentId);
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const tagConfigSchema = z.object({
-    slug: z.string().trim().min(1, t("field_required")),
     display: z.string().trim().min(1, t("field_required")),
     category: z.nativeEnum(TagCategory, {
       required_error: t("field_required"),
     }),
-    description: z.string().optional(),
+    description: z.string().trim().optional(),
     priority: z.number().min(0, t("priority_non_negative")),
     status: z.nativeEnum(TagStatus, {
       required_error: t("field_required"),
@@ -70,6 +74,8 @@ export default function TagConfigForm({
     resource: z.nativeEnum(TagResource, {
       required_error: t("field_required"),
     }),
+    facility_organization: z.string().optional(),
+    organization: z.string().optional(),
   });
 
   type TagConfigFormValues = z.infer<typeof tagConfigSchema>;
@@ -87,28 +93,16 @@ export default function TagConfigForm({
   const form = useForm<TagConfigFormValues>({
     resolver: zodResolver(tagConfigSchema),
     defaultValues: {
-      slug: "",
       display: "",
       category: parentTag?.category || TagCategory.CLINICAL,
       description: "",
       priority: parentTag?.priority || 100,
       status: TagStatus.ACTIVE,
       resource: parentTag?.resource || TagResource.PATIENT,
+      facility_organization: undefined,
+      organization: undefined,
     },
   });
-
-  React.useEffect(() => {
-    if (isEditing) return;
-
-    const subscription = form.watch((value, { name }) => {
-      if (name === "display") {
-        form.setValue("slug", generateSlug(value.display || ""), {
-          shouldValidate: true,
-        });
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form, isEditing]);
 
   // Fetch existing config data when editing
   const { data: existingConfig, isLoading: isLoadingConfig } = useQuery({
@@ -124,13 +118,14 @@ export default function TagConfigForm({
   useEffect(() => {
     if (existingConfig && isEditing) {
       form.reset({
-        slug: existingConfig.slug,
         display: existingConfig.display,
         category: existingConfig.category,
         description: existingConfig.description || "",
         priority: existingConfig.priority,
         status: existingConfig.status,
         resource: existingConfig.resource,
+        facility_organization: existingConfig.facility_organization?.id,
+        organization: existingConfig.organization?.id,
       });
     }
   }, [existingConfig, isEditing, form]);
@@ -139,13 +134,14 @@ export default function TagConfigForm({
   useEffect(() => {
     if (parentTag && isCreatingChild) {
       form.reset({
-        slug: "",
         display: "",
         category: parentTag.category,
         description: "",
         priority: parentTag.priority,
         status: TagStatus.ACTIVE,
         resource: parentTag.resource,
+        facility_organization: undefined,
+        organization: undefined,
       });
     }
   }, [parentTag, isCreatingChild, form]);
@@ -180,7 +176,6 @@ export default function TagConfigForm({
 
   const onSubmit = (data: TagConfigFormValues) => {
     const payload: TagConfigRequest = {
-      slug: data.slug,
       display: data.display,
       category: data.category,
       description: data.description || "",
@@ -189,6 +184,12 @@ export default function TagConfigForm({
       resource: data.resource,
       ...(parentId && { parent: parentId }),
       ...(facilityId && { facility: facilityId }),
+      ...(data.facility_organization && {
+        facility_organization: data.facility_organization,
+      }),
+      ...(data.organization && {
+        organization: data.organization,
+      }),
     };
 
     if (isEditing) {
@@ -215,24 +216,7 @@ export default function TagConfigForm({
                   placeholder={t("enter_display_name")}
                   {...field}
                   disabled={isLoading}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="slug"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel aria-required>{t("slug")}</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder={t("enter_tag_slug")}
-                  {...field}
-                  disabled={isLoading}
+                  autoFocus={!isAppleDevice}
                 />
               </FormControl>
               <FormMessage />
@@ -252,7 +236,7 @@ export default function TagConfigForm({
                 disabled={isLoading}
               >
                 <FormControl>
-                  <SelectTrigger className="capitalize">
+                  <SelectTrigger className="capitalize" ref={field.ref}>
                     <SelectValue placeholder={t("select_category")}>
                       {t(field.value)}
                     </SelectValue>
@@ -280,10 +264,10 @@ export default function TagConfigForm({
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
-                disabled={isLoading || isEditing}
+                disabled={isLoading || isEditing || isCreatingChild}
               >
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger ref={field.ref}>
                     <SelectValue placeholder={t("select_resource")}>
                       {t(field.value)}
                     </SelectValue>
@@ -336,7 +320,7 @@ export default function TagConfigForm({
                 disabled={isLoading}
               >
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger ref={field.ref}>
                     <SelectValue placeholder={t("select_status")}>
                       {t(field.value)}
                     </SelectValue>
@@ -374,6 +358,61 @@ export default function TagConfigForm({
           )}
         />
 
+        {facilityId ? (
+          <FormField
+            control={form.control}
+            name="facility_organization"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Facility Organisation</FormLabel>
+                <FormControl>
+                  <FacilityOrganizationSelector
+                    facilityId={facilityId}
+                    value={field.value ? [field.value] : null}
+                    onChange={(value: string[] | null) => {
+                      field.onChange(value?.[0] || null);
+                    }}
+                    currentOrganizations={
+                      existingConfig?.facility_organization
+                        ? [existingConfig.facility_organization]
+                        : []
+                    }
+                    singleSelection={true}
+                    optional={true}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <FormField
+            control={form.control}
+            name="organization"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Organization</FormLabel>
+                <FormControl>
+                  <RoleOrgSelector
+                    value={field.value ? [field.value] : null}
+                    onChange={(value: string[] | null) => {
+                      field.onChange(value?.[0] || null);
+                    }}
+                    currentOrganizations={
+                      existingConfig?.organization
+                        ? [existingConfig.organization]
+                        : []
+                    }
+                    singleSelection={true}
+                    optional={true}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
         {/* Add parent tag info when creating a child */}
         {isCreatingChild && parentTag && (
           <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
@@ -401,7 +440,12 @@ export default function TagConfigForm({
           </div>
         )}
 
-        <div className="flex justify-end space-x-2">
+        <div
+          className={cn(
+            !isMobile && "flex justify-end space-x-2",
+            isMobile && "absolute top-8 right-4 z-10",
+          )}
+        >
           <Button type="submit" disabled={isLoading || !form.formState.isDirty}>
             {isLoading
               ? t("saving")

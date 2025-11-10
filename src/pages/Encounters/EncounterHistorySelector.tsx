@@ -1,45 +1,51 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { ChevronDown, CircleDashed } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useInView } from "react-intersection-observer";
-
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FilterSelect } from "@/components/ui/filter-select";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import {
+  dateFilter,
+  encounterStatusFilter,
+  tagFilter,
+} from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
-import { DateRangeFilter } from "@/components/Common/DateRangeFilter";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { dateTimeQueryString } from "@/Utils/utils";
+import RailPanel from "@/components/Common/RailPanel";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
-  ENCOUNTER_STATUS,
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
   completedEncounterStatus,
 } from "@/types/emr/encounter/encounter";
-import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
-import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
+import { ChevronDown, Tags } from "lucide-react";
+import React, { useEffect, useState } from "react";
+
+import TagBadge from "@/components/Tags/TagBadge";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { dateTimeQueryString } from "@/Utils/utils";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
+import { useInView } from "react-intersection-observer";
 
 interface EncounterCardProps {
   encounter: EncounterRead;
@@ -67,36 +73,71 @@ function EncounterCard({
       {isSelected && (
         <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
       )}
-      <CardContent className="flex justify-between items-center px-4 py-3">
-        <div className="flex flex-col">
-          <span className="text-base font-semibold">
-            {t(`encounter_class__${encounter.encounter_class}`)}
-          </span>
-          <span className="text-sm font-medium text-gray-700">
-            {encounter.facility.name}
-          </span>
-          <span className="text-sm text-gray-600">
-            {encounter.period.start && (
-              <span>{format(new Date(encounter.period.start!), "dd MMM")}</span>
+      <CardContent className="flex flex-col px-4 py-3 gap-2">
+        <div className="flex justify-between items-center">
+          <div className="flex flex-col gap-1">
+            <span className="text-base font-semibold">
+              {t(`encounter_class__${encounter.encounter_class}`)}
+            </span>
+            <span className="text-sm font-medium text-gray-700">
+              {encounter.facility.name}
+            </span>
+            {encounter.tags.length > 0 && (
+              <HoverCard openDelay={150}>
+                <HoverCardTrigger className="hidden md:block">
+                  <div className="flex items-center py-1 pr-1 gap-2">
+                    <Tags className="size-4 text-gray-700" />
+                    <span className="text-sm text-gray-700 font-medium">
+                      {t("encounter_tag_count", {
+                        count: encounter.tags.length,
+                      })}
+                    </span>
+                  </div>
+                </HoverCardTrigger>
+                <HoverCardContent
+                  className="flex flex-col gap-2 p-4 border border-gray-200 rounded-md max-w-90 shadow-lg"
+                  side="right"
+                >
+                  <EncounterTagHoverCard encounter={encounter} />
+                </HoverCardContent>
+              </HoverCard>
             )}
-            {encounter.period.end && encounter.period.start && (
-              <span>{" - "}</span>
-            )}
-            {encounter.period.end ? (
-              <span>{format(new Date(encounter.period.end), "dd MMM")}</span>
-            ) : (
-              <span>
-                {" - "}
-                {t("ongoing")}
-              </span>
-            )}
-          </span>
+          </div>
+          <div className="flex flex-col gap-1 pt-0.5 items-end">
+            <span className="text-sm text-gray-600 whitespace-nowrap">
+              {encounter.period.start && (
+                <span>
+                  {format(new Date(encounter.period.start!), "dd MMM")}
+                </span>
+              )}
+              {encounter.period.end && encounter.period.start && (
+                <span>{" - "}</span>
+              )}
+              {encounter.period.end ? (
+                <span>{format(new Date(encounter.period.end), "dd MMM")}</span>
+              ) : (
+                <span>
+                  {" - "}
+                  {t("ongoing")}
+                </span>
+              )}
+            </span>
+            <Badge
+              variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
+              size="sm"
+              className=" whitespace-nowrap"
+            >
+              {t(`encounter_status__${encounter.status}`)}
+            </Badge>
+          </div>
         </div>
-        <div>
-          <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]} size="sm">
-            {t(`encounter_status__${encounter.status}`)}
-          </Badge>
-        </div>
+        {encounter.tags.length > 0 && (
+          <div className="md:hidden flex flex-wrap gap-2">
+            {encounter.tags.map((tag) => (
+              <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -109,10 +150,10 @@ interface Props {
 const EncounterHistoryList = ({ onSelect }: Props) => {
   const { t } = useTranslation();
   const { ref, inView } = useInView();
-  const [showFilters, setShowFilters] = useState(false);
 
   const [status, setStatus] = useState<string>();
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [tagsBehavior, setTagsBehavior] = useState<string>("any");
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
 
@@ -124,27 +165,6 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     patientId,
     facilityId,
   } = useEncounter();
-
-  const tagConfigsQuery = useTagConfigs({ ids: selectedTagIds, facilityId });
-  const selectedTags = tagConfigsQuery
-    .map((q) => q.data)
-    .filter(Boolean) as TagConfig[];
-
-  const handleStatusChange = (value: string | undefined) => {
-    setStatus(value);
-  };
-
-  const handleTagsChange = (tags: TagConfig[]) => {
-    setSelectedTagIds(tags.map((tag) => tag.id));
-  };
-
-  const handleDateFromChange = (date: Date | undefined) => {
-    setDateFrom(date);
-  };
-
-  const handleDateToChange = (date: Date | undefined) => {
-    setDateTo(date);
-  };
 
   const handleSelect = (encounterId: string | null) => {
     setSelectedEncounter(encounterId);
@@ -164,6 +184,7 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
       patientId,
       status,
       selectedTagIds,
+      tagsBehavior,
       dateFrom,
       dateTo,
     ],
@@ -176,7 +197,10 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             ? { patient_filter: patientId, facility: facilityId }
             : { patient: patientId }),
           ...(status && { status }),
-          ...(selectedTagIds.length > 0 && { tags: selectedTagIds.join(",") }),
+          ...(selectedTagIds.length > 0 && {
+            tags: selectedTagIds.join(","),
+            tags_behavior: tagsBehavior,
+          }),
           ...(dateFrom && {
             created_date_after: dateTimeQueryString(dateFrom),
           }),
@@ -207,6 +231,55 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
+  const onFilterUpdate = (query: Record<string, unknown>) => {
+    for (const [key, value] of Object.entries(query)) {
+      const filterValue = value as
+        | string
+        | TagConfig[]
+        | { from: Date; to: Date };
+      switch (key) {
+        case "status":
+          setStatus(filterValue as string);
+          break;
+        case "tags":
+          setSelectedTagIds(
+            (filterValue as TagConfig[])?.map((tag) => tag.id) ?? [],
+          );
+          break;
+        case "tags_behavior":
+          setTagsBehavior(filterValue as string);
+          break;
+        case "created_date":
+          if (
+            filterValue &&
+            typeof filterValue === "object" &&
+            "from" in filterValue &&
+            "to" in filterValue
+          ) {
+            setDateFrom(filterValue.from as Date);
+            setDateTo(filterValue.to as Date);
+          } else {
+            setDateFrom(undefined);
+            setDateTo(undefined);
+          }
+          break;
+      }
+    }
+  };
+
+  const filters = [
+    encounterStatusFilter("status"),
+    tagFilter("tags", TagResource.ENCOUNTER),
+    dateFilter("created_date"),
+  ];
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useMultiFilterState(filters, onFilterUpdate);
+
   return (
     <div className="space-y-4 pt-2">
       {!primaryEncounter ? (
@@ -234,56 +307,20 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
             <h2 className="text-xs font-medium text-gray-600 uppercase">
               {t("other_encounters")}
             </h2>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowFilters(!showFilters)}
-              className={cn(showFilters && "bg-gray-100")}
-              title={t("toggle_filters")}
-            >
-              <CareIcon icon="l-filter" className="size-4" />
-            </Button>
           </div>
 
           {/* Filters */}
-          {showFilters && (
-            <div className="flex flex-col gap-2 mb-4">
-              <FilterSelect
-                value={status || ""}
-                onValueChange={handleStatusChange}
-                options={[...ENCOUNTER_STATUS]}
-                label={t("status")}
-                onClear={() => setStatus(undefined)}
-                icon={<CircleDashed className="size-4 text-gray-600" />}
-                className="bg-white font-medium rounded-md hover:bg-gray-100 h-9"
-              />
 
-              <TagSelectorPopover
-                selected={selectedTags}
-                onChange={handleTagsChange}
-                resource={TagResource.ENCOUNTER}
-                asFilter
-                className="mt-0 bg-white font-medium rounded-md"
-              />
-
-              <DateRangeFilter
-                dateFrom={dateFrom}
-                dateTo={dateTo}
-                onDateFromChange={handleDateFromChange}
-                onDateToChange={handleDateToChange}
-                onDateRangeChange={(from, to) => {
-                  setDateFrom(from);
-                  setDateTo(to);
-                }}
-                onClear={() => {
-                  setDateFrom(undefined);
-                  setDateTo(undefined);
-                }}
-                popoverPlaceholder={t("select_created_date_range")}
-                className="bg-white font-medium rounded-md"
-              />
-            </div>
-          )}
+          <MultiFilter
+            selectedFilters={selectedFilters}
+            onFilterChange={handleFilterChange}
+            onOperationChange={handleOperationChange}
+            onClearAll={handleClearAll}
+            onClearFilter={handleClearFilter}
+            placeholder={t("filter")}
+            triggerButtonClassName="self-start"
+            facilityId={facilityId}
+          />
         </div>
 
         <div className="flex flex-col gap-2">
@@ -341,7 +378,13 @@ const EncounterHistoryList = ({ onSelect }: Props) => {
   );
 };
 
-export default function EncounterHistorySelector() {
+export default function EncounterHistorySelector({
+  isRailOpen,
+  setIssRailOpen,
+}: {
+  isRailOpen: boolean;
+  setIssRailOpen: (open: boolean) => void;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   const { t } = useTranslation();
@@ -352,25 +395,28 @@ export default function EncounterHistorySelector() {
         <h2 className="px-2 mb-2 text-xs font-medium text-gray-600 uppercase">
           {t("chosen_encounter")}
         </h2>
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger className="w-full">
+        <Drawer open={isOpen} onOpenChange={setIsOpen}>
+          <DrawerTrigger className="w-full">
             <EncounterSheetTrigger />
-          </SheetTrigger>
-          <SheetContent
-            side="bottom"
-            className="max-h-[85vh] rounded-t-3xl overflow-y-auto mb-2"
-          >
-            <SheetHeader className="px-4 pb-2">
-              <SheetTitle>{t("past_encounters")}</SheetTitle>
-            </SheetHeader>
-            <EncounterHistoryList onSelect={() => setIsOpen(false)} />
-          </SheetContent>
-        </Sheet>
+          </DrawerTrigger>
+          <DrawerContent className="px-4">
+            <DrawerHeader className="py-1.5">
+              <DrawerTitle className="text-lg font-semibold">
+                {t("past_encounters")}
+              </DrawerTitle>
+            </DrawerHeader>
+            <div className="overflow-y-auto pb-4 pr-2">
+              <EncounterHistoryList onSelect={() => setIsOpen(false)} />
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
       <div className="hidden lg:block pr-3">
-        <ScrollArea className="h-[calc(100vh-9rem)] pr-3">
-          <EncounterHistoryList />
-        </ScrollArea>
+        <RailPanel open={isRailOpen} onOpenChange={setIssRailOpen}>
+          <ScrollArea className="h-[calc(100vh-9rem)] pr-3">
+            <EncounterHistoryList />
+          </ScrollArea>
+        </RailPanel>
       </div>
     </>
   );
@@ -387,48 +433,75 @@ const EncounterSheetTrigger = () => {
 
   return (
     <Card className="relative rounded-md cursor-pointer w-full lg:w-80 bg-white border-primary-600">
-      <CardContent className="px-3 py-1 flex justify-between items-center">
+      <CardContent className="flex flex-col px-3 py-2 gap-1">
         <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
-        <div className="flex flex-col sm:flex-row sm:gap-3 items-start sm:items-center">
-          <span className="text-base font-semibold">
-            {t(`encounter_class__${encounter.encounter_class}`)}
-          </span>
-          <div className="flex flex-col sm:flex-row sm:gap-3 items-start sm:items-center">
-            <span className="text-sm text-gray-700">
-              {encounter.period.start && (
-                <span>
-                  {format(new Date(encounter.period.start!), "dd MMM")}
-                </span>
-              )}
-              {encounter.period.end && encounter.period.start && (
-                <span>{" - "}</span>
-              )}
-              {encounter.period.end ? (
-                <span>{format(new Date(encounter.period.end), "dd MMM")}</span>
-              ) : (
-                <span>
-                  {" - "}
-                  {t("ongoing")}
-                </span>
-              )}
+        <div className="flex justify-between items-start">
+          <div className="flex flex-col items-start gap-1">
+            <span className="text-base font-semibold">
+              {t(`encounter_class__${encounter.encounter_class}`)}
             </span>
-            <div className="w-px h-4 bg-gray-300 hidden sm:block" />
-            <span className="text-sm text-gray-700">
+            <span className="text-sm font-medium text-gray-700">
               {encounter.facility.name}
             </span>
           </div>
-        </div>
-        <div className="flex gap-3 items-center">
-          <div className="my-2">
-            <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
-              {t(`encounter_status__${encounter.status}`)}
-            </Badge>
-          </div>
-          <div className={buttonVariants({ variant: "ghost", size: "icon" })}>
-            <ChevronDown />
+          <div className="flex gap-1 items-center justify-center">
+            <div className="flex flex-col gap-1 items-end ">
+              <span className="text-sm text-gray-600 whitespace-nowrap">
+                {encounter.period.start && (
+                  <span>
+                    {format(new Date(encounter.period.start!), "dd MMM")}
+                  </span>
+                )}
+                {encounter.period.end && encounter.period.start && (
+                  <span>{" - "}</span>
+                )}
+                {encounter.period.end ? (
+                  <span>
+                    {format(new Date(encounter.period.end), "dd MMM")}
+                  </span>
+                ) : (
+                  <span>
+                    {" - "}
+                    {t("ongoing")}
+                  </span>
+                )}
+              </span>
+              <Badge
+                variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
+                size="sm"
+                className=" whitespace-nowrap"
+              >
+                {t(`encounter_status__${encounter.status}`)}
+              </Badge>
+            </div>
+            <div className={buttonVariants({ variant: "ghost", size: "icon" })}>
+              <ChevronDown />
+            </div>
           </div>
         </div>
       </CardContent>
     </Card>
+  );
+};
+
+const EncounterTagHoverCard = ({ encounter }: { encounter: EncounterRead }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-sm text-gray-700 font-medium">
+        {t("encounter_tag_label", { count: encounter.tags.length })}:
+      </span>
+      <div className="flex flex-wrap gap-2">
+        {encounter.tags.length > 0 ? (
+          <>
+            {encounter.tags.map((tag) => (
+              <TagBadge key={tag.id} tag={tag} hierarchyDisplay />
+            ))}
+          </>
+        ) : (
+          <span className="text-sm text-gray-500">{t("no_tags")}</span>
+        )}
+      </div>
+    </div>
   );
 };

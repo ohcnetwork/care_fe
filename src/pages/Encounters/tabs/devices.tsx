@@ -57,6 +57,7 @@ export const EncounterDevicesTab = () => {
         limit,
       },
     }),
+    enabled: !!facilityId,
   });
 
   const { mutate: disassociateDevice, isPending: isDisassociating } =
@@ -162,7 +163,7 @@ export const EncounterDevicesTab = () => {
             {!!(data && data.count > limit) && (
               <Pagination
                 data={{ totalCount: data.count }}
-                onChange={(page, _) => setPage(page)}
+                onChange={(page) => setPage(page)}
                 defaultPerPage={limit}
                 cPage={page}
               />

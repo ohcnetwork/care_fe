@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
+import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -9,6 +10,8 @@ import { toast } from "sonner";
 import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import careConfig from "@careConfig";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +46,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import mutate from "@/Utils/request/mutate";
+import { locationAtomFamily } from "@/atoms/location-atom";
+import { LocationPicker } from "@/components/Location/LocationPicker";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
   PaymentReconciliationCreate,
@@ -55,6 +60,8 @@ import {
   PaymentReconciliationType,
 } from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
 
 interface PaymentReconciliationSheetProps {
   open: boolean;
@@ -63,6 +70,7 @@ interface PaymentReconciliationSheetProps {
   invoice?: InvoiceRead;
   accountId: string;
   onSuccess?: () => void;
+  isCreditNote?: boolean;
 }
 
 // Add schema before the component
@@ -98,6 +106,10 @@ const formSchema = z
     disposition: z.string().optional(),
     note: z.string().optional(),
     account: z.string(),
+    is_credit_note: z.boolean().optional(),
+    location: careConfig.paymentLocationRequired
+      ? z.string().min(1)
+      : z.string().optional(),
   })
   .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
     message: t("tender_amount_cannot_be_less_than_payment_amount"),
@@ -111,11 +123,16 @@ export function PaymentReconciliationSheet({
   invoice,
   accountId,
   onSuccess,
+  isCreditNote = false,
 }: PaymentReconciliationSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [tenderAmount, setTenderAmount] = useState<string>("0");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
+  const [selectedLocationObject, setSelectedLocationObject] = useAtom(
+    locationAtomFamily(facilityId),
+  );
+  useShortcutSubContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -136,6 +153,8 @@ export function PaymentReconciliationSheet({
       disposition: "",
       note: "",
       account: accountId,
+      is_credit_note: isCreditNote,
+      location: selectedLocationObject?.id,
     },
   });
 
@@ -216,6 +235,8 @@ export function PaymentReconciliationSheet({
       amount: Number(data.amount).toFixed(2),
       tendered_amount: Number(data.tendered_amount).toFixed(2),
       returned_amount: Number(data.returned_amount).toFixed(2),
+      is_credit_note: isCreditNote,
+      location: data.location,
     };
     submitPayment(submissionData);
   });
@@ -264,7 +285,7 @@ export function PaymentReconciliationSheet({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue
                             placeholder={t("select_payment_method")}
                           />
@@ -302,6 +323,32 @@ export function PaymentReconciliationSheet({
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel
+                      aria-required={careConfig.paymentLocationRequired}
+                    >
+                      {t("location")}
+                    </FormLabel>
+                    <FormControl>
+                      <LocationPicker
+                        facilityId={facilityId}
+                        value={selectedLocationObject}
+                        onValueChange={(location) => {
+                          setSelectedLocationObject(location);
+                          field.onChange(location?.id);
+                        }}
+                        placeholder={t("select_location")}
+                        className="w-full border-gray-300"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -314,7 +361,7 @@ export function PaymentReconciliationSheet({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue
                             placeholder={t("select_reconciliation_type")}
                           />
@@ -349,7 +396,12 @@ export function PaymentReconciliationSheet({
                       <MonetaryAmountInput
                         {...field}
                         value={field.value || ""}
-                        onChange={(e) => field.onChange(e.target.value)}
+                        onChange={(e) => {
+                          field.onChange(e.target.value);
+                          if (isCreditNote) {
+                            setTenderAmount(e.target.value);
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -357,7 +409,7 @@ export function PaymentReconciliationSheet({
                 )}
               />
 
-              {isCashPayment && (
+              {isCashPayment && !isCreditNote && (
                 <>
                   <FormField
                     control={form.control}
@@ -476,6 +528,7 @@ export function PaymentReconciliationSheet({
                 ) : (
                   t("record_payment")
                 )}
+                <ShortcutBadge actionId="submit-action" />
               </Button>
             </SheetFooter>
           </form>

@@ -37,12 +37,12 @@ export function CreateDiscountMonetaryComponentSheet() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="w-full lg:w-auto">
           <PlusIcon className="size-4 mr-2" />
           {t("create_discount_component")}
         </Button>
       </SheetTrigger>
-      <SheetContent className="sm:max-w-md">
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("create_discount_component")}</SheetTitle>
         </SheetHeader>

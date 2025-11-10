@@ -12,8 +12,9 @@ import {
 import query from "@/Utils/request/query";
 import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
 import {
-  Appointment,
   AvailabilityHeatmapResponse,
+  PublicAppointment,
+  SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
 import scheduleApis from "@/types/scheduling/scheduleApi";
@@ -25,7 +26,12 @@ export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
   }[] = [];
 
   for (const slot of slots) {
+    // skip past slots
     if (isPast(slot.end_datetime)) {
+      continue;
+    }
+    // skip fully allocated slots
+    if (slot.allocated === slot.availability.tokens_per_slot) {
       continue;
     }
     const availability = slot.availability;
@@ -57,12 +63,14 @@ export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
  */
 export const useAvailabilityHeatmap = ({
   facilityId,
-  userId,
+  resourceId,
   month,
+  resourceType,
 }: {
   facilityId: string;
-  userId?: string;
+  resourceId?: string;
   month: Date;
+  resourceType: SchedulableResourceType;
 }) => {
   const { start, end } = getMonthStartAndEnd(month);
 
@@ -77,10 +85,12 @@ export const useAvailabilityHeatmap = ({
     body: {
       // voluntarily coalesce to empty string since we know query would be
       // enabled only if userId is present
-      user: userId ?? "",
+      resource_type: resourceType,
+      resource_id: resourceId ?? "",
       from_date: fromDate,
       to_date: toDate,
     },
+    silent: true,
   });
 
   if (careConfig.appointments.useAvailabilityStatsAPI === false) {
@@ -88,9 +98,9 @@ export const useAvailabilityHeatmap = ({
   }
 
   return useQuery({
-    queryKey: ["availabilityHeatmap", userId, fromDate, toDate],
+    queryKey: ["availabilityHeatmap", resourceId, fromDate, toDate],
     queryFn,
-    enabled: !!userId,
+    enabled: !!resourceId,
   });
 };
 
@@ -112,7 +122,7 @@ const getInfiniteAvailabilityHeatmap = ({
   return result;
 };
 
-export const formatAppointmentSlotTime = (appointment: Appointment) => {
+export const formatAppointmentSlotTime = (appointment: PublicAppointment) => {
   if (!appointment.token_slot?.start_datetime) {
     return "";
   }

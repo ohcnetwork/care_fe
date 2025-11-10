@@ -2,11 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, PlusIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -22,7 +23,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import {
+  MonetaryDisplay,
+  getCurrencySymbol,
+} from "@/components/ui/monetary-display";
 import {
   Table,
   TableBody,
@@ -33,15 +37,19 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 
+import { useShortcutSubContext } from "@/context/ShortcutContext";
+
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
-import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  MonetaryComponent,
+  MonetaryComponentType,
+} from "@/types/base/monetaryComponent/monetaryComponent";
+import accountApi from "@/types/billing/account/accountApi";
 import {
   ChargeItemRead,
   ChargeItemStatus,
+  MRP_CODE,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import {
@@ -50,6 +58,12 @@ import {
   InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -70,12 +84,16 @@ interface CreateInvoicePageProps {
   onSuccess?: () => void;
   showHeader?: boolean;
   sourceUrl?: string;
+  locationId?: string;
+  patientId?: string;
+  disableCreateChargeItems?: boolean;
+  showDispenseNowButton?: boolean;
 }
 
 interface PriceComponentRowProps {
   label: string;
-  components: any[];
-  totalPriceComponents: any[];
+  components: MonetaryComponent[];
+  totalPriceComponents: MonetaryComponent[];
 }
 
 function PriceComponentRow({
@@ -96,6 +114,7 @@ function PriceComponentRow({
           <TableCell>
             {component.code && `${component.code.display} `}({label})
           </TableCell>
+          <TableCell></TableCell>
           <TableCell></TableCell>
           <TableCell className="text-right">
             <MonetaryDisplay {...component} />
@@ -121,9 +140,16 @@ export function CreateInvoicePage({
   onSuccess,
   showHeader = true,
   sourceUrl,
+  locationId,
+  patientId,
+  disableCreateChargeItems = false,
+  showDispenseNowButton = false,
 }: CreateInvoicePageProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const hasInitializedSelections = useRef(false);
+
+  useShortcutSubContext("facility:billing");
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>(
     () => {
       if (!preSelectedChargeItems) return {};
@@ -139,16 +165,31 @@ export function CreateInvoicePage({
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
     {},
   );
+  const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       status: InvoiceStatus.draft,
-      payment_terms: "",
+      payment_terms: import.meta.env.REACT_DEFAULT_PAYMENT_TERMS || "",
       note: "",
       charge_items: preSelectedChargeItems?.map((item) => item.id) || [],
     },
   });
+
+  const { data: account } = useQuery({
+    queryKey: ["account", accountId],
+    queryFn: query(accountApi.retrieveAccount, {
+      pathParams: { facilityId, accountId },
+    }),
+    enabled: !!facilityId && !!accountId,
+  });
+
+  const handleChargeItemsAdded = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["chargeItems", facilityId, accountId],
+    });
+  };
 
   const {
     data: chargeItemsData,
@@ -234,25 +275,31 @@ export function CreateInvoicePage({
     }));
   };
 
-  const getUnitComponentsByType = (item: any, type: MonetaryComponentType) => {
+  const getUnitComponentsByType = (
+    item: ChargeItemRead,
+    type: MonetaryComponentType,
+  ) => {
     return (
       item.unit_price_components?.filter(
-        (c: any) => c.monetary_component_type === type,
+        (c) => c.monetary_component_type === type,
       ) || []
     );
   };
 
-  const getTotalComponentsByType = (item: any, type: MonetaryComponentType) => {
+  const getTotalComponentsByType = (
+    item: ChargeItemRead,
+    type: MonetaryComponentType,
+  ) => {
     return (
       item.total_price_components?.filter(
-        (c: any) => c.monetary_component_type === type,
+        (c) => c.monetary_component_type === type,
       ) || []
     );
   };
 
-  const getBaseComponent = (item: any) => {
+  const getBaseComponent = (item: ChargeItemRead) => {
     return item.unit_price_components?.find(
-      (c: any) => c.monetary_component_type === MonetaryComponentType.base,
+      (c) => c.monetary_component_type === MonetaryComponentType.base,
     );
   };
 
@@ -265,6 +312,26 @@ export function CreateInvoicePage({
     chargeItemsData?.pages.flatMap((page) => page.results) ??
     [];
 
+  useEffect(() => {
+    // Only auto-select on the very first load when we have data
+    if (chargeItems.length > 0 && !hasInitializedSelections.current) {
+      setSelectedRows(
+        chargeItems.reduce(
+          (acc, item) => {
+            acc[item.id] = true;
+            return acc;
+          },
+          {} as Record<string, boolean>,
+        ),
+      );
+      form.setValue(
+        "charge_items",
+        chargeItems.map((item) => item.id),
+      );
+      hasInitializedSelections.current = true;
+    }
+  }, [chargeItems, form]);
+
   return (
     <div className="container mx-auto md:px-4 pb-6">
       {showHeader && (
@@ -272,6 +339,7 @@ export function CreateInvoicePage({
           <Link
             href={`/facility/${facilityId}/billing/account/${accountId}`}
             className="text-xs text-gray-500 hover:text-gray-700"
+            data-shortcut-id="go-back"
           >
             ← {t("back_to_account")}
           </Link>
@@ -322,8 +390,21 @@ export function CreateInvoicePage({
           </div>
 
           <div className="pb-2">
-            <div className="text-sm font-medium text-gray-950">
-              {t("billable_charge_items")}
+            <div className="flex justify-between items-center mb-4">
+              <div className="text-sm font-medium text-gray-950">
+                {t("billable_charge_items")}
+              </div>
+              {!disableCreateChargeItems && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddChargeItemsOpen(true)}
+                >
+                  <PlusIcon className="size-4 mr-2" />
+                  {t("add_charge_items")}
+                  <ShortcutBadge actionId="add-charge-item" />
+                </Button>
+              )}
             </div>
             {isLoading ? (
               <TableSkeleton count={3} />
@@ -370,11 +451,14 @@ export function CreateInvoicePage({
                       <TableHead className="border bg-gray-100 text-gray-700">
                         {t("quantity")}
                       </TableHead>
+                      <TableHead className="border bg-gray-100 text-gray-700 text-right">
+                        {t("mrp")} ({getCurrencySymbol()})
+                      </TableHead>
                       <TableHead className="border-y bg-gray-100 text-gray-700 text-right">
-                        {t("unit_price")} ({t("inr")})
+                        {t("unit_price")} ({getCurrencySymbol()})
                       </TableHead>
                       <TableHead className="border rounded-tr-md bg-gray-100 text-gray-700 text-right font-semibold">
-                        {t("amount")} ({t("inr")})
+                        {t("amount")} ({getCurrencySymbol()})
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -382,7 +466,13 @@ export function CreateInvoicePage({
                     {chargeItems.filter(Boolean).flatMap((item) => {
                       const isExpanded = expandedItems[item.id] || false;
                       const baseComponent = getBaseComponent(item);
-                      const baseAmount = baseComponent?.amount || 0;
+                      const baseAmount = baseComponent?.amount || "0";
+                      const mrpAmount = item.unit_price_components.find(
+                        (c) =>
+                          c.monetary_component_type ===
+                            MonetaryComponentType.informational &&
+                          c.code?.code === MRP_CODE,
+                      )?.amount;
 
                       const mainRow = (
                         <TableRow
@@ -421,6 +511,9 @@ export function CreateInvoicePage({
                           </TableCell>
                           <TableCell className="font-medium text-base border-y text-gray-950">
                             {item.quantity}
+                          </TableCell>
+                          <TableCell className="font-medium text-base border-y text-gray-950 text-right">
+                            <MonetaryDisplay amount={mrpAmount} />
                           </TableCell>
                           <TableCell className="font-medium text-base border-y text-gray-950 text-right">
                             <MonetaryDisplay amount={baseAmount} />
@@ -470,6 +563,7 @@ export function CreateInvoicePage({
                           <TableCell>{t("amount")}</TableCell>
                           <TableCell></TableCell>
                           <TableCell></TableCell>
+                          <TableCell></TableCell>
                           <TableCell className="text-right">
                             <MonetaryDisplay amount={item.total_price} />
                           </TableCell>
@@ -514,17 +608,32 @@ export function CreateInvoicePage({
           <div className="flex justify-end space-x-4">
             <Button
               type="button"
-              variant="link"
-              className="text-base font-semibold underline"
+              variant="ghost"
+              className="text-base font-semibold"
               onClick={() => window.history.back()}
               disabled={createMutation.isPending}
+              data-shortcut-id="go-back"
             >
-              {t("cancel")}
+              <span className="underline">{t("cancel")}</span>
             </Button>
+            {showDispenseNowButton && (
+              <Button
+                type="button"
+                variant="outline_primary"
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation?payment_status=unpaid`,
+                  )
+                }
+              >
+                {t("dispense_now")}
+                <ShortcutBadge actionId="view-prescriptions" />
+              </Button>
+            )}
             <Button
               type="submit"
               variant="primary_gradient"
-              disabled={createMutation.isPending}
+              disabled={createMutation.isPending || isAddChargeItemsOpen}
             >
               {createMutation.isPending ? (
                 <div className="flex items-center gap-2">
@@ -535,12 +644,23 @@ export function CreateInvoicePage({
                 <div className="flex items-center gap-2">
                   <PlusIcon className="size-4" />
                   {t("create_invoice")}
+                  <ShortcutBadge actionId="submit-action" />
                 </div>
               )}
             </Button>
           </div>
         </form>
       </Form>
+
+      {account?.patient && (
+        <AddChargeItemsBillingSheet
+          open={isAddChargeItemsOpen}
+          onOpenChange={setIsAddChargeItemsOpen}
+          facilityId={facilityId}
+          patientId={account.patient.id}
+          onChargeItemsAdded={handleChargeItemsAdded}
+        />
+      )}
     </div>
   );
 }

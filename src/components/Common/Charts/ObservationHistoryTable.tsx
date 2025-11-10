@@ -20,6 +20,7 @@ import { Code } from "@/types/base/code/code";
 import { ObservationListRead } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
 import { useTranslation } from "react-i18next";
+
 interface ObservationHistoryTableProps {
   patientId: string;
   encounterId: string;
@@ -45,13 +46,15 @@ export const ObservationHistoryTable = ({
 }: ObservationHistoryTableProps) => {
   const { ref, inView } = useInView();
   const { t } = useTranslation();
+
   const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteQuery<
     PaginatedResponse<ObservationListRead>
   >({
     queryKey: [
       "infinite-observations",
       patientId,
-      codes.map((c) => c.code).join(","),
+      encounterId,
+      codes.map((c) => c.code),
     ],
     queryFn: async ({ pageParam = 0 }) => {
       const response = await query(observationApi.list, {

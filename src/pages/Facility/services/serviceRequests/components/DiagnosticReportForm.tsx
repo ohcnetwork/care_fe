@@ -37,7 +37,6 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { Avatar } from "@/components/Common/Avatar";
-import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import { FileListTable } from "@/components/Files/FileListTable";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
 
@@ -80,10 +79,11 @@ interface DiagnosticReportFormProps {
   diagnosticReports: DiagnosticReportRead[];
   activityDefinition?: {
     diagnostic_report_codes?: Code[];
-    category?: string;
+    classification?: string;
     specimen_requirements?: SpecimenDefinitionRead[];
   };
   specimens: SpecimenRead[];
+  disableEdit: boolean;
 }
 
 // Interface for component values
@@ -99,6 +99,7 @@ interface ObservationValue {
   value: string;
   unit: string;
   isNormal: boolean;
+  status: ObservationStatus;
   components: Record<string, ComponentValue>;
 }
 
@@ -114,6 +115,7 @@ export function DiagnosticReportForm({
   diagnosticReports,
   activityDefinition,
   specimens,
+  disableEdit,
 }: DiagnosticReportFormProps) {
   const { t } = useTranslation();
   const [observations, setObservations] = useState<ObservationsByDefinition>(
@@ -127,13 +129,7 @@ export function DiagnosticReportForm({
   const [conclusion, setConclusion] = useState<string>("");
   const queryClient = useQueryClient();
 
-  // Add state for delete confirmation
-  const [deleteConfirmation, setDeleteConfirmation] = useState<{
-    definitionId: string;
-    index: number;
-  } | null>(null);
-
-  const isImagingReport = activityDefinition?.category === "imaging";
+  const isImagingReport = activityDefinition?.classification === "imaging";
 
   // Get the latest report if any exists
   const latestReport =
@@ -158,19 +154,20 @@ export function DiagnosticReportForm({
   });
 
   // Query to fetch files for the diagnostic report
-  const { data: files = { results: [], count: 0 }, refetch: refetchFiles } =
-    useQuery<PaginatedResponse<FileReadMinimal>>({
-      queryKey: ["files", "diagnostic_report", fullReport?.id],
-      queryFn: query(fileApi.list, {
-        queryParams: {
-          file_type: "diagnostic_report",
-          associating_id: fullReport?.id,
-          limit: 100,
-          offset: 0,
-        },
-      }),
-      enabled: !!fullReport?.id,
-    });
+  const { data: files = { results: [], count: 0 } } = useQuery<
+    PaginatedResponse<FileReadMinimal>
+  >({
+    queryKey: ["files", "diagnostic_report", fullReport?.id],
+    queryFn: query(fileApi.list, {
+      queryParams: {
+        file_type: "diagnostic_report",
+        associating_id: fullReport?.id,
+        limit: 100,
+        offset: 0,
+      },
+    }),
+    enabled: !!fullReport?.id,
+  });
 
   // Creating a new diagnostic report
   const { mutate: createDiagnosticReport, isPending: isCreatingReport } =
@@ -260,28 +257,6 @@ export function DiagnosticReportForm({
       },
     });
 
-  // Add a new mutation for updating observation status
-  const { mutate: updateObservationStatus, isPending: isUpdatingStatus } =
-    useMutation({
-      mutationFn: mutate(observationApi.upsertObservations, {
-        pathParams: {
-          patient_external_id: patientId,
-          external_id: latestReport?.id || "",
-        },
-      }),
-      onSuccess: () => {
-        toast.success(t("observation_deleted"));
-        queryClient.invalidateQueries({
-          queryKey: ["diagnosticReport", latestReport?.id],
-        });
-      },
-      onError: (err: any) => {
-        toast.error(
-          `Failed to delete observation: ${err.message || "Unknown error"}`,
-        );
-      },
-    });
-
   // Initialize file upload hook
   const fileUpload = useFileUpload({
     type: "diagnostic_report" as any,
@@ -344,6 +319,7 @@ export function DiagnosticReportForm({
               value: obs.value.value || "",
               unit: obs.value.unit?.code || "",
               isNormal: obs.interpretation === "normal",
+              status: obs.status,
               components,
             };
 
@@ -376,6 +352,7 @@ export function DiagnosticReportForm({
           value: "",
           unit: "",
           isNormal: true,
+          status: ObservationStatus.AMENDED,
           components: {},
         };
       }
@@ -399,6 +376,7 @@ export function DiagnosticReportForm({
           value: "",
           unit: "",
           isNormal: true,
+          status: ObservationStatus.AMENDED,
           components: {},
         };
       }
@@ -426,6 +404,7 @@ export function DiagnosticReportForm({
           value: "",
           unit: "",
           isNormal: true,
+          status: ObservationStatus.AMENDED,
           components: {},
         };
       }
@@ -455,6 +434,7 @@ export function DiagnosticReportForm({
           value: "",
           unit: "",
           isNormal: true,
+          status: ObservationStatus.AMENDED,
           components: {},
         };
       }
@@ -493,6 +473,7 @@ export function DiagnosticReportForm({
           value: "",
           unit: "",
           isNormal: true,
+          status: ObservationStatus.AMENDED,
           components: {},
         };
       }
@@ -530,6 +511,7 @@ export function DiagnosticReportForm({
           value: "",
           unit: "",
           isNormal: true,
+          status: ObservationStatus.AMENDED,
           components: {},
         };
       }
@@ -587,6 +569,10 @@ export function DiagnosticReportForm({
       // Check if all observations have values
       const hasObservationValue = Object.values(observations).some((obsList) =>
         obsList.some((obs) => {
+          // Skip observations marked as deleted
+          if (obs.status === ObservationStatus.ENTERED_IN_ERROR) {
+            return false;
+          }
           const hasMainValue = obs.value.trim() !== "";
           const hasComponentValue = Object.values(obs.components).some(
             (comp) => comp.value.trim() !== "",
@@ -595,14 +581,23 @@ export function DiagnosticReportForm({
         }),
       );
 
+      // Check if any observations are marked for deletion
+      const hasDeletions =
+        !hasObservationValue &&
+        Object.values(observations).some((obsList) =>
+          obsList.some(
+            (obs) => obs.status === ObservationStatus.ENTERED_IN_ERROR,
+          ),
+        );
+
       // If there's a conclusion, we must have results first
       if (conclusion.trim() && !hasObservationValue) {
         toast.error(t("cannot_add_conclusion_without_results"));
         return;
       }
 
-      // Results are mandatory
-      if (!hasObservationValue) {
+      // Results are mandatory, unless an observation is being deleted
+      if (!hasObservationValue && !hasDeletions) {
         toast.error(t("please_fill_all_results"));
         return;
       }
@@ -626,14 +621,22 @@ export function DiagnosticReportForm({
                 (comp) => comp.value.trim() !== "",
               );
 
+            // For observations marked for deletion, always include them if they have an ID
+            const isMarkedForDeletion =
+              obsData.status === ObservationStatus.ENTERED_IN_ERROR &&
+              obsData.id;
+
             // For regular observations, skip if no value is entered
             // For component-based observations, check component values
-            if (!hasComponents && !obsData.value.trim()) {
-              return null;
-            }
+            // But always include observations marked for deletion
+            if (!isMarkedForDeletion) {
+              if (!hasComponents && !obsData.value.trim()) {
+                return null;
+              }
 
-            if (hasComponents && !hasComponentValues) {
-              return null;
+              if (hasComponents && !hasComponentValues) {
+                return null;
+              }
             }
 
             const value: QuestionnaireSubmitResultValue = {
@@ -688,9 +691,12 @@ export function DiagnosticReportForm({
             return {
               ...(obsData.id
                 ? { observation_id: obsData.id }
-                : { observation_definition: definitionId }),
+                : { observation_definition: observationDefinition?.slug }),
               observation: {
-                status: ObservationStatus.FINAL,
+                status:
+                  obsData.status === ObservationStatus.ENTERED_IN_ERROR
+                    ? ObservationStatus.ENTERED_IN_ERROR
+                    : ObservationStatus.FINAL,
                 value_type:
                   observationDefinition?.permitted_data_type || "float",
                 effective_datetime: new Date().toISOString(),
@@ -726,59 +732,43 @@ export function DiagnosticReportForm({
   }
 
   function handleDeleteObservation(definitionId: string, index: number) {
-    setDeleteConfirmation({ definitionId, index });
-  }
-
-  function handleConfirmDelete() {
-    if (!deleteConfirmation) return;
-    const { definitionId, index } = deleteConfirmation;
-
     const observationsList = observations[definitionId];
     if (!observationsList || !observationsList[index]) return;
 
     const observation = observationsList[index];
-    if (!observation.id) {
-      // If the observation hasn't been saved yet, just remove it from the state
-      setObservations((prev) => {
-        const updatedList = [...(prev[definitionId] || [])];
-        updatedList.splice(index, 1);
-        return {
-          ...prev,
-          [definitionId]:
-            updatedList.length > 0
-              ? updatedList
-              : [
-                  {
-                    id: "",
-                    value: "",
-                    unit: "",
-                    isNormal: true,
-                    components: {},
-                  },
-                ],
-        };
-      });
-    } else {
-      // If the observation exists in the backend, mark it as entered_in_error
-      const updatePayload: ObservationUpsertRequest = {
-        observation_id: observation.id,
-        observation_definition: definitionId,
-        observation: {
+    setObservations((prev) => {
+      const updatedList = [...(prev[definitionId] || [])];
+      let newList = [];
+      if (observation.id) {
+        // For existing observations, mark as ENTERED_IN_ERROR
+        const updatedObservation = {
+          ...observation,
           status: ObservationStatus.ENTERED_IN_ERROR,
-          value_type: "string",
-          effective_datetime: new Date().toISOString(),
-          value: observation.value
-            ? { value: observation.value }
-            : { value: "" },
-        },
+        };
+        newList = updatedList.map((obs, i) =>
+          i === index ? updatedObservation : obs,
+        );
+      } else {
+        // For new observations, remove them from the list
+        newList = updatedList.filter((_, i) => i !== index);
+      }
+      return {
+        ...prev,
+        [definitionId]:
+          newList.length > 0
+            ? newList
+            : [
+                {
+                  id: "",
+                  value: "",
+                  unit: "",
+                  isNormal: true,
+                  status: ObservationStatus.AMENDED,
+                  components: {},
+                },
+              ],
       };
-
-      updateObservationStatus({
-        observations: [updatePayload],
-      });
-    }
-
-    setDeleteConfirmation(null);
+    });
   }
 
   // Helper to render component inputs for multi-component observations like blood pressure
@@ -790,24 +780,11 @@ export function DiagnosticReportForm({
     if (!definition.component || definition.component.length === 0) {
       return null;
     }
+    const isErrored =
+      observationData.status === ObservationStatus.ENTERED_IN_ERROR;
 
     return (
       <div className="space-y-2">
-        <Separator />
-        <div className="flex justify-between items-center">
-          <Label className="text-base font-semibold">
-            {t("observation") + " " + (index + 1)}
-          </Label>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => handleDeleteObservation(definition.id, index)}
-            disabled={isUpdatingStatus}
-          >
-            <Trash2 className="size-4" />
-          </Button>
-        </div>
         {definition.component.map((component, componentIndex) => {
           const componentData = observationData.components[
             component.code.code
@@ -819,7 +796,7 @@ export function DiagnosticReportForm({
 
           return (
             <div key={component.code.code}>
-              <Label className="text-sm/10 font-semibold mb-1 block text-gray-950">
+              <Label className="text-sm/10 mb-1 block text-gray-950">
                 {componentIndex + 1}.{" "}
                 {component.code.display || component.code.code}
               </Label>
@@ -839,6 +816,7 @@ export function DiagnosticReportForm({
                           unit,
                         )
                       }
+                      disabled={isErrored || disableEdit}
                     >
                       <SelectTrigger className="w-full">
                         {componentData.unit ? (
@@ -885,6 +863,7 @@ export function DiagnosticReportForm({
                         ? "number"
                         : "text"
                     }
+                    disabled={isErrored || disableEdit}
                   />
                 </div>
 
@@ -900,10 +879,11 @@ export function DiagnosticReportForm({
                         !checked, // isNormal is the opposite of checked (isAbnormal)
                       )
                     }
+                    disabled={isErrored || disableEdit}
                   />
                   <Label
                     htmlFor={`abnormal-checkbox-${definition.id}-${component.code.code}-${index}`}
-                    className="text-sm font-medium text-gray-950 cursor-pointer"
+                    className="text-sm font-normal text-gray-950 cursor-pointer"
                   >
                     {t("abnormal")}
                   </Label>
@@ -912,6 +892,7 @@ export function DiagnosticReportForm({
             </div>
           );
         })}
+        <Separator className="mt-4" />
       </div>
     );
   }
@@ -1010,14 +991,13 @@ export function DiagnosticReportForm({
               <div className="space-y-6">
                 {fullReport.status !== DiagnosticReportStatus.final &&
                   observationDefinitions.map((definition) => {
-                    const hasComponents =
-                      definition.component && definition.component.length > 0;
                     const observationsList = observations[definition.id] || [
                       {
                         id: "",
                         value: "",
                         unit: "",
                         isNormal: true,
+                        status: ObservationStatus.AMENDED,
                         components: {},
                       },
                     ];
@@ -1035,119 +1015,152 @@ export function DiagnosticReportForm({
                               </Label>
                             </div>
 
-                            {observationsList.map((observationData, index) => (
-                              <div key={index} className="space-y-4">
-                                {/* For blood pressure and similar observations with components, we may or may not need to show the main value field */}
-                                {(!hasComponents ||
-                                  definition.permitted_data_type !==
-                                    "quantity") && (
-                                  <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-stretch sm:items-center">
-                                    {definition.permitted_unit && (
-                                      <div className="w-full sm:w-32">
-                                        <Label className="text-sm font-medium mb-1 block text-gray-700">
-                                          {t("unit")}
-                                        </Label>
-                                        <Select
-                                          value={observationData.unit}
-                                          onValueChange={(unit) =>
-                                            handleUnitChange(
+                            {observationsList.map((observationData, index) => {
+                              const hasComponents =
+                                definition.component &&
+                                definition.component.length > 0;
+                              const isErrored =
+                                observationData.status ===
+                                ObservationStatus.ENTERED_IN_ERROR;
+                              return (
+                                <div
+                                  key={index}
+                                  className={cn(
+                                    "space-y-1 bg-gray-200/50 p-4 rounded-lg",
+                                    isErrored && "bg-gray-100",
+                                  )}
+                                >
+                                  <div className="flex justify-between items-center">
+                                    <Label className="text-sm font-semibold text-gray-950">
+                                      {t("observation") + " " + (index + 1)}
+                                    </Label>
+                                    {isErrored ? (
+                                      <span className="text-sm text-red-500">
+                                        {t("marked_for_deletion")}
+                                      </span>
+                                    ) : (
+                                      !disableEdit && (
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-2"
+                                          onClick={() =>
+                                            handleDeleteObservation(
                                               definition.id,
                                               index,
-                                              unit,
                                             )
                                           }
+                                          disabled={
+                                            isErrored ||
+                                            (index === 0 && !observationData.id)
+                                          }
                                         >
-                                          <SelectTrigger className="w-full">
-                                            <SelectValue
-                                              placeholder={t("unit")}
-                                            />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            <SelectItem
-                                              value={
-                                                definition.permitted_unit.code
-                                              }
-                                            >
-                                              {definition.permitted_unit
-                                                .display ||
-                                                definition.permitted_unit.code}
-                                            </SelectItem>
-                                          </SelectContent>
-                                        </Select>
-                                      </div>
+                                          <Trash2 className="size-4" />
+                                        </Button>
+                                      )
                                     )}
-
-                                    <div className="flex-1">
-                                      <Label className="text-sm font-medium mb-1 block text-gray-700">
-                                        {t("result")}
-                                      </Label>
-                                      <Input
-                                        value={observationData.value}
-                                        onChange={(e) =>
-                                          handleValueChange(
-                                            definition.id,
-                                            index,
-                                            e.target.value,
-                                          )
-                                        }
-                                        placeholder={t("result_value")}
-                                        type={
-                                          definition.permitted_data_type ===
-                                            "decimal" ||
-                                          definition.permitted_data_type ===
-                                            "integer"
-                                            ? "number"
-                                            : "text"
-                                        }
-                                      />
-                                    </div>
-
-                                    <div className="flex items-center space-x-2 sm:pt-6">
-                                      <Checkbox
-                                        id={`abnormal-checkbox-${definition.id}-${index}`}
-                                        checked={!observationData.isNormal}
-                                        onCheckedChange={(checked) =>
-                                          handleNormalChange(
-                                            definition.id,
-                                            index,
-                                            !checked, // isNormal is the opposite of checked (isAbnormal)
-                                          )
-                                        }
-                                      />
-                                      <Label
-                                        htmlFor={`abnormal-checkbox-${definition.id}-${index}`}
-                                        className="text-sm font-medium text-gray-700 cursor-pointer"
-                                      >
-                                        {t("abnormal")}
-                                      </Label>
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-2"
-                                        onClick={() =>
-                                          handleDeleteObservation(
-                                            definition.id,
-                                            index,
-                                          )
-                                        }
-                                        disabled={isUpdatingStatus}
-                                      >
-                                        <Trash2 className="size-4" />
-                                      </Button>
-                                    </div>
                                   </div>
-                                )}
 
-                                {/* Render component inputs for multi-component observations */}
-                                {hasComponents &&
-                                  renderComponentInputs(
-                                    definition,
-                                    observationData,
-                                    index,
+                                  {/* For blood pressure and similar observations with components, we may or may not need to show the main value field */}
+                                  {!hasComponents && (
+                                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-stretch sm:items-center">
+                                      {definition.permitted_unit && (
+                                        <div className="w-full sm:w-32">
+                                          <Label className="text-sm font-medium mb-1 block text-gray-700">
+                                            {t("unit")}
+                                          </Label>
+                                          <Select
+                                            value={observationData.unit}
+                                            onValueChange={(unit) =>
+                                              handleUnitChange(
+                                                definition.id,
+                                                index,
+                                                unit,
+                                              )
+                                            }
+                                            disabled={isErrored || disableEdit}
+                                          >
+                                            <SelectTrigger className="w-full">
+                                              <SelectValue
+                                                placeholder={t("unit")}
+                                              />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem
+                                                value={
+                                                  definition.permitted_unit.code
+                                                }
+                                              >
+                                                {definition.permitted_unit
+                                                  .display ||
+                                                  definition.permitted_unit
+                                                    .code}
+                                              </SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                      )}
+
+                                      <div className="flex-1">
+                                        <Label className="text-sm font-medium mb-1 block text-gray-700">
+                                          {t("result")}
+                                        </Label>
+                                        <Input
+                                          value={observationData.value}
+                                          onChange={(e) =>
+                                            handleValueChange(
+                                              definition.id,
+                                              index,
+                                              e.target.value,
+                                            )
+                                          }
+                                          placeholder={t("result_value")}
+                                          type={
+                                            definition.permitted_data_type ===
+                                              "decimal" ||
+                                            definition.permitted_data_type ===
+                                              "integer"
+                                              ? "number"
+                                              : "text"
+                                          }
+                                          disabled={isErrored || disableEdit}
+                                        />
+                                      </div>
+
+                                      <div className="flex items-center space-x-2 sm:pt-6">
+                                        <Checkbox
+                                          id={`abnormal-checkbox-${definition.id}-${index}`}
+                                          checked={!observationData.isNormal}
+                                          onCheckedChange={(checked) =>
+                                            handleNormalChange(
+                                              definition.id,
+                                              index,
+                                              !checked, // isNormal is the opposite of checked (isAbnormal)
+                                            )
+                                          }
+                                          disabled={isErrored || disableEdit}
+                                        />
+                                        <Label
+                                          htmlFor={`abnormal-checkbox-${definition.id}-${index}`}
+                                          className="text-sm font-medium text-gray-700 cursor-pointer"
+                                        >
+                                          {t("abnormal")}
+                                        </Label>
+                                      </div>
+                                    </div>
                                   )}
-                              </div>
-                            ))}
+
+                                  {/* Render component inputs for multi-component observations */}
+                                  {hasComponents &&
+                                    renderComponentInputs(
+                                      definition,
+                                      observationData,
+                                      index,
+                                    )}
+                                </div>
+                              );
+                            })}
 
                             {/* Add button for multiple observations */}
                             <Button
@@ -1166,12 +1179,14 @@ export function DiagnosticReportForm({
                                         value: "",
                                         unit: "",
                                         isNormal: true,
+                                        status: ObservationStatus.AMENDED,
                                         components: {},
                                       },
                                     ],
                                   };
                                 });
                               }}
+                              disabled={disableEdit}
                             >
                               <PlusCircle className="size-4 mr-2" />
                               {t("add_another_result")}
@@ -1198,6 +1213,7 @@ export function DiagnosticReportForm({
                         value={conclusion}
                         onChange={(e) => setConclusion(e.target.value)}
                         rows={3}
+                        disabled={disableEdit}
                       />
                     </CardContent>
                   </Card>
@@ -1210,7 +1226,7 @@ export function DiagnosticReportForm({
                       <Button
                         variant="primary"
                         onClick={handleSubmit}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || disableEdit}
                       >
                         <Save className="size-4 mr-2" />
                         {t("save_results")}
@@ -1229,9 +1245,8 @@ export function DiagnosticReportForm({
                             files={files.results}
                             type="diagnostic_report"
                             associatingId={fullReport.id}
-                            canEdit={true}
+                            canEdit={!disableEdit}
                             showHeader={false}
-                            onRefetch={refetchFiles}
                           />
                         </div>
                       )}
@@ -1318,7 +1333,7 @@ export function DiagnosticReportForm({
                               );
                             setSelectedReportCode(code || null);
                           }}
-                          disabled={!hasCollectedSpecimens}
+                          disabled={!hasCollectedSpecimens || disableEdit}
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue
@@ -1344,6 +1359,7 @@ export function DiagnosticReportForm({
                   <Button
                     onClick={handleCreateReport}
                     disabled={
+                      disableEdit ||
                       isCreatingReport ||
                       !hasCollectedSpecimens ||
                       (!!activityDefinition?.diagnostic_report_codes?.length &&
@@ -1368,19 +1384,6 @@ export function DiagnosticReportForm({
         fileUpload={fileUpload}
         associatingId={fullReport?.id || ""}
         type="diagnostic_report"
-      />
-
-      <ConfirmActionDialog
-        open={deleteConfirmation !== null}
-        onOpenChange={(open) => {
-          if (!open) setDeleteConfirmation(null);
-        }}
-        title={t("delete_observation")}
-        description={t("observation_delete_confirmation")}
-        onConfirm={handleConfirmDelete}
-        confirmText={t("delete")}
-        cancelText={t("cancel")}
-        variant="destructive"
       />
     </Card>
   );

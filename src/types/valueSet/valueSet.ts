@@ -73,7 +73,6 @@ export interface ValueSetUpdate extends ValueSetBase {
 export interface ExpandRequest {
   search: string;
   count: number;
-  language: string;
 }
 
 export interface ValueSetCodeMetadata {
@@ -85,43 +84,15 @@ export interface ValueSetCodeMetadata {
   inactive: boolean;
 }
 
-export interface Property {
-  children: string[];
-  effectiveTime: string;
-  inactive: boolean | null;
-  moduleId: string;
-  normalForm: string;
-  normalFormTerse: string;
-  parents: string[];
-  sufficientlyDefined: boolean | null;
-}
-
 export interface DesignationItem {
   details: Designation;
-  context: {
-    "http://snomed.info/fhir/StructureDefinition/designation-use-context": {
-      context: {
-        system: string;
-        code: string;
-      };
-      role: {
-        system: string;
-        code: string;
-        display: string;
-      };
-      type: {
-        system: string;
-        code: string;
-        display: string;
-      };
-    };
-  };
+  context: Record<string, unknown>;
 }
 
 export interface ValueSetLookupResponse {
   designations: DesignationItem[];
   metadata: ValueSetCodeMetadata;
-  properties: Property;
+  properties: Record<string, unknown>;
 }
 
 export interface ValueSetLookupRequest {

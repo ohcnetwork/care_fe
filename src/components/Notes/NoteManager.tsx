@@ -56,7 +56,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { formatDateTime, isTouchDevice } from "@/Utils/utils";
+import { formatDateTime, formatName, isTouchDevice } from "@/Utils/utils";
 import { NoteRead } from "@/types/notes/messages";
 import { ThreadRead, threadTemplates } from "@/types/notes/thread";
 import threadApi from "@/types/notes/threadApi";
@@ -137,7 +137,7 @@ function MessageItem({
           >
             <span className="flex pr-2">
               <Avatar
-                name={message.created_by?.username}
+                name={formatName(message.created_by)}
                 imageUrl={message.created_by?.profile_picture_url}
                 className="size-8 rounded-full object-cover ring-1 ring-transparent hover:ring-red-200 transition"
               />
@@ -154,7 +154,7 @@ function MessageItem({
         >
           <p className="text-xs space-x-2 mb-1">
             <span className="text-gray-700 font-medium">
-              {message.created_by.username}
+              {formatName(message.created_by)}
             </span>
             <time
               className="text-gray-500"
@@ -280,39 +280,40 @@ const MobileNav = ({
   onOpenThreads,
   onNewThread,
   canWrite,
-  t,
 }: {
   threadsCount: number;
   onOpenThreads: () => void;
   onNewThread: () => void;
   canWrite: boolean;
-  t: (key: string) => string;
-}) => (
-  <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-2 flex items-center justify-around z-50 divide-x">
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={onOpenThreads}
-      className="flex-1 flex flex-col items-center gap-1 h-auto py-2 rounded-none"
-    >
-      <MessageCircle className="size-5" />
-      <span className="text-xs">
-        {t("threads")} ({threadsCount})
-      </span>
-    </Button>
-    {canWrite && (
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-2 flex items-center justify-around z-50 divide-x">
       <Button
         variant="ghost"
         size="sm"
-        onClick={onNewThread}
+        onClick={onOpenThreads}
         className="flex-1 flex flex-col items-center gap-1 h-auto py-2 rounded-none"
       >
-        <MessageSquarePlus className="size-5" />
-        <span className="text-xs">{t("new_thread")}</span>
+        <MessageCircle className="size-5" />
+        <span className="text-xs">
+          {t("threads")}({threadsCount})
+        </span>
       </Button>
-    )}
-  </div>
-);
+      {canWrite && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onNewThread}
+          className="flex-1 flex flex-col items-center gap-1 h-auto py-2 rounded-none"
+        >
+          <MessageSquarePlus className="size-5" />
+          <span className="text-xs">{t("new_thread")}</span>
+        </Button>
+      )}
+    </div>
+  );
+};
 
 interface NoteManagerProps {
   canAccess: boolean;
@@ -770,7 +771,6 @@ export function NoteManager({
         onOpenThreads={() => setIsThreadsExpanded(true)}
         onNewThread={() => setShowNewThreadDialog(true)}
         canWrite={canWrite}
-        t={t}
       />
 
       <NewThreadDialog

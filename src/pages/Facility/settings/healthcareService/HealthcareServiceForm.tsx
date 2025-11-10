@@ -30,6 +30,8 @@ import Page from "@/components/Common/Page";
 import RequirementsSelector from "@/components/Common/RequirementsSelector";
 import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 
+import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+
 // import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
 import mutate from "@/Utils/request/mutate";
@@ -41,7 +43,6 @@ import {
   InternalType,
 } from "@/types/healthcareService/healthcareService";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
-import locationApi from "@/types/location/locationApi";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -50,15 +51,20 @@ const formSchema = z.object({
   //     display: z.string().min(1, "Display name is required"),
   //     system: z.string().min(1, "System is required"),
   //   }),
-  styling_metadata: z
-    .object({
-      careIcon: z.string().optional(),
-    })
-    .nullable()
-    .optional(),
+  styling_metadata: z.object({
+    careIcon: z.string().optional(),
+  }),
   extra_details: z.string(),
   internal_type: z.nativeEnum(InternalType).optional(),
-  locations: z.array(z.string()).min(1, "At least one location is required"),
+  locations: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+      }),
+    )
+    .min(1, "At least one location is required"),
+  managing_organization: z.string().nullable().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -127,14 +133,6 @@ function HealthcareServiceFormContent({
   const queryClient = useQueryClient();
   const isEditMode = Boolean(healthcareServiceId);
 
-  const { data: locations } = useQuery({
-    queryKey: ["locations", facilityId],
-    queryFn: query(locationApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: { limit: 100 },
-    }),
-  });
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues:
@@ -142,15 +140,23 @@ function HealthcareServiceFormContent({
         ? {
             name: existingData.name,
             // service_type: existingData.service_type,
-            styling_metadata: existingData.styling_metadata,
+            styling_metadata: existingData.styling_metadata || {
+              careIcon: undefined,
+            },
             extra_details: existingData.extra_details,
-            internal_type: existingData.internal_type,
-            locations: existingData.locations.map((loc) => loc.id),
+            internal_type: existingData.internal_type || undefined,
+            locations: existingData.locations.map((loc) => ({
+              id: loc.id,
+              name: loc.name,
+            })),
+            managing_organization: existingData.managing_organization?.id,
           }
         : {
-            styling_metadata: { careIcon: "" },
+            name: "",
+            styling_metadata: { careIcon: undefined },
             extra_details: "",
             locations: [],
+            managing_organization: null,
           },
   });
 
@@ -182,28 +188,28 @@ function HealthcareServiceFormContent({
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["healthcareServices"] });
         toast.success(t("healthcare_service_updated_successfully"));
-        navigate(`/facility/${facilityId}/settings/healthcare_services`);
+        navigate(
+          `/facility/${facilityId}/settings/healthcare_services/${healthcareServiceId}`,
+        );
       },
     });
 
   const isPending = isCreating || isUpdating;
 
   function onSubmit(data: FormValues) {
-    // Prepare styling_metadata - only include if careIcon has a value
-    const styling_metadata = data.styling_metadata?.careIcon
-      ? { careIcon: data.styling_metadata.careIcon }
-      : {};
-
     if (isEditMode && healthcareServiceId) {
       updateHealthcareService({
         ...data,
         facility: facilityId,
+        locations: data.locations.map((loc) => loc.id),
+        managing_organization: data.managing_organization || undefined,
       } as HealthcareServiceUpdateSpec);
     } else {
       const payload: HealthcareServiceCreateSpec = {
         ...data,
         facility: facilityId,
-        styling_metadata,
+        locations: data.locations.map((loc) => loc.id),
+        managing_organization: data.managing_organization || undefined,
       };
       createHealthcareService(payload);
     }
@@ -284,7 +290,7 @@ function HealthcareServiceFormContent({
                           onValueChange={field.onChange}
                           value={field.value}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger ref={field.ref}>
                             <SelectValue
                               placeholder={t("select_internal_type")}
                             />
@@ -340,26 +346,20 @@ function HealthcareServiceFormContent({
                         <RequirementsSelector
                           title={t("location_requirements")}
                           description={t("location_requirements_description")}
-                          value={field.value.map((locationId) => {
-                            const location = locations?.results.find(
-                              (loc) => loc.id === locationId,
-                            );
-                            return {
-                              value: locationId,
-                              label: location?.name || locationId,
-                              details: [],
-                            };
-                          })}
+                          value={field.value.map((location) => ({
+                            value: location.id,
+                            label: location.name,
+                            details: [],
+                          }))}
                           onChange={(values) => {
-                            field.onChange(values.map((item) => item.value));
+                            field.onChange(
+                              values.map((item) => ({
+                                id: item.value,
+                                name: item.label,
+                              })),
+                            );
                           }}
-                          options={
-                            locations?.results.map((location) => ({
-                              label: location.name,
-                              value: location.id,
-                              details: [],
-                            })) || []
-                          }
+                          options={[]}
                           isLoading={false}
                           placeholder={t("select_locations")}
                           customSelector={
@@ -369,6 +369,49 @@ function HealthcareServiceFormContent({
                               onChange={field.onChange}
                             />
                           }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Managing Organization Section */}
+            <div className="rounded-lg border border-gray-200 bg-white p-4">
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-base font-medium text-gray-900">
+                    {t("managing_organization")}{" "}
+                    <span className="text-sm font-normal text-gray-500">
+                      ({t("optional")})
+                    </span>
+                  </h2>
+                  <p className="mt-0.5 text-sm text-gray-500">
+                    {t("select_organization_that_manages_this_service")}
+                  </p>
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="managing_organization"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <FacilityOrganizationSelector
+                          value={field.value ? [field.value] : null}
+                          currentOrganizations={
+                            existingData?.managing_organization
+                              ? [existingData.managing_organization]
+                              : []
+                          }
+                          onChange={(value) => {
+                            field.onChange(value?.[0] || null);
+                          }}
+                          facilityId={facilityId}
+                          singleSelection={true}
+                          optional={true}
                         />
                       </FormControl>
                       <FormMessage />
@@ -427,7 +470,10 @@ function HealthcareServiceFormContent({
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={isPending || !form.formState.isDirty}
+              >
                 {isPending
                   ? isEditMode
                     ? t("saving")

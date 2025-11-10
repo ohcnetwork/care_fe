@@ -1,6 +1,6 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { Code } from "@/types/base/code/code";
+import { CodeConceptMinimal } from "@/types/base/code/code";
 
 import {
   ExpandRequest,
@@ -45,29 +45,29 @@ export default {
     path: "/api/v1/valueset/{slug}/expand/",
     method: HttpMethod.POST,
     TBody: Type<ExpandRequest>(),
-    TRes: Type<{ results: Code[] }>(),
+    TRes: Type<{ results: CodeConceptMinimal[] }>(),
   },
   previewSearch: {
     path: "/api/v1/valueset/preview_search/",
     method: HttpMethod.POST,
     TBody: Type<ValueSetBase>(),
-    TRes: Type<{ results: Code[] }>(),
+    TRes: Type<{ results: CodeConceptMinimal[] }>(),
   },
   favourites: {
     path: "/api/v1/valueset/{slug}/favourites/",
     method: HttpMethod.GET,
-    TRes: Type<Code[]>(),
+    TRes: Type<CodeConceptMinimal[]>(),
   },
   addFavourite: {
     path: "/api/v1/valueset/{slug}/add_favourite/",
     method: HttpMethod.POST,
-    TBody: Type<Code>(),
+    TBody: Type<CodeConceptMinimal>(),
     TRes: Type<{ message: string }>(),
   },
   removeFavourite: {
     path: "/api/v1/valueset/{slug}/remove_favourite/",
     method: HttpMethod.POST,
-    TBody: Type<Code>(),
+    TBody: Type<CodeConceptMinimal>(),
     TRes: Type<{ message: string }>(),
   },
   clearFavourites: {
@@ -79,18 +79,18 @@ export default {
   recentViews: {
     path: "/api/v1/valueset/{slug}/recent_views/",
     method: HttpMethod.GET,
-    TRes: Type<Code[]>(),
+    TRes: Type<CodeConceptMinimal[]>(),
   },
   addRecentView: {
     path: "/api/v1/valueset/{slug}/add_recent_view/",
     method: HttpMethod.POST,
-    TBody: Type<Code>(),
+    TBody: Type<CodeConceptMinimal>(),
     TRes: Type<{ message: string }>(),
   },
   removeRecentView: {
     path: "/api/v1/valueset/{slug}/remove_recent_view/",
     method: HttpMethod.POST,
-    TBody: Type<Code>(),
+    TBody: Type<CodeConceptMinimal>(),
     TRes: Type<{ message: string }>(),
   },
   clearRecentViews: {

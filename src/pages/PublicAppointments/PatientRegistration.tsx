@@ -33,7 +33,7 @@ import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrgani
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import { Appointment } from "@/types/scheduling/schedule";
+import { PublicAppointment } from "@/types/scheduling/schedule";
 
 type PatientRegistrationProps = {
   facilityId: string;
@@ -109,7 +109,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
           Authorization: `Bearer ${tokenData.token}`,
         },
       }),
-      onSuccess: (data: Appointment) => {
+      onSuccess: (data: PublicAppointment) => {
         toast.success(t("appointment_created_success"));
         queryClient.invalidateQueries({
           queryKey: [
@@ -154,7 +154,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         data.ageInputType === "date_of_birth"
           ? dateQueryString(data.date_of_birth)
           : undefined,
-      age: data.ageInputType === "age" ? data.age : undefined,
+      age: data.ageInputType === "age" ? Number(data.age) : undefined,
       pincode: data.pincode,
       geo_organization: data.geo_organization,
     };
@@ -206,7 +206,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                   <FormItem className="flex flex-col">
                     <FormLabel aria-required>{t("patient_name")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder={t("type_patient_name")} />
+                      <Input {...field} placeholder={t("type_name")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -277,7 +277,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
                             onChange={(date) =>
                               field.onChange(dateQueryString(date))
                             }
-                            id="dob"
                           />
                         </FormControl>
                         <FormMessage />

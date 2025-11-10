@@ -9,6 +9,7 @@ import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 import { Permissions, getPermissions } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
+import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
 import { DispenseMedicineButton } from "@/pages/Encounters/tabs/overview/summary-panel-details-tab/dispense-medicine";
@@ -52,6 +53,7 @@ type EncounterContextType = {
     manageCareTeam: () => void;
     manageDepartments: () => void;
     dispenseMedicine: () => void;
+    dispense: () => void;
   };
 };
 
@@ -62,6 +64,7 @@ enum EncounterAction {
   ManageCareTeam,
   ManageDepartments,
   DispenseMedicine,
+  Dispense,
 }
 
 const encounterContext = createContext<EncounterContextType | undefined>(
@@ -88,6 +91,7 @@ export function EncounterProvider({
     queryKey: ["patient", patientId],
     queryFn: query(patientApi.getPatient, {
       pathParams: { id: patientId },
+      silent: true,
     }),
   });
 
@@ -181,7 +185,7 @@ export function EncounterProvider({
         patientId,
         primaryEncounterId,
         selectedEncounterId,
-        patient,
+        patient: patient ?? primaryEncounter?.patient,
         primaryEncounter,
         selectedEncounter,
         isPatientLoading,
@@ -215,6 +219,9 @@ export function EncounterProvider({
           },
           dispenseMedicine: () => {
             setActiveAction(EncounterAction.DispenseMedicine);
+          },
+          dispense: () => {
+            setActiveAction(EncounterAction.Dispense);
           },
         },
       }}
@@ -256,7 +263,6 @@ export function EncounterProvider({
           }}
           encounter={selectedEncounter}
           canWrite={canWriteSelectedEncounter}
-          trigger={<></>}
         />
       )}
 
@@ -270,7 +276,7 @@ export function EncounterProvider({
           setOpen={(open) => {
             setActiveAction(open ? EncounterAction.ManageDepartments : null);
           }}
-          trigger={<></>}
+          trigger={<span />}
         />
       )}
 
@@ -278,6 +284,13 @@ export function EncounterProvider({
         open={activeAction === EncounterAction.DispenseMedicine}
         setOpen={(open) => {
           setActiveAction(open ? EncounterAction.DispenseMedicine : null);
+        }}
+      />
+
+      <DispenseButton
+        open={activeAction === EncounterAction.Dispense}
+        setOpen={(open) => {
+          setActiveAction(open ? EncounterAction.Dispense : null);
         }}
       />
     </encounterContext.Provider>

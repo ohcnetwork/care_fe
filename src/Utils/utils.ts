@@ -5,7 +5,7 @@ import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
-import { PatientRead } from "@/types/emr/patient/patient";
+import { PatientRead, PublicPatientRead } from "@/types/emr/patient/patient";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -93,30 +93,9 @@ export const dateTimeQueryString = (date: DateLike, isEndDate = false) => {
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/**
- * Referred from: https://stackoverflow.com/a/9039885/7887936
- * @returns `true` if device is iOS, else `false`
- */
-function _isAppleDevice() {
-  if (navigator.platform.includes("Mac")) return true;
-  return (
-    [
-      "iPad Simulator",
-      "iPhone Simulator",
-      "iPod Simulator",
-      "iPad",
-      "iPhone",
-      "iPod",
-    ].includes(navigator.platform) ||
-    // iPad on iOS 13 detection
-    (navigator.userAgent.includes("Mac") && "ontouchend" in document)
-  );
-}
-
-/**
- * `true` if device is an Apple device, else `false`
- */
-export const isAppleDevice = _isAppleDevice();
+export const isAppleDevice =
+  /iPhone|iPad|iPod|Mac/i.test(navigator.userAgent) ||
+  (navigator.userAgent.includes("Mac") && "ontouchend" in document);
 
 function hasTouch() {
   try {
@@ -161,7 +140,10 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
   };
 };
 
-export const formatPatientAge = (obj: PatientRead, abbreviated = false) => {
+export const formatPatientAge = (
+  obj: PatientRead | PublicPatientRead,
+  abbreviated = false,
+) => {
   const suffixes = getRelativeDateSuffix(abbreviated);
   const start = dayjs(
     obj.date_of_birth
@@ -169,9 +151,10 @@ export const formatPatientAge = (obj: PatientRead, abbreviated = false) => {
       : new Date(obj.year_of_birth!, 0, 1),
   );
 
-  const end = dayjs(
-    obj.deceased_datetime ? new Date(obj.deceased_datetime) : new Date(),
-  );
+  const end =
+    "deceased_datetime" in obj && obj.deceased_datetime
+      ? dayjs(new Date(obj.deceased_datetime))
+      : dayjs(new Date());
 
   const years = end.diff(start, "years");
   if (years) {

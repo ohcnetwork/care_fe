@@ -1,17 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { navigate } from "raviger";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterSelect } from "@/components/ui/filter-select";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -20,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 
 import Page from "@/components/Common/Page";
 import {
@@ -27,37 +24,39 @@ import {
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
 
+import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
+
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import {
   PRODUCT_STATUS_COLORS,
-  ProductBase,
   ProductRead,
   ProductStatusOptions,
 } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
+import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
 function ProductCard({
   product,
   facilityId,
 }: {
-  product: ProductBase;
+  product: ProductRead;
   facilityId: string;
 }) {
   const { t } = useTranslation();
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="mb-4 flex flex-wrap flex-col md:flex-row items-start justify-between gap-2">
           <div>
             <div className="mb-2 flex items-center gap-2">
               <Badge variant={PRODUCT_STATUS_COLORS[product.status]}>
                 {t(product.status)}
               </Badge>
             </div>
-            <h3 className="font-medium text-gray-900">
-              Product ID: {product.id}
+            <h3 className="font-medium text-gray-900 break-normal text-lg">
+              {product.product_knowledge.name}
             </h3>
             {product.batch?.lot_number && (
               <p className="mt-1 text-sm text-gray-500">
@@ -71,16 +70,9 @@ function ProductCard({
               </p>
             )}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              navigate(`/facility/${facilityId}/settings/product/${product.id}`)
-            }
-          >
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("see_details")}
-          </Button>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <ProductActions product={product} facilityId={facilityId} />
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -92,14 +84,10 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
-
-  // TODO: Remove this once we have a default status (robo's PR)
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: "active" });
-    }
-  }, []);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["products", qParams],
@@ -111,10 +99,19 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: qParams.status,
-        name: qParams.search,
-        ordering: "-created_date",
+        product_knowledge: qParams.product_knowledge_slug,
       },
     }),
+  });
+
+  const { data: productKnowledge } = useQuery({
+    queryKey: ["productKnowledge", qParams.product_knowledge_slug],
+    queryFn: query.debounced(productKnowledgeApi.retrieveProductKnowledge, {
+      pathParams: {
+        slug: qParams.product_knowledge_slug,
+      },
+    }),
+    enabled: !!qParams.product_knowledge_slug,
   });
 
   const products = response?.results || [];
@@ -128,31 +125,20 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
             <div>
               <p className="text-gray-600 text-sm">{t("manage_products")}</p>
             </div>
-            <Button
-              onClick={() =>
-                navigate(`/facility/${facilityId}/settings/product/new`)
-              }
-            >
-              <CareIcon icon="l-plus" className="mr-2" />
-              {t("add_product")}
-            </Button>
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
-            <div className="w-full md:w-auto">
-              <div className="relative w-full md:w-auto">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  <CareIcon icon="l-search" className="size-5" />
-                </span>
-                <Input
-                  placeholder={t("search_products")}
-                  value={qParams.search || ""}
-                  onChange={(e) =>
-                    updateQuery({ search: e.target.value || undefined })
-                  }
-                  className="w-full md:w-[300px] pl-10"
-                />
-              </div>
+            <div className="w-full sm:w-auto">
+              <ProductKnowledgeSelect
+                value={productKnowledge}
+                onChange={(productKnowledge) => {
+                  updateQuery({
+                    product_knowledge_slug: productKnowledge?.slug || undefined,
+                  });
+                }}
+                placeholder={t("search_product_knowledge")}
+                disableFavorites
+              />
             </div>
             <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">
               <div className="flex-1 sm:flex-initial sm:w-auto">
@@ -160,7 +146,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(ProductStatusOptions)}
-                  label="status"
+                  label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>
@@ -179,7 +165,9 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
           </>
         ) : products.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
             title={t("no_products_found")}
             description={t("adjust_product_filters")}
           />
@@ -187,7 +175,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
           <>
             {/* Mobile Card View */}
             <div className="grid gap-4 md:hidden">
-              {products.map((product: ProductBase) => (
+              {products.map((product: ProductRead) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -200,8 +188,8 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
               <div className="rounded-lg border">
                 <Table>
                   <TableHeader className="bg-gray-100">
-                    <TableRow>
-                      <TableHead>{t("id")}</TableHead>
+                    <TableRow className="divide-x">
+                      <TableHead>{t("name")}</TableHead>
                       <TableHead>{t("status")}</TableHead>
                       <TableHead>{t("lot_number")}</TableHead>
                       <TableHead>{t("expires")}</TableHead>
@@ -230,18 +218,12 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
                             : "-"}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              navigate(
-                                `/facility/${facilityId}/settings/product/${product.id}`,
-                              )
-                            }
-                          >
-                            <CareIcon icon="l-edit" className="size-4" />
-                            {t("see_details")}
-                          </Button>
+                          <div className="flex gap-2">
+                            <ProductActions
+                              product={product}
+                              facilityId={facilityId}
+                            />
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -259,5 +241,20 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
         )}
       </div>
     </Page>
+  );
+}
+
+function ProductActions({
+  product,
+  facilityId,
+}: {
+  product: ProductRead;
+  facilityId: string;
+}) {
+  return (
+    <ActionButtons
+      editPath={`/facility/${facilityId}/settings/product/${product.id}/edit`}
+      viewPath={`/facility/${facilityId}/settings/product/${product.id}`}
+    />
   );
 }

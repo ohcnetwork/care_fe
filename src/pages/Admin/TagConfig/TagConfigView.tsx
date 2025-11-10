@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import React from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -10,12 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import TagConfigFormDrawer from "./components/TagConfigFormDrawer";
 
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
@@ -31,7 +25,6 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
-import TagConfigForm from "./TagConfigForm";
 import TagConfigTable from "./components/TagConfigTable";
 
 interface TagConfigViewProps {
@@ -46,9 +39,6 @@ export default function TagConfigView({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { goBack } = useAppHistory();
-
-  const [isEditSheetOpen, setIsEditSheetOpen] = React.useState(false);
-  const [isAddChildSheetOpen, setIsAddChildSheetOpen] = React.useState(false);
 
   // Fetch tag details
   const { data: tagConfig, isLoading } = useQuery({
@@ -87,7 +77,6 @@ export default function TagConfigView({
       return mutate(tagConfigApi.update, {
         pathParams: { external_id: child.id! },
       })({
-        slug: childData.slug,
         display: childData.display,
         category: childData.category,
         description: childData.description || "",
@@ -108,20 +97,15 @@ export default function TagConfigView({
         queryKey: ["tagConfig", "children", tagId, facilityId],
       });
     },
-    onError: (error: any) => {
-      toast.error(error?.message || t("failed_to_archive_child_tag"));
-    },
   });
 
   const handleEditSuccess = () => {
-    setIsEditSheetOpen(false);
     queryClient.invalidateQueries({
       queryKey: ["tagConfig", tagId, facilityId],
     });
   };
 
   const handleAddChildSuccess = () => {
-    setIsAddChildSheetOpen(false);
     queryClient.invalidateQueries({
       queryKey: ["tagConfig", "children", tagId, facilityId],
     });
@@ -151,7 +135,7 @@ export default function TagConfigView({
     return (
       <Page title={t("tag_config_details")} hideTitleOnPage>
         <EmptyState
-          icon="l-tag-alt"
+          icon={<CareIcon icon="l-tag-alt" className="text-primary size-6" />}
           title={t("tag_config_not_found")}
           description={t("tag_config_not_found_description")}
         />
@@ -181,13 +165,20 @@ export default function TagConfigView({
               <h1 className="text-2xl font-bold text-gray-900">
                 {tagConfig.display}
               </h1>
-              <p className="text-gray-600">{tagConfig.slug}</p>
             </div>
           </div>
-          <Button onClick={() => setIsEditSheetOpen(true)}>
-            <CareIcon icon="l-edit" className="size-4 mr-2" />
-            {t("edit_tag")}
-          </Button>
+          <TagConfigFormDrawer
+            title={t("edit_tag_config")}
+            configId={tagId}
+            onSuccess={handleEditSuccess}
+            facilityId={facilityId}
+            trigger={
+              <Button>
+                <CareIcon icon="l-edit" className="size-4 mr-2" />
+                {t("edit_tag")}
+              </Button>
+            }
+          />
         </div>
 
         {/* Tag Details Card */}
@@ -248,6 +239,18 @@ export default function TagConfigView({
                   {tagConfig.has_children ? t("yes") : t("no")}
                 </div>
               </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">
+                  {t("managing_organization")}
+                </label>
+                <div className="mt-1 text-sm">
+                  {tagConfig.facility_organization
+                    ? tagConfig.facility_organization.name
+                    : tagConfig.organization
+                      ? tagConfig.organization.name
+                      : t("none")}
+                </div>
+              </div>
             </div>
             {tagConfig.description && (
               <div>
@@ -290,15 +293,22 @@ export default function TagConfigView({
                 <CareIcon icon="l-sitemap" className="size-5" />
                 {t("child_tags")}
               </CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsAddChildSheetOpen(true)}
-                disabled={!!tagConfig.parent}
-              >
-                <CareIcon icon="l-plus" className="size-4 mr-2" />
-                {t("add_child_tag")}
-              </Button>
+              <TagConfigFormDrawer
+                title={t("add_child_tag")}
+                parentId={tagId}
+                onSuccess={handleAddChildSuccess}
+                facilityId={facilityId}
+                trigger={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!!tagConfig.parent}
+                  >
+                    <CareIcon icon="l-plus" className="size-4 mr-2" />
+                    {t("add_child_tag")}
+                  </Button>
+                }
+              />
             </div>
           </CardHeader>
           <CardContent>
@@ -315,38 +325,6 @@ export default function TagConfigView({
             />
           </CardContent>
         </Card>
-
-        {/* Edit Sheet */}
-        <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
-          <SheetContent className="overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>{t("edit_tag_config")}</SheetTitle>
-            </SheetHeader>
-            <div className="mt-6 pb-6">
-              <TagConfigForm
-                configId={tagId}
-                onSuccess={handleEditSuccess}
-                facilityId={facilityId}
-              />
-            </div>
-          </SheetContent>
-        </Sheet>
-
-        {/* Add Child Sheet */}
-        <Sheet open={isAddChildSheetOpen} onOpenChange={setIsAddChildSheetOpen}>
-          <SheetContent className="overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>{t("add_child_tag")}</SheetTitle>
-            </SheetHeader>
-            <div className="mt-6 pb-6">
-              <TagConfigForm
-                parentId={tagId}
-                onSuccess={handleAddChildSuccess}
-                facilityId={facilityId}
-              />
-            </div>
-          </SheetContent>
-        </Sheet>
       </div>
     </Page>
   );

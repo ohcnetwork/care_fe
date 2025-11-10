@@ -54,7 +54,9 @@ export function PatientSwitcher({ className }: PatientSwitcherProps) {
       >
         <Tooltip>
           <TooltipTrigger asChild>
-            <SelectTrigger>
+            <SelectTrigger
+              className={cn(!open && !isMobile && "pr-0 [&>svg]:hidden")}
+            >
               <SelectValue
                 asChild
                 placeholder={

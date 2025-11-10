@@ -17,22 +17,25 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import Page from "@/components/Common/Page";
+import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
-import { Code } from "@/types/base/code/code";
+import BackButton from "@/components/Common/BackButton";
+import { Code, isCodePresent } from "@/types/base/code/code";
 import {
   PRODUCT_KNOWLEDGE_STATUS_COLORS,
   ProductName,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
+import { ArrowLeft } from "lucide-react";
 
 interface Props {
   facilityId: string;
-  productKnowledgeId: string;
+  slug: string;
 }
 
 function CodeDisplay({ code }: { code: Code | null }) {
-  if (!code) return null;
+  if (!isCodePresent(code)) return null;
   return (
     <div className="space-y-1">
       <p className="text-sm font-medium">{code.display}</p>
@@ -42,34 +45,7 @@ function CodeDisplay({ code }: { code: Code | null }) {
   );
 }
 
-function LoadingSkeleton() {
-  return (
-    <div className="container mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <div className="h-8 w-48 animate-pulse rounded-md bg-gray-200" />
-          <div className="h-4 w-32 animate-pulse rounded-md bg-gray-200" />
-        </div>
-      </div>
-      <div className="space-y-6">
-        <div className="rounded-lg border border-gray-200 p-6">
-          <div className="space-y-4">
-            <div className="h-6 w-32 animate-pulse rounded-md bg-gray-200" />
-            <div className="space-y-2">
-              <div className="h-4 w-full animate-pulse rounded-md bg-gray-200" />
-              <div className="h-4 w-3/4 animate-pulse rounded-md bg-gray-200" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function ProductKnowledgeView({
-  facilityId,
-  productKnowledgeId,
-}: Props) {
+export default function ProductKnowledgeView({ facilityId, slug }: Props) {
   const { t } = useTranslation();
 
   const {
@@ -77,18 +53,17 @@ export default function ProductKnowledgeView({
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["productKnowledge", productKnowledgeId],
+    queryKey: ["productKnowledge", slug],
     queryFn: query(productKnowledgeApi.retrieveProductKnowledge, {
-      pathParams: { productKnowledgeId },
+      pathParams: { slug },
+      queryParams: {
+        facility: facilityId,
+      },
     }),
   });
 
   if (isLoading) {
-    return (
-      <Page title={t("loading")}>
-        <LoadingSkeleton />
-      </Page>
-    );
+    return <CardListWithHeaderSkeleton count={3} />;
   }
 
   if (isError || !product) {
@@ -102,16 +77,10 @@ export default function ProductKnowledgeView({
               {t("product_knowledge_not_found")}
             </AlertDescription>
           </Alert>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={() =>
-              navigate(`/facility/${facilityId}/settings/product_knowledge`)
-            }
-          >
-            <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
+          <BackButton>
+            <ArrowLeft />
             {t("back_to_list")}
-          </Button>
+          </BackButton>
         </div>
       </Page>
     );
@@ -120,17 +89,10 @@ export default function ProductKnowledgeView({
   return (
     <Page title={product.name} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
-        <Button
-          variant="outline"
-          size="xs"
-          className="mb-2"
-          onClick={() =>
-            navigate(`/facility/${facilityId}/settings/product_knowledge`)
-          }
-        >
-          <CareIcon icon="l-arrow-left" className="size-4" />
+        <BackButton>
+          <ArrowLeft />
           {t("back")}
-        </Button>
+        </BackButton>
 
         <div className="flex items-center justify-between">
           <div>
@@ -140,17 +102,18 @@ export default function ProductKnowledgeView({
                 {t(product.status)}
               </Badge>
             </div>
-            {product.code && (
+            {isCodePresent(product.code) && (
               <p className="mt-1 text-sm text-gray-600">
                 {product.code.system} | {product.code.code}
               </p>
             )}
           </div>
           <Button
+            className="mb-6"
             variant="outline"
             onClick={() =>
               navigate(
-                `/facility/${facilityId}/settings/product_knowledge/${product.id}/edit`,
+                `/facility/${facilityId}/settings/product_knowledge/${product.slug}/edit`,
               )
             }
           >
@@ -169,16 +132,18 @@ export default function ProductKnowledgeView({
               <p className="font-medium">{t(product.product_type)}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">{t("slug")}</p>
-              <p className="text-gray-700">{product.slug}</p>
-            </div>
-            <div>
               <p className="text-sm text-gray-500">
                 {t("product_knowledge_alternate_identifier")}
               </p>
               <p className="text-gray-700">
                 {product.alternate_identifier || "-"}
               </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">{t("base_unit")}</p>
+              <div className="rounded-lg border bg-gray-50/50 p-3">
+                <CodeDisplay code={product.base_unit} />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -236,7 +201,9 @@ export default function ProductKnowledgeView({
                           </p>
                           <p className="font-medium">
                             {guideline.stability_duration.value}{" "}
-                            {guideline.stability_duration.unit?.code || ""}
+                            {t(
+                              `unit_${guideline.stability_duration.unit?.code}`,
+                            ) || ""}
                           </p>
                         </div>
                       </div>

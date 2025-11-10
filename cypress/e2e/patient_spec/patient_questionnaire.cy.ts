@@ -77,14 +77,19 @@ describe("All combination of questionnaire submissions", () => {
     cy.visit("/");
     facilityCreation.selectFirstRandomFacility();
     cy.getFacilityIdAndNavigate("encounters/patients");
-    cy.get("button").contains("In Progress").first().click();
+    cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounters");
+    cy.get("button").contains("Filter").click();
+    cy.get('[role="menuitem"]').contains("Status").click();
+    cy.get("div").contains("In Progress").click();
+    cy.get("body").type("{esc}");
+    cy.wait("@getEncounters").its("response.statusCode").should("eq", 200);
     cy.get("button").contains("View Encounter").first().click();
     cy.get("button").contains("Update Details").click();
     cy.get("div[role='dialog']").within(() => {
       cy.get('[data-cy="add-questionnaire-button"]').click();
     });
     cy.typeAndSelectOption(
-      "input[placeholder='Search Questionnaires']",
+      "input[placeholder='Search Forms']",
       questionnaireName,
       false,
     );
@@ -104,7 +109,7 @@ describe("All combination of questionnaire submissions", () => {
     cy.verifyNotification("Questionnaire submitted successfully");
 
     // Verify the allergy information appears in the patient overview
-    cy.verifyContentPresence("[data-slot='accordion']", [
+    cy.verifyContentPresence("[data-slot='collapsible']", [
       "Allergies",
       allergyName,
       "Active",
@@ -161,12 +166,15 @@ describe("All combination of questionnaire submissions", () => {
     facilityCreation.selectFirstRandomFacility();
     cy.getFacilityIdAndNavigate("encounters/patients");
     cy.get("button").contains("View Encounter").first().click();
-    cy.get("svg.lucide-external-link").filter(":visible").first().click();
+    cy.get("[data-slot='patient-info-hover-card-trigger']")
+      .filter(":visible")
+      .click();
+    cy.get("a").contains("View Profile").click();
     cy.get("[role='tablist']").contains("Updates").click();
     cy.get("a").contains("Add Patient Updates").click();
-    cy.get("button").contains("Add Questionnaire").click();
+    cy.get("button").contains("Add Forms").click();
     cy.typeAndSelectOption(
-      "input[placeholder='Search Questionnaires']",
+      "input[placeholder='Search Forms']",
       questionnaireName,
       false,
     );

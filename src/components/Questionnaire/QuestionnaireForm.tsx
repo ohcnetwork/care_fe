@@ -19,7 +19,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import batchApi from "@/types/base/batch/batchApi";
-import { MedicationRequest } from "@/types/emr/medicationRequest/medicationRequest";
+import { MedicationRequestCreate } from "@/types/emr/medicationRequest/medicationRequest";
 import { MedicationStatementRequest } from "@/types/emr/medicationStatement";
 import { FileUploadQuestion } from "@/types/files/file";
 import {
@@ -33,6 +33,7 @@ import type {
 } from "@/types/questionnaire/form";
 import {
   type Question,
+  AnswerOption,
   findQuestionById,
 } from "@/types/questionnaire/question";
 import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
@@ -152,7 +153,7 @@ function ValidationErrorDisplay({
             icon="l-exclamation-circle"
             className="size-5 text-red-500"
           />
-          <h3 className="font-medium text-red-700">Validation Errors</h3>
+          <h3 className="font-medium text-red-700">{t("validation_errors")}</h3>
         </div>
 
         {/* Server-level errors */}
@@ -308,7 +309,7 @@ const STRUCTURED_TYPE_VALIDATORS = {
     response: ResponseValue | undefined,
     questionId: string,
   ) => {
-    const medicationData = (response?.value as MedicationRequest[]) || [];
+    const medicationData = (response?.value as MedicationRequestCreate[]) || [];
     return validateMedicationRequestQuestion(medicationData, questionId);
   },
   files: (response: ResponseValue | undefined, quesitonId: string) => {
@@ -326,10 +327,23 @@ const initializeResponses = (
     if (q.type === "group" && q.questions) {
       q.questions.forEach(processQuestion);
     } else {
+      let defaultValues: ResponseValue[] = [];
+      if (q.answer_option && q.answer_option.length > 0) {
+        const defaultOptions: AnswerOption[] = q.answer_option.filter(
+          (o) => o.initial_selected === true,
+        );
+        if (defaultOptions.length > 0) {
+          defaultValues = defaultOptions.map((opt) => ({
+            type: "string",
+            value: opt.value,
+            coding: opt.code ?? undefined,
+          }));
+        }
+      }
       responses.push({
         question_id: q.id,
         link_id: q.link_id,
-        values: [],
+        values: defaultValues,
         structured_type: q.structured_type ?? null,
       });
     }
@@ -373,7 +387,7 @@ export function QuestionnaireForm({
   });
 
   const { mutate: submitBatch, isPending } = useMutation({
-    mutationFn: mutate(batchApi.request, { silent: true }),
+    mutationFn: mutate(batchApi.batchRequest, { silent: true }),
     onSuccess: () => {
       setServerErrors(undefined);
       toast.success(t("questionnaire_submitted_successfully"));
@@ -953,7 +967,7 @@ export function QuestionnaireForm({
 
         <DebugPreview
           data={questionnaireForms}
-          title="QuestionnaireForm"
+          title={t("questionnaire_form")}
           className="p-4 space-y-6 max-w-4xl m-2"
         />
       </div>

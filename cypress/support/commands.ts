@@ -146,17 +146,15 @@ Cypress.Commands.add("preventPrint", () => {
 });
 
 Cypress.Commands.add("closeNotification", () => {
-  return cy
-    .get("li[data-sonner-toast]", { timeout: 10000 })
+  // Wait for toast to appear and be visible
+  cy.get("li[data-sonner-toast]", { timeout: 10000 })
+    .filter(":visible")
     .first()
-    .should("be.visible")
-    .then(($toast) => {
-      cy.wrap($toast)
-        .find('button[aria-label="Close toast"]', { timeout: 5000 })
-        .should("be.visible")
-        .should("not.be.disabled")
-        .click({ force: true });
-    });
+    .should("be.visible");
+
+  // Simply wait for the toast to auto-dismiss
+  // Sonner toasts auto-dismiss after their duration
+  cy.get("li[data-sonner-toast]", { timeout: 10000 }).should("not.exist");
 });
 
 Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
@@ -269,7 +267,7 @@ Cypress.Commands.add(
     // Click to open the dropdown
     cy.contains("label", labelText)
       .parent('[data-slot="form-item"]')
-      .find("[data-slot='popover-trigger']")
+      .find("[role='combobox']")
       .click()
       .scrollIntoView()
       .then(() => {
@@ -325,17 +323,10 @@ Cypress.Commands.add(
   },
 );
 
-// Enhanced command for clicking radio buttons in complex nested structures
-Cypress.Commands.add(
-  "clickRadioButtonByLabel",
-  (labelText: string, buttonValue: string) => {
-    cy.get("label").contains(labelText).scrollIntoView();
-    // Find the label and navigate to the closest question container
-    cy.get("label")
-      .contains(labelText)
-      .closest('[data-cy^="question-"]')
-      .within(() => {
-        cy.get(`button[value='${buttonValue}']`).click();
-      });
-  },
-);
+Cypress.Commands.add("clickConfirmAction", (label: string) => {
+  cy.get('div[data-slot="alert-dialog-footer"]')
+    .should("be.visible")
+    .within(() => {
+      cy.contains("button", label).click();
+    });
+});

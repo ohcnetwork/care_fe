@@ -54,7 +54,6 @@ export function useLocationManagement({
         limit: itemsPerPage + 2,
         name: searchQuery || undefined,
         mode: parentId ? undefined : "kind",
-        ordering: "sort_index",
       },
     }),
   });
@@ -89,7 +88,7 @@ export function useLocationManagement({
         }),
       );
 
-      return mutate(batchApi.request, { silent: true })({
+      return mutate(batchApi.batchRequest, { silent: true })({
         requests: batchRequests,
       });
     },

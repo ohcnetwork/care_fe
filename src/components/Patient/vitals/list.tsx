@@ -98,7 +98,8 @@ export const VitalsList = ({
     queryKey: [
       "infinite-observations",
       patientId,
-      filteredVitalCodes.map((c) => c.code).join(","),
+      encounterId,
+      filteredVitalCodes.map((c) => c.code),
     ],
     queryFn: async ({ pageParam = 0 }) => {
       const response = await query(observationApi.list, {
@@ -125,7 +126,7 @@ export const VitalsList = ({
   if (isLoading) {
     return (
       <EncounterAccordionLayout
-        title="vitals"
+        title={t("vitals")}
         readOnly={true}
         className={className}
       >
@@ -137,13 +138,11 @@ export const VitalsList = ({
 
   return (
     <EncounterAccordionLayout
-      title="vitals"
+      title={t("vitals")}
       readOnly={true}
       className={className}
     >
-      <div>
-        <VitalsTable vitals={vitals} vitalCodes={filteredVitalCodes} />
-      </div>
+      <VitalsTable vitals={vitals} vitalCodes={filteredVitalCodes} />
       {hasNextPage && (
         <div className="flex justify-center">
           <Button variant="ghost" size="xs" onClick={() => fetchNextPage()}>

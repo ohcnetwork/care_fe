@@ -17,11 +17,6 @@ import { Input } from "@/components/ui/input";
 
 import { Code } from "@/types/base/code/code";
 
-const formSchema = z.object({
-  code: z.string().min(1, { message: "field_required" }),
-  display: z.string().min(1, { message: "field_required" }),
-});
-
 interface DiscountCodeFormProps {
   defaultValues?: Code;
   onSubmit: (data: Code) => void;
@@ -32,6 +27,17 @@ export function DiscountCodeForm({
   onSubmit,
 }: DiscountCodeFormProps) {
   const { t } = useTranslation();
+
+  const formSchema = z.object({
+    code: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
+    display: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
+  });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -87,7 +93,11 @@ export function DiscountCodeForm({
         />
 
         <div className="pt-2">
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={!form.formState.isDirty}
+          >
             {t("save")}
           </Button>
         </div>

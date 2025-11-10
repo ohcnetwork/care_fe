@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
@@ -8,12 +7,6 @@ import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 import { Button } from "@/components/ui/button";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { Input } from "@/components/ui/input";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 
 import Page from "@/components/Common/Page";
 
@@ -27,7 +20,7 @@ import {
 } from "@/types/emr/tagConfig/tagConfig";
 import tagConfigApi from "@/types/emr/tagConfig/tagConfigApi";
 
-import TagConfigForm from "./TagConfigForm";
+import TagConfigFormDrawer from "./components/TagConfigFormDrawer";
 import TagConfigTable from "./components/TagConfigTable";
 
 interface TagConfigListProps {
@@ -39,16 +32,10 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
-
-  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
-
-  // TODO: Remove this once we have a default status (robo's PR)
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: "active" });
-    }
-  }, []);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["tagConfig", qParams, facilityId],
@@ -56,12 +43,12 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
       queryParams: {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        search: qParams.search,
+        display: qParams.display,
         status: qParams.status,
         category: qParams.category,
         resource: qParams.resource,
         parent_is_null: true,
-        facility: facilityId,
+        ...(facilityId ? { facility: facilityId, facility_only: true } : {}),
       },
     }),
   });
@@ -76,18 +63,6 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
     }
   };
 
-  const handleAdd = () => {
-    setIsSheetOpen(true);
-  };
-
-  const handleSheetClose = () => {
-    setIsSheetOpen(false);
-  };
-
-  const handleSheetOpenChange = (open: boolean) => {
-    setIsSheetOpen(open);
-  };
-
   return (
     <Page title={t("tag_config")} hideTitleOnPage>
       <div className="container mx-auto">
@@ -95,29 +70,22 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
           <h1 className="text-2xl font-bold text-gray-700">
             {t("tag_config")}
           </h1>
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-gray-600 text-sm">
                 {t("manage_tag_config_description")}
               </p>
             </div>
-            <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
-              <Button onClick={handleAdd}>
-                <CareIcon icon="l-plus" className="mr-2" />
-                {t("add_tag_config")}
-              </Button>
-              <SheetContent className="overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>{t("add_tag_config")}</SheetTitle>
-                </SheetHeader>
-                <div className="mt-6 pb-6">
-                  <TagConfigForm
-                    onSuccess={handleSheetClose}
-                    facilityId={facilityId}
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
+            <TagConfigFormDrawer
+              title={t("add_tag_config")}
+              facilityId={facilityId}
+              trigger={
+                <Button>
+                  <CareIcon icon="l-plus" className="mr-2" />
+                  {t("add_tag_config")}
+                </Button>
+              }
+            />
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
@@ -128,9 +96,9 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
                 </span>
                 <Input
                   placeholder={t("search_tag_configs")}
-                  value={qParams.search || ""}
+                  value={qParams.display || ""}
                   onChange={(e) =>
-                    updateQuery({ search: e.target.value || undefined })
+                    updateQuery({ display: e.target.value || undefined })
                   }
                   className="w-full md:w-[300px] pl-10"
                 />

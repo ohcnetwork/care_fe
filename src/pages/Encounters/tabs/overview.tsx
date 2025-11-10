@@ -34,14 +34,10 @@ export const EncounterOverviewTab = () => {
     plotsConfig?.find((plot) => plot.id === "primary-parameters")?.groups || [];
 
   return (
-    <div className="flex gap-3">
-      <div className="flex-1 xl:h-[calc(100vh-12rem)] xl:pr-3 overflow-y-auto">
+    <div className="flex gap-3 @max-md:w-full">
+      <div className="flex-1 xl:h-[calc(100vh-14rem)] xl:pr-3 overflow-y-auto">
         <div className="flex flex-col gap-6">
-          {canWrite && (
-            <div className="hidden xl:block">
-              <QuickActions />
-            </div>
-          )}
+          {canWrite && <QuickActions />}
           <ClinicalHistoryOverview />
           <div className="xl:hidden">
             <SummaryPanel />
@@ -56,16 +52,19 @@ export const EncounterOverviewTab = () => {
               encounterId={encounterId}
               readOnly={!canWrite}
               encounterStatus={encounter?.status}
+              showViewEncounter={false}
             />
             <SymptomsList
               patientId={patientId}
               encounterId={encounterId}
               readOnly={!canWrite}
+              showViewEncounter={false}
             />
             <DiagnosisList
               patientId={patientId}
               encounterId={encounterId}
               readOnly={!canWrite}
+              showViewEncounter={false}
             />
             <VitalsList
               patientId={patientId}
@@ -73,7 +72,7 @@ export const EncounterOverviewTab = () => {
               codeGroups={vitalGroups}
             />
             <QuestionnaireResponsesList
-              encounter={encounter}
+              encounterId={encounterId}
               patientId={patientId}
               canAccess={canAccess}
             />
@@ -81,7 +80,7 @@ export const EncounterOverviewTab = () => {
         </div>
       </div>
 
-      <ScrollArea className="w-72 h-[calc(100vh-12rem)] hidden xl:block">
+      <ScrollArea className="w-72 h-[calc(100vh-14rem)] hidden xl:block">
         <SummaryPanel />
       </ScrollArea>
     </div>

@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { navigate } from "raviger";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -26,6 +25,8 @@ import {
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
 
+import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
+
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
@@ -47,7 +48,7 @@ function SpecimenDefinitionCard({
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="mb-4 flex flex-wrap flex-col md:flex-row items-start justify-between gap-2">
           <div>
             <div className="mb-2 flex items-center gap-2">
               <Badge
@@ -56,23 +57,19 @@ function SpecimenDefinitionCard({
                 {t(definition.status)}
               </Badge>
             </div>
-            <h3 className="font-medium text-gray-900">{definition.title}</h3>
+            <h3 className="font-medium text-gray-900 text-lg">
+              {definition.title}
+            </h3>
             <p className="mt-1 text-sm text-gray-500 whitespace-pre-wrap">
               {definition.description}
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/specimen_definitions/${definition.id}`,
-              )
-            }
-          >
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("see_details")}
-          </Button>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <SpecimenDefinitionActions
+              definition={definition}
+              facilityId={facilityId}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -90,14 +87,10 @@ export function SpecimenDefinitionsList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
-
-  // TODO: Remove this once we have a default status (robo's PR)
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: "active" });
-    }
-  }, []);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["specimenDefinitions", facilityId, qParams],
@@ -108,7 +101,6 @@ export function SpecimenDefinitionsList({
         status: qParams.status,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        ordering: "-created_date",
       },
     }),
   });
@@ -162,7 +154,7 @@ export function SpecimenDefinitionsList({
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(SpecimenDefinitionStatus)}
-                  label="status"
+                  label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>
@@ -181,9 +173,11 @@ export function SpecimenDefinitionsList({
           </>
         ) : specimenDefinitions.length === 0 ? (
           <EmptyState
-            icon="l-folder-open"
-            title={t("no_definitions_found")}
-            description={t("adjust_filters")}
+            icon={
+              <CareIcon icon="l-folder-open" className="text-primary size-6" />
+            }
+            title={t("no_specimen_definitions_found")}
+            description={t("adjust_specimen_definition_filters")}
           />
         ) : (
           <>
@@ -191,7 +185,7 @@ export function SpecimenDefinitionsList({
             <div className="grid gap-4 md:hidden">
               {specimenDefinitions.map((definition) => (
                 <SpecimenDefinitionCard
-                  key={definition.id}
+                  key={definition.slug}
                   definition={definition}
                   facilityId={facilityId}
                 />
@@ -211,7 +205,7 @@ export function SpecimenDefinitionsList({
                   </TableHeader>
                   <TableBody className="bg-white">
                     {specimenDefinitions.map((definition) => (
-                      <TableRow key={definition.id} className="divide-x">
+                      <TableRow key={definition.slug} className="divide-x">
                         <TableCell className="font-medium">
                           {definition.title}
                         </TableCell>
@@ -230,18 +224,12 @@ export function SpecimenDefinitionsList({
                           {definition.description}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              navigate(
-                                `/facility/${facilityId}/settings/specimen_definitions/${definition.id}`,
-                              )
-                            }
-                          >
-                            <CareIcon icon="l-edit" className="size-4" />
-                            {t("see_details")}
-                          </Button>
+                          <div className="flex flex-wrap gap-2">
+                            <SpecimenDefinitionActions
+                              definition={definition}
+                              facilityId={facilityId}
+                            />
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -257,5 +245,20 @@ export function SpecimenDefinitionsList({
         </div>
       </div>
     </Page>
+  );
+}
+
+function SpecimenDefinitionActions({
+  definition,
+  facilityId,
+}: {
+  definition: SpecimenDefinitionRead;
+  facilityId: string;
+}) {
+  return (
+    <ActionButtons
+      editPath={`/facility/${facilityId}/settings/specimen_definitions/${definition.slug}/edit`}
+      viewPath={`/facility/${facilityId}/settings/specimen_definitions/${definition.slug}`}
+    />
   );
 }

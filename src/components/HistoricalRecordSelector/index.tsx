@@ -14,6 +14,7 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -353,6 +354,9 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
             <SheetTitle className="text-lg font-medium text-center">
               {title || t("history")}
             </SheetTitle>
+            <SheetDescription className="sr-only">
+              {title || t("history")}
+            </SheetDescription>
           </SheetHeader>
           {structuredTypes.length > 1 && (
             <Tabs
@@ -465,7 +469,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
           {isLoadingRecords && <Skeleton className="h-8 w-full" />}
         </div>
 
-        <div className="flex flex-col gap-2 p-4 border-t">
+        <div className="sticky bottom-0 bg-white flex flex-col gap-2 p-4 border-t">
           {state.dateGroupedRecords.length > 0 &&
             (isLoadingRecords ? (
               <div className="flex justify-center p-4">

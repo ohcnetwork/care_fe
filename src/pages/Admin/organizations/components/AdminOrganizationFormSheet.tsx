@@ -101,12 +101,6 @@ export default function AdminOrganizationFormSheet({
       setOpen(false);
       form.reset();
     },
-    onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string }[] };
-      errorData.errors.forEach((er) => {
-        toast.error(er.msg);
-      });
-    },
   });
 
   const { mutate: updateOrganization, isPending: isUpdating } = useMutation({
@@ -152,7 +146,7 @@ export default function AdminOrganizationFormSheet({
             {t("edit")}
           </Button>
         ) : (
-          <Button>
+          <Button className="w-full md:w-auto">
             <CareIcon icon="l-plus" className="mr-2 size-4" />
             {t("add_organization")}
           </Button>

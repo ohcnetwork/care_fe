@@ -15,11 +15,11 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 import { usePatientContext } from "@/hooks/usePatientUser";
 
 import query from "@/Utils/request/query";
-import { formatName } from "@/Utils/utils";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
   APPOINTMENT_STATUS_COLORS,
-  Appointment,
+  PublicAppointment,
+  formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
 
 import AppointmentDialog from "./components/AppointmentDialog";
@@ -28,7 +28,7 @@ function PatientIndex() {
   const { t } = useTranslation();
 
   const [selectedAppointment, setSelectedAppointment] = useState<
-    Appointment | undefined
+    PublicAppointment | undefined
   >();
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
 
@@ -81,7 +81,7 @@ function PatientIndex() {
     dayjs().isBefore(dayjs(appointment.token_slot.start_datetime)),
   );
 
-  const getAppointmentCard = (appointment: Appointment) => {
+  const getAppointmentCard = (appointment: PublicAppointment) => {
     const appointmentTime = dayjs(appointment.token_slot.start_datetime);
     const appointmentDate = appointmentTime.format("DD MMMM YYYY");
     const appointmentTimeSlot = appointmentTime.format("hh:mm a");
@@ -91,12 +91,10 @@ function PatientIndex() {
           <CardTitle>
             <div className="flex flex-col">
               <span className="text-xs font-medium">
-                {t("practitioner", { count: 1 })}:{" "}
+                {t(appointment.resource_type, { count: 1 })}:{" "}
               </span>
               <span className="text-sm">
-                {appointment?.user
-                  ? formatName(appointment.user)
-                  : "Resource from BE"}
+                {formatScheduleResourceName(appointment)}
               </span>
             </div>
           </CardTitle>
@@ -153,7 +151,7 @@ function PatientIndex() {
   };
 
   const getAppointmentCardContent = (
-    appointments: Appointment[] | undefined,
+    appointments: PublicAppointment[] | undefined,
   ) => {
     return (
       <div className="grid gap-4 mb-2">

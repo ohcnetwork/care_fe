@@ -48,6 +48,7 @@ import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import {
+  getResourceRequestCategoryEnum,
   RESOURCE_REQUEST_STATUS_OPTIONS,
   ResourceRequestCategory,
   ResourceRequestRead,
@@ -72,10 +73,12 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   const resourceFormSchema = z.object({
     status: z.nativeEnum(ResourceRequestStatus),
     category: z.nativeEnum(ResourceRequestCategory),
-    assigned_facility: z.object({
-      id: z.string(),
-      name: z.string(),
-    }),
+    assigned_facility: z
+      .object({
+        id: z.string(),
+        name: z.string(),
+      })
+      .nullable(),
     emergency: z.enum(["true", "false"]),
     title: z.string().min(1, { message: t("field_required") }),
     reason: z
@@ -126,7 +129,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
     if (resourceData) {
       form.reset({
         status: resourceData.status,
-        category: resourceData.category,
+        category: getResourceRequestCategoryEnum(resourceData.category),
         assigned_facility: resourceData.assigned_facility,
         assigned_to: resourceData.assigned_to?.id,
         emergency: resourceData.emergency ? "true" : "false",
@@ -169,7 +172,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
       status: data.status,
       category: data.category,
       origin_facility: String(facilityId),
-      assigned_facility: data.assigned_facility?.id,
+      assigned_facility: data.assigned_facility?.id || null,
       assigned_to: assignedToUser?.id || null,
       approving_facility: null,
       emergency: data.emergency === "true",
@@ -394,9 +397,9 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {valuesOf(ResourceRequestCategory).map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {t(`resource_request_category__${option}`)}
+                        {valuesOf(ResourceRequestCategory).map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {t(`resource_request_category__${category}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>

@@ -63,13 +63,13 @@ export const PERMISSION_SUBMIT_QUESTIONNAIRE = "can_submit_questionnaire";
 export const PERMISSION_MANAGE_QUESTIONNAIRE = "can_manage_questionnaire";
 
 // Appointment Permissions
-export const PERMISSION_LIST_USER_BOOKING = "can_list_user_booking";
-export const PERMISSION_WRITE_USER_BOOKING = "can_write_user_booking";
-export const PERMISSION_CREATE_APPOINTMENT = "can_create_appointment";
+export const PERMISSION_LIST_BOOKING = "can_list_booking";
+export const PERMISSION_WRITE_BOOKING = "can_write_booking";
 
 // Schedule Permissions
-export const PERMISSION_WRITE_USER_SCHEDULE = "can_write_user_schedule";
-export const PERMISSION_LIST_USER_SCHEDULE = "can_list_user_schedule";
+export const PERMISSION_WRITE_SCHEDULE = "can_write_schedule";
+export const PERMISSION_LIST_SCHEDULE = "can_list_schedule";
+export const PERMISSION_RESCHEDULE_APPOINTMENT = "can_reschedule_booking";
 
 // User Permissions
 export const PERMISSION_CREATE_USER = "can_create_user";
@@ -78,6 +78,16 @@ export const PERMISSION_LIST_USER = "can_list_user";
 // Template Permissions
 export const PERMISSION_LIST_TEMPLATE = "can_list_template";
 export const PERMISSION_MANAGE_TEMPLATE = "can_manage_template";
+export const PERMISSION_CREATE_CHARGE_ITEM_DEFINITION =
+  "can_create_charge_item_definition";
+export const PERMISSION_SET_CHARGE_ITEM_DEFINITION =
+  "can_set_charge_item_definition";
+
+// Token Permissions
+export const PERMISSION_WRITE_TOKEN_CATEGORY = "can_write_token_category";
+export const PERMISSION_LIST_TOKEN_CATEGORIES = "can_list_token_category";
+export const PERMISSION_WRITE_TOKEN = "can_write_token";
+export const PERMISSION_LIST_TOKENS = "can_list_token";
 
 export interface Permissions {
   // Patient Permissions
@@ -167,18 +177,18 @@ export interface Permissions {
   canManageQuestionnaire: boolean;
 
   // Appointment Permissions
-  /** Permission slug: "can_list_user_booking" */
+  /** Permission slug: "can_list_booking" */
   canViewAppointments: boolean;
-  /** Permission slug: "can_write_user_booking" */
-  canUpdateAppointment: boolean;
-  /** Permission slug: "can_create_appointment" */
-  canCreateAppointment: boolean;
+  /** Permission slug: "can_write_booking" */
+  canWriteAppointment: boolean;
 
   // Schedule Permissions
   /** Permission slug: "can_write_user_schedule" */
   canWriteSchedule: boolean;
   /** Permission slug: "can_list_user_schedule" */
   canViewSchedule: boolean;
+  /** Permission slug: "can_reschedule_booking" */
+  canRescheduleAppointment: boolean;
 
   // User Permissions
   /** Permission slug: "can_create_user" */
@@ -191,6 +201,18 @@ export interface Permissions {
   canListTemplate: boolean;
   /** Permission slug: "can_manage_template" */
   canManageTemplate: boolean;
+  /** Permission slug: "can_create_charge_item_definition" */
+  canSetChargeItemDefinition: boolean;
+
+  // Token Permissions
+  /** Permission slug: "can_write_token_category" */
+  canWriteTokenCategory: boolean;
+  /** Permission slug: "can_list_token_category" */
+  canListTokenCategories: boolean;
+  /** Permission slug: "can_write_token" */
+  canWriteToken: boolean;
+  /** Permission slug: "can_list_token" */
+  canListTokens: boolean;
 }
 
 export type HasPermissionFn = (
@@ -332,25 +354,16 @@ export function getPermissions(
     ),
 
     // Appointments
-    canViewAppointments: hasPermission(
-      PERMISSION_LIST_USER_BOOKING,
-      permissions,
-    ),
-    canUpdateAppointment: hasPermission(
-      PERMISSION_WRITE_USER_BOOKING,
-      permissions,
-    ),
-    canCreateAppointment: hasPermission(
-      PERMISSION_CREATE_APPOINTMENT,
-      permissions,
-    ),
+    canViewAppointments: hasPermission(PERMISSION_LIST_BOOKING, permissions),
+    canWriteAppointment: hasPermission(PERMISSION_WRITE_BOOKING, permissions),
 
     // Schedules and Availability
-    canWriteSchedule: hasPermission(
-      PERMISSION_WRITE_USER_SCHEDULE,
+    canWriteSchedule: hasPermission(PERMISSION_WRITE_SCHEDULE, permissions),
+    canViewSchedule: hasPermission(PERMISSION_LIST_SCHEDULE, permissions),
+    canRescheduleAppointment: hasPermission(
+      PERMISSION_RESCHEDULE_APPOINTMENT,
       permissions,
     ),
-    canViewSchedule: hasPermission(PERMISSION_LIST_USER_SCHEDULE, permissions),
 
     // User
     canCreateUser: hasPermission(PERMISSION_CREATE_USER, permissions),
@@ -360,5 +373,21 @@ export function getPermissions(
     // Template
     canListTemplate: hasPermission(PERMISSION_LIST_TEMPLATE, permissions),
     canManageTemplate: hasPermission(PERMISSION_MANAGE_TEMPLATE, permissions),
+    canSetChargeItemDefinition: hasPermission(
+      PERMISSION_SET_CHARGE_ITEM_DEFINITION,
+      permissions,
+    ),
+
+    // Tokens
+    canWriteTokenCategory: hasPermission(
+      PERMISSION_WRITE_TOKEN_CATEGORY,
+      permissions,
+    ),
+    canListTokenCategories: hasPermission(
+      PERMISSION_LIST_TOKEN_CATEGORIES,
+      permissions,
+    ),
+    canWriteToken: hasPermission(PERMISSION_WRITE_TOKEN, permissions),
+    canListTokens: hasPermission(PERMISSION_LIST_TOKENS, permissions),
   };
 }
