@@ -3,6 +3,7 @@ import { CaptionsOff } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PermissionType } from "@/common/Permissions";
 import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { TimelineWrapper } from "@/components/Common/TimelineWrapper";
@@ -15,7 +16,7 @@ import query from "@/Utils/request/query";
 interface PatientHomeEncountersProps {
   patientId: string;
   facilityId: string;
-  facilityPermissions: string[];
+  facilityPermissions: PermissionType[];
   canListEncounters: boolean;
 }
 
