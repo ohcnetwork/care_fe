@@ -206,9 +206,14 @@
   },
   "browserslist": {
     "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+      "chrome >= 110",
+      "firefox >= 142",
+      "safari >= 11",
+      "edge >= 139",
+      "and_chr >= 141",
+      "and_ff >= 143",
+      "ios_saf >= 11",
+      "samsung >= 28"
     ],
     "development": [
       "last 1 chrome version",
