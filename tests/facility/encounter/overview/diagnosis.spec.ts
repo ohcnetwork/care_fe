@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { type Page, expect, test } from "@playwright/test";
 import { format, subDays } from "date-fns";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -8,7 +8,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 let facilityId: string;
 let diagnosisName: string;
 
-async function navigateToEncounter(page: any) {
+async function navigateToEncounter(page: Page) {
   facilityId = getFacilityId();
   const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
   const createdDateBefore = format(new Date(), "yyyy-MM-dd");
@@ -18,7 +18,7 @@ async function navigateToEncounter(page: any) {
   await page.getByRole("button", { name: "View Encounter" }).first().click();
 }
 
-async function addDiagnosis(page: any, severity?: string) {
+async function addDiagnosis(page: Page, severity?: string) {
   await page.getByRole("link", { name: "Diagnosis" }).click();
   await page.getByRole("combobox").filter({ hasText: "Add Diagnosis" }).click();
   await page.getByPlaceholder("Add Diagnosis").fill(diagnosisName);
