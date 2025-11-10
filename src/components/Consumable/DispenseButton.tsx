@@ -32,10 +32,11 @@ export const DispenseButton = ({
   const [extractedChargeItems, setExtractedChargeItems] = useState<
     ChargeItemRead[]
   >([]);
+  const [accountId, setAccountId] = useState<string | undefined>(undefined);
   const { selectedEncounter } = useEncounter();
   const { facilityId } = useCurrentFacility();
 
-  const { data: account } = useQuery({
+  const { refetch: refetchAccount } = useQuery({
     queryKey: ["accounts", selectedEncounter?.patient.id],
     queryFn: query(accountApi.listAccount, {
       pathParams: { facilityId },
@@ -62,6 +63,13 @@ export const DispenseButton = ({
       current = current.parent;
     }
     return path.length > 1 ? path.join(" → ") : path[0] || "";
+  };
+
+  const resetInvoiceState = () => {
+    setIsInvoiceSheetOpen(false);
+    setAccountId(undefined);
+    setLocation(undefined);
+    setExtractedChargeItems([]);
   };
 
   return (
@@ -93,26 +101,28 @@ export const DispenseButton = ({
             name: location.name,
             path: getLocationPath(location),
           }}
-          onDispenseComplete={(chargeItems: ChargeItemRead[]) => {
+          onDispenseComplete={async (chargeItems: ChargeItemRead[]) => {
             setExtractedChargeItems(chargeItems);
             setShowDrawer(false);
-            setIsInvoiceSheetOpen(true);
+            const result = await refetchAccount();
+            const fetchedAccountId = result.data?.results?.[0]?.id;
+
+            if (fetchedAccountId) {
+              setAccountId(fetchedAccountId);
+              setIsInvoiceSheetOpen(true);
+            }
           }}
         />
       )}
 
-      {selectedEncounter && account?.results?.[0] && (
+      {selectedEncounter && accountId && (
         <CreateInvoiceSheet
           facilityId={facilityId}
-          accountId={account.results[0].id}
+          accountId={accountId}
           open={isInvoiceSheetOpen}
-          onOpenChange={(open) => {
-            setIsInvoiceSheetOpen(open);
-          }}
+          onOpenChange={(open) => !open && resetInvoiceState()}
           preSelectedChargeItems={extractedChargeItems}
-          onSuccess={() => {
-            setIsInvoiceSheetOpen(false);
-          }}
+          onSuccess={resetInvoiceState}
           sourceUrl={buildEncounterUrl(
             selectedEncounter.patient.id,
             `/encounter/${selectedEncounter.id}/updates`,
