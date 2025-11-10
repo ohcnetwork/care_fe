@@ -1633,6 +1633,7 @@
   "discharge_date_time": "Discharge Date and Time",
   "discharge_details": "Discharge Details",
   "discharge_disposition": "Discharge Disposition",
+  "discharge_disposition_required": "Discharge disposition is required",
   "discharge_from_care": "Discharge from CARE",
   "discharge_patient": "Discharge Patient",
   "discharge_patient_description": "Ready to discharge? This will update the patient's status and require discharge summary details.",
