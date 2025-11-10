@@ -1,5 +1,6 @@
 import { t } from "i18next";
 
+import { PermissionType } from "@/common/Permissions";
 import { RoleRead } from "@/types/emr/role/role";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -52,7 +53,7 @@ export interface Organization {
   created_at: string;
   updated_at: string;
   metadata: Metadata | null;
-  permissions: string[];
+  permissions: PermissionType[];
 }
 
 export interface OrganizationCreate {

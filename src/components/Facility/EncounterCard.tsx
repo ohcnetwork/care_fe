@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
-import { getPermissions } from "@/common/Permissions";
+import { getPermissions, PermissionType } from "@/common/Permissions";
 
 import { formatDateTime } from "@/common/utils";
 import TagBadge from "@/components/Tags/TagBadge";
@@ -22,7 +22,7 @@ import { useState } from "react";
 
 interface TimelineEncounterCardProps {
   encounter: EncounterRead;
-  permissions: string[];
+  permissions: PermissionType[];
   facilityId?: string;
   isLast?: boolean;
   isFirst?: boolean;

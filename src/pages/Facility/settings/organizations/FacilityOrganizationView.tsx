@@ -31,7 +31,7 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 
-import { getPermissions } from "@/common/Permissions";
+import { getPermissions, PermissionType } from "@/common/Permissions";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -44,7 +44,7 @@ import FacilityOrganizationFormSheet from "./components/FacilityOrganizationForm
 interface Props {
   id?: string;
   facilityId: string;
-  permissions: string[];
+  permissions: PermissionType[];
 }
 
 function DeleteOrgDialog({

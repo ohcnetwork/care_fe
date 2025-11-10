@@ -1,3 +1,5 @@
+import { PermissionType } from "@/common/Permissions";
+
 export interface Permission {
   name: string;
   slug: string;
@@ -6,10 +8,10 @@ export interface Permission {
 }
 
 export interface Permissions {
-  permissions: string[];
+  permissions: PermissionType[];
 }
 
 export interface FacilityPermissions extends Permissions {
-  root_org_permissions: string[];
-  child_org_permissions: string[];
+  root_org_permissions: PermissionType[];
+  child_org_permissions: PermissionType[];
 }

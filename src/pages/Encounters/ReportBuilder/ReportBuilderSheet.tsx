@@ -17,7 +17,7 @@ import {
 
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
-import { getPermissions } from "@/common/Permissions";
+import { getPermissions, PermissionType } from "@/common/Permissions";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -33,7 +33,7 @@ interface ReportBuilderSheetProps {
   patientId: string;
   trigger: React.ReactNode;
   onSuccess?: () => void;
-  permissions: string[];
+  permissions: PermissionType[];
 }
 
 export default function ReportBuilderSheet({

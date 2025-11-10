@@ -28,6 +28,7 @@ import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
+import { PermissionType } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 import OrganizationLayoutSkeleton from "@/pages/Organization/components/OrganizationLayoutSkeleton";
 import {
@@ -41,7 +42,7 @@ interface Props {
   // NavOrganizationId is used to show the organization switcher in the sidebar, it may not the parent organization
   navOrganizationId?: string;
   id: string;
-  children: (props: { orgPermissions: string[] }) => React.ReactNode;
+  children: (props: { orgPermissions: PermissionType[] }) => React.ReactNode;
   setOrganization?: (org: Organization) => void;
 }
 

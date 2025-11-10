@@ -1,93 +1,79 @@
-// Patient Permissions
-export const PERMISSION_CREATE_PATIENT = "can_create_patient";
-export const PERMISSION_WRITE_PATIENT = "can_write_patient";
-export const PERMISSION_LIST_PATIENTS = "can_list_patients";
-export const PERMISSION_VIEW_CLINICAL_DATA = "can_view_clinical_data";
-export const PERMISSION_VIEW_QUESTIONNAIRE_RESPONSES =
-  "can_view_questionnaire_responses";
-export const PERMISSION_SUBMIT_PATIENT_QUESTIONNAIRE =
-  "can_submit_patient_questionnaire";
+export enum PermissionType {
+  // Patient Permissions
+  CREATE_PATIENT = "can_create_patient",
+  WRITE_PATIENT = "can_write_patient",
+  LIST_PATIENTS = "can_list_patients",
+  VIEW_CLINICAL_DATA = "can_view_clinical_data",
+  VIEW_QUESTIONNAIRE_RESPONSES = "can_view_questionnaire_responses",
+  SUBMIT_PATIENT_QUESTIONNAIRE = "can_submit_patient_questionnaire",
 
-// Encounter Permissions
-export const PERMISSION_CREATE_ENCOUNTER = "can_create_encounter";
-export const PERMISSION_LIST_ENCOUNTERS = "can_list_encounter";
-export const PERMISSION_WRITE_ENCOUNTER = "can_write_encounter";
-export const PERMISSION_READ_ENCOUNTER = "can_read_encounter";
-export const PERMISSION_SUBMIT_ENCOUNTER_QUESTIONNAIRE =
-  "can_submit_encounter_questionnaire";
+  // Encounter Permissions
+  CREATE_ENCOUNTER = "can_create_encounter",
+  LIST_ENCOUNTERS = "can_list_encounter",
+  WRITE_ENCOUNTER = "can_write_encounter",
+  READ_ENCOUNTER = "can_read_encounter",
+  SUBMIT_ENCOUNTER_QUESTIONNAIRE = "can_submit_encounter_questionnaire",
 
-// Facility Organization Permissions
-export const PERMISSION_CREATE_FACILITY_ORGANIZATION =
-  "can_create_facility_organization";
-export const PERMISSION_CREATE_FACILITY_ORGANIZATION_ROOT =
-  "can_create_facility_organization_root";
-export const PERMISSION_VIEW_FACILITY_ORGANIZATION =
-  "can_view_facility_organization";
-export const PERMISSION_DELETE_FACILITY_ORGANIZATION =
-  "can_delete_facility_organization";
-export const PERMISSION_MANAGE_FACILITY_ORGANIZATION =
-  "can_manage_facility_organization";
-export const PERMISSION_LIST_FACILITY_ORGANIZATION_USERS =
-  "can_list_facility_organization_users";
-export const PERMISSION_MANAGE_FACILITY_ORGANIZATION_USERS =
-  "can_manage_facility_organization_users";
+  // Facility Organization Permissions
+  CREATE_FACILITY_ORGANIZATION = "can_create_facility_organization",
+  CREATE_FACILITY_ORGANIZATION_ROOT = "can_create_facility_organization_root",
+  VIEW_FACILITY_ORGANIZATION = "can_view_facility_organization",
+  DELETE_FACILITY_ORGANIZATION = "can_delete_facility_organization",
+  MANAGE_FACILITY_ORGANIZATION = "can_manage_facility_organization",
+  LIST_FACILITY_ORGANIZATION_USERS = "can_list_facility_organization_users",
+  MANAGE_FACILITY_ORGANIZATION_USERS = "can_manage_facility_organization_users",
 
-// Facility Permissions
-export const PERMISSION_CREATE_FACILITY = "can_create_facility";
-export const PERMISSION_READ_FACILITY = "can_read_facility";
-export const PERMISSION_UPDATE_FACILITY = "can_update_facility";
+  // Facility Permissions
+  CREATE_FACILITY = "can_create_facility",
+  READ_FACILITY = "can_read_facility",
+  UPDATE_FACILITY = "can_update_facility",
 
-// Location Permissions
-export const PERMISSION_LIST_FACILITY_LOCATIONS = "can_list_facility_locations";
-export const PERMISSION_WRITE_FACILITY_LOCATIONS =
-  "can_write_facility_locations";
-export const PERMISSION_LIST_FACILITY_LOCATION_ORGANIZATIONS =
-  "can_list_facility_location_organizations";
-export const PERMISSION_CREATE_FACILITY_LOCATION_ORGANIZATIONS =
-  "can_create_facility_location_organizations";
+  // Location Permissions
+  LIST_FACILITY_LOCATIONS = "can_list_facility_locations",
+  WRITE_FACILITY_LOCATIONS = "can_write_facility_locations",
+  LIST_FACILITY_LOCATION_ORGANIZATIONS = "can_list_facility_location_organizations",
+  CREATE_FACILITY_LOCATION_ORGANIZATIONS = "can_create_facility_location_organizations",
 
-// Organization Permissions
-export const PERMISSION_VIEW_ORGANIZATION = "can_view_organization";
-export const PERMISSION_CREATE_ORGANIZATION = "can_create_organization";
-export const PERMISSION_DELETE_ORGANIZATION = "can_delete_organization";
-export const PERMISSION_MANAGE_ORGANIZATION = "can_manage_organization";
-export const PERMISSION_MANAGE_ORGANIZATION_USERS =
-  "can_manage_organization_users";
-export const PERMISSION_LIST_ORGANIZATION_USERS = "can_list_organization_users";
+  // Organization Permissions
+  VIEW_ORGANIZATION = "can_view_organization",
+  CREATE_ORGANIZATION = "can_create_organization",
+  DELETE_ORGANIZATION = "can_delete_organization",
+  MANAGE_ORGANIZATION = "can_manage_organization",
+  MANAGE_ORGANIZATION_USERS = "can_manage_organization_users",
+  LIST_ORGANIZATION_USERS = "can_list_organization_users",
 
-// Questionnaire Permissions
-export const PERMISSION_WRITE_QUESTIONNAIRE = "can_write_questionnaire";
-export const PERMISSION_ARCHIVE_QUESTIONNAIRE = "can_archive_questionnaire";
-export const PERMISSION_READ_QUESTIONNAIRE = "can_read_questionnaire";
-export const PERMISSION_SUBMIT_QUESTIONNAIRE = "can_submit_questionnaire";
-export const PERMISSION_MANAGE_QUESTIONNAIRE = "can_manage_questionnaire";
+  // Questionnaire Permissions
+  WRITE_QUESTIONNAIRE = "can_write_questionnaire",
+  ARCHIVE_QUESTIONNAIRE = "can_archive_questionnaire",
+  READ_QUESTIONNAIRE = "can_read_questionnaire",
+  SUBMIT_QUESTIONNAIRE = "can_submit_questionnaire",
+  MANAGE_QUESTIONNAIRE = "can_manage_questionnaire",
 
-// Appointment Permissions
-export const PERMISSION_LIST_BOOKING = "can_list_booking";
-export const PERMISSION_WRITE_BOOKING = "can_write_booking";
+  // Appointment Permissions
+  LIST_BOOKING = "can_list_booking",
+  WRITE_BOOKING = "can_write_booking",
 
-// Schedule Permissions
-export const PERMISSION_WRITE_SCHEDULE = "can_write_schedule";
-export const PERMISSION_LIST_SCHEDULE = "can_list_schedule";
-export const PERMISSION_RESCHEDULE_APPOINTMENT = "can_reschedule_booking";
+  // Schedule Permissions
+  WRITE_SCHEDULE = "can_write_schedule",
+  LIST_SCHEDULE = "can_list_schedule",
+  RESCHEDULE_APPOINTMENT = "can_reschedule_booking",
 
-// User Permissions
-export const PERMISSION_CREATE_USER = "can_create_user";
-export const PERMISSION_LIST_USER = "can_list_user";
+  // User Permissions
+  CREATE_USER = "can_create_user",
+  LIST_USER = "can_list_user",
 
-// Template Permissions
-export const PERMISSION_LIST_TEMPLATE = "can_list_template";
-export const PERMISSION_MANAGE_TEMPLATE = "can_manage_template";
-export const PERMISSION_CREATE_CHARGE_ITEM_DEFINITION =
-  "can_create_charge_item_definition";
-export const PERMISSION_SET_CHARGE_ITEM_DEFINITION =
-  "can_set_charge_item_definition";
+  // Template Permissions
+  LIST_TEMPLATE = "can_list_template",
+  MANAGE_TEMPLATE = "can_manage_template",
+  CREATE_CHARGE_ITEM_DEFINITION = "can_create_charge_item_definition",
+  SET_CHARGE_ITEM_DEFINITION = "can_set_charge_item_definition",
 
-// Token Permissions
-export const PERMISSION_WRITE_TOKEN_CATEGORY = "can_write_token_category";
-export const PERMISSION_LIST_TOKEN_CATEGORIES = "can_list_token_category";
-export const PERMISSION_WRITE_TOKEN = "can_write_token";
-export const PERMISSION_LIST_TOKENS = "can_list_token";
+  // Token Permissions
+  WRITE_TOKEN_CATEGORY = "can_write_token_category",
+  LIST_TOKEN_CATEGORIES = "can_list_token_category",
+  WRITE_TOKEN = "can_write_token",
+  LIST_TOKENS = "can_list_token",
+}
 
 export interface Permissions {
   // Patient Permissions
@@ -216,178 +202,202 @@ export interface Permissions {
 }
 
 export type HasPermissionFn = (
-  permission: string,
-  permissions: string[],
+  permission: PermissionType,
+  permissions: PermissionType[],
 ) => boolean;
 
 export function getPermissions(
   hasPermission: HasPermissionFn,
-  permissions: string[],
+  permissions: PermissionType[],
 ): Permissions {
   return {
     // Patients
-    canCreatePatient: hasPermission(PERMISSION_CREATE_PATIENT, permissions),
-    canWritePatient: hasPermission(PERMISSION_WRITE_PATIENT, permissions),
-    canViewPatients: hasPermission(PERMISSION_LIST_PATIENTS, permissions),
+    canCreatePatient: hasPermission(PermissionType.CREATE_PATIENT, permissions),
+    canWritePatient: hasPermission(PermissionType.WRITE_PATIENT, permissions),
+    canViewPatients: hasPermission(PermissionType.LIST_PATIENTS, permissions),
     canViewClinicalData: hasPermission(
-      PERMISSION_VIEW_CLINICAL_DATA,
+      PermissionType.VIEW_CLINICAL_DATA,
       permissions,
     ),
     canViewPatientQuestionnaireResponses: hasPermission(
-      PERMISSION_VIEW_QUESTIONNAIRE_RESPONSES,
+      PermissionType.VIEW_QUESTIONNAIRE_RESPONSES,
       permissions,
     ),
     canSubmitPatientQuestionnaireResponses: hasPermission(
-      PERMISSION_SUBMIT_PATIENT_QUESTIONNAIRE,
+      PermissionType.SUBMIT_PATIENT_QUESTIONNAIRE,
       permissions,
     ),
 
     // Encounters
-    canCreateEncounter: hasPermission(PERMISSION_CREATE_ENCOUNTER, permissions),
-    canListEncounters: hasPermission(PERMISSION_LIST_ENCOUNTERS, permissions),
-    canWriteEncounter: hasPermission(PERMISSION_WRITE_ENCOUNTER, permissions),
-    canViewEncounter: hasPermission(PERMISSION_READ_ENCOUNTER, permissions),
+    canCreateEncounter: hasPermission(
+      PermissionType.CREATE_ENCOUNTER,
+      permissions,
+    ),
+    canListEncounters: hasPermission(
+      PermissionType.LIST_ENCOUNTERS,
+      permissions,
+    ),
+    canWriteEncounter: hasPermission(
+      PermissionType.WRITE_ENCOUNTER,
+      permissions,
+    ),
+    canViewEncounter: hasPermission(PermissionType.READ_ENCOUNTER, permissions),
     canSubmitEncounterQuestionnaire: hasPermission(
-      PERMISSION_SUBMIT_ENCOUNTER_QUESTIONNAIRE,
+      PermissionType.SUBMIT_ENCOUNTER_QUESTIONNAIRE,
       permissions,
     ),
 
     // Facility Organizations
     canCreateFacilityOrganization: hasPermission(
-      PERMISSION_CREATE_FACILITY_ORGANIZATION,
+      PermissionType.CREATE_FACILITY_ORGANIZATION,
       permissions,
     ),
     canCreateFacilityOrganizationRoot: hasPermission(
-      PERMISSION_CREATE_FACILITY_ORGANIZATION_ROOT,
+      PermissionType.CREATE_FACILITY_ORGANIZATION_ROOT,
       permissions,
     ),
     canViewFacilityOrganizations: hasPermission(
-      PERMISSION_VIEW_FACILITY_ORGANIZATION,
+      PermissionType.VIEW_FACILITY_ORGANIZATION,
       permissions,
     ),
     canDeleteFacilityOrganization: hasPermission(
-      PERMISSION_DELETE_FACILITY_ORGANIZATION,
+      PermissionType.DELETE_FACILITY_ORGANIZATION,
       permissions,
     ),
     canManageFacilityOrganization: hasPermission(
-      PERMISSION_MANAGE_FACILITY_ORGANIZATION,
+      PermissionType.MANAGE_FACILITY_ORGANIZATION,
       permissions,
     ),
     canListFacilityOrganizationUsers: hasPermission(
-      PERMISSION_LIST_FACILITY_ORGANIZATION_USERS,
+      PermissionType.LIST_FACILITY_ORGANIZATION_USERS,
       permissions,
     ),
     canManageFacilityOrganizationUsers: hasPermission(
-      PERMISSION_MANAGE_FACILITY_ORGANIZATION_USERS,
+      PermissionType.MANAGE_FACILITY_ORGANIZATION_USERS,
       permissions,
     ),
 
     // Facility
-    canCreateFacility: hasPermission(PERMISSION_CREATE_FACILITY, permissions),
-    canReadFacility: hasPermission(PERMISSION_READ_FACILITY, permissions),
-    canUpdateFacility: hasPermission(PERMISSION_UPDATE_FACILITY, permissions),
+    canCreateFacility: hasPermission(
+      PermissionType.CREATE_FACILITY,
+      permissions,
+    ),
+    canReadFacility: hasPermission(PermissionType.READ_FACILITY, permissions),
+    canUpdateFacility: hasPermission(
+      PermissionType.UPDATE_FACILITY,
+      permissions,
+    ),
 
     // Locations
     canListFacilityLocations: hasPermission(
-      PERMISSION_LIST_FACILITY_LOCATIONS,
+      PermissionType.LIST_FACILITY_LOCATIONS,
       permissions,
     ),
     canWriteFacilityLocation: hasPermission(
-      PERMISSION_WRITE_FACILITY_LOCATIONS,
+      PermissionType.WRITE_FACILITY_LOCATIONS,
       permissions,
     ),
     canListFacilityLocationOrganizations: hasPermission(
-      PERMISSION_LIST_FACILITY_LOCATION_ORGANIZATIONS,
+      PermissionType.LIST_FACILITY_LOCATION_ORGANIZATIONS,
       permissions,
     ),
     canCreateFacilityLocationOrganizations: hasPermission(
-      PERMISSION_CREATE_FACILITY_LOCATION_ORGANIZATIONS,
+      PermissionType.CREATE_FACILITY_LOCATION_ORGANIZATIONS,
       permissions,
     ),
 
     // Organizations
     canViewOrganizations: hasPermission(
-      PERMISSION_VIEW_ORGANIZATION,
+      PermissionType.VIEW_ORGANIZATION,
       permissions,
     ),
     canCreateOrganization: hasPermission(
-      PERMISSION_CREATE_ORGANIZATION,
+      PermissionType.CREATE_ORGANIZATION,
       permissions,
     ),
     canDeleteOrganization: hasPermission(
-      PERMISSION_DELETE_ORGANIZATION,
+      PermissionType.DELETE_ORGANIZATION,
       permissions,
     ),
     canManageOrganization: hasPermission(
-      PERMISSION_MANAGE_ORGANIZATION,
+      PermissionType.MANAGE_ORGANIZATION,
       permissions,
     ),
     canManageOrganizationUsers: hasPermission(
-      PERMISSION_MANAGE_ORGANIZATION_USERS,
+      PermissionType.MANAGE_ORGANIZATION_USERS,
       permissions,
     ),
     canListOrganizationUsers: hasPermission(
-      PERMISSION_LIST_ORGANIZATION_USERS,
+      PermissionType.LIST_ORGANIZATION_USERS,
       permissions,
     ),
 
     // Questionnaire
     canWriteQuestionnaire: hasPermission(
-      PERMISSION_WRITE_QUESTIONNAIRE,
+      PermissionType.WRITE_QUESTIONNAIRE,
       permissions,
     ),
     canArchiveQuestionnaire: hasPermission(
-      PERMISSION_ARCHIVE_QUESTIONNAIRE,
+      PermissionType.ARCHIVE_QUESTIONNAIRE,
       permissions,
     ),
     canReadQuestionnaire: hasPermission(
-      PERMISSION_READ_QUESTIONNAIRE,
+      PermissionType.READ_QUESTIONNAIRE,
       permissions,
     ),
     canSubmitQuestionnaire: hasPermission(
-      PERMISSION_SUBMIT_QUESTIONNAIRE,
+      PermissionType.SUBMIT_QUESTIONNAIRE,
       permissions,
     ),
     canManageQuestionnaire: hasPermission(
-      PERMISSION_MANAGE_QUESTIONNAIRE,
+      PermissionType.MANAGE_QUESTIONNAIRE,
       permissions,
     ),
 
     // Appointments
-    canViewAppointments: hasPermission(PERMISSION_LIST_BOOKING, permissions),
-    canWriteAppointment: hasPermission(PERMISSION_WRITE_BOOKING, permissions),
+    canViewAppointments: hasPermission(
+      PermissionType.LIST_BOOKING,
+      permissions,
+    ),
+    canWriteAppointment: hasPermission(
+      PermissionType.WRITE_BOOKING,
+      permissions,
+    ),
 
     // Schedules and Availability
-    canWriteSchedule: hasPermission(PERMISSION_WRITE_SCHEDULE, permissions),
-    canViewSchedule: hasPermission(PERMISSION_LIST_SCHEDULE, permissions),
+    canWriteSchedule: hasPermission(PermissionType.WRITE_SCHEDULE, permissions),
+    canViewSchedule: hasPermission(PermissionType.LIST_SCHEDULE, permissions),
     canRescheduleAppointment: hasPermission(
-      PERMISSION_RESCHEDULE_APPOINTMENT,
+      PermissionType.RESCHEDULE_APPOINTMENT,
       permissions,
     ),
 
     // User
-    canCreateUser: hasPermission(PERMISSION_CREATE_USER, permissions),
+    canCreateUser: hasPermission(PermissionType.CREATE_USER, permissions),
     // Currently listed, but not used in BE
-    canListUsers: hasPermission(PERMISSION_LIST_USER, permissions),
+    canListUsers: hasPermission(PermissionType.LIST_USER, permissions),
 
     // Template
-    canListTemplate: hasPermission(PERMISSION_LIST_TEMPLATE, permissions),
-    canManageTemplate: hasPermission(PERMISSION_MANAGE_TEMPLATE, permissions),
+    canListTemplate: hasPermission(PermissionType.LIST_TEMPLATE, permissions),
+    canManageTemplate: hasPermission(
+      PermissionType.MANAGE_TEMPLATE,
+      permissions,
+    ),
     canSetChargeItemDefinition: hasPermission(
-      PERMISSION_SET_CHARGE_ITEM_DEFINITION,
+      PermissionType.SET_CHARGE_ITEM_DEFINITION,
       permissions,
     ),
 
     // Tokens
     canWriteTokenCategory: hasPermission(
-      PERMISSION_WRITE_TOKEN_CATEGORY,
+      PermissionType.WRITE_TOKEN_CATEGORY,
       permissions,
     ),
     canListTokenCategories: hasPermission(
-      PERMISSION_LIST_TOKEN_CATEGORIES,
+      PermissionType.LIST_TOKEN_CATEGORIES,
       permissions,
     ),
-    canWriteToken: hasPermission(PERMISSION_WRITE_TOKEN, permissions),
-    canListTokens: hasPermission(PERMISSION_LIST_TOKENS, permissions),
+    canWriteToken: hasPermission(PermissionType.WRITE_TOKEN, permissions),
+    canListTokens: hasPermission(PermissionType.LIST_TOKENS, permissions),
   };
 }

@@ -17,6 +17,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 
+import { PermissionType } from "@/common/Permissions";
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
@@ -242,7 +243,7 @@ export interface EncounterRead
   organizations: FacilityOrganizationRead[];
   current_location: LocationList;
   location_history: LocationHistory[];
-  permissions: string[];
+  permissions: PermissionType[];
   care_team: CareTeamResponse[];
   tags: TagConfig[];
   appointment: AppointmentRead | null;

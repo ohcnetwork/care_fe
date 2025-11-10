@@ -1,4 +1,8 @@
-import { HasPermissionFn, getPermissions } from "@/common/Permissions";
+import {
+  HasPermissionFn,
+  PermissionType,
+  getPermissions,
+} from "@/common/Permissions";
 
 import { PatientRead } from "@/types/emr/patient/patient";
 
@@ -74,7 +78,7 @@ export const BASE_PATIENT_TABS: Tab[] = [
 ];
 
 export function getTabs(
-  permissions: string[],
+  permissions: PermissionType[],
   hasPermission: HasPermissionFn,
 ): Tabs {
   const {

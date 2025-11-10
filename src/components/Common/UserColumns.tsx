@@ -1,9 +1,10 @@
+import { PermissionType } from "@/common/Permissions";
 import { UserRead } from "@/types/user/user";
 
 export type userChildProps = {
   userData: UserRead;
   username: string;
-  permissions?: string[];
+  permissions?: PermissionType[];
 };
 
 export default function UserColumns({

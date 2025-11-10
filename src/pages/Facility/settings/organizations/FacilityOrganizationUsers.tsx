@@ -13,7 +13,7 @@ import { UserCard } from "@/components/Users/UserListAndCard";
 
 import useFilters from "@/hooks/useFilters";
 
-import { getPermissions } from "@/common/Permissions";
+import { getPermissions, PermissionType } from "@/common/Permissions";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
@@ -27,7 +27,7 @@ import LinkFacilityUserSheet from "./components/LinkFacilityUserSheet";
 interface Props {
   id: string;
   facilityId: string;
-  permissions: string[];
+  permissions: PermissionType[];
 }
 
 export default function FacilityOrganizationUsers({
