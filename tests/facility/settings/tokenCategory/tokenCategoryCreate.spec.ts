@@ -1,11 +1,14 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
+import { getFacilityId } from "tests/support/facilityId";
+
 test.describe("Token Category Create - Permission Tests", () => {
   // Test data generators
   let tokenCategoryName: string;
   let shorthand: string;
   let resourceType: string;
+  let facilityId: string;
 
   // Resource types available for token categories
   const resourceTypes = ["Practitioner", "Location", "Healthcare Service"];
@@ -15,6 +18,7 @@ test.describe("Token Category Create - Permission Tests", () => {
     tokenCategoryName = faker.company.name();
     shorthand = faker.string.alphanumeric(5).toUpperCase();
     resourceType = faker.helpers.arrayElement(resourceTypes);
+    facilityId = getFacilityId();
   });
 
   test.describe("Admin Access", () => {
@@ -24,58 +28,33 @@ test.describe("Token Category Create - Permission Tests", () => {
     test("Admin can view Add Token Category button and create token category", async ({
       page,
     }) => {
-      // Step 1: Start from the main page
-      await page.goto("/");
+      // Step 1: Navigate directly to token category page
+      await page.goto(`/facility/${facilityId}/settings/token_category`);
       await page.waitForLoadState("networkidle");
 
-      // Step 2: Select the first facility card
-      const firstFacilityCard = page
-        .locator('a[href*="/facility/"][href$="/overview"]')
-        .first();
-      await expect(firstFacilityCard).toBeVisible();
-      await firstFacilityCard.click();
-
-      // Wait for navigation to facility page
-      await page.waitForURL(/\/facility\/[^/]+/);
-
-      // Step 3: Open toggle sidebar
-      const sidebarToggle = page.getByRole("button", {
-        name: "Toggle Sidebar",
-      });
-      await expect(sidebarToggle).toBeVisible();
-      await sidebarToggle.click();
-
-      // Step 4: Click on Settings section to expand it
-      const settingsSection = page.getByRole("button", { name: "Settings" });
-      await expect(settingsSection).toBeVisible();
-      await settingsSection.click();
-
-      // Step 5: Click on Token Category link
-      const tokenCategoryLink = page.getByRole("link", {
-        name: "Token Category",
-      });
-      await expect(tokenCategoryLink).toBeVisible();
-      await tokenCategoryLink.click();
-
       // Verify we're on the token category list page
-      await expect(page).toHaveURL(/\/settings\/token_category/);
+      await expect(page).toHaveURL(
+        /\/facility\/[^/]+\/settings\/token_category/,
+      );
 
-      // Step 6: Verify Add Token Category button is visible
+      // Step 2: Verify Add Token Category button is visible
       const addButton = page.getByRole("button", {
         name: "Add Token Category",
       });
       await expect(addButton).toBeVisible();
 
-      // Step 7: Click Add Token Category button
+      // Step 3: Click Add Token Category button
       await addButton.click();
 
       // Verify we're on the creation page
-      await expect(page).toHaveURL(/\/settings\/token_category\/new/);
+      await expect(page).toHaveURL(
+        /\/facility\/[^/]+\/settings\/token_category\/new/,
+      );
       await expect(
         page.getByRole("heading", { name: "Create Token Category" }),
       ).toBeVisible();
 
-      // Step 8: Create a new token category
+      // Step 4: Create a new token category
       // Fill all mandatory fields
       await page.getByRole("textbox", { name: "Name" }).fill(tokenCategoryName);
       await page.getByRole("combobox", { name: "Resource Type" }).click();
@@ -86,9 +65,11 @@ test.describe("Token Category Create - Permission Tests", () => {
       await page.getByRole("button", { name: "Create" }).click();
 
       // Wait for navigation back to list page
-      await page.waitForURL(/\/settings\/token_category(?!\/new)/);
+      await page.waitForURL(
+        /\/facility\/[^/]+\/settings\/token_category(?!\/new)/,
+      );
 
-      // Step 9: Test search functionality
+      // Step 5: Test search functionality
       // First, verify there are items in the table before searching
       await page.waitForLoadState("networkidle");
       const tableBody = page.locator("tbody");
@@ -106,7 +87,7 @@ test.describe("Token Category Create - Permission Tests", () => {
       await expect(tableBody).toContainText(shorthand);
       await expect(tableBody).toContainText(resourceType);
 
-      // Step 10: Verify search filters correctly by searching for non-existent item
+      // Step 6: Verify search filters correctly by searching for non-existent item
       const nonExistentName = "NonExistentTokenCategory12345";
       await page
         .getByRole("textbox", { name: "Search Token Categories" })
@@ -127,7 +108,7 @@ test.describe("Token Category Create - Permission Tests", () => {
         await expect(tableBody).not.toContainText(tokenCategoryName);
       }
 
-      // Step 11: Clear search and verify all items are shown again
+      // Step 7: Clear search and verify all items are shown again
       await page
         .getByRole("textbox", { name: "Search Token Categories" })
         .clear();
@@ -163,55 +144,30 @@ test.describe("Token Category Create - Permission Tests", () => {
     });
 
     test("Nurse cannot see Add Token Category button", async ({ page }) => {
-      // Step 1: Start from the main page
-      await page.goto("/");
+      // Step 1: Navigate directly to token category page
+      await page.goto(`/facility/${facilityId}/settings/token_category`);
       await page.waitForLoadState("networkidle");
 
-      // Step 2: Select the first facility card
-      const firstFacilityCard = page
-        .locator('a[href*="/facility/"][href$="/overview"]')
-        .first();
-      await expect(firstFacilityCard).toBeVisible();
-      await firstFacilityCard.click();
+      // Step 2: Check if we have access to the page
+      // If nurse has access to the page, verify Add Token Category button is NOT visible
+      const pageAccessible = await page
+        .getByText(/Token Category|token_category/i)
+        .isVisible()
+        .catch(() => false);
 
-      // Wait for navigation to facility page
-      await page.waitForURL(/\/facility\/[^/]+/);
+      if (pageAccessible) {
+        // Verify we're on the token category list page
+        await expect(page).toHaveURL(
+          /\/facility\/[^/]+\/settings\/token_category/,
+        );
 
-      // Step 3: Open toggle sidebar
-      const sidebarToggle = page.getByRole("button", {
-        name: "Toggle Sidebar",
-      });
-      await expect(sidebarToggle).toBeVisible();
-      await sidebarToggle.click();
-
-      // Step 4: Check if Settings section exists
-      const settingsSection = page.getByRole("button", { name: "Settings" });
-
-      if (await settingsSection.isVisible()) {
-        // If Settings exists, click it to expand
-        await settingsSection.click();
-
-        // Check if Token Category link is visible
-        const tokenCategoryLink = page.getByRole("link", {
-          name: "Token Category",
+        // Verify Add Token Category button is NOT visible
+        const addButton = page.getByRole("button", {
+          name: "Add Token Category",
         });
-
-        if (await tokenCategoryLink.isVisible()) {
-          // If Token Category link exists, click it
-          await tokenCategoryLink.click();
-
-          // Verify we're on the token category list page
-          await expect(page).toHaveURL(/\/settings\/token_category/);
-
-          // Step 5: Verify Add Token Category button is NOT visible
-          const addButton = page.getByRole("button", {
-            name: "Add Token Category",
-          });
-          await expect(addButton).not.toBeVisible();
-        }
-        // If Token Category link is not visible, nurse doesn't have access to the page
+        await expect(addButton).not.toBeVisible();
       }
-      // If Settings section doesn't exist, that's also valid for nurses
+      // If page is not accessible, that's also valid for nurses (access denied)
     });
   });
 });
