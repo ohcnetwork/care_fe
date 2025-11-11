@@ -1,6 +1,11 @@
-import { z } from "zod";
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
-import { ENCOUNTER_CLASS } from "../src/types/emr/encounter/encounter";
+import {
+  ENCOUNTER_CLASS,
+  ENCOUNTER_DISCHARGE_DISPOSITION,
+  EncounterDischargeDisposition,
+} from "../src/types/emr/encounter/encounter";
+
+import { z } from "zod";
 
 const logoSchema = z.object({
   light: z.string().url(),
@@ -103,6 +108,7 @@ const envSchema = z
     REACT_ALLOWED_LOCALES: z.string().optional(),
     REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED: numberAsString.optional(),
     REACT_DEFAULT_ENCOUNTER_TYPE: z.string().optional(),
+    REACT_DEFAULT_DISCHARGE_DISPOSITION: z.string().optional(),
     REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.string().uuid().optional(),
     REACT_CUSTOM_REMOTE_I18N_URL: z.string().url().optional(),
     REACT_CUSTOM_SHORTCUTS: customShortcutsSchemaString.optional(),
@@ -119,6 +125,19 @@ const envSchema = z
         code: z.ZodIssueCode.custom,
         message: "Encounter class not in allowed encounter classes",
         path: ["REACT_DEFAULT_ENCOUNTER_TYPE"],
+      });
+    }
+
+    if (
+      data.REACT_DEFAULT_DISCHARGE_DISPOSITION &&
+      !ENCOUNTER_DISCHARGE_DISPOSITION.includes(
+        data.REACT_DEFAULT_DISCHARGE_DISPOSITION as EncounterDischargeDisposition,
+      )
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid discharge disposition",
+        path: ["REACT_DEFAULT_DISCHARGE_DISPOSITION"],
       });
     }
 

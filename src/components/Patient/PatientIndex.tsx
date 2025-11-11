@@ -226,7 +226,7 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                               text: getSearchOptions(
                                 t,
                                 identifierSearch,
-                                facility,
+                                allIdentifierConfigs,
                               ).find(
                                 (opt) => opt.key === identifierSearch.config,
                               )?.display,
