@@ -79,8 +79,10 @@ test.describe("Token Category Create - Permission Tests", () => {
         .getByRole("textbox", { name: "Search Token Categories" })
         .fill(tokenCategoryName);
 
-      // Wait for search to filter results
-      await page.waitForTimeout(500);
+      // Wait for table to update with search results
+      await expect(tableBody).toContainText(tokenCategoryName, {
+        timeout: 5000,
+      });
 
       // Verify search results contain the created token category
       await expect(tableBody).toContainText(tokenCategoryName);
@@ -92,9 +94,6 @@ test.describe("Token Category Create - Permission Tests", () => {
       await page
         .getByRole("textbox", { name: "Search Token Categories" })
         .fill(nonExistentName);
-
-      // Wait for search to filter results
-      await page.waitForTimeout(500);
 
       // Verify no results found or table is empty
       const noResultsText = page.getByText(/No.*found|No products found/i);
@@ -113,15 +112,15 @@ test.describe("Token Category Create - Permission Tests", () => {
         .getByRole("textbox", { name: "Search Token Categories" })
         .clear();
 
-      // Wait for search to reset
-      await page.waitForTimeout(500);
-
       // Search again for our created token category to verify it's back in the list
       await page
         .getByRole("textbox", { name: "Search Token Categories" })
         .fill(tokenCategoryName);
 
-      await page.waitForTimeout(500);
+      // Wait for table to show the token category again
+      await expect(tableBody).toContainText(tokenCategoryName, {
+        timeout: 5000,
+      });
 
       // Verify our token category is visible again
       await expect(tableBody).toContainText(tokenCategoryName);
