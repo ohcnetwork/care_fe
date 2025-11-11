@@ -67,7 +67,7 @@ test.describe("Create an Encounter", () => {
 
     await page.getByRole("button", { name: "Create Encounter" }).click();
 
-    //wait for success message and verify on encounter page
+    // Wait for success message and verify on encounter page
     await expect(
       page.getByText("Encounter created successfully"),
     ).toBeVisible();
