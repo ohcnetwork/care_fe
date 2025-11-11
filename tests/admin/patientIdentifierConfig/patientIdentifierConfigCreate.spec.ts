@@ -70,7 +70,7 @@ test.describe("Patient Identifier Config - Create", () => {
       .getByRole("textbox", { name: "Search configs" })
       .fill(displayName);
 
-    const tableBody = await page.locator('[data-slot="table-body"]');
+    const tableBody = page.locator('[data-slot="table-body"]');
 
     await expect(tableBody).toContainText(displayName);
     await expect(tableBody).toContainText(systemUrl);
