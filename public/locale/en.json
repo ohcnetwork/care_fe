@@ -4485,6 +4485,7 @@
   "search_vendor": "Search vendor",
   "search_wards_units": "Search wards/units...",
   "searching": "Searching...",
+  "searching_term": "Searching for {{term}}",
   "secret_key_copied": "Secret key copied to clipboard",
   "section_allergy": "Allergies",
   "section_care_team": "Care Team",

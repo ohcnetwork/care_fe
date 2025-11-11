@@ -116,7 +116,7 @@ export default function PatientIdentifierFilter({
     queryFn: query(patientApi.getPatient, {
       pathParams: { id: patientId! },
     }),
-    enabled: !!patientId,
+    enabled: !!patientId && selectedPatient?.id !== patientId,
   });
 
   // Update selectedPatient when patientDetails are fetched
@@ -205,7 +205,6 @@ export default function PatientIdentifierFilter({
     onSelect(undefined);
   };
 
-  // Get the selected identifier config
   const selectedConfig = allIdentifierConfigs.find((c) => c.id === searchType);
 
   const triggerButton = (
@@ -226,7 +225,6 @@ export default function PatientIdentifierFilter({
     </Button>
   );
 
-  // Get state-specific messages
   const getSearchStateMessage = () => {
     if (!searchType) {
       return t("select_search_type");
@@ -244,7 +242,7 @@ export default function PatientIdentifierFilter({
     }
 
     if (isPatientFetching) {
-      return `${t("searching")} ${searchTerm}...`;
+      return `${t("searching_term", { term: searchTerm })}...`;
     }
 
     if (!patientList?.results.length) {
@@ -418,7 +416,6 @@ export default function PatientIdentifierFilter({
         )}
       </div>
 
-      {/* Year of Birth Verification Dialog */}
       <Dialog open={verificationOpen} onOpenChange={setVerificationOpen}>
         <DialogContent>
           <DialogHeader>

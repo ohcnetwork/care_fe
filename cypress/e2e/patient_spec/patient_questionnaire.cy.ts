@@ -78,7 +78,7 @@ describe("All combination of questionnaire submissions", () => {
     facilityCreation.selectFirstRandomFacility();
     cy.getFacilityIdAndNavigate("encounters/patients");
     cy.intercept("GET", "**/api/v1/encounter/**").as("getEncounters");
-    cy.get("button").contains("Filter").click();
+    cy.contains("button", /^Filter$/).click();
     cy.get('[role="menuitem"]').contains("Status").click();
     cy.get("div").contains("In Progress").click();
     cy.get("body").type("{esc}");
