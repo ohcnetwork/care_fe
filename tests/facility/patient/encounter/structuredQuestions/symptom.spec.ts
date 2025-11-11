@@ -37,7 +37,7 @@ const symptomOptions = [
   "Acquired arteriovenous malformation of vascular structure of gastrointestinal tract",
   "Venous ulcer of left ankle",
   "Acute left-sided ulcerative colitis",
-  // "Allergy to hydrogen peroxide",
+  "Allergy to hydrogen peroxide",
 ];
 const usedSymptoms = new Set<string>(); // To track used symptoms across tests so we don't add duplicate symptoms
 
