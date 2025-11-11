@@ -584,19 +584,6 @@ export function DiagnosisQuestion({
                 ),
               },
               {
-                key: "created_by",
-                label: t("recorded_by"),
-                render: (created_by) => formatName(created_by),
-              },
-              {
-                key: "onset",
-                label: t("onset_date"),
-                render: (onset: Onset) =>
-                  onset?.onset_datetime
-                    ? format(new Date(onset.onset_datetime), "dd MMM yyyy")
-                    : "",
-              },
-              {
                 key: "severity",
                 label: t("severity"),
                 render: (severity: DiagnosisSeverity | null) => (
@@ -615,6 +602,14 @@ export function DiagnosisQuestion({
                 key: "created_by",
                 label: t("recorded_by"),
                 render: (created_by) => formatName(created_by),
+              },
+              {
+                key: "onset",
+                label: t("onset_date"),
+                render: (onset: Onset) =>
+                  onset?.onset_datetime
+                    ? format(new Date(onset.onset_datetime), "dd MMM yyyy")
+                    : "",
               },
             ],
             queryKey: ["diagnoses_and_chronic_conditions", patientId],
