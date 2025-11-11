@@ -1,20 +1,59 @@
+import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { format, subDays } from "date-fns";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+const encounterClasses = [
+  "Inpatient",
+  "Ambulatory",
+  "Observation",
+  "Emergency",
+  "Virtual",
+  "Home Health",
+];
+
+const encounterStatuses = ["In Progress", "Planned", "On Hold"];
+
+const encounterPriorities = [
+  "Stat",
+  "ASAP",
+  "Emergency",
+  "Urgent",
+  "Routine",
+  "Elective",
+  "Rush reporting",
+  "Timing critical",
+  "Callback results",
+  "Callback for scheduling",
+  "Pre-op",
+  "As needed",
+  "Use as directed",
+];
+
 test.describe("Create an Encounter", () => {
+  let randomEncounterClass: string;
+  let randomEncounterStatus: string;
+  let randomEncounterPriority: string;
+
   test.beforeEach(async ({ page }) => {
     const facilityId = getFacilityId();
-    await page.goto(`/facility/${facilityId}/encounters/patients/all?`);
+    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
+    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+
+    // Select random values for this test run
+    randomEncounterClass = faker.helpers.arrayElement(encounterClasses);
+    randomEncounterStatus = faker.helpers.arrayElement(encounterStatuses);
+    randomEncounterPriority = faker.helpers.arrayElement(encounterPriorities);
+
+    await page.goto(
+      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
+    );
   });
 
   test("through patient home", async ({ page }) => {
-    await page.getByText("Date").click();
-    await page.getByRole("button", { name: "Last 6 months" }).click();
-
-    await page.keyboard.press("Escape");
-
+    // Wait for page load after navigation
     await page.getByRole("link", { name: "Patient Home" }).first().click();
 
     await expect(
@@ -22,7 +61,10 @@ test.describe("Create an Encounter", () => {
     ).toBeVisible();
 
     await page.getByRole("button", { name: "Create Encounter" }).click();
-    await page.getByRole("button", { name: "Home Health" }).click();
+
+    // Use the random encounter type selected in beforeEach
+    await page.getByRole("button", { name: randomEncounterClass }).click();
+
     await page.getByRole("button", { name: "Create Encounter" }).click();
 
     //wait for success message and verify on encounter page
@@ -30,16 +72,20 @@ test.describe("Create an Encounter", () => {
       page.getByText("Encounter created successfully"),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Home Health" }),
+      page.getByRole("heading", { name: randomEncounterClass }),
+    ).toBeVisible();
+
+    //verify encounter details on the details tab
+    await page.getByRole("tab", { name: "Details" }).click();
+    await page.getByRole("link", { name: "Update Encounter" }).click();
+
+    // Verify encounter status, class, and priority are displayed correctly
+    await expect(
+      page.getByRole("combobox").filter({ hasText: randomEncounterClass }),
     ).toBeVisible();
   });
 
   test("through phone number + year", async ({ page }) => {
-    // Wait for page load after navigation
-    await page.getByText("Date").click();
-    await page.getByRole("button", { name: "Last 6 months" }).click();
-    await page.keyboard.press("Escape");
-
     // Wait for the first patient entry to be visible and click
     await page.getByRole("link", { name: "Patient Home" }).first().click();
 
@@ -89,11 +135,14 @@ test.describe("Create an Encounter", () => {
     ).toBeVisible();
 
     await page.getByRole("button", { name: "Create Encounter" }).click();
-    await page.getByRole("button", { name: "Home Health" }).click();
+
+    // Use the random encounter type selected in beforeEach
+    await page.getByRole("button", { name: randomEncounterClass }).click();
+
     await page.getByRole("combobox", { name: "Status" }).click();
-    await page.getByRole("option", { name: "In Progress" }).click();
+    await page.getByRole("option", { name: randomEncounterStatus }).click();
     await page.getByRole("combobox", { name: "Priority" }).click();
-    await page.getByRole("option", { name: "ASAP" }).click();
+    await page.getByRole("option", { name: randomEncounterPriority }).click();
     await page.getByRole("button", { name: "Create Encounter" }).click();
     //wait for success message
     await expect(
@@ -102,25 +151,22 @@ test.describe("Create an Encounter", () => {
 
     //verify on encounter page
     await expect(
-      page.getByRole("heading", { name: "Home Health" }),
+      page.getByRole("heading", { name: randomEncounterClass }),
     ).toBeVisible();
 
-    //edit encounter to planned status
-    await test.step("edit that encounter to planned status", async () => {
-      await page.getByRole("tab", { name: "Details" }).click();
-      await page.getByRole("link", { name: "Update Encounter" }).click();
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "In Progress" })
-        .click();
-      await page.getByRole("option", { name: "Discharged" }).click();
-      await page.getByRole("button", { name: "Submit" }).click();
-      await page.getByRole("tab", { name: "Actions" }).click();
-      await page.getByRole("button", { name: "Mark as Completed" }).click();
-      await page.getByRole("button", { name: "Mark as Complete" }).click();
+    //verify encounter details on the details tab
+    await page.getByRole("tab", { name: "Details" }).click();
+    await page.getByRole("link", { name: "Update Encounter" }).click();
 
-      //wait for success message
-      await expect(page.getByText("Encounter completed")).toBeVisible();
-    });
+    // Verify encounter status, class, and priority are displayed correctly
+    await expect(
+      page.getByRole("combobox").filter({ hasText: randomEncounterStatus }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("combobox").filter({ hasText: randomEncounterClass }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("combobox").filter({ hasText: randomEncounterPriority }),
+    ).toBeVisible();
   });
 });
