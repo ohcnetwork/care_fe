@@ -57,7 +57,8 @@ test.describe("Facility Devices Management", () => {
     const modelNumber = faker.string.alphanumeric(6);
     const partNumber = faker.string.alphanumeric(8);
     const phoneNumber =
-      faker.helpers.arrayElement(["6", "7", "8", "9"]) + faker.string.numeric(9); // Indian mobile format: XXXXXXXXXX (starts with 6-9)
+      faker.helpers.arrayElement(["6", "7", "8", "9"]) +
+      faker.string.numeric(9); // Indian mobile format: XXXXXXXXXX (starts with 6-9)
 
     const statusOptions = ["Active", "Inactive", "Entered in Error"];
     const availabilityOptions = ["Available", "Destroyed", "Damaged", "Lost"];
@@ -171,5 +172,23 @@ test.describe("Facility Devices Management", () => {
     await expect(
       page.getByRole("textbox", { name: "Part Number" }),
     ).toHaveValue(partNumber);
+  });
+
+  test("Show validation error when clicking Save without filling required field", async ({
+    page,
+  }) => {
+    // Navigate to Add Device form
+    await page.getByRole("link", { name: "Add Device" }).click();
+
+    // Click Save button without filling any fields
+    await page.getByRole("button", { name: "Save" }).click();
+
+    // Verify error message for Registered Name field
+    const registeredNameLabel = page.getByLabel("Registered Name");
+    const registeredNameError = page
+      .locator('[data-slot="form-item"]')
+      .filter({ has: registeredNameLabel })
+      .getByText("This field is required");
+    await expect(registeredNameError).toBeVisible();
   });
 });
