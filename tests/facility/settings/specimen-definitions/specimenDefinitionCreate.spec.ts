@@ -2,47 +2,20 @@ import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { getFieldErrorMessage } from "tests/helper/error";
 import { getFacilityId } from "tests/support/facilityId";
+import {
+  capOptions,
+  collectionOptions,
+  INT_MAX,
+  MAX_SLUG_LENGTH,
+  MIN_SLUG_LENGTH,
+  preferenceOptions,
+  preparationOptions,
+  STATUS_OPTIONS,
+  typeCollectedOptions,
+} from "./specimenDefinitionConstants";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
-
-const MIN_SLUG_LENGTH = 5;
-const MAX_SLUG_LENGTH = 25;
-const INT_MAX = 100; // Arbitrary upper limit for integer fields
-const STATUS_OPTIONS = ["Draft", "Active"];
-const typeCollectedOptions = [
-  "Abscess",
-  "Air Sample",
-  "Amputation",
-  "Allograft",
-  "Amniotic Fluid",
-];
-
-const collectionOptions = [
-  "Finger stick",
-  "Timed urine collection",
-  "Biopsy - action",
-  "Excision - action",
-  "Puncture - action",
-];
-
-const preparationOptions = [
-  "Full strength dose",
-  "Fractionated dose",
-  "Day before procedure",
-  "Fetal prelabour period",
-  "Same day but before procedure",
-];
-
-const preferenceOptions = ["Preferred", "Alternate"];
-
-const capOptions = [
-  "black cap",
-  "brown cap",
-  "lavender cap",
-  "grey cap",
-  "red cap",
-];
 
 test.describe("Specimen Definitions Create", () => {
   let facilityId: string;

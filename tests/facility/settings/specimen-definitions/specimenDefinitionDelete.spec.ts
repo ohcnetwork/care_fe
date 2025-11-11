@@ -1,10 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
+import { DELETED_STATUS } from "./specimenDefinitionConstants";
 
 test.use({ storageState: "tests/.auth/user.json" });
-
-const DELETED_STATUS = "Retired";
 
 test.describe("Specimen Definitions Delete", () => {
   let facilityId: string;
