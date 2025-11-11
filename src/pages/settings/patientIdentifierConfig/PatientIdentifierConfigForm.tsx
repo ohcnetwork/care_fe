@@ -549,7 +549,6 @@ export default function PatientIdentifierConfigForm({
               )}
 
               {/* Status Section */}
-
               <div>
                 <h2 className="text-lg font-semibold mb-1">{t("status")}</h2>
                 <FormDescription>{t("status_help")}</FormDescription>
