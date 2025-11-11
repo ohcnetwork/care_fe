@@ -307,7 +307,7 @@ export default function PatientIdentifierFilter({
         <div className="relative px-2">
           {isPhoneNumberConfig ? (
             <PhoneInput
-              placeholder={selectedConfig?.config.display}
+              placeholder={selectedConfig?.config.display || t("search")}
               value={searchTerm}
               onChange={(value) => setSearchTerm(value || "")}
               className="border-none focus:ring-0 focus:outline-none flex-1"
@@ -351,7 +351,7 @@ export default function PatientIdentifierFilter({
               <Trans
                 i18nKey="found_patient_with_this"
                 values={{
-                  count: patientList?.results.length,
+                  count: patientList?.results.length || 0,
                   identifier: isPhoneNumberConfig
                     ? t("phone_number").toLowerCase()
                     : t("identifier").toLowerCase(),
