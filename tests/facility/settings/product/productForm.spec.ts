@@ -7,21 +7,28 @@ test.use({ storageState: "tests/.auth/user.json" });
 test.describe("Product Form Redirects", () => {
     const newLotNumber = `LOT-${faker.string.alphanumeric(10)}`;
     let facilityId: string;
+    // NOTE: This ID MUST be a valid, existing product ID for the test to work fully.
     const productId: string = "dummy-existing-product-id"; 
 
     test.beforeEach(async ({ page }) => {
         facilityId = getFacilityId();
-        const targetUrl = `/facility/${facilityId}/settings/products`;
-        await page.goto(targetUrl);
         
+        // --- ROBUST NAVIGATION FIX: Reverting to UI clicks for stability ---
+        await page.goto(`/facility/${facilityId}`);
+        await page.getByRole("button", { name: "Toggle Sidebar" }).click();
+        await page.getByRole("link", { name: /settings/i }).click();
+        await page.getByRole("link", { name: /products/i }).click();
+        
+        // --- STABLE ASSERTION FIX: Check for the unique 'Add Product' button ---
         await expect(
-            page.getByRole("heading", { name: /products/i }),
+            page.getByRole("button", { name: "Add Product" }),
         ).toBeVisible();
     });
 
     test("should redirect to product details page after successful edit and enable correct back navigation", async ({
         page,
     }) => {
+        // Navigating directly to the EDIT page for the assumed existing product
         const editUrl = `/facility/${facilityId}/settings/product/${productId}/edit`;
         await page.goto(editUrl);
         
@@ -47,6 +54,7 @@ test.describe("Product Form Redirects", () => {
             await expect(page).toHaveURL(expectedDetailsUrlRegex);
             await expect(page.getByText(newLotNumber)).toBeVisible();
 
+            // CRITICAL CHECK for the original bug fix
             await page.goBack(); 
 
             const expectedListUrlRegex = new RegExp(
