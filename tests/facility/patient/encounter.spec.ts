@@ -117,13 +117,11 @@ test.describe("Create an Encounter", () => {
       .getByRole("textbox", { name: "Search by Patient Phone Number" })
       .fill(cleanPhoneNumber || "");
 
-    //select the first result
-    await page
-      .getByRole("cell", {
-        name: new RegExp(cleanPhoneNumber?.slice(-4) || ""),
-      })
-      .first()
-      .click();
+    //select the first result - wait for table body and click the first row
+    const firstRow = page.locator('tbody[data-slot="table-body"] tr').first();
+    await firstRow.waitFor({ state: "visible" });
+    await firstRow.click();
+
     await page
       .getByRole("textbox", { name: "Year of Birth (YYYY)" })
       .fill(yearOfBirth || "");
