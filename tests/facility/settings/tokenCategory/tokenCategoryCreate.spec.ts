@@ -25,10 +25,8 @@ test.describe("Token Category Create - Permission Tests", () => {
     // Use admin authenticated state
     test.use({ storageState: "tests/.auth/user.json" });
 
-    test("Admin can view Add Token Category button and create token category", async ({
-      page,
-    }) => {
-      // Step 1: Navigate directly to token category page
+    test("Admin can view Add Token Category button", async ({ page }) => {
+      // Navigate directly to token category page
       await page.goto(`/facility/${facilityId}/settings/token_category`);
       await page.waitForLoadState("networkidle");
 
@@ -37,14 +35,17 @@ test.describe("Token Category Create - Permission Tests", () => {
         /\/facility\/[^/]+\/settings\/token_category/,
       );
 
-      // Step 2: Verify Add Token Category button is visible
+      // Verify Add Token Category button is visible
       const addButton = page.getByRole("button", {
         name: "Add Token Category",
       });
       await expect(addButton).toBeVisible();
+    });
 
-      // Step 3: Click Add Token Category button
-      await addButton.click();
+    test("Admin can create a token category", async ({ page }) => {
+      // Navigate directly to creation page
+      await page.goto(`/facility/${facilityId}/settings/token_category/new`);
+      await page.waitForLoadState("networkidle");
 
       // Verify we're on the creation page
       await expect(page).toHaveURL(
@@ -54,7 +55,6 @@ test.describe("Token Category Create - Permission Tests", () => {
         page.getByRole("heading", { name: "Create Token Category" }),
       ).toBeVisible();
 
-      // Step 4: Create a new token category
       // Fill all mandatory fields
       await page.getByRole("textbox", { name: "Name" }).fill(tokenCategoryName);
       await page.getByRole("combobox", { name: "Resource Type" }).click();
@@ -69,8 +69,7 @@ test.describe("Token Category Create - Permission Tests", () => {
         /\/facility\/[^/]+\/settings\/token_category(?!\/new)/,
       );
 
-      // Step 5: Test search functionality
-      // First, verify there are items in the table before searching
+      // Verify the created token category appears in the list
       await page.waitForLoadState("networkidle");
       const tableBody = page.locator("tbody");
 
@@ -79,51 +78,65 @@ test.describe("Token Category Create - Permission Tests", () => {
         .getByRole("textbox", { name: "Search Token Categories" })
         .fill(tokenCategoryName);
 
-      // Wait for table to update with search results
-      await expect(tableBody).toContainText(tokenCategoryName, {
-        timeout: 5000,
-      });
-
       // Verify search results contain the created token category
       await expect(tableBody).toContainText(tokenCategoryName);
       await expect(tableBody).toContainText(shorthand);
       await expect(tableBody).toContainText(resourceType);
+    });
 
-      // Step 6: Verify search filters correctly by searching for non-existent item
+    test("Admin sees no results when searching for non-existent token category", async ({
+      page,
+    }) => {
+      // Navigate directly to token category page
+      await page.goto(`/facility/${facilityId}/settings/token_category`);
+      await page.waitForLoadState("networkidle");
+
       const nonExistentName = "NonExistentTokenCategory12345";
+
+      // Search for non-existent item
       await page
         .getByRole("textbox", { name: "Search Token Categories" })
         .fill(nonExistentName);
 
-      // Verify no results found or table is empty
-      const noResultsText = page.getByText(/No.*found|No products found/i);
-      const hasNoResults = await noResultsText.isVisible().catch(() => false);
+      // Verify no results found message is displayed
+      const noResultsText = page.getByText("No products found");
+      await expect(noResultsText).toBeVisible();
+    });
 
-      if (hasNoResults) {
-        // "No results" message is displayed
-        await expect(noResultsText).toBeVisible();
-      } else {
-        // Or table body should not contain our created token category
-        await expect(tableBody).not.toContainText(tokenCategoryName);
-      }
+    test("Admin sees validation errors when submitting empty form", async ({
+      page,
+    }) => {
+      // Navigate directly to creation page
+      await page.goto(`/facility/${facilityId}/settings/token_category/new`);
+      await page.waitForLoadState("networkidle");
 
-      // Step 7: Clear search and verify all items are shown again
-      await page
-        .getByRole("textbox", { name: "Search Token Categories" })
-        .clear();
+      // Verify we're on the creation page
+      await expect(page).toHaveURL(
+        /\/facility\/[^/]+\/settings\/token_category\/new/,
+      );
 
-      // Search again for our created token category to verify it's back in the list
-      await page
-        .getByRole("textbox", { name: "Search Token Categories" })
-        .fill(tokenCategoryName);
+      // Click Create button without filling any fields
+      await page.getByRole("button", { name: "Create" }).click();
 
-      // Wait for table to show the token category again
-      await expect(tableBody).toContainText(tokenCategoryName, {
-        timeout: 5000,
-      });
+      // Verify error message for Name field
+      const nameLabel = page.getByLabel("Name");
+      const nameError = page
+        .locator('[data-slot="form-item"]')
+        .filter({ has: nameLabel })
+        .getByText("This field is required");
+      await expect(nameError).toBeVisible();
 
-      // Verify our token category is visible again
-      await expect(tableBody).toContainText(tokenCategoryName);
+      // Verify error message for Shorthand field
+      const shorthandLabel = page.getByLabel("Shorthand");
+      const shorthandError = page
+        .locator('[data-slot="form-item"]')
+        .filter({ has: shorthandLabel })
+        .getByText("This field is required");
+      await expect(shorthandError).toBeVisible();
+
+      // Verify Resource Type field exists (has default value so no error)
+      const resourceTypeLabel = page.getByLabel("Resource Type");
+      await expect(resourceTypeLabel).toBeVisible();
     });
   });
 

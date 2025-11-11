@@ -54,12 +54,10 @@ test.describe("Token Category List - Permission Tests", () => {
       await expect(sidebarToggle).toBeVisible();
       await sidebarToggle.click();
 
-      // Click on Settings section to expand it
       const settingsSection = page.getByRole("button", { name: "Settings" });
       await expect(settingsSection).toBeVisible();
       await settingsSection.click();
 
-      // Verify Token Category link is visible in sidebar
       const tokenCategoryLink = page.getByRole("link", {
         name: "Token Category",
       });
@@ -107,29 +105,21 @@ test.describe("Token Category List - Permission Tests", () => {
       expect(await viewButtons.count()).toBe(0);
       expect(await editButtons.count()).toBe(0);
 
-      // Step 4: Open toggle sidebar to verify Token Category link is not visible
+      // Step 4: Verify Token Category link is NOT visible in sidebar
       const sidebarToggle = page.getByRole("button", {
         name: "Toggle Sidebar",
       });
       await expect(sidebarToggle).toBeVisible();
       await sidebarToggle.click();
 
-      // Step 5: Check if Settings section exists
       const settingsSection = page.getByRole("button", { name: "Settings" });
+      await expect(settingsSection).toBeVisible();
+      await settingsSection.click();
 
-      if (await settingsSection.isVisible()) {
-        // If Settings exists, click it to expand
-        await settingsSection.click();
-
-        // Step 6: Verify Token Category link is NOT visible
-        const tokenCategoryLink = page.getByRole("link", {
-          name: "Token Category",
-        });
-        await expect(tokenCategoryLink).not.toBeVisible();
-      } else {
-        // If Settings section doesn't exist, that's also valid for volunteers
-        await expect(settingsSection).not.toBeVisible();
-      }
+      const tokenCategoryLink = page.getByRole("link", {
+        name: "Token Category",
+      });
+      await expect(tokenCategoryLink).not.toBeVisible();
     });
   });
 });
