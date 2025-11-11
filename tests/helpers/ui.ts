@@ -336,6 +336,95 @@ export async function selectFromCategoryPicker(
   }
 }
 
+interface SelectFromDefinitionCategoryPickerOptions {
+  search?: string;
+  navigateCategories?: string[];
+  itemIndex?: number;
+}
+
+/**
+ * Helper for ResourceDefinitionCategoryPicker component
+ * This is different from selectFromCategoryPicker and handles definition selection
+ * (used for activity definitions, etc.)
+ *
+ * @example
+ * await selectFromDefinitionCategoryPicker(page, trigger, {
+ *   navigateCategories: ["Lab Tests"],
+ *   search: "Complete Blood Count",
+ *   itemIndex: 0
+ * });
+ */
+export async function selectFromDefinitionCategoryPicker(
+  page: Page,
+  trigger: Locator,
+  {
+    search,
+    navigateCategories = [],
+    itemIndex = 0,
+  }: SelectFromDefinitionCategoryPickerOptions = {},
+) {
+  await trigger.waitFor({ state: "visible" });
+  await trigger.scrollIntoViewIfNeeded();
+
+  // Close any existing popovers before opening
+  await closeAnyOpenPopovers(page);
+
+  await trigger.click();
+
+  // Wait for the picker to open (could be dialog or popover)
+  const dialog = page.getByRole("dialog").last();
+  const hasDialog = await dialog.isVisible().catch(() => false);
+  const popper = page.locator("[data-radix-popper-content-wrapper]").last();
+  const scope = hasDialog ? dialog : popper;
+
+  await scope.waitFor({ state: "visible" });
+
+  // Navigate through categories if specified
+  for (const categoryTitle of navigateCategories) {
+    // Wait for the category to appear
+    const categoryItem = scope.getByRole("option", {
+      name: new RegExp(categoryTitle, "i"),
+    });
+    await categoryItem.waitFor({ state: "attached" });
+    await categoryItem.waitFor({ state: "visible" });
+    await categoryItem.click();
+
+    // Wait for navigation to complete
+    await page.waitForTimeout(300);
+  }
+
+  // If search is provided, use search to filter items
+  if (search) {
+    const input = scope.locator('[data-slot="command-input"]').first();
+    await input.waitFor({ state: "visible" });
+    await input.fill("");
+    await input.fill(search);
+
+    // Wait for search results to load
+    await page.waitForTimeout(500);
+  }
+
+  // Wait for items to load
+  const items = scope.getByRole("option");
+  await items.first().waitFor({ state: "attached" });
+  await items.first().waitFor({ state: "visible" });
+
+  const count = await items.count();
+  if (count === 0) {
+    throw new Error("No items found in definition category picker");
+  }
+
+  // Select item at itemIndex
+  const targetItem = items.nth(itemIndex);
+  await targetItem.waitFor({ state: "attached" });
+  await targetItem.waitFor({ state: "visible" });
+  await targetItem.scrollIntoViewIfNeeded();
+  await targetItem.click();
+
+  // Wait for selection to register and dialog to close
+  await scope.waitFor({ state: "hidden" }).catch(() => {});
+}
+
 /**
  * Checks if a toast notification with the given text is visible
  * @param page - Playwright page object
