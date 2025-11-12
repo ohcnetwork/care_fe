@@ -345,7 +345,7 @@ export default function PatientIdentifierFilter({
                 }}
               />
             </div>
-            <CommandList className="pb-2 h-[calc(50vh-12rem)]">
+            <CommandList className="max-h-[calc(50vh-12rem)] overflow-y-auto">
               <CommandGroup className="p-0">
                 {patientList?.results.map((patient) => (
                   <CommandItem
