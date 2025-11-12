@@ -334,12 +334,20 @@ function HealthcareServiceFormContent({
             {/* Locations Section */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
               <div className="space-y-4">
+                <div>
+                  <h2 className="text-base font-medium text-gray-900">
+                    {t("locations")}
+                  </h2>
+                  <p className="mt-0.5 text-sm text-gray-500">
+                    {t("Select the locations where this service is available")}
+                  </p>
+                </div>
+
                 <FormField
                   control={form.control}
                   name="locations"
                   render={({ field, fieldState }) => (
                     <FormItem>
-                      <FormLabel>{t("locations")}</FormLabel>
                       <FormControl>
                         <RequirementsSelector
                           title={t("location_requirements")}
