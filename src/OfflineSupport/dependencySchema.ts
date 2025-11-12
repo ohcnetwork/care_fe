@@ -22,6 +22,7 @@ export const dependencySchema: DependencySchema = {
   ],
   mark_encounter_as_complete: [
     { location: "mutationPathParams", path: ["id"], resourceType: "encounter" },
+    { location: "payload", path: ["id"], resourceType: "encounter" },
   ],
 
   // Resource request ( depend on patient)

@@ -7,6 +7,7 @@ import {
   QueryParamsObject,
 } from "@/OfflineSupport/offlineKeys";
 import {
+  isOfflineId,
   normalizeOfflineEncounterRecord,
   normalizeUserBase,
   saveOfflineWrite,
@@ -146,13 +147,6 @@ export const queueMarkAscompleteRecord = async ({
 }: QueueMarkAsCompleteParams): Promise<void> => {
   try {
     // Check if this is an offline-created encounter
-    if (encounter.id.startsWith("offline-")) {
-      const error = new Error(
-        "Cannot mark offline-created encounter as complete",
-      );
-      onError?.(error);
-      return;
-    }
 
     const useQueryParams: QueryParamsObject<typeof encounterApi.get> = encounter
       .facility.id
@@ -160,22 +154,29 @@ export const queueMarkAscompleteRecord = async ({
       : { patient: encounter.patient.id };
 
     const offlineWrite: saveOfflineWriteData = {
-      id: encounter.id,
+      id: isOfflineId(encounter.id)
+        ? `${encounter.id}-mark-complete`
+        : encounter.id,
+
       userId: userId,
       facilityId: encounter.facility.id,
       mutationSyncRouteKey: OfflineKeyMap.mark_encounter_as_complete,
       type: OfflineKeyMap.mark_encounter_as_complete,
       resourceType: "Encounter",
-      mutationPathParams: { id: encounter.id } satisfies PathParamsObject<
-        typeof encounterApi.update
-      >,
+      mutationPathParams: {
+        id: encounter.id,
+      } satisfies PathParamsObject<typeof encounterApi.update>,
       payload: encounterUpdatedData,
-      serverTimestamp: encounter.modified_date,
-      useQueryRouteKey: "getEncounter",
-      useQueryPathParams: { id: encounter.id } satisfies PathParamsObject<
-        typeof encounterApi.get
-      >,
-      useQueryParams: useQueryParams,
+      ...(!isOfflineId(encounter.id)
+        ? {
+            serverTimestamp: encounter.modified_date,
+            useQueryRouteKey: "getEncounter",
+            useQueryPathParams: {
+              id: encounter.id,
+            } satisfies PathParamsObject<typeof encounterApi.get>,
+            useQueryParams: useQueryParams,
+          }
+        : { parentMutationId: encounter.id }),
     };
 
     const saveResult = await saveOfflineWrite(offlineWrite);
