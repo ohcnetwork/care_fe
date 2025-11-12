@@ -270,8 +270,8 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
           />
         )}
 
-        <Card>
-          <CardHeader>
+        <Card className="flex flex-col min-h-80">
+          <CardHeader className="flex flex-col">
             <div className="flex items-center justify-between">
               <CardTitle>{t("permissions")}</CardTitle>
               <div className="flex gap-2">
@@ -306,13 +306,13 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
               />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-auto">
             <FormField
               control={form.control}
               name="permissions"
               render={() => (
                 <FormItem>
-                  <div className="space-y-3 max-h-60 overflow-y-auto">
+                  <div className="space-y-3 max-h-60 mr-2">
                     {permissions.map((permission, index) => (
                       <div
                         key={permission.slug}

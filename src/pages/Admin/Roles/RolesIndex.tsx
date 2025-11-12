@@ -203,7 +203,7 @@ export default function RolesIndex() {
                   {t("add_role")}
                 </Button>
               </SheetTrigger>
-              <SheetContent className="flex flex-col">
+              <SheetContent>
                 <SheetHeader>
                   <SheetTitle>
                     {mode === "edit"
@@ -213,7 +213,7 @@ export default function RolesIndex() {
                         : t("add_role")}
                   </SheetTitle>
                 </SheetHeader>
-                <div className="mt-6 flex-1 overflow-y-auto pr-2">
+                <div className="mt-6 overflow-auto pr-2">
                   <RoleForm role={selectedRole} onSuccess={handleSheetClose} />
                 </div>
               </SheetContent>
