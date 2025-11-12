@@ -291,9 +291,16 @@ export function EditInvoiceTable({
     return <div>{t("no_charge_items_found")}</div>;
   }
 
+  const onError = () => {
+    toast.error(t("invalid_value"));
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, onError)}
+        className="space-y-4"
+      >
         <div className="rounded-t-sm border border-gray-300 overflow-x-auto">
           <Table>
             <TableHeader>
@@ -424,7 +431,7 @@ export function EditInvoiceTable({
                                             );
                                             form.setValue(
                                               `items.${index}.discounts.${discountIndex}.amount`,
-                                              "0",
+                                              undefined,
                                             );
                                             form.setValue(
                                               `items.${index}.discounts.${discountIndex}.factor`,
