@@ -67,6 +67,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         product_knowledge: qParams.product_knowledge_id,
+        ordering: "net_content",
       },
     }),
   });
