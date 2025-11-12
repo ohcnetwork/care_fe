@@ -114,64 +114,21 @@ export interface CurrentUserRead extends UserRead, Permissions {
 export type UserType = 'doctor' | 'nurse' | 'staff' | 'volunteer' | 'administrator';
 ```
 
-## Medical Measurement Types
-```typescript
-// Vital signs with proper units
-export interface VitalSigns {
-  temperature: { value: number; unit: 'celsius' | 'fahrenheit' };
-  bloodPressure: { systolic: number; diastolic: number; unit: 'mmHg' };
-  heartRate: { value: number; unit: 'bpm' };
-  oxygenSaturation: { value: number; unit: 'percentage' };
-  recordedAt: string; // ISO 8601
-  recordedBy: UserReadMinimal;
-}
-```
-
-## Healthcare-Specific Utility Types
-```typescript
-// Emergency priority levels
-export type EmergencyPriority = 'critical' | 'urgent' | 'semi-urgent' | 'non-urgent';
-
-// Bed status in facility
-export type BedStatus = 'occupied' | 'available' | 'maintenance' | 'reserved';
-
-// Medication administration routes
-export type MedicationRoute = 'oral' | 'intravenous' | 'intramuscular' | 'topical' | 'inhaled';
-```
-
 ## Zod Schema Integration
 ```typescript
 import { z } from 'zod';
 
-// Zod schema matching TypeScript interface
+// Create zod schemas matching TypeScript interfaces
 export const PatientAdmissionSchema = z.object({
   name: z.string().min(2).max(100),
   age: z.number().min(0).max(150),
   bloodGroup: z.nativeEnum(BloodGroupChoices),
-  emergencyContact: z.string().regex(/^\+?[\d\s-()]+$/), // Phone validation
 });
 
 export type PatientAdmissionFormData = z.infer<typeof PatientAdmissionSchema>;
 ```
 
-## Medical Data Privacy Types
-```typescript
-// PHI (Protected Health Information) markers
-export interface PHISafePatientData {
-  id: string; // Hashed/anonymized
-  ageRange: '0-10' | '11-20' | '21-30' | '31-40' | '41-50' | '51+';
-  condition: string;
-  // Never include name, address, phone in PHI-safe types
-}
-```
-
-## Integration with React Query
-```typescript
-// API query result types
-export type PatientQueryResult = {
-  data: PatientRead;
-  isLoading: boolean;
-  error: ApiError | null;
-  refetch: () => void;
-};
-```
+## Medical Data Privacy
+- Mark PHI (Protected Health Information) appropriately
+- Never include PII (name, address, phone) in analytics types
+- Use hashed/anonymized IDs where applicable

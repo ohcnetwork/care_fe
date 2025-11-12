@@ -31,34 +31,10 @@ applyTo: "**/*.config.{js,mjs,cjs,ts,mts,cts,json,yml,yaml}"
 - Document all environment variables
 - Provide sensible defaults where possible
 
-### Build Optimization
+### Configuration Best Practices
 
-- Configure code splitting and lazy loading where applicable
-- Optimize bundle size with proper tree shaking
-- Set up proper caching strategies
-- Configure PWA settings appropriately
-
-### Development Experience
-
-- Configure hot module replacement for fast development
-- Set up proper source mapping for debugging
-- Configure path aliases for clean imports
-- Enable TypeScript strict mode for better code quality
-
-### CI/CD Integration
-
-- Ensure configurations work in CI/CD environments
-- Set appropriate timeouts for long-running processes
-- Configure proper caching for faster builds
-- Handle different environment configurations
-
-### Security Considerations
-
-- Avoid committing sensitive configuration values
-- Use environment variables for API endpoints
-
-### Performance Monitoring
-
-- Configure bundle analysis tools
-- Set up performance budgets
-- Track bundle size changes over time
+- Build optimization: Configure code splitting and tree shaking in Vite
+- TypeScript: Enable strict mode for better type safety
+- Path aliases: Configure @ imports for clean imports (@/components/, @/types/)
+- Environment: Use environment variables for API endpoints, avoid committing secrets
+- Build timeouts: Set appropriate timeouts for long-running build processes

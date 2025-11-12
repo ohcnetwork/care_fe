@@ -81,18 +81,15 @@ const PATHS_WITHOUT_SIDEBAR = [
 
 ## Responsive Design
 
-- Use Tailwind's responsive classes
+- Use Tailwind responsive classes (sm:, md:, lg:)
 - Follow mobile-first approach
-- Test components across different screen sizes
-- Use proper breakpoints as defined in `tailwind.config.js`
 
 ## Accessibility
 
-- Implement proper ARIA attributes
-- Ensure keyboard navigation works
-- Maintain proper color contrast
+- Use proper ARIA attributes
+- Ensure keyboard navigation
+- Maintain WCAG 2.1 AA color contrast
 - Support screen readers
-- Test with accessibility tools
 
 ## Component Structure
 
@@ -119,7 +116,6 @@ export function Component({ title, onAction }: ComponentProps) {
 
 ## Internationalization
 
-- Use translation keys from `src/Locale/`
-- Support RTL languages
-- Use proper date/time formatting
-- Support multiple languages
+- Use `i18next` for all user-facing text
+- Translation keys from `src/Locale/`
+- Use `date-fns` for date/time formatting with locale support

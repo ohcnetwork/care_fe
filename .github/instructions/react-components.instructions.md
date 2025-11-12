@@ -63,7 +63,7 @@ applyTo: "src/components/**/*.{ts,tsx}"
 
 ## Testing Integration
 
-- Playwright attributes: Use `data-testid="patient-info-card"` following feature-action pattern
-- Page Object Model: Reference tests/pageObject/ structure for component testing
+- Test selectors: Use semantic selectors with Playwright (getByRole, getByLabel, getByText)
 - Medical workflow testing: Test critical paths (patient admission, medication orders)
 - Error scenarios: Test network failures, invalid patient data, authorization errors
+- Accessibility testing: Verify ARIA labels and keyboard navigation in healthcare workflows

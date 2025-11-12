@@ -19,46 +19,16 @@ applyTo: "src/context/**/*.{ts,tsx}"
 
 ## Context Implementation Patterns
 
-### Permission Management Example
-```typescript
-interface PermissionContextType {
-  userPermissions: Permission[];
-  canAccessPatient: (patientId: string) => boolean;
-  canPrescribeMedication: boolean;
-  emergencyOverride: boolean;
-}
-
-export const usePermissions = () => {
-  const context = useContext(PermissionContext);
-  if (!context) {
-    throw new Error('usePermissions must be used within PermissionProvider');
-  }
-  return context;
-};
-```
-
-## Healthcare Context Guidelines
+## Implementation Guidelines
 
 ### Core Context Types
-- Patient Context: Current patient selection and medical alerts
-- Facility Context: Department location and resource availability  
-- Emergency Context: Critical care protocols and rapid response
-- Audit Context: HIPAA compliance and data access logging
+- Permission Context: Medical role-based permissions and patient data access
+- Shortcut Context: Medical workflow keyboard shortcuts
+- Custom contexts should support emergency override for critical care
 
 ### Implementation Standards
 - Use TypeScript interfaces for all context types
-- Include proper error boundaries for medical data
+- Include proper error boundaries for critical medical data
 - Implement audit logging for PHI access
 - Handle offline scenarios for critical workflows
-
-### Security Requirements
-- Log all medical data access automatically
-- Implement proper consent management
-- Maintain audit trails for compliance
-- Use data minimization principles
-
-### Testing Requirements
-- Test role-based access control
-- Validate emergency override scenarios
-- Verify audit trail completeness
-- Test offline data handling
+- Test role-based access control thoroughly

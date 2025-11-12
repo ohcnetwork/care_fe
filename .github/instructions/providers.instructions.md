@@ -9,42 +9,22 @@ applyTo: "src/Providers/**/*.{ts,tsx}"
 - PatientUserProvider: Patient authentication for public appointment booking
 - HistoryAPIProvider: Navigation history for clinical workflows
 
-### Authentication Patterns
-```typescript
-// Healthcare role-based provider example
-export const AuthUserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<UserRead | null>(null);
-  const [permissions, setPermissions] = useState<Permission[]>([]);
-  
-  return (
-    <AuthUserContext.Provider value={{
-      user,
-      permissions,
-      canAccessPatient: (patientId: string) => hasPermission('view_patient'),
-      canPrescribeMedication: hasPermission('prescribe_medication'),
-    }}>
-      {children}
-    </AuthUserContext.Provider>
-  );
-};
-```
-
 ## Provider Implementation Guidelines
 
-### State Management
+### State Management Integration
 - Use React hooks for local provider state
-- Integrate with @tanstack/react-query for server state  
+- Use Jotai atoms (e.g., `userAtom` in `src/atoms/user-atom.ts`) for shared authentication state
+- Integrate with @tanstack/react-query for server state
 - Handle loading, error, and success states consistently
 - Implement proper cleanup and memory management
 
 ### Error Handling
 - Provide fallback UI for provider failures
-- Log errors appropriately without exposing PII
-- Handle network failures gracefully
+- Log errors appropriately without exposing PHI/PII
+- Handle network failures gracefully in hospital environments
 - Implement retry logic for critical operations
 
 ### Testing Requirements
 - Test provider state management and updates
 - Verify authentication and authorization flows
 - Test emergency scenarios and override mechanisms
-- Validate audit logging and compliance features

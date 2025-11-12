@@ -23,20 +23,15 @@ applyTo: "src/hooks/**/*.{ts,tsx}"
 
 ## Hook Development Standards
 
-### Implementation Patterns
+### Implementation
 - Use `useState` for local state, `@tanstack/react-query` for server state
 - Handle loading, error, and success states consistently
 - Implement proper cleanup for subscriptions and timers
-- Use TypeScript strict typing for medical data
+- Use TypeScript strict typing
 
-### Healthcare Compliance
-- Validate medical data inputs using `zod` schemas
-- Handle PHI with appropriate security measures
-- Implement audit logging for sensitive operations
-- Maintain HIPAA compliance in data handling
-
-### Error Handling & Performance
-- Provide meaningful error messages for clinical workflows
-- Handle network failures gracefully in hospital environments
-- Debounce search operations and optimize for slow networks
-- Implement retry logic for critical medical operations
+### Healthcare Patterns
+- Validate medical data with `zod` schemas
+- Handle PHI securely
+- Provide meaningful error messages
+- Debounce search operations
+- Implement retry logic for critical operations

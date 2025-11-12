@@ -47,7 +47,7 @@ Multi-language support for global healthcare deployment:
 
 - i18n Strings: All literal strings must use i18next
 - Language files: English Locale files are in `public/locale/en.json`
-- Locale files for Non-English languages should not be edited directly, Managed via Crowdin,
+- Locale files for Non-English languages should not be edited directly, Managed via Crowdin
 - Date/time formats: Localized formatting for medical timestamps
 
 ## Path-Specific Instructions
@@ -106,7 +106,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - `npm run postinstall` -- installs platform-specific dependencies and generates headers (takes ~3 seconds)
 - `npm run setup` -- generates plugin map and setup (takes ~1 second)
 - `npm run build` -- production build. NEVER CANCEL: Takes 2+ minutes. Set timeout to 180+ seconds.
-- `npm run dev` -- starts development server on http://localhost:4000 (takes ~5 seconds)
+- `npm run dev` -- starts development server on `http://localhost:4000` (takes ~5 seconds)
 - `npm run preview` -- starts production preview server (requires build first)
 
 ### Linting and Formatting

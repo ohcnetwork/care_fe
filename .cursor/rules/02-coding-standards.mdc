@@ -16,7 +16,7 @@ alwaysApply: false
 
 ## Components Structure
 
-- One component per file
+- One component per file is preferred
 - Descriptive naming: `PatientOverview.tsx`, `FacilityList.tsx`
 - Organize by feature: Patient/, Facility/, etc.
 - WCAG 2.1 AA accessibility compliance
@@ -32,6 +32,7 @@ alwaysApply: false
 ## Data Management
 
 - TanStack Query for API data
+- Jotai for lightweight atomic state (user preferences, UI state)
 - React Context for app state
 - Proper error handling
 - Data validation patterns

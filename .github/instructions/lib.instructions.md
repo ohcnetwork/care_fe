@@ -16,12 +16,13 @@ applyTo: "src/lib/**/*.{ts,tsx}"
 
 ## Implementation Guidelines
 
-### Error Handling & Compliance
-- Handle errors without exposing PII
-- Maintain audit trails for medical data access
-- Implement proper error recovery for critical systems
-- Log performance issues affecting patient care
+## Implementation Standards
 
-### Standards Support
+### Error Handling
+- Handle errors without exposing PHI/PII
+- Provide meaningful error messages
+- Use TypeScript's strict null checks
+
+### Healthcare Standards
 - Clinical API models are extensions of FHIR resources
-- Handle medical coding systems with SNOMED CT and LOINC
+- Support medical coding systems (SNOMED CT, LOINC)

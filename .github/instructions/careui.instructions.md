@@ -55,19 +55,17 @@ import { Card } from "@/components/ui/card";
 ## Healthcare Design Requirements
 
 ### Accessibility
-Medical applications require enhanced accessibility for clinical environments:
-- Screen reader support: All medical data must be accessible via assistive technology
-- Keyboard navigation: Full keyboard support for hands-free operation in clinical settings
-- High contrast mode: Support system-level high contrast preferences
-- Focus management: Clear, visible focus indicators for complex medical workflows
-- ARIA labels: Comprehensive labeling for medical context and urgency
+- Screen reader support for all medical data
+- Full keyboard navigation
+- High contrast mode support
+- Clear focus indicators
+- Comprehensive ARIA labels for medical context
 
 ### Clinical Environment Styling
-- Color conventions: Follow medical standards (red=critical, yellow=warning, green=stable)
-- High contrast: Ensure visibility in varied clinical lighting conditions
-- Touch targets: Minimum 44px for mobile medical devices and touch screens
-- Print compatibility: Medical forms and reports must render correctly in print media
-- Performance: Sub-100ms response times for emergency medical workflows
+- Follow medical color standards (red=critical, yellow=warning, green=stable)
+- Ensure high contrast for clinical lighting
+- Minimum 44px touch targets for mobile devices
+- Support print media for medical forms
 
 ### Component Interface Patterns
 Healthcare components should follow consistent prop patterns:
@@ -98,27 +96,15 @@ interface MedicalComponentProps {
 - Validation: Support zod schemas for medical data validation and FHIR compliance
 
 ### Data Integration
-- Medical APIs: Components should integrate cleanly with healthcare data sources
-- FHIR compatibility: Support healthcare data standards where applicable
-- Real-time updates: Support live data updates for critical medical information
-- Offline resilience: Core functionality should work without network connectivity
+- Integrate with React Query for medical APIs
+- Support real-time updates for critical information
+- Handle offline scenarios gracefully
 
 ## Development Guidelines
 
-### Component Development
-- Composition over inheritance: Prefer composable patterns for medical workflow flexibility
-- Error boundaries: Implement proper error handling for critical medical data
-- Testing: Comprehensive testing including accessibility and medical workflow scenarios
-- Documentation: Include medical use cases and clinical context in component documentation
-
-### Performance Requirements
-- Rendering performance: Target sub-100ms response times for emergency workflows
-- Memory efficiency: Optimize for long-running clinical applications
-- Bundle impact: Minimize bundle size impact on hospital network infrastructure
-- Progressive enhancement: Ensure core functionality works on older medical devices
-
-### Code Quality
-- TypeScript: Use strict TypeScript for medical data safety
-- Accessibility testing: Include automated accessibility testing in CI/CD
-- Medical validation: Implement appropriate validation for clinical data inputs
-- Error handling: Robust error handling with user-friendly medical context
+- Prefer composition over inheritance
+- Use strict TypeScript
+- Implement error boundaries for medical data
+- Include medical use cases in documentation
+- Target sub-100ms response for emergency workflows
+- Test accessibility thoroughly

@@ -22,7 +22,7 @@ applyTo: "src/common/**/*.{ts,tsx}"
 
 ## Implementation Patterns
 
-### Medical Permission Checking
+### Permission Checking
 ```typescript
 // Role-based permission example
 export const canAccessPatientData = (user: UserRead, patientId: string) => {
@@ -36,7 +36,7 @@ export const canAccessPatientData = (user: UserRead, patientId: string) => {
 
 ### Form Validation
 ```typescript
-// Vital signs validation example
+// Use zod schemas for validation
 export const validateVitalSigns = (vitals: VitalSigns) => {
   const schema = z.object({
     temperature: z.number().min(95).max(110),
