@@ -138,7 +138,7 @@ export function EncounterList({
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
-        patient: patient_filter,
+        patient_filter: patient_filter,
       },
     }),
     enabled: !propEncounters && !encounter_id,
@@ -278,7 +278,6 @@ export function EncounterList({
                   placeholder={t("filter_by_identifier")}
                   className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
                   patientId={qParams.patient_filter}
-                  level="facility"
                 />
                 <MultiFilter
                   selectedFilters={selectedFilters}

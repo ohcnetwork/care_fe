@@ -329,7 +329,6 @@ export default function ServiceRequestList({
                 placeholder={t("filter_by_identifier")}
                 className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
                 patientId={qParams.patient}
-                level="facility"
               />
             </div>
           </div>
