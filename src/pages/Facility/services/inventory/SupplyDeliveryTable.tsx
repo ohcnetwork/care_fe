@@ -82,16 +82,6 @@ export function SupplyDeliveryTable({
     },
   });
 
-  const updateStatus = (
-    deliveryId: string,
-    newStatus: SupplyDeliveryStatus,
-  ) => {
-    updateDeliveryStatus({
-      deliveryId,
-      status: newStatus,
-    });
-  };
-
   const inProgressDeliveries = deliveries.filter(
     (d) => d.status === SupplyDeliveryStatus.in_progress,
   );
@@ -253,10 +243,10 @@ export function SupplyDeliveryTable({
                         <Button
                           variant="ghost"
                           onClick={() =>
-                            updateStatus(
-                              delivery.id,
-                              SupplyDeliveryStatus.entered_in_error,
-                            )
+                            updateDeliveryStatus({
+                              deliveryId: delivery.id,
+                              status: SupplyDeliveryStatus.entered_in_error,
+                            })
                           }
                           className="w-full flex justify-stretch"
                         >
@@ -268,10 +258,10 @@ export function SupplyDeliveryTable({
                         <Button
                           variant="ghost"
                           onClick={() =>
-                            updateStatus(
-                              delivery.id,
-                              SupplyDeliveryStatus.abandoned,
-                            )
+                            updateDeliveryStatus({
+                              deliveryId: delivery.id,
+                              status: SupplyDeliveryStatus.abandoned,
+                            })
                           }
                           className="w-full flex justify-stretch"
                         >

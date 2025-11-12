@@ -244,24 +244,12 @@ export function DeliveryOrderShow({
         queryKey: ["deliveryOrders", deliveryOrderId],
       });
 
-      const statusMessages: Partial<Record<DeliveryOrderStatus, string>> = {
-        [DeliveryOrderStatus.pending]: t(
-          "order_marked_as_approved_successfully",
-        ),
-        [DeliveryOrderStatus.completed]: t(
-          "order_marked_as_completed_successfully",
-        ),
-        [DeliveryOrderStatus.entered_in_error]: t(
-          "order_marked_as_entered_in_error_successfully",
-        ),
-        [DeliveryOrderStatus.abandoned]: t(
-          "order_marked_as_abandoned_successfully",
-        ),
-      };
-
       toast.success(
-        statusMessages[updatedDeliveryOrder.status] ||
-          t("order_updated_successfully"),
+        updatedDeliveryOrder.status === DeliveryOrderStatus.pending
+          ? t("order_marked_as_approved_successfully")
+          : t("order_marked_as_successfully_toast", {
+              status: t(updatedDeliveryOrder.status),
+            }),
       );
     },
   });
