@@ -8,6 +8,7 @@ import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
+import { LocalStorageKeys } from "@/common/constants";
 import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 import { AppCacheDB } from "./AppcacheDB";
 import { detectAndMarkConflict } from "./conflictHandler";
@@ -164,6 +165,10 @@ export class SyncManager {
       this.isRunning = false;
       this.abortController = null;
       this.options.onSyncComplete?.();
+      localStorage.setItem(
+        LocalStorageKeys.LastOfflineSyncTimestamp,
+        new Date().toISOString(),
+      );
       await this.cleanupSyncedRecords();
     }
 

@@ -47,6 +47,8 @@ import { checkParentSyncStatus } from "@/OfflineSupport/offlineWriteHelpers";
 import { getPendingAndRetryableWrites } from "@/OfflineSupport/writeQueue";
 import { useSync } from "@/context/SyncContext";
 
+import { LocalStorageKeys } from "@/common/constants";
+import dayjs from "dayjs";
 import {
   handleAppointmentEdit,
   handleAppointmentQuestionnaireEdit,
@@ -82,8 +84,12 @@ async function getWritesByStatus(
 }
 
 function useSyncData(facilityId?: string, refreshTrigger?: number) {
+  const lastSyncDateStr = localStorage.getItem(
+    LocalStorageKeys.LastOfflineSyncTimestamp,
+  );
+  const relative = lastSyncDateStr ? dayjs(lastSyncDateStr).fromNow() : "Never";
   const [syncData, setSyncData] = useState({
-    lastSync: "Never",
+    lastSync: relative,
     statistics: {
       pending: 0,
       failed: 0,
@@ -124,7 +130,7 @@ function useSyncData(facilityId?: string, refreshTrigger?: number) {
         const successfulWrites = allWrites.filter(
           (w) => w.syncStatus === "success",
         );
-        let lastSync = "Never";
+        let lastSync = relative;
         if (successfulWrites.length > 0) {
           const lastSuccessfulWrite = successfulWrites.sort(
             (a, b) =>
