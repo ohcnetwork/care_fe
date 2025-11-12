@@ -1,10 +1,7 @@
-import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import {
-  expectToast,
-  selectFromDefinitionCategoryPicker,
-  selectFromValueSet,
-} from "tests/helpers/ui";
+import { Priority, Status } from "src/types/emr/serviceRequest/serviceRequest";
+import { createServiceRequest } from "tests/helpers/serviceRequest";
+import { clickTabOrMenuItem } from "tests/helpers/ui";
 import { getEncounterMetadata } from "tests/support/encounterId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -30,66 +27,37 @@ test.describe("Patient Service Request Tab", () => {
   test("should create a service request with lab test selection", async ({
     page,
   }) => {
-    await expect(
-      page
-        .locator('[data-slot="card-content"]')
-        .getByText(/no service requests found/i),
-    ).toBeVisible();
-
-    await page.getByRole("button", { name: /create service request/i }).click();
-
-    await expect(page).toHaveURL(
-      `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/service_request`,
+    const serviceRequestData = await createServiceRequest(
+      page,
+      facilityId,
+      patientId,
+      encounterId,
+      {
+        priority: Priority.urgent,
+      },
     );
-
-    await expect(
-      page.getByRole("heading", { name: /service request/i }),
-    ).toBeVisible();
-
-    const patientInstruction = faker.lorem.sentence();
-    const notes = faker.lorem.sentence();
-
-    // Wait for the activity definition picker to be ready
-    const activityDefinitionPicker = page
-      .locator('button[role="combobox"]')
-      .filter({ hasText: /select activity definition/i });
-    await activityDefinitionPicker.waitFor({ state: "visible" });
-
-    await selectFromDefinitionCategoryPicker(page, activityDefinitionPicker, {
-      navigateCategories: ["Lab Tests"],
-      search: "Complete Blood Count (CBC) Panel",
-      itemIndex: 0,
-    });
-
-    const bodySiteSelector = page
-      .locator('button[role="combobox"]')
-      .filter({ hasText: /body site/i });
-    await bodySiteSelector.waitFor({ state: "visible" });
-
-    await selectFromValueSet(page, bodySiteSelector, {
-      search: "Blood",
-    });
-
-    await page
-      .getByPlaceholder(/enter patient instruction/i)
-      .fill(patientInstruction);
-
-    await page.getByPlaceholder(/add note/i).fill(notes);
-
-    await page.getByRole("button", { name: /add/i }).click();
-    await page.getByRole("button", { name: /submit/i }).click();
-
-    await expectToast(page, /questionnaire submitted successfully/i);
 
     await expect(page).toHaveURL(
       `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
     );
 
-    await page.getByRole("tab", { name: /service requests/i }).click();
+    await clickTabOrMenuItem(page, /service requests/i);
     await expect(page).toHaveURL(/\/service_requests$/);
 
+    const firstRow = page
+      .locator('[data-slot="table-body"] [data-slot="table-row"]')
+      .first();
+
     await expect(
-      page.getByText("Complete Blood Count (CBC) Panel"),
+      firstRow.getByText(serviceRequestData.activityDefinition),
+    ).toBeVisible();
+
+    await expect(
+      firstRow.getByText(new RegExp(Status.active, "i")),
+    ).toBeVisible();
+
+    await expect(
+      firstRow.getByText(serviceRequestData.priority, { exact: false }),
     ).toBeVisible();
   });
 });

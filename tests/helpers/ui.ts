@@ -439,3 +439,74 @@ export async function expectToast(
   const toaster = page.locator(".toaster.group");
   await expect(toaster.getByText(text)).toBeVisible(options);
 }
+
+/**
+ * Clicks on a tab that may be visible or hidden in a dropdown menu.
+ * Handles responsive layouts where tabs can be moved to a menu.
+ *
+ * @param page - Playwright page instance
+ * @param tabName - Name or regex pattern for the tab
+ *
+ * @example
+ * ```typescript
+ * await clickTabOrMenuItem(page, /service requests/i);
+ * ```
+ */
+export async function clickTabOrMenuItem(
+  page: Page,
+  tabName: string | RegExp,
+): Promise<void> {
+  // Try to find as a visible tab first
+  const tab = page.getByRole("tab", { name: tabName });
+  const isTabVisible = await tab.isVisible().catch(() => false);
+
+  if (isTabVisible) {
+    await tab.click();
+    return;
+  }
+
+  // If not visible as a tab, it might be in a dropdown menu
+  // Look for a menu trigger button (usually has a chevron or more icon)
+  // Try multiple strategies to find the menu trigger
+  let menuTrigger = page
+    .locator("button")
+    .filter({ hasText: /more|menu|⋯/i })
+    .first();
+
+  let isMenuTriggerVisible = await menuTrigger.isVisible().catch(() => false);
+
+  if (!isMenuTriggerVisible) {
+    // Try finding button with chevron/more icons
+    menuTrigger = page
+      .locator("button")
+      .filter({
+        has: page.locator(
+          "svg.lucide-more-horizontal, svg.lucide-chevron-down",
+        ),
+      })
+      .first();
+    isMenuTriggerVisible = await menuTrigger.isVisible().catch(() => false);
+  }
+
+  if (isMenuTriggerVisible) {
+    await menuTrigger.click();
+    // Wait for menu to open
+    await page.locator('[role="menu"]').waitFor({ state: "visible" });
+
+    // Click the menu item
+    await page.getByRole("menuitem", { name: tabName }).click();
+    return;
+  }
+
+  // Fallback: try to find as menuitem directly (menu might already be open)
+  const menuItem = page.getByRole("menuitem", { name: tabName });
+  const isMenuItemVisible = await menuItem.isVisible().catch(() => false);
+
+  if (isMenuItemVisible) {
+    await menuItem.click();
+    return;
+  }
+
+  // If all else fails, try clicking by text (less reliable but works as fallback)
+  await page.getByText(tabName).click();
+}
