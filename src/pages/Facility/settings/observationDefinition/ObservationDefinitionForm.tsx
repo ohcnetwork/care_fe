@@ -41,9 +41,9 @@ import {
 import {
   OBSERVATION_DEFINITION_CATEGORY,
   OBSERVATION_DEFINITION_STATUS,
-  type ObservationDefinitionCreateSpec,
-  type ObservationDefinitionReadSpec,
-  ObservationDefinitionUpdateSpec,
+  type ObservationDefinitionCreate,
+  type ObservationDefinitionRead,
+  ObservationDefinitionUpdate,
   QuestionType,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
@@ -112,7 +112,7 @@ function ObservationDefinitionFormContent({
 }: {
   facilityId: string;
   observationSlug?: string;
-  existingData?: ObservationDefinitionReadSpec;
+  existingData?: ObservationDefinitionRead;
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
@@ -152,7 +152,8 @@ function ObservationDefinitionFormContent({
             })
             .refine((data) => data.code && data.display && data.system, {
               message: t("field_required"),
-            }),
+            })
+            .nullable(),
           qualified_ranges: qualifiedRangeSchema,
         }),
       )
@@ -242,7 +243,7 @@ function ObservationDefinitionFormContent({
           facility: facilityId,
         },
       }),
-      onSuccess: (observationDefinition: ObservationDefinitionReadSpec) => {
+      onSuccess: (observationDefinition: ObservationDefinitionRead) => {
         queryClient.invalidateQueries({ queryKey: ["observationDefinitions"] });
         toast.success(t("observation_definition_updated"));
         navigate(
@@ -255,9 +256,9 @@ function ObservationDefinitionFormContent({
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     if (isEditMode && observationSlug) {
-      updateObservationDefinition(data as ObservationDefinitionUpdateSpec);
+      updateObservationDefinition(data as ObservationDefinitionUpdate);
     } else {
-      const payload: ObservationDefinitionCreateSpec = {
+      const payload: ObservationDefinitionCreate = {
         ...data,
         facility: facilityId,
       };

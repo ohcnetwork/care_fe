@@ -34,7 +34,7 @@ import {
   OBSERVATION_DEFINITION_CATEGORY,
   OBSERVATION_DEFINITION_STATUS,
   OBSERVATION_DEFINITION_STATUS_COLORS,
-  type ObservationDefinitionReadSpec,
+  type ObservationDefinitionRead,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 
@@ -42,7 +42,7 @@ function ObservationDefinitionCard({
   definition,
   facilityId,
 }: {
-  definition: ObservationDefinitionReadSpec;
+  definition: ObservationDefinitionRead;
   facilityId: string;
 }) {
   const { t } = useTranslation();
@@ -201,7 +201,7 @@ export default function ObservationDefinitionList({
             {/* Mobile Card View */}
             <div className="grid gap-4 md:hidden">
               {observationDefinitions.map(
-                (definition: ObservationDefinitionReadSpec) => (
+                (definition: ObservationDefinitionRead) => (
                   <ObservationDefinitionCard
                     key={definition.slug}
                     definition={definition}
@@ -225,7 +225,7 @@ export default function ObservationDefinitionList({
                   </TableHeader>
                   <TableBody className="bg-white">
                     {observationDefinitions.map(
-                      (definition: ObservationDefinitionReadSpec) => (
+                      (definition: ObservationDefinitionRead) => (
                         <TableRow key={definition.slug} className="divide-x">
                           <TableCell className="font-medium">
                             {definition.title}
@@ -275,7 +275,7 @@ function ObservationDefinitionActions({
   definition,
   facilityId,
 }: {
-  definition: ObservationDefinitionReadSpec;
+  definition: ObservationDefinitionRead;
   facilityId: string;
 }) {
   return (

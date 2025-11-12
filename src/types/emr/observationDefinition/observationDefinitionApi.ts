@@ -3,15 +3,16 @@ import { PaginatedResponse } from "@/Utils/request/types";
 
 import { Metrics } from "@/types/base/condition/condition";
 import {
-  ObservationDefinitionCreateSpec,
-  ObservationDefinitionReadSpec,
+  ObservationDefinitionCreate,
+  ObservationDefinitionRead,
+  ObservationDefinitionUpdate,
 } from "./observationDefinition";
 
 export default {
   listObservationDefinition: {
     path: "/api/v1/observation_definition/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<ObservationDefinitionReadSpec>>(),
+    TRes: Type<PaginatedResponse<ObservationDefinitionRead>>(),
     defaultQueryParams: {
       ordering: "-created_date",
     },
@@ -19,17 +20,19 @@ export default {
   retrieveObservationDefinition: {
     path: "/api/v1/observation_definition/{observationSlug}/",
     method: HttpMethod.GET,
-    TRes: Type<ObservationDefinitionReadSpec>(),
+    TRes: Type<ObservationDefinitionRead>(),
   },
   createObservationDefinition: {
     path: "/api/v1/observation_definition/",
     method: HttpMethod.POST,
-    TRes: Type<ObservationDefinitionCreateSpec>(),
+    TRes: Type<ObservationDefinitionRead>(),
+    TBody: Type<ObservationDefinitionCreate>(),
   },
   updateObservationDefinition: {
     path: "/api/v1/observation_definition/{observationSlug}/",
     method: HttpMethod.PUT,
-    TRes: Type<ObservationDefinitionReadSpec>(),
+    TRes: Type<ObservationDefinitionRead>(),
+    TBody: Type<ObservationDefinitionUpdate>(),
   },
   getAllMetrics: {
     path: "/api/v1/observation_definition/metrics/",

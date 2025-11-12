@@ -2,7 +2,7 @@ import { Code } from "@/types/base/code/code";
 import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
 import { SlugConfig } from "@/types/base/slug/slugConfig";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
-import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
+import { ObservationDefinitionRead } from "@/types/emr/observationDefinition/observationDefinition";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 import { LocationList } from "@/types/location/location";
@@ -79,7 +79,7 @@ export interface ActivityDefinitionReadSpec extends BaseActivityDefinitionSpec {
   version?: number;
   specimen_requirements: SpecimenDefinitionRead[];
   charge_item_definitions: ChargeItemDefinitionRead[];
-  observation_result_requirements: ObservationDefinitionReadSpec[];
+  observation_result_requirements: ObservationDefinitionRead[];
   locations: LocationList[];
   category: ResourceCategoryRead;
   healthcare_service: HealthcareServiceReadSpec;

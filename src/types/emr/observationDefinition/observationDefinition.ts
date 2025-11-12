@@ -12,10 +12,10 @@ export enum QuestionType {
   quantity = "quantity",
 }
 
-export interface ObservationDefinitionComponentSpec {
+export interface ObservationDefinitionComponent {
   code: Code;
   permitted_data_type: QuestionType;
-  permitted_unit: Code;
+  permitted_unit: Code | null;
   qualified_ranges: QualifiedRange[];
 }
 
@@ -31,39 +31,39 @@ export const OBSERVATION_DEFINITION_CATEGORY = [
   "activity",
 ] as string[];
 
-export interface BaseObservationDefinitionSpec {
-  id: string;
-  slug: string;
+export interface BaseObservationDefinition {
   title: string;
   status: ObservationDefinitionStatus;
   description: string;
   category: (typeof OBSERVATION_DEFINITION_CATEGORY)[number];
   code: Code;
   permitted_data_type: QuestionType;
-  component: ObservationDefinitionComponentSpec[];
+  component: ObservationDefinitionComponent[];
   body_site: Code | null;
   method: Code | null;
   permitted_unit: Code | null;
   derived_from_uri?: string;
   qualified_ranges: QualifiedRange[];
+}
+
+export interface ObservationDefinitionRead extends BaseObservationDefinition {
+  id: string;
+  slug: string;
   slug_config: SlugConfig;
-}
-
-export interface ObservationDefinitionCreateSpec
-  extends Omit<BaseObservationDefinitionSpec, "id" | "slug_config" | "slug"> {
-  slug_value: string;
-  facility: string;
-}
-
-export interface ObservationDefinitionUpdateSpec
-  extends Omit<BaseObservationDefinitionSpec, "slug_config" | "slug"> {
-  slug_value: string;
-  facility: string;
-}
-
-export interface ObservationDefinitionReadSpec
-  extends BaseObservationDefinitionSpec {
   version?: number;
+  facility?: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+export interface ObservationDefinitionCreate extends BaseObservationDefinition {
+  slug_value: string;
+  facility?: string | null;
+}
+
+export interface ObservationDefinitionUpdate extends BaseObservationDefinition {
+  slug_value: string;
 }
 
 export const OBSERVATION_DEFINITION_STATUS = [

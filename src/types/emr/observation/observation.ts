@@ -1,5 +1,5 @@
 import { Code } from "@/types/base/code/code";
-import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
+import { ObservationDefinitionRead } from "@/types/emr/observationDefinition/observationDefinition";
 import { QuestionType } from "@/types/questionnaire/question";
 import { SubjectType } from "@/types/questionnaire/questionnaire";
 import { UserReadMinimal } from "@/types/user/user";
@@ -75,7 +75,7 @@ export interface ObservationRead extends ObservationBase {
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
   data_entered_by?: UserReadMinimal | null;
-  observation_definition?: ObservationDefinitionReadSpec | null;
+  observation_definition?: ObservationDefinitionRead | null;
 }
 
 export type ObservationCreate = Omit<ObservationBase, "id">;
