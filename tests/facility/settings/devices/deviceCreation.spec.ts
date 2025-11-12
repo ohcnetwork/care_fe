@@ -80,6 +80,7 @@ test.describe("Facility Devices Management", () => {
     await page
       .getByRole("listbox")
       .getByRole("option", { name: status })
+      .first()
       .click();
 
     // Select availability status
@@ -89,6 +90,7 @@ test.describe("Facility Devices Management", () => {
     await page
       .getByRole("listbox")
       .getByRole("option", { name: availabilityStatus })
+      .first()
       .click();
 
     // Fill device details
@@ -180,8 +182,12 @@ test.describe("Facility Devices Management", () => {
     // Navigate to Add Device form
     await page.getByRole("link", { name: "Add Device" }).click();
 
-    // Click Save button without filling any fields
-    await page.getByRole("button", { name: "Save" }).click();
+    await page.waitForLoadState("networkidle");
+
+    // Scroll to Save button and click it without filling any fields
+    const saveButton = page.getByRole("button", { name: "Save" });
+    await saveButton.scrollIntoViewIfNeeded();
+    await saveButton.click();
 
     // Verify error message for Registered Name field
     const registeredNameLabel = page.getByLabel("Registered Name");
