@@ -1,9 +1,21 @@
 import { useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { LocationSelectorDialog } from "@/components/ui/sidebar/facility/location/location-switcher";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { buildEncounterUrl } from "@/pages/Encounters/utils/utils";
+import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import {
+  AccountBillingStatus,
+  AccountStatus,
+} from "@/types/billing/account/Account";
+import accountApi from "@/types/billing/account/accountApi";
+import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { LocationList } from "@/types/location/location";
+import query from "@/Utils/request/query";
 
 import DispenseDrawer from "./DispenseDrawer";
 
@@ -16,7 +28,26 @@ export const DispenseButton = ({
 }) => {
   const [location, setLocation] = useState<LocationList | undefined>(undefined);
   const [showDrawer, setShowDrawer] = useState(false);
+  const [isInvoiceSheetOpen, setIsInvoiceSheetOpen] = useState(false);
+  const [extractedChargeItems, setExtractedChargeItems] = useState<
+    ChargeItemRead[]
+  >([]);
+  const [accountId, setAccountId] = useState<string | undefined>(undefined);
   const { selectedEncounter } = useEncounter();
+  const { facilityId } = useCurrentFacility();
+
+  const { refetch: refetchAccount } = useQuery({
+    queryKey: ["accounts", selectedEncounter?.patient.id],
+    queryFn: query(accountApi.listAccount, {
+      pathParams: { facilityId },
+      queryParams: {
+        patient: selectedEncounter?.patient.id,
+        status: AccountStatus.active,
+        billing_status: AccountBillingStatus.open,
+      },
+    }),
+    enabled: !!facilityId && !!selectedEncounter?.patient.id,
+  });
 
   const handleLocationSelect = (selectedLocation: LocationList) => {
     setLocation(selectedLocation);
@@ -32,6 +63,13 @@ export const DispenseButton = ({
       current = current.parent;
     }
     return path.length > 1 ? path.join(" → ") : path[0] || "";
+  };
+
+  const resetInvoiceState = () => {
+    setIsInvoiceSheetOpen(false);
+    setAccountId(undefined);
+    setLocation(undefined);
+    setExtractedChargeItems([]);
   };
 
   return (
@@ -63,6 +101,34 @@ export const DispenseButton = ({
             name: location.name,
             path: getLocationPath(location),
           }}
+          onDispenseComplete={async (chargeItems: ChargeItemRead[]) => {
+            setExtractedChargeItems(chargeItems);
+            setShowDrawer(false);
+            const result = await refetchAccount();
+            const fetchedAccountId = result.data?.results?.[0]?.id;
+
+            if (fetchedAccountId) {
+              setAccountId(fetchedAccountId);
+              setIsInvoiceSheetOpen(true);
+            }
+          }}
+        />
+      )}
+
+      {selectedEncounter && accountId && (
+        <CreateInvoiceSheet
+          facilityId={facilityId}
+          accountId={accountId}
+          open={isInvoiceSheetOpen}
+          onOpenChange={(open) => !open && resetInvoiceState()}
+          preSelectedChargeItems={extractedChargeItems}
+          onSuccess={resetInvoiceState}
+          sourceUrl={buildEncounterUrl(
+            selectedEncounter.patient.id,
+            `/encounter/${selectedEncounter.id}/updates`,
+            facilityId,
+          )}
+          patientId={selectedEncounter.patient.id}
         />
       )}
     </>

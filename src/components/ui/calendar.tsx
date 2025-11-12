@@ -1,5 +1,5 @@
 import { differenceInCalendarDays } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDownIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
 import {
   DateRange,
@@ -101,7 +101,7 @@ function Calendar({
     props.captionClassName,
   );
   const _captionLabelClassName = cn(
-    "truncate text-sm font-medium",
+    "rounded-md pl-2 pr-1 flex items-center gap-1 text-sm h-8 [&>svg]:size-3.5 border border-gray-400",
     props.captionLabelClassName,
   );
   const buttonNavClassName = buttonVariants({
@@ -169,6 +169,10 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
+      formatters={{
+        formatMonthDropdown: (date) =>
+          date.toLocaleString("default", { month: "short" }),
+      }}
       classNames={{
         months: _monthsClassName,
         month_caption: _monthCaptionClassName,
@@ -195,8 +199,13 @@ function Calendar({
       }}
       components={{
         Chevron: ({ orientation }) => {
-          const Icon = orientation === "left" ? ChevronLeft : ChevronRight;
-          return <Icon className="size-4" />;
+          if (orientation === "left") {
+            return <ChevronLeft className="size-4" />;
+          }
+          if (orientation === "right") {
+            return <ChevronRight className="size-4" />;
+          }
+          return <ChevronDownIcon className="size-4" />;
         },
         Nav: ({ className }) => (
           <Nav
