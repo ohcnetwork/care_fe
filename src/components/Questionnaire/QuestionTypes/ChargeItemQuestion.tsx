@@ -301,12 +301,6 @@ export function ChargeItemQuestion({
             noResultsFound: "no_charge_item_definitions_found_for",
             noItemsFound: "no_charge_item_definitions_found",
           }}
-          mapper={(item) => ({
-            id: item.id,
-            title: item.title,
-            slug: item.slug,
-            category: item.category,
-          })}
         />
       </div>
     </div>
