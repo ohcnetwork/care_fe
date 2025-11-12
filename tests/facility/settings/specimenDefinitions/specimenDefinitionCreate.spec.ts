@@ -1,7 +1,5 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { getFieldErrorMessage } from "tests/helper/error";
-import { getFacilityId } from "tests/support/facilityId";
 import {
   capOptions,
   collectionOptions,
@@ -12,7 +10,9 @@ import {
   preparationOptions,
   STATUS_OPTIONS,
   typeCollectedOptions,
-} from "./specimenDefinitionConstants";
+} from "tests/facility/settings/specimenDefinitions/specimenDefinitionConstants";
+import { getFieldErrorMessage } from "tests/helper/error";
+import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });

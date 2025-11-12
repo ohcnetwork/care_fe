@@ -1,6 +1,5 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
-import { getFacilityId } from "tests/support/facilityId";
 import {
   INT_MAX,
   MIN_SLUG_LENGTH,
@@ -10,7 +9,8 @@ import {
   preferenceOptions,
   preparationOptions,
   typeCollectedOptions,
-} from "./specimenDefinitionConstants";
+} from "tests/facility/settings/specimenDefinitions/specimenDefinitionConstants";
+import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -40,23 +40,42 @@ test.describe("Specimen Definitions Edit", () => {
     await page.goto(targetUrl);
   });
 
-  test("should be able to edit specimen definition and verify changes in list", async ({
-    page,
-  }) => {
-    // Select a random existing specimen definition to edit
-    const allRows = page.locator('[data-slot="table-body"] tr');
-    await allRows.first().waitFor({ state: "visible" }); // Wait for the table to load
-
-    const rowCount = await allRows.count();
-    const rowIndex = faker.number.int({ min: 0, max: rowCount - 1 });
-    const row = allRows.nth(rowIndex);
-    await row.getByRole("link", { name: /edit/i }).click();
+  test("edit specimen definition and verify changes", async ({ page }) => {
+    // Create a specimen definition with only required fields to edit it
+    await page.getByRole("button", { name: "Add Definition" }).click();
 
     await page.getByRole("textbox", { name: "Title *" }).fill(definitionTitle);
     await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);
     await page
       .getByRole("textbox", { name: "Description *" })
       .fill(definitionDescription);
+    await page.getByRole("combobox", { name: "Status *" }).click();
+    await page.getByRole("option", { name: status }).click();
+
+    await page.getByRole("combobox", { name: "Type Collected *" }).click();
+    await page.getByRole("option", { name: typeCollected }).click();
+
+    await page.getByRole("button", { name: /save/i }).click();
+
+    // Apply status filter before searching
+    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
+    await page.getByRole("option", { name: status.toLowerCase() }).click();
+
+    // Search for the newly created definition
+    await page
+      .getByRole("textbox", { name: "Search definitions" })
+      .fill(definitionTitle);
+
+    await page.getByRole("link", { name: /edit/i }).first().click();
+
+    // Edit all fields
+    await page
+      .getByRole("textbox", { name: "Title *" })
+      .fill(`${definitionTitle}-edited`);
+    await page.getByRole("textbox", { name: "Slug *" }).fill(definitionSlug);
+    await page
+      .getByRole("textbox", { name: "Description *" })
+      .fill(`${definitionDescription}-edited`);
     await page.getByRole("combobox", { name: "Status *" }).click();
     await page.getByRole("option", { name: status }).click();
 
@@ -76,6 +95,16 @@ test.describe("Specimen Definitions Edit", () => {
     await page.getByRole("button", { name: "Add" }).click();
     await page.getByRole("combobox", { name: "Patient Preparation" }).click();
     await page.getByRole("option", { name: preparationOption }).click();
+
+    const isDerived = faker.datatype.boolean();
+    if (isDerived) {
+      await page.getByRole("switch", { name: "Is Derived" }).click();
+    }
+
+    const isSingleUse = faker.datatype.boolean();
+    if (isSingleUse) {
+      await page.getByRole("switch", { name: "Single Use" }).click();
+    }
 
     await page.getByRole("combobox", { name: "Preference" }).click();
     const preferenceOption = faker.helpers.arrayElement(preferenceOptions);
@@ -125,14 +154,24 @@ test.describe("Specimen Definitions Edit", () => {
 
     // Verify all fields on detail page
     await expect(
-      page.getByRole("heading", { name: definitionTitle }),
+      page.getByRole("heading", { name: `${definitionTitle}-edited` }),
     ).toBeVisible();
-    await expect(page.getByText(definitionDescription)).toBeVisible();
+    await expect(
+      page.getByText(`${definitionDescription}-edited`),
+    ).toBeVisible();
     await expect(page.getByText(status)).toBeVisible();
     await expect(page.getByText(derivedFromURI)).toBeVisible();
     await expect(page.getByText(typeCollected)).toBeVisible();
     await expect(page.getByText(collectionOption)).toBeVisible();
     await expect(page.getByText(preparationOption)).toBeVisible();
+    await expect(
+      page.getByText(new RegExp(`Is Derived${isDerived ? "Yes" : "No"}`, "i")),
+    ).toBeVisible();
+    await expect(
+      page.getByText(
+        new RegExp(`Single Use${isSingleUse ? "Yes" : "No"}`, "i"),
+      ),
+    ).toBeVisible();
     await expect(page.getByText(requirement)).toBeVisible();
     await expect(
       page.getByText(new RegExp(`${retentionTime}\\s+(hours|days)`)),
