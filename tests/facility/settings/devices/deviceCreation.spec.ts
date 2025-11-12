@@ -184,8 +184,17 @@ test.describe("Facility Devices Management", () => {
 
     await page.waitForLoadState("networkidle");
 
-    // Scroll to Save button and click it without filling any fields
+    // Verify Save button is disabled initially
     const saveButton = page.getByRole("button", { name: "Save" });
+    await expect(saveButton).toBeDisabled();
+
+    // Fill User Friendly Name to enable the Save button
+    const userFriendlyName = faker.word.words(2);
+    await page
+      .getByRole("textbox", { name: "User Friendly Name" })
+      .fill(userFriendlyName);
+
+    // Scroll to Save button and click it without filling the required Registered Name field
     await saveButton.scrollIntoViewIfNeeded();
     await saveButton.click();
 
