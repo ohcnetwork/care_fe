@@ -90,6 +90,10 @@ const SearchInputFieldRenderer = ({
   open: boolean;
   onSearch: (key: string, value: string) => void;
 }) => {
+  const { t } = useTranslation();
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const handlePhoneChange = useCallback(
     (value: string | undefined) => {
       const phoneValue = value || "";
@@ -110,39 +114,63 @@ const SearchInputFieldRenderer = ({
     [selectedOption.key, onSearch, setSearchValue],
   );
 
+  const validateInput = useCallback(
+    (value: string) => {
+      if (selectedOption.regex && value) {
+        const regex = new RegExp(selectedOption.regex);
+        if (!regex.test(value)) {
+          setValidationError("invalid_format_please_check_your_input");
+          return;
+        }
+      }
+      setValidationError(null);
+    },
+    [selectedOption.regex],
+  );
+
   const handleTextChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value;
 
-      // Apply regex validation if provided
-      // For progressive typing, we need to allow partial matches
-      // Extract the character class from the regex to validate each character
-      if (selectedOption.regex && value) {
-        try {
-          // Test if adding this character still allows for a valid final result
-          // We'll use a simple approach: extract character classes and validate
-          const charClassMatch =
-            selectedOption.regex.match(/\[([^\]]+)\]|\\\w/);
-          if (charClassMatch) {
-            // If we have a character class like [0-9] or \d, validate each character
-            const charPattern = charClassMatch[0];
-            const charRegex = new RegExp(`^${charPattern}+$`);
-            if (!charRegex.test(value)) {
-              // Don't update if the value doesn't match the character pattern
-              return;
-            }
-          }
-        } catch (e) {
-          // If regex parsing fails, allow the input (fail open for better UX)
-          console.warn("Invalid regex pattern:", selectedOption.regex, e);
-        }
+      if (validationError) {
+        setValidationError(null);
+      }
+
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current);
       }
 
       setSearchValue(value);
       onSearch(selectedOption.key, value);
+
+      // Set up debounced validation (500ms after user stops typing)
+      validationTimeoutRef.current = setTimeout(() => {
+        validateInput(value);
+      }, 500);
     },
-    [selectedOption.key, selectedOption.regex, onSearch, setSearchValue],
+    [
+      selectedOption.key,
+      onSearch,
+      setSearchValue,
+      validationError,
+      validateInput,
+    ],
   );
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (validationError) {
+      setValidationError(null);
+    }
+  }, [selectedOption.key]);
 
   switch (selectedOption.type) {
     case "phone":
@@ -164,20 +192,25 @@ const SearchInputFieldRenderer = ({
     default:
       return (
         <div className="relative">
-          <Input
-            type="text"
-            placeholder={selectedOption.placeholder}
-            ref={inputRef as React.RefObject<HTMLInputElement>}
-            value={searchValue}
-            onChange={handleTextChange}
-            className={cn(
-              !isSingleOption &&
-                "grow border-none shadow-none focus-visible:ring-0",
-              inputClassName,
-            )}
-            {...prop}
-          />
-          {!isSingleOption && <KeyboardShortcutHint open={open} />}
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder={selectedOption.placeholder}
+              ref={inputRef as React.RefObject<HTMLInputElement>}
+              value={searchValue}
+              onChange={handleTextChange}
+              className={cn(
+                !isSingleOption &&
+                  "grow border-none shadow-none focus-visible:ring-0",
+                inputClassName,
+              )}
+              {...prop}
+            />
+            {!isSingleOption && <KeyboardShortcutHint open={open} />}
+          </div>
+          {validationError && (
+            <p className="text-sm text-red-500 mt-1">{t(validationError)}</p>
+          )}
         </div>
       );
   }
