@@ -11,10 +11,12 @@ import RolesIndex from "@/pages/Admin/Roles/RolesIndex";
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
 import AdminOrganizationList from "@/pages/Admin/organizations/AdminOrganizationList";
+import TemplateBuilder from "@/pages/Encounters/TemplateBuilder/TemplateBuilder";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
 
 const AdminRoutes: AppRoutes = {
+  "/admin/template/builder": () => <TemplateBuilder />,
   "/admin/questionnaire": () => <QuestionnaireList />,
   "/admin/questionnaire/create": () => <QuestionnaireEditor />,
   "/admin/questionnaire/:id/edit": ({ id }) => <QuestionnaireEditor id={id} />,

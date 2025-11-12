@@ -5607,5 +5607,11 @@
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
   "zoom_out": "Zoom Out",
-  "℞": "℞"
+  "℞": "℞",
+  "template_builder": "Template Builder",
+  "template_builder_description": "Build your report template by selecting sections and fields",
+  "select_section_to_add": "Select Section to Add",
+  "no_sections_added": "No sections added yet. Select a section from the dropdown above to get started.",
+  "select_fields_to_include": "Select fields to include in this section",
+  "sections_count": "{{count}} section(s) added"
 }
