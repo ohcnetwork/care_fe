@@ -101,6 +101,7 @@ function AllSupplyDeliveriesComponent({
         }
       : {
           supplier: deliveryOrder?.supplier?.id,
+          destination: isRequester ? locationId : deliveryOrder.destination?.id,
         }),
   };
 
@@ -221,7 +222,13 @@ export function DeliveryOrderShow({
       queryClient.invalidateQueries({
         queryKey: ["deliveryOrders", deliveryOrderId],
       });
-      toast.success(t("order_updated_successfully"));
+      toast.success(
+        deliveryOrder?.status === DeliveryOrderStatus.draft
+          ? t("order_marked_as_approved_successfully")
+          : deliveryOrder?.status === DeliveryOrderStatus.pending
+            ? t("order_marked_as_completed_successfully")
+            : t("order_updated_successfully"),
+      );
     },
     onError: (_error) => {
       toast.error(t("error_updating_order"));
@@ -422,7 +429,7 @@ export function DeliveryOrderShow({
                       DeliveryOrderStatus.completed,
                     )
                   }
-                  disabled={isUpdating}
+                  disabled={isUpdating || selectedDeliveries.length !== 0}
                 >
                   {isUpdating ? t("updating") : t("mark_as_completed")}
                   <ShortcutBadge actionId="mark-as" />
@@ -599,6 +606,9 @@ export function DeliveryOrderShow({
                       showCheckbox={
                         deliveryOrder.status === DeliveryOrderStatus.pending &&
                         isRequester
+                      }
+                      autoSelectOnMount={
+                        deliveryOrder.status === DeliveryOrderStatus.pending
                       }
                       selectedDeliveries={selectedDeliveries}
                       onDeliverySelect={(deliveryId, checked) => {
