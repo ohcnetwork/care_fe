@@ -52,10 +52,11 @@ import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 
 interface Props {
-  onSelect: (patientId: string | undefined) => void;
+  onSelect: (patientId: string | undefined, patientName?: string) => void;
   placeholder?: string;
   className?: string;
   patientId?: string;
+  patientName?: string;
 }
 
 export default function PatientIdentifierFilter({
@@ -63,6 +64,7 @@ export default function PatientIdentifierFilter({
   placeholder,
   className,
   patientId,
+  patientName,
 }: Props) {
   const { t } = useTranslation();
   const { facility, facilityId } = useCurrentFacility();
@@ -79,14 +81,14 @@ export default function PatientIdentifierFilter({
   const [verificationOpen, setVerificationOpen] = useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
 
-  // Set initial patient ID if provided
+  // Set initial patient ID and name if provided
   useEffect(() => {
     if (patientId && !selectedPatient) {
-      setSelectedPatient({ id: patientId } as PatientRead);
+      setSelectedPatient({ id: patientId, name: patientName } as PatientRead);
     } else if (!patientId) {
       setSelectedPatient(null);
     }
-  }, [patientId, selectedPatient]);
+  }, [patientId, patientName, selectedPatient]);
 
   // Combine instance and facility identifier configs
   const allIdentifierConfigs = useMemo(
@@ -109,22 +111,6 @@ export default function PatientIdentifierFilter({
       setSearchType(phoneConfig?.id || allIdentifierConfigs[0].id);
     }
   }, [allIdentifierConfigs, searchType]);
-
-  // Fetch patient details when patientId is provided
-  const { data: patientDetails } = useQuery({
-    queryKey: ["patient-details", patientId],
-    queryFn: query(patientApi.getPatient, {
-      pathParams: { id: patientId! },
-    }),
-    enabled: !!patientId && selectedPatient?.id !== patientId,
-  });
-
-  // Update selectedPatient when patientDetails are fetched
-  useEffect(() => {
-    if (patientDetails) {
-      setSelectedPatient(patientDetails);
-    }
-  }, [patientDetails]);
 
   // Check if current search type is phone number
   const isPhoneNumberConfig =
@@ -165,7 +151,7 @@ export default function PatientIdentifierFilter({
       setSelectedPatient(patient);
       setOpen(false);
       setSearchTerm("");
-      onSelect(patient.id);
+      onSelect(patient.id, patient.name);
     },
     [onSelect],
   );
