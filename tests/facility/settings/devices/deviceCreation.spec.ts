@@ -80,6 +80,7 @@ test.describe("Facility Devices Management", () => {
     await page
       .getByRole("listbox")
       .getByRole("option", { name: status })
+      .first()
       .click();
 
     // Select availability status
@@ -89,6 +90,7 @@ test.describe("Facility Devices Management", () => {
     await page
       .getByRole("listbox")
       .getByRole("option", { name: availabilityStatus })
+      .first()
       .click();
 
     // Fill device details
@@ -172,5 +174,36 @@ test.describe("Facility Devices Management", () => {
     await expect(
       page.getByRole("textbox", { name: "Part Number" }),
     ).toHaveValue(partNumber);
+  });
+
+  test("Show validation error when clicking Save without filling required field", async ({
+    page,
+  }) => {
+    // Navigate to Add Device form
+    await page.getByRole("link", { name: "Add Device" }).click();
+
+    await page.waitForLoadState("networkidle");
+
+    // Verify Save button is disabled initially
+    const saveButton = page.getByRole("button", { name: "Save" });
+    await expect(saveButton).toBeDisabled();
+
+    // Fill User Friendly Name to enable the Save button
+    const userFriendlyName = faker.word.words(2);
+    await page
+      .getByRole("textbox", { name: "User Friendly Name" })
+      .fill(userFriendlyName);
+
+    // Scroll to Save button and click it without filling the required Registered Name field
+    await saveButton.scrollIntoViewIfNeeded();
+    await saveButton.click();
+
+    // Verify error message for Registered Name field
+    const registeredNameLabel = page.getByLabel("Registered Name");
+    const registeredNameError = page
+      .locator('[data-slot="form-item"]')
+      .filter({ has: registeredNameLabel })
+      .getByText("This field is required");
+    await expect(registeredNameError).toBeVisible();
   });
 });
