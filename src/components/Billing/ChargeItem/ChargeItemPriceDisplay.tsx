@@ -103,7 +103,7 @@ export default function ChargeItemPriceDisplay({
             key={`surcharge-${index}`}
             className="flex justify-between text-gray-500"
           >
-            <span className="whitespace-wrap max-w-[30vw]">
+            <span className="max-w-[10rem]">
               {component.code?.display || t("surcharge")}
             </span>
             {renderComponentValue(component, "+")}
@@ -115,7 +115,7 @@ export default function ChargeItemPriceDisplay({
             key={`discount-${index}`}
             className="flex justify-between text-gray-500"
           >
-            <span className="whitespace-wrap max-w-[30vw]">
+            <span className="max-w-[10rem]">
               {component.code?.display || t("discount")}
             </span>
             {renderComponentValue(component, "-")}
@@ -127,7 +127,7 @@ export default function ChargeItemPriceDisplay({
             key={`tax-${index}`}
             className="flex justify-between text-gray-500"
           >
-            <span className="whitespace-wrap max-w-[30vw]">
+            <span className="max-w-[10rem]">
               {component.code?.display || t("tax")}
             </span>
             {renderComponentValue(component, "+")}
