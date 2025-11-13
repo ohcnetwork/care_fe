@@ -34,10 +34,12 @@ import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { ProductKnowledgeSelect } from "./ProductKnowledgeSelect";
 
-const SORT_OPTIONS: Record<string, string> = {
+const SORT_OPTIONS = {
   low_to_high: "net_content",
   high_to_low: "-net_content",
-};
+} as const;
+
+type SortOptionKey = keyof typeof SORT_OPTIONS;
 
 interface InventoryListProps {
   facilityId: string;
@@ -103,30 +105,32 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
               value={qParams.status || ""}
               onValueChange={(value) => updateQuery({ status: value })}
               options={Object.values(InventoryStatusOptions)}
-              label={t("status")}
+              label="status"
               onClear={() => updateQuery({ status: undefined })}
               className="w-full sm:w-auto h-9 border-gray-300"
-              placeholder={t("filter_by_status")}
+              placeholder="filter_by_status"
             />
           </div>
           <div className="w-full sm:w-auto">
             <FilterSelect
               icon={<ArrowDownUp className="size-4" />}
               value={
-                Object.keys(SORT_OPTIONS).find(
+                (Object.keys(SORT_OPTIONS) as Array<SortOptionKey>).find(
                   (key) => SORT_OPTIONS[key] === qParams.ordering,
                 ) || ""
               }
               onValueChange={(value) =>
                 updateQuery({
-                  ordering: value ? SORT_OPTIONS[value] : undefined,
+                  ordering: value
+                    ? SORT_OPTIONS[value as SortOptionKey]
+                    : undefined,
                 })
               }
               options={Object.keys(SORT_OPTIONS)}
-              label={t("qty")}
+              label="qty"
               onClear={() => updateQuery({ ordering: undefined })}
               className="w-full sm:w-auto h-9 border-gray-300"
-              placeholder={t("sort_by_quantity")}
+              placeholder="sort_by_quantity"
             />
           </div>
         </div>
