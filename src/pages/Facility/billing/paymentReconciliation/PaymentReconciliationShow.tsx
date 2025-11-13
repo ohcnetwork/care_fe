@@ -254,6 +254,16 @@ export function PaymentReconciliationShow({
                       value={payment.reference_number}
                     />
                   )}
+                  {payment.location && (
+                    <InfoItem
+                      label={t("location")}
+                      value={payment.location.name}
+                    />
+                  )}
+                </div>
+
+                {/* Middle column */}
+                <div>
                   <InfoItem
                     label={t("reconciliation_type")}
                     value={humanize(payment.reconciliation_type)}

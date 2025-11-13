@@ -1,6 +1,7 @@
 import {
   ENCOUNTER_CLASS,
   EncounterClass,
+  EncounterDischargeDisposition,
 } from "@/types/emr/encounter/encounter";
 
 import { NonEmptyArray } from "@/Utils/types";
@@ -59,6 +60,10 @@ const careConfig = {
       ? (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",")[0] as EncounterClass)
       : undefined),
 
+  defaultDischargeDisposition: env.REACT_DEFAULT_DISCHARGE_DISPOSITION as
+    | EncounterDischargeDisposition
+    | undefined,
+
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
     "https://www.openstreetmap.org/?mlat={lat}&mlon={long}&zoom=15",
@@ -102,6 +107,11 @@ const careConfig = {
       true,
     ),
   },
+
+  /**
+   * Flag to make location field mandatory for payment reconciliation
+   */
+  paymentLocationRequired: boolean("REACT_PAYMENT_LOCATION_REQUIRED", true),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
@@ -190,7 +200,14 @@ const careConfig = {
    * System identifier for patient phone number configuration
    */
   phoneNumberConfigSystem: "system.care.ohc.network/patient-phone-number",
-  patientNameConfigSystem: "system.care.ohc.network/patient-name",
+
+  /**
+   * Enable automatic invoice sheet after dispensing items
+   */
+  enableAutoInvoiceAfterDispense: boolean(
+    "REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE",
+    false,
+  ),
 } as const;
 
 export default careConfig;
