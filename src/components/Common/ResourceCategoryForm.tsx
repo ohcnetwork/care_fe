@@ -257,7 +257,9 @@ export function ResourceCategoryForm({
                         const sanitizedValue = e.target.value
                           .toLowerCase()
                           .replace(/[^a-z0-9_-]/g, "");
-                        field.onChange(sanitizedValue);
+                        form.setValue("slug_value", sanitizedValue, {
+                          shouldValidate: true,
+                        });
                       }}
                     />
                   </FormControl>

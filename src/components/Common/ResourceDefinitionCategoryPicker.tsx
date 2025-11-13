@@ -85,13 +85,7 @@ interface ResourceDefinitionCategoryPickerProps<T> {
     pathParams?: Record<string, string>;
     queryParams?: Record<string, unknown>;
   };
-  // Optional translations
-  translations: {
-    searchPlaceholder: string;
-    selectPlaceholder: string;
-    noResultsFound: string;
-    noItemsFound: string;
-  };
+  translationBaseKey: string;
   // Optional mapper function to transform API response to BaseDefinition
   mapper?: (item: T) => BaseCategoryPickerDefinition;
   // Favorites functionality
@@ -133,7 +127,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   resourceType,
   searchParamName = "title",
   listDefinitions,
-  translations,
+  translationBaseKey,
   allowMultiple = false,
   mapper = (item: T) => item as BaseCategoryPickerDefinition,
   enableFavorites = false,
@@ -421,7 +415,7 @@ export function ResourceDefinitionCategoryPicker<T>({
     if (!selectedDefinition || allowMultiple) {
       return (
         <span className="text-gray-500 truncate">
-          {placeholder || t(translations.selectPlaceholder) || t("select_item")}
+          {placeholder || t(`select_${translationBaseKey}`) || t("select_item")}
         </span>
       );
     }
@@ -441,7 +435,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   const renderSearchInput = () => (
     <div className="px-3 border-b">
       <CommandInput
-        placeholder={t(translations.searchPlaceholder)}
+        placeholder={t(`search_${translationBaseKey}`)}
         value={searchQuery}
         onValueChange={setSearchQuery}
         className="h-9 border-0 focus:ring-0 text-base sm:text-sm"
@@ -527,9 +521,8 @@ export function ResourceDefinitionCategoryPicker<T>({
           <Search className="size-8 mx-auto mb-2 opacity-50" />
           <div className="text-sm">
             {currentParent
-              ? t(translations.noResultsFound) || t("no_results_found_for")
-              : t("no_categories_found_for")}{" "}
-            "{searchQuery}"
+              ? t("no_results_found_for", { term: searchQuery })
+              : t("no_categories_found_for", { term: searchQuery })}
           </div>
         </div>
       ) : (
@@ -537,7 +530,7 @@ export function ResourceDefinitionCategoryPicker<T>({
           <Folder className="size-8 mx-auto mb-2 opacity-50" />
           <div className="text-sm">
             {currentParent
-              ? t(translations.noItemsFound) || t("no_items_found")
+              ? t(`no_${translationBaseKey}_found`) || t("no_items_found")
               : t("no_categories_found")}
           </div>
         </div>
@@ -553,12 +546,7 @@ export function ResourceDefinitionCategoryPicker<T>({
           .filter(
             (category) =>
               !searchQuery ||
-              category.title
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-              category.description
-                ?.toLowerCase()
-                .includes(searchQuery.toLowerCase()),
+              category.title.toLowerCase().includes(searchQuery.toLowerCase()),
           )
           .map((category) => (
             <CommandItem
@@ -577,11 +565,6 @@ export function ResourceDefinitionCategoryPicker<T>({
                   <div className="font-medium text-sm truncate">
                     {category.title}
                   </div>
-                  {category.description && (
-                    <div className="text-xs text-gray-500 truncate mt-0.5">
-                      {category.description}
-                    </div>
-                  )}
                 </div>
               </div>
               <ChevronRight className="size-4 text-gray-500" />
@@ -639,11 +622,6 @@ export function ResourceDefinitionCategoryPicker<T>({
             <div className="font-medium text-sm break flex items-center justify-between gap-2">
               <span className="break-all">{definition.title}</span>
             </div>
-            {definition.description && (
-              <div className="text-xs text-gray-500 truncate mt-0.5">
-                {definition.description}
-              </div>
-            )}
             {searchQuery && definition.category && (
               <div className="text-xs text-gray-500 truncate mt-0.5">
                 {getDisplayPath(definition)}
@@ -834,7 +812,7 @@ export function ResourceDefinitionCategoryPicker<T>({
 
           <DrawerContent className="flex flex-col max-h-[85vh]">
             <DrawerTitle className="sr-only">
-              {t(translations.selectPlaceholder) || t("select_item")}
+              {t(`select_${translationBaseKey}`) || t("select_item")}
             </DrawerTitle>
             <div className="px-4 py-3 border-b flex-shrink-0">
               {!isMobile && (

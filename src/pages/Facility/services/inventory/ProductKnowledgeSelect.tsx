@@ -74,12 +74,7 @@ export function ProductKnowledgeSelect({
         },
       }}
       mapper={productKnowledgeMapper}
-      translations={{
-        searchPlaceholder: "search_product_knowledge",
-        selectPlaceholder: "select_product_knowledge",
-        noResultsFound: "no_product_knowledge_found_for",
-        noItemsFound: "no_product_knowledge_found",
-      }}
+      translationBaseKey="product_knowledge"
       enableFavorites={!disableFavorites}
       favoritesConfig={
         !disableFavorites
