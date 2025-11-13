@@ -104,14 +104,12 @@ export const DispenseButton = ({
             path: getLocationPath(location),
           }}
           onDispenseComplete={async (chargeItems: ChargeItemRead[]) => {
-            setExtractedChargeItems(chargeItems);
             setShowDrawer(false);
 
             if (!careConfig.enableAutoInvoiceAfterDispense) {
-              setExtractedChargeItems([]);
               return;
             }
-
+            setExtractedChargeItems(chargeItems);
             const result = await refetchAccount();
             const fetchedAccountId = result.data?.results?.[0]?.id;
 
