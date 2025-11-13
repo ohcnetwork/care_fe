@@ -219,7 +219,7 @@ export function ProductFormContent({
       );
       setHasInitialized(true);
     }
-  }, [existingData?.charge_item_definition, hasInitialized, isEditMode]);
+  }, [existingData?.charge_item_definition, isEditMode]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
