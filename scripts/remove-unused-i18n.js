@@ -7,7 +7,7 @@ const { Parser } = require("i18next-scanner");
 async function extractUsedKeys(src, extensions) {
   const files = glob.sync(`**/*.+(${extensions.join("|")})`, {
     cwd: src,
-    ignore: ["node_modules/**", "dist/**", "types/**"],
+    ignore: ["node_modules/**", "dist/**"],
   });
 
   const parser = new Parser({
