@@ -105,10 +105,10 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
               value={qParams.status || ""}
               onValueChange={(value) => updateQuery({ status: value })}
               options={Object.values(InventoryStatusOptions)}
-              label="status"
+              label="status" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
               onClear={() => updateQuery({ status: undefined })}
               className="w-full sm:w-auto h-9 border-gray-300"
-              placeholder="filter_by_status"
+              placeholder="filter_by_status" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
             />
           </div>
           <div className="w-full sm:w-auto">
@@ -127,10 +127,10 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                 })
               }
               options={Object.keys(SORT_OPTIONS)}
-              label="qty"
+              label="qty" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
               onClear={() => updateQuery({ ordering: undefined })}
               className="w-full sm:w-auto h-9 border-gray-300"
-              placeholder="sort_by_quantity"
+              placeholder="sort_by_quantity" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
             />
           </div>
         </div>

@@ -213,7 +213,7 @@ export function ChargeItemList({
               value={qParams.status || ""}
               onValueChange={(value) => updateQuery({ status: value })}
               options={Object.values(ChargeItemDefinitionStatus)}
-              label="status"
+              label="status" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
               onClear={() => updateQuery({ status: undefined })}
             />
           </div>
