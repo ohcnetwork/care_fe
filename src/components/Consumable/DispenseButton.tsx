@@ -108,6 +108,7 @@ export const DispenseButton = ({
             setShowDrawer(false);
 
             if (!careConfig.enableAutoInvoiceAfterDispense) {
+              setExtractedChargeItems([]);
               return;
             }
 
