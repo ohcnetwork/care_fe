@@ -62,12 +62,7 @@ export function ChargeItemCard({
             </div>
           </div>
         </div>
-        <div
-          className={cn(
-            "items-center cursor-pointer flex flex-row gap-2 sm:gap-1",
-            !invoiceUrl && "pointer-events-none",
-          )}
-        >
+        <div className={cn("items-center flex flex-row gap-2 sm:gap-1")}>
           <div className="font-semibold text-sm flex items-center">
             <span className="items-center">
               <MonetaryDisplay amount={chargeItem.total_price} />
