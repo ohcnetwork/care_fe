@@ -239,7 +239,7 @@ export function ProductKnowledgeList({
               value={qParams.status || ""}
               onValueChange={(value) => updateQuery({ status: value })}
               options={Object.values(ProductKnowledgeStatus)}
-              label={t("status")}
+              label="status"
               onClear={() => updateQuery({ status: undefined })}
             />
           </div>
@@ -250,7 +250,7 @@ export function ProductKnowledgeList({
               value={qParams.product_type || ""}
               onValueChange={(value) => updateQuery({ product_type: value })}
               options={Object.values(ProductKnowledgeType)}
-              label={t("product_type")}
+              label="product_type"
               onClear={() => updateQuery({ product_type: undefined })}
             />
           </div>

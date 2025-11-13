@@ -94,7 +94,7 @@ export const EncounterServiceRequestTab = () => {
             value={qParams.status || ""}
             onValueChange={(value) => updateQuery({ status: value })}
             options={Object.values(Status)}
-            label={t("status")}
+            label="status"
             onClear={handleClearStatus}
           />
         </div>
@@ -104,7 +104,7 @@ export const EncounterServiceRequestTab = () => {
             value={qParams.priority || ""}
             onValueChange={(value) => updateQuery({ priority: value })}
             options={Object.values(Priority)}
-            label={t("priority")}
+            label="priority"
             onClear={handleClearPriority}
           />
         </div>

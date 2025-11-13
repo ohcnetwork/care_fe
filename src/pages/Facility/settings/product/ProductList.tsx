@@ -146,7 +146,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(ProductStatusOptions)}
-                  label={t("status")}
+                  label="status"
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>

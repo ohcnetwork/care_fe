@@ -351,7 +351,7 @@ export default function MedicationDispenseList({
                   )
                 }
                 options={["all", "pending", "partial", "complete"]}
-                label={t("dispense_status") as string}
+                label="dispense_status"
                 onClear={() => setDispenseFilter("all")}
               />
             </div>

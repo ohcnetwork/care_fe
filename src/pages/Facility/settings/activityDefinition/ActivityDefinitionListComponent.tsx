@@ -226,7 +226,7 @@ export function ActivityDefinitionList({
               value={qParams.status || ""}
               onValueChange={(value) => updateQuery({ status: value })}
               options={Object.values(Status)}
-              label={t("status")}
+              label="status"
               onClear={() => updateQuery({ status: undefined })}
             />
           </div>
@@ -237,7 +237,7 @@ export function ActivityDefinitionList({
               value={qParams.classification || ""}
               onValueChange={(value) => updateQuery({ classification: value })}
               options={Object.values(Classification)}
-              label={t("category")}
+              label="category"
               onClear={() => updateQuery({ classification: undefined })}
             />
           </div>

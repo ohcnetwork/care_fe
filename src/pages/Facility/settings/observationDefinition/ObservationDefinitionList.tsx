@@ -162,7 +162,7 @@ export default function ObservationDefinitionList({
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={OBSERVATION_DEFINITION_STATUS as unknown as string[]}
-                  label={t("status")}
+                  label="status"
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>
@@ -171,7 +171,7 @@ export default function ObservationDefinitionList({
                   value={qParams.category || ""}
                   onValueChange={(value) => updateQuery({ category: value })}
                   options={OBSERVATION_DEFINITION_CATEGORY}
-                  label={t("category")}
+                  label="category"
                   onClear={() => updateQuery({ category: undefined })}
                 />
               </div>

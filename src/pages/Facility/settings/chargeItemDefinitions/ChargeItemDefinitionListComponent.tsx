@@ -213,7 +213,7 @@ export function ChargeItemList({
               value={qParams.status || ""}
               onValueChange={(value) => updateQuery({ status: value })}
               options={Object.values(ChargeItemDefinitionStatus)}
-              label={t("status")}
+              label="status"
               onClear={() => updateQuery({ status: undefined })}
             />
           </div>

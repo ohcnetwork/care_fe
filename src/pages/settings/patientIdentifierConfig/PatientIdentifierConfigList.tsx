@@ -224,7 +224,7 @@ export default function PatientIdentifierConfigList({
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(PatientIdentifierConfigStatus)}
-                  label={t("status")}
+                  label="status"
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>

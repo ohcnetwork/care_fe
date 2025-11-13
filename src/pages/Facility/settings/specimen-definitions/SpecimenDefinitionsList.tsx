@@ -154,7 +154,7 @@ export function SpecimenDefinitionsList({
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(SpecimenDefinitionStatus)}
-                  label={t("status")}
+                  label="status"
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>

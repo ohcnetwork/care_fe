@@ -110,7 +110,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(TagStatus)}
-                  label={t("status")}
+                  label="status"
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>
@@ -119,7 +119,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
                   value={qParams.category || ""}
                   onValueChange={(value) => updateQuery({ category: value })}
                   options={Object.values(TagCategory)}
-                  label={t("category")}
+                  label="category"
                   onClear={() => updateQuery({ category: undefined })}
                 />
               </div>
@@ -128,7 +128,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
                   value={qParams.resource || ""}
                   onValueChange={(value) => updateQuery({ resource: value })}
                   options={Object.values(TagResource)}
-                  label={t("resource")}
+                  label="resource"
                   onClear={() => updateQuery({ resource: undefined })}
                 />
               </div>

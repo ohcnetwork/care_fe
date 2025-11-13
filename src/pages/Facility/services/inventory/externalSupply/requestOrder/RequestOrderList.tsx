@@ -113,10 +113,10 @@ export function RequestOrderList({
           value={qParams.priority || ""}
           onValueChange={(value) => updateQuery({ priority: value })}
           options={Object.values(RequestOrderPriority)}
-          label={t("priority")}
+          label="priority"
           onClear={() => updateQuery({ priority: undefined })}
           className="w-full sm:w-auto h-9"
-          placeholder={t("filter_by_priority")}
+          placeholder="filter_by_priority"
         />
       </div>
     </div>
