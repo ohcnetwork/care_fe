@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { ArrowDownUp } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -33,11 +34,15 @@ import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { ProductKnowledgeSelect } from "./ProductKnowledgeSelect";
 
+const SORT_OPTIONS: Record<string, string> = {
+  low_to_high: "net_content",
+  high_to_low: "-net_content",
+};
+
 interface InventoryListProps {
   facilityId: string;
   locationId: string;
 }
-
 export function InventoryList({ facilityId, locationId }: InventoryListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
@@ -67,7 +72,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         product_knowledge: qParams.product_knowledge_id,
-        ordering: "net_content",
+        ordering: qParams.ordering,
       },
     }),
   });
@@ -76,7 +81,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
     <Page
       title={t("inventory")}
       options={
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-2">
           <div className="w-full sm:w-auto">
             <ProductKnowledgeSelect
               value={selectedProductKnowledge}
@@ -102,6 +107,26 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
               onClear={() => updateQuery({ status: undefined })}
               className="w-full sm:w-auto h-9 border-gray-300"
               placeholder={t("filter_by_status")}
+            />
+          </div>
+          <div className="w-full sm:w-auto">
+            <FilterSelect
+              icon={<ArrowDownUp className="size-4" />}
+              value={
+                Object.keys(SORT_OPTIONS).find(
+                  (key) => SORT_OPTIONS[key] === qParams.ordering,
+                ) || ""
+              }
+              onValueChange={(value) =>
+                updateQuery({
+                  ordering: value ? SORT_OPTIONS[value] : undefined,
+                })
+              }
+              options={Object.keys(SORT_OPTIONS)}
+              label={t("qty")}
+              onClear={() => updateQuery({ ordering: undefined })}
+              className="w-full sm:w-auto h-9 border-gray-300"
+              placeholder={t("sort_by_quantity")}
             />
           </div>
         </div>
