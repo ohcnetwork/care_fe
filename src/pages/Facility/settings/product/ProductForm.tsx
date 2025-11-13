@@ -2,13 +2,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { navigate } from "raviger";
-import { useImperativeHandle, useState } from "react";
+import { useEffect, useImperativeHandle, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import Autocomplete from "@/components/ui/autocomplete";
+import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -41,12 +41,12 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { mergeAutocompleteOptions } from "@/Utils/utils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
+import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import {
+  ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
-  ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import {
@@ -169,8 +169,10 @@ export function ProductFormContent({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(productId);
-  const [cidSearch, setCidSearch] = useState("");
   const [createCidOpen, setCreateCidOpen] = useState(false);
+  const [selectedChargeItemDefinition, setSelectedChargeItemDefinition] =
+    useState<ChargeItemDefinitionRead | null>(null);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Get product knowledge list for the dropdown
   const { data: productKnowledgeResponse } = useQuery({
@@ -209,25 +211,15 @@ export function ProductFormContent({
           ...(existingProductKnowledge ? [existingProductKnowledge] : []),
         ];
 
-  // Get charge item definition list for the dropdown with search
-  const { data: chargeItemDefinitionResponse, isLoading: isLoadingCID } =
-    useQuery({
-      queryKey: ["chargeItemDefinitions", cidSearch],
-      queryFn: query.debounced(
-        chargeItemDefinitionApi.listChargeItemDefinition,
-        {
-          pathParams: { facilityId },
-          queryParams: {
-            limit: 100,
-            status: ChargeItemDefinitionStatus.active,
-            title: cidSearch,
-          },
-        },
-      ),
-    });
-
-  const chargeItemDefinitionOptions =
-    chargeItemDefinitionResponse?.results || [];
+  // Set initial selected charge item definition when existing data loads
+  useEffect(() => {
+    if (existingData?.charge_item_definition && !hasInitialized && isEditMode) {
+      setSelectedChargeItemDefinition(
+        existingData.charge_item_definition as ChargeItemDefinitionRead,
+      );
+      setHasInitialized(true);
+    }
+  }, [existingData?.charge_item_definition, hasInitialized, isEditMode]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -441,32 +433,36 @@ export function ProductFormContent({
                 <FormItem>
                   <FormLabel>{t("charge_item_definition")}</FormLabel>
                   <div className="flex flex-col gap-2 sm:flex-row">
-                    <FormControl className="flex-1">
-                      <Autocomplete
-                        options={mergeAutocompleteOptions(
-                          chargeItemDefinitionOptions.map((cid) => ({
-                            label: cid.title,
-                            value: cid.slug,
-                          })),
-                          field.value
-                            ? {
-                                label:
-                                  chargeItemDefinitionOptions.find(
-                                    (cid) => cid.slug === field.value,
-                                  )?.title || "",
-                                value: field.value,
-                              }
-                            : undefined,
-                        )}
-                        value={field.value || ""}
-                        onChange={field.onChange}
-                        onSearch={setCidSearch}
-                        placeholder={t("select_charge_item_definition")}
-                        isLoading={isLoadingCID}
-                        noOptionsMessage={t("no_charge_item_definitions_found")}
-                        data-cy="charge-item-definition-search"
-                      />
-                    </FormControl>
+                    <div className="flex-1 min-w-0">
+                      <FormControl>
+                        <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
+                          facilityId={facilityId}
+                          value={selectedChargeItemDefinition || undefined}
+                          onValueChange={(selectedDef) => {
+                            if (!selectedDef) {
+                              setSelectedChargeItemDefinition(null);
+                              field.onChange("");
+                              return;
+                            }
+                            const def = selectedDef as ChargeItemDefinitionRead;
+                            setSelectedChargeItemDefinition(def);
+                            field.onChange(def.slug);
+                          }}
+                          placeholder={t("select_charge_item_definition")}
+                          className="w-full"
+                          resourceType={
+                            ResourceCategoryResourceType.charge_item_definition
+                          }
+                          listDefinitions={{
+                            queryFn:
+                              chargeItemDefinitionApi.listChargeItemDefinition,
+                            pathParams: { facilityId },
+                            queryParams: { status: "active" },
+                          }}
+                          translationBaseKey="charge_item_definition"
+                        />
+                      </FormControl>
+                    </div>
                     <Sheet open={createCidOpen} onOpenChange={setCreateCidOpen}>
                       <SheetTrigger asChild>
                         <Button
