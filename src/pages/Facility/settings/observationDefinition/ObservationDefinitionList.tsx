@@ -162,7 +162,7 @@ export default function ObservationDefinitionList({
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={OBSERVATION_DEFINITION_STATUS as unknown as string[]}
-                  label="status" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+                  label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>
@@ -171,7 +171,7 @@ export default function ObservationDefinitionList({
                   value={qParams.category || ""}
                   onValueChange={(value) => updateQuery({ category: value })}
                   options={OBSERVATION_DEFINITION_CATEGORY}
-                  label="category" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+                  label={t("category")}
                   onClear={() => updateQuery({ category: undefined })}
                 />
               </div>

@@ -154,7 +154,7 @@ export function SpecimenDefinitionsList({
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(SpecimenDefinitionStatus)}
-                  label="status" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+                  label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>

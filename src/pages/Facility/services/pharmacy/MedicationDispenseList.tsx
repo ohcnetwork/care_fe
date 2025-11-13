@@ -351,7 +351,7 @@ export default function MedicationDispenseList({
                   )
                 }
                 options={["all", "pending", "partial", "complete"]}
-                label="dispense_status" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+                label={t("dispense_status") as string}
                 onClear={() => setDispenseFilter("all")}
               />
             </div>

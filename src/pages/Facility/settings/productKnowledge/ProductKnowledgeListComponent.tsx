@@ -239,7 +239,7 @@ export function ProductKnowledgeList({
               value={qParams.status || ""}
               onValueChange={(value) => updateQuery({ status: value })}
               options={Object.values(ProductKnowledgeStatus)}
-              label="status" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+              label={t("status")}
               onClear={() => updateQuery({ status: undefined })}
             />
           </div>
@@ -250,7 +250,7 @@ export function ProductKnowledgeList({
               value={qParams.product_type || ""}
               onValueChange={(value) => updateQuery({ product_type: value })}
               options={Object.values(ProductKnowledgeType)}
-              label="product_type" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+              label={t("product_type")}
               onClear={() => updateQuery({ product_type: undefined })}
             />
           </div>

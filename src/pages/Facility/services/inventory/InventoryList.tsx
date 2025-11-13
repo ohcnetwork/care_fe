@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDownUp } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -34,17 +33,11 @@ import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { ProductKnowledgeSelect } from "./ProductKnowledgeSelect";
 
-const SORT_OPTIONS = {
-  low_to_high: "net_content",
-  high_to_low: "-net_content",
-} as const;
-
-type SortOptionKey = keyof typeof SORT_OPTIONS;
-
 interface InventoryListProps {
   facilityId: string;
   locationId: string;
 }
+
 export function InventoryList({ facilityId, locationId }: InventoryListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
@@ -74,7 +67,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         product_knowledge: qParams.product_knowledge_id,
-        ordering: qParams.ordering,
+        ordering: "net_content",
       },
     }),
   });
@@ -83,7 +76,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
     <Page
       title={t("inventory")}
       options={
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-2">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="w-full sm:w-auto">
             <ProductKnowledgeSelect
               value={selectedProductKnowledge}
@@ -105,32 +98,10 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
               value={qParams.status || ""}
               onValueChange={(value) => updateQuery({ status: value })}
               options={Object.values(InventoryStatusOptions)}
-              label="status" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+              label={t("status")}
               onClear={() => updateQuery({ status: undefined })}
               className="w-full sm:w-auto h-9 border-gray-300"
-              placeholder="filter_by_status" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
-            />
-          </div>
-          <div className="w-full sm:w-auto">
-            <FilterSelect
-              icon={<ArrowDownUp className="size-4" />}
-              value={
-                (Object.keys(SORT_OPTIONS) as Array<SortOptionKey>).find(
-                  (key) => SORT_OPTIONS[key] === qParams.ordering,
-                ) || ""
-              }
-              onValueChange={(value) =>
-                updateQuery({
-                  ordering: value
-                    ? SORT_OPTIONS[value as SortOptionKey]
-                    : undefined,
-                })
-              }
-              options={Object.keys(SORT_OPTIONS)}
-              label="qty" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
-              onClear={() => updateQuery({ ordering: undefined })}
-              className="w-full sm:w-auto h-9 border-gray-300"
-              placeholder="sort_by_quantity" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+              placeholder={t("filter_by_status")}
             />
           </div>
         </div>

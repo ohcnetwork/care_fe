@@ -94,7 +94,7 @@ export const EncounterServiceRequestTab = () => {
             value={qParams.status || ""}
             onValueChange={(value) => updateQuery({ status: value })}
             options={Object.values(Status)}
-            label="status" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+            label={t("status")}
             onClear={handleClearStatus}
           />
         </div>
@@ -104,7 +104,7 @@ export const EncounterServiceRequestTab = () => {
             value={qParams.priority || ""}
             onValueChange={(value) => updateQuery({ priority: value })}
             options={Object.values(Priority)}
-            label="priority" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+            label={t("priority")}
             onClear={handleClearPriority}
           />
         </div>

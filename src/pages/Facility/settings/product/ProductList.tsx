@@ -146,7 +146,7 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(ProductStatusOptions)}
-                  label="status" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+                  label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>

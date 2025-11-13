@@ -110,7 +110,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
                   options={Object.values(TagStatus)}
-                  label="status" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+                  label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
               </div>
@@ -119,7 +119,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
                   value={qParams.category || ""}
                   onValueChange={(value) => updateQuery({ category: value })}
                   options={Object.values(TagCategory)}
-                  label="category" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+                  label={t("category")}
                   onClear={() => updateQuery({ category: undefined })}
                 />
               </div>
@@ -128,7 +128,7 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
                   value={qParams.resource || ""}
                   onValueChange={(value) => updateQuery({ resource: value })}
                   options={Object.values(TagResource)}
-                  label="resource" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+                  label={t("resource")}
                   onClear={() => updateQuery({ resource: undefined })}
                 />
               </div>

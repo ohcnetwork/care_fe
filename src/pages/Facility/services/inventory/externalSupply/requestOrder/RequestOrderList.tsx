@@ -113,10 +113,10 @@ export function RequestOrderList({
           value={qParams.priority || ""}
           onValueChange={(value) => updateQuery({ priority: value })}
           options={Object.values(RequestOrderPriority)}
-          label="priority" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+          label={t("priority")}
           onClear={() => updateQuery({ priority: undefined })}
           className="w-full sm:w-auto h-9"
-          placeholder="filter_by_priority" // eslint-disable-line i18next/no-literal-string -- FilterSelect handles translation internally
+          placeholder={t("filter_by_priority")}
         />
       </div>
     </div>
