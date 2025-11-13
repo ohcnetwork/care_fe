@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { navigate } from "raviger";
-import { useEffect, useImperativeHandle, useState } from "react";
+import { useImperativeHandle, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -171,8 +171,10 @@ export function ProductFormContent({
   const isEditMode = Boolean(productId);
   const [createCidOpen, setCreateCidOpen] = useState(false);
   const [selectedChargeItemDefinition, setSelectedChargeItemDefinition] =
-    useState<ChargeItemDefinitionRead | null>(null);
-  const [hasInitialized, setHasInitialized] = useState(false);
+    useState<ChargeItemDefinitionRead | null>(
+      (existingData?.charge_item_definition as ChargeItemDefinitionRead) ||
+        null,
+    );
 
   // Get product knowledge list for the dropdown
   const { data: productKnowledgeResponse } = useQuery({
@@ -210,16 +212,6 @@ export function ProductFormContent({
           ...(productKnowledgeResponse?.results || []),
           ...(existingProductKnowledge ? [existingProductKnowledge] : []),
         ];
-
-  // Set initial selected charge item definition when existing data loads
-  useEffect(() => {
-    if (existingData?.charge_item_definition && !hasInitialized && isEditMode) {
-      setSelectedChargeItemDefinition(
-        existingData.charge_item_definition as ChargeItemDefinitionRead,
-      );
-      setHasInitialized(true);
-    }
-  }, [existingData?.charge_item_definition, isEditMode]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
