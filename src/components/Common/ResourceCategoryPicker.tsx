@@ -373,7 +373,7 @@ export function ResourceCategoryPicker({
               <div className="p-6 text-center text-gray-500">
                 <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <div className="text-sm">
-                  {t("no_categories_found_for")} "{searchQuery}"
+                  {t("no_categories_found_for", { term: searchQuery })}
                 </div>
               </div>
             ) : (
