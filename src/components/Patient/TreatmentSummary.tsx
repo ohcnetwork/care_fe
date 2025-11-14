@@ -410,12 +410,12 @@ export default function TreatmentSummary({
                 <SectionLayout title={t("allergies")}>
                   <PrintTable
                     headers={[
-                      { key: "allergen" },
-                      { key: "status" },
-                      { key: "criticality" },
-                      { key: "verification" },
-                      { key: "notes" },
-                      { key: "logged_by" },
+                      { key: t("allergen") },
+                      { key: t("status") },
+                      { key: t("criticality") },
+                      { key: t("verification") },
+                      { key: t("notes") },
+                      { key: t("logged_by") },
                     ]}
                     rows={allergies?.results.map((allergy) => ({
                       allergen: allergy.code.display,
@@ -434,13 +434,13 @@ export default function TreatmentSummary({
                 <SectionLayout title={t("symptoms")}>
                   <PrintTable
                     headers={[
-                      { key: "symptom" },
-                      { key: "severity" },
-                      { key: "status" },
-                      { key: "verification" },
-                      { key: "onset" },
-                      { key: "notes" },
-                      { key: "logged_by" },
+                      { key: t("symptom") },
+                      { key: t("severity") },
+                      { key: t("status") },
+                      { key: t("verification") },
+                      { key: t("onset") },
+                      { key: t("notes") },
+                      { key: t("logged_by") },
                     ]}
                     rows={symptoms?.results?.map((symptom) => ({
                       symptom: symptom.code.display,
@@ -464,13 +464,13 @@ export default function TreatmentSummary({
                 <SectionLayout title={t("diagnoses")}>
                   <PrintTable
                     headers={[
-                      { key: "diagnosis" },
-                      { key: "status" },
-                      { key: "severity" },
-                      { key: "verification" },
-                      { key: "onset" },
-                      { key: "notes" },
-                      { key: "logged_by" },
+                      { key: t("diagnosis") },
+                      { key: t("status") },
+                      { key: t("severity") },
+                      { key: t("verification") },
+                      { key: t("onset") },
+                      { key: t("notes") },
+                      { key: t("logged_by") },
                     ]}
                     rows={diagnoses?.results.map((diagnosis) => ({
                       diagnosis: diagnosis.code.display,
@@ -496,12 +496,12 @@ export default function TreatmentSummary({
                 <SectionLayout title={t("medications")}>
                   <PrintTable
                     headers={[
-                      { key: "medicine" },
-                      { key: "status" },
-                      { key: "dosage" },
-                      { key: "frequency" },
-                      { key: "duration" },
-                      { key: "instructions" },
+                      { key: t("medicine") },
+                      { key: t("status") },
+                      { key: t("dosage") },
+                      { key: t("frequency") },
+                      { key: t("duration") },
+                      { key: t("instructions") },
                     ]}
                     rows={medications?.results.map((medication) => {
                       const instruction = medication.dosage_instruction[0];
@@ -547,15 +547,13 @@ export default function TreatmentSummary({
                 <SectionLayout title={t("medication_statements")}>
                   <PrintTable
                     headers={[
-                      { key: "medication" },
-                      { key: "dosage" },
-                      { key: "status" },
-                      {
-                        key: "medication_taken_between",
-                      },
-                      { key: "reason" },
-                      { key: "notes" },
-                      { key: "logged_by" },
+                      { key: t("medication") },
+                      { key: t("dosage") },
+                      { key: t("status") },
+                      { key: t("medication_taken_between") },
+                      { key: t("reason") },
+                      { key: t("notes") },
+                      { key: t("logged_by") },
                     ]}
                     rows={medicationStatement?.results.map((medication) => ({
                       medication:

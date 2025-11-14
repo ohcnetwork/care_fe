@@ -305,9 +305,9 @@ export const DischargeTab = ({
           className="cursor-pointer"
           onClick={() => updateQuery({ is_archived: undefined })}
         >
-          {t(
-            qParams.is_archived === "false" ? "active_files" : "archived_files",
-          )}
+          {qParams.is_archived === "false"
+            ? t("active_files")
+            : t("archived_files")}
           <CareIcon icon="l-times-circle" className="ml-1" />
         </Badge>
       </div>

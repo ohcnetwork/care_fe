@@ -52,7 +52,8 @@
     "unimported": "unimported",
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src ./cypress ./tests --write",
-    "sort-locales": "node ./scripts/sort-locales.js"
+    "sort-locales": "node ./scripts/sort-locales.js",
+    "remove-unused-i18n": "node scripts/remove-unused-i18n.js"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.0-a18b139",

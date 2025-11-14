@@ -106,7 +106,7 @@ function cleanLocaleFiles(localesPath, usedKeys, dynamicPrefixes) {
       removedCount++;
     }
 
-    fs.writeFileSync(localeFilePath, JSON.stringify(cleaned, null, 2));
+    fs.writeFileSync(localeFilePath, JSON.stringify(cleaned, null, 2) + "\n");
     console.log(`✅ Cleaned ${locale} — removed ${removedCount} unused keys`);
   }
 }

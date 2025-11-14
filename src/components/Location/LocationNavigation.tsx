@@ -134,11 +134,9 @@ export function LocationNavigation({
             <BedStatusLegend />
             {!isLoadingBeds && beds.length === 0 && (
               <div className="w-full mt-6 py-6 px-4 border border-gray-200 bg-gray-50 text-center text-gray-500 text-sm rounded-md">
-                {t(
-                  !showAvailableOnly
-                    ? "no_beds_found"
-                    : "no_available_beds_found",
-                )}
+                {!showAvailableOnly
+                  ? t("no_beds_found")
+                  : t("no_available_beds_found")}
               </div>
             )}
             <BedListing

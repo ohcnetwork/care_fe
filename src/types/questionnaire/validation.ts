@@ -112,7 +112,7 @@ export function validateFields(
           if (error instanceof Error) {
             errors.push({
               question_id: questionId,
-              error: t(error.message || "invalid_value"),
+              error: error.message || t("invalid_value"),
               type: "validation_error",
               field_key: field.key,
               index,

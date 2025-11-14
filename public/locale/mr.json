@@ -17,6 +17,8 @@
   "last_name": "आडनाव",
   "login": "लॉगिन",
   "new_password": "नवीन पासवर्ड",
+  "no_duplicate_facility": "बनावट हॉस्पिटल सुविधा मुळीच तयार करू नका",
+  "no_facilities": "कोणतेही हॉस्पिटल नाही",
   "password": "पासवर्ड",
   "password_mismatch": "\"पासवर्ड\" आणि \"पासवर्डची खात्री करा\" दोन्ही सारखे हवेत.",
   "password_reset_success": "पासवर्ड यशस्वीपणे रिसेट झाला",
@@ -32,8 +34,10 @@
   "sex": "लिंग",
   "emergency_contact": "आपत्कालीन संपर्क",
   "emergency_contact_person_name": "आपत्कालीन संपर्क व्यक्तीचे नाव",
+  "no_social_profile_details_available": "कोणतीही सामाजिक प्रोफाइल माहिती उपलब्ध नाही",
   "location": "स्थान",
   "current_address": "सध्याचा पत्ता",
   "permanent_address": "स्थायी पत्ता",
+  "no_medical_history_available": "कोणताही वैद्यकीय इतिहास उपलब्ध नाही",
   "allergies": "अॅलर्जी"
 }
