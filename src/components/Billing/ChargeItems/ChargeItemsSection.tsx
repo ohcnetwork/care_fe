@@ -32,7 +32,6 @@ interface ChargeItemsSectionProps {
   sourceUrl?: string;
   encounterId?: string;
   disableCreateChargeItems?: boolean;
-  locationId?: string;
   viewOnly?: boolean;
 }
 
@@ -44,7 +43,6 @@ export function ChargeItemsSection({
   sourceUrl,
   encounterId,
   disableCreateChargeItems = false,
-  locationId,
   viewOnly = false,
 }: ChargeItemsSectionProps) {
   const { t } = useTranslation();
@@ -96,7 +94,7 @@ export function ChargeItemsSection({
     <>
       <Card className="bg-white shadow-sm rounded-md p-1">
         <CardHeader className="p-2 bg-gray-50">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row gap-2 items-center justify-between">
             <CardTitle>{t("charge_items")}</CardTitle>
             <div className="flex items-center gap-2">
               {(chargeItems?.results ?? []).filter(
@@ -139,10 +137,7 @@ export function ChargeItemsSection({
             <ChargeItemCard
               key={chargeItem.id}
               chargeItem={chargeItem}
-              serviceResourceId={resourceId}
-              serviceResourceType={serviceResourceType}
-              locationId={locationId}
-              patientId={patientId}
+              sourceUrl={sourceUrl}
             />
           ))}
         </CardContent>

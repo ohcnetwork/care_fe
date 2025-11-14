@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -63,7 +62,7 @@ export default function AddChargeItemSheet({
   const [isAddChargeItemsOpen, setIsAddChargeItemsOpen] = React.useState(false);
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
-    limit: 15,
+    limit: 13,
     disableCache: true,
   });
   useShortcutSubContext("facility:billing:invoice");
@@ -165,19 +164,20 @@ export default function AddChargeItemSheet({
         </SheetHeader>
 
         <div className="mt-6">
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex flex-col sm:flex-row gap-2 justify-between items-center mb-2">
             <Input
               placeholder={t("search_charge_items")}
               value={qParams.search || ""}
               onChange={(e) =>
                 updateQuery({ search: e.target.value || undefined })
               }
-              className="max-w-xs"
+              className="w-full sm:max-w-xs"
             />
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsAddChargeItemsOpen(true)}
+              className="w-full sm:w-auto"
             >
               <PlusIcon className="size-4 mr-2" />
               {t("other_charge_items")}
@@ -188,7 +188,7 @@ export default function AddChargeItemSheet({
           {isLoading ? (
             <TableSkeleton count={5} />
           ) : (
-            <ScrollArea className="max-h-[calc(100vh-20rem)] scroll-y-auto py-2">
+            <div className="py-2">
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
@@ -244,12 +244,12 @@ export default function AddChargeItemSheet({
                   </TableBody>
                 </Table>
               </div>
-            </ScrollArea>
+            </div>
           )}
 
           <Pagination totalCount={response?.count || 0} />
         </div>
-        <SheetFooter>
+        <SheetFooter className="flex flex-row justify-end gap-2">
           <Button
             variant="outline"
             onClick={() => setOpen(false)}

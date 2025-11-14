@@ -350,7 +350,11 @@ export const SelectedDateBadge = ({
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="text-sm underline cursor-pointer">
         {isRangeSelected ? (
-          <span>{t(isRangeSelected.label)}</span>
+          <span>
+            {t(isRangeSelected.label, {
+              ...(isRangeSelected.count && { count: isRangeSelected.count }),
+            })}
+          </span>
         ) : selected.from && selected.to && !isSameDate ? (
           <span>
             {(() => {
