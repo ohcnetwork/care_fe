@@ -50,7 +50,8 @@ async function extractUsedKeys(src, extensions) {
       }
 
       // ✅ Detect plural usage (adds `_one`, `_other`)
-      const pluralRegex = /t\(\s*["'`](.*?)["'`]\s*,\s*{[\s\S]*?count\s*:/g;
+      const pluralRegex =
+        /t\(\s*["'`]([a-zA-Z0-9_]+)["'`]\s*,\s*{\s*(?:[^\n]*\n?\s*)?count\s*:/g;
       let match;
       while ((match = pluralRegex.exec(jsContent)) !== null) {
         const baseKey = match[1];
