@@ -728,8 +728,6 @@ export function ChargeItemDefinitionForm({
 
   const { isDirty } = form.formState;
 
-  console.log(form.formState.errors);
-
   // Handle form submission
   const { mutate: upsert, isPending } = useMutation({
     mutationFn: isUpdate
