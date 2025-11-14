@@ -470,7 +470,7 @@ function HealthcareServiceFormContent({
               </Button>
               <Button
                 type="submit"
-                disabled={isPending || !form.formState.isDirty}
+                disabled={isPending || (!isEditMode && !form.formState.isDirty)}
               >
                 {isPending
                   ? isEditMode
