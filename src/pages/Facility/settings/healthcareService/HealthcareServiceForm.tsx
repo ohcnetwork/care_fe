@@ -468,10 +468,7 @@ function HealthcareServiceFormContent({
               >
                 {t("cancel")}
               </Button>
-              <Button
-                type="submit"
-                disabled={isPending || !form.formState.isDirty}
-              >
+              <Button type="submit" disabled={isPending}>
                 {isPending
                   ? isEditMode
                     ? t("saving")
