@@ -72,7 +72,6 @@ export const ENCOUNTER_DISCHARGE_DISPOSITION = [
   "snf",
   "oth",
 ] as const;
-export const DEFAULT_DISCHARGE_DISPOSITION = "home";
 
 export const ENCOUNTER_PRIORITY = [
   "stat",

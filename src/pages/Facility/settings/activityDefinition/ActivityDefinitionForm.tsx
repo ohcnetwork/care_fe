@@ -128,8 +128,8 @@ function ActivityDefinitionFormContent({
     title: z.string().min(1, t("field_required")),
     slug_value: z
       .string()
-      .min(1, t("field_required"))
-      .max(25, t("character_count_validation", { min: 1, max: 25 })),
+      .min(5, t("character_count_validation", { min: 5, max: 25 }))
+      .max(25, t("character_count_validation", { min: 5, max: 25 })),
     description: z.string().min(1, t("field_required")),
     usage: z.string().min(1, t("field_required")),
     derived_from_uri: z.string().nullable(),
@@ -471,7 +471,9 @@ function ActivityDefinitionFormContent({
                               const sanitizedValue = e.target.value
                                 .toLowerCase()
                                 .replace(/[^a-z0-9_-]/g, "");
-                              field.onChange(sanitizedValue);
+                              form.setValue("slug_value", sanitizedValue, {
+                                shouldValidate: true,
+                              });
                             }}
                           />
                         </FormControl>
@@ -886,13 +888,7 @@ function ActivityDefinitionFormContent({
                             chargeItemDefinitionApi.listChargeItemDefinition,
                           pathParams: { facilityId },
                         }}
-                        translations={{
-                          searchPlaceholder: "search_charge_item_definitions",
-                          selectPlaceholder: "select_charge_item_definition",
-                          noResultsFound:
-                            "no_charge_item_definitions_found_for",
-                          noItemsFound: "no_charge_item_definitions_found",
-                        }}
+                        translationBaseKey="charge_item_definition"
                         mapper={(item) => ({
                           id: item.id,
                           title: item.title,

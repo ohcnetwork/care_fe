@@ -138,7 +138,7 @@ export function EncounterList({
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
-        patient: patient_filter,
+        patient_filter: patient_filter,
       },
     }),
     enabled: !propEncounters && !encounter_id,
