@@ -115,6 +115,7 @@ interface ResourceDefinitionCategoryPickerProps<T> {
   };
   ref?: React.Ref<HTMLButtonElement>;
   hideClearButton?: boolean;
+  hideSelectedDisplay?: boolean;
 }
 
 export function ResourceDefinitionCategoryPicker<T>({
@@ -133,6 +134,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   enableFavorites = false,
   favoritesConfig,
   ref,
+  hideSelectedDisplay = false,
   hideClearButton = false,
 }: ResourceDefinitionCategoryPickerProps<T>) {
   const shouldHideClearButton = allowMultiple || hideClearButton;
@@ -1069,7 +1071,7 @@ export function ResourceDefinitionCategoryPicker<T>({
           </PopoverContent>
         </Popover>
       )}
-      {allowMultiple && (
+      {allowMultiple && !hideSelectedDisplay && (
         <div className="space-y-2">
           {Array.isArray(value) && value.length > 0 && (
             <div className="flex flex-col gap-2">
