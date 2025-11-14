@@ -219,9 +219,10 @@ export default function DispenseDrawer({
     fields.forEach((field, index) => {
       const inventories =
         productKnowledgeInventoriesMap[field.productKnowledge?.id];
-      const currentLots = form.watch(`items.${index}.lots`);
+      const currentLots = form.getValues(`items.${index}.lots`);
 
       if (
+        inventories !== undefined &&
         inventories?.length === 1 &&
         !currentLots.some((lot) => lot.selectedInventoryId)
       ) {
