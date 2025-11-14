@@ -1062,7 +1062,7 @@ export function ConditionComponent<
     queryFn: query(observationDefinitionApi.getAllMetrics),
   });
 
-  const metrics = data?.filter((m) => m.name !== "patient_tag");
+  const metrics = data?.filter((m) => !m.name.includes("tag"));
 
   useEffect(() => {
     if (metrics?.[0] && conditions.length === 0) {

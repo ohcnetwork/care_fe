@@ -357,7 +357,7 @@ export function CompactConditionEditor({
   const [isAdding, setIsAdding] = useState(false);
 
   const metrics =
-    availableMetrics?.filter((m) => m.name !== "encounter_tag") || [];
+    availableMetrics?.filter((m) => !m.name.includes("tag")) || [];
 
   // Set up form with zod validation
   const form = useForm({
