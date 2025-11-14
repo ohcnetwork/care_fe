@@ -684,7 +684,11 @@ export function ChargeItemDefinitionForm({
           )
           .map((component) => ({
             ...mapPriceComponent(component),
-            conditions: component.conditions || [],
+            conditions:
+              component.conditions?.map((condition) => ({
+                ...condition,
+                _conditionType: `${condition.metric}_${condition.operation}`,
+              })) || [],
           })) || [],
     };
   };
@@ -723,6 +727,8 @@ export function ChargeItemDefinitionForm({
   const basePrice = form.watch("base_price") || "0";
 
   const { isDirty } = form.formState;
+
+  console.log(form.formState.errors);
 
   // Handle form submission
   const { mutate: upsert, isPending } = useMutation({
