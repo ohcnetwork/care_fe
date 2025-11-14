@@ -61,12 +61,12 @@ export const ENCOUNTER_DIET_PREFERENCE = [
 
 export const ENCOUNTER_DISCHARGE_DISPOSITION = [
   "home",
-  "alt_home",
   "other_hcf",
-  "hosp",
-  "long",
   "aadvice",
   "exp",
+  "alt_home",
+  "hosp",
+  "long",
   "psy",
   "rehab",
   "snf",

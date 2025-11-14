@@ -40,6 +40,8 @@ import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
+import { validateEncounterQuestion } from "@/components/Questionnaire/QuestionTypes/EncounterQuestion";
+import { EncounterEdit } from "@/types/emr/encounter/encounter";
 import { QuestionRenderer } from "./QuestionRenderer";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
@@ -296,6 +298,10 @@ const STRUCTURED_TYPE_VALIDATORS = {
       questionId,
       required ?? false,
     );
+  },
+  encounter: (response: ResponseValue | undefined, questionId: string) => {
+    const encounterData = (response?.value as EncounterEdit[]) || [];
+    return validateEncounterQuestion(encounterData[0], questionId);
   },
   medication_statement: (
     response: ResponseValue | undefined,
@@ -575,7 +581,7 @@ export function QuestionnaireForm({
           return;
         }
 
-        if (q.required) {
+        if (q.required && isQuestionEnabled(q, form.responses)) {
           // Handle appointment validation
           const response = form.responses.find((r) => r.question_id === q.id);
           const hasValue = response?.values?.some(
@@ -603,7 +609,11 @@ export function QuestionnaireForm({
           }
         }
 
-        if (q.type === "structured" && q.structured_type) {
+        if (
+          q.type === "structured" &&
+          q.structured_type &&
+          isQuestionEnabled(q, form.responses)
+        ) {
           const response = form.responses.find((r) => r.question_id === q.id);
           const validator =
             STRUCTURED_TYPE_VALIDATORS[

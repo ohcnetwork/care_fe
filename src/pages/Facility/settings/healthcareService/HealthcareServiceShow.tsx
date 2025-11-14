@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
-import { useTranslation } from "react-i18next";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import duoToneIcons from "@/CAREUI/icons/DuoTonePaths.json";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link, navigate } from "raviger";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,12 +15,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { getPermissions } from "@/common/Permissions";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import ColoredIndicator from "@/CAREUI/display/ColoredIndicator";
-import query from "@/Utils/request/query";
+import BackButton from "@/components/Common/BackButton";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
+import { usePermissions } from "@/context/PermissionContext";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import healthcareServiceApi from "@/types/healthcareService/healthcareServiceApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import queryClient from "@/Utils/request/queryClient";
 
 type DuoToneIconName = keyof typeof duoToneIcons;
 
@@ -31,6 +39,13 @@ export default function HealthcareServiceShow({
   healthcareServiceId: string;
 }) {
   const { t } = useTranslation();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { facility } = useCurrentFacility();
+  const { hasPermission } = usePermissions();
+  const { canWriteHealthcareService } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
 
   const { data: healthcareService, isLoading } = useQuery({
     queryKey: ["healthcareService", healthcareServiceId],
@@ -40,6 +55,20 @@ export default function HealthcareServiceShow({
         healthcareServiceId,
       },
     }),
+  });
+
+  const { mutate: deleteHealthcareService } = useMutation({
+    mutationFn: mutate(healthcareServiceApi.deleteHealthcareService, {
+      pathParams: {
+        facilityId,
+        healthcareServiceId,
+      },
+    }),
+    onSuccess: () => {
+      queryClient.clear();
+      toast.success(t("healthcare_service_deleted_successfully"));
+      navigate(`/facility/${facilityId}/settings/healthcare_services`);
+    },
   });
 
   const getIconName = (name: string): DuoToneIconName =>
@@ -95,14 +124,17 @@ export default function HealthcareServiceShow({
             {t("healthcare_service_details")}
           </h1>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() =>
-                navigate(`/facility/${facilityId}/settings/healthcare_services`)
-              }
-            >
-              {t("back_to_list")}
-            </Button>
+            <BackButton>{t("back_to_list")}</BackButton>
+            {canWriteHealthcareService && (
+              <Button
+                variant="outline"
+                className="cursor-pointer"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <CareIcon icon="l-trash" className="size-4" />
+                {t("delete")}
+              </Button>
+            )}
             <Button
               onClick={() =>
                 navigate(
@@ -113,6 +145,14 @@ export default function HealthcareServiceShow({
               {t("edit")}
             </Button>
           </div>
+          <ConfirmActionDialog
+            open={showDeleteDialog}
+            onOpenChange={setShowDeleteDialog}
+            title={t("are_you_sure")}
+            description={t("are_you_sure_want_to_delete_this_service")}
+            confirmText={t("confirm")}
+            onConfirm={() => deleteHealthcareService()}
+          />
         </div>
 
         <div className="space-y-6">
@@ -160,27 +200,22 @@ export default function HealthcareServiceShow({
               ) : (
                 <div className="grid gap-2">
                   {healthcareService.locations.map((location) => (
-                    <div
+                    <Link
                       key={location.id}
-                      className="flex items-center justify-between rounded-lg border p-3"
+                      href={`/facility/${facilityId}/locations/${location.id}/medication_requests`}
+                      basePath="/"
                     >
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {location.name}
-                        </p>
+                      <div className="flex items-center justify-between rounded-lg border p-3">
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {location.name}
+                          </p>
+                        </div>
+                        <div className="p-2 flex items-center justify-center">
+                          <CareIcon icon="l-arrow-right" className="size-4" />
+                        </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/locations/${location.id}/medication_requests`,
-                          )
-                        }
-                      >
-                        <CareIcon icon="l-arrow-right" className="size-4" />
-                      </Button>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}

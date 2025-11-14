@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronsUpDown, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
@@ -80,17 +80,27 @@ export default function PatientIdentifierFilter({
     }
   }, [patientId, selectedPatient]);
 
+  // Combine instance and facility identifier configs
+  const allIdentifierConfigs = useMemo(
+    () => [
+      ...(facility?.patient_instance_identifier_configs || []),
+      ...(facility?.patient_facility_identifier_configs || []),
+    ],
+    [
+      facility?.patient_instance_identifier_configs,
+      facility?.patient_facility_identifier_configs,
+    ],
+  );
+
   // Set default search type to first identifier config (prioritize phone number)
   useEffect(() => {
-    if (facility?.patient_instance_identifier_configs?.length && !searchType) {
-      const phoneConfig = facility.patient_instance_identifier_configs.find(
+    if (allIdentifierConfigs.length && !searchType) {
+      const phoneConfig = allIdentifierConfigs.find(
         (c) => c.config.system === careConfig.phoneNumberConfigSystem,
       );
-      setSearchType(
-        phoneConfig?.id || facility.patient_instance_identifier_configs[0].id,
-      );
+      setSearchType(phoneConfig?.id || allIdentifierConfigs[0].id);
     }
-  }, [facility?.patient_instance_identifier_configs, searchType]);
+  }, [allIdentifierConfigs, searchType]);
 
   // Fetch patient details when patientId is provided
   const { data: patientDetails } = useQuery({
@@ -110,9 +120,8 @@ export default function PatientIdentifierFilter({
 
   // Check if current search type is phone number
   const isPhoneNumberConfig =
-    facility?.patient_instance_identifier_configs?.find(
-      (c) => c.id === searchType,
-    )?.config.system === careConfig.phoneNumberConfigSystem;
+    allIdentifierConfigs.find((c) => c.id === searchType)?.config.system ===
+    careConfig.phoneNumberConfigSystem;
 
   // Patient search query (for identifier-based search)
   const { data: patientList, isFetching: isPatientFetching } = useQuery({
@@ -205,9 +214,8 @@ export default function PatientIdentifierFilter({
             placeholder={
               searchType
                 ? t("search_by_identifier", {
-                    name: facility?.patient_instance_identifier_configs?.find(
-                      (c) => c.id === searchType,
-                    )?.config.display,
+                    name: allIdentifierConfigs.find((c) => c.id === searchType)
+                      ?.config.display,
                   })
                 : t("select_search_type")
             }
@@ -221,9 +229,8 @@ export default function PatientIdentifierFilter({
             placeholder={
               searchType
                 ? t("search_by_identifier", {
-                    name: facility?.patient_instance_identifier_configs?.find(
-                      (c) => c.id === searchType,
-                    )?.config.display,
+                    name: allIdentifierConfigs.find((c) => c.id === searchType)
+                      ?.config.display,
                   })
                 : t("select_search_type")
             }
@@ -248,21 +255,19 @@ export default function PatientIdentifierFilter({
       <div className="flex flex-wrap gap-1.5 p-2 border-t rounded-b-lg bg-gray-50 border-t-gray-100">
         {[
           // Phone number configs first
-          ...(facility?.patient_instance_identifier_configs?.filter(
+          ...allIdentifierConfigs.filter(
             (c) =>
               c.config.auto_maintained &&
               c.config.system === careConfig.phoneNumberConfigSystem,
-          ) || []),
+          ),
           // Auto-maintained configs but not phone number configs
-          ...(facility?.patient_instance_identifier_configs?.filter(
+          ...allIdentifierConfigs.filter(
             (c) =>
               c.config.auto_maintained &&
               c.config.system !== careConfig.phoneNumberConfigSystem,
-          ) || []),
+          ),
           // Non-auto-maintained configs
-          ...(facility?.patient_instance_identifier_configs?.filter(
-            (c) => !c.config.auto_maintained,
-          ) || []),
+          ...allIdentifierConfigs.filter((c) => !c.config.auto_maintained),
         ].map((config) => (
           <Button
             key={config.id}
