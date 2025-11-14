@@ -76,7 +76,6 @@ export const EncounterShow = (props: Props) => {
 
   useSidebarAutoCollapse({ restore: false });
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [isEncounterRailOpen, setIsEncounterRailOpen] = useState(true);
   const getShortcutDisplay = useEncounterShortcutDisplays();
 
   const { t } = useTranslation();
@@ -198,6 +197,14 @@ export const EncounterShow = (props: Props) => {
       title={t("encounter")}
       className="block md:px-1 -mt-4"
       hideTitleOnPage
+      style={
+        {
+          "--encounter-header-offset":
+            primaryEncounter?.appointment?.id && canWritePrimaryEncounter
+              ? "3rem"
+              : "0rem",
+        } as React.CSSProperties
+      }
     >
       {primaryEncounter &&
         primaryEncounter.appointment?.id &&
@@ -255,10 +262,7 @@ export const EncounterShow = (props: Props) => {
         <PatientDeceasedInfo patient={patient} />
       </div>
       <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
-        <EncounterHistorySelector
-          isRailOpen={isEncounterRailOpen}
-          setIssRailOpen={setIsEncounterRailOpen}
-        />
+        <EncounterHistorySelector />
         <div className="w-full">
           <div className="hidden lg:block">
             {isSelectedEncounterLoading ? (
@@ -318,7 +322,7 @@ export const EncounterShow = (props: Props) => {
           <NavTabs
             showMoreAfterIndex={showMoreAfterIndex}
             className="@container w-full"
-            tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-14rem)]"
+            tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-14rem-var(--encounter-header-offset))]"
             tabs={tabs}
             currentTab={props.tab}
             tabTriggerClassName="max-w-36"

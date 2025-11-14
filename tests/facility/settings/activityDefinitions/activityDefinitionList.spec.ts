@@ -96,9 +96,7 @@ test.describe("activity definition list", () => {
     await statusFilterTrigger.click();
     await page.getByRole("option", { name: /draft/i }).click();
 
-    await expect(
-      page.getByText(/no activity definitions found/i),
-    ).toBeVisible();
+    await expect(page.getByText(/no activity definition found/i)).toBeVisible();
 
     const clearButton = page
       .getByRole("button")
@@ -127,9 +125,7 @@ test.describe("activity definition list", () => {
     await categoryFilterTrigger.click();
     await page.getByRole("option", { name: /imaging/i }).click();
 
-    await expect(
-      page.getByText(/no activity definitions found/i),
-    ).toBeVisible();
+    await expect(page.getByText(/no activity definition found/i)).toBeVisible();
 
     const categoryFilterTriggerAgain = page
       .locator('[data-slot="select-trigger"]')

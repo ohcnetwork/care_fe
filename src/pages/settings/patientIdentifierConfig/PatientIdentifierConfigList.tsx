@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -186,6 +187,11 @@ export default function PatientIdentifierConfigList({
                       ? t("edit_patient_identifier_config")
                       : t("add_patient_identifier_config")}
                   </SheetTitle>
+                  <SheetDescription>
+                    {selectedConfig && "id" in selectedConfig
+                      ? t("manage_patient_identifier_config")
+                      : t("manage_instance_patient_identifier_config")}
+                  </SheetDescription>
                 </SheetHeader>
                 <div className="mt-6 pb-6">
                   <PatientIdentifierConfigForm
