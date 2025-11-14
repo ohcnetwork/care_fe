@@ -140,8 +140,8 @@ function HealthcareServiceFormContent({
         ? {
             name: existingData.name,
             // service_type: existingData.service_type,
-            styling_metadata: {
-              careIcon: existingData.styling_metadata?.careIcon,
+            styling_metadata: existingData.styling_metadata || {
+              careIcon: undefined,
             },
             extra_details: existingData.extra_details,
             internal_type: existingData.internal_type || undefined,
@@ -468,7 +468,10 @@ function HealthcareServiceFormContent({
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={isPending || !form.formState.isDirty}
+              >
                 {isPending
                   ? isEditMode
                     ? t("saving")
