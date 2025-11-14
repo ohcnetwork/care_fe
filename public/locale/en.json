@@ -2701,6 +2701,7 @@
   "loading_observation_definition": "Loading observation definition...",
   "loading_organizations": "Loading organizations...",
   "loading_queues": "Loading queues...",
+  "loading_stock": "Loading stock...",
   "local_body": "Local body",
   "local_ip_address": "Local IP Address",
   "local_ip_address_example": "e.g. 192.168.0.123",
