@@ -51,6 +51,8 @@ test.describe.serial("Healthcare Services Management", () => {
     // Click Add Healthcare Service button
     await page.getByRole("button", { name: "Add Healthcare Service" }).click();
 
+    await page.waitForSelector("text=Create Healthcare Service");
+
     // Fill in the service name
     await page.getByRole("textbox", { name: "Name" }).fill(serviceName);
 
@@ -227,6 +229,8 @@ test.describe.serial("Healthcare Services Management", () => {
     // Click Add Healthcare Service button
     await page.getByRole("button", { name: "Add Healthcare Service" }).click();
 
+    await expect(page.getByText("Create Healthcare Service")).toBeVisible();
+
     // Try to submit without filling required fields
     await page.getByRole("button", { name: "Create" }).click();
 
@@ -245,6 +249,8 @@ test.describe.serial("Healthcare Services Management", () => {
 
     // Click Add Healthcare Service button
     await page.getByRole("button", { name: "Add Healthcare Service" }).click();
+
+    await page.waitForSelector("text=Create Healthcare Service");
 
     // Fill in only the required service name
     await page.getByRole("textbox", { name: "Name" }).fill(minimalServiceName);
