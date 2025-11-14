@@ -17,6 +17,7 @@ import { QuestionGroup } from "./QuestionTypes/QuestionGroup";
 const FULL_WIDTH_QUESTION_TYPES: StructuredQuestionType[] = [
   "medication_request",
   "medication_statement",
+  "diagnosis",
 ];
 
 interface QuestionRendererProps {

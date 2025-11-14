@@ -1,6 +1,7 @@
 import {
   ENCOUNTER_CLASS,
   EncounterClass,
+  EncounterDischargeDisposition,
 } from "@/types/emr/encounter/encounter";
 
 import { NonEmptyArray } from "@/Utils/types";
@@ -58,6 +59,10 @@ const careConfig = {
     (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",").length === 1
       ? (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",")[0] as EncounterClass)
       : undefined),
+
+  defaultDischargeDisposition: env.REACT_DEFAULT_DISCHARGE_DISPOSITION as
+    | EncounterDischargeDisposition
+    | undefined,
 
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
@@ -195,6 +200,14 @@ const careConfig = {
    * System identifier for patient phone number configuration
    */
   phoneNumberConfigSystem: "system.care.ohc.network/patient-phone-number",
+
+  /**
+   * Enable automatic invoice sheet after dispensing items
+   */
+  enableAutoInvoiceAfterDispense: boolean(
+    "REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE",
+    false,
+  ),
 } as const;
 
 export default careConfig;

@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -29,14 +28,16 @@ export function DiscountCodeForm({
 }: DiscountCodeFormProps) {
   const { t } = useTranslation();
 
-  const formSchema = useMemo(
-    () =>
-      z.object({
-        code: z.string().min(1, { message: t("field_required") }),
-        display: z.string().min(1, { message: t("field_required") }),
-      }),
-    [t],
-  );
+  const formSchema = z.object({
+    code: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
+    display: z
+      .string()
+      .trim()
+      .min(1, { message: t("field_required") }),
+  });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
