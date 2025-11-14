@@ -14,6 +14,11 @@ import { CaretSortIcon } from "@radix-ui/react-icons";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import batchApi from "@/types/base/batch/batchApi";
 import {
+  ChargeItemBatchResponse,
+  ChargeItemRead,
+  extractChargeItemsFromBatchResponse,
+} from "@/types/billing/chargeItem/chargeItem";
+import {
   MedicationDispenseCategory,
   MedicationDispenseCreate,
   MedicationDispenseStatus,
@@ -79,6 +84,7 @@ interface Props {
   patientId: string;
   encounterId: string;
   selectedLocation: SelectedLocation;
+  onDispenseComplete?: (chargeItems: ChargeItemRead[]) => void;
 }
 
 interface FormItemType {
@@ -118,6 +124,7 @@ export default function DispenseDrawer({
   patientId: _patientId,
   encounterId,
   selectedLocation,
+  onDispenseComplete,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -209,12 +216,21 @@ export default function DispenseDrawer({
 
   const { mutate: dispense, isPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: () => {
+    onSuccess: (response) => {
       toast.success(t("items_dispensed_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["inventory", currentLocation.id],
       });
-      onOpenChange(false);
+
+      const chargeItems = extractChargeItemsFromBatchResponse(
+        response as ChargeItemBatchResponse,
+      );
+
+      if (chargeItems.length > 0 && onDispenseComplete) {
+        onDispenseComplete(chargeItems);
+      } else {
+        onOpenChange(false);
+      }
     },
   });
 

@@ -20,6 +20,7 @@ interface ImportMetaEnv {
   readonly REACT_RECAPTCHA_SITE_KEY?: string;
   readonly REACT_JWT_TOKEN_REFRESH_INTERVAL?: string;
   readonly REACT_DEFAULT_ENCOUNTER_TYPE?: string;
+  readonly REACT_DEFAULT_DISCHARGE_DISPOSITION?: string;
   readonly REACT_ENCOUNTER_DEFAULT_DATE_FILTER?: string;
   readonly REACT_APPOINTMENTS_DEFAULT_DATE_FILTER?: string;
   readonly REACT_PAYMENT_LOCATION_REQUIRED?: string;
@@ -31,6 +32,7 @@ interface ImportMetaEnv {
   readonly REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION?: string;
   readonly REACT_DISABLE_PATIENT_LOGIN?: string;
   readonly REACT_CUSTOM_REMOTE_I18N_URL?: string;
+  readonly REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE?: string;
 
   // Plugins related envs...
   readonly REACT_SENTRY_DSN?: string;
