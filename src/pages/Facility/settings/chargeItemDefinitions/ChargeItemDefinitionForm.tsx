@@ -815,7 +815,8 @@ export function ChargeItemDefinitionForm({
     ...facilityData.instance_discount_monetary_components,
   ].map((component) => ({
     ...component,
-    ...(component?.amount != null && { amount: String(component.amount) }),
+    amount:
+      component?.amount != null ? String(component.amount) : component.amount,
   }));
   const availableTaxes = [...facilityData.instance_tax_monetary_components];
 
