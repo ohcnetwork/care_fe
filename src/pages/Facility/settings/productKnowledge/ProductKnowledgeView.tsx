@@ -1,6 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { navigate } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -16,14 +18,17 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading";
 
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import BackButton from "@/components/Common/BackButton";
 import { Code, isCodePresent } from "@/types/base/code/code";
 import {
   PRODUCT_KNOWLEDGE_STATUS_COLORS,
+  ProductKnowledgeStatus,
   ProductName,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
@@ -47,6 +52,8 @@ function CodeDisplay({ code }: { code: Code | null }) {
 
 export default function ProductKnowledgeView({ facilityId, slug }: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const {
     data: product,
@@ -61,6 +68,47 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
       },
     }),
   });
+
+  const { mutate: updateProductKnowledge, isPending: isDeleting } = useMutation(
+    {
+      mutationFn: mutate(productKnowledgeApi.updateProductKnowledge, {
+        pathParams: { slug },
+      }),
+      onSuccess: () => {
+        toast.success(t("product_knowledge_deleted_successfully"));
+        queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
+        navigate(
+          `/facility/${facilityId}/settings/product_knowledge/categories/${product?.category.slug}`,
+        );
+      },
+    },
+  );
+
+  const handleDelete = () => {
+    if (!product) return;
+
+    const updateData = {
+      ...product,
+      status: ProductKnowledgeStatus.retired,
+      category: product.category.slug,
+      slug_value: product.slug_config.slug_value,
+      facility: facilityId,
+    };
+
+    if (!product.code || !product.code.code) {
+      delete updateData.code;
+    }
+
+    if (
+      !product.definitional ||
+      !product.definitional.dosage_form ||
+      !product.definitional.dosage_form.code
+    ) {
+      delete updateData.definitional;
+    }
+
+    updateProductKnowledge(updateData);
+  };
 
   if (isLoading) {
     return <CardListWithHeaderSkeleton count={3} />;
@@ -89,7 +137,9 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
   return (
     <Page title={product.name} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
-        <BackButton>
+        <BackButton
+          to={`/facility/${facilityId}/settings/product_knowledge/categories/${product.category.slug}`}
+        >
           <ArrowLeft />
           {t("back")}
         </BackButton>
@@ -108,18 +158,29 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
               </p>
             )}
           </div>
-          <Button
-            className="mb-6"
-            variant="outline"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/product_knowledge/${product.slug}/edit`,
-              )
-            }
-          >
-            <CareIcon icon="l-pen" className="mr-2 size-4" />
-            {t("edit")}
-          </Button>
+          <div className="flex gap-2">
+            {product.status !== ProductKnowledgeStatus.retired && (
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteDialog(true)}
+                disabled={isDeleting}
+              >
+                <CareIcon icon="l-trash" className="mr-2 size-4" />
+                {isDeleting ? t("deleting") : t("delete")}
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              onClick={() =>
+                navigate(
+                  `/facility/${facilityId}/settings/product_knowledge/${product.slug}/edit`,
+                )
+              }
+            >
+              <CareIcon icon="l-pen" className="mr-2 size-4" />
+              {t("edit")}
+            </Button>
+          </div>
         </div>
 
         <Card>
@@ -214,7 +275,7 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
             </Card>
           )}
 
-        {product.definitional && (
+        {product.definitional?.dosage_form && (
           <Card>
             <CardHeader>
               <CardTitle>{t("product_definition")}</CardTitle>
@@ -255,6 +316,25 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
             </CardContent>
           </Card>
         )}
+
+        <ConfirmActionDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          title={t("delete")}
+          description={
+            <Alert variant="destructive">
+              <AlertTitle>{t("warning")}</AlertTitle>
+              <AlertDescription>
+                {t("are_you_sure_want_to_delete", {
+                  name: product.name,
+                })}
+              </AlertDescription>
+            </Alert>
+          }
+          confirmText={isDeleting ? t("deleting") : t("confirm")}
+          variant="destructive"
+          onConfirm={handleDelete}
+        />
       </div>
     </Page>
   );
