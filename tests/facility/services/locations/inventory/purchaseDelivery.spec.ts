@@ -52,6 +52,13 @@ test.describe("Purchase Delivery", () => {
       .filter({ hasText: /^Gloves$/ })
       .first()
       .click();
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Search Product" })
+      .first()
+      .click();
+    await page.getByRole("option").first().click();
+
     await page.getByRole("button", { name: "Add Another Item" }).click();
     await page.getByPlaceholder("Search Product Knowledge").fill("Ibuprofen");
     await page
@@ -60,8 +67,6 @@ test.describe("Purchase Delivery", () => {
       .first()
       .click();
 
-    await page.getByRole("combobox").nth(2).click();
-    await page.getByRole("option").first().click();
     await page
       .getByRole("combobox")
       .filter({ hasText: "Search Product" })
@@ -82,7 +87,7 @@ test.describe("Purchase Delivery", () => {
     ).toBeDisabled();
 
     await page
-      .getByRole("row", { name: "Item Requested Qty. Received" })
+      .getByRole("row", { name: "Item Requested Qty" })
       .getByRole("checkbox")
       .click();
 
@@ -95,9 +100,10 @@ test.describe("Purchase Delivery", () => {
     ).toBeDisabled();
 
     await page
-      .getByRole("row", { name: "Item Requested Qty. Received" })
+      .getByRole("row", { name: "Item Requested Qty" })
       .getByRole("checkbox")
       .click();
+
     await page.getByRole("button", { name: "Receive & Update Stock" }).click();
     await page.getByRole("button", { name: "Confirm" }).click();
     await page.getByRole("button", { name: "Mark as Completed" }).click();
