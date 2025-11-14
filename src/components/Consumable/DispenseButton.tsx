@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 
+import careConfig from "@careConfig";
+
 import { LocationSelectorDialog } from "@/components/ui/sidebar/facility/location/location-switcher";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
@@ -102,8 +104,12 @@ export const DispenseButton = ({
             path: getLocationPath(location),
           }}
           onDispenseComplete={async (chargeItems: ChargeItemRead[]) => {
-            setExtractedChargeItems(chargeItems);
             setShowDrawer(false);
+
+            if (!careConfig.enableAutoInvoiceAfterDispense) {
+              return;
+            }
+            setExtractedChargeItems(chargeItems);
             const result = await refetchAccount();
             const fetchedAccountId = result.data?.results?.[0]?.id;
 

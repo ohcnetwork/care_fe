@@ -107,8 +107,8 @@ export function SpecimenDefinitionForm({
     title: z.string().min(1, t("field_required")),
     slug_value: z
       .string()
-      .min(1, t("field_required"))
-      .max(25, t("character_count_validation", { min: 1, max: 25 })),
+      .min(5, t("character_count_validation", { min: 5, max: 25 }))
+      .max(25, t("character_count_validation", { min: 5, max: 25 })),
     status: z.nativeEnum(SpecimenDefinitionStatus),
     description: z.string().min(1, t("field_required")),
     derived_from_uri: z
@@ -268,7 +268,9 @@ export function SpecimenDefinitionForm({
                             const sanitizedValue = e.target.value
                               .toLowerCase()
                               .replace(/[^a-z0-9_-]/g, "");
-                            field.onChange(sanitizedValue);
+                            form.setValue("slug_value", sanitizedValue, {
+                              shouldValidate: true,
+                            });
                           }}
                         />
                       </FormControl>
