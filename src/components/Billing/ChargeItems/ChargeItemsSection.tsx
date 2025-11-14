@@ -1,10 +1,10 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
@@ -48,6 +48,7 @@ export function ChargeItemsSection({
   viewOnly = false,
 }: ChargeItemsSectionProps) {
   const { t } = useTranslation();
+  useShortcutSubContext("facility:appointment");
   const queryClient = useQueryClient();
 
   const [isMultiAddOpen, setIsMultiAddOpen] = useState(false);
@@ -118,7 +119,7 @@ export function ChargeItemsSection({
                 >
                   <PlusIcon className="size-4 mr-2" />
                   {t("create_invoice")}
-                  <ShortcutBadge actionId="create-invoice" />
+                  <ShortcutBadge actionId="create-an-invoice" />
                 </Button>
               )}
               {!disableCreateChargeItems && !viewOnly && (
@@ -129,6 +130,7 @@ export function ChargeItemsSection({
                 >
                   <PlusIcon className="size-4 mr-2" />
                   {t("add_charge_items")}
+                  <ShortcutBadge actionId="add-a-charge-item" />
                 </Button>
               )}
             </div>

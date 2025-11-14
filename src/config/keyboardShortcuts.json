@@ -49,7 +49,9 @@
     { "key": "2", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
     { "key": "1", "action": "start-consultation", "description": "Start Consultation", "when": "always" },
     { "key": "3", "action": "print-appointment", "description": "Print Appointment", "when": "always" },
-    { "key": "c", "action": "check-in-action", "description": "Check-in Appointment", "when": "always" }
+    { "key": "c", "action": "check-in-action", "description": "Check-in Appointment", "when": "always" },
+    { "key": "i", "action": "create-an-invoice", "description": "Create Invoice", "when": "always" },
+    { "key": "a", "action": "add-a-charge-item", "description": "Add Charge Items", "when": "always" }
   ],
 
   "facility:billing": [
