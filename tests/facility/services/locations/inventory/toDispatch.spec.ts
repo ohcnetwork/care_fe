@@ -131,7 +131,7 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
       .getByRole("button", { name: "View Details" })
       .click();
     await page
-      .getByRole("row", { name: "Item Requested Qty. Received" })
+      .getByRole("row", { name: "Item Requested Qty." })
       .getByRole("checkbox")
       .click();
     await page.getByRole("button", { name: "Mark as Completed" }).click();
