@@ -735,12 +735,7 @@ export function ServiceRequestQuestion({
             queryFn: activityDefinitionApi.listActivityDefinition,
             pathParams: { facilityId },
           }}
-          translations={{
-            searchPlaceholder: "search_activity_definitions",
-            selectPlaceholder: "select_activity_definition",
-            noResultsFound: "no_activity_definitions_found_for",
-            noItemsFound: "no_activity_definitions_found",
-          }}
+          translationBaseKey="activity_definition"
         />
       </div>
     </div>

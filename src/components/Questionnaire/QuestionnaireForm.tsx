@@ -40,6 +40,8 @@ import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
+import { validateEncounterQuestion } from "@/components/Questionnaire/QuestionTypes/EncounterQuestion";
+import { EncounterEdit } from "@/types/emr/encounter/encounter";
 import { QuestionRenderer } from "./QuestionRenderer";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
@@ -296,6 +298,10 @@ const STRUCTURED_TYPE_VALIDATORS = {
       questionId,
       required ?? false,
     );
+  },
+  encounter: (response: ResponseValue | undefined, questionId: string) => {
+    const encounterData = (response?.value as EncounterEdit[]) || [];
+    return validateEncounterQuestion(encounterData[0], questionId);
   },
   medication_statement: (
     response: ResponseValue | undefined,
