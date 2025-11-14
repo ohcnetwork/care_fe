@@ -24,6 +24,7 @@ import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoler
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
 import { completedEncounterStatus } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -519,7 +520,7 @@ export default function TreatmentSummary({
                       const remarks = formatSig(instruction);
                       const notes = medication.note;
                       return {
-                        medicine: medication.medication?.display,
+                        medicine: displayMedicationName(medication),
                         status: t(`medication_status__${medication.status}`),
                         dosage: dosage,
                         frequency: instruction?.as_needed_boolean
