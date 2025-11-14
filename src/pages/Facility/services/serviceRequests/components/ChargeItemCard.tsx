@@ -22,7 +22,7 @@ import {
   ChargeItemRead,
 } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
-import { Link } from "raviger";
+import { navigate } from "raviger";
 interface ChargeItemCardProps {
   chargeItem: ChargeItemRead;
   sourceUrl?: string;
@@ -76,11 +76,13 @@ export function ChargeItemCard({ chargeItem, sourceUrl }: ChargeItemCardProps) {
             )}
           </div>
           {invoiceUrl ? (
-            <Button asChild variant="outline" size="xs">
-              <Link href={invoiceUrl}>
-                {t("invoice")}
-                <CareIcon icon="l-external-link-alt" className="size-6" />
-              </Link>
+            <Button
+              variant="outline"
+              size="xs"
+              onClick={() => navigate(invoiceUrl)}
+            >
+              {t("invoice")}
+              <CareIcon icon="l-external-link-alt" className="size-6" />
             </Button>
           ) : (
             <Badge variant={CHARGE_ITEM_STATUS_COLORS[chargeItem.status]}>
