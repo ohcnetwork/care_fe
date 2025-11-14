@@ -140,7 +140,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
               <div className="flex-auto">
                 <DetailRow label={t("inv_no")} value={invoice.number} />
               </div>
-              <div className="flex-auto text-right">
+              <div className="text-right">
                 <DetailRow
                   label={t("date")}
                   value={
