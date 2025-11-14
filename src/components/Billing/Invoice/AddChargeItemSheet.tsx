@@ -169,14 +169,14 @@ export default function AddChargeItemSheet({
           <div className="m-3">
             <div className="flex flex-col sm:flex-row gap-2 mb-4 justify-between">
               <div className="relative">
-                <SearchIcon className="size-4 mr-2 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <SearchIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 <Input
                   placeholder={t("search_charge_items")}
                   value={qParams.search || ""}
                   onChange={(e) =>
                     updateQuery({ search: e.target.value || undefined })
                   }
-                  className="w-full sm:w-auto pl-9"
+                  className="w-full sm:w-auto pl-10"
                   autoFocus={false}
                 />
               </div>
