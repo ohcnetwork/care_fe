@@ -304,7 +304,11 @@ export default function ServiceRequestShow({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => goBack()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                goBack();
+              }}
               className="font-semibold border border-gray-400 text-gray-950 underline underline-offset-2"
             >
               <ArrowLeft />
