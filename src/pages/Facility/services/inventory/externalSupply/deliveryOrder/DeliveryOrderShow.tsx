@@ -156,8 +156,6 @@ export function DeliveryOrderShow({
     condition: SupplyDeliveryCondition.normal,
   });
   const [showAllDeliveries, setShowAllDeliveries] = useState(false);
-  const [selectedProductKnowledge, setSelectedProductKnowledge] =
-    useState<ProductKnowledgeBase>();
   const [selectedProductKnowledgeDrawer, setSelectedProductKnowledgeDrawer] =
     useState<ProductKnowledgeBase>();
 
@@ -175,23 +173,11 @@ export function DeliveryOrderShow({
 
   const { data: supplyDeliveries, isLoading: isLoadingSupplyDeliveries } =
     useQuery({
-      queryKey: [
-        "supplyDeliveries",
-        deliveryOrderId,
-        selectedProductKnowledge?.id,
-      ],
+      queryKey: ["supplyDeliveries", deliveryOrderId],
       queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
         queryParams: {
           order: deliveryOrderId,
           facility: facilityId,
-          ...(internal
-            ? {
-                supplied_inventory_item_product_knowledge:
-                  selectedProductKnowledge?.id,
-              }
-            : {
-                supplied_item_product_knowledge: selectedProductKnowledge?.id,
-              }),
         },
       }),
       enabled: !!deliveryOrderId,
@@ -390,7 +376,10 @@ export function DeliveryOrderShow({
                 <Trans
                   i18nKey="delivery_request_from_to"
                   values={{
-                    from: deliveryOrder.origin?.name || t("origin"),
+                    from:
+                      deliveryOrder.origin?.name ||
+                      deliveryOrder.supplier?.name ||
+                      t("origin"),
                     to: deliveryOrder.destination?.name || t("destination"),
                   }}
                   components={{
@@ -504,85 +493,72 @@ export function DeliveryOrderShow({
         {/* Supply Deliveries Section */}
         <Card>
           <CardHeader className="text-lg flex flex-row justify-between">
-            <CardTitle>{t("supply_deliveries")}</CardTitle>
-            <div className="flex gap-2">
-              <div className="flex items-center">
-                <div>
-                  <ProductKnowledgeSelect
-                    value={selectedProductKnowledge}
-                    onChange={(value) => {
-                      setSelectedProductKnowledge(value);
-                    }}
-                    placeholder={t("filter_by_product")}
-                    disableFavorites
-                  />
-                </div>
-              </div>
+            <CardTitle>
+              {isRequester
+                ? deliveryOrder.status === DeliveryOrderStatus.completed
+                  ? t("items_updated_stock")
+                  : t("items_to_receive")
+                : t("supply_deliveries")}
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              {deliveryOrder.status === DeliveryOrderStatus.pending && (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAllDeliveries(true)}
+                >
+                  {t("view_all_deliveries")}
+                  <ShortcutBadge actionId="all-deliveries" />
+                </Button>
+              )}
 
-              <div className="flex items-center gap-2">
-                {deliveryOrder.status === DeliveryOrderStatus.pending && (
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowAllDeliveries(true)}
-                  >
-                    {t("view_all_deliveries")}
-                    <ShortcutBadge actionId="all-deliveries" />
-                  </Button>
+              {deliveryOrder.status === DeliveryOrderStatus.pending &&
+                isRequester && (
+                  <>
+                    <Button
+                      onClick={handleConfirmUpdateStock}
+                      className="h-10"
+                      disabled={
+                        isUpdating ||
+                        isUpsertingDeliveries ||
+                        selectedDeliveries.length === 0
+                      }
+                    >
+                      {isUpsertingDeliveries
+                        ? t("updating")
+                        : t("receive_update_stock")}
+                      <ShortcutBadge actionId="enter-action" />
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon" className="h-10">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={handleMarkAsAbandoned}
+                          disabled={
+                            isUpdating ||
+                            isUpsertingDeliveries ||
+                            selectedDeliveries.length === 0
+                          }
+                        >
+                          {t("mark_as_abandoned")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={handleMarkAsDamaged}
+                          disabled={
+                            isUpdating ||
+                            isUpsertingDeliveries ||
+                            selectedDeliveries.length === 0
+                          }
+                        >
+                          {t("mark_as_damaged")}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </>
                 )}
-
-                {deliveryOrder.status === DeliveryOrderStatus.pending &&
-                  isRequester && (
-                    <>
-                      <Button
-                        onClick={handleConfirmUpdateStock}
-                        className="h-10"
-                        disabled={
-                          isUpdating ||
-                          isUpsertingDeliveries ||
-                          selectedDeliveries.length === 0
-                        }
-                      >
-                        {isUpsertingDeliveries
-                          ? t("updating")
-                          : t("confirm_update_stock")}
-                        <ShortcutBadge actionId="enter-action" />
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-10"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={handleMarkAsAbandoned}
-                            disabled={
-                              isUpdating ||
-                              isUpsertingDeliveries ||
-                              selectedDeliveries.length === 0
-                            }
-                          >
-                            {t("mark_as_abandoned")}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={handleMarkAsDamaged}
-                            disabled={
-                              isUpdating ||
-                              isUpsertingDeliveries ||
-                              selectedDeliveries.length === 0
-                            }
-                          >
-                            {t("mark_as_damaged")}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </>
-                  )}
-              </div>
             </div>
           </CardHeader>
           <CardContent className="p-2">
@@ -652,11 +628,7 @@ export function DeliveryOrderShow({
                     />
                   </div>
                 ) : (
-                  <EmptyState
-                    icon={<Truck className="size-5 text-primary-600" />}
-                    title={t("no_deliveries_found")}
-                    description={t("no_deliveries_found_description")}
-                  />
+                  <></>
                 )}
 
                 {/* Add New Supply Delivery Form - Always show when in draft mode */}
@@ -698,6 +670,7 @@ export function DeliveryOrderShow({
                   }}
                   placeholder={t("filter_by_product")}
                   disableFavorites
+                  alignContent="end"
                 />
               </div>
               {deliveryOrder && (
@@ -722,7 +695,7 @@ export function DeliveryOrderShow({
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t("confirm_update_stock")}</DialogTitle>
+              <DialogTitle>{t("receive_update_stock")}</DialogTitle>
               <DialogDescription>
                 {t("apply_updates_selected", {
                   count: selectedDeliveries.length,

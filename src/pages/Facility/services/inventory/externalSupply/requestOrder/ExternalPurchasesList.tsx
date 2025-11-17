@@ -23,14 +23,12 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 interface Props {
   facilityId: string;
   locationId: string;
-  internal: boolean;
   isRequester: boolean;
 }
 
-export function RequestOrderList({
+export function ExternalPurchasesList({
   facilityId,
   locationId,
-  internal,
   isRequester,
 }: Props) {
   const { t } = useTranslation();
@@ -75,7 +73,6 @@ export function RequestOrderList({
     queryKey: [
       "requestOrders",
       locationId,
-      internal,
       isRequester,
       qParams,
       effectiveStatus,
@@ -87,7 +84,7 @@ export function RequestOrderList({
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: effectiveStatus,
-        origin_isnull: !internal,
+        origin_isnull: true,
         supplier: qParams.supplier,
         priority: qParams.priority,
       },
@@ -96,35 +93,9 @@ export function RequestOrderList({
 
   const orders = response?.results || [];
 
-  const renderFilters = () => (
-    <div className="flex flex-col md:flex-row gap-4">
-      <OrgSelect
-        value={qParams.supplier}
-        onChange={(supplier) => updateQuery({ supplier: supplier?.id })}
-        orgType="product_supplier"
-        placeholder={t("search_by_supplier")}
-        inputPlaceholder={t("search_vendor")}
-        noOptionsMessage={t("no_vendor_found")}
-        className="w-[250px]"
-      />
-
-      <div className="w-full sm:w-auto">
-        <FilterSelect
-          value={qParams.priority || ""}
-          onValueChange={(value) => updateQuery({ priority: value })}
-          options={Object.values(RequestOrderPriority)}
-          label={t("priority")}
-          onClear={() => updateQuery({ priority: undefined })}
-          className="w-full sm:w-auto h-9"
-          placeholder={t("filter_by_priority")}
-        />
-      </div>
-    </div>
-  );
-
   return (
     <Page
-      title={internal ? t("orders") : t("purchase_orders")}
+      title={t("purchase_orders")}
       hideTitleOnPage
       shortCutContext="facility:inventory"
     >
@@ -132,7 +103,7 @@ export function RequestOrderList({
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold text-gray-900">
-              {internal ? t("orders") : t("purchase_orders")}
+              {t("purchase_orders")}
             </h1>
           </div>
           {isRequester && (
@@ -144,7 +115,7 @@ export function RequestOrderList({
                     getInventoryBasePath(
                       facilityId,
                       locationId,
-                      internal,
+                      false,
                       true,
                       isRequester,
                       "new",
@@ -179,13 +150,37 @@ export function RequestOrderList({
               value={tab.value}
               className="mt-2 space-y-4"
             >
-              {renderFilters()}
+              <div className="flex flex-col md:flex-row gap-4">
+                <OrgSelect
+                  value={qParams.supplier}
+                  onChange={(supplier) =>
+                    updateQuery({ supplier: supplier?.id })
+                  }
+                  orgType="product_supplier"
+                  placeholder={t("search_by_supplier")}
+                  inputPlaceholder={t("search_vendor")}
+                  noOptionsMessage={t("no_vendor_found")}
+                  className="w-[250px]"
+                />
+
+                <div className="w-full sm:w-auto">
+                  <FilterSelect
+                    value={qParams.priority || ""}
+                    onValueChange={(value) => updateQuery({ priority: value })}
+                    options={Object.values(RequestOrderPriority)}
+                    label={t("priority")}
+                    onClear={() => updateQuery({ priority: undefined })}
+                    className="w-full sm:w-auto h-9"
+                    placeholder={t("filter_by_priority")}
+                  />
+                </div>
+              </div>
               <RequestOrderTable
                 requests={orders}
                 isLoading={isLoading}
                 facilityId={facilityId}
                 locationId={locationId}
-                internal={internal}
+                internal={false}
                 isRequester={isRequester}
               />
               <div className="mt-4">

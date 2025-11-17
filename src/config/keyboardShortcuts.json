@@ -101,6 +101,7 @@
     { "key": "v", "action": "view-invoice", "description": "View Invoice", "when": "always" }
   ],
   "facility:inventory": [
+    { "key": "r", "action": "raise-stock-request", "description": "Raise Stock Request", "when": "always" },
     { "key": "c", "action": "create-order", "description": "Create Order", "when": "always" },
     { "key": "a", "action": "add-item", "description": "Add Item", "when": "always" },
     { "key": "e", "action": "edit-order", "description": "Edit Order", "when": "always" },
