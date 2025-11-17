@@ -450,11 +450,9 @@ export function MonetaryComponentSelector({
             <div className="flex items-center gap-2 flex-wrap">
               {selectedComponents.length === 0 ? (
                 <span className="text-gray-500 text-sm">
-                  {t(
-                    type === MonetaryComponentType.tax
-                      ? "add_tax"
-                      : "add_discount",
-                  )}
+                  {type === MonetaryComponentType.tax
+                    ? t("add_tax")
+                    : t("add_discount")}
                 </span>
               ) : type === MonetaryComponentType.tax ? (
                 // For taxes, show badges in trigger
