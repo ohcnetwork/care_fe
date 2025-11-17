@@ -78,7 +78,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
         run: |
-          HAS_TESTED=$(gh pr view $PR_NUMBER --repo $REPO --json labels --jq '.labels[].name' | grep -i "^tested$" || echo "")
+          HAS_TESTED=$(gh pr view $PR_NUMBER --repo $REPO --json labels --jq '.labels[].name' | grep -x "Tested" || echo "")
 
           gh pr edit $PR_NUMBER --remove-label "changes required" --repo $REPO 2>/dev/null || true
 
