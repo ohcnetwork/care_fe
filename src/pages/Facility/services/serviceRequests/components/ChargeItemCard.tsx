@@ -20,29 +20,19 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   CHARGE_ITEM_STATUS_COLORS,
   ChargeItemRead,
-  ChargeItemServiceResource,
 } from "@/types/billing/chargeItem/chargeItem";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
-import { Link } from "raviger";
+import { navigate } from "raviger";
 interface ChargeItemCardProps {
   chargeItem: ChargeItemRead;
-  serviceResourceId: string;
-  serviceResourceType: ChargeItemServiceResource;
-  locationId?: string;
-  patientId?: string;
+  sourceUrl?: string;
 }
 
-export function ChargeItemCard({
-  chargeItem,
-  serviceResourceId,
-  serviceResourceType,
-  locationId,
-  patientId,
-}: ChargeItemCardProps) {
+export function ChargeItemCard({ chargeItem, sourceUrl }: ChargeItemCardProps) {
   const isPaid = chargeItem.paid_invoice?.status === InvoiceStatus.balanced;
   const { facilityId } = useCurrentFacility();
   const invoiceUrl = chargeItem.paid_invoice
-    ? `/facility/${facilityId}/billing/invoices/${chargeItem.paid_invoice.id}?sourceUrl=/facility/${facilityId}/${locationId ? `locations/${locationId}/` : ""}${patientId ? `patient/${patientId}/` : ""}${serviceResourceType === ChargeItemServiceResource.service_request ? "service_requests/" : "appointments/"}${serviceResourceId}`
+    ? `/facility/${facilityId}/billing/invoices/${chargeItem.paid_invoice.id}?sourceUrl=${sourceUrl}`
     : null;
 
   return (
@@ -86,11 +76,13 @@ export function ChargeItemCard({
             )}
           </div>
           {invoiceUrl ? (
-            <Button asChild variant="outline" size="xs">
-              <Link href={invoiceUrl}>
-                {t("invoice")}
-                <CareIcon icon="l-external-link-alt" className="size-6" />
-              </Link>
+            <Button
+              variant="outline"
+              size="xs"
+              onClick={() => navigate(invoiceUrl)}
+            >
+              {t("invoice")}
+              <CareIcon icon="l-external-link-alt" className="size-6" />
             </Button>
           ) : (
             <Badge variant={CHARGE_ITEM_STATUS_COLORS[chargeItem.status]}>
