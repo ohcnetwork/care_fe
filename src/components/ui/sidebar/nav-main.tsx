@@ -1,6 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import { ActiveLink, useFullPath } from "raviger";
-import { Fragment, ReactNode, useMemo, useState } from "react";
+import { Fragment, ReactNode, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -48,17 +48,26 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
   const isCollapsed = state === "collapsed";
 
   const fullPath = useFullPath();
-  const fullPathMap = useMemo(
-    () =>
-      fullPath.split("/").reduce(
-        (acc, part) => ({
-          ...acc,
-          [part]: true,
-        }),
-        {} as Record<string, boolean>,
-      ),
-    [fullPath],
-  );
+
+  const normalize = (s: string) => s.replace(/\/+$/, "");
+
+  function matchPath(itemUrl: string, currentPath: string) {
+    const base = normalize(itemUrl);
+    const current = normalize(currentPath);
+
+    // exact or deeper prefix match: /a/b  matches /a/b and /a/b/...
+    if (current === base || current.startsWith(base + "/")) return true;
+
+    // special-case: treat "accounts" link as matching "account/:id"
+    // e.g. /.../billing/accounts should match /.../billing/account/<id>
+    if (base.endsWith("/accounts")) {
+      const singular = base.replace(/\/accounts$/, "/account");
+      if (current === singular || current.startsWith(singular + "/"))
+        return true;
+    }
+
+    return false;
+  }
 
   return (
     <SidebarGroup>
@@ -121,11 +130,9 @@ export function NavMain({ links }: { links: NavigationLink[] }) {
                                   >
                                     <ActiveLink
                                       href={subItem.url}
-                                      className="w-full"
-                                      activeClass={cn(
-                                        subItem.url
-                                          .split("/")
-                                          .every((part) => fullPathMap[part]) &&
+                                      className={cn(
+                                        "w-full",
+                                        matchPath(subItem.url, fullPath) &&
                                           "bg-white text-green-700 shadow",
                                       )}
                                       exactActiveClass="bg-white text-green-700 shadow"
