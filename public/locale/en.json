@@ -654,7 +654,7 @@
   "appointment_closed_successfully": "Appoinment closed successfully",
   "appointment_created_success": "Appointment created successfully",
   "appointment_created_successfully": "Appointment created Successfully",
-  "appointment_created_successfully_description": "Appointment with <strong>{{name}}</strong> on <strong>{{date}}</strong> at <strong>{{time}}</strong> for <strong>{{duration}}</strong>",
+  "appointment_created_successfully_description": "Appointment with <strong>{{name}}</strong> on <strong>{{date}}</strong> for the <strong>{{slot_start_time}}</strong> - <strong>{{slot_end_time}}</strong> slot",
   "appointment_details": "Appointment Details",
   "appointment_invoice_alert": "Back to Appointment",
   "appointment_management_actions": "Manage appointment status and actions",
