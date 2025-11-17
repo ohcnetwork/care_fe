@@ -65,34 +65,43 @@ export const SummaryPanelActionsTab = () => {
       <div className="flex pl-1 @xs:hidden">
         <h6 className="text-gray-950 font-semibold">{t("actions")}</h6>
       </div>
-      <div className="flex flex-col sm:@sm:flex-row gap-3 sm:@sm:gap-4">
-        {actions.map((action) => (
-          <Button
-            key={action.label}
-            variant="outline"
-            className={cn(
-              "justify-start sm:@sm:justify-center sm:@sm:flex-1",
-              action.hideOnMobile && "hidden sm:flex",
-            )}
-            onClick={action.onClick}
-          >
-            <NotebookPen />
-            {action.label}
-          </Button>
-        ))}
+      <div>
+        <div className="flex flex-col sm:@sm:flex-row gap-3 sm:@sm:gap-4">
+          {actions.map((action) => (
+            <Button
+              key={action.label}
+              variant="outline"
+              className={cn(
+                "justify-start sm:@sm:justify-center sm:@sm:flex-1",
+                action.hideOnMobile && "hidden xl:flex",
+              )}
+              onClick={action.onClick}
+            >
+              <NotebookPen />
+              {action.label}
+            </Button>
+          ))}
 
-        {selectedEncounter && (
-          <PLUGIN_Component
-            __name="EncounterActions"
-            encounter={selectedEncounter}
-            className={cn(
-              buttonVariants({ variant: "outline" }),
-              "justify-start sm:@sm:justify-center sm:@sm:flex-1 w-full",
-            )}
-          />
-        )}
-
-        <div className="sm:@sm:flex-1 flex flex-col gap-2 border-t border-gray-300 border-dashed sm:@sm:border-none pt-3 sm:@sm:pt-0">
+          {selectedEncounter && (
+            <PLUGIN_Component
+              __name="EncounterActions"
+              encounter={selectedEncounter}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "justify-start sm:@sm:justify-center sm:@sm:flex-1 w-full",
+              )}
+            />
+          )}
+        </div>
+        <div className="flex xl:hidden flex-col space-y-2 mt-3">
+          <Account />
+          <Locations />
+          <ManageCareTeam />
+          <DepartmentsAndTeams />
+          <HospitalizationDetails />
+          <DischargeDetails />
+        </div>
+        <div className="sm:@sm:flex-1 flex flex-col gap-2 border-t border-gray-300 border-dashed sm:@sm:border-none pt-3 sm:@sm:pt-0 mt-3">
           <Button
             variant="outline_primary"
             className="justify-start sm:@sm:justify-center"
@@ -101,14 +110,6 @@ export const SummaryPanelActionsTab = () => {
             <CheckIcon />
             {t("mark_as_completed")}
           </Button>
-        </div>
-        <div className="sm:hidden space-y-2">
-          <Account />
-          <Locations />
-          <ManageCareTeam />
-          <DepartmentsAndTeams />
-          <HospitalizationDetails />
-          <DischargeDetails />
         </div>
       </div>
     </div>
