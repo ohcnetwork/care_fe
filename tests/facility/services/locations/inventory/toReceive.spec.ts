@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, Page, test } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state
@@ -8,9 +8,11 @@ test.use({ storageState: "tests/.auth/user.json" });
 let orderName: string;
 let bioChemLabLocationId: string;
 let bioChembasePath: string;
+let isInitialized: boolean = false;
 
 test.describe("Facility To-Receive Orders Inventory Flow", () => {
-  test.beforeAll(async ({ page }) => {
+  async function setupInitialData(page: Page) {
+    if (isInitialized) return;
     const facilityId = getFacilityId();
     const servicesUrl = `/facility/${facilityId}/services/`;
     await page.goto(servicesUrl);
@@ -29,9 +31,11 @@ test.describe("Facility To-Receive Orders Inventory Flow", () => {
           ),
         )?.[1] ?? "";
     bioChembasePath = `/facility/${facilityId}/locations/${bioChemLabLocationId}`;
-  });
+    isInitialized = true;
+  }
 
   test.beforeEach(async ({ page }) => {
+    await setupInitialData(page);
     // Navigate to the To-Receive Orders Inventory page before each test
     await page.goto(bioChembasePath + "/inventory/internal/receive");
   });
