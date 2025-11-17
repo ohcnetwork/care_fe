@@ -7,6 +7,12 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { PLUGIN_Component } from "@/PluginEngine";
+import { Account } from "./summary-panel-details-tab/account";
+import { DepartmentsAndTeams } from "./summary-panel-details-tab/department-and-team";
+import { DischargeDetails } from "./summary-panel-details-tab/discharge-summary";
+import { HospitalizationDetails } from "./summary-panel-details-tab/hospitalisation";
+import { Locations } from "./summary-panel-details-tab/locations";
+import { ManageCareTeam } from "./summary-panel-details-tab/manage-care-team";
 
 export const SummaryPanelActionsTab = () => {
   const { t } = useTranslation();
@@ -26,24 +32,33 @@ export const SummaryPanelActionsTab = () => {
     {
       label: t("manage_consents"),
       onClick: () => navigate("consents"),
+      hideOnMobile: false,
     },
     {
       label: t("manage_care_team"),
       onClick: manageCareTeam,
+      hideOnMobile: true,
     },
     {
       label: t("update_location"),
       onClick: assignLocation,
+      hideOnMobile: true,
     },
     {
       label: t("update_department"),
       onClick: manageDepartments,
+      hideOnMobile: true,
     },
     {
       label: t("dispense"),
       onClick: dispense,
+      hideOnMobile: false,
     },
-  ] as const satisfies { label: string; onClick: () => void }[];
+  ] as const satisfies {
+    label: string;
+    onClick: () => void;
+    hideOnMobile: boolean;
+  }[];
 
   return (
     <div className="flex flex-col gap-2 bg-gray-100 @sm:bg-white p-2 @sm:p-3 rounded-lg border border-gray-200 @sm:shadow @sm:overflow-x-auto">
@@ -55,7 +70,10 @@ export const SummaryPanelActionsTab = () => {
           <Button
             key={action.label}
             variant="outline"
-            className="justify-start sm:@sm:justify-center sm:@sm:flex-1"
+            className={cn(
+              "justify-start sm:@sm:justify-center sm:@sm:flex-1",
+              action.hideOnMobile && "hidden sm:flex",
+            )}
             onClick={action.onClick}
           >
             <NotebookPen />
@@ -83,6 +101,14 @@ export const SummaryPanelActionsTab = () => {
             <CheckIcon />
             {t("mark_as_completed")}
           </Button>
+        </div>
+        <div className="sm:hidden space-y-2">
+          <Account />
+          <Locations />
+          <ManageCareTeam />
+          <DepartmentsAndTeams />
+          <HospitalizationDetails />
+          <DischargeDetails />
         </div>
       </div>
     </div>
