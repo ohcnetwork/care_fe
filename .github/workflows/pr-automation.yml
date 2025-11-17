@@ -89,7 +89,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           PR_LABELS=$(gh pr view $PR_NUMBER --repo $REPO --json labels --jq '.labels[].name' | tr '\n' ' ')
-          ISSUE_NUMBER=$(gh pr view $PR_NUMBER --repo $REPO --json body --jq '.body' | grep -oP '(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#\K\d+' | head -1 || echo "")
+          ISSUE_NUMBER=$(gh pr view $PR_NUMBER --repo $REPO --json body --jq '.body' | grep -oiP '(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#\K\d+' | head -1 || echo "")
 
           if [[ -n "$ISSUE_NUMBER" && -n "$PR_LABELS" ]]; then
             for label in $PR_LABELS; do
