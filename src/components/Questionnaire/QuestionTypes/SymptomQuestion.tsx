@@ -864,6 +864,11 @@ export function SymptomQuestion({
                     : "",
               },
             ],
+            notesField: {
+              key: "note",
+              label: t("notes"),
+              render: (note) => note,
+            },
             queryKey: ["symptoms", patientId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(symptomApi.listSymptoms, {

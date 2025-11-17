@@ -508,6 +508,17 @@ export function MedicationRequestQuestion({
                 ),
               },
             ],
+            instructionsField: {
+              key: "dosage_instruction",
+              label: t("instructions"),
+              render: (instructions) =>
+                instructions?.[0]?.additional_instruction?.[0]?.display,
+            },
+            notesField: {
+              key: "note",
+              label: t("notes"),
+              render: (note) => note,
+            },
             queryKey: ["medication_requests", patientId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(medicationRequestApi.list, {
@@ -536,14 +547,9 @@ export function MedicationRequestQuestion({
                 render: (dosage) => dosage,
               },
               {
-                key: "dosage_instruction",
-                label: t("duration"),
-                render: (instructions) => {
-                  const duration =
-                    instructions?.[0]?.timing?.repeat?.bounds_duration;
-                  if (!duration?.value) return "-";
-                  return `${duration.value} ${duration.unit}`;
-                },
+                key: "status",
+                label: t("status"),
+                render: (status: string) => t(status),
               },
               {
                 key: "created_by",
@@ -562,6 +568,11 @@ export function MedicationRequestQuestion({
                 ),
               },
             ],
+            notesField: {
+              key: "note",
+              label: t("notes"),
+              render: (note) => note,
+            },
             queryKey: ["medication_statements", patientId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(medicationStatementApi.list, {

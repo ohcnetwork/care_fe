@@ -612,6 +612,11 @@ export function DiagnosisQuestion({
                     : "",
               },
             ],
+            notesField: {
+              key: "note",
+              label: t("notes"),
+              render: (note) => note,
+            },
             queryKey: ["diagnoses_and_chronic_conditions", patientId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(diagnosisApi.listDiagnosis, {
