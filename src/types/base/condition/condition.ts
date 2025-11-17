@@ -73,13 +73,15 @@ export interface Metrics {
   allowed_operations: ConditionOperation[];
 }
 
+export const CONDITION_AGE_VALUE_TYPES = ["years", "months", "days"] as const;
+
 export const conditionSchema = z.discriminatedUnion("_conditionType", [
   z.object({
     metric: z.literal("patient_age"),
     operation: z.literal(ConditionOperation.equality),
     value: z.object({
       value: z.number().min(0, "Value must be >= 0"),
-      value_type: z.enum(["years", "months", "days"]),
+      value_type: z.enum(CONDITION_AGE_VALUE_TYPES),
     }),
     _conditionType: z.literal("patient_age_equality"),
   }),
@@ -90,7 +92,7 @@ export const conditionSchema = z.discriminatedUnion("_conditionType", [
       .object({
         min: z.number().min(0, "Min value must be >= 0"),
         max: z.number().min(0, "Max value must be >= 0"),
-        value_type: z.enum(["years", "months", "days"]),
+        value_type: z.enum(CONDITION_AGE_VALUE_TYPES),
       })
       .refine((data) => data.min <= data.max, {
         message: "Min value must be <= max value",
@@ -214,5 +216,3 @@ export const extractTagInformation = (
   const tagIds = typeof value === "string" ? value.split(",") : [];
   return tagIds;
 };
-
-export const CONDITION_AGE_VALUE_TYPES = ["years", "months", "days"] as const;

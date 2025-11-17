@@ -15,6 +15,8 @@ import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import {
   ObservationComponent,
   ObservationRead,
+  ObservationReferenceRange,
+  QuestionnaireSubmitResultValue,
 } from "@/types/emr/observation/observation";
 
 interface DiagnosticReportResultsTableProps {
@@ -24,9 +26,25 @@ interface DiagnosticReportResultsTableProps {
 export function DiagnosticReportResultsTable({
   observations,
 }: DiagnosticReportResultsTableProps) {
-  const renderReferenceRange = (referenceRange: any) => {
+  const renderReferenceRange = (
+    referenceRange: ObservationReferenceRange[],
+    value: QuestionnaireSubmitResultValue,
+  ) => {
     if (!referenceRange || !referenceRange[0]) return "-";
-    const range = referenceRange[0];
+    let range = null;
+    if (value.value) {
+      for (const r of referenceRange) {
+        if (r.min && Number(value.value) < r.min) {
+          continue;
+        }
+        if (r.max && Number(value.value) > r.max) {
+          continue;
+        }
+        range = r;
+        break;
+      }
+    }
+    if (!range) return "-";
     return (
       <div className="flex items-center gap-1 text-gray-500">
         <span>
@@ -103,7 +121,8 @@ export function DiagnosticReportResultsTable({
           </div>
         </TableCell>
         <TableCell className="border-r border-b border-gray-300">
-          {renderReferenceRange(component.reference_range)}
+          {component.reference_range &&
+            renderReferenceRange(component.reference_range, component.value)}
         </TableCell>
         <TableCell className="border-b border-gray-300">
           {renderInterpretation(component.interpretation || "")}
@@ -144,7 +163,10 @@ export function DiagnosticReportResultsTable({
           </TableCell>
           <TableCell>
             {!hasComponents &&
-              renderReferenceRange(observation.reference_range)}
+              renderReferenceRange(
+                observation.reference_range || [],
+                observation.value,
+              )}
           </TableCell>
           <TableCell>
             {!hasComponents &&
