@@ -578,7 +578,7 @@ export function ChargeItemDefinitionPicker({
                 <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <div className="text-sm">
                   {viewMode === "categories"
-                    ? `${t("no_categories_found_for")} "${searchQuery}"`
+                    ? `${t("no_categories_found_for", { term: searchQuery })}`
                     : `${t("no_definitions_found_for")} "${searchQuery}"`}
                 </div>
               </div>
