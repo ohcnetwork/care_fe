@@ -30,6 +30,7 @@ import {
   getConditionValue,
   getDefaultCondition,
   Metrics,
+  TagOperationValue,
 } from "@/types/base/condition/condition";
 
 interface CompactConditionEditorProps {
@@ -45,11 +46,11 @@ function TagSelector({
   onChange,
   resource,
 }: {
-  value: string;
-  onChange: (value: string) => void;
+  value: TagOperationValue;
+  onChange: (value: TagOperationValue) => void;
   resource: TagResource;
 }) {
-  const tagIds = extractTagInformation(value);
+  const { tagIds } = extractTagInformation(value);
 
   const tagQueries = useTagConfigs({
     ids: tagIds,
@@ -61,16 +62,21 @@ function TagSelector({
     .filter(Boolean) as TagConfig[];
 
   const handleChange = (tags: TagConfig[]) => {
-    onChange(tags.map((tag) => tag.id).join(","));
+    onChange({
+      value: tags.map((tag) => tag.id).join(","),
+      value_type: resource,
+    });
   };
 
   return (
-    <TagSelectorPopover
-      selected={selectedTags}
-      resource={resource}
-      onChange={handleChange}
-      className="h-9 w-full"
-    />
+    <div className="flex gap-1 items-center">
+      <TagSelectorPopover
+        selected={selectedTags}
+        resource={resource}
+        onChange={handleChange}
+        className="h-9 w-full"
+      />
+    </div>
   );
 }
 
@@ -255,7 +261,7 @@ function RenderInput({
 
   // For has_tag operation
   if (operation === ConditionOperation.has_tag) {
-    const resource =
+    const tagResource =
       metric === "encounter_tag" ? TagResource.ENCOUNTER : TagResource.PATIENT;
     return (
       <FormField
@@ -265,11 +271,11 @@ function RenderInput({
           <FormItem className="flex-1">
             <FormControl>
               <TagSelector
-                value={field.value as string}
+                value={field.value as TagOperationValue}
                 onChange={(value) => {
                   field.onChange(value);
                 }}
-                resource={resource}
+                resource={tagResource}
               />
             </FormControl>
           </FormItem>
@@ -357,7 +363,7 @@ export function CompactConditionEditor({
   const [isAdding, setIsAdding] = useState(false);
 
   const metrics =
-    availableMetrics?.filter((m) => !m.name.includes("tag")) || [];
+    availableMetrics?.filter((m) => !m.name.includes("encounter_tag")) || [];
 
   // Set up form with zod validation
   const form = useForm({
@@ -496,7 +502,7 @@ export function CompactConditionEditor({
                 control={form.control}
                 name="operation"
                 render={({ field }) => (
-                  <FormItem className="flex-1 w-full sm:max-w-[200px]">
+                  <FormItem className="grow-2 w-full sm:max-w-[300px]">
                     <FormControl>
                       <Select
                         value={field.value}

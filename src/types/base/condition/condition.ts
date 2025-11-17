@@ -48,7 +48,7 @@ export type Condition =
     })
   | (ConditionBase & {
       operation: ConditionOperation.has_tag;
-      value: string;
+      value: TagOperationValue;
     })
   | (ConditionBase & {
       metric: "patient_age";
@@ -109,13 +109,19 @@ export const conditionSchema = z.discriminatedUnion("_conditionType", [
   z.object({
     metric: z.literal("encounter_tag"),
     operation: z.literal(ConditionOperation.has_tag),
-    value: z.string().trim().min(1, "Tags are required"),
+    value: z.object({
+      value: z.string().trim().min(1, "Tags are required"),
+      value_type: z.enum([TagResource.ENCOUNTER, TagResource.PATIENT]),
+    }),
     _conditionType: z.literal("encounter_tag_has_tag"),
   }),
   z.object({
     metric: z.literal("patient_tag"),
     operation: z.literal(ConditionOperation.has_tag),
-    value: z.string().trim().min(1, "Tags are required"),
+    value: z.object({
+      value: z.string().trim().min(1, "Tags are required"),
+      value_type: z.enum([TagResource.PATIENT]),
+    }),
     _conditionType: z.literal("patient_tag_has_tag"),
   }),
 ]) as z.ZodType<Condition>;
@@ -127,7 +133,7 @@ export function ConditionOperationSummary({
 }) {
   const { t } = useTranslation();
   const conditionName = t(`condition_metric__${condition.metric}`);
-  const tagIds = extractTagInformation(condition.value);
+  const { tagIds, tagResource } = extractTagInformation(condition.value);
   const tags = useTagConfigs({
     ids: tagIds,
     disabled:
@@ -135,28 +141,30 @@ export function ConditionOperationSummary({
   })
     .map(({ data }) => data)
     .filter(Boolean) as TagConfig[];
-  const valueType =
-    typeof condition.value === "object" && "value_type" in condition.value
-      ? condition?.value.value_type
-      : "";
   switch (condition.operation) {
     case ConditionOperation.equality: {
       const value =
         typeof condition.value === "object" && "value" in condition.value
           ? condition.value.value
           : condition.value;
-      let valueDisplay = value.toString();
+      let valueDisplay = typeof value === "string" ? value : value;
       if (condition.metric === "patient_gender") {
         valueDisplay = t(`GENDER__${value}`);
       }
+      const valueType =
+        typeof condition.value === "object" && "value_type" in condition.value
+          ? condition?.value.value_type
+          : "";
       return `${conditionName} is equal to ${valueDisplay} ${valueType}`;
     }
     case ConditionOperation.in_range: {
+      const valueType =
+        "value_type" in condition.value ? condition?.value.value_type : "";
       return `${conditionName} is in range ${condition.value.min} to ${condition.value.max} ${valueType}`;
     }
     case ConditionOperation.has_tag: {
       const tagDisplay = tags.map((tag) => tag.display).join(", ");
-      return `Has any of the following ${conditionName}: ${tagDisplay}`;
+      return `Has any of the following ${tagResource} tag(s): ${tagDisplay}`;
     }
   }
 }
@@ -185,7 +193,7 @@ export function getConditionValue(
       }
       break;
     case ConditionOperation.has_tag:
-      conditionValue = "";
+      conditionValue = { value: "", value_type: TagResource.ENCOUNTER };
       break;
   }
   return conditionValue;
@@ -209,10 +217,20 @@ export const getDefaultCondition = (metrics: Metrics[]) => {
 export const extractTagInformation = (
   value:
     | string
+    | TagOperationValue
     | ConditionOperationInRangeValue
     | AgeOperationEqualityValue
     | AgeOperationInRangeValue,
 ) => {
-  const tagIds = typeof value === "string" ? value.split(",") : [];
-  return tagIds;
+  const tagIds =
+    typeof value === "object" &&
+    "value" in value &&
+    typeof value.value === "string"
+      ? value.value.split(",")
+      : [];
+  const tagResource =
+    typeof value === "object" && "value_type" in value
+      ? (value.value_type as TagResource)
+      : TagResource.ENCOUNTER;
+  return { tagIds, tagResource };
 };

@@ -46,6 +46,7 @@ import {
   getConditionValue,
   getDefaultCondition,
   Metrics,
+  TagOperationValue,
 } from "@/types/base/condition/condition";
 import {
   COLOR_OPTIONS,
@@ -695,7 +696,11 @@ export function RenderConditionInput({
   condition: Condition;
   index: number;
   handleSetValue: (
-    value: string | ConditionOperationInRangeValue | AgeOperationEqualityValue,
+    value:
+      | string
+      | ConditionOperationInRangeValue
+      | AgeOperationEqualityValue
+      | TagOperationValue,
     index: number,
   ) => void;
   handleSetValueType: (value: string, index: number) => void;
@@ -706,7 +711,7 @@ export function RenderConditionInput({
   const operation = condition.operation;
   const value =
     "value" in condition ? condition.value : { min: undefined, max: undefined };
-  const tagIds = extractTagInformation(value);
+  const { tagIds, tagResource } = extractTagInformation(value);
   const tagQueries = useTagConfigs({
     ids: tagIds,
     disabled: operation !== ConditionOperation.has_tag,
@@ -1002,17 +1007,30 @@ export function RenderConditionInput({
           </div>
         );
       } else if (operation === ConditionOperation.has_tag) {
+        const tagType =
+          tagResource || condition.metric === "encounter_tag"
+            ? TagResource.ENCOUNTER
+            : TagResource.PATIENT;
         const selectedTags = tagQueries
           .map((query) => query.data)
           .filter(Boolean) as TagConfig[];
+        const handleSetTagValue = (value: string) => {
+          handleSetValue(
+            {
+              value: value,
+              value_type: tagType,
+            },
+            index,
+          );
+        };
         return (
           <>
             <FormField
               control={form.control}
-              name={`${fieldName}.value` as any}
+              name={`${fieldName}.value.value` as any}
               render={() => {
                 const errorMessage = form.getFieldState(
-                  `${fieldName}.value`,
+                  `${fieldName}.value.value`,
                   form.formState,
                 ).error?.message;
                 return (
@@ -1020,11 +1038,10 @@ export function RenderConditionInput({
                     <FormControl>
                       <TagSelectorPopover
                         selected={selectedTags}
-                        resource={TagResource.ENCOUNTER}
+                        resource={tagType}
                         onChange={(tags) => {
-                          handleSetValue(
+                          handleSetTagValue(
                             tags.map((tag) => tag.id).join(","),
-                            index,
                           );
                         }}
                         className={errorMessage ? "border-red-500" : ""}
@@ -1062,7 +1079,7 @@ export function ConditionComponent<
     queryFn: query(observationDefinitionApi.getAllMetrics),
   });
 
-  const metrics = data?.filter((m) => !m.name.includes("tag"));
+  const metrics = data?.filter((m) => !m.name.includes("patient_tags"));
 
   useEffect(() => {
     if (metrics?.[0] && conditions.length === 0) {
@@ -1109,7 +1126,11 @@ export function ConditionComponent<
   };
 
   const handleSetValue = (
-    value: string | ConditionOperationInRangeValue | AgeOperationEqualityValue,
+    value:
+      | string
+      | ConditionOperationInRangeValue
+      | AgeOperationEqualityValue
+      | TagOperationValue,
     index: number,
   ) => {
     let updatedCondition = conditions[index];
