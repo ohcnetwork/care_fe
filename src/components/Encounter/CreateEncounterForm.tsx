@@ -133,8 +133,6 @@ export default function CreateEncounterForm({
       },
       tags: data.tags,
       appointment: appointment,
-      external_identifier: null,
-      discharge_summary_advice: null,
     };
 
     createEncounter(encounterRequest);

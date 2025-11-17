@@ -248,12 +248,18 @@ export interface EncounterRead
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
 }
-export interface EncounterCreate extends EncounterBase {
+export interface EncounterCreate
+  extends Omit<
+    EncounterBase,
+    "discharge_summary_advice" | "external_identifier"
+  > {
   patient: string;
   facility: string;
   organizations: string[];
   tags?: string[];
   appointment?: string;
+  external_identifier?: string;
+  discharge_summary_advice?: string;
 }
 
 export type EncounterEdit = EncounterBase;
