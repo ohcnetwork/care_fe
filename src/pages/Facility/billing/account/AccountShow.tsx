@@ -348,7 +348,7 @@ export function AccountShow({
 
             {account.status === AccountStatus.active &&
               !isAccountBillingClosed && (
-                <div className="lg:hidden w-full flex  justify-end gap-2">
+                <div className="lg:hidden w-full flex justify-end gap-2">
                   <Button
                     variant="outline"
                     className="border-gray-400 text-gray-950"
