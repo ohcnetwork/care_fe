@@ -690,6 +690,7 @@ const PatientBasicsContent = ({
               </FormLabel>
               <FormControl>
                 <TagSelectorPopover
+                  facilityId={facilityId}
                   selected={selectedTags}
                   onChange={(tags) => {
                     field.onChange(tags.map((tag) => tag.id));

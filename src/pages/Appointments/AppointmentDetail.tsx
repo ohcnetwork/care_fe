@@ -247,13 +247,13 @@ export default function AppointmentDetail(props: Props) {
                         appointment.token_slot.start_datetime,
                         "do MMMM",
                       ),
-                      time: format(
+                      slot_start_time: format(
                         appointment.token_slot.start_datetime,
                         "h:mm a",
                       ),
-                      duration: getReadableDuration(
-                        appointment.token_slot.start_datetime,
+                      slot_end_time: format(
                         appointment.token_slot.end_datetime,
+                        "h:mm a",
                       ),
                     }}
                   />
