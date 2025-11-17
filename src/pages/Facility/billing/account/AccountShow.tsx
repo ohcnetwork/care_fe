@@ -52,6 +52,7 @@ import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import BackButton from "@/components/Common/BackButton";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import AccountSheet from "./AccountSheet";
@@ -257,15 +258,10 @@ export function AccountShow({
 
   return (
     <div className="space-y-3">
-      <Button
-        variant="outline"
-        size="xs"
-        className="text-gray-950 gap-1 border-gray-400"
-        onClick={() => navigate(`/facility/${facilityId}/billing/accounts`)}
-      >
+      <BackButton size="xs">
         <CareIcon icon="l-arrow-left" className="size-4" />
         {t("back")}
-      </Button>
+      </BackButton>
       <PatientHeader
         patient={account.patient}
         facilityId={facilityId}
