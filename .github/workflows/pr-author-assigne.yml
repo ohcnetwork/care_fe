@@ -97,7 +97,7 @@ jobs:
           exit 0
 
       - name: Close PR if author not same as assignee
-        if: steps.issue.outputs.assignee != 'null' && steps.issue.outputs.assignee != github.event.pull_request.user.login #&& steps.check-core.outputs.is_core == 'false'
+        if: steps.issue.outputs.assignee != 'null' && steps.issue.outputs.assignee != github.event.pull_request.user.login && steps.check-core.outputs.is_core == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
