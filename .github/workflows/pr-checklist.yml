@@ -52,6 +52,21 @@ jobs:
               return;
             }
 
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number
+            });
+
+            const existingComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('⚠️ Merge Checklist Incomplete')
+            );
+
+            if (existingComment) {
+              return;
+            }
+
             const commentBody = [
               '## ⚠️ Merge Checklist Incomplete',
               '',
