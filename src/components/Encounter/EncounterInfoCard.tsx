@@ -9,6 +9,7 @@ import {
   ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
   EncounterListRead,
+  EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
@@ -21,7 +22,7 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 export interface EncounterInfoCardProps {
-  encounter: EncounterListRead;
+  encounter: EncounterListRead | EncounterRead;
   facilityId: string;
   hideBorder?: boolean;
 }

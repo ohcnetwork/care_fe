@@ -31,6 +31,7 @@ import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilte
 import {
   EncounterClass,
   EncounterListRead,
+  EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
@@ -312,13 +313,15 @@ export function EncounterList({
             </div>
           ) : (
             <>
-              {encounters.map((encounter: EncounterListRead) => (
-                <EncounterInfoCard
-                  key={encounter.id}
-                  encounter={encounter}
-                  facilityId={facilityId}
-                />
-              ))}
+              {encounters.map(
+                (encounter: EncounterListRead | EncounterRead) => (
+                  <EncounterInfoCard
+                    key={encounter.id}
+                    encounter={encounter}
+                    facilityId={facilityId}
+                  />
+                ),
+              )}
               {queryEncounters?.count &&
                 queryEncounters.count > resultsPerPage && (
                   <div className="col-span-full">
