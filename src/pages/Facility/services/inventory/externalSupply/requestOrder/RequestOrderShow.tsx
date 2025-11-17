@@ -172,11 +172,7 @@ export function RequestOrderShow({
   const qParams = {
     request_order: requestOrderId,
     ...(isRequester && {
-      status: [
-        DeliveryOrderStatus.pending,
-        DeliveryOrderStatus.in_progress,
-        DeliveryOrderStatus.completed,
-      ].join(","),
+      status: "pending,in_progress,completed",
     }),
   };
 
