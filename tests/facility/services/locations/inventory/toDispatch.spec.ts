@@ -10,6 +10,7 @@ let bioChemLabLocationId: string;
 let pharmacyLocationId: string;
 let bioChembasePath: string;
 let pharmacybasePath: string;
+let isInitialized: boolean = false;
 
 test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
   async function createStockRequest(page: Page, orderNameParam?: string) {
@@ -46,7 +47,8 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     await page.goto(bioChembasePath + "/inventory/internal/receive");
   }
 
-  test.beforeAll(async ({ page }) => {
+  async function setupInitialData(page: Page) {
+    if (isInitialized) return;
     const facilityId = getFacilityId();
     const servicesUrl = `/facility/${facilityId}/services/`;
     await page.goto(servicesUrl);
@@ -75,9 +77,11 @@ test.describe("Facility To-Dispatch Orders Inventory Flow", () => {
     bioChembasePath = `/facility/${facilityId}/locations/${bioChemLabLocationId}`;
     orderName = faker.lorem.words(5);
     await createStockRequest(page, orderName);
-  });
+    isInitialized = true;
+  }
 
   test.beforeEach(async ({ page }) => {
+    await setupInitialData(page);
     // Navigate to the To-Receive Orders Inventory page before each test
     await page.goto(pharmacybasePath + "/inventory/internal/dispatch");
   });
