@@ -109,7 +109,7 @@ test.describe("Charge Item Definition Creation", () => {
 
     await page
       .locator("div")
-      .filter({ hasText: /^Add discount$/ })
+      .filter({ hasText: /^Add Discount$/ })
       .first()
       .click();
     await page.getByRole("checkbox").first().click();
