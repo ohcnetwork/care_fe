@@ -387,13 +387,12 @@ export function EditInvoiceTable({
                         );
                       }
 
-                      const selectedDiscountKeys =
-                        item.discounts
-                          ?.map((d) => getDiscountComponentKey(d))
-                          .filter((key) => key) || [];
+                      const hasEmptyRow =
+                        item.discounts?.some((d) => !d.code) || false;
 
                       const hasMoreDiscountsToAdd =
-                        selectedDiscountKeys.length < availableDiscounts.length;
+                        (item.discounts?.length || 0) <
+                        availableDiscounts.length;
 
                       return (
                         <div className="space-y-2">
@@ -520,6 +519,7 @@ export function EditInvoiceTable({
                                       <FormItem className="flex-1">
                                         <FormControl>
                                           <MonetaryAmountInput
+                                            hideCurrency={true}
                                             value={value}
                                             onChange={(e) => {
                                               const newValue = e.target.value;
@@ -600,6 +600,7 @@ export function EditInvoiceTable({
                               size="sm"
                               className="w-full"
                               onClick={() => handleAddDiscount(index)}
+                              disabled={hasEmptyRow}
                             >
                               <Plus className="h-4 w-4 mr-2" />
                               {t("add_discount")}
