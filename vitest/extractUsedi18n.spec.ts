@@ -5,7 +5,6 @@ import { describe, expect, it } from "vitest";
 describe("extractUsedKeys - full fixture test", () => {
   it("should extract static, plural, Trans, and dynamic keys from fixture", async () => {
     const fixtureDir = path.join(__dirname, "fixtures");
-    console.log(fixtureDir);
 
     const { usedKeys, dynamicPrefixes } = await extractUsedKeys(fixtureDir, [
       "tsx",

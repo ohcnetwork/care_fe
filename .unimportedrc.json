@@ -41,13 +41,6 @@
       ]
     ],
     [
-      "supports-color",
-      [
-        "node_modules/debug/src/node.js",
-        "node_modules/require-and-forget/node_modules/debug/src/node.js"
-      ]
-    ],
-    [
       "tailwindcss/colors",
       [
         "node_modules/@tailwindcss/forms/src/index.js",
