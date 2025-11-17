@@ -278,13 +278,14 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
         // Ignore test files from file watching to avoid unnecessary HMR triggers
         ignored: [
           "**/cypress/**",
-          "**/tests/**", 
+          "**/tests/**",
+          "**/vitest/**",
           "**/test/**",
           "**/*.test.*",
           "**/*.spec.*",
           "**/playwright-report/**",
-          "**/test-results/**"
-        ]
+          "**/test-results/**",
+        ],
       },
       headers: {
         "Strict-Transport-Security":

@@ -44,17 +44,18 @@ async function extractUsedKeys(src, extensions) {
         },
       );
 
-      // ✅ Extract <Trans i18nKey="..."> keys
-      if (jsContent.includes("<Trans") || jsContent.includes("{ Trans")) {
-        parser.parseTransFromString(jsContent, (key) => usedKeys.add(key));
+      const transRegex = /i18nKey=["'`]([^"'`]+)["'`]/g;
+      let match;
+      while ((match = transRegex.exec(content)) !== null) {
+        usedKeys.add(match[1]); // only the key value
       }
 
       // ✅ Detect plural usage (adds `_one`, `_other`)
       const pluralRegex =
         /t\(\s*["'`]([a-zA-Z0-9_]+)["'`]\s*,\s*{\s*(?:[^\n]*\n?\s*)?count\s*:/g;
-      let match;
-      while ((match = pluralRegex.exec(jsContent)) !== null) {
-        const baseKey = match[1];
+      let match1;
+      while ((match1 = pluralRegex.exec(jsContent)) !== null) {
+        const baseKey = match1[1];
         usedKeys.add(baseKey);
         usedKeys.add(`${baseKey}_one`);
         usedKeys.add(`${baseKey}_other`);
@@ -112,23 +113,25 @@ function cleanLocaleFiles(localesPath, usedKeys, dynamicPrefixes) {
   }
 }
 
-(async () => {
-  try {
-    const src = "./src";
-    const localesPath = "./public/locale";
-    const extensions = ["ts", "tsx"];
+/**
+ * Run cleanup only when called directly via CLI
+ */
+async function main() {
+  const src = "./src";
+  const localesPath = "./public/locale";
+  const extensions = ["ts", "tsx"];
 
-    console.log("🔍 Scanning codebase for i18n keys...");
-    const { usedKeys, dynamicPrefixes } = await extractUsedKeys(
-      src,
-      extensions,
-    );
+  console.log("🔍 Scanning codebase for i18n keys...");
+  const { usedKeys, dynamicPrefixes } = await extractUsedKeys(src, extensions);
 
-    console.log("🧹 Cleaning locale files...");
-    cleanLocaleFiles(localesPath, usedKeys, dynamicPrefixes);
+  console.log("🧹 Cleaning locale files...");
+  cleanLocaleFiles(localesPath, usedKeys, dynamicPrefixes);
 
-    console.log("🎉 Cleanup complete!");
-  } catch (err) {
-    console.error("❌ Error:", err.message);
-  }
-})();
+  console.log("🎉 Cleanup complete!");
+}
+
+if (require.main === module) {
+  main().catch((err) => console.error("❌ Script failed:", err));
+}
+
+module.exports = { extractUsedKeys, cleanLocaleFiles };
