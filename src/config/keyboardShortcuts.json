@@ -49,7 +49,9 @@
     { "key": "2", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
     { "key": "1", "action": "start-consultation", "description": "Start Consultation", "when": "always" },
     { "key": "3", "action": "print-appointment", "description": "Print Appointment", "when": "always" },
-    { "key": "c", "action": "check-in-action", "description": "Check-in Appointment", "when": "always" }
+    { "key": "c", "action": "check-in-action", "description": "Check-in Appointment", "when": "always" },
+    { "key": "i", "action": "create-an-invoice", "description": "Create Invoice", "when": "always" },
+    { "key": "a", "action": "add-a-charge-item", "description": "Add Charge Items", "when": "always" }
   ],
 
   "facility:billing": [
@@ -99,6 +101,7 @@
     { "key": "v", "action": "view-invoice", "description": "View Invoice", "when": "always" }
   ],
   "facility:inventory": [
+    { "key": "r", "action": "raise-stock-request", "description": "Raise Stock Request", "when": "always" },
     { "key": "c", "action": "create-order", "description": "Create Order", "when": "always" },
     { "key": "a", "action": "add-item", "description": "Add Item", "when": "always" },
     { "key": "e", "action": "edit-order", "description": "Edit Order", "when": "always" },

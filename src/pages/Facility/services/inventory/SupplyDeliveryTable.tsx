@@ -33,6 +33,7 @@ interface SupplyDeliveryTableProps {
   internal?: boolean;
   onDeliveryClick?: (delivery: SupplyDeliveryRead) => void;
   autoSelectOnMount?: boolean;
+  isRequester?: boolean;
 }
 
 export function SupplyDeliveryTable({
@@ -44,6 +45,7 @@ export function SupplyDeliveryTable({
   internal = false,
   onDeliveryClick,
   autoSelectOnMount = false,
+  isRequester = false,
 }: SupplyDeliveryTableProps) {
   const { t } = useTranslation();
 
@@ -102,10 +104,10 @@ export function SupplyDeliveryTable({
               {t("requested_qty")}
             </TableHead>
             <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-              {t("received_qty")}
+              {isRequester ? t("received_qty") : t("dispatched_qty")}
             </TableHead>
             <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
-              {t("received_date")}
+              {isRequester ? t("received_date") : t("dispatched_date")}
             </TableHead>
             <TableHead className="border-x p-3 text-gray-700 text-sm font-medium leading-5">
               {t("base")}
@@ -154,7 +156,7 @@ export function SupplyDeliveryTable({
                 </div>
               </TableCell>
               <TableCell className="border-x p-3 text-gray-950">
-                {delivery.supply_request?.quantity}
+                {delivery.supply_request?.quantity || "-"}
               </TableCell>
               <TableCell className="border-x p-3 text-gray-950">
                 {delivery.supplied_item_quantity}
