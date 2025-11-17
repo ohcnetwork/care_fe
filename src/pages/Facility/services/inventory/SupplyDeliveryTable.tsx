@@ -168,39 +168,36 @@ export function SupplyDeliveryTable({
               <TableCell className="border-x p-3 text-gray-950">
                 <MonetaryDisplay
                   amount={
-                    delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.filter(
+                    delivery.supplied_inventory_item?.product.charge_item_definition?.price_components?.filter(
                       (c) =>
                         c.monetary_component_type ===
                         MonetaryComponentType.base,
-                    )[0].amount
+                    )?.[0]?.amount
                   }
                 />
               </TableCell>
               <TableCell className="border-x p-3 text-gray-950">
                 <MonetaryDisplay
-                  amount={String(
-                    delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
-                      .filter(
-                        (c) =>
-                          c.monetary_component_type ===
-                          MonetaryComponentType.tax,
-                      )
-                      .reduce((acc, curr) => acc + Number(curr.amount || 0), 0),
-                  )}
+                  amount={delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
+                    ?.filter(
+                      (c) =>
+                        c.monetary_component_type === MonetaryComponentType.tax,
+                    )
+                    ?.reduce((acc, curr) => acc + Number(curr.amount || 0), 0)
+                    ?.toString()}
                   hideCurrency
                 />
               </TableCell>
               <TableCell className="border-x p-3 text-gray-950">
                 <MonetaryDisplay
-                  amount={String(
-                    delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
-                      .filter(
-                        (c) =>
-                          c.monetary_component_type ===
-                          MonetaryComponentType.discount,
-                      )
-                      .reduce((acc, curr) => acc + Number(curr.amount || 0), 0),
-                  )}
+                  amount={delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
+                    ?.filter(
+                      (c) =>
+                        c.monetary_component_type ===
+                        MonetaryComponentType.discount,
+                    )
+                    ?.reduce((acc, curr) => acc + Number(curr.amount || 0), 0)
+                    ?.toString()}
                   hideCurrency
                 />
               </TableCell>
