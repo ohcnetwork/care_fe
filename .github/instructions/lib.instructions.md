@@ -16,8 +16,6 @@ applyTo: "src/lib/**/*.{ts,tsx}"
 
 ## Implementation Guidelines
 
-## Implementation Standards
-
 ### Error Handling
 - Handle errors without exposing PHI/PII
 - Provide meaningful error messages

@@ -39,9 +39,9 @@ await page.getByLabel("Date of Birth").fill("1980-01-15");
 await page.getByText("Create Patient").click();
 await page.getByText(/facility created successfully/i).toBeVisible();
 
-// ⚠️ Use sparingly: data-cy selectors (only when semantic locators are insufficient)
+// ⚠️ Use sparingly: data-testid selectors (only when semantic locators are insufficient)
 // Example: Complex custom dropdowns without proper ARIA roles
-const stateCombobox = stateRegion.locator('[data-cy="select-state"]');
+const stateCombobox = stateRegion.locator('[data-testid="select-state"]');
 
 // ❌ Avoid: CSS class selectors (brittle and non-semantic)
 await page.locator(".submit-button").click();
