@@ -71,6 +71,7 @@ export const DischargeTab = ({
   const [selectedAudioFile, setSelectedAudioFile] =
     useState<FileReadMinimal | null>(null);
   const [openAudioPlayerDialog, setOpenAudioPlayerDialog] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const queryClient = useQueryClient();
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
@@ -121,7 +122,7 @@ export const DischargeTab = ({
     type: type,
     multiple: true,
     allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
-    allowNameFallback: false,
+    allowNameFallback: true,
     compress: false,
   });
   useEffect(() => {
@@ -141,6 +142,143 @@ export const DischargeTab = ({
       fileUpload.clearFiles();
     }
   }, [openUploadDialog]);
+
+  // Check if a file already exists (duplicate check)
+  const isDuplicateFile = (newFile: File, existingFiles: File[]) => {
+    return existingFiles.some(
+      (file) => file.name === newFile.name && file.size === newFile.size,
+    );
+  };
+
+  // Drag and drop handlers
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (canEdit && e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    if (
+      x <= rect.left ||
+      x >= rect.right ||
+      y <= rect.top ||
+      y >= rect.bottom
+    ) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Set dropEffect to allow the drop
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = "copy";
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (!canEdit) return;
+
+    // Try to get files from dataTransfer
+    let droppedFiles: File[] = [];
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      droppedFiles = Array.from(e.dataTransfer.files);
+    } else if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      // Fallback to items if files is empty
+      for (let i = 0; i < e.dataTransfer.items.length; i++) {
+        const item = e.dataTransfer.items[i];
+        if (item.kind === "file") {
+          const file = item.getAsFile();
+          if (file) {
+            droppedFiles.push(file);
+          }
+        }
+      }
+    }
+
+    const validFiles: File[] = [];
+    const duplicateFiles: string[] = [];
+    const invalidFiles: string[] = [];
+
+    droppedFiles.forEach((file) => {
+      // Check if file is duplicate
+      if (isDuplicateFile(file, fileUpload.files)) {
+        duplicateFiles.push(file.name);
+        return;
+      }
+
+      // Check file size
+      if (file.size > 10e7) {
+        invalidFiles.push(`${file.name} (${t("file_error__file_size")})`);
+        return;
+      }
+
+      // Check file extension
+      const extension = file.name.split(".").pop()?.toLowerCase();
+      if (
+        !BACKEND_ALLOWED_EXTENSIONS.map((ext) =>
+          ext.replace(".", "").toLowerCase(),
+        ).includes(extension || "")
+      ) {
+        invalidFiles.push(
+          `${file.name} (${t("file_error__file_type", { extension })})`,
+        );
+        return;
+      }
+
+      validFiles.push(file);
+    });
+
+    // Show notifications for duplicates and invalid files
+    if (duplicateFiles.length > 0) {
+      toast.warning(
+        t("duplicate_files_skipped", {
+          count: duplicateFiles.length,
+          files: duplicateFiles.join(", "),
+        }),
+      );
+    }
+
+    if (invalidFiles.length > 0) {
+      toast.error(
+        t("invalid_files_skipped", {
+          count: invalidFiles.length,
+          files: invalidFiles.join(", "),
+        }),
+      );
+    }
+
+    // Add valid files to the upload queue
+    if (validFiles.length > 0) {
+      // Create a DataTransfer object with only the new valid files
+      const dataTransfer = new DataTransfer();
+      validFiles.forEach((file) => dataTransfer.items.add(file));
+
+      // Get the input element and update its files
+      const input = document.getElementById(
+        `file_upload_${type}`,
+      ) as HTMLInputElement;
+      if (input) {
+        input.files = dataTransfer.files;
+        // Trigger the change event to process the files
+        const event = new Event("change", { bubbles: true });
+        input.dispatchEvent(event);
+      }
+    }
+  };
 
   const getFileType = (file: FileReadMinimal) => {
     return fileManager.getFileType(file);
@@ -317,55 +455,58 @@ export const DischargeTab = ({
   const FileUploadButtons = () => {
     if (!canEdit) return <></>;
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline_primary"
-            className="flex flex-row items-center mr-2"
-          >
-            <CareIcon icon="l-file-upload" className="mr-1" />
-            <span>{t("add_files")}</span>
-            <CareIcon icon="l-angle-down" className="ml-1" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-[calc(100vw-2.5rem)] sm:w-full"
-        >
-          <DropdownMenuItem
-            className="flex flex-row items-center"
-            onSelect={(e) => {
-              e.preventDefault();
-            }}
-            aria-label={t("choose_file")}
-          >
-            <Label
-              htmlFor={`file_upload_${type}`}
-              className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium"
+      <>
+        {/* Hidden file input - always rendered so drag & drop can access it */}
+        {fileUpload.Input({ className: "hidden" })}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline_primary"
+              className="flex flex-row items-center mr-2"
             >
-              <CareIcon icon="l-file-upload-alt" />
-              <span>{t("choose_file")}</span>
-            </Label>
-            {fileUpload.Input({ className: "hidden" })}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => fileUpload.handleCameraCapture()}
-            className="flex items-center text-primary-900 font-medium"
-            aria-label={t("open_camera")}
+              <CareIcon icon="l-file-upload" className="mr-1" />
+              <span>{t("add_files")}</span>
+              <CareIcon icon="l-angle-down" className="ml-1" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="w-[calc(100vw-2.5rem)] sm:w-full"
           >
-            <CareIcon icon="l-camera" />
-            <span>{t("open_camera")}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => fileUpload.handleAudioCapture()}
-            className="flex items-center text-primary-900 font-medium"
-            aria-label={t("record")}
-          >
-            <CareIcon icon="l-microphone" />
-            <span>{t("record")}</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            <DropdownMenuItem
+              className="flex flex-row items-center"
+              onSelect={(e) => {
+                e.preventDefault();
+              }}
+              aria-label={t("choose_file")}
+            >
+              <Label
+                htmlFor={`file_upload_${type}`}
+                className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium"
+              >
+                <CareIcon icon="l-file-upload-alt" />
+                <span>{t("choose_file")}</span>
+              </Label>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => fileUpload.handleCameraCapture()}
+              className="flex items-center text-primary-900 font-medium"
+              aria-label={t("open_camera")}
+            >
+              <CareIcon icon="l-camera" />
+              <span>{t("open_camera")}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => fileUpload.handleAudioCapture()}
+              className="flex items-center text-primary-900 font-medium"
+              aria-label={t("record")}
+            >
+              <CareIcon icon="l-microphone" />
+              <span>{t("record")}</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </>
     );
   };
 
@@ -552,7 +693,32 @@ export const DischargeTab = ({
   );
 
   return (
-    <div className="space-y-4">
+    <div
+      className="space-y-4 relative"
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Drag and Drop Overlay */}
+      {isDragging && canEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary-500/20 backdrop-blur-sm">
+          <div className="rounded-lg bg-white p-8 shadow-2xl border-4 border-dashed border-primary-500">
+            <div className="flex flex-col items-center gap-4">
+              <CareIcon
+                icon="l-cloud-upload"
+                className="text-6xl text-primary-500"
+              />
+              <p className="text-xl font-semibold text-gray-900">
+                {t("drop_files_here")}
+              </p>
+              <p className="text-sm text-gray-600">
+                {t("release_to_upload_files")}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="z-40">
         {fileUpload.Dialogues}
         {fileManager.Dialogues}

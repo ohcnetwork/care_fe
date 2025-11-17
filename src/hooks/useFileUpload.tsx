@@ -128,9 +128,38 @@ export default function useFileUpload(
       return;
     }
     const selectedFiles = Array.from(e.target.files);
-    setFiles((prev) => [...prev, ...selectedFiles]);
+
+    // Check for duplicates
+    const duplicateFiles: string[] = [];
+    const uniqueFiles: File[] = [];
+
+    selectedFiles.forEach((newFile) => {
+      const isDuplicate = files.some(
+        (existingFile) =>
+          existingFile.name === newFile.name &&
+          existingFile.size === newFile.size,
+      );
+
+      if (isDuplicate) {
+        duplicateFiles.push(newFile.name);
+      } else {
+        uniqueFiles.push(newFile);
+      }
+    });
+
+    // Show warning for duplicate files
+    if (duplicateFiles.length > 0) {
+      toast.warning(
+        t("duplicate_files_skipped", {
+          count: duplicateFiles.length,
+          files: duplicateFiles.join(", "),
+        }),
+      );
+    }
+
+    setFiles((prev) => [...prev, ...uniqueFiles]);
     if (options.compress) {
-      selectedFiles.forEach((file) => {
+      uniqueFiles.forEach((file) => {
         const ext = file.name.split(".").pop()?.toLowerCase();
         if (ext && (FILE_EXTENSIONS.IMAGE as readonly string[]).includes(ext)) {
           const options = {
