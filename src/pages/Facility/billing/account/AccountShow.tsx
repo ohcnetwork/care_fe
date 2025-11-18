@@ -1,6 +1,6 @@
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, MoreVertical } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -52,6 +52,7 @@ import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import BackButton from "@/components/Common/BackButton";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import AccountSheet from "./AccountSheet";
@@ -257,15 +258,10 @@ export function AccountShow({
 
   return (
     <div className="space-y-3">
-      <Button
-        variant="outline"
-        size="xs"
-        className="text-gray-950 gap-1 border-gray-400"
-        onClick={() => navigate(`/facility/${facilityId}/billing/accounts`)}
-      >
+      <BackButton size="xs">
         <CareIcon icon="l-arrow-left" className="size-4" />
         {t("back")}
-      </Button>
+      </BackButton>
       <PatientHeader
         patient={account.patient}
         facilityId={facilityId}
@@ -352,15 +348,42 @@ export function AccountShow({
 
             {account.status === AccountStatus.active &&
               !isAccountBillingClosed && (
-                <div className="lg:hidden w-full">
+                <div className="lg:hidden w-full flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    className="border-gray-400 text-gray-950"
+                    onClick={() =>
+                      navigate(
+                        `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
+                      )
+                    }
+                  >
+                    <CareIcon icon="l-plus" className="size-4" />
+                    {t("invoice")}
+                    <ShortcutBadge actionId="create-invoice" />
+                  </Button>
+
+                  <Button
+                    variant="primary"
+                    onClick={() =>
+                      setPaymentSheet({
+                        isOpen: true,
+                        isCreditNote: false,
+                      })
+                    }
+                  >
+                    <CareIcon icon="l-plus" className="size-4" />
+                    {t("payment")}
+                    <ShortcutBadge actionId="record-payment-account" />
+                  </Button>
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild className="w-full">
+                    <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className=" border-gray-400 text-gray-950"
+                        size="icon"
+                        className="border-gray-400"
                       >
-                        {t("actions")}
-                        <ChevronDown className="size-5" />
+                        <MoreVertical className="size-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -380,27 +403,6 @@ export function AccountShow({
                         )}
                       <DropdownMenuItem
                         onClick={() =>
-                          navigate(
-                            `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                          )
-                        }
-                      >
-                        {t("create_invoice")}
-                        <ShortcutBadge actionId="create-invoice" />
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          setPaymentSheet({
-                            isOpen: true,
-                            isCreditNote: false,
-                          })
-                        }
-                      >
-                        {t("record_payment")}
-                        <ShortcutBadge actionId="record-payment-account" />
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
                           setPaymentSheet({
                             isOpen: true,
                             isCreditNote: true,
@@ -418,7 +420,7 @@ export function AccountShow({
       />
       <div className="bg-gray-100 p-3 space-y-4 rounded-lg">
         <div className="bg-gray-100 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex flex-col md:flex-row md:items-center gap-8">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div>
               <p className="text-sm text-gray-700 font-medium">
                 {t("account")}
@@ -427,31 +429,35 @@ export function AccountShow({
                 {account.name}
               </p>
             </div>
-            <div>
-              <p className="text-sm text-gray-700 font-medium">{t("status")}</p>
-              <Badge variant={ACCOUNT_STATUS_COLORS[account.status]}>
-                {t(account.status)}
-              </Badge>
-            </div>
-            <div>
-              <p className="text-sm text-gray-700 font-medium">
-                {t("start_date")}
-              </p>
-              <p className="font-medium text-base text-gray-950">
-                {account.service_period?.start
-                  ? formatDate(account.service_period?.start)
-                  : formatDate(account.created_date)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-700 font-medium">
-                {t("end_date")}
-              </p>
-              <p className="font-medium text-base text-gray-950">
-                {account.service_period?.end
-                  ? formatDate(account.service_period?.end)
-                  : t("ongoing")}
-              </p>
+            <div className="flex md:items-center gap-8">
+              <div>
+                <p className="text-sm text-gray-700 font-medium">
+                  {t("status")}
+                </p>
+                <Badge variant={ACCOUNT_STATUS_COLORS[account.status]}>
+                  {t(account.status)}
+                </Badge>
+              </div>
+              <div>
+                <p className="text-sm text-gray-700 font-medium">
+                  {t("start_date")}
+                </p>
+                <p className="font-medium text-base text-gray-950">
+                  {account.service_period?.start
+                    ? formatDate(account.service_period?.start)
+                    : formatDate(account.created_date)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-700 font-medium">
+                  {t("end_date")}
+                </p>
+                <p className="font-medium text-base text-gray-950">
+                  {account.service_period?.end
+                    ? formatDate(account.service_period?.end)
+                    : t("ongoing")}
+                </p>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">

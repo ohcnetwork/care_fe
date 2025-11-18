@@ -217,6 +217,8 @@ export default function ObservationDefinitionView({
       ...definition,
       component: definition.component || [],
       status: "retired",
+      slug_value: definition.slug_config.slug_value,
+      facility: facilityId,
     });
   };
 

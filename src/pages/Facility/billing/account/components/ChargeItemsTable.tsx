@@ -171,7 +171,7 @@ export function ChargeItemsTable({
     if (!item.service_resource || !item.service_resource_id) return "";
     switch (item.service_resource) {
       case ChargeItemServiceResource.service_request:
-        return `/facility/${facilityId}/services_requests/${item.service_resource_id}`;
+        return `/facility/${facilityId}/service_requests/${item.service_resource_id}`;
       case ChargeItemServiceResource.appointment:
         return `/facility/${facilityId}/patient/${patientId}/appointments/${item.service_resource_id}`;
       default:

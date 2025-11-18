@@ -252,7 +252,6 @@ export const STRUCTURED_QUESTIONS = [
     label: "Time of Death",
     questionnaire: time_of_death_questionnaire,
   },
-  { value: "appointment", label: "Appointment" },
   { value: "files", label: "Files", questionnaire: files_questionnaire },
   {
     value: "service_request",
