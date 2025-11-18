@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { ArchiveIcon } from "lucide-react";
+import { navigate } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -7,8 +8,6 @@ import { toast } from "sonner";
 import { buttonVariants } from "@/components/ui/button";
 
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
-
-import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -25,7 +24,6 @@ const ArchivePatientSection = ({
   patientName,
 }: ArchivePatientSectionProps) => {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
 
   const [open, setOpen] = useState(false);
 
@@ -36,10 +34,7 @@ const ArchivePatientSection = ({
     onSuccess: () => {
       toast.success(t("patient_archived_successfully"));
       setOpen(false);
-      goBack();
-    },
-    onError: () => {
-      setOpen(false);
+      navigate("/");
     },
   });
 
