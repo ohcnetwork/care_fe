@@ -96,6 +96,10 @@ export function SupplyDeliveryTable({
     showCheckbox &&
     deliveries.some((d) => d.status === SupplyDeliveryStatus.in_progress);
 
+  const showActionsColumn =
+    deliveryOrderStatus === DeliveryOrderStatus.draft &&
+    inProgressDeliveries.length > 0;
+
   const didAutoSelectRef = useRef(false);
   useEffect(() => {
     if (!autoSelectOnMount) return;
@@ -142,10 +146,7 @@ export function SupplyDeliveryTable({
           <TableHead>{t("disc")}</TableHead>
           <TableHead>{t("status")}</TableHead>
           <TableHead>{t("condition")}</TableHead>
-          {deliveryOrderStatus === DeliveryOrderStatus.draft &&
-            deliveries.some(
-              (d) => d.status === SupplyDeliveryStatus.in_progress,
-            ) && <TableHead>{t("actions")}</TableHead>}
+          {showActionsColumn && <TableHead>{t("actions")}</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody className="text-sm">
@@ -235,12 +236,16 @@ export function SupplyDeliveryTable({
                 </Badge>
               )}
             </TableCell>
-            {delivery.status === SupplyDeliveryStatus.in_progress &&
-              deliveryOrderStatus === DeliveryOrderStatus.draft && (
-                <TableCell>
+            {showActionsColumn && (
+              <TableCell>
+                {delivery.status === SupplyDeliveryStatus.in_progress && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="icon">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label={t("actions")}
+                      >
                         <EllipsisVertical className="size-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -277,8 +282,9 @@ export function SupplyDeliveryTable({
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </TableCell>
-              )}
+                )}
+              </TableCell>
+            )}
           </TableRow>
         ))}
       </TableBody>
