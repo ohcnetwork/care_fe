@@ -253,7 +253,7 @@ export default function AddChargeItemSheet({
             <Pagination totalCount={response?.count || 0} />
           </div>
         </div>
-        <SheetFooter className="bg-gray-100 p-3 gap-2">
+        <SheetFooter className="bg-white p-3 gap-2">
           <Button
             variant="outline"
             onClick={() => setOpen(false)}
