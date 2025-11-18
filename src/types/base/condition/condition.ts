@@ -137,7 +137,10 @@ export function ConditionOperationSummary({
 }) {
   const { t } = useTranslation();
   const conditionName = t(`condition_metric__${condition.metric}`);
-  const { tagIds, tagResource } = extractTagInformation(condition.value);
+  const { tagIds, tagResource } = extractTagInformation(
+    condition.value,
+    condition.metric,
+  );
   const tags = useTagConfigs({
     ids: tagIds,
     disabled:
@@ -234,6 +237,7 @@ export const extractTagInformation = (
     | ConditionOperationInRangeValue
     | AgeOperationEqualityValue
     | AgeOperationInRangeValue,
+  metric?: string,
 ) => {
   const tagIds =
     typeof value === "object" &&
@@ -242,9 +246,7 @@ export const extractTagInformation = (
       ? value.value.split(",")
       : [];
   const tagResource =
-    typeof value === "object" && "value_type" in value
-      ? (value.value_type as TagResource)
-      : TagResource.ENCOUNTER;
+    metric === "encounter_tag" ? TagResource.ENCOUNTER : TagResource.PATIENT;
   return { tagIds, tagResource };
 };
 

@@ -59,7 +59,7 @@ import {
   QualifiedRange,
 } from "@/types/base/qualifiedRange/qualifiedRange";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
-import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import valueSetApi from "@/types/valueSet/valueSetApi";
 import query from "@/Utils/request/query";
@@ -711,7 +711,10 @@ export function RenderConditionInput({
   const operation = condition.operation;
   const value =
     "value" in condition ? condition.value : { min: undefined, max: undefined };
-  const { tagIds, tagResource } = extractTagInformation(value);
+  const { tagIds, tagResource } = extractTagInformation(
+    value,
+    condition.metric,
+  );
   const tagQueries = useTagConfigs({
     ids: tagIds,
     disabled: operation !== ConditionOperation.has_tag,
@@ -1007,10 +1010,6 @@ export function RenderConditionInput({
           </div>
         );
       } else if (operation === ConditionOperation.has_tag) {
-        const tagType =
-          tagResource || condition.metric === "encounter_tag"
-            ? TagResource.ENCOUNTER
-            : TagResource.PATIENT;
         const selectedTags = tagQueries
           .map((query) => query.data)
           .filter(Boolean) as TagConfig[];
@@ -1018,7 +1017,7 @@ export function RenderConditionInput({
           handleSetValue(
             {
               value: value,
-              value_type: tagType,
+              value_type: tagResource,
             },
             index,
           );
@@ -1038,7 +1037,7 @@ export function RenderConditionInput({
                     <FormControl>
                       <TagSelectorPopover
                         selected={selectedTags}
-                        resource={tagType}
+                        resource={tagResource}
                         onChange={(tags) => {
                           handleSetTagValue(
                             tags.map((tag) => tag.id).join(","),
@@ -1079,7 +1078,7 @@ export function ConditionComponent<
     queryFn: query(observationDefinitionApi.getAllMetrics),
   });
 
-  const metrics = data?.filter((m) => !m.name.includes("patient_tags"));
+  const metrics = data?.filter((m) => !m.name.includes("patient_tag"));
 
   useEffect(() => {
     if (metrics?.[0] && conditions.length === 0) {
