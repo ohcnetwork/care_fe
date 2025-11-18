@@ -127,10 +127,10 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                 })
               }
               options={Object.keys(SORT_OPTIONS)}
-              label="qty"
+              label={t("net_content")}
               onClear={() => updateQuery({ ordering: undefined })}
               className="w-full sm:w-auto h-9 border-gray-300"
-              placeholder="sort_by_quantity"
+              placeholder={t("sort_by_net_content")}
             />
           </div>
         </div>
