@@ -84,10 +84,7 @@ describe("All combination of questionnaire submissions", () => {
     cy.get("body").type("{esc}");
     cy.wait("@getEncounters").its("response.statusCode").should("eq", 200);
     cy.get("button").contains("View Encounter").first().click();
-    cy.get("button").contains("Update Details").click();
-    cy.get("div[role='dialog']").within(() => {
-      cy.get('[data-cy="add-questionnaire-button"]').click();
-    });
+    cy.get("button").contains("Forms").first().click();
     cy.typeAndSelectOption(
       "input[placeholder='Search Forms']",
       questionnaireName,
