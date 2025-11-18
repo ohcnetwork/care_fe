@@ -65,7 +65,7 @@ function extractVitals(
           (fields) => fields.main_code?.code === code.code,
         );
         vitalsObject[code.display] = {
-          value: vitalField?.value.value || "",
+          value: vitalField?.value.value || undefined,
           unit: vitalField?.value.unit?.code,
         };
       }
