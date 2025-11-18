@@ -148,7 +148,7 @@ export function SupplyDeliveryTable({
             ) && <TableHead>{t("actions")}</TableHead>}
         </TableRow>
       </TableHeader>
-      <TableBody>
+      <TableBody className="text-sm">
         {deliveries.map((delivery) => (
           <TableRow key={delivery.id}>
             {showAllCheckbox && (
