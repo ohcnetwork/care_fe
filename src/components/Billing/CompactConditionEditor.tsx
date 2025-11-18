@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -20,9 +20,10 @@ import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 
 import {
+  AgeOperationEqualityValue,
   AgeOperationInRangeValue,
-  Condition,
   CONDITION_AGE_VALUE_TYPES,
+  ConditionForm,
   ConditionOperation,
   ConditionOperationSummary,
   conditionSchema,
@@ -34,9 +35,9 @@ import {
 } from "@/types/base/condition/condition";
 
 interface CompactConditionEditorProps {
-  conditions: Condition[];
+  conditions: ConditionForm[];
   availableMetrics: Metrics[];
-  onChange: (conditions: Condition[]) => void;
+  onChange: (conditions: ConditionForm[]) => void;
   className?: string;
 }
 
@@ -87,7 +88,7 @@ function RenderInput({
 }: {
   metric: string;
   operation: ConditionOperation;
-  form: UseFormReturn<Condition, unknown, Condition>;
+  form: UseFormReturn<ConditionForm, unknown, ConditionForm>;
 }) {
   const { t } = useTranslation();
   // For patient_gender with equality operation
@@ -128,6 +129,7 @@ function RenderInput({
 
   // For patient_age with equality operation
   if (metric === "patient_age" && operation === ConditionOperation.equality) {
+    const value = form.getValues("value") as AgeOperationEqualityValue;
     return (
       <div className="flex flex-1 gap-1 justify-between">
         <FormField
@@ -139,9 +141,11 @@ function RenderInput({
                 <Input
                   type="number"
                   placeholder={t("value")}
-                  value={field.value}
+                  value={value.value ?? ""}
                   onChange={(e) => {
-                    const newValue = Number(e.target.value);
+                    const inputValue = e.target.value;
+                    const newValue =
+                      inputValue === "" ? undefined : Number(inputValue);
                     field.onChange(newValue);
                   }}
                   className="grow h-9!"
@@ -158,7 +162,7 @@ function RenderInput({
             <FormItem className="flex-1">
               <FormControl>
                 <Select
-                  value={field.value || "years"}
+                  value={value.value_type || "years"}
                   onValueChange={(value_type) => {
                     field.onChange(value_type);
                   }}
@@ -184,8 +188,9 @@ function RenderInput({
 
   // For patient_age with in_range operation
   if (metric === "patient_age" && operation === ConditionOperation.in_range) {
+    const value = form.getValues("value") as AgeOperationInRangeValue;
     return (
-      <>
+      <div className="flex gap-1 grow-2">
         <FormField
           control={form.control}
           name="value.min"
@@ -195,9 +200,11 @@ function RenderInput({
                 <Input
                   type="number"
                   placeholder={t("min")}
-                  value={field.value}
+                  value={value.min ?? ""}
                   onChange={(e) => {
-                    const min = Number(e.target.value);
+                    const inputValue = e.target.value;
+                    const min =
+                      inputValue === "" ? undefined : Number(inputValue);
                     field.onChange(min);
                   }}
                   className="grow"
@@ -216,9 +223,11 @@ function RenderInput({
                 <Input
                   type="number"
                   placeholder={t("max")}
-                  value={field.value}
+                  value={value.max ?? ""}
                   onChange={(e) => {
-                    const max = Number(e.target.value);
+                    const inputValue = e.target.value;
+                    const max =
+                      inputValue === "" ? undefined : Number(inputValue);
                     field.onChange(max);
                   }}
                   className="grow"
@@ -255,7 +264,7 @@ function RenderInput({
             </FormItem>
           )}
         />
-      </>
+      </div>
     );
   }
 
@@ -365,13 +374,22 @@ export function CompactConditionEditor({
   const metrics =
     availableMetrics?.filter((m) => !m.name.includes("encounter_tag")) || [];
 
+  const defaultCondition = getDefaultCondition(metrics);
+
   // Set up form with zod validation
   const form = useForm({
     resolver: zodResolver(conditionSchema),
     defaultValues: {
-      ...getDefaultCondition(metrics),
+      ...defaultCondition,
     },
   });
+
+  // Reset form when metrics become available
+  useEffect(() => {
+    if (metrics.length > 0) {
+      form.reset(defaultCondition);
+    }
+  }, [metrics.length]);
 
   const { metric, operation } = form.watch();
 
@@ -386,12 +404,8 @@ export function CompactConditionEditor({
     }));
     onChange(updatedConditions);
 
-    // Reset form
-    form.reset({
-      metric: "",
-      operation: ConditionOperation.equality,
-      value: "",
-    });
+    // Reset form to default values
+    form.reset(defaultCondition);
 
     setIsAdding(false);
   };
@@ -426,14 +440,7 @@ export function CompactConditionEditor({
   const resetValue = (op: ConditionOperation) => {
     const metric = form.getValues("metric");
     const value = getConditionValue(metric, op);
-    if (op === ConditionOperation.in_range && metric === "patient_age") {
-      const { min, max, value_type } = value as AgeOperationInRangeValue;
-      form.setValue("value.min", min);
-      form.setValue("value.max", max);
-      form.setValue("value.value_type", value_type);
-    } else {
-      form.setValue("value", value);
-    }
+    form.setValue("value", value);
     form.setValue("_conditionType", `${metric}_${op}`);
   };
 
@@ -502,7 +509,7 @@ export function CompactConditionEditor({
                 control={form.control}
                 name="operation"
                 render={({ field }) => (
-                  <FormItem className="grow-2 w-full sm:max-w-[300px]">
+                  <FormItem className="grow-2 w-full sm:max-w-[200px]">
                     <FormControl>
                       <Select
                         value={field.value}
@@ -539,19 +546,25 @@ export function CompactConditionEditor({
                   {/* Map errors to user-friendly messages */}
                   {Object.entries(form.formState.errors).map(([key, error]) => {
                     // Get error message based on field
-                    let errorMessage = "";
+                    const errorMessage: Record<string, string> = {};
                     if (typeof error.message === "string") {
-                      errorMessage = error.message;
+                      errorMessage[key] = error.message;
                     } else if (typeof error === "object") {
                       Object.entries(error).forEach(([k, v]: [string, any]) => {
                         if (v && typeof v.message === "string") {
-                          errorMessage += `${k} ${v.message} `;
+                          errorMessage[k] = v.message;
                         }
                       });
                     }
 
                     return errorMessage ? (
-                      <li key={key}>{errorMessage}</li>
+                      <li key={key}>
+                        {Object.entries(errorMessage).map(([k, v]) => (
+                          <li key={k}>
+                            {k}: {v}
+                          </li>
+                        ))}
+                      </li>
                     ) : null;
                   })}
                 </ul>

@@ -1,4 +1,5 @@
-import { GENDERS } from "@/common/constants";
+import { GENDER_TYPES, GENDERS } from "@/common/constants";
+import { QualifiedRange } from "@/types/base/qualifiedRange/qualifiedRange";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import { useTranslation } from "react-i18next";
@@ -13,7 +14,6 @@ export enum ConditionOperation {
 
 export interface ConditionBase {
   metric: string;
-  _conditionType?: string;
 }
 
 export interface ConditionOperationInRangeValue {
@@ -60,6 +60,10 @@ export type Condition =
       operation: ConditionOperation.in_range;
       value: AgeOperationInRangeValue;
     });
+
+export type ConditionForm = Condition & {
+  _conditionType: string;
+};
 
 export interface MetricsContext {
   patient: "patient";
@@ -124,7 +128,7 @@ export const conditionSchema = z.discriminatedUnion("_conditionType", [
     }),
     _conditionType: z.literal("patient_tag_has_tag"),
   }),
-]) as z.ZodType<Condition>;
+]) as z.ZodType<ConditionForm>;
 
 export function ConditionOperationSummary({
   condition,
@@ -174,6 +178,7 @@ export function getConditionValue(
   operation: ConditionOperation,
 ):
   | string
+  | TagOperationValue
   | ConditionOperationInRangeValue
   | AgeOperationEqualityValue
   | AgeOperationInRangeValue {
@@ -182,6 +187,9 @@ export function getConditionValue(
     case ConditionOperation.equality:
       if (metric === "patient_age") {
         conditionValue = { value: 0, value_type: "years" };
+        break;
+      } else if (metric === "patient_gender") {
+        conditionValue = GENDER_TYPES[0].id;
         break;
       }
       conditionValue = "";
@@ -192,26 +200,31 @@ export function getConditionValue(
         conditionValue = { ...conditionValue, value_type: "years" };
       }
       break;
-    case ConditionOperation.has_tag:
-      conditionValue = { value: "", value_type: TagResource.ENCOUNTER };
+    case ConditionOperation.has_tag: {
+      const tagResource =
+        metric === "encounter_tag"
+          ? TagResource.ENCOUNTER
+          : TagResource.PATIENT;
+      conditionValue = { value: "", value_type: tagResource };
       break;
+    }
   }
   return conditionValue;
 }
 
 export const getDefaultCondition = (metrics: Metrics[]) => {
-  if (!metrics || metrics.length === 0) return {} as Condition;
+  if (!metrics || metrics.length === 0) return {} as ConditionForm;
   const firstOperation = metrics?.[0]
     ?.allowed_operations?.[0] as ConditionOperation;
   const metricName = metrics?.[0].name || "";
   const value = getConditionValue(metrics?.[0].name, firstOperation);
-  const newCondition: Condition = {
+  const newCondition = {
     metric: metricName,
     operation: firstOperation,
     value: value as any,
     _conditionType: `${metricName}_${firstOperation}`,
-  } as Condition;
-  return newCondition;
+  };
+  return newCondition as ConditionForm;
 };
 
 export const extractTagInformation = (
@@ -233,4 +246,20 @@ export const extractTagInformation = (
       ? (value.value_type as TagResource)
       : TagResource.ENCOUNTER;
   return { tagIds, tagResource };
+};
+
+const stripConditionType = (condition: ConditionForm): Condition => {
+  const { _conditionType, ...rest } = condition;
+  return rest;
+};
+
+export const removeConditionType = (
+  qualifiedRanges: QualifiedRange[],
+): QualifiedRange[] => {
+  return qualifiedRanges.map((range) => ({
+    ...range,
+    conditions: range.conditions.map((condition) => ({
+      ...stripConditionType(condition as ConditionForm),
+    })),
+  }));
 };

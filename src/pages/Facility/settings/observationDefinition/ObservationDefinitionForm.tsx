@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { CodeSchema } from "@/types/base/code/code";
+import { removeConditionType } from "@/types/base/condition/condition";
 import {
   InterpretationType,
   QualifiedRange,
@@ -312,12 +313,20 @@ function ObservationDefinitionFormContent({
   };
 
   function onSubmit(data: z.infer<typeof formSchema>) {
+    const cleanData = {
+      ...data,
+      qualified_ranges: removeConditionType(data.qualified_ranges || []),
+      component: data.component?.map((c) => ({
+        ...c,
+        qualified_ranges: removeConditionType(c.qualified_ranges || []),
+      })),
+    };
     if (isEditMode && observationSlug) {
-      updateObservationDefinition(data as ObservationDefinitionUpdateSpec);
+      updateObservationDefinition(cleanData as ObservationDefinitionUpdateSpec);
     } else {
       const payload: ObservationDefinitionCreateSpec = {
-        ...data,
-        facility: facilityId,
+        ...cleanData,
+        facility: facilityId as string,
       };
       createObservationDefinition(payload);
     }
