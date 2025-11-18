@@ -476,8 +476,7 @@ export default function ServiceRequestShow({
               resourceId={serviceRequestId}
               encounterId={request.encounter.id}
               serviceResourceType={ChargeItemServiceResource.service_request}
-              sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/services_requests/${serviceRequestId}`}
-              locationId={locationId}
+              sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/service_requests/${serviceRequestId}`}
               patientId={request.encounter.patient.id}
               viewOnly={disableEdit}
             />

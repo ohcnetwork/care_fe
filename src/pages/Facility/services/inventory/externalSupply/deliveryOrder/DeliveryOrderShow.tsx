@@ -1,11 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, Edit, MoreVertical, Truck } from "lucide-react";
+import {
+  ChevronLeft,
+  Edit,
+  EllipsisVertical,
+  MoreVertical,
+  Truck,
+} from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import BackButton from "@/components/Common/BackButton";
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +47,9 @@ import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/Prod
 import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
+  DeliveryOrderRetrieve,
   DeliveryOrderStatus,
+  DeliveryOrderUpdate,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
@@ -156,10 +166,15 @@ export function DeliveryOrderShow({
     condition: SupplyDeliveryCondition.normal,
   });
   const [showAllDeliveries, setShowAllDeliveries] = useState(false);
-  const [selectedProductKnowledge, setSelectedProductKnowledge] =
-    useState<ProductKnowledgeBase>();
   const [selectedProductKnowledgeDrawer, setSelectedProductKnowledgeDrawer] =
     useState<ProductKnowledgeBase>();
+  const [deliveryOrderStatusDialog, setDeliveryOrderStatusDialog] = useState<{
+    open: boolean;
+    status: DeliveryOrderStatus | null;
+  }>({
+    open: false,
+    status: null,
+  });
 
   const { data: deliveryOrder, isLoading } = useQuery({
     queryKey: ["deliveryOrders", deliveryOrderId],
@@ -175,23 +190,11 @@ export function DeliveryOrderShow({
 
   const { data: supplyDeliveries, isLoading: isLoadingSupplyDeliveries } =
     useQuery({
-      queryKey: [
-        "supplyDeliveries",
-        deliveryOrderId,
-        selectedProductKnowledge?.id,
-      ],
+      queryKey: ["supplyDeliveries", deliveryOrderId],
       queryFn: query.paginated(supplyDeliveryApi.listSupplyDelivery, {
         queryParams: {
           order: deliveryOrderId,
           facility: facilityId,
-          ...(internal
-            ? {
-                supplied_inventory_item_product_knowledge:
-                  selectedProductKnowledge?.id,
-              }
-            : {
-                supplied_item_product_knowledge: selectedProductKnowledge?.id,
-              }),
         },
       }),
       enabled: !!deliveryOrderId,
@@ -211,27 +214,29 @@ export function DeliveryOrderShow({
       },
     });
 
-  const { mutate: updateDeliveryOrder, isPending: isUpdating } = useMutation({
+  const { mutate: updateDeliveryOrder, isPending: isUpdating } = useMutation<
+    DeliveryOrderRetrieve,
+    Error,
+    DeliveryOrderUpdate
+  >({
     mutationFn: mutate(deliveryOrderApi.updateDeliveryOrder, {
       pathParams: {
         facilityId: facilityId,
         deliveryOrderId: deliveryOrderId,
       },
     }),
-    onSuccess: () => {
+    onSuccess: (updatedDeliveryOrder: DeliveryOrderRetrieve) => {
       queryClient.invalidateQueries({
         queryKey: ["deliveryOrders", deliveryOrderId],
       });
+
       toast.success(
-        deliveryOrder?.status === DeliveryOrderStatus.draft
+        updatedDeliveryOrder.status === DeliveryOrderStatus.pending
           ? t("order_marked_as_approved_successfully")
-          : deliveryOrder?.status === DeliveryOrderStatus.pending
-            ? t("order_marked_as_completed_successfully")
-            : t("order_updated_successfully"),
+          : t("order_marked_as_successfully_toast", {
+              status: t(updatedDeliveryOrder.status),
+            }),
       );
-    },
-    onError: (_error) => {
-      toast.error(t("error_updating_order"));
     },
   });
 
@@ -390,7 +395,10 @@ export function DeliveryOrderShow({
                 <Trans
                   i18nKey="delivery_request_from_to"
                   values={{
-                    from: deliveryOrder.origin?.name || t("origin"),
+                    from:
+                      deliveryOrder.origin?.name ||
+                      deliveryOrder.supplier?.name ||
+                      t("origin"),
                     to: deliveryOrder.destination?.name || t("destination"),
                   }}
                   components={{
@@ -401,14 +409,15 @@ export function DeliveryOrderShow({
             </div>
           </div>
           <div className="flex items-center justify-end gap-2">
-            {!isRequester && (
-              <Button variant="outline" asChild>
-                <Link href={`${deliveryOrderId}/edit`}>
-                  <Edit /> {t("edit")}
-                  <ShortcutBadge actionId="edit-order" />
-                </Link>
-              </Button>
-            )}
+            {!isRequester &&
+              deliveryOrder.status === DeliveryOrderStatus.draft && (
+                <Button variant="outline" asChild>
+                  <Link href={`${deliveryOrderId}/edit`}>
+                    <Edit /> {t("edit")}
+                    <ShortcutBadge actionId="edit-order" />
+                  </Link>
+                </Button>
+              )}
 
             {deliveryOrder.status === DeliveryOrderStatus.draft && (
               <Button
@@ -435,6 +444,50 @@ export function DeliveryOrderShow({
                   <ShortcutBadge actionId="mark-as" />
                 </Button>
               )}
+
+            {deliveryOrder.status === DeliveryOrderStatus.draft && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <EllipsisVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={() =>
+                        setDeliveryOrderStatusDialog({
+                          open: true,
+                          status: DeliveryOrderStatus.entered_in_error,
+                        })
+                      }
+                      disabled={isUpdating}
+                      className="w-full flex justify-stretch"
+                    >
+                      <CareIcon icon="l-exclamation-circle" />
+                      <span>{t("mark_as_entered_in_error")}</span>
+                    </Button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={() =>
+                        setDeliveryOrderStatusDialog({
+                          open: true,
+                          status: DeliveryOrderStatus.abandoned,
+                        })
+                      }
+                      disabled={isUpdating}
+                      className="w-full flex justify-stretch"
+                    >
+                      <CareIcon icon="l-ban" />
+                      <span>{t("mark_as_abandoned")}</span>
+                    </Button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
 
@@ -504,85 +557,72 @@ export function DeliveryOrderShow({
         {/* Supply Deliveries Section */}
         <Card>
           <CardHeader className="text-lg flex flex-row justify-between">
-            <CardTitle>{t("supply_deliveries")}</CardTitle>
-            <div className="flex gap-2">
-              <div className="flex items-center">
-                <div>
-                  <ProductKnowledgeSelect
-                    value={selectedProductKnowledge}
-                    onChange={(value) => {
-                      setSelectedProductKnowledge(value);
-                    }}
-                    placeholder={t("filter_by_product")}
-                    disableFavorites
-                  />
-                </div>
-              </div>
+            <CardTitle>
+              {isRequester
+                ? deliveryOrder.status === DeliveryOrderStatus.completed
+                  ? t("items_updated_stock")
+                  : t("items_to_receive")
+                : t("supply_deliveries")}
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              {deliveryOrder.status === DeliveryOrderStatus.pending && (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAllDeliveries(true)}
+                >
+                  {t("view_all_deliveries")}
+                  <ShortcutBadge actionId="all-deliveries" />
+                </Button>
+              )}
 
-              <div className="flex items-center gap-2">
-                {deliveryOrder.status === DeliveryOrderStatus.pending && (
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowAllDeliveries(true)}
-                  >
-                    {t("view_all_deliveries")}
-                    <ShortcutBadge actionId="all-deliveries" />
-                  </Button>
+              {deliveryOrder.status === DeliveryOrderStatus.pending &&
+                isRequester && (
+                  <>
+                    <Button
+                      onClick={handleConfirmUpdateStock}
+                      className="h-10"
+                      disabled={
+                        isUpdating ||
+                        isUpsertingDeliveries ||
+                        selectedDeliveries.length === 0
+                      }
+                    >
+                      {isUpsertingDeliveries
+                        ? t("updating")
+                        : t("receive_update_stock")}
+                      <ShortcutBadge actionId="enter-action" />
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon" className="h-10">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={handleMarkAsAbandoned}
+                          disabled={
+                            isUpdating ||
+                            isUpsertingDeliveries ||
+                            selectedDeliveries.length === 0
+                          }
+                        >
+                          {t("mark_as_abandoned")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={handleMarkAsDamaged}
+                          disabled={
+                            isUpdating ||
+                            isUpsertingDeliveries ||
+                            selectedDeliveries.length === 0
+                          }
+                        >
+                          {t("mark_as_damaged")}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </>
                 )}
-
-                {deliveryOrder.status === DeliveryOrderStatus.pending &&
-                  isRequester && (
-                    <>
-                      <Button
-                        onClick={handleConfirmUpdateStock}
-                        className="h-10"
-                        disabled={
-                          isUpdating ||
-                          isUpsertingDeliveries ||
-                          selectedDeliveries.length === 0
-                        }
-                      >
-                        {isUpsertingDeliveries
-                          ? t("updating")
-                          : t("confirm_update_stock")}
-                        <ShortcutBadge actionId="enter-action" />
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-10"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={handleMarkAsAbandoned}
-                            disabled={
-                              isUpdating ||
-                              isUpsertingDeliveries ||
-                              selectedDeliveries.length === 0
-                            }
-                          >
-                            {t("mark_as_abandoned")}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={handleMarkAsDamaged}
-                            disabled={
-                              isUpdating ||
-                              isUpsertingDeliveries ||
-                              selectedDeliveries.length === 0
-                            }
-                          >
-                            {t("mark_as_damaged")}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </>
-                  )}
-              </div>
             </div>
           </CardHeader>
           <CardContent className="p-2">
@@ -649,14 +689,11 @@ export function DeliveryOrderShow({
                             : delivery.supplied_item?.product_knowledge,
                         );
                       }}
+                      deliveryOrderStatus={deliveryOrder.status}
                     />
                   </div>
                 ) : (
-                  <EmptyState
-                    icon={<Truck className="size-5 text-primary-600" />}
-                    title={t("no_deliveries_found")}
-                    description={t("no_deliveries_found_description")}
-                  />
+                  <></>
                 )}
 
                 {/* Add New Supply Delivery Form - Always show when in draft mode */}
@@ -698,6 +735,7 @@ export function DeliveryOrderShow({
                   }}
                   placeholder={t("filter_by_product")}
                   disableFavorites
+                  alignContent="end"
                 />
               </div>
               {deliveryOrder && (
@@ -722,7 +760,7 @@ export function DeliveryOrderShow({
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t("confirm_update_stock")}</DialogTitle>
+              <DialogTitle>{t("receive_update_stock")}</DialogTitle>
               <DialogDescription>
                 {t("apply_updates_selected", {
                   count: selectedDeliveries.length,
@@ -833,6 +871,34 @@ export function DeliveryOrderShow({
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <ConfirmActionDialog
+          open={deliveryOrderStatusDialog.open}
+          onOpenChange={(open) =>
+            setDeliveryOrderStatusDialog((prev) => ({ ...prev, open }))
+          }
+          title={
+            deliveryOrderStatusDialog.status ===
+            DeliveryOrderStatus.entered_in_error
+              ? t("mark_as_entered_in_error")
+              : t("mark_as_abandoned")
+          }
+          description={
+            deliveryOrderStatusDialog.status ===
+            DeliveryOrderStatus.entered_in_error
+              ? t("mark_order_as_entered_in_error_confirmation_description")
+              : t("mark_order_as_abandoned_confirmation_description")
+          }
+          confirmText={t("confirm")}
+          variant="destructive"
+          onConfirm={() => {
+            if (deliveryOrderStatusDialog.status) {
+              handleUpdateDeliveryOrderStatus(deliveryOrderStatusDialog.status);
+            }
+            setDeliveryOrderStatusDialog({ open: false, status: null });
+          }}
+          disabled={isUpdating}
+        />
       </div>
     </Page>
   );
