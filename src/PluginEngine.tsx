@@ -1,13 +1,13 @@
+import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import Loading from "@/components/Common/Loading";
 import { useQuery } from "@tanstack/react-query";
 import {
   __federation_method_getRemote as getFederationRemote,
   __federation_method_setRemote as setFederationRemote,
   __federation_method_unwrapDefault as unwrapModule,
 } from "__federation__";
+import { Loader2Icon } from "lucide-react";
 import React, { Suspense, useEffect, useState } from "react";
-
-import ErrorBoundary from "@/components/Common/ErrorBoundary";
-import Loading from "@/components/Common/Loading";
 
 import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
 import query from "@/Utils/request/query";
@@ -143,7 +143,18 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
 
         return (
           <PluginErrorBoundary key={plugin.plugin} pluginName={plugin.plugin}>
-            <React.Suspense fallback={<div>Loading...</div>}>
+            <React.Suspense
+              fallback={
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2Icon
+                    role="status"
+                    aria-label="Loading"
+                    className="size-4 animate-spin"
+                  />
+                  <p className="text-sm text-gray-600">Loading</p>
+                </div>
+              }
+            >
               <Component {...props} />
             </React.Suspense>
           </PluginErrorBoundary>
