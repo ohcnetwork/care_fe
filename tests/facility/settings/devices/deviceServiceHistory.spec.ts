@@ -6,12 +6,12 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Device Service History", () => {
   let facilityId: string;
-  let originalNotes: string;
+  let notes: string;
   let updatedNotes: string;
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-    originalNotes = faker.lorem.sentence();
+    notes = faker.lorem.sentence();
     updatedNotes = faker.lorem.sentence();
     await page.goto(`/facility/${facilityId}/settings/devices`);
   });
@@ -32,8 +32,6 @@ test.describe("Device Service History", () => {
     await page.waitForLoadState("networkidle");
 
     await page.getByRole("button", { name: "Add Service Record" }).click();
-
-    const notes = faker.lorem.sentence();
 
     await page.getByRole("textbox", { name: "Notes *" }).fill(notes);
 
@@ -59,14 +57,14 @@ test.describe("Device Service History", () => {
 
     await page.getByRole("button", { name: "Add Service Record" }).click();
 
-    await page.getByRole("textbox", { name: "Notes *" }).fill(originalNotes);
+    await page.getByRole("textbox", { name: "Notes *" }).fill(notes);
     await page.getByRole("button", { name: "Save" }).click();
 
-    await expect(page.getByText(originalNotes)).toBeVisible();
+    await expect(page.getByText(notes)).toBeVisible();
 
     await page
       .locator('[data-slot="card"]')
-      .filter({ hasText: originalNotes })
+      .filter({ hasText: notes })
       .locator("button:has(.lucide-square-pen)")
       .first()
       .click();
@@ -93,7 +91,7 @@ test.describe("Device Service History", () => {
     await expect(updatedCard).toBeVisible();
 
     await expect(
-      page.locator('[data-slot="card"]').filter({ hasText: originalNotes }),
+      page.locator('[data-slot="card"]').filter({ hasText: notes }),
     ).toHaveCount(0);
   });
 
@@ -153,8 +151,6 @@ test.describe("Device Service History", () => {
 
     await page.getByRole("button", { name: "Add Service Record" }).click();
 
-    const notes = faker.lorem.sentence();
-
     await page.getByRole("textbox", { name: "Notes *" }).fill(notes);
     await page.getByRole("button", { name: "Save" }).click();
 
@@ -167,16 +163,15 @@ test.describe("Device Service History", () => {
       .first()
       .click();
 
-    const saveButton = page.getByRole("button", { name: "Update" });
-    await expect(saveButton).toBeDisabled();
+    const updateButton = page.getByRole("button", { name: "Update" });
+    await expect(updateButton).toBeDisabled();
 
-    const newNotes = faker.lorem.sentence();
-    await page.getByRole("textbox", { name: "Notes *" }).fill(newNotes);
+    await page.getByRole("textbox", { name: "Notes *" }).fill(updatedNotes);
 
-    await expect(saveButton).toBeEnabled();
+    await expect(updateButton).toBeEnabled();
 
     await page.getByRole("textbox", { name: "Notes *" }).fill(notes);
 
-    await expect(saveButton).toBeDisabled();
+    await expect(updateButton).toBeDisabled();
   });
 });
