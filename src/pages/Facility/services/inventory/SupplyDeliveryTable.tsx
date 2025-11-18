@@ -48,6 +48,7 @@ interface SupplyDeliveryTableProps {
   onDeliveryClick?: (delivery: SupplyDeliveryRead) => void;
   deliveryOrderStatus?: DeliveryOrderStatus;
   autoSelectOnMount?: boolean;
+  isRequester?: boolean;
 }
 
 export function SupplyDeliveryTable({
@@ -60,6 +61,7 @@ export function SupplyDeliveryTable({
   onDeliveryClick,
   deliveryOrderStatus,
   autoSelectOnMount = false,
+  isRequester = false,
 }: SupplyDeliveryTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -129,8 +131,12 @@ export function SupplyDeliveryTable({
           )}
           <TableHead>{t("item")}</TableHead>
           <TableHead>{t("requested_qty")}</TableHead>
-          <TableHead>{t("received_qty")}</TableHead>
-          <TableHead>{t("received_date")}</TableHead>
+          <TableHead>
+            {isRequester ? t("received_qty") : t("dispatched_qty")}
+          </TableHead>
+          <TableHead>
+            {isRequester ? t("received_date") : t("dispatched_date")}
+          </TableHead>
           <TableHead>{t("base")}</TableHead>
           <TableHead>{t("tax")}</TableHead>
           <TableHead>{t("disc")}</TableHead>
@@ -168,7 +174,7 @@ export function SupplyDeliveryTable({
                   : delivery.supplied_item?.product_knowledge?.name}
               </div>
             </TableCell>
-            <TableCell>{delivery.supply_request?.quantity}</TableCell>
+            <TableCell>{delivery.supply_request?.quantity || "-"}</TableCell>
             <TableCell>{delivery.supplied_item_quantity}</TableCell>
             <TableCell>
               {delivery.created_date &&

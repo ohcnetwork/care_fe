@@ -14,7 +14,7 @@ export interface MonetaryComponent {
   code?: Code;
   factor?: number;
   amount?: string;
-  conditions: Condition[];
+  conditions?: Condition[];
 }
 
 export interface MonetaryComponentRead extends MonetaryComponent {
