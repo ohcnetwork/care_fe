@@ -1230,6 +1230,7 @@
   "error_fetching_users_data": "Failed to load user data. Please try again later.",
   "error_generating_svg": "Error generating SVG",
   "error_loading_definitions": "Error loading the definitions",
+  "error_loading_encounter_tab": "Error loading encounter tab",
   "error_loading_observation_definition": "Error loading observation definition",
   "error_loading_pdf": "Error loading PDF",
   "error_loading_product": "Error Loading Product",

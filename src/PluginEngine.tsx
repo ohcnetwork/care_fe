@@ -1,19 +1,22 @@
+import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import Loading from "@/components/Common/Loading";
+import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import { useQuery } from "@tanstack/react-query";
 import {
   __federation_method_getRemote as getFederationRemote,
   __federation_method_setRemote as setFederationRemote,
   __federation_method_unwrapDefault as unwrapModule,
 } from "__federation__";
+import { Loader2Icon } from "lucide-react";
 import React, { Suspense, useEffect, useState } from "react";
-
-import ErrorBoundary from "@/components/Common/ErrorBoundary";
-import Loading from "@/components/Common/Loading";
 
 import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
 import query from "@/Utils/request/query";
 
 import { PluginManifest, SupportedPluginComponents } from "@/pluginTypes";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
+import { t } from "i18next";
+import { z } from "zod";
 
 // Import the remote component synchronously
 export default function PluginEngine({
@@ -35,10 +38,16 @@ export default function PluginEngine({
 
       const manifests = await Promise.all(
         enabledPlugins.configs.map(async (plugin) => {
-          if (!plugin.meta.url) {
-            console.error(`Plugin ${plugin.slug} is missing a URL in meta`);
+          if (
+            !plugin.meta.url ||
+            !z.string().url().safeParse(plugin.meta.url).success
+          ) {
+            console.error(
+              `Plugin ${plugin.slug} has an invalid URL (${plugin.meta.url}) in meta`,
+            );
             return undefined;
           }
+
           setFederationRemote(plugin.slug, {
             url: () => Promise.resolve(plugin.meta.url),
             format: "esm",
@@ -63,6 +72,12 @@ export default function PluginEngine({
       const availablePlugins = filteredManifests.map((manifest) =>
         unwrapModule(manifest),
       );
+
+      if (availablePlugins.length === 0) {
+        console.log("No plugins found");
+        return;
+      }
+
       console.log(
         `Loading ${filteredManifests.length} plugins; available plugins`,
         availablePlugins,
@@ -112,9 +127,22 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
         }
 
         return (
-          <React.Suspense key={plugin.plugin} fallback={<div>Loading...</div>}>
-            <Component {...props} />
-          </React.Suspense>
+          <PluginErrorBoundary key={plugin.plugin} pluginName={plugin.plugin}>
+            <React.Suspense
+              fallback={
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2Icon
+                    role="status"
+                    aria-label="Loading"
+                    className="size-4 animate-spin"
+                  />
+                  <p className="text-sm text-gray-600">{t("loading")}</p>
+                </div>
+              }
+            >
+              <Component {...props} />
+            </React.Suspense>
+          </PluginErrorBoundary>
         );
       })}
     </>
