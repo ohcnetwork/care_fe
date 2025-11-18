@@ -14,7 +14,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    include: ["vitest/*.{test,spec}.{ts,tsx}"],
+    include: ["vitest/**/*.{test,spec}.{ts,tsx}"],
     exclude: ["build", "node_modules"],
     coverage: {
       provider: "v8",
