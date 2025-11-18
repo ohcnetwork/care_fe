@@ -69,7 +69,12 @@ async function extractUsedKeys(src, extensions) {
       }
     } catch (err) {
       // Log and continue on parse errors so the script can process other files
-      console.error("❌ Failed to extract i18n keys from", filePath, ":", err.message);
+      console.error(
+        "❌ Failed to extract i18n keys from",
+        filePath,
+        ":",
+        err.message,
+      );
     }
   }
 

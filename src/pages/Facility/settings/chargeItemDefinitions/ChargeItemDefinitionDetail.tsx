@@ -51,6 +51,10 @@ export function ChargeItemDefinitionDetail({
       pathParams: { facilityId, slug },
     }),
   });
+  const { data: availableMetrics = [] } = useQuery({
+    queryKey: ["metrics"],
+    queryFn: query(chargeItemDefinitionApi.listMetrics, {}),
+  });
 
   const { mutate: updateChargeItemDefinition, isPending: isDeleting } =
     useMutation({
@@ -295,14 +299,19 @@ export function ChargeItemDefinitionDetail({
                               {t("conditions")}
                             </p>
                             {component.conditions.map((condition, index) => {
+                              const metric = availableMetrics.find(
+                                (m) => m.name === condition.metric,
+                              );
                               return (
                                 <div
                                   key={index}
                                   className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
                                 >
                                   <span>
-                                    {t(condition.metric)}{" "}
-                                    <span>{t(condition.operation)}</span>{" "}
+                                    {metric?.verbose_name || condition.metric}{" "}
+                                    <span>
+                                      {t(`operation__${condition.operation}`)}
+                                    </span>{" "}
                                     {getConditionValue(condition)}
                                   </span>
                                 </div>

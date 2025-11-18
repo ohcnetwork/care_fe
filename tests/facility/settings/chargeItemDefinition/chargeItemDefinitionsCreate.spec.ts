@@ -141,6 +141,6 @@ test.describe("Charge Item Definition Creation", () => {
     await expect(page.getByText(purchasePrice)).toBeVisible();
     await expect(page.getByText("9%")).toBeVisible();
     await expect(page.getByText("6%")).toBeVisible();
-    await expect(page.getByText("Age In Range 60 - 120")).toBeVisible();
+    await expect(page.getByText("Patient Age In Range 60 - 70")).toBeVisible();
   });
 });
