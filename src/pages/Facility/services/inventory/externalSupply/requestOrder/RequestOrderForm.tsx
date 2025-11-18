@@ -38,6 +38,7 @@ import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import BackButton from "@/components/Common/BackButton";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import {
   REQUEST_ORDER_STATUS_COLORS,
@@ -274,9 +275,9 @@ export default function RequestOrderForm({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <input type="submit" hidden />
-            <Card className="p-0  bg-gray-50">
+            <Card className="p-0 bg-white">
               <CardContent className="space-y-4 p-4 rounded-md">
-                <div className="grid sm:grid-cols-2 gap-4 items-start">
+                <div className="space-y-4 border border-gray-100 rounded-md p-4 bg-gray-50">
                   <FormField
                     control={form.control}
                     name="name"
@@ -296,72 +297,106 @@ export default function RequestOrderForm({
                     )}
                   />
 
+                  <div className="grid sm:grid-cols-2 gap-4 items-start">
+                    <FormField
+                      control={form.control}
+                      name={internal ? "origin" : "supplier"}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {internal ? t("deliver_from") : t("vendor")}
+                          </FormLabel>
+                          <FormControl>
+                            <Autocomplete
+                              options={
+                                internal ? deliveryFromOptions : vendorOptions
+                              }
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                              isLoading={
+                                internal
+                                  ? isLoadingDeliveryFromLocations
+                                  : false
+                              }
+                              onSearch={
+                                internal
+                                  ? setSearchDeliveryFrom
+                                  : setSupplierSearchQuery
+                              }
+                              placeholder={
+                                internal
+                                  ? t("select_location")
+                                  : t("select_vendor")
+                              }
+                              inputPlaceholder={
+                                internal
+                                  ? t("search_location")
+                                  : t("search_vendor")
+                              }
+                              noOptionsMessage={
+                                internal
+                                  ? t("no_location_found")
+                                  : t("no_vendor_found")
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="intent"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("intent")}</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger
+                                className="border border-gray-400"
+                                ref={field.ref}
+                              >
+                                <SelectValue placeholder={t("select_intent")} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {Object.values(RequestOrderIntent).map(
+                                (intent) => (
+                                  <SelectItem key={intent} value={intent}>
+                                    {t(intent)}
+                                  </SelectItem>
+                                ),
+                              )}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
                   <FormField
                     control={form.control}
-                    name={internal ? "origin" : "supplier"}
+                    name="note"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          {internal ? t("deliver_from") : t("vendor")}
+                          {t("note")}
+                          <span className="text-gray-500 text-sm italic">
+                            ({t("optional")})
+                          </span>
                         </FormLabel>
                         <FormControl>
-                          <Autocomplete
-                            options={
-                              internal ? deliveryFromOptions : vendorOptions
-                            }
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            isLoading={
-                              internal ? isLoadingDeliveryFromLocations : false
-                            }
-                            onSearch={
-                              internal
-                                ? setSearchDeliveryFrom
-                                : setSupplierSearchQuery
-                            }
-                            placeholder={
-                              internal
-                                ? t("select_location")
-                                : t("select_vendor")
-                            }
-                            inputPlaceholder={
-                              internal
-                                ? t("search_location")
-                                : t("search_vendor")
-                            }
-                            noOptionsMessage={
-                              internal
-                                ? t("no_location_found")
-                                : t("no_vendor_found")
-                            }
-                          />
+                          <Textarea rows={3} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
 
-                <FormField
-                  control={form.control}
-                  name="note"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        {t("note")}
-                        <span className="text-gray-500 text-sm italic">
-                          ({t("optional")})
-                        </span>
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea rows={3} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="reason"
@@ -397,100 +432,115 @@ export default function RequestOrderForm({
 
                   <FormField
                     control={form.control}
-                    name="intent"
+                    name="category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("intent")}</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger
-                              className="border border-gray-400"
-                              ref={field.ref}
-                            >
-                              <SelectValue placeholder={t("select_intent")} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.values(RequestOrderIntent).map((intent) => (
-                              <SelectItem key={intent} value={intent}>
-                                {t(intent)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormLabel>{t("category")}</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            value={field.value}
+                            className="flex flex-col sm:flex-row gap-2"
+                          >
+                            {Object.values(RequestOrderCategory).map(
+                              (category) => (
+                                <div
+                                  key={category}
+                                  className={cn(
+                                    "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
+                                    field.value === category &&
+                                      "border-primary bg-primary/10",
+                                  )}
+                                >
+                                  <RadioGroupItem
+                                    value={category}
+                                    id={category}
+                                  />
+                                  <Label htmlFor={category}>
+                                    {t(category)}
+                                  </Label>
+                                </div>
+                              ),
+                            )}
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="priority"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("priority")}</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            value={field.value}
+                            className="flex flex-col sm:flex-row gap-2"
+                          >
+                            {Object.values(RequestOrderPriority).map(
+                              (priority) => (
+                                <div
+                                  key={priority}
+                                  className={cn(
+                                    "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
+                                    field.value === priority &&
+                                      "border-primary bg-primary/10",
+                                  )}
+                                >
+                                  <RadioGroupItem
+                                    value={priority}
+                                    id={priority}
+                                  />
+                                  <Label htmlFor={priority}>
+                                    {t(priority)}
+                                  </Label>
+                                </div>
+                              ),
+                            )}
+                          </RadioGroup>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("category")}</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          value={field.value}
-                          className="flex flex-col sm:flex-row gap-2"
-                        >
-                          {Object.values(RequestOrderCategory).map(
-                            (category) => (
-                              <div
-                                key={category}
-                                className={cn(
-                                  "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
-                                  field.value === category &&
-                                    "border-primary bg-primary/10",
-                                )}
-                              >
-                                <RadioGroupItem
-                                  value={category}
-                                  id={category}
-                                />
-                                <Label htmlFor={category}>{t(category)}</Label>
-                              </div>
-                            ),
-                          )}
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <Separator className="my-2" />
+
+                <div className="flex justify-end space-x-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      navigate(
+                        requestOrderId
+                          ? returnPath + requestOrderId
+                          : returnPath,
+                      )
+                    }
+                  >
+                    {t("cancel")}
+                    <ShortcutBadge actionId="cancel-action" />
+                  </Button>
+                  <Button type="submit" disabled={isPending}>
+                    {isPending
+                      ? isEditMode
+                        ? t("saving")
+                        : t("creating")
+                      : isEditMode
+                        ? t("save")
+                        : t("create")}
+                    <ShortcutBadge actionId="enter-action" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
-
-            <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    requestOrderId ? returnPath + requestOrderId : returnPath,
-                  )
-                }
-              >
-                {t("cancel")}
-                <ShortcutBadge actionId="cancel-action" />
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending
-                  ? isEditMode
-                    ? t("saving")
-                    : t("creating")
-                  : isEditMode
-                    ? t("save")
-                    : t("create")}
-                <ShortcutBadge actionId="enter-action" />
-              </Button>
-            </div>
           </form>
         </Form>
       </div>
