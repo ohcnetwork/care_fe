@@ -92,7 +92,7 @@ export function SpecimenForm({
     },
   });
 
-  const { mutate: updateSpecimen } = useMutation({
+  const { mutate: updateSpecimen, isPending } = useMutation({
     mutationFn: mutate(specimenApi.updateSpecimen, {
       pathParams: {
         facilityId,
@@ -529,10 +529,15 @@ export function SpecimenForm({
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={onCancel}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isPending}
+              >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={disableEdit}>
+              <Button type="submit" disabled={disableEdit || isPending}>
                 {t("collect")}
               </Button>
             </div>
