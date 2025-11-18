@@ -163,7 +163,9 @@ export const EncounterObservationsTab = () => {
                           </div>
                         )}
                         <div className="font-medium text-sm text-gray-600">
-                          {item.main_code?.display || item.main_code?.code}
+                          {item.main_code?.display ||
+                            item.main_code?.code ||
+                            t("unknown")}
                         </div>
                       </div>
                     </Card>
