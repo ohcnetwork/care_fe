@@ -15,8 +15,8 @@ import query from "@/Utils/request/query";
 import { PluginManifest, SupportedPluginComponents } from "@/pluginTypes";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
 
-class PluginErrorBoundary extends React.Component<
-  { children: React.ReactNode; pluginName: string },
+export class PluginErrorBoundary extends React.Component<
+  { children: React.ReactNode; pluginName: string; fallback?: React.ReactNode },
   { hasError: boolean }
 > {
   constructor(props: { children: React.ReactNode; pluginName: string }) {
@@ -38,7 +38,7 @@ class PluginErrorBoundary extends React.Component<
 
   render() {
     if (this.state.hasError) {
-      return null;
+      return this.props.fallback || null;
     }
 
     return this.props.children;
