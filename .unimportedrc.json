@@ -23,6 +23,12 @@
   ],
   "ignoreUnresolved": [
     [
+      "__federation__",
+      [
+        "src/PluginEngine.tsx"
+      ]
+    ],
+    [
       "./pluginMap",
       [
         "src/pluginTypes.ts"
