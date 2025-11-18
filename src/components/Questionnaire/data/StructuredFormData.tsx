@@ -275,7 +275,7 @@ export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireRead> =
   STRUCTURED_QUESTIONS.reduce(
     (acc, question) => {
       if ("questionnaire" in question) {
-        acc[question.questionnaire.id] = question.questionnaire;
+        acc[question.questionnaire.slug] = question.questionnaire;
       }
       return acc;
     },
