@@ -40,16 +40,22 @@ test.describe("Questionnaire Status Management", () => {
     await page.getByRole("menuitem", { name: "Status" }).click();
     await page.getByText("In Progress", { exact: true }).click();
     // Close the filter menu by pressing Escape
+    await page.waitForLoadState("networkidle");
     await page.keyboard.press("Escape");
 
+    // Expand date range to find encounters
+    await page.getByText("Date").first().click();
+    await page.getByRole("button", { name: "Last month" }).click();
+    await page.keyboard.press("Escape");
     // Wait for filtered results to load
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("networkidle");
 
     // Open the first encounter details
     await page
       .locator('[data-cy="encounter-list-cards"]')
       .first()
       .getByText("View Encounter")
+      .first()
       .click();
 
     // Click Update Encounter link
