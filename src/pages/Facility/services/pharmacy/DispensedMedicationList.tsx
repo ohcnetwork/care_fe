@@ -1,17 +1,3 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "raviger";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
-
-import { groupItemsByTime } from "@/lib/time";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { EmptyState } from "@/components/ui/empty-state";
 import {
   Select,
   SelectContent,
@@ -28,27 +14,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
-
-import useFilters from "@/hooks/useFilters";
-
-import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { useShortcutSubContext } from "@/context/ShortcutContext";
-import ViewDefaultAccountButton from "@/pages/Facility/billing/account/ViewDefaultAccountButton";
-import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import {
   AccountBillingStatus,
   AccountStatus,
 } from "@/types/billing/account/Account";
-import accountApi from "@/types/billing/account/accountApi";
 import {
   ChargeItemRead,
   ChargeItemStatus,
 } from "@/types/billing/chargeItem/chargeItem";
-import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import {
   MEDICATION_DISPENSE_STATUS_COLORS,
   MedicationDispenseCategory,
@@ -57,8 +30,30 @@ import {
   MedicationDispenseUpdate,
   MedicationDispenseUpsert,
 } from "@/types/emr/medicationDispense/medicationDispense";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { EmptyState } from "@/components/ui/empty-state";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
+import useFilters from "@/hooks/useFilters";
+import { groupItemsByTime } from "@/lib/time";
+import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
+import ViewDefaultAccountButton from "@/pages/Facility/billing/account/ViewDefaultAccountButton";
+import accountApi from "@/types/billing/account/accountApi";
+import { InvoiceStatus } from "@/types/billing/invoice/invoice";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 import { PillIcon } from "lucide-react";
+import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 interface MedicationTableProps {
   facilityId: string;
@@ -241,9 +236,13 @@ function MedicationTable({
                   {new Date(medication.when_prepared).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={isPaid ? "green" : "destructive"}>
-                    {isPaid ? t("paid") : t("unpaid")}
-                  </Badge>
+                  {!medication.charge_item ? (
+                    "-"
+                  ) : (
+                    <Badge variant={isPaid ? "green" : "destructive"}>
+                      {isPaid ? t("paid") : t("unpaid")}
+                    </Badge>
+                  )}
                 </TableCell>
                 <TableCell>
                   {medication?.charge_item?.paid_invoice && (

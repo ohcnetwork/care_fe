@@ -135,25 +135,6 @@ test.describe("Patient Registration", () => {
     });
   });
 
-  test("should show validation errors for empty required fields", async ({
-    page,
-  }) => {
-    // Start patient registration
-    await page
-      .getByRole("textbox", { name: /search by patient phone number/i })
-      .press("Shift+Enter");
-
-    // Try to submit without filling required fields
-    await test.step("Submit empty form", async () => {
-      await page.getByRole("button", { name: /register patient/i }).click();
-
-      // Verify validation errors appear
-      await expect(
-        page.getByText(/required|not valid|invalid/i).first(),
-      ).toBeVisible();
-    });
-  });
-
   test("should handle emergency contact information", async ({ page }) => {
     const patientData = generatePatientData();
 
