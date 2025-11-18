@@ -10,53 +10,54 @@ This directory contains Playwright E2E tests for questionnaire status management
 
 This test file is a Playwright equivalent of the Cypress test located at `cypress/e2e/dashboard_spec/questionnaire.cy.ts`.
 
-#### Test: "verify questionnaire status functionality in encounter"
+#### Tests
 
-**Purpose:** Validates that questionnaire status changes correctly control whether a questionnaire is available to be added to patient encounters.
+The file contains three independent tests, one for each questionnaire status:
 
-**Test Flow:**
+**1. "retired questionnaire should not be available in encounter"**
 
-1. **Navigate to Facility and Encounter**
-   - Login with authenticated state
-   - Navigate to the first available facility
-   - Access "Patients > All Encounters" from sidebar
-   - Filter encounters by "In Progress" status
-   - Open the first in-progress encounter
-   - Navigate to "Update Encounter" page
+- Sets questionnaire status to "retired"
+- Verifies questionnaire is NOT available when trying to add to encounter
+- Expects "No Results Found" message
 
-2. **Add Questionnaire to Encounter**
-   - Add the "Respiratory Support" questionnaire to the encounter
-   - Save the encounter URL for future navigation
+**2. "draft questionnaire should not be available in encounter"**
 
-3. **Navigate to Admin Dashboard**
-   - Go to homepage
-   - Click "Admin Dashboard"
-   - Search for "Respiratory Support" questionnaire
-   - Open the questionnaire details page
-   - Save the questionnaire URL for future navigation
+- Sets questionnaire status to "draft"
+- Verifies questionnaire is NOT available when trying to add to encounter
+- Expects "No Results Found" message
 
-4. **Test Retired Status**
-   - Set questionnaire status to "retired"
-   - Save changes and verify success notification
-   - Return to the encounter page
-   - Attempt to add the questionnaire
-   - **Expected:** Questionnaire should NOT be available (shows "No Results Found")
+**3. "active questionnaire should be available in encounter"**
 
-5. **Test Draft Status**
-   - Return to questionnaire details page
-   - Set questionnaire status to "draft"
-   - Save changes and verify success notification
-   - Return to the encounter page
-   - Attempt to add the questionnaire
-   - **Expected:** Questionnaire should NOT be available (shows "No Results Found")
+- Sets questionnaire status to "active"
+- Verifies questionnaire IS available when trying to add to encounter
+- Can successfully add questionnaire to encounter
 
-6. **Test Active Status**
-   - Return to questionnaire details page
-   - Set questionnaire status to "active"
-   - Save changes and verify success notification
-   - Return to the encounter page
-   - Attempt to add the questionnaire
-   - **Expected:** Questionnaire SHOULD be available and can be added
+#### Test Flow (Each Test)
+
+1. **Setup**
+   - Uses `beforeAll` hook to navigate to questionnaire admin once
+   - Saves questionnaire URL for reuse across tests
+
+2. **Navigate to Encounter**
+   - Gets facility ID using `getFacilityId()` helper
+   - Navigates directly to encounters list with URL filters:
+     - Date range: Last 90 days
+     - Status: in-progress
+   - Opens first encounter and clicks "Update Encounter"
+
+3. **Change Questionnaire Status**
+   - Navigates to saved questionnaire URL
+   - Clicks status radio button (retired/draft/active)
+   - Clicks "Save" button
+   - Waits for "Questionnaire updated successfully" notification
+
+4. **Verify Availability**
+   - Goes back to encounter page
+   - Clicks "Add Form" combobox
+   - Types questionnaire name
+   - Verifies availability based on status:
+     - Retired/Draft: "No Results Found" appears
+     - Active: Questionnaire option is visible and clickable
 
 ## Running the Tests
 
@@ -96,30 +97,51 @@ npm run playwright:show-report
 
 ## Key Differences from Cypress Test
 
-### Authentication
+### Test Structure
 
-- **Cypress:** Uses `cy.loginByApi("superadmin")` custom command
-- **Playwright:** Uses `test.use({ storageState: "tests/.auth/user.json" })` for authenticated state
+- **Cypress:** Single test with sequential status changes
+- **Playwright:** Three separate, independent tests (one per status)
+- **Benefit:** Reduces flakiness, easier to debug, tests can run in parallel
 
-### URL Handling
+### Locator Strategy
 
-- **Cypress:** Uses aliases with `cy.saveCurrentUrl().as("patientEncounterUrl")`
-- **Playwright:** Uses variables: `patientEncounterUrl = page.url()`
+- **Cypress:** Used `data-cy` attributes (e.g., `data-cy="add-questionnaire-button"`)
+- **Playwright:** Uses semantic locators:
+  - `getByRole("combobox")` for questionnaire selector
+  - `getByRole("button", { name: /save/i })` for save button
+  - `getByText("View Encounter")` for navigation links
+  - `getByPlaceholder(/search/i)` for search inputs
+- **Benefit:** More resilient to implementation changes, better accessibility
 
-### Element Selection
+### Navigation
 
-- **Cypress:** Uses custom commands like `cy.verifyAndClickElement()`, `cy.typeAndSelectOption()`
-- **Playwright:** Uses native locators: `page.getByRole()`, `page.locator()`, `page.getByText()`
+- **Cypress:** Manual navigation through UI (clicks facility, sidebar, filters)
+- **Playwright:** Direct URL navigation with query parameters
+  ```typescript
+  `/facility/${facilityId}/encounters/patients/all?created_date_after=${date}&status=in-progress`;
+  ```
+- **Benefit:** Faster test execution, more reliable
+
+### Facility Selection
+
+- **Cypress:** `facilityCreation.selectFirstRandomFacility()` - clicks UI
+- **Playwright:** `getFacilityId()` - uses stored facility ID from setup
+- **Benefit:** Reuses setup work, faster execution
 
 ### Waiting Strategy
 
-- **Cypress:** Implicit waiting with custom commands
-- **Playwright:** Implicit auto-waiting with locators, explicit `waitForTimeout()` where needed
+- **Cypress:** Custom commands with implicit waits
+- **Playwright:** Element-based explicit waits
+  - `page.getByRole("button").first().waitFor()` - waits for element to appear
+  - Implicit auto-waiting on all locator actions
+  - No `waitForTimeout()` calls
+- **Benefit:** More deterministic, less flaky
 
-### Notifications
+### Authentication
 
-- **Cypress:** Custom command `cy.verifyNotification()`
-- **Playwright:** Direct assertion with `expect(page.locator("li[data-sonner-toast]")...)`
+- **Cypress:** `cy.loginByApi("superadmin")` custom command
+- **Playwright:** `test.use({ storageState: "tests/.auth/user.json" })` for authenticated state
+- **Benefit:** Faster - reuses authentication across tests
 
 ## Test Data Requirements
 
