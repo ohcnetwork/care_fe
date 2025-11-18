@@ -5454,7 +5454,7 @@
   "username_max_length_validation": "Use at most <strong>16 characters</strong>",
   "username_min_length_validation": "Use at least <strong>4 characters</strong>",
   "username_not_available": "Username is not available",
-  "username_not_valid": "username is not valid",
+  "username_not_valid": "Username is not valid",
   "username_start_end_validation": "Must start and end with a <strong>letter</strong> or <strong>number</strong>",
   "username_success_message": "All set! Your username is strong",
   "username_userdetails_not_found": "Unable to fetch details as username or user details not found",
