@@ -385,7 +385,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
               <div className="max-w-2xl mx-auto flex justify-end">
                 <Button
                   variant="primary_gradient"
-                  disabled={!form.formState.isValid || isPending}
+                  disabled={!form.formState.isDirty || isPending}
                 >
                   <CheckIcon />
                   {patientId ? t("update") : t("register_patient")}
