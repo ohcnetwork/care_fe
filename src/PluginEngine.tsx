@@ -15,6 +15,36 @@ import query from "@/Utils/request/query";
 import { PluginManifest, SupportedPluginComponents } from "@/pluginTypes";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
 
+class PluginErrorBoundary extends React.Component<
+  { children: React.ReactNode; pluginName: string },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode; pluginName: string }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error(
+      `[Plugin Error] Plugin "${this.props.pluginName}" encountered an error:`,
+      error,
+      errorInfo,
+    );
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+
+    return this.props.children;
+  }
+}
+
 // Import the remote component synchronously
 export default function PluginEngine({
   children,
@@ -112,9 +142,11 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
         }
 
         return (
-          <React.Suspense key={plugin.plugin} fallback={<div>Loading...</div>}>
-            <Component {...props} />
-          </React.Suspense>
+          <PluginErrorBoundary key={plugin.plugin} pluginName={plugin.plugin}>
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <Component {...props} />
+            </React.Suspense>
+          </PluginErrorBoundary>
         );
       })}
     </>
