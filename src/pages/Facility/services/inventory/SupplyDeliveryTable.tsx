@@ -193,29 +193,23 @@ export function SupplyDeliveryTable({
             </TableCell>
             <TableCell>
               <MonetaryDisplay
-                amount={String(
-                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
-                    .filter(
-                      (c) =>
-                        c.monetary_component_type === MonetaryComponentType.tax,
-                    )
-                    .reduce((acc, curr) => acc + Number(curr.amount || 0), 0),
-                )}
-                hideCurrency
+                factor={
+                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.filter(
+                    (c) =>
+                      c.monetary_component_type === MonetaryComponentType.tax,
+                  )[0]?.factor
+                }
               />
             </TableCell>
             <TableCell>
               <MonetaryDisplay
-                amount={String(
-                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
-                    .filter(
-                      (c) =>
-                        c.monetary_component_type ===
-                        MonetaryComponentType.discount,
-                    )
-                    .reduce((acc, curr) => acc + Number(curr.amount || 0), 0),
-                )}
-                hideCurrency
+                factor={
+                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.filter(
+                    (c) =>
+                      c.monetary_component_type ===
+                      MonetaryComponentType.discount,
+                  )[0]?.factor
+                }
               />
             </TableCell>
             <TableCell>
