@@ -16,6 +16,7 @@ import { Avatar } from "@/components/Common/Avatar";
 
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import { ObservationListRead } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
@@ -114,9 +115,7 @@ export const ObservationHistoryTable = ({
         <TableBody>
           {data?.pages.map((page, _pageIndex) =>
             page.results.map((observation: ObservationListRead) => {
-              const name = observation.data_entered_by
-                ? `${observation.data_entered_by.first_name} ${observation.data_entered_by.last_name}`
-                : t("unknown");
+              const name = formatName(observation.data_entered_by);
 
               return (
                 <TableRow key={observation.id}>
@@ -127,7 +126,7 @@ export const ObservationHistoryTable = ({
                     {codes.find((c) => c.code === observation.main_code?.code)
                       ?.display || observation.main_code?.code}
                   </TableCell>
-                  <TableCell>{observation.value.value}</TableCell>
+                  <TableCell>{observation.value.value || "-"}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar name={name} className="size-6" />

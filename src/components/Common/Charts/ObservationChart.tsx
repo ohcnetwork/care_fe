@@ -35,6 +35,7 @@ import { Avatar } from "@/components/Common/Avatar";
 import query from "@/Utils/request/query";
 import { Code } from "@/types/base/code/code";
 
+import { formatName } from "@/Utils/utils";
 import observationApi from "@/types/emr/observation/observationApi";
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
 interface CodeGroup {
@@ -204,9 +205,7 @@ export const ObservationVisualizer = ({
         if (!isNaN(value) && timestamp in processedData && code.display) {
           const details: ObservationDetails = {
             value,
-            enteredBy: observation.data_entered_by
-              ? `${observation.data_entered_by.first_name} ${observation.data_entered_by.last_name}`
-              : t("unknown"),
+            enteredBy: formatName(observation.data_entered_by),
             enteredAt: formatChartDate(observation.effective_datetime).display,
             note: observation.note || undefined,
             status: observation.status,
