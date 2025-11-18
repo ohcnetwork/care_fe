@@ -154,15 +154,15 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                 />
               </div>
             </div>
-            <div className="flex flex-wrap justify-between gap-2 mb-4">
-              <div className="flex">
+            <div className="flex flex-wrap justify-between gap-2 mb-4 w-full">
+              <div className="flex justify-between flex-1">
                 <div className="min-w-fit mr-4">
                   <DetailRow
                     label={t("name")}
                     value={patient.name.toUpperCase()}
                   />
                 </div>
-                <div className="flex-1 min-w-fit mr-4">
+                <div className="min-w-fit mr-4">
                   <DetailRow
                     label={`${t("age")} / ${t("sex")}`}
                     value={
@@ -173,7 +173,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                   />
                 </div>
               </div>
-              <div className="flex-1 break-words whitespace-pre-wrap overflow-hidden">
+              <div className="flex flex-1 min-w-[50%] break-words whitespace-pre-wrap overflow-hidden justify-start sm:justify-end">
                 <DetailRow label={t("address")} value={patient.address} />
               </div>
             </div>
