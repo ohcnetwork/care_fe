@@ -116,6 +116,7 @@ interface ResourceDefinitionCategoryPickerProps<T> {
   ref?: React.Ref<HTMLButtonElement>;
   hideClearButton?: boolean;
   hideSelectedDisplay?: boolean;
+  alignContent?: "start" | "center" | "end";
 }
 
 export function ResourceDefinitionCategoryPicker<T>({
@@ -136,6 +137,7 @@ export function ResourceDefinitionCategoryPicker<T>({
   ref,
   hideSelectedDisplay = false,
   hideClearButton = false,
+  alignContent = "start",
 }: ResourceDefinitionCategoryPickerProps<T>) {
   const shouldHideClearButton = allowMultiple || hideClearButton;
   const { t } = useTranslation();
@@ -934,7 +936,7 @@ export function ResourceDefinitionCategoryPicker<T>({
               "p-0 shadow-lg border-0 -w-[var(--radix-popover-trigger-width)] sm:max-w-[80vw]",
               enableFavorites ? "md:max-w-[70vw]" : "min-w-[420px]",
             )}
-            align="start"
+            align={alignContent}
             sideOffset={4}
           >
             <div
