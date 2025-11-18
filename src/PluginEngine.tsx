@@ -16,6 +16,7 @@ import query from "@/Utils/request/query";
 import { PluginManifest, SupportedPluginComponents } from "@/pluginTypes";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
 import { t } from "i18next";
+import { z } from "zod";
 
 // Import the remote component synchronously
 export default function PluginEngine({
@@ -37,10 +38,16 @@ export default function PluginEngine({
 
       const manifests = await Promise.all(
         enabledPlugins.configs.map(async (plugin) => {
-          if (!plugin.meta.url) {
-            console.error(`Plugin ${plugin.slug} is missing a URL in meta`);
+          if (
+            !plugin.meta.url ||
+            !z.string().url().safeParse(plugin.meta.url).success
+          ) {
+            console.error(
+              `Plugin ${plugin.slug} has an invalid URL (${plugin.meta.url}) in meta`,
+            );
             return undefined;
           }
+
           setFederationRemote(plugin.slug, {
             url: () => Promise.resolve(plugin.meta.url),
             format: "esm",
@@ -65,6 +72,12 @@ export default function PluginEngine({
       const availablePlugins = filteredManifests.map((manifest) =>
         unwrapModule(manifest),
       );
+
+      if (availablePlugins.length === 0) {
+        console.log("No plugins found");
+        return;
+      }
+
       console.log(
         `Loading ${filteredManifests.length} plugins; available plugins`,
         availablePlugins,
