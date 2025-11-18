@@ -67,6 +67,11 @@ function generateAdminLinks(
         },
       ],
     },
+    {
+      name: "Apps",
+      url: `${baseUrl}/apps`,
+      icon: <CareIcon icon="l-apps" />,
+    },
     ...pluginNavItems,
   ];
 
