@@ -194,21 +194,25 @@ export function SupplyDeliveryTable({
             <TableCell>
               <MonetaryDisplay
                 factor={
-                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.filter(
-                    (c) =>
-                      c.monetary_component_type === MonetaryComponentType.tax,
-                  )[0]?.factor
+                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
+                    .filter(
+                      (c) =>
+                        c.monetary_component_type === MonetaryComponentType.tax,
+                    )
+                    .reduce((sum, c) => sum + (c.factor || 0), 0) || undefined
                 }
               />
             </TableCell>
             <TableCell>
               <MonetaryDisplay
                 factor={
-                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.filter(
-                    (c) =>
-                      c.monetary_component_type ===
-                      MonetaryComponentType.discount,
-                  )[0]?.factor
+                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
+                    .filter(
+                      (c) =>
+                        c.monetary_component_type ===
+                        MonetaryComponentType.discount,
+                    )
+                    .reduce((sum, c) => sum + (c.factor || 0), 0) || undefined
                 }
               />
             </TableCell>
