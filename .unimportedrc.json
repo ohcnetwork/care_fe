@@ -35,6 +35,30 @@
       ]
     ],
     [
+      "__federation__",
+      [
+        "src/PluginEngine.tsx"
+      ]
+    ],
+    [
+      "cypress",
+      [
+        "cypress.config.ts"
+      ]
+    ],
+    [
+      "cypress-localstorage-commands/plugin",
+      [
+        "cypress.config.ts"
+      ]
+    ],
+    [
+      "cypress-split",
+      [
+        "cypress.config.ts"
+      ]
+    ],
+    [
       "supports-color",
       [
         "node_modules/debug/src/node.js"
