@@ -88,7 +88,9 @@ const formSchema = z
         const num = Number(val);
         return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
       },
-      { message: t("enter_valid_amount") },
+      {
+        message: t("enter_valid_amount"),
+      },
     ),
     tendered_amount: z.string().refine(
       (val) => {
@@ -127,7 +129,7 @@ export function PaymentReconciliationSheet({
 }: PaymentReconciliationSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [tenderAmount, setTenderAmount] = useState<string>("0");
+  const [tenderAmount, setTenderAmount] = useState<string>("");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
   const [selectedLocationObject, setSelectedLocationObject] = useAtom(
     locationAtomFamily(facilityId),
@@ -144,8 +146,8 @@ export function PaymentReconciliationSheet({
       outcome: PaymentReconciliationOutcome.complete,
       method: PaymentReconciliationPaymentMethod.cash,
       payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-      amount: String(invoice?.total_gross || "0"),
-      tendered_amount: "0",
+      amount: String(invoice?.total_gross || ""),
+      tendered_amount: "",
       returned_amount: "0",
       target_invoice: invoice?.id,
       reference_number: "",
