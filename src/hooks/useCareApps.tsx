@@ -1,8 +1,8 @@
 import { CableIcon, Loader2Icon } from "lucide-react";
 import { Suspense, createContext, useContext } from "react";
 
+import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
-import { PluginErrorBoundary } from "@/PluginEngine";
 import { PluginManifest } from "@/pluginTypes";
 import { t } from "i18next";
 

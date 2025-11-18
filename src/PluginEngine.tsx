@@ -1,5 +1,6 @@
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
+import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import { useQuery } from "@tanstack/react-query";
 import {
   __federation_method_getRemote as getFederationRemote,
@@ -15,36 +16,6 @@ import query from "@/Utils/request/query";
 import { PluginManifest, SupportedPluginComponents } from "@/pluginTypes";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
 import { t } from "i18next";
-
-export class PluginErrorBoundary extends React.Component<
-  { children: React.ReactNode; pluginName: string; fallback?: React.ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: { children: React.ReactNode; pluginName: string }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error(
-      `[Plugin Error] Plugin "${this.props.pluginName}" encountered an error:`,
-      error,
-      errorInfo,
-    );
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback || null;
-    }
-
-    return this.props.children;
-  }
-}
 
 // Import the remote component synchronously
 export default function PluginEngine({
