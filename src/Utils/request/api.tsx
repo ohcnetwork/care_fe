@@ -1,4 +1,9 @@
 import { PaginatedResponse } from "@/Utils/request/types";
+import {
+  BatchRequestBody,
+  BatchRequestResponse,
+} from "@/types/base/batch/batch";
+import { Code } from "@/types/base/code/code";
 import { UserReadMinimal } from "@/types/user/user";
 
 /**
@@ -41,6 +46,24 @@ const routes = {
   getScheduleAbleFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/schedulable_users/",
     TRes: Type<PaginatedResponse<UserReadMinimal>>(),
+  },
+
+  valueset: {
+    expand: {
+      path: "/api/v1/valueset/{system}/expand/",
+      method: "POST",
+      TBody: Type<{ search: string; count: number }>(),
+      TRes: Type<{ results: Code[] }>(),
+    },
+  },
+
+  batchRequest: {
+    path: "/api/v1/batch_requests/",
+    method: "POST",
+    TRes: Type<{
+      results: BatchRequestResponse[];
+    }>(),
+    TBody: Type<BatchRequestBody>(),
   },
 } as const;
 
