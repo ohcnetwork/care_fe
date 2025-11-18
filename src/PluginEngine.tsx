@@ -14,6 +14,7 @@ import query from "@/Utils/request/query";
 
 import { PluginManifest, SupportedPluginComponents } from "@/pluginTypes";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
+import { t } from "i18next";
 
 export class PluginErrorBoundary extends React.Component<
   { children: React.ReactNode; pluginName: string; fallback?: React.ReactNode },
@@ -151,7 +152,7 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
                     aria-label="Loading"
                     className="size-4 animate-spin"
                   />
-                  <p className="text-sm text-gray-600">Loading</p>
+                  <p className="text-sm text-gray-600">{t("loading")}</p>
                 </div>
               }
             >

@@ -4,6 +4,7 @@ import { Suspense, createContext, useContext } from "react";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { PluginErrorBoundary } from "@/PluginEngine";
 import { PluginManifest } from "@/pluginTypes";
+import { t } from "i18next";
 
 export const CareAppsContext = createContext<PluginManifest[]>([]);
 
@@ -41,7 +42,9 @@ const withSuspense = (
               aria-label="Error"
               className="size-4 text-red-500"
             />
-            <p className="text-sm text-gray-600">Error Loading Encounter Tab</p>
+            <p className="text-sm text-gray-600">
+              {t("error_loading_encounter_tab")}
+            </p>
           </div>
         }
       >
@@ -53,7 +56,7 @@ const withSuspense = (
                 aria-label="Loading"
                 className="size-4 animate-spin"
               />
-              <p className="text-sm text-gray-600">Loading</p>
+              <p className="text-sm text-gray-600">{t("loading")}</p>
             </div>
           }
         >
