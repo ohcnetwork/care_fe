@@ -42,6 +42,12 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<PatientRead>(),
   },
+  deletePatient: {
+    path: "/api/v1/patient/{id}/",
+    method: HttpMethod.DELETE,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<void>(),
+  },
 
   // Patient Search
   searchPatient: {

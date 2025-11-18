@@ -4,6 +4,7 @@ import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import DuplicatePatientDialog from "@/components/Facility/DuplicatePatientDialog";
+import ArchivePatientSection from "@/components/Patient/ArchivePatientSection";
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import {
   Accordion,
@@ -395,6 +396,13 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
             </div>
           </form>
         </Form>
+
+        {patientId && patientQuery.data && (
+          <ArchivePatientSection
+            patientId={patientId}
+            patientName={patientQuery.data.name}
+          />
+        )}
       </div>
 
       {showDuplicate && (
