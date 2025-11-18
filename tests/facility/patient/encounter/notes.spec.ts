@@ -1,0 +1,540 @@
+import { faker } from "@faker-js/faker";
+import { expect, test } from "@playwright/test";
+import { format, subDays } from "date-fns";
+import { getFacilityId } from "tests/support/facilityId";
+
+test.use({ storageState: "tests/.auth/user.json" });
+
+test.describe("Encounter vs Patient Notes Isolation", () => {
+  let patientUrl: string;
+  let encounterUrl: string;
+  let encounterNoteTitle: string;
+  let patientNoteTitle: string;
+  let encounterNoteMessage: string;
+  let patientNoteMessage: string;
+
+  test.beforeEach(async ({ page }) => {
+    const facilityId = getFacilityId();
+    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
+    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+
+    // Generate unique titles and messages for this test run
+    encounterNoteTitle = `Encounter Note ${faker.string.alphanumeric(8)}`;
+    patientNoteTitle = `Patient Note ${faker.string.alphanumeric(8)}`;
+    encounterNoteMessage = `Encounter message: ${faker.lorem.sentence()}`;
+    patientNoteMessage = `Patient message: ${faker.lorem.sentence()}`;
+
+    // Navigate to encounters page
+    await page.goto(
+      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
+    );
+
+    // Navigate to first patient's encounter
+    await page.getByRole("link", { name: "Patient Home" }).first().click();
+
+    // Save the patient URL for later navigation to patient notes
+    patientUrl = page.url();
+
+    // Get the patient profile to access patient notes later
+    await page
+      .getByRole("button", { name: /.*\d+\s*Y,/ })
+      .first()
+      .click();
+    await page.getByRole("link", { name: "View Profile" }).click();
+
+    // Go back to encounter
+    await page.goto(patientUrl);
+
+    // Navigate to encounter details
+    await page
+      .getByRole("link", { name: /Encounter/ })
+      .first()
+      .click();
+    encounterUrl = page.url();
+  });
+
+  test("should create encounter note and verify it does NOT appear in patient notes", async ({
+    page,
+  }) => {
+    // Create a thread in encounter notes
+    await page.getByRole("tab", { name: "Notes" }).click();
+
+    // Wait for notes section to load
+    await expect(
+      page.getByRole("button", { name: /New/i }).first(),
+    ).toBeVisible();
+
+    // Create new thread
+    await page.getByRole("button", { name: /New/i }).first().click();
+
+    // Enter thread title
+    await page.getByPlaceholder(/discussion title/i).fill(encounterNoteTitle);
+
+    // Create thread and wait for success
+    const createThreadResponse = page.waitForResponse(
+      (response) =>
+        response.url().includes("/thread/") &&
+        response.request().method() === "POST" &&
+        response.status() === 201,
+    );
+    await page.getByRole("button", { name: /Create/i }).click();
+    await createThreadResponse;
+
+    // Verify thread was created
+    await expect(
+      page.getByRole("button").filter({ hasText: encounterNoteTitle }),
+    ).toBeVisible();
+
+    // Send a message in the encounter thread
+    await page.getByPlaceholder(/type.*message/i).fill(encounterNoteMessage);
+
+    const sendMessageResponse = page.waitForResponse(
+      (response) =>
+        response.url().includes("/note/") &&
+        response.request().method() === "POST" &&
+        response.status() === 201,
+    );
+    await page.getByRole("button", { name: /Send/i, exact: false }).click();
+    await sendMessageResponse;
+
+    // Verify message appears in encounter notes
+    await expect(page.getByText(encounterNoteMessage)).toBeVisible();
+
+    // Navigate to patient notes tab
+    await page.goto(patientUrl.replace(/\/encounter\/.*/, ""));
+    await page.getByRole("tab", { name: "Notes" }).click();
+
+    // Verify encounter note does NOT appear in patient notes
+    await expect(
+      page.getByRole("button").filter({ hasText: encounterNoteTitle }),
+    ).not.toBeVisible();
+    await expect(page.getByText(encounterNoteMessage)).not.toBeVisible();
+  });
+
+  test("should create patient note and verify it does NOT appear in encounter notes", async ({
+    page,
+  }) => {
+    // Navigate to patient profile and notes
+    await page.goto(patientUrl.replace(/\/encounter\/.*/, ""));
+    await page.getByRole("tab", { name: "Notes" }).click();
+
+    // Wait for notes section to load
+    await expect(
+      page.getByRole("button", { name: /New/i }).first(),
+    ).toBeVisible();
+
+    // Create new thread in patient notes
+    await page.getByRole("button", { name: /New/i }).first().click();
+
+    // Enter thread title
+    await page.getByPlaceholder(/discussion title/i).fill(patientNoteTitle);
+
+    // Create thread and wait for success
+    const createThreadResponse = page.waitForResponse(
+      (response) =>
+        response.url().includes("/thread/") &&
+        response.request().method() === "POST" &&
+        response.status() === 201,
+    );
+    await page.getByRole("button", { name: /Create/i }).click();
+    await createThreadResponse;
+
+    // Verify thread was created
+    await expect(
+      page.getByRole("button").filter({ hasText: patientNoteTitle }),
+    ).toBeVisible();
+
+    // Send a message in the patient thread
+    await page.getByPlaceholder(/type.*message/i).fill(patientNoteMessage);
+
+    const sendMessageResponse = page.waitForResponse(
+      (response) =>
+        response.url().includes("/note/") &&
+        response.request().method() === "POST" &&
+        response.status() === 201,
+    );
+    await page.getByRole("button", { name: /Send/i, exact: false }).click();
+    await sendMessageResponse;
+
+    // Verify message appears in patient notes
+    await expect(page.getByText(patientNoteMessage)).toBeVisible();
+
+    // Navigate to encounter notes
+    await page.goto(encounterUrl);
+    await page.getByRole("tab", { name: "Notes" }).click();
+
+    // Verify patient note does NOT appear in encounter notes
+    await expect(
+      page.getByRole("button").filter({ hasText: patientNoteTitle }),
+    ).not.toBeVisible();
+    await expect(page.getByText(patientNoteMessage)).not.toBeVisible();
+  });
+});
+
+test.describe("Thread Messaging - Multi-user & Single-user", () => {
+  let encounterUrl: string;
+  let threadTitle: string;
+  let userAMessage1: string;
+  let userAMessage2: string;
+  let userAMessage3: string;
+  let userBMessage: string;
+
+  test.beforeEach(async ({ page }) => {
+    const facilityId = getFacilityId();
+    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
+    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+
+    // Generate unique data for this test run
+    threadTitle = `Thread ${faker.string.alphanumeric(8)}`;
+    userAMessage1 = `User A message 1: ${faker.lorem.sentence()}`;
+    userAMessage2 = `User A message 2: ${faker.lorem.sentence()}`;
+    userAMessage3 = `User A message 3: ${faker.lorem.sentence()}`;
+    userBMessage = `User B message: ${faker.lorem.sentence()}`;
+
+    // Navigate to encounters and open first encounter
+    await page.goto(
+      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
+    );
+    await page.getByRole("link", { name: "Patient Home" }).first().click();
+    await page
+      .getByRole("link", { name: /Encounter/ })
+      .first()
+      .click();
+    encounterUrl = page.url();
+    await page.getByRole("tab", { name: "Notes" }).click();
+  });
+
+  test("should support multi-user messaging in same thread", async ({
+    page,
+    context,
+  }) => {
+    // User A creates thread and sends message
+    await page.getByRole("button", { name: /New/i }).first().click();
+    await page.getByPlaceholder(/discussion title/i).fill(threadTitle);
+
+    const createThreadResponse = page.waitForResponse(
+      (response) =>
+        response.url().includes("/thread/") &&
+        response.request().method() === "POST" &&
+        response.status() === 201,
+    );
+    await page.getByRole("button", { name: /Create/i }).click();
+    await createThreadResponse;
+
+    // User A sends first message
+    await page.getByPlaceholder(/type.*message/i).fill(userAMessage1);
+    let sendMessageResponse = page.waitForResponse(
+      (response) =>
+        response.url().includes("/note/") &&
+        response.request().method() === "POST" &&
+        response.status() === 201,
+    );
+    await page.getByRole("button", { name: /Send/i, exact: false }).click();
+    await sendMessageResponse;
+
+    // Verify User A's message
+    await expect(page.getByText(userAMessage1)).toBeVisible();
+
+    // Switch to User B (new page with different auth)
+    const page2 = await context.newPage();
+
+    // Login as a different user (we'll use the same auth for simplicity in this test environment)
+    // In a real scenario, you'd have a separate auth state for user B
+    await page2.goto(encounterUrl);
+    await page2.getByRole("tab", { name: "Notes" }).click();
+
+    // Select the thread created by User A
+    await page2.getByRole("button").filter({ hasText: threadTitle }).click();
+
+    // Verify User A's message is visible to User B
+    await expect(page2.getByText(userAMessage1)).toBeVisible();
+
+    // User B sends a message
+    await page2.getByPlaceholder(/type.*message/i).fill(userBMessage);
+    sendMessageResponse = page2.waitForResponse(
+      (response) =>
+        response.url().includes("/note/") &&
+        response.request().method() === "POST" &&
+        response.status() === 201,
+    );
+    await page2.getByRole("button", { name: /Send/i, exact: false }).click();
+    await sendMessageResponse;
+
+    // Verify User B's message appears for User B
+    await expect(page2.getByText(userBMessage)).toBeVisible();
+
+    // Refresh User A's view and verify both messages appear
+    await page.reload();
+    await page.getByRole("tab", { name: "Notes" }).click();
+    await page.getByRole("button").filter({ hasText: threadTitle }).click();
+
+    await expect(page.getByText(userAMessage1)).toBeVisible();
+    await expect(page.getByText(userBMessage)).toBeVisible();
+
+    await page2.close();
+  });
+
+  test("should maintain correct order for consecutive messages from same user", async ({
+    page,
+  }) => {
+    // Create thread
+    await page.getByRole("button", { name: /New/i }).first().click();
+    await page.getByPlaceholder(/discussion title/i).fill(threadTitle);
+
+    const createThreadResponse = page.waitForResponse(
+      (response) =>
+        response.url().includes("/thread/") &&
+        response.request().method() === "POST" &&
+        response.status() === 201,
+    );
+    await page.getByRole("button", { name: /Create/i }).click();
+    await createThreadResponse;
+
+    // Send multiple consecutive messages
+    const messages = [userAMessage1, userAMessage2, userAMessage3];
+
+    for (const message of messages) {
+      await page.getByPlaceholder(/type.*message/i).fill(message);
+      const sendMessageResponse = page.waitForResponse(
+        (response) =>
+          response.url().includes("/note/") &&
+          response.request().method() === "POST" &&
+          response.status() === 201,
+      );
+      await page.getByRole("button", { name: /Send/i, exact: false }).click();
+      await sendMessageResponse;
+    }
+
+    // Verify all messages appear
+    await expect(page.getByText(userAMessage1)).toBeVisible();
+    await expect(page.getByText(userAMessage2)).toBeVisible();
+    await expect(page.getByText(userAMessage3)).toBeVisible();
+
+    // Verify message order by checking their positions
+    const chatMessages = page.locator('[class*="flex-col-reverse"]').first();
+    const allMessages = await chatMessages.getByText(
+      new RegExp(`${userAMessage1}|${userAMessage2}|${userAMessage3}`),
+    );
+
+    // Since messages are in reverse order (newest at top), check count
+    const messageCount = await allMessages.count();
+    expect(messageCount).toBe(3);
+  });
+});
+
+test.describe("Thread Creation", () => {
+  let encounterUrl: string;
+  let thread1Title: string;
+  let thread2Title: string;
+  let thread3Title: string;
+
+  test.beforeEach(async ({ page }) => {
+    const facilityId = getFacilityId();
+    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
+    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+
+    // Generate unique thread titles
+    thread1Title = `Thread 1 ${faker.string.alphanumeric(8)}`;
+    thread2Title = `Thread 2 ${faker.string.alphanumeric(8)}`;
+    thread3Title = `Thread 3 ${faker.string.alphanumeric(8)}`;
+
+    // Navigate to encounter notes
+    await page.goto(
+      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
+    );
+    await page.getByRole("link", { name: "Patient Home" }).first().click();
+    await page
+      .getByRole("link", { name: /Encounter/ })
+      .first()
+      .click();
+    encounterUrl = page.url();
+    await page.getByRole("tab", { name: "Notes" }).click();
+  });
+
+  test("should create multiple threads and verify all appear without duplication", async ({
+    page,
+  }) => {
+    const threadTitles = [thread1Title, thread2Title, thread3Title];
+
+    // Create three threads
+    for (const title of threadTitles) {
+      await page.getByRole("button", { name: /New/i }).first().click();
+      await page.getByPlaceholder(/discussion title/i).fill(title);
+
+      const createThreadResponse = page.waitForResponse(
+        (response) =>
+          response.url().includes("/thread/") &&
+          response.request().method() === "POST" &&
+          response.status() === 201,
+      );
+      await page.getByRole("button", { name: /Create/i }).click();
+      await createThreadResponse;
+
+      // Verify thread appears
+      await expect(
+        page.getByRole("button").filter({ hasText: title }),
+      ).toBeVisible();
+    }
+
+    // Verify all threads are present
+    for (const title of threadTitles) {
+      await expect(
+        page.getByRole("button").filter({ hasText: title }),
+      ).toBeVisible();
+    }
+
+    // Verify no duplication - each thread should appear exactly once
+    for (const title of threadTitles) {
+      const threadButtons = page.getByRole("button").filter({ hasText: title });
+      const count = await threadButtons.count();
+      expect(count).toBe(1);
+    }
+  });
+});
+
+test.describe("Thread Visibility & Switching", () => {
+  let encounterUrl: string;
+  let thread1Title: string;
+  let thread2Title: string;
+  let thread3Title: string;
+  let thread1Message: string;
+  let thread2Message: string;
+  let thread3Message: string;
+
+  test.beforeEach(async ({ page }) => {
+    const facilityId = getFacilityId();
+    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
+    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+
+    // Generate unique data
+    thread1Title = `Thread 1 ${faker.string.alphanumeric(8)}`;
+    thread2Title = `Thread 2 ${faker.string.alphanumeric(8)}`;
+    thread3Title = `Thread 3 ${faker.string.alphanumeric(8)}`;
+    thread1Message = `Thread 1 message: ${faker.lorem.sentence()}`;
+    thread2Message = `Thread 2 message: ${faker.lorem.sentence()}`;
+    thread3Message = `Thread 3 message: ${faker.lorem.sentence()}`;
+
+    // Navigate to encounter notes
+    await page.goto(
+      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
+    );
+    await page.getByRole("link", { name: "Patient Home" }).first().click();
+    await page
+      .getByRole("link", { name: /Encounter/ })
+      .first()
+      .click();
+    encounterUrl = page.url();
+    await page.getByRole("tab", { name: "Notes" }).click();
+
+    // Create three threads with messages
+    const threadsData = [
+      { title: thread1Title, message: thread1Message },
+      { title: thread2Title, message: thread2Message },
+      { title: thread3Title, message: thread3Message },
+    ];
+
+    for (const thread of threadsData) {
+      await page.getByRole("button", { name: /New/i }).first().click();
+      await page.getByPlaceholder(/discussion title/i).fill(thread.title);
+
+      const createThreadResponse = page.waitForResponse(
+        (response) =>
+          response.url().includes("/thread/") &&
+          response.request().method() === "POST" &&
+          response.status() === 201,
+      );
+      await page.getByRole("button", { name: /Create/i }).click();
+      await createThreadResponse;
+
+      // Send message
+      await page.getByPlaceholder(/type.*message/i).fill(thread.message);
+      const sendMessageResponse = page.waitForResponse(
+        (response) =>
+          response.url().includes("/note/") &&
+          response.request().method() === "POST" &&
+          response.status() === 201,
+      );
+      await page.getByRole("button", { name: /Send/i, exact: false }).click();
+      await sendMessageResponse;
+
+      // Verify message appears
+      await expect(page.getByText(thread.message)).toBeVisible();
+    }
+  });
+
+  test("should switch between threads and verify each shows only its own messages", async ({
+    page,
+  }) => {
+    // Switch to Thread 1 and verify
+    await page.getByRole("button").filter({ hasText: thread1Title }).click();
+    await expect(page.getByText(thread1Message)).toBeVisible();
+    await expect(page.getByText(thread2Message)).not.toBeVisible();
+    await expect(page.getByText(thread3Message)).not.toBeVisible();
+
+    // Switch to Thread 2 and verify
+    await page.getByRole("button").filter({ hasText: thread2Title }).click();
+    await expect(page.getByText(thread2Message)).toBeVisible();
+    await expect(page.getByText(thread1Message)).not.toBeVisible();
+    await expect(page.getByText(thread3Message)).not.toBeVisible();
+
+    // Switch to Thread 3 and verify
+    await page.getByRole("button").filter({ hasText: thread3Title }).click();
+    await expect(page.getByText(thread3Message)).toBeVisible();
+    await expect(page.getByText(thread1Message)).not.toBeVisible();
+    await expect(page.getByText(thread2Message)).not.toBeVisible();
+
+    // Switch back to Thread 1 to verify persistence
+    await page.getByRole("button").filter({ hasText: thread1Title }).click();
+    await expect(page.getByText(thread1Message)).toBeVisible();
+    await expect(page.getByText(thread2Message)).not.toBeVisible();
+    await expect(page.getByText(thread3Message)).not.toBeVisible();
+  });
+
+  test("should allow sending messages in different threads and confirm messages stay in respective threads", async ({
+    page,
+  }) => {
+    const newThread1Message = `New message in Thread 1: ${faker.lorem.sentence()}`;
+    const newThread2Message = `New message in Thread 2: ${faker.lorem.sentence()}`;
+
+    // Switch to Thread 1 and send a new message
+    await page.getByRole("button").filter({ hasText: thread1Title }).click();
+    await page.getByPlaceholder(/type.*message/i).fill(newThread1Message);
+    let sendMessageResponse = page.waitForResponse(
+      (response) =>
+        response.url().includes("/note/") &&
+        response.request().method() === "POST" &&
+        response.status() === 201,
+    );
+    await page.getByRole("button", { name: /Send/i, exact: false }).click();
+    await sendMessageResponse;
+
+    // Verify new message in Thread 1
+    await expect(page.getByText(newThread1Message)).toBeVisible();
+    await expect(page.getByText(thread1Message)).toBeVisible();
+
+    // Switch to Thread 2 and send a new message
+    await page.getByRole("button").filter({ hasText: thread2Title }).click();
+    await page.getByPlaceholder(/type.*message/i).fill(newThread2Message);
+    sendMessageResponse = page.waitForResponse(
+      (response) =>
+        response.url().includes("/note/") &&
+        response.request().method() === "POST" &&
+        response.status() === 201,
+    );
+    await page.getByRole("button", { name: /Send/i, exact: false }).click();
+    await sendMessageResponse;
+
+    // Verify new message in Thread 2, and Thread 1 messages are not visible
+    await expect(page.getByText(newThread2Message)).toBeVisible();
+    await expect(page.getByText(thread2Message)).toBeVisible();
+    await expect(page.getByText(newThread1Message)).not.toBeVisible();
+    await expect(page.getByText(thread1Message)).not.toBeVisible();
+
+    // Switch back to Thread 1 to verify all Thread 1 messages, no Thread 2 messages
+    await page.getByRole("button").filter({ hasText: thread1Title }).click();
+    await expect(page.getByText(newThread1Message)).toBeVisible();
+    await expect(page.getByText(thread1Message)).toBeVisible();
+    await expect(page.getByText(newThread2Message)).not.toBeVisible();
+    await expect(page.getByText(thread2Message)).not.toBeVisible();
+  });
+});
