@@ -1,9 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
 import { InfoIcon, MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import Autocomplete from "@/components/ui/autocomplete";
+import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,7 +16,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -30,9 +28,12 @@ import {
 import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPriceDisplay";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
 
-import query from "@/Utils/request/query";
+import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
-import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import {
+  ChargeItemDefinitionBase,
+  ChargeItemDefinitionRead,
+} from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
@@ -177,15 +178,6 @@ export function ChargeItemQuestion({
   const [chargeItems, setChargeItems] = useState<
     ApplyChargeItemDefinitionRequestWithObject[]
   >([]);
-  const [cidSearch, setCidSearch] = useState("");
-
-  const { data: chargeItemDefinitions, isLoading } = useQuery({
-    queryKey: ["chargeItemDefinitions", cidSearch],
-    queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
-      pathParams: { facilityId },
-      queryParams: { limit: 100, status: "active", title: cidSearch },
-    }),
-  });
 
   useEffect(() => {
     if (selectedChargeItemDefinition) {
@@ -213,7 +205,6 @@ export function ChargeItemQuestion({
     }
   }, [
     selectedChargeItemDefinition,
-    chargeItemDefinitions,
     encounterId,
     chargeItems,
     updateQuestionnaireResponseCB,
@@ -278,46 +269,33 @@ export function ChargeItemQuestion({
                 index={index}
               />
             ))}
-
-            {isLoading && (
-              <TableRow>
-                <TableCell colSpan={4}>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-[200px]" />
-                      <Skeleton className="h-3 w-[150px]" />
-                    </div>
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
           </TableBody>
         </Table>
       )}
 
       <div className="space-y-2 w-full">
-        <Autocomplete
-          options={
-            chargeItemDefinitions?.results?.map((cid) => ({
-              label: cid.title,
-              value: cid.id,
-            })) || []
-          }
-          value={selectedChargeItemDefinition?.id || ""}
-          onChange={(value) => {
-            const selectedCID = chargeItemDefinitions?.results.find(
-              (cid) => cid.id === value,
+        <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
+          facilityId={facilityId}
+          value={selectedChargeItemDefinition || undefined}
+          onValueChange={(selectedDef) => {
+            if (!selectedDef) {
+              setSelectedChargeItemDefinition(null);
+              return;
+            }
+            setSelectedChargeItemDefinition(
+              selectedDef as ChargeItemDefinitionRead,
             );
-            if (!selectedCID) return;
-            setSelectedChargeItemDefinition(selectedCID);
           }}
-          onSearch={setCidSearch}
           placeholder={t("select_charge_item_definition")}
-          isLoading={isLoading}
-          noOptionsMessage={t("no_charge_item_definitions_found")}
           disabled={disabled}
-          data-cy="charge-item-definition-search"
+          className="w-full"
+          resourceType={ResourceCategoryResourceType.charge_item_definition}
+          listDefinitions={{
+            queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
+            pathParams: { facilityId },
+            queryParams: { status: "active" },
+          }}
+          translationBaseKey="charge_item_definition"
         />
       </div>
     </div>
