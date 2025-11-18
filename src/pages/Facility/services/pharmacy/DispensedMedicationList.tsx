@@ -443,8 +443,7 @@ export default function DispensedMedicationList({
 
           {selectedMedications.length > 0 &&
             (status === MedicationDispenseStatus.preparation ||
-              status === MedicationDispenseStatus.in_progress ||
-              status === MedicationDispenseStatus.on_hold) && (
+              status === MedicationDispenseStatus.in_progress) && (
               <Button
                 onClick={() =>
                   completeMedications({ signal: new AbortController().signal })
