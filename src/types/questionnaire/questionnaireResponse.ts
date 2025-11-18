@@ -11,8 +11,8 @@ export type StructuredResponseValue = {
 
 export interface QuestionnaireResponse {
   id: string;
-  created_date: string | null;
-  modified_date: string | null;
+  created_date: string;
+  modified_date: string;
   questionnaire?: QuestionnaireRead;
   subject_id: string;
   responses: Response[];
