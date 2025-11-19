@@ -111,7 +111,7 @@ test.describe("Assign users to a patient", () => {
   });
 
   test("Cancel user assignment without selecting role", async ({ page }) => {
-    const userName = "Admin User";
+    const userName = "care-doctor";
 
     // Navigate to users tab and open assign dialog
     await openUsersTab(page);
