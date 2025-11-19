@@ -168,6 +168,7 @@ test.describe("Department/Team Creation", () => {
   }) => {
     const departmentName = faker.word.words(2);
     const description = faker.lorem.sentence();
+    const nonExistentSearch = faker.string.uuid();
 
     await createOrganization(page, departmentName, "Department", description);
     await searchDepartment(page, departmentName);
@@ -176,7 +177,7 @@ test.describe("Department/Team Creation", () => {
       page.getByRole("row").filter({ hasText: departmentName }),
     ).toBeVisible();
 
-    await searchDepartment(page, "NonExistentDepartment12345");
+    await searchDepartment(page, nonExistentSearch);
 
     await expect(
       page.getByRole("row").filter({ hasText: departmentName }),
