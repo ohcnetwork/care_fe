@@ -266,12 +266,16 @@ export default function MedicationRequestList({
         </div>
         <div className="flex items-center gap-2">
           <PatientIdentifierFilter
-            onSelect={(patientId) =>
-              updateQuery({ patient_external_id: patientId })
+            onSelect={(patientId, patientName) =>
+              updateQuery({
+                patient_external_id: patientId,
+                patient_name: patientName,
+              })
             }
             placeholder={t("filter_by_identifier")}
             className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
             patientId={qParams.patient_external_id}
+            patientName={qParams.patient_name}
           />
         </div>
       </div>
