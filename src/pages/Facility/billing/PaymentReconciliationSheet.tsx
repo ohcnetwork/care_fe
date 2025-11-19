@@ -1,9 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { t } from "i18next";
 import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -73,51 +72,6 @@ interface PaymentReconciliationSheetProps {
   isCreditNote?: boolean;
 }
 
-// Add schema before the component
-const formSchema = z
-  .object({
-    reconciliation_type: z.nativeEnum(PaymentReconciliationType),
-    status: z.nativeEnum(PaymentReconciliationStatus),
-    kind: z.nativeEnum(PaymentReconciliationKind),
-    issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
-    outcome: z.nativeEnum(PaymentReconciliationOutcome),
-    method: z.nativeEnum(PaymentReconciliationPaymentMethod),
-    payment_datetime: z.string(),
-    amount: z.string().refine(
-      (val) => {
-        const num = Number(val);
-        return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
-      },
-      {
-        message: t("enter_valid_amount"),
-      },
-    ),
-    tendered_amount: z.string().refine(
-      (val) => {
-        const num = Number(val);
-        return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
-      },
-      {
-        message: t("enter_valid_amount"),
-      },
-    ),
-    returned_amount: z.string().optional(),
-    target_invoice: z.string().optional(),
-    reference_number: z.string().optional(),
-    authorization: z.string().optional(),
-    disposition: z.string().optional(),
-    note: z.string().optional(),
-    account: z.string(),
-    is_credit_note: z.boolean().optional(),
-    location: careConfig.paymentLocationRequired
-      ? z.string().min(1)
-      : z.string().optional(),
-  })
-  .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
-    message: t("tender_amount_cannot_be_less_than_payment_amount"),
-    path: ["tendered_amount"],
-  });
-
 export function PaymentReconciliationSheet({
   open,
   onOpenChange,
@@ -135,6 +89,55 @@ export function PaymentReconciliationSheet({
     locationAtomFamily(facilityId),
   );
   useShortcutSubContext();
+
+  // Define schema inside component to ensure t() is properly initialized
+  const formSchema = useMemo(
+    () =>
+      z
+        .object({
+          reconciliation_type: z.nativeEnum(PaymentReconciliationType),
+          status: z.nativeEnum(PaymentReconciliationStatus),
+          kind: z.nativeEnum(PaymentReconciliationKind),
+          issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
+          outcome: z.nativeEnum(PaymentReconciliationOutcome),
+          method: z.nativeEnum(PaymentReconciliationPaymentMethod),
+          payment_datetime: z.string(),
+          amount: z.string().refine(
+            (val) => {
+              const num = Number(val);
+              return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
+            },
+            {
+              message: t("enter_valid_amount"),
+            },
+          ),
+          tendered_amount: z.string().refine(
+            (val) => {
+              const num = Number(val);
+              return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
+            },
+            {
+              message: t("enter_valid_amount"),
+            },
+          ),
+          returned_amount: z.string().optional(),
+          target_invoice: z.string().optional(),
+          reference_number: z.string().optional(),
+          authorization: z.string().optional(),
+          disposition: z.string().optional(),
+          note: z.string().optional(),
+          account: z.string(),
+          is_credit_note: z.boolean().optional(),
+          location: careConfig.paymentLocationRequired
+            ? z.string().min(1)
+            : z.string().optional(),
+        })
+        .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
+          message: t("tender_amount_cannot_be_less_than_payment_amount"),
+          path: ["tendered_amount"],
+        }),
+    [t],
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
