@@ -62,6 +62,7 @@ interface Props {
   trigger?: React.ReactNode;
   onSuccess?: () => void;
   disableRedirectOnSuccess?: boolean;
+  defaultStatus?: "planned" | "in_progress" | "on_hold";
 }
 
 export default function CreateEncounterForm({
@@ -72,6 +73,7 @@ export default function CreateEncounterForm({
   trigger,
   onSuccess,
   disableRedirectOnSuccess = false,
+  defaultStatus = "planned",
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -92,7 +94,7 @@ export default function CreateEncounterForm({
   const form = useForm({
     resolver: zodResolver(encounterFormSchema),
     defaultValues: {
-      status: "planned",
+      status: defaultStatus,
       encounter_class: careConfig.defaultEncounterType,
       priority: "routine",
       organizations: [],
