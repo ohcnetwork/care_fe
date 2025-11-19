@@ -217,14 +217,11 @@ export default function PatientIdentifierFilter({
     }
 
     if (!searchTerm) {
-      if (isPhoneNumberConfig) {
-        return t("start_typing_phone_number");
-      }
       return t("start_typing_to_search");
     }
 
     if (isPhoneNumberConfig && !isValidPhoneNumber(searchTerm)) {
-      return t("continue_typing_full_number_to_search");
+      return t("enter_valid_phone_number_to_search");
     }
 
     if (isPatientFetching) {
