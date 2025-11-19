@@ -149,7 +149,7 @@ export function PaymentReconciliationSheet({
       outcome: PaymentReconciliationOutcome.complete,
       method: PaymentReconciliationPaymentMethod.cash,
       payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-      amount: String(invoice?.total_gross || ""),
+      amount: invoice?.total_gross != null ? String(invoice.total_gross) : "",
       tendered_amount: "",
       returned_amount: "0",
       target_invoice: invoice?.id,
