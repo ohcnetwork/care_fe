@@ -250,7 +250,7 @@ export function EncounterQuestion({
             value={encounter.status}
             onValueChange={(value: EncounterStatus) =>
               handleUpdateEncounter({
-                status: value as EncounterStatus,
+                status: value,
               })
             }
             disabled={disabled}

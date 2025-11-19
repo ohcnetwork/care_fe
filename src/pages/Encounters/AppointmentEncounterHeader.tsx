@@ -270,7 +270,7 @@ export const AppointmentEncounterHeader = ({
       <div className="flex sm:flex-row flex-col gap-2 sm:items-center items-start">
         <div>
           {encounter.status !== EncounterStatus.IN_PROGRESS &&
-          encounter.status !== "completed" ? (
+          encounter.status !== EncounterStatus.COMPLETED ? (
             <span className="text-sm text-black">
               {t("do_you_want_to_start_this_encounter")}
             </span>
@@ -285,7 +285,7 @@ export const AppointmentEncounterHeader = ({
           )}
         </div>
         <div className="w-full sm:w-auto">
-          {encounter.status !== "in_progress" &&
+          {encounter.status !== EncounterStatus.IN_PROGRESS &&
           encounter.status !== EncounterStatus.COMPLETED ? (
             <Button
               variant="outline"
