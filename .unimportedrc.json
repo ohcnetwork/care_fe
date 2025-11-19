@@ -23,12 +23,6 @@
   ],
   "ignoreUnresolved": [
     [
-      "__federation__",
-      [
-        "src/PluginEngine.tsx"
-      ]
-    ],
-    [
       "./pluginMap",
       [
         "src/pluginTypes.ts"
@@ -47,27 +41,16 @@
       ]
     ],
     [
-      "cypress",
+      "supports-color",
       [
-        "cypress.config.ts"
-      ]
-    ],
-    [
-      "cypress-localstorage-commands/plugin",
-      [
-        "cypress.config.ts"
-      ]
-    ],
-    [
-      "cypress-split",
-      [
-        "cypress.config.ts"
+        "node_modules/debug/src/node.js"
       ]
     ],
     [
       "supports-color",
       [
-        "node_modules/debug/src/node.js"
+        "node_modules/debug/src/node.js",
+        "node_modules/require-and-forget/node_modules/debug/src/node.js"
       ]
     ],
     [
