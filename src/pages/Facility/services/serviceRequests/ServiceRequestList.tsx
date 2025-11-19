@@ -325,10 +325,13 @@ export default function ServiceRequestList({
             </div>
             <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">
               <PatientIdentifierFilter
-                onSelect={(patientId) => updateQuery({ patient: patientId })}
+                onSelect={(patientId, patientName) =>
+                  updateQuery({ patient: patientId, patient_name: patientName })
+                }
                 placeholder={t("filter_by_identifier")}
                 className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
                 patientId={qParams.patient}
+                patientName={qParams.patient_name}
               />
             </div>
           </div>
