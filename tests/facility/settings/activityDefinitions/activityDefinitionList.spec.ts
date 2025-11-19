@@ -95,25 +95,23 @@ test.describe("activity definition list", () => {
     ).toBeVisible();
   });
 
-  test("should filter by status and verify all rows have matching status", async ({
-    page,
-  }) => {
-    // Create ADs with each status for testing
-    for (const status of Object.values(Status)) {
-      await createActivityDefinition(page, facilityId, {
+  // Test status filtering - one test per status
+  for (const status of Object.values(Status)) {
+    test(`should filter by ${status} status and verify all rows have matching status`, async ({
+      page,
+    }) => {
+      // Create AD with this status
+      const createdAD = await createActivityDefinition(page, facilityId, {
         resourceCategoryName,
         overrides: { status },
       });
-    }
 
-    // Navigate back to list page
-    await page.goto(
-      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
-    );
+      // Navigate back to list page
+      await page.goto(
+        `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
+      );
 
-    // Test each status filter
-    for (const status of Object.values(Status)) {
-      // Apply status filter - selecting directly replaces any existing selection
+      // Apply status filter
       const statusFilterTrigger = page
         .locator('[data-slot="select-trigger"]')
         .filter({ hasText: /status/i });
@@ -132,6 +130,10 @@ test.describe("activity definition list", () => {
           const row = tableRows.nth(i);
           await expect(row.getByText(new RegExp(status, "i"))).toBeVisible();
         }
+        // Verify our created AD is visible
+        await expect(
+          tableRows.filter({ hasText: createdAD.title }),
+        ).toBeVisible();
       } else {
         // If no rows, verify the "no results" message
         await expect(
@@ -143,28 +145,26 @@ test.describe("activity definition list", () => {
       await expect(
         page.getByText(/showing \d+ of \d+ activity definitions/i),
       ).toBeVisible();
-    }
-  });
+    });
+  }
 
-  test("should filter by category/classification and verify all rows have matching classification", async ({
-    page,
-  }) => {
-    // Create ADs with each classification for testing
-    for (const classification of Object.values(Classification)) {
-      await createActivityDefinition(page, facilityId, {
+  // Test classification filtering - one test per classification
+  for (const classification of Object.values(Classification)) {
+    test(`should filter by ${classification} classification and verify all rows have matching classification`, async ({
+      page,
+    }) => {
+      // Create AD with this classification
+      const createdAD = await createActivityDefinition(page, facilityId, {
         resourceCategoryName,
         overrides: { classification },
       });
-    }
 
-    // Navigate back to list page
-    await page.goto(
-      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
-    );
+      // Navigate back to list page
+      await page.goto(
+        `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
+      );
 
-    // Test each classification filter
-    for (const classification of Object.values(Classification)) {
-      // Apply classification filter - selecting directly replaces any existing selection
+      // Apply classification filter
       const categoryFilterTrigger = page
         .locator('[data-slot="select-trigger"]')
         .filter({ hasText: /category/i });
@@ -191,6 +191,10 @@ test.describe("activity definition list", () => {
           const row = tableRows.nth(i);
           await expect(row.getByText(classificationPattern)).toBeVisible();
         }
+        // Verify our created AD is visible
+        await expect(
+          tableRows.filter({ hasText: createdAD.title }),
+        ).toBeVisible();
       } else {
         // If no rows, verify the "no results" message
         await expect(
@@ -202,8 +206,8 @@ test.describe("activity definition list", () => {
       await expect(
         page.getByText(/showing \d+ of \d+ activity definitions/i),
       ).toBeVisible();
-    }
-  });
+    });
+  }
 
   test("should display correct content in a table row", async ({ page }) => {
     const tableRows = page.locator(
