@@ -105,7 +105,9 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       tailwindcss(),
       federation({
         name: "core",
-        remotes: {},
+        remotes: {
+          dummy: "",
+        },
         shared: [
           "react",
           "react-dom",
