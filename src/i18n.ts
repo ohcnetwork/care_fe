@@ -7,6 +7,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import HttpApi from "i18next-http-backend";
 import resourcesToBackend from "i18next-resources-to-backend";
 import { initReactI18next } from "react-i18next";
+import { z } from "zod";
 
 export const LANGUAGES = {
   en: "English",
@@ -30,7 +31,10 @@ const namespaceToUrl = (namespace: string) => {
     (config) => config.meta?.name === namespace || config.slug === namespace,
   );
 
-  if (pluginConfig?.meta?.url) {
+  if (
+    pluginConfig?.meta?.url &&
+    z.string().url().safeParse(pluginConfig.meta.url).success
+  ) {
     const url = new URL(pluginConfig.meta.url);
     return url.origin.toString();
   }
