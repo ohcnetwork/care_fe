@@ -35,9 +35,9 @@ export interface QualifiedRange {
   valueset_interpretation?: CustomValueSet[];
   _interpretation_type: InterpretationType;
 }
-
+//To do: Translations not being loaded for playwright tests, need to debug and fix
 const interpretationSchema = z.object({
-  display: z.string().min(1, t("display_required")),
+  display: z.string().min(1, "Display is required"),
   icon: z.string().optional(),
   color: z.string().optional(),
 });
@@ -58,7 +58,7 @@ export const qualifiedRangeSchema = z.array(
               return false;
             },
             {
-              message: t("either_min_or_max_value_required"),
+              message: "Either min or max value is required",
               path: ["min"],
             },
           )
