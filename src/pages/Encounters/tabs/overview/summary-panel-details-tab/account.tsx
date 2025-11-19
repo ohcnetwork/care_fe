@@ -73,20 +73,21 @@ export const Account = () => {
         {!account ? (
           <EmptyState message={t("no_account_found")} />
         ) : (
-          <div className="flex flex-row bg-gray-100 rounded-md p-2 border border-gray-200 justify-between">
-            <span className="text-sm text-black font-semibold">
-              {account.name}
-            </span>
-            <Link
-              href={`/facility/${facilityId}/billing/account/${account.id}?encounterId=${encounter.id}`}
-            >
+          <Link
+            href={`/facility/${facilityId}/billing/account/${account.id}?encounterId=${encounter.id}`}
+          >
+            <div className="flex flex-row bg-gray-100 rounded-md p-2 border border-gray-200 justify-between">
+              <span className="text-sm text-black font-semibold">
+                {account.name}
+              </span>
+
               <Badge
                 variant={ACCOUNT_BILLING_STATUS_COLORS[account.billing_status]}
               >
                 {t(account.billing_status)}
               </Badge>
-            </Link>
-          </div>
+            </div>
+          </Link>
         )}
       </div>
     </div>

@@ -4,7 +4,7 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-test.describe("Inventory Module (Currently direct Purchase Delivery only)", () => {
+test.describe("Purchase Delivery", () => {
   let facilityId: string;
   let testData: {
     orderName: string;
@@ -45,13 +45,20 @@ test.describe("Inventory Module (Currently direct Purchase Delivery only)", () =
       page.getByRole("heading", { name: testData.orderName }),
     ).toBeVisible();
 
-    await page.getByRole("combobox").filter({ hasText: /^$/ }).click();
+    await page.getByRole("button", { name: "Add Another Item" }).click();
     await page.getByPlaceholder("Search Product Knowledge").fill("Gloves");
     await page
       .locator("div")
       .filter({ hasText: /^Gloves$/ })
       .first()
       .click();
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Search Product" })
+      .first()
+      .click();
+    await page.getByRole("option").first().click();
+
     await page.getByRole("button", { name: "Add Another Item" }).click();
     await page.getByPlaceholder("Search Product Knowledge").fill("Ibuprofen");
     await page
@@ -60,8 +67,6 @@ test.describe("Inventory Module (Currently direct Purchase Delivery only)", () =
       .first()
       .click();
 
-    await page.getByRole("combobox").nth(2).click();
-    await page.getByRole("option").first().click();
     await page
       .getByRole("combobox")
       .filter({ hasText: "Search Product" })
@@ -82,7 +87,7 @@ test.describe("Inventory Module (Currently direct Purchase Delivery only)", () =
     ).toBeDisabled();
 
     await page
-      .getByRole("row", { name: "Item Requested Qty. Received" })
+      .getByRole("row", { name: "Item Requested Qty" })
       .getByRole("checkbox")
       .click();
 
@@ -90,18 +95,21 @@ test.describe("Inventory Module (Currently direct Purchase Delivery only)", () =
       page.getByRole("button", { name: /Mark as Completed/i }),
     ).toBeEnabled();
 
-    await expect(page.getByText("Confirm")).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "Receive & Update Stock" }),
+    ).toBeDisabled();
 
     await page
-      .getByRole("row", { name: "Item Requested Qty. Received" })
+      .getByRole("row", { name: "Item Requested Qty" })
       .getByRole("checkbox")
       .click();
-    await page.getByRole("button", { name: "Confirm & Update Stock" }).click();
+
+    await page.getByRole("button", { name: "Receive & Update Stock" }).click();
     await page.getByRole("button", { name: "Confirm" }).click();
     await page.getByRole("button", { name: "Mark as Completed" }).click();
 
     await expect(
-      page.getByText(/Order marked as completed successfully/i),
+      page.getByText(/Order successfully marked as completed/i),
     ).toBeVisible();
   });
 });

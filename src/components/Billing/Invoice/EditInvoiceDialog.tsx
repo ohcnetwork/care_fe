@@ -26,7 +26,7 @@ export function EditInvoiceDialog({
   const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full sm:max-w-3xl overflow-auto">
+      <DialogContent className="w-full sm:max-w-5xl overflow-auto">
         <DialogHeader>
           <DialogTitle>{t("edit_invoice_items")}</DialogTitle>
         </DialogHeader>

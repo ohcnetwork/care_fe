@@ -297,7 +297,7 @@ export function InvoiceShow({
     if (sourceUrl?.includes("medication_dispense")) {
       return t("medication_dispense_invoice_alert");
     }
-    if (sourceUrl?.includes("services_requests")) {
+    if (sourceUrl?.includes("service_requests")) {
       return t("service_request_invoice_alert");
     }
     if (sourceUrl?.includes("encounter")) {
