@@ -59,6 +59,195 @@ interface Props {
   patientName?: string;
 }
 
+interface IdentifierConfig {
+  id: string;
+  config: {
+    display: string;
+    system: string;
+  };
+}
+
+interface PatientSearchSelectorProps {
+  allIdentifierConfigs: IdentifierConfig[];
+  searchType: string;
+  setSearchType: (value: string) => void;
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  isPhoneNumberConfig: boolean;
+  selectedConfig: IdentifierConfig | undefined;
+  handlePatientSelect: (patient: PatientRead | PartialPatientModel) => void;
+  patientList?: { results: (PatientRead | PartialPatientModel)[] };
+  isPatientFetching: boolean;
+}
+
+function PatientSearchSelector({
+  allIdentifierConfigs,
+  searchType,
+  setSearchType,
+  searchTerm,
+  setSearchTerm,
+  isPhoneNumberConfig,
+  selectedConfig,
+  handlePatientSelect,
+  patientList,
+  isPatientFetching,
+}: PatientSearchSelectorProps) {
+  const { t } = useTranslation();
+
+  const searchStateMessage = (() => {
+    if (!searchType) {
+      return t("select_search_type");
+    }
+
+    if (!searchTerm) {
+      return t("start_typing_to_search");
+    }
+
+    if (isPhoneNumberConfig && !isValidPhoneNumber(searchTerm)) {
+      return t("enter_valid_phone_number_to_search");
+    }
+
+    if (isPatientFetching) {
+      return `${t("searching_term", { term: searchTerm })}...`;
+    }
+
+    if (!patientList?.results.length) {
+      return t("no_matches_found");
+    }
+
+    return null;
+  })();
+
+  return (
+    <Command shouldFilter={false} className="border-none">
+      <div className="flex flex-col">
+        {allIdentifierConfigs.length > 2 ? (
+          <div className="p-2">
+            <label className="text-xs text-gray-600 mb-1.5 ml-1 block">
+              {t("search_by")}
+            </label>
+            <Select value={searchType} onValueChange={setSearchType}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {allIdentifierConfigs.map((config) => (
+                  <SelectItem key={config.id} value={config.id}>
+                    {config.config.display}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : allIdentifierConfigs.length >= 2 ? (
+          <Tabs
+            value={searchType}
+            onValueChange={(value) => {
+              setSearchType(value);
+              setSearchTerm("");
+            }}
+            className="w-full p-2"
+          >
+            <TabsList className="w-full h-auto p-0.5 shadow-inner rounded-md">
+              {allIdentifierConfigs.map((config) => (
+                <TabsTrigger
+                  key={config.id}
+                  value={config.id}
+                  className="flex-1 rounded-sm truncate"
+                >
+                  <span className="truncate">{config.config.display}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        ) : allIdentifierConfigs.length === 1 ? (
+          <div className="p-2">
+            <span className="text-sm text-gray-900">
+              {allIdentifierConfigs[0].config.display}
+            </span>
+          </div>
+        ) : null}
+
+        <div className="relative px-2">
+          {isPhoneNumberConfig ? (
+            <PhoneInput
+              placeholder={selectedConfig?.config.display || t("search")}
+              value={searchTerm}
+              onChange={(value) => setSearchTerm(value || "")}
+              className="border-none focus:ring-0 focus:outline-none flex-1"
+              autoFocus
+            />
+          ) : (
+            <>
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10" />
+              <Input
+                type="text"
+                placeholder={selectedConfig?.config.display || t("search")}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+                autoFocus
+              />
+            </>
+          )}
+          {searchTerm && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-5 top-1/2 -translate-y-1/2 size-6 text-gray-400 hover:bg-transparent"
+              onClick={() => setSearchTerm("")}
+              aria-label="Clear search input"
+            >
+              <X className="size-4" />
+            </Button>
+          )}
+        </div>
+
+        {searchStateMessage ? (
+          <Card className="flex items-center justify-center border m-2 bg-gray-50 rounded-sm shadow-none">
+            <div className="text-sm text-gray-950 text-center p-5">
+              {searchStateMessage}
+            </div>
+          </Card>
+        ) : (
+          <>
+            <div className="p-2 text-xs text-gray-700">
+              <Trans
+                i18nKey="found_patient_with_this"
+                values={{
+                  count: patientList?.results.length || 0,
+                  identifier: isPhoneNumberConfig
+                    ? t("phone_number").toLowerCase()
+                    : t("identifier").toLowerCase(),
+                }}
+                components={{
+                  strong: <span className="font-medium" />,
+                }}
+              />
+            </div>
+            <CommandList className="max-h-[calc(50vh-12rem)] overflow-y-auto">
+              <CommandGroup className="p-0">
+                {patientList?.results.map((patient) => (
+                  <CommandItem
+                    key={patient.id}
+                    value={patient.id}
+                    onSelect={() => handlePatientSelect(patient)}
+                    className="px-4 py-2.5 cursor-pointer hover:bg-gray-50 aria-selected:bg-gray-50"
+                  >
+                    <span className="text-sm text-gray-900">
+                      {patient.name}
+                    </span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </>
+        )}
+      </div>
+    </Command>
+  );
+}
+
 export default function PatientIdentifierFilter({
   onSelect,
   placeholder,
@@ -211,159 +400,6 @@ export default function PatientIdentifierFilter({
     </Button>
   );
 
-  const getSearchStateMessage = () => {
-    if (!searchType) {
-      return t("select_search_type");
-    }
-
-    if (!searchTerm) {
-      return t("start_typing_to_search");
-    }
-
-    if (isPhoneNumberConfig && !isValidPhoneNumber(searchTerm)) {
-      return t("enter_valid_phone_number_to_search");
-    }
-
-    if (isPatientFetching) {
-      return `${t("searching_term", { term: searchTerm })}...`;
-    }
-
-    if (!patientList?.results.length) {
-      return t("no_matches_found");
-    }
-
-    return null;
-  };
-
-  const selectorContent = (
-    <Command shouldFilter={false} className="border-none">
-      <div className="flex flex-col">
-        {allIdentifierConfigs.length > 2 ? (
-          <div className="p-2">
-            <label className="text-xs text-gray-600 mb-1.5 ml-1 block">
-              {t("search_by")}
-            </label>
-            <Select value={searchType} onValueChange={setSearchType}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {allIdentifierConfigs.map((config) => (
-                  <SelectItem key={config.id} value={config.id}>
-                    {config.config.display}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        ) : allIdentifierConfigs.length >= 2 ? (
-          <Tabs
-            value={searchType}
-            onValueChange={(value) => {
-              setSearchType(value);
-              setSearchTerm("");
-            }}
-            className="w-full p-2"
-          >
-            <TabsList className="w-full h-auto p-0.5 shadow-inner rounded-md">
-              {allIdentifierConfigs.map((config) => (
-                <TabsTrigger
-                  key={config.id}
-                  value={config.id}
-                  className="flex-1 rounded-sm truncate"
-                >
-                  <span className="truncate">{config.config.display}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        ) : allIdentifierConfigs.length === 1 ? (
-          <div className="p-2">
-            <span className="text-sm text-gray-900">
-              {allIdentifierConfigs[0].config.display}
-            </span>
-          </div>
-        ) : null}
-
-        <div className="relative px-2">
-          {isPhoneNumberConfig ? (
-            <PhoneInput
-              placeholder={selectedConfig?.config.display || t("search")}
-              value={searchTerm}
-              onChange={(value) => setSearchTerm(value || "")}
-              className="border-none focus:ring-0 focus:outline-none flex-1"
-              autoFocus
-            />
-          ) : (
-            <>
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none z-10" />
-              <Input
-                type="text"
-                placeholder={selectedConfig?.config.display || t("search")}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-                autoFocus
-              />
-            </>
-          )}
-          {searchTerm && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-5 top-1/2 -translate-y-1/2 size-6 text-gray-400 hover:bg-transparent"
-              onClick={() => setSearchTerm("")}
-              aria-label="Clear search input"
-            >
-              <X className="size-4" />
-            </Button>
-          )}
-        </div>
-
-        {getSearchStateMessage() ? (
-          <Card className="flex items-center justify-center border m-2 bg-gray-50 rounded-sm shadow-none">
-            <div className="text-sm text-gray-950 text-center p-5">
-              {getSearchStateMessage()}
-            </div>
-          </Card>
-        ) : (
-          <>
-            <div className="p-2 text-xs text-gray-700">
-              <Trans
-                i18nKey="found_patient_with_this"
-                values={{
-                  count: patientList?.results.length || 0,
-                  identifier: isPhoneNumberConfig
-                    ? t("phone_number").toLowerCase()
-                    : t("identifier").toLowerCase(),
-                }}
-                components={{
-                  strong: <span className="font-medium" />,
-                }}
-              />
-            </div>
-            <CommandList className="max-h-[calc(50vh-12rem)] overflow-y-auto">
-              <CommandGroup className="p-0">
-                {patientList?.results.map((patient) => (
-                  <CommandItem
-                    key={patient.id}
-                    value={patient.id}
-                    onSelect={() => handlePatientSelect(patient)}
-                    className="px-4 py-2.5 cursor-pointer hover:bg-gray-50 aria-selected:bg-gray-50"
-                  >
-                    <span className="text-sm text-gray-900">
-                      {patient.name}
-                    </span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </>
-        )}
-      </div>
-    </Command>
-  );
-
   return (
     <>
       <div
@@ -376,14 +412,36 @@ export default function PatientIdentifierFilter({
           <Drawer open={open} onOpenChange={setOpen}>
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
             <DrawerContent className="min-h-[50vh] max-h-[85vh]">
-              {selectorContent}
+              <PatientSearchSelector
+                allIdentifierConfigs={allIdentifierConfigs}
+                searchType={searchType}
+                setSearchType={setSearchType}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                isPhoneNumberConfig={isPhoneNumberConfig}
+                selectedConfig={selectedConfig}
+                handlePatientSelect={handlePatientSelect}
+                patientList={patientList}
+                isPatientFetching={isPatientFetching}
+              />
             </DrawerContent>
           </Drawer>
         ) : (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
             <PopoverContent className="w-80 p-0 overflow-hidden rounded-lg">
-              {selectorContent}
+              <PatientSearchSelector
+                allIdentifierConfigs={allIdentifierConfigs}
+                searchType={searchType}
+                setSearchType={setSearchType}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                isPhoneNumberConfig={isPhoneNumberConfig}
+                selectedConfig={selectedConfig}
+                handlePatientSelect={handlePatientSelect}
+                patientList={patientList}
+                isPatientFetching={isPatientFetching}
+              />
             </PopoverContent>
           </Popover>
         )}
