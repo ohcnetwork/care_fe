@@ -206,9 +206,9 @@ test.describe("Thread Messaging - Multi-user & Single-user", () => {
 
   test("should support multi-user messaging in same thread", async ({
     page,
-    context,
+    browser,
   }) => {
-    // User A creates thread and sends message
+    // User A (admin) creates thread and sends message
     await page.getByRole("button", { name: /New/i }).first().click();
     await page.getByPlaceholder(/discussion title/i).fill(threadTitle);
 
@@ -235,33 +235,40 @@ test.describe("Thread Messaging - Multi-user & Single-user", () => {
     // Verify User A's message
     await expect(page.getByText(userAMessage1)).toBeVisible();
 
-    // Switch to User B (new page with different auth)
-    const page2 = await context.newPage();
+    // Create User B context with facility admin authentication
+    const userBContext = await browser.newContext({
+      storageState: "tests/.auth/facilityAdmin.json",
+    });
+    const userBPage = await userBContext.newPage();
 
-    // Login as a different user (we'll use the same auth for simplicity in this test environment)
-    // In a real scenario, you'd have a separate auth state for user B
-    await page2.goto(encounterUrl);
-    await page2.getByRole("tab", { name: "Notes" }).click();
+    // User B navigates to the same encounter
+    await userBPage.goto(encounterUrl);
+    await userBPage.getByRole("tab", { name: "Notes" }).click();
 
     // Select the thread created by User A
-    await page2.getByRole("button").filter({ hasText: threadTitle }).click();
+    await userBPage
+      .getByRole("button")
+      .filter({ hasText: threadTitle })
+      .click();
 
     // Verify User A's message is visible to User B
-    await expect(page2.getByText(userAMessage1)).toBeVisible();
+    await expect(userBPage.getByText(userAMessage1)).toBeVisible();
 
     // User B sends a message
-    await page2.getByPlaceholder(/type.*message/i).fill(userBMessage);
-    sendMessageResponse = page2.waitForResponse(
+    await userBPage.getByPlaceholder(/type.*message/i).fill(userBMessage);
+    sendMessageResponse = userBPage.waitForResponse(
       (response) =>
         response.url().includes("/note/") &&
         response.request().method() === "POST" &&
         response.status() === 201,
     );
-    await page2.getByRole("button", { name: /Send/i, exact: false }).click();
+    await userBPage
+      .getByRole("button", { name: /Send/i, exact: false })
+      .click();
     await sendMessageResponse;
 
     // Verify User B's message appears for User B
-    await expect(page2.getByText(userBMessage)).toBeVisible();
+    await expect(userBPage.getByText(userBMessage)).toBeVisible();
 
     // Refresh User A's view and verify both messages appear
     await page.reload();
@@ -271,7 +278,8 @@ test.describe("Thread Messaging - Multi-user & Single-user", () => {
     await expect(page.getByText(userAMessage1)).toBeVisible();
     await expect(page.getByText(userBMessage)).toBeVisible();
 
-    await page2.close();
+    // Clean up User B context
+    await userBContext.close();
   });
 
   test("should maintain correct order for consecutive messages from same user", async ({
