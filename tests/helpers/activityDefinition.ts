@@ -1,0 +1,119 @@
+import { faker } from "@faker-js/faker";
+import type { Page } from "@playwright/test";
+
+import {
+  Classification,
+  Status,
+} from "src/types/emr/activityDefinition/activityDefinition";
+
+import { closeAnyOpenPopovers, expectToast, selectFromValueSet } from "./ui";
+
+export function generateActivityDefinitionData() {
+  const status = faker.helpers.arrayElement(Object.values(Status));
+  const classification = faker.helpers.arrayElement(
+    Object.values(Classification),
+  );
+  return {
+    title: `${faker.science.chemicalElement().name.slice(0, 16)}_${faker.string.uuid().slice(0, 8)}`,
+    description: faker.lorem.sentence(),
+    usage: faker.lorem.sentences(2),
+    derivedFromUri: faker.internet.url(),
+    status: status,
+    classification: classification,
+  };
+}
+
+interface CreateActivityDefinitionOptions {
+  resourceCategoryName?: string;
+  overrides?: Partial<{
+    title: string;
+    description: string;
+    usage: string;
+    status: Status;
+    classification: Classification;
+    derivedFromUri: string;
+  }>;
+}
+
+interface CreatedActivityDefinition {
+  title: string;
+  description: string;
+  usage: string;
+  status: Status;
+  classification: Classification;
+  derivedFromUri: string;
+}
+
+/**
+ * Helper function to create an Activity Definition via UI with required fields only
+ * @param page - Playwright page object
+ * @param facilityId - Facility ID where the AD will be created
+ * @param options - Optional overrides for default values
+ * @returns Object containing the created AD data including the extracted ID
+ */
+export async function createActivityDefinition(
+  page: Page,
+  facilityId: string,
+  options: CreateActivityDefinitionOptions = {},
+): Promise<CreatedActivityDefinition> {
+  const resourceCategoryName = options.resourceCategoryName || "Lab Tests";
+
+  // Generate test data with random values
+  const testData = {
+    title:
+      options.overrides?.title ||
+      `${faker.science.chemicalElement().name.slice(0, 16)}_${faker.string.uuid().slice(0, 8)}`,
+    description: options.overrides?.description || faker.lorem.sentence(),
+    usage: options.overrides?.usage || faker.lorem.sentences(2),
+    status:
+      options.overrides?.status ||
+      faker.helpers.arrayElement(Object.values(Status)),
+    classification:
+      options.overrides?.classification ||
+      faker.helpers.arrayElement(Object.values(Classification)),
+    derivedFromUri: options.overrides?.derivedFromUri || faker.internet.url(),
+  };
+
+  await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
+  await page.getByText(resourceCategoryName).click();
+
+  await page.getByRole("button", { name: /add activity definition/i }).click();
+
+  await page.getByLabel(/title.*\*/i).fill(testData.title);
+  await page.getByLabel(/description.*\*/i).fill(testData.description);
+  await page.getByLabel(/usage.*\*/i).fill(testData.usage);
+
+  await page.getByLabel(/^status$/i).click();
+  await page
+    .getByRole("option", { name: new RegExp(testData.status, "i") })
+    .click();
+
+  await page.getByRole("combobox", { name: /^category\s*\*$/i }).click();
+  await page
+    .getByRole("option", {
+      name: new RegExp(testData.classification.replace(/_/g, "\\s"), "i"),
+    })
+    .click();
+
+  await page.getByLabel(/^kind$/i).click();
+  await page.getByRole("option", { name: /service request/i }).click();
+
+  const codeCombobox = page.getByRole("combobox", { name: /^code/i });
+  await selectFromValueSet(page, codeCombobox, {
+    itemIndex: 0,
+  });
+
+  await closeAnyOpenPopovers(page);
+  await page.getByRole("button", { name: /^create$/i }).click();
+
+  await expectToast(page, /activity definition created successfully/i);
+
+  return {
+    title: testData.title,
+    description: testData.description,
+    usage: testData.usage,
+    status: testData.status,
+    classification: testData.classification,
+    derivedFromUri: testData.derivedFromUri,
+  };
+}
