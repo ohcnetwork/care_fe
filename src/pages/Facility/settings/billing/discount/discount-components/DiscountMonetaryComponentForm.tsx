@@ -60,19 +60,52 @@ export function DiscountMonetaryComponentForm({
         .object({
           monetary_component_type: z.literal(MonetaryComponentType.discount),
           code: CodeSchema.optional(),
-          factor: z.number().min(0).max(100).optional(),
-          amount: z
+          factor: z.preprocess((v) => {
+            if (v === "" || v === null || v === undefined) return undefined;
+            const n = Number(v);
+            return isNaN(n) ? undefined : n;
+          }, z.number().min(0).max(100).optional()),
+          amount: z.preprocess(
+            (v) => {
+              if (v === null || v === undefined) return "";
+              if (typeof v === "string") return v;
+              return String(v ?? ""); // always a string
+            },
+            z
+              .string()
+              .trim()
+              .refine((v) => v === "" || !isNaN(Number(v)), {
+                message: t("amount_must_be_a_valid_number"),
+              })
+              .refine((v) => v === "" || Number(v) >= 0, {
+                message: t("amount_must_be_greater_than_or_equal_to_0"),
+              })
+              .optional(),
+          ),
+          title: z
             .string()
-            .refine((val) => !val || Number(val) >= 0, {
-              message: t("amount_must_be_greater_than_or_equal_to_0"),
-            })
-            .optional(),
-          title: z.string().min(1, { message: t("field_required") }),
+            .trim()
+            .min(1, { message: t("field_required") }),
           conditions: z.array(conditionSchema).default([]),
         })
-        .refine((data) => data.factor != null || data.amount != null, {
-          message: t("either_amount_or_factor_required"),
-          path: ["factor", "amount"],
+        .superRefine((data, ctx) => {
+          const hasFactor = data.factor !== undefined && data.factor !== null;
+          const hasAmount =
+            data.amount !== undefined && data.amount?.trim() !== "";
+
+          if (!hasFactor && !hasAmount) {
+            // attach to BOTH fields
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("either_amount_or_factor_required"),
+              path: ["factor"],
+            });
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("either_amount_or_factor_required"),
+              path: ["amount"],
+            });
+          }
         })
         .refine(
           (data) => {
@@ -114,10 +147,12 @@ export function DiscountMonetaryComponentForm({
   const handleValueTypeChange = (value: "factor" | "amount") => {
     setValueType(value);
     if (value === "factor") {
-      form.setValue("amount", undefined);
+      form.setValue("amount", "");
     } else {
       form.setValue("factor", undefined);
     }
+
+    form.trigger(["factor", "amount"]);
   };
 
   // Handle condition changes
@@ -131,7 +166,11 @@ export function DiscountMonetaryComponentForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        noValidate
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4"
+      >
         <FormField
           control={form.control}
           name="title"
@@ -139,7 +178,10 @@ export function DiscountMonetaryComponentForm({
             <FormItem>
               <FormLabel>{t("name")}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value.trimStart())}
+                />
               </FormControl>
               <FormDescription>
                 {t("discount_component_name_description")}
@@ -163,18 +205,17 @@ export function DiscountMonetaryComponentForm({
                         <div className="relative">
                           <Input
                             type="number"
-                            min="0"
-                            max="100"
-                            step="0.01"
                             {...field}
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.value
-                                  ? parseFloat(e.target.value)
-                                  : null,
-                              )
+                            value={
+                              typeof field.value === "number" ||
+                              typeof field.value === "string"
+                                ? field.value
+                                : ""
                             }
-                            value={field.value === null ? "" : field.value}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              field.onChange(v === "" ? undefined : v);
+                            }}
                             className="pr-8"
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
@@ -198,14 +239,14 @@ export function DiscountMonetaryComponentForm({
                             ₹
                           </span>
                           <Input
-                            type="number"
-                            min="0"
-                            step="0.01"
                             {...field}
-                            onChange={(e) =>
-                              field.onChange(e.target.value || null)
+                            value={
+                              typeof field.value === "string" ||
+                              typeof field.value === "number"
+                                ? field.value
+                                : ""
                             }
-                            value={field.value === null ? "" : field.value}
+                            onChange={(e) => field.onChange(e.target.value)}
                             className="pl-8"
                           />
                         </div>
@@ -216,29 +257,19 @@ export function DiscountMonetaryComponentForm({
                 />
               )}
             </div>
-            <FormField
-              control={form.control}
-              name="factor"
-              render={({ field: _field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      value={valueType}
-                      onValueChange={handleValueTypeChange}
-                    >
-                      <SelectTrigger className="flex-1" ref={_field.ref}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="factor">{t("factor")}</SelectItem>
-                        <SelectItem value="amount">{t("amount")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormItem>
+              <FormControl>
+                <Select value={valueType} onValueChange={handleValueTypeChange}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="factor">{t("factor")}</SelectItem>
+                    <SelectItem value="amount">{t("amount")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+            </FormItem>
           </div>
           <FormDescription>
             {valueType === "factor"
