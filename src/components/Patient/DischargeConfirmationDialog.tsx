@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button";
 
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 
-import { type EncounterEdit } from "@/types/emr/encounter/encounter";
+import {
+  EncounterStatus,
+  type EncounterEdit,
+} from "@/types/emr/encounter/encounter";
 
 interface DischargeConfirmationDialogProps {
   encounter: EncounterEdit;
@@ -28,7 +31,7 @@ const DischargeConfirmationDialog = ({
 
   const handleConfirm = () => {
     onConfirm({
-      status: "discharged",
+      status: EncounterStatus.DISCHARGED,
       period: {
         ...encounter.period,
         end: new Date().toISOString(),
