@@ -1,4 +1,5 @@
 import { Condition, conditionSchema } from "@/types/base/condition/condition";
+import { t } from "i18next";
 import { z } from "zod";
 
 export interface Interpretation {
@@ -36,7 +37,7 @@ export interface QualifiedRange {
 }
 
 const interpretationSchema = z.object({
-  display: z.string().min(1, "Display is required"),
+  display: z.string().min(1, t("display_required")),
   icon: z.string().optional(),
   color: z.string().optional(),
 });
@@ -57,7 +58,7 @@ export const qualifiedRangeSchema = z.array(
               return false;
             },
             {
-              message: "Either min or max value is required",
+              message: t("either_min_or_max_value_required"),
               path: ["min"],
             },
           )
@@ -68,7 +69,7 @@ export const qualifiedRangeSchema = z.array(
               return data.min <= data.max;
             },
             {
-              message: "Min value must be <= max value",
+              message: t("min_less_max_error"),
               path: ["max"],
             },
           ),
@@ -80,7 +81,7 @@ export const qualifiedRangeSchema = z.array(
         .array(
           z.object({
             interpretation: interpretationSchema,
-            valueset: z.string().min(1, "Value set is required"),
+            valueset: z.string().min(1, t("required")),
           }),
         )
         .optional(),
@@ -98,7 +99,7 @@ export const qualifiedRangeSchema = z.array(
       ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Ranges and value sets cannot be used together",
+          message: t("ranges_valueset_conflict_error"),
           path: ["_interpretation_type"],
         });
       }
@@ -108,7 +109,7 @@ export const qualifiedRangeSchema = z.array(
       ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Ranges are required",
+          message: t("required"),
           path: ["ranges"],
         });
       }
@@ -119,7 +120,7 @@ export const qualifiedRangeSchema = z.array(
       ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Value sets are required",
+          message: t("required"),
           path: ["valueset_interpretation"],
         });
       }
@@ -131,16 +132,29 @@ export const getRangeSummary = (range: NumericRange) => {
     return "";
   }
   if (!range.min) {
-    return `${range.interpretation.display} when value is less than ${range.max}`;
+    return t("observation_interpretation_range_max_only", {
+      display: range.interpretation.display,
+      max: range.max,
+    });
   }
   if (!range.max) {
-    return `${range.interpretation.display} when value is greater than ${range.min}`;
+    return t("observation_interpretation_range_min_only", {
+      display: range.interpretation.display,
+      min: range.min,
+    });
   }
-  return `${range.interpretation.display} when value is between ${range.min} and ${range.max}`;
+  return t("observation_interpretation_range_between", {
+    display: range.interpretation.display,
+    min: range.min,
+    max: range.max,
+  });
 };
 
 export const getValuesetSummary = (valueset: CustomValueSet) => {
-  return `${valueset.interpretation.display} when value is in ${valueset.valueset}`;
+  return t("observation_interpretation_valueset_summary", {
+    display: valueset.interpretation.display,
+    valueset: valueset.valueset,
+  });
 };
 
 export const COLOR_OPTIONS = {

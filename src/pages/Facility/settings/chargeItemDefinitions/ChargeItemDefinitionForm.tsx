@@ -711,6 +711,7 @@ export function ChargeItemDefinitionForm({
     if (isUpdate && initialData) {
       form.reset(getDefaultValues());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialData?.slug, isUpdate]);
 
   useEffect(() => {
@@ -863,7 +864,7 @@ export function ChargeItemDefinitionForm({
           amount:
             component.factor != null ? undefined : String(component.amount),
           conditions:
-            component.conditions.map((condition) => ({
+            component.conditions?.map((condition) => ({
               ...condition,
               _conditionType: `${condition.metric}_${condition.operation}`,
             })) || [],
@@ -897,7 +898,7 @@ export function ChargeItemDefinitionForm({
     const newComponents = [...currentComponents];
     newComponents[componentIndex] = {
       ...newComponents[componentIndex],
-      conditions: conditions.map((condition) => ({
+      conditions: conditions?.map((condition) => ({
         ...condition,
         _conditionType: `${condition.metric}_${condition.operation}`,
       })),

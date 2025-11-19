@@ -170,8 +170,9 @@ function ObservationDefinitionFormContent({
         return !(hasRootQualifiedRanges && hasComponentQualifiedRanges);
       },
       {
-        message:
-          "Either root-level or component-level observation interpretations can be added, not both",
+        message: t(
+          "observation_interpretation_root_component_conflict_message",
+        ),
         path: ["qualified_ranges"],
       },
     );

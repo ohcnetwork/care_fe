@@ -47,7 +47,6 @@ interface MultiFilterStyleTagSelectorProps {
   disabled?: boolean;
   isLoading?: boolean;
   trigger?: React.ReactNode;
-  singleSelect?: boolean;
 }
 
 // Clean, minimal tag selector matching multi-filter design
@@ -60,7 +59,6 @@ export function MultiFilterStyleTagSelector({
   disabled = false,
   isLoading = false,
   trigger,
-  singleSelect = false,
 }: MultiFilterStyleTagSelectorProps) {
   const [open, setOpen] = useState(false);
   const [groupPopoverOpen, setGroupPopoverOpen] = useState<string | null>(null);
@@ -123,21 +121,13 @@ export function MultiFilterStyleTagSelector({
 
     const isCurrentlySelected = selected.some((t) => t.id === tag.id);
 
-    if (singleSelect) {
-      if (isCurrentlySelected) {
-        onChange([]);
-      } else {
-        onChange([tag]);
-      }
+    if (isCurrentlySelected) {
+      onChange(selected.filter((t) => t.id !== tag.id));
     } else {
-      if (isCurrentlySelected) {
-        onChange(selected.filter((t) => t.id !== tag.id));
-      } else {
-        onChange([
-          ...selected.filter((t) => t.id !== alreadySelectedInGroup?.id),
-          tag,
-        ]);
-      }
+      onChange([
+        ...selected.filter((t) => t.id !== alreadySelectedInGroup?.id),
+        tag,
+      ]);
     }
   };
 
