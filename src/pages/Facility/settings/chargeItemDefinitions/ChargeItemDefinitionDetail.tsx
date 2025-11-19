@@ -295,7 +295,7 @@ export function ChargeItemDefinitionDetail({
                               {t("conditions")}
                             </p>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {component.conditions.map((condition, index) => {
+                              {component.conditions?.map((condition, index) => {
                                 return (
                                   <div
                                     key={index}
