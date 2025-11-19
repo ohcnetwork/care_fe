@@ -1,177 +1,215 @@
+import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 import { format, subDays } from "date-fns";
 import { getFacilityId } from "tests/support/facilityId";
 
-// Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
-test.describe("Questionnaire Status Management", () => {
-  const questionnaireName = "Respiratory Support";
-  let questionnaireUrl: string;
+test.describe("Questionnaire Visibility by Status and Subject Type", () => {
+  async function createQuestionnaire(
+    page: Page,
+    subjectType: "encounter" | "patient",
+    status: "active" | "draft" | "retired",
+  ) {
+    const slug = faker.string.alphanumeric({ length: 10 });
+    const name = `Test ${subjectType} ${status} ${slug}`;
 
-  // Helper function to navigate to questionnaire admin page
-  async function navigateToQuestionnaireAdmin(page: Page) {
     await page.goto("/");
     await page.getByRole("link", { name: "Admin Dashboard" }).click();
-
-    // Search for the questionnaire
+    await page.getByRole("button", { name: "Create Questionnaire" }).click();
+    await page.getByRole("button", { name: "Import" }).click();
     await page
-      .getByPlaceholder(/search/i)
-      .filter({ hasText: "" })
-      .first()
-      .fill(questionnaireName);
+      .locator("[data-slot='dropdown-menu-item']")
+      .getByText("Import from URL")
+      .click();
 
-    // Wait for search results to load by checking if view button appears
-    await page.getByRole("button", { name: /view/i }).first().waitFor();
+    await page
+      .getByPlaceholder("https://example.com/questionnaire.json")
+      .fill(
+        "https://raw.githubusercontent.com/nihal467/questionnaire/refs/heads/main/All%20Structure%20Question.json",
+      );
+    await page.locator("[data-slot='button']").getByText("Import").click();
+    await page.getByRole("button", { name: "Import Form" }).click();
 
-    // Click the first questionnaire view button
-    await page.getByRole("button", { name: /view/i }).first().click();
+    await page
+      .locator("[data-slot='card-title']")
+      .getByText("Properties")
+      .scrollIntoViewIfNeeded();
 
-    return page.url();
-  }
-
-  // Helper function to update questionnaire status
-  async function updateQuestionnaireStatus(
-    page: Page,
-    status: "retired" | "draft" | "active",
-  ) {
-    await page.goto(questionnaireUrl);
     await page.locator(`#status-${status}`).click();
+    await page.locator(`#subject-type-${subjectType}`).click();
 
-    // Save the questionnaire
-    await page.getByRole("button", { name: /save/i }).click();
+    await page.locator("input[name='title']").fill(name);
+    await page.locator("input[name='slug']").fill(slug);
 
-    // Wait for success notification
+    await page
+      .getByRole("button", { name: "Select Organizations" })
+      .first()
+      .click();
+    await page.locator("[cmdk-input]").waitFor({ state: "visible" });
+    await page.locator("[cmdk-input]").fill("Admin");
+    await page.locator("[cmdk-item]").getByText("Admin").first().click();
+    await page.keyboard.press("Escape");
+
+    await page.locator("button[type='submit']").click();
+
     await expect(
       page
         .locator("li[data-sonner-toast]")
-        .getByText("Questionnaire updated successfully"),
+        .getByText("Questionnaire created successfully"),
     ).toBeVisible({ timeout: 10000 });
+
+    return name;
   }
 
-  // Helper function to try adding questionnaire to encounter
-  async function tryAddingQuestionnaire(
+  async function navigateToEncounterPage(page: Page) {
+    const facilityId = getFacilityId();
+    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
+    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+
+    await page.goto(
+      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
+    );
+
+    await page.getByText("View Encounter").first().click();
+    await page.getByRole("link", { name: "Update Encounter" }).click();
+  }
+
+  async function navigateToPatientUpdatesPage(page: Page) {
+    const facilityId = getFacilityId();
+    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
+    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+
+    await page.goto(
+      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in_progress`,
+    );
+
+    await page.getByText("View Encounter").first().click();
+
+    await page
+      .locator("[data-slot='patient-info-hover-card-trigger']")
+      .last()
+      .click();
+
+    await page.getByRole("link", { name: "View Profile" }).click();
+
+    await page.getByRole("tab", { name: "Updates" }).click();
+
+    await page.getByRole("link", { name: "Add Patient Updates" }).click();
+  }
+
+  async function checkQuestionnaireAvailability(
     page: Page,
+    questionnaireName: string,
     shouldBeAvailable: boolean,
   ) {
-    // Click the add questionnaire button (combobox with role)
     await page
       .getByRole("combobox")
       .filter({ hasText: /add form/i })
       .click();
 
-    // Wait for the combobox to be visible and type the questionnaire name
     await page.locator("[cmdk-input]").waitFor({ state: "visible" });
     await page.locator("[cmdk-input]").fill(questionnaireName);
 
     if (shouldBeAvailable) {
-      // Wait for and verify the questionnaire option is available
       await expect(
         page.getByRole("option", { name: questionnaireName }).first(),
       ).toBeVisible();
-      await page
-        .getByRole("option", { name: questionnaireName })
-        .first()
-        .click();
+      await page.keyboard.press("Escape");
     } else {
-      // Verify "No Results Found" message appears
       await expect(
         page.locator("[cmdk-empty]").getByText("No Results Found"),
       ).toBeVisible();
-
-      // Close the combobox
       await page.keyboard.press("Escape");
     }
   }
 
-  // Setup: Navigate to questionnaire admin and save URL
   test.beforeAll(async ({ browser }) => {
     const context = await browser.newContext({
       storageState: "tests/.auth/user.json",
     });
-    const page = await context.newPage();
-    questionnaireUrl = await navigateToQuestionnaireAdmin(page);
     await context.close();
   });
 
-  test("retired questionnaire should not be available in encounter", async ({
-    page,
-  }) => {
-    const facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+  test.describe("Encounter Subject Type Questionnaires", () => {
+    test("Active + Encounter Subject -> Visible in encounter, not in patient updates", async ({
+      page,
+    }) => {
+      const questionnaireName = await createQuestionnaire(
+        page,
+        "encounter",
+        "active",
+      );
 
-    // Navigate directly to encounters with filters applied
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in-progress`,
-    );
+      await navigateToEncounterPage(page);
+      await checkQuestionnaireAvailability(page, questionnaireName, true);
+    });
 
-    // Open the first encounter details
-    await page.getByText("View Encounter").first().click();
+    test("Draft + Encounter Subject -> Not visible in encounter, not in patient updates", async ({
+      page,
+    }) => {
+      const questionnaireName = await createQuestionnaire(
+        page,
+        "encounter",
+        "draft",
+      );
 
-    // Click Update Encounter link
-    await page.getByRole("link", { name: "Update Encounter" }).click();
+      await navigateToEncounterPage(page);
+      await checkQuestionnaireAvailability(page, questionnaireName, false);
+    });
 
-    // Update questionnaire status to retired
-    await updateQuestionnaireStatus(page, "retired");
+    test("Retired + Encounter Subject -> Not visible in encounter, not in patient updates", async ({
+      page,
+    }) => {
+      const questionnaireName = await createQuestionnaire(
+        page,
+        "encounter",
+        "retired",
+      );
 
-    // Go back to encounter and verify questionnaire is not available
-    await page.goBack();
-    await page.goBack();
-    await tryAddingQuestionnaire(page, false);
+      await navigateToEncounterPage(page);
+      await checkQuestionnaireAvailability(page, questionnaireName, false);
+    });
   });
 
-  test("draft questionnaire should not be available in encounter", async ({
-    page,
-  }) => {
-    const facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+  test.describe("Patient Subject Type Questionnaires", () => {
+    test("Active + Patient Subject -> Visible in patient updates, not in encounter", async ({
+      page,
+    }) => {
+      const questionnaireName = await createQuestionnaire(
+        page,
+        "patient",
+        "active",
+      );
 
-    // Navigate directly to encounters with filters applied
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in-progress`,
-    );
+      await navigateToPatientUpdatesPage(page);
+      await checkQuestionnaireAvailability(page, questionnaireName, true);
+    });
 
-    // Open the first encounter details
-    await page.getByText("View Encounter").first().click();
+    test("Draft + Patient Subject -> Not visible in patient updates, not in encounter", async ({
+      page,
+    }) => {
+      const questionnaireName = await createQuestionnaire(
+        page,
+        "patient",
+        "draft",
+      );
 
-    // Click Update Encounter link
-    await page.getByRole("link", { name: "Update Encounter" }).click();
+      await navigateToPatientUpdatesPage(page);
+      await checkQuestionnaireAvailability(page, questionnaireName, false);
+    });
 
-    // Update questionnaire status to draft
-    await updateQuestionnaireStatus(page, "draft");
+    test("Retired + Patient Subject -> Not visible in patient updates, not in encounter", async ({
+      page,
+    }) => {
+      const questionnaireName = await createQuestionnaire(
+        page,
+        "patient",
+        "retired",
+      );
 
-    // Go back to encounter and verify questionnaire is not available
-    await page.goBack();
-    await page.goBack();
-    await tryAddingQuestionnaire(page, false);
-  });
-
-  test("active questionnaire should be available in encounter", async ({
-    page,
-  }) => {
-    const facilityId = getFacilityId();
-    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
-
-    // Navigate directly to encounters with filters applied
-    await page.goto(
-      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}&status=in-progress`,
-    );
-
-    // Open the first encounter details
-    await page.getByText("View Encounter").first().click();
-
-    // Click Update Encounter link
-    await page.getByRole("link", { name: "Update Encounter" }).click();
-
-    // Update questionnaire status to active
-    await updateQuestionnaireStatus(page, "active");
-
-    // Go back to encounter and verify questionnaire is available
-    await page.goBack();
-    await page.goBack();
-    await tryAddingQuestionnaire(page, true);
+      await navigateToPatientUpdatesPage(page);
+      await checkQuestionnaireAvailability(page, questionnaireName, false);
+    });
   });
 });
