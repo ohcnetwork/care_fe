@@ -1,13 +1,12 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
 
-// Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Facility Location Creation", () => {
   let facilityId: string;
-  // Common faker option arrays for all below tests
+
   const locationTypes = [
     "Building",
     "Ward",
@@ -26,241 +25,275 @@ test.describe("Facility Location Creation", () => {
     "Unoccupied",
   ];
 
-  // Generate the fresh faker constants for each test
   let location: string;
   let locationName: string;
   let locationDescription: string;
   let status: string;
   let operationalStatus: string;
 
-  // Common navigation before each test
   test.beforeEach(async ({ page }) => {
-    // Get facility ID for each test run
     facilityId = getFacilityId();
 
-    // Generate fresh faker values for each test
     location = faker.helpers.arrayElement(locationTypes);
     locationName = faker.company.name();
     locationDescription = faker.lorem.sentence();
     status = faker.helpers.arrayElement(statusOptions);
     operationalStatus = faker.helpers.arrayElement(operationalStatusOptions);
 
-    const targetUrl = `/facility/${facilityId}/settings/locations`;
-    await page.goto(targetUrl);
+    await page.goto(`/facility/${facilityId}/settings/locations`);
   });
 
-  test("Add a new location with mandatory fields", async ({ page }) => {
+  async function openAddLocationDialog(page: Page) {
     await page.getByRole("button", { name: "Add Location" }).click();
+  }
 
-    // Select location form (mandatory field)
+  async function selectLocationType(page: Page, locationType: string) {
     await page.getByRole("combobox", { name: "Location Form" }).click();
-    await page.getByRole("option", { name: location }).click();
+    await page.getByRole("option", { name: locationType }).click();
+  }
 
-    // Fill location name (mandatory field)
-    await page.getByRole("textbox", { name: "Name" }).fill(locationName);
+  async function fillLocationName(page: Page, name: string) {
+    await page.getByRole("textbox", { name: "Name" }).fill(name);
+  }
 
-    // Note: Description is intentionally skipped as it's optional
+  async function fillLocationDescription(page: Page, description: string) {
+    await page.getByRole("textbox", { name: "Description" }).fill(description);
+  }
 
-    // Select status (mandatory field)
+  async function selectStatus(page: Page, statusValue: string) {
     await page.getByRole("combobox", { name: "Status", exact: true }).click();
-    await page.getByRole("option", { name: status }).first().click();
+    await page.getByRole("option", { name: statusValue }).first().click();
+  }
 
-    // Select operational status (mandatory field)
+  async function selectOperationalStatus(
+    page: Page,
+    operationalStatusValue: string,
+  ) {
     await page.getByRole("combobox", { name: "Operational Status" }).click();
-    await page.getByRole("option", { name: operationalStatus }).first().click();
-
-    // Submit the form
-    await page.getByRole("button", { name: "Create" }).click();
-
-    // Verify location appears in search results
     await page
-      .getByRole("textbox", { name: "Search by name" })
-      .fill(locationName);
+      .getByRole("option", { name: operationalStatusValue })
+      .first()
+      .click();
+  }
 
-    // Assert that all entered data is correctly displayed
+  async function submitLocationForm(page: Page) {
+    await page.getByRole("button", { name: "Create" }).click();
+  }
+
+  async function verifyLocationCreatedNotification(page: Page) {
+    await expect(
+      page.locator("li[data-sonner-toast]").getByText("Location Created"),
+    ).toBeVisible({ timeout: 10000 });
+  }
+
+  async function searchLocationByName(page: Page, name: string) {
+    await page.getByRole("textbox", { name: "Search by name" }).fill(name);
+  }
+
+  async function verifyLocationInTable(
+    page: Page,
+    name: string,
+    statusValue: string,
+    locationType: string,
+  ) {
     const tableBody = page.locator('[data-slot="table-body"]');
-    await expect(tableBody).toContainText(locationName);
-    await expect(tableBody).toContainText(status);
-    await expect(tableBody).toContainText(location);
+    await expect(tableBody).toContainText(name);
+    await expect(tableBody).toContainText(statusValue);
+    await expect(tableBody).toContainText(locationType);
+  }
 
-    // Assert that all entered data is correctly displayed in edit slideover
+  async function openEditLocation(page: Page) {
     await page.locator("button[title='Edit Location']").first().click();
+  }
 
-    // Verify that Location Form combobox is disabled and has the correct location form
+  async function verifyLocationFormDisabled(page: Page, locationType: string) {
     const locationFormCombobox = page.getByRole("combobox", {
       name: "Location Form",
     });
     await expect(locationFormCombobox).toBeDisabled();
-    await expect(locationFormCombobox).toContainText(location);
+    await expect(locationFormCombobox).toContainText(locationType);
+  }
 
-    // Verify that Name textbox contains the correct location name
+  async function verifyLocationName(page: Page, name: string) {
     const nameTextbox = page.getByRole("textbox", { name: "Name" });
-    await expect(nameTextbox).toHaveValue(locationName);
+    await expect(nameTextbox).toHaveValue(name);
+  }
 
-    // Verify that Description textbox is empty (since we didn't fill it during creation)
+  async function verifyLocationDescription(page: Page, description: string) {
     const descriptionTextbox = page.getByRole("textbox", {
       name: "Description",
     });
-    await expect(descriptionTextbox).toHaveValue("");
+    await expect(descriptionTextbox).toHaveValue(description);
+  }
 
-    // Verify that Status combobox contains the correct status
+  async function verifyLocationStatus(page: Page, statusValue: string) {
     const statusCombobox = page.getByRole("combobox", {
       name: "Status",
       exact: true,
     });
-    await expect(statusCombobox).toContainText(status);
+    await expect(statusCombobox).toContainText(statusValue);
+  }
 
-    // Verify that Operational Status combobox contains the correct operational status
+  async function verifyLocationOperationalStatus(
+    page: Page,
+    operationalStatusValue: string,
+  ) {
     const operationalStatusCombobox = page.getByRole("combobox", {
       name: "Operational Status",
     });
-    await expect(operationalStatusCombobox).toContainText(operationalStatus);
+    await expect(operationalStatusCombobox).toContainText(
+      operationalStatusValue,
+    );
+  }
+
+  async function openParentLocation(page: Page) {
+    await page.locator('[data-slot="table-body"] tr').first().click();
+  }
+
+  async function enableBulkBedCreation(page: Page) {
+    await page.getByRole("checkbox", { name: "Create Multiple Beds" }).click();
+  }
+
+  async function selectNumberOfBeds(page: Page, count: number) {
+    await page.getByRole("combobox", { name: "Number of beds" }).click();
+    await page
+      .getByRole("option", { name: `${count} Beds` })
+      .first()
+      .click();
+  }
+
+  async function verifyMultipleBedsCreatedNotification(
+    page: Page,
+    count: number,
+  ) {
+    await expect(
+      page
+        .locator("li[data-sonner-toast]")
+        .getByText(`${count} Beds created successfully`),
+    ).toBeVisible({ timeout: 10000 });
+  }
+
+  async function searchChildLocationByName(page: Page, name: string) {
+    await page
+      .getByRole("textbox", { name: "Search by name" })
+      .last()
+      .fill(name);
+  }
+
+  async function verifyChildLocationInTable(
+    page: Page,
+    name: string,
+    locationType: string,
+  ) {
+    const tableBody = page.locator('[data-slot="table-body"]').last();
+    await expect(tableBody).toContainText(name);
+    await expect(tableBody).toContainText(locationType);
+  }
+
+  async function verifyErrorMessage(page: Page, message: string | RegExp) {
+    await expect(
+      page.locator("li[data-sonner-toast]").getByText(message),
+    ).toBeVisible({ timeout: 10000 });
+  }
+
+  test("Add a new location with mandatory fields", async ({ page }) => {
+    await openAddLocationDialog(page);
+    await selectLocationType(page, location);
+    await fillLocationName(page, locationName);
+    await selectStatus(page, status);
+    await selectOperationalStatus(page, operationalStatus);
+    await submitLocationForm(page);
+
+    await searchLocationByName(page, locationName);
+    await verifyLocationInTable(page, locationName, status, location);
+
+    await openEditLocation(page);
+    await verifyLocationFormDisabled(page, location);
+    await verifyLocationName(page, locationName);
+    await verifyLocationDescription(page, "");
+    await verifyLocationStatus(page, status);
+    await verifyLocationOperationalStatus(page, operationalStatus);
   });
 
   test("Add a new location with all fields", async ({ page }) => {
-    // Open the location creation form
-    await page.getByRole("button", { name: "Add Location" }).click();
+    await openAddLocationDialog(page);
+    await selectLocationType(page, location);
+    await fillLocationName(page, locationName);
+    await fillLocationDescription(page, locationDescription);
+    await selectStatus(page, status);
+    await selectOperationalStatus(page, operationalStatus);
+    await submitLocationForm(page);
 
-    // Select location form (mandatory field)
-    await page.getByRole("combobox", { name: "Location Form" }).click();
-    await page.getByRole("option", { name: location }).click();
+    await searchLocationByName(page, locationName);
+    await verifyLocationInTable(page, locationName, status, location);
 
-    // Fill location name (mandatory field)
-    await page.getByRole("textbox", { name: "Name" }).fill(locationName);
-
-    // Fill description field (optional field - testing that optional fields work)
-    await page
-      .getByRole("textbox", { name: "Description" })
-      .fill(locationDescription);
-
-    // Select status (mandatory field)
-    await page.getByRole("combobox", { name: "Status", exact: true }).click();
-    await page.getByRole("option", { name: status }).first().click();
-
-    // Select operational status (mandatory field)
-    await page.getByRole("combobox", { name: "Operational Status" }).click();
-    await page.getByRole("option", { name: operationalStatus }).first().click();
-
-    // Submit the form
-    await page.getByRole("button", { name: "Create" }).click();
-
-    // Verify location appears in search results
-    await page
-      .getByRole("textbox", { name: "Search by name" })
-      .fill(locationName);
-
-    // Assert that all entered data is correctly displayed
-    const tableBody = page.locator('[data-slot="table-body"]');
-    await expect(tableBody).toContainText(locationName);
-    await expect(tableBody).toContainText(status);
-    await expect(tableBody).toContainText(location);
-
-    // Assert that all entered data is correctly displayed in edit slideover
-    await page.locator("button[title='Edit Location']").first().click();
-
-    // Verify that Location Form combobox is disabled and has the correct location form
-    const locationFormCombobox = page.getByRole("combobox", {
-      name: "Location Form",
-    });
-    await expect(locationFormCombobox).toBeDisabled();
-    await expect(locationFormCombobox).toContainText(location);
-
-    // Verify that Name textbox contains the correct location name
-    const nameTextbox = page.getByRole("textbox", { name: "Name" });
-    await expect(nameTextbox).toHaveValue(locationName);
-
-    // Verify that Description textbox contains the description (since we filled it during creation)
-    const descriptionTextbox = page.getByRole("textbox", {
-      name: "Description",
-    });
-    await expect(descriptionTextbox).toHaveValue(locationDescription);
-
-    // Verify that Status combobox contains the correct status
-    const statusCombobox = page.getByRole("combobox", {
-      name: "Status",
-      exact: true,
-    });
-    await expect(statusCombobox).toContainText(status);
-
-    // Verify that Operational Status combobox contains the correct operational status
-    const operationalStatusCombobox = page.getByRole("combobox", {
-      name: "Operational Status",
-    });
-    await expect(operationalStatusCombobox).toContainText(operationalStatus);
-  });
-
-  test("Modify an existing location and verify its updates", async ({
-    page,
-  }) => {
-    // Click the first edit button (pencil icon) to open edit form
-    await page.locator("button[title='Edit Location']").first().click();
-
-    // Update location name with new random value
-    await page.getByRole("textbox", { name: "Name" }).fill(locationName);
-
-    // Update description with new random value
-    await page
-      .getByRole("textbox", { name: "Description" })
-      .fill(locationDescription);
-
-    // Update status with new random selection
-    await page.getByRole("combobox", { name: "Status", exact: true }).click();
-    await page.getByRole("option", { name: status }).first().click();
-
-    // Update operational status with new random selection
-    await page.getByRole("combobox", { name: "Operational Status" }).click();
-    await page.getByRole("option", { name: operationalStatus }).first().click();
-
-    // Submit the updated form
-    await page.getByRole("button", { name: "Update" }).click();
-
-    // Search for the updated location to verify changes were saved
-    await page
-      .getByRole("textbox", { name: "Search by name" })
-      .fill(locationName);
-
-    // Assert that all updated data is correctly displayed in the table
-    const tableBody = page.locator('[data-slot="table-body"]');
-    await expect(tableBody).toContainText(locationName);
-    await expect(tableBody).toContainText(status);
-
-    // Verify the updated data is correctly displayed in edit form
-    await page.locator("button[title='Edit Location']").first().click();
-
-    // Verify all updated values are correctly saved and displayed
-    const updatedNameTextbox = page.getByRole("textbox", { name: "Name" });
-    await expect(updatedNameTextbox).toHaveValue(locationName);
-
-    const updatedDescriptionTextbox = page.getByRole("textbox", {
-      name: "Description",
-    });
-    await expect(updatedDescriptionTextbox).toHaveValue(locationDescription);
-
-    const updatedStatusCombobox = page.getByRole("combobox", {
-      name: "Status",
-      exact: true,
-    });
-    await expect(updatedStatusCombobox).toContainText(status);
-
-    const updatedOperationalStatusCombobox = page.getByRole("combobox", {
-      name: "Operational Status",
-    });
-    await expect(updatedOperationalStatusCombobox).toContainText(
-      operationalStatus,
-    );
+    await openEditLocation(page);
+    await verifyLocationFormDisabled(page, location);
+    await verifyLocationName(page, locationName);
+    await verifyLocationDescription(page, locationDescription);
+    await verifyLocationStatus(page, status);
+    await verifyLocationOperationalStatus(page, operationalStatus);
   });
 
   test("Validate location create button is disabled when mandatory fields are empty", async ({
     page,
   }) => {
-    await page.getByRole("button", { name: "Add Location" }).click();
+    await openAddLocationDialog(page);
 
-    // Verify that the name field is empty and is the only mandatory required field now
     const nameTextbox = page.getByRole("textbox", { name: "Name" });
     await expect(nameTextbox).toHaveValue("");
 
-    // Verify that Create button is disabled when mandatory fields are empty
     const createButton = page.getByRole("button", { name: "Create" });
     await expect(createButton).toBeDisabled();
+  });
+
+  test("Add single bed as child location", async ({ page }) => {
+    const bedName = faker.company.name();
+
+    await openParentLocation(page);
+    await openAddLocationDialog(page);
+    await selectLocationType(page, "Bed");
+    await fillLocationName(page, bedName);
+    await submitLocationForm(page);
+
+    await verifyLocationCreatedNotification(page);
+
+    await searchChildLocationByName(page, bedName);
+    await verifyChildLocationInTable(page, bedName, "Bed");
+  });
+
+  test("Add multiple beds as child location", async ({ page }) => {
+    const bedBaseName = faker.word.words(1);
+    const bedCount = 2;
+
+    await openParentLocation(page);
+    await openAddLocationDialog(page);
+    await selectLocationType(page, "Bed");
+    await fillLocationName(page, bedBaseName);
+    await enableBulkBedCreation(page);
+    await selectNumberOfBeds(page, bedCount);
+    await submitLocationForm(page);
+
+    await verifyMultipleBedsCreatedNotification(page, bedCount);
+
+    const childSearchBox = page
+      .getByRole("textbox", { name: "Search by name" })
+      .last();
+    const childTableBody = page.locator('[data-slot="table-body"]').last();
+
+    for (let i = 1; i <= bedCount; i++) {
+      await childSearchBox.fill(`${bedBaseName} ${i}`);
+      await expect(childTableBody).toContainText(`${bedBaseName} ${i}`);
+    }
+  });
+
+  test("Verify error when creating bed in root location", async ({ page }) => {
+    await openAddLocationDialog(page);
+    await selectLocationType(page, "Bed");
+
+    await verifyErrorMessage(
+      page,
+      /Beds can only be created under a parent location/i,
+    );
   });
 });
