@@ -37,6 +37,7 @@ export default function PrescriptionsView({
     queryKey: ["patient", patientId],
     queryFn: query(patientApi.getPatient, {
       pathParams: { id: patientId ?? "" },
+      silent: true,
     }),
     enabled: !!patientId,
   });

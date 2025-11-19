@@ -349,6 +349,7 @@ export function MonetaryComponentSelector({
       return <></>;
     }
     return listComponents.map((component, idx) => {
+      const isSelected = isComponentSelected(component, tempSelectedComponents);
       return (
         <div
           key={`${component.title}-${component.code?.code || idx}`}
@@ -357,7 +358,7 @@ export function MonetaryComponentSelector({
           )}
         >
           <Checkbox
-            checked={isComponentSelected(component, tempSelectedComponents)}
+            checked={isSelected}
             onCheckedChange={(checked) =>
               handleTempToggle(component, checked as boolean)
             }
@@ -812,7 +813,11 @@ export function ChargeItemDefinitionForm({
   const availableDiscounts = [
     ...facilityData.discount_monetary_components,
     ...facilityData.instance_discount_monetary_components,
-  ];
+  ].map((component) => ({
+    ...component,
+    amount:
+      component?.amount != null ? String(component.amount) : component.amount,
+  }));
   const availableTaxes = [...facilityData.instance_tax_monetary_components];
 
   const mrpCode = facilityData.instance_informational_codes.find(
