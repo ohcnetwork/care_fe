@@ -109,7 +109,6 @@ export function DiscountMonetaryComponentForm({
         })
         .refine(
           (data) => {
-            // If there's a code, it must have a display value
             return data.code == null || data.code.display.length > 0;
           },
           {
