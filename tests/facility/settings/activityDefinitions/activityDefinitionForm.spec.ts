@@ -2,6 +2,10 @@ import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
 import {
+  Classification,
+  Status,
+} from "src/types/emr/activityDefinition/activityDefinition";
+import {
   closeAnyOpenPopovers,
   expectToast,
   selectFromCategoryPicker,
@@ -14,16 +18,22 @@ import { getFacilityId } from "tests/support/facilityId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 function generateActivityDefinitionData() {
+  const status = faker.helpers.arrayElement(Object.values(Status));
+  const classification = faker.helpers.arrayElement(
+    Object.values(Classification),
+  );
   return {
     title: `${faker.science.chemicalElement().name.slice(0, 16)}_${faker.string.uuid().slice(0, 8)}`,
     description: faker.lorem.sentence(),
     usage: faker.lorem.sentences(2),
     derivedFromUri: faker.internet.url(),
+    status: status,
+    classification: classification,
   };
 }
 
 let facilityId: string;
-const categoryName = "Lab Tests";
+const resourceCategoryName = "Lab Tests";
 
 test.beforeAll(() => {
   facilityId = getFacilityId();
@@ -31,7 +41,7 @@ test.beforeAll(() => {
 
 test.beforeEach(async ({ page }) => {
   await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
-  await page.getByText(categoryName).click();
+  await page.getByText(resourceCategoryName).click();
 });
 
 test.describe("activity definition form", () => {
@@ -53,12 +63,17 @@ test.describe("activity definition form", () => {
     await page.getByLabel(/usage.*\*/i).fill(testData.usage);
 
     await page.getByLabel(/^status$/i).click();
-    await page.getByRole("option", { name: /active/i }).click();
+    await page
+      .getByRole("option", { name: new RegExp(testData.status, "i") })
+      .click();
 
     await page.getByRole("combobox", { name: /^category\s*\*$/i }).click();
-    await page.getByRole("option").first().click();
-
-    await expect(page.getByText(categoryName)).toBeVisible();
+    await page
+      .getByRole("option", {
+        name: new RegExp(testData.classification.replace(/_/g, "\\s"), "i"),
+      })
+      .click();
+    await expect(page.getByText(resourceCategoryName)).toBeVisible();
 
     await page.getByLabel(/^kind$/i).click();
     await page.getByRole("option", { name: /service request/i }).click();
@@ -77,7 +92,7 @@ test.describe("activity definition form", () => {
       `/facility/${facilityId}/settings/activity_definitions`,
     );
 
-    await page.getByText(categoryName).click();
+    await page.getByText(resourceCategoryName).click();
 
     const activityRow = page.locator("tr", { hasText: testData.title });
     await expect(activityRow).toBeVisible();
@@ -91,13 +106,15 @@ test.describe("activity definition form", () => {
       page.getByRole("heading", { name: testData.title }),
     ).toBeVisible();
 
-    await expect(page.getByText("Active")).toBeVisible();
+    await expect(
+      page.getByText(testData.status, { exact: false }),
+    ).toBeVisible();
 
     const overviewCard = page.locator('[data-slot="card"]').filter({
       has: page.locator('[data-slot="card-title"]', { hasText: "Overview" }),
     });
     await expect(overviewCard).toBeVisible();
-    await expect(overviewCard.getByText(categoryName)).toBeVisible();
+    await expect(overviewCard.getByText(resourceCategoryName)).toBeVisible();
     await expect(overviewCard.getByText(testData.description)).toBeVisible();
     await expect(overviewCard.getByText(testData.usage)).toBeVisible();
 
@@ -132,11 +149,17 @@ test.describe("activity definition form", () => {
         await page.getByLabel(/usage.*\*/i).fill(testData.usage);
 
         await page.getByLabel(/^status$/i).click();
-        await page.getByRole("option", { name: /active/i }).click();
+        await page
+          .getByRole("option", { name: new RegExp(testData.status, "i") })
+          .click();
 
         await page.getByRole("combobox", { name: /^category\s*\*$/i }).click();
-        await page.getByRole("option").first().click();
-        await expect(page.getByText(categoryName)).toBeVisible();
+        await page
+          .getByRole("option", {
+            name: new RegExp(testData.classification.replace(/_/g, "\\s"), "i"),
+          })
+          .click();
+        await expect(page.getByText(resourceCategoryName)).toBeVisible();
 
         await page.getByLabel(/^kind$/i).click();
         await page.getByRole("option", { name: /service request/i }).click();
@@ -212,7 +235,7 @@ test.describe("activity definition form", () => {
       );
 
       await test.step("navigate and verify details", async () => {
-        await page.getByText(categoryName).click();
+        await page.getByText(resourceCategoryName).click();
 
         const activityRow = page.locator("tr", { hasText: testData.title });
         await expect(activityRow).toBeVisible();
@@ -227,7 +250,9 @@ test.describe("activity definition form", () => {
         await expect(
           page.getByRole("heading", { name: testData.title }),
         ).toBeVisible();
-        await expect(page.getByText("Active")).toBeVisible();
+        await expect(
+          page.getByText(testData.status, { exact: false }),
+        ).toBeVisible();
 
         const overviewCard = page.locator('[data-slot="card"]').filter({
           has: page.locator('[data-slot="card-title"]', {
@@ -235,7 +260,9 @@ test.describe("activity definition form", () => {
           }),
         });
         await expect(overviewCard).toBeVisible();
-        await expect(overviewCard.getByText(categoryName)).toBeVisible();
+        await expect(
+          overviewCard.getByText(resourceCategoryName),
+        ).toBeVisible();
         await expect(
           overviewCard.getByText(testData.description),
         ).toBeVisible();
@@ -324,7 +351,9 @@ test.describe("activity definition form", () => {
         );
         await expect(page.getByLabel(/usage.*\*/i)).toHaveValue(testData.usage);
 
-        await expect(page.getByLabel(/^status$/i)).toContainText(/active/i);
+        await expect(page.getByLabel(/^status$/i)).toContainText(
+          new RegExp(testData.status, "i"),
+        );
         await expect(
           page.getByRole("combobox", { name: "Category" }),
         ).toContainText("Laboratory");
@@ -343,10 +372,19 @@ test.describe("activity definition form", () => {
         await page.getByLabel(/usage.*\*/i).fill(updatedData.usage);
 
         await page.getByRole("combobox", { name: "Category" }).click();
-        await page.getByRole("option", { name: "Imaging" }).click();
+        await page
+          .getByRole("option", {
+            name: new RegExp(
+              updatedData.classification.replace(/_/g, "\\s"),
+              "i",
+            ),
+          })
+          .click();
 
         await page.getByLabel(/^status$/i).click();
-        await page.getByRole("option", { name: /draft/i }).click();
+        await page
+          .getByRole("option", { name: new RegExp(updatedData.status, "i") })
+          .click();
 
         await page
           .getByLabel(/^derived from uri$/i)
@@ -411,7 +449,9 @@ test.describe("activity definition form", () => {
       await expect(
         page.getByRole("heading", { name: updatedData.title }),
       ).toBeVisible();
-      await expect(page.getByText("Draft")).toBeVisible();
+      await expect(
+        page.getByText(updatedData.status, { exact: false }),
+      ).toBeVisible();
 
       const overviewCard = page.locator('[data-slot="card"]').filter({
         has: page.locator('[data-slot="card-title"]', {
@@ -419,7 +459,7 @@ test.describe("activity definition form", () => {
         }),
       });
       await expect(overviewCard).toBeVisible();
-      await expect(overviewCard.getByText(categoryName)).toBeVisible();
+      await expect(overviewCard.getByText(resourceCategoryName)).toBeVisible();
       await expect(
         overviewCard.getByText(updatedData.description),
       ).toBeVisible();
@@ -520,7 +560,7 @@ test.describe("activity definition form", () => {
         `/facility/${facilityId}/settings/activity_definitions`,
       );
 
-      await page.getByText(categoryName).click();
+      await page.getByText(resourceCategoryName).click();
 
       const activityRow = page.locator("tr", { hasText: updatedData.title });
       await expect(activityRow).not.toBeVisible();
