@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, SearchIcon } from "lucide-react";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -159,36 +158,41 @@ export default function AddChargeItemSheet({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-3xl">
-        <SheetHeader>
+      <SheetContent
+        className="w-full sm:max-w-3xl p-0 flex flex-col [&>button]:hidden"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        <SheetHeader className="ml-3 mt-3">
           <SheetTitle>{t("add_charge_items_invoice")}</SheetTitle>
         </SheetHeader>
+        <div className="flex-1 overflow-auto">
+          <div className="m-3">
+            <div className="flex flex-col sm:flex-row gap-2 mb-4 justify-between">
+              <div className="relative">
+                <SearchIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <Input
+                  placeholder={t("search_charge_items")}
+                  value={qParams.search || ""}
+                  onChange={(e) =>
+                    updateQuery({ search: e.target.value || undefined })
+                  }
+                  className="w-full sm:w-auto pl-10"
+                  autoFocus={false}
+                />
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setIsAddChargeItemsOpen(true)}
+              >
+                <PlusIcon />
+                {t("other_charge_items")}
+                <ShortcutBadge actionId="other-charge-items" />
+              </Button>
+            </div>
 
-        <div className="mt-6">
-          <div className="flex justify-between items-center mb-2">
-            <Input
-              placeholder={t("search_charge_items")}
-              value={qParams.search || ""}
-              onChange={(e) =>
-                updateQuery({ search: e.target.value || undefined })
-              }
-              className="max-w-xs"
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsAddChargeItemsOpen(true)}
-            >
-              <PlusIcon className="size-4 mr-2" />
-              {t("other_charge_items")}
-              <ShortcutBadge actionId="other-charge-items" />
-            </Button>
-          </div>
-
-          {isLoading ? (
-            <TableSkeleton count={5} />
-          ) : (
-            <ScrollArea className="max-h-[calc(100vh-20rem)] scroll-y-auto py-2">
+            {isLoading ? (
+              <TableSkeleton count={5} />
+            ) : (
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
@@ -244,12 +248,12 @@ export default function AddChargeItemSheet({
                   </TableBody>
                 </Table>
               </div>
-            </ScrollArea>
-          )}
+            )}
 
-          <Pagination totalCount={response?.count || 0} />
+            <Pagination totalCount={response?.count || 0} />
+          </div>
         </div>
-        <SheetFooter>
+        <SheetFooter className="bg-white p-3 gap-2">
           <Button
             variant="outline"
             onClick={() => setOpen(false)}
@@ -265,7 +269,6 @@ export default function AddChargeItemSheet({
             disabled={
               selectedItems.size === 0 || isPending || isAddChargeItemsOpen
             }
-            className="flex flex-row items-center gap-2 justify-between"
           >
             <span>{t("add_selected_items")}</span>
             <ShortcutBadge actionId="submit-action" className="bg-white" />

@@ -1,7 +1,10 @@
+import { CableIcon, Loader2Icon } from "lucide-react";
 import { Suspense, createContext, useContext } from "react";
 
+import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { PluginManifest } from "@/pluginTypes";
+import { t } from "i18next";
 
 export const CareAppsContext = createContext<PluginManifest[]>([]);
 
@@ -25,13 +28,41 @@ export const useCareApps = () => {
 
 const withSuspense = (
   Component: React.ComponentType<PluginEncounterTabProps>,
+  pluginName: string,
 ) => {
   // eslint-disable-next-line react/display-name
   return (props: PluginEncounterTabProps) => {
     return (
-      <Suspense fallback={<div>Loading...</div>}>
-        <Component {...props} />
-      </Suspense>
+      <PluginErrorBoundary
+        pluginName={pluginName}
+        fallback={
+          <div className="flex items-center justify-center gap-2 py-6">
+            <CableIcon
+              role="status"
+              aria-label="Error"
+              className="size-4 text-red-500"
+            />
+            <p className="text-sm text-gray-600">
+              {t("error_loading_encounter_tab")}
+            </p>
+          </div>
+        }
+      >
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center gap-2">
+              <Loader2Icon
+                role="status"
+                aria-label="Loading"
+                className="size-4 animate-spin"
+              />
+              <p className="text-sm text-gray-600">{t("loading")}</p>
+            </div>
+          }
+        >
+          <Component {...props} />
+        </Suspense>
+      </PluginErrorBoundary>
     );
   };
 };
@@ -43,7 +74,7 @@ export const useCareAppEncounterTabs = () => {
     (acc, app) => {
       const appTabs = Object.entries(app.encounterTabs ?? {}).reduce(
         (acc, [key, Component]) => {
-          return { ...acc, [key]: withSuspense(Component) };
+          return { ...acc, [key]: withSuspense(Component, app.plugin) };
         },
         {},
       );
