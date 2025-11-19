@@ -6,7 +6,6 @@ import { getFacilityId } from "tests/support/facilityId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Encounter vs Patient Notes Isolation", () => {
-  let patientUrl: string;
   let encounterUrl: string;
   let encounterNoteTitle: string;
   let patientNoteTitle: string;
@@ -18,38 +17,20 @@ test.describe("Encounter vs Patient Notes Isolation", () => {
     const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
     const createdDateBefore = format(new Date(), "yyyy-MM-dd");
 
-    // Generate unique titles and messages for this test run
+    // Generate unique titles and messages
     encounterNoteTitle = `Encounter Note ${faker.string.alphanumeric(8)}`;
     patientNoteTitle = `Patient Note ${faker.string.alphanumeric(8)}`;
     encounterNoteMessage = `Encounter message: ${faker.lorem.sentence()}`;
     patientNoteMessage = `Patient message: ${faker.lorem.sentence()}`;
 
-    // Navigate to encounters page
+    // Navigate to encounters list page
     await page.goto(
       `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
     );
 
     // Navigate to first patient's encounter
-    await page.getByRole("link", { name: "Patient Home" }).first().click();
+    await page.getByRole("link", { name: "View Encounter" }).first().click();
 
-    // Save the patient URL for later navigation to patient notes
-    patientUrl = page.url();
-
-    // Get the patient profile to access patient notes later
-    await page
-      .getByRole("button", { name: /.*\d+\s*Y,/ })
-      .first()
-      .click();
-    await page.getByRole("link", { name: "View Profile" }).click();
-
-    // Go back to encounter
-    await page.goto(patientUrl);
-
-    // Navigate to encounter details
-    await page
-      .getByRole("link", { name: /Encounter/ })
-      .first()
-      .click();
     encounterUrl = page.url();
   });
 
@@ -70,15 +51,8 @@ test.describe("Encounter vs Patient Notes Isolation", () => {
     // Enter thread title
     await page.getByPlaceholder(/discussion title/i).fill(encounterNoteTitle);
 
-    // Create thread and wait for success
-    const createThreadResponse = page.waitForResponse(
-      (response) =>
-        response.url().includes("/thread/") &&
-        response.request().method() === "POST" &&
-        response.status() === 201,
-    );
     await page.getByRole("button", { name: /Create/i }).click();
-    await createThreadResponse;
+    await expect(page.getByText("Thread created successfully")).toBeVisible();
 
     // Verify thread was created
     await expect(
@@ -88,21 +62,22 @@ test.describe("Encounter vs Patient Notes Isolation", () => {
     // Send a message in the encounter thread
     await page.getByPlaceholder(/type.*message/i).fill(encounterNoteMessage);
 
-    const sendMessageResponse = page.waitForResponse(
-      (response) =>
-        response.url().includes("/note/") &&
-        response.request().method() === "POST" &&
-        response.status() === 201,
-    );
-    await page.getByRole("button", { name: /Send/i, exact: false }).click();
-    await sendMessageResponse;
+    await page
+      .getByRole("button", { name: "send-chat-message-button" })
+      .click();
 
+    await page.waitForTimeout(4000);
     // Verify message appears in encounter notes
     await expect(page.getByText(encounterNoteMessage)).toBeVisible();
 
-    // Navigate to patient notes tab
-    await page.goto(patientUrl.replace(/\/encounter\/.*/, ""));
+    await page
+      .locator("[data-slot='patient-info-hover-card-trigger']")
+      .last()
+      .click();
+
+    await page.getByRole("link", { name: "View Profile" }).click();
     await page.getByRole("tab", { name: "Notes" }).click();
+    await page.waitForLoadState("networkidle");
 
     // Verify encounter note does NOT appear in patient notes
     await expect(
@@ -115,7 +90,12 @@ test.describe("Encounter vs Patient Notes Isolation", () => {
     page,
   }) => {
     // Navigate to patient profile and notes
-    await page.goto(patientUrl.replace(/\/encounter\/.*/, ""));
+    await page
+      .locator("[data-slot='patient-info-hover-card-trigger']")
+      .last()
+      .click();
+
+    await page.getByRole("link", { name: "View Profile" }).click();
     await page.getByRole("tab", { name: "Notes" }).click();
 
     // Wait for notes section to load
@@ -130,14 +110,9 @@ test.describe("Encounter vs Patient Notes Isolation", () => {
     await page.getByPlaceholder(/discussion title/i).fill(patientNoteTitle);
 
     // Create thread and wait for success
-    const createThreadResponse = page.waitForResponse(
-      (response) =>
-        response.url().includes("/thread/") &&
-        response.request().method() === "POST" &&
-        response.status() === 201,
-    );
+
     await page.getByRole("button", { name: /Create/i }).click();
-    await createThreadResponse;
+    await expect(page.getByText("Thread created successfully")).toBeVisible();
 
     // Verify thread was created
     await expect(
@@ -147,14 +122,11 @@ test.describe("Encounter vs Patient Notes Isolation", () => {
     // Send a message in the patient thread
     await page.getByPlaceholder(/type.*message/i).fill(patientNoteMessage);
 
-    const sendMessageResponse = page.waitForResponse(
-      (response) =>
-        response.url().includes("/note/") &&
-        response.request().method() === "POST" &&
-        response.status() === 201,
-    );
-    await page.getByRole("button", { name: /Send/i, exact: false }).click();
-    await sendMessageResponse;
+    await page
+      .getByRole("button", { name: "send-chat-message-button" })
+      .click();
+
+    await page.waitForTimeout(4000);
 
     // Verify message appears in patient notes
     await expect(page.getByText(patientNoteMessage)).toBeVisible();
@@ -162,6 +134,8 @@ test.describe("Encounter vs Patient Notes Isolation", () => {
     // Navigate to encounter notes
     await page.goto(encounterUrl);
     await page.getByRole("tab", { name: "Notes" }).click();
+
+    await page.waitForLoadState("networkidle");
 
     // Verify patient note does NOT appear in encounter notes
     await expect(
@@ -331,7 +305,6 @@ test.describe("Thread Messaging - Multi-user & Single-user", () => {
 });
 
 test.describe("Thread Creation", () => {
-  let encounterUrl: string;
   let thread1Title: string;
   let thread2Title: string;
   let thread3Title: string;
@@ -350,12 +323,8 @@ test.describe("Thread Creation", () => {
     await page.goto(
       `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
     );
-    await page.getByRole("link", { name: "Patient Home" }).first().click();
-    await page
-      .getByRole("link", { name: /Encounter/ })
-      .first()
-      .click();
-    encounterUrl = page.url();
+    await page.getByRole("link", { name: "View Encounter" }).first().click();
+
     await page.getByRole("tab", { name: "Notes" }).click();
   });
 
@@ -369,14 +338,7 @@ test.describe("Thread Creation", () => {
       await page.getByRole("button", { name: /New/i }).first().click();
       await page.getByPlaceholder(/discussion title/i).fill(title);
 
-      const createThreadResponse = page.waitForResponse(
-        (response) =>
-          response.url().includes("/thread/") &&
-          response.request().method() === "POST" &&
-          response.status() === 201,
-      );
       await page.getByRole("button", { name: /Create/i }).click();
-      await createThreadResponse;
 
       // Verify thread appears
       await expect(
@@ -401,7 +363,6 @@ test.describe("Thread Creation", () => {
 });
 
 test.describe("Thread Visibility & Switching", () => {
-  let encounterUrl: string;
   let thread1Title: string;
   let thread2Title: string;
   let thread3Title: string;
@@ -431,7 +392,6 @@ test.describe("Thread Visibility & Switching", () => {
       .getByRole("link", { name: /Encounter/ })
       .first()
       .click();
-    encounterUrl = page.url();
     await page.getByRole("tab", { name: "Notes" }).click();
 
     // Create three threads with messages
