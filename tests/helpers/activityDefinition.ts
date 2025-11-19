@@ -23,6 +23,18 @@ export function generateActivityDefinitionData() {
   };
 }
 
+/**
+ * Generate expected slug from title based on the application's slug generation logic
+ * @param title - The title to convert to a slug
+ * @returns The expected slug value
+ */
+export function generateExpectedSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-_]/g, "");
+}
+
 interface CreateActivityDefinitionOptions {
   resourceCategoryName?: string;
   overrides?: Partial<{
@@ -49,7 +61,7 @@ interface CreatedActivityDefinition {
  * @param page - Playwright page object
  * @param facilityId - Facility ID where the AD will be created
  * @param options - Optional overrides for default values
- * @returns Object containing the created AD data including the extracted ID
+ * @returns Object containing the created AD data
  */
 export async function createActivityDefinition(
   page: Page,

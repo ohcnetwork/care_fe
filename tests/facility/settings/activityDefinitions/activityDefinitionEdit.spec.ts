@@ -4,6 +4,7 @@ import { expect, test } from "@playwright/test";
 import {
   createActivityDefinition,
   generateActivityDefinitionData,
+  generateExpectedSlug,
 } from "tests/helpers/activityDefinition";
 import {
   closeAnyOpenPopovers,
@@ -32,53 +33,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("activity definition edit", () => {
-  test("should display all prefilled fields including optional ones", async ({
-    page,
-  }) => {
-    const testData = generateActivityDefinitionData();
-
+  test("should display all prefilled fields", async ({ page }) => {
     await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
-    await page.getByText(resourceCategoryName).click();
-    await page
-      .getByRole("button", { name: /add activity definition/i })
-      .click();
-
-    await page.getByLabel(/title.*\*/i).fill(testData.title);
-    await page.getByLabel(/description.*\*/i).fill(testData.description);
-    await page.getByLabel(/usage.*\*/i).fill(testData.usage);
-
-    await page.getByLabel(/^status$/i).click();
-    await page
-      .getByRole("option", { name: new RegExp(testData.status, "i") })
-      .click();
-
-    await page.getByRole("combobox", { name: /^category\s*\*$/i }).click();
-    await page
-      .getByRole("option", {
-        name: new RegExp(testData.classification.replace(/_/g, "\\s"), "i"),
-      })
-      .click();
-
-    await page.getByLabel(/^kind$/i).click();
-    await page.getByRole("option", { name: /service request/i }).click();
-
-    const codeCombobox = page.getByRole("combobox", { name: /^code/i });
-    await selectFromValueSet(page, codeCombobox, {
-      itemIndex: 0,
-    });
-
-    await page.getByLabel(/^derived from uri$/i).fill(testData.derivedFromUri);
-
-    const bodySite = page.getByRole("combobox", { name: /body site/i });
-    await selectFromValueSet(page, bodySite, {
-      itemIndex: 0,
-    });
-
-    await closeAnyOpenPopovers(page);
-    await page.getByRole("button", { name: /^create$/i }).click();
-
-    await expectToast(page, /activity definition created successfully/i);
-
     await page.getByText(resourceCategoryName).click();
 
     const clearButton = page
@@ -88,38 +44,175 @@ test.describe("activity definition edit", () => {
     await clearButton.click();
 
     const searchInput = page.getByPlaceholder(/search/i);
-    await searchInput.fill(testData.title);
+    await searchInput.fill(createdAD.title);
 
-    const activityRow = page.locator("tr", { hasText: testData.title });
+    const activityRow = page.locator("tr", { hasText: createdAD.title });
     await expect(activityRow).toBeVisible();
     await activityRow.getByRole("link", { name: /view/i }).click();
 
     await page.getByRole("button", { name: /edit/i }).click();
 
-    // Verify all prefilled fields
-    await expect(page.getByLabel(/title.*\*/i)).toHaveValue(testData.title);
+    // Store selected values for exact verification
+    const selectedValues = {
+      bodySite: "arm",
+      specimenRequirement: "blood",
+      observationRequirement: "glucose",
+      chargeItem: "test",
+      location: "Pharmacy",
+      diagnosticReport: "lab",
+    };
+
+    // Add all optional fields with specific search terms
+    const bodySite = page.getByRole("combobox", { name: /body site/i });
+    await selectFromValueSet(page, bodySite, {
+      search: selectedValues.bodySite,
+      itemIndex: 0,
+    });
+
+    await page.getByLabel(/^derived from uri$/i).fill(createdAD.derivedFromUri);
+
+    const specimenContainer = page
+      .getByText(/^specimen requirements$/i)
+      .locator("..");
+    const specimenTrigger = specimenContainer.getByRole("combobox").first();
+    await selectFromRequirements(page, specimenTrigger, {
+      search: selectedValues.specimenRequirement,
+      itemIndex: 0,
+    });
+    await closeAnyOpenPopovers(page);
+
+    const obsContainer = page
+      .getByText(/^observation requirements$/i)
+      .locator("..");
+    const obsTrigger = obsContainer.getByRole("combobox").first();
+    await selectFromRequirements(page, obsTrigger, {
+      search: selectedValues.observationRequirement,
+      itemIndex: 0,
+    });
+    await closeAnyOpenPopovers(page);
+
+    const chargeContainer = page
+      .getByText(/^charge item definitions$/i)
+      .locator("..");
+    const chargePicker = chargeContainer.getByRole("combobox").first();
+    await selectFromCategoryPicker(page, chargePicker, {
+      closeAfterSelect: true,
+      navigateCategories: ["Lab Tests"],
+      search: selectedValues.chargeItem,
+      itemIndex: 0,
+    });
+
+    const locationsSection = page.getByText(/^locations$/i).locator("..");
+    await locationsSection.scrollIntoViewIfNeeded();
+    const locationsTrigger = locationsSection.getByRole("combobox").first();
+    await selectFromLocationMultiSelect(page, locationsTrigger, {
+      search: selectedValues.location,
+      itemIndex: 0,
+    });
+
+    const diagSection = page
+      .getByText(/^diagnostic report codes$/i)
+      .locator("..");
+    const diagCombobox = diagSection.getByRole("combobox").first();
+    await selectFromValueSet(page, diagCombobox, {
+      search: selectedValues.diagnosticReport,
+      itemIndex: 0,
+    });
+
+    await page.getByRole("button", { name: "Save" }).click();
+    await expectToast(page, /activity definition updated successfully/i);
+
+    // Now navigate back to edit and verify all fields are prefilled
+    await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
+    await page.getByText(resourceCategoryName).click();
+
+    const clearButton2 = page
+      .getByRole("button")
+      .filter({ has: page.locator("svg.lucide-x") })
+      .first();
+    await clearButton2.click();
+
+    const searchInput2 = page.getByPlaceholder(/search/i);
+    await searchInput2.fill(createdAD.title);
+
+    const activityRow2 = page.locator("tr", { hasText: createdAD.title });
+    await expect(activityRow2).toBeVisible();
+    await activityRow2.getByRole("link", { name: /view/i }).click();
+
+    await page.getByRole("button", { name: /edit/i }).click();
+
+    await expect(page.getByLabel(/title.*\*/i)).toHaveValue(createdAD.title);
+    const expectedSlug = generateExpectedSlug(createdAD.title);
+    await expect(page.getByLabel(/slug/i)).toHaveValue(expectedSlug);
     await expect(page.getByLabel(/description.*\*/i)).toHaveValue(
-      testData.description,
+      createdAD.description,
     );
-    await expect(page.getByLabel(/usage.*\*/i)).toHaveValue(testData.usage);
+    await expect(page.getByLabel(/usage.*\*/i)).toHaveValue(createdAD.usage);
 
     await expect(page.getByLabel(/^status$/i)).toContainText(
-      new RegExp(testData.status, "i"),
+      new RegExp(createdAD.status, "i"),
     );
     await expect(
       page.getByRole("combobox", { name: "Category" }),
-    ).toContainText(new RegExp(testData.classification, "i"));
+    ).toContainText(
+      new RegExp(createdAD.classification.replace(/_/g, "\\s"), "i"),
+    );
     await expect(page.getByLabel(/^kind$/i)).toContainText(/service request/i);
 
     await expect(page.getByLabel(/^derived from uri$/i)).toHaveValue(
-      testData.derivedFromUri,
+      createdAD.derivedFromUri,
     );
 
-    // Verify body site is prefilled
     const bodySiteCombobox = page.getByRole("combobox", {
       name: /body site/i,
     });
-    await expect(bodySiteCombobox).not.toBeEmpty();
+    await expect(bodySiteCombobox).toContainText(
+      new RegExp(selectedValues.bodySite, "i"),
+    );
+
+    const specimenContainer2 = page
+      .getByText(/^specimen requirements$/i)
+      .locator("..");
+
+    await expect(
+      specimenContainer2
+        .getByText(new RegExp(selectedValues.specimenRequirement, "i"))
+        .first(),
+    ).toBeVisible();
+
+    const obsContainer2 = page
+      .getByText(/^observation requirements$/i)
+      .locator("..");
+    await expect(
+      obsContainer2
+        .getByText(new RegExp(selectedValues.observationRequirement, "i"))
+        .first(),
+    ).toBeVisible();
+
+    const chargeContainer2 = page
+      .getByText(/^charge item definitions$/i)
+      .locator("..");
+    await expect(
+      chargeContainer2
+        .getByText(new RegExp(selectedValues.chargeItem, "i"))
+        .first(),
+    ).toBeVisible();
+
+    const locationsSection2 = page.getByText(/^locations$/i).locator("..");
+    await expect(
+      locationsSection2
+        .getByText(new RegExp(selectedValues.location, "i"))
+        .first(),
+    ).toBeVisible();
+
+    const diagSection2 = page
+      .getByText(/^diagnostic report codes$/i)
+      .locator("..");
+    await expect(
+      diagSection2
+        .getByText(new RegExp(selectedValues.diagnosticReport, "i"))
+        .first(),
+    ).toBeVisible();
   });
 
   test("should edit activity definition with all fields", async ({ page }) => {
@@ -180,14 +273,12 @@ test.describe("activity definition edit", () => {
         .fill(updatedData.derivedFromUri);
     });
 
-    await test.step("add additional details", async () => {
+    await test.step("add additional details and requirements", async () => {
       const bodySite = page.getByRole("combobox", { name: /body site/i });
       await selectFromValueSet(page, bodySite, {
-        itemIndex: 0,
+        itemIndex: faker.number.int({ min: 0, max: 2 }),
       });
-    });
 
-    await test.step("add additional requirements", async () => {
       const specimenContainer = page
         .getByText(/^specimen requirements$/i)
         .locator("..");
@@ -213,7 +304,7 @@ test.describe("activity definition edit", () => {
       await selectFromCategoryPicker(page, chargePicker, {
         closeAfterSelect: true,
         navigateCategories: ["Lab Tests"],
-        itemIndex: 1,
+        itemIndex: faker.number.int({ min: 0, max: 2 }),
       });
 
       const locationsSection = page.getByText(/^locations$/i).locator("..");

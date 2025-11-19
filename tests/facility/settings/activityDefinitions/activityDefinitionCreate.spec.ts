@@ -1,7 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
-import { generateActivityDefinitionData } from "tests/helpers/activityDefinition";
+import {
+  generateActivityDefinitionData,
+  generateExpectedSlug,
+} from "tests/helpers/activityDefinition";
 import {
   closeAnyOpenPopovers,
   expectToast,
@@ -41,6 +44,10 @@ test.describe("activity definition form", () => {
     ).toBeVisible();
 
     await page.getByLabel(/title.*\*/i).fill(testData.title);
+
+    const expectedSlug = generateExpectedSlug(testData.title);
+    await expect(page.getByLabel(/slug/i)).toHaveValue(expectedSlug);
+
     await page.getByLabel(/description.*\*/i).fill(testData.description);
     await page.getByLabel(/usage.*\*/i).fill(testData.usage);
 
@@ -136,6 +143,10 @@ test.describe("activity definition form", () => {
         ).toBeVisible();
 
         await page.getByLabel(/title.*\*/i).fill(testData.title);
+
+        const expectedSlug = generateExpectedSlug(testData.title);
+        await expect(page.getByLabel(/slug/i)).toHaveValue(expectedSlug);
+
         await page.getByLabel(/description.*\*/i).fill(testData.description);
         await page.getByLabel(/usage.*\*/i).fill(testData.usage);
 
