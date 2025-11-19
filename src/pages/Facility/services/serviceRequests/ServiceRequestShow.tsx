@@ -493,11 +493,7 @@ export default function ServiceRequestShow({
                       variant="outline"
                       size="sm"
                       onClick={preparePrintAllQRCodes}
-                      disabled={
-                        disableEdit ||
-                        isCreatingDraftSpecimen ||
-                        isPrintingAllQRCodes
-                      }
+                      disabled={isCreatingDraftSpecimen || isPrintingAllQRCodes}
                     >
                       <PrinterIcon className="size-4" />
                       {isPrintingAllQRCodes ? (
