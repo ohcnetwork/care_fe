@@ -214,8 +214,7 @@ export const EncounterShow = (props: Props) => {
         } as React.CSSProperties
       }
     >
-      {primaryEncounter &&
-        primaryEncounter.appointment?.id &&
+      {primaryEncounter?.appointment?.id &&
         canShowAppointmentEncounterHeader && (
           <div className="flex items-center justify-center -mt-2 mb-2">
             <AppointmentEncounterHeader
