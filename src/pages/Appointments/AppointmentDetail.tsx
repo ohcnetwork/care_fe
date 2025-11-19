@@ -493,6 +493,7 @@ export default function AppointmentDetail(props: Props) {
                         facilityId={facilityId}
                         patientName={appointment.patient.name}
                         appointment={appointment.id}
+                        defaultStatus="in_progress"
                         trigger={
                           <QuickAction
                             icon={<PlusSquare className="text-primary-500" />}
