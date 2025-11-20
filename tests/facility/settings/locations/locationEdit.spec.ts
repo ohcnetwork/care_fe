@@ -2,12 +2,10 @@ import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
 
-// Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("Facility Location Edit", () => {
   let facilityId: string;
-  const statusOptions = ["Active", "Inactive", "Unknown"];
   const operationalStatusOptions = [
     "Closed",
     "Housekeeping",
@@ -17,76 +15,95 @@ test.describe("Facility Location Edit", () => {
     "Unoccupied",
   ];
 
-  let locationDescription: string;
-  let status: string;
-  let operationalStatus: string;
-
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-
-    locationDescription = faker.lorem.sentence();
-    status = faker.helpers.arrayElement(statusOptions);
-    operationalStatus = faker.helpers.arrayElement(operationalStatusOptions);
-
     await page.goto(`/facility/${facilityId}/settings/locations`);
   });
 
   test("Modify an existing location and verify its updates", async ({
     page,
   }) => {
-    // Click the first edit button (pencil icon) to open edit form
-    await page.locator("button[title='Edit Location']").first().click();
+    const locationName = faker.company.name();
+    const updatedDescription = faker.lorem.sentence();
+    let newStatus: string;
+    let newOperationalStatus: string;
 
-    // Get the existing location name for later use
-    const nameTextbox = page.getByRole("textbox", { name: "Name" });
-    const existingLocationName = await nameTextbox.inputValue();
-
-    // Update description with new random value
-    await page
-      .getByRole("textbox", { name: "Description" })
-      .fill(locationDescription);
-
-    // Update status with new random selection
-    await page.getByRole("combobox", { name: "Status", exact: true }).click();
-    await page.getByRole("option", { name: status }).first().click();
-
-    // Update operational status with new random selection
-    await page.getByRole("combobox", { name: "Operational Status" }).click();
-    await page.getByRole("option", { name: operationalStatus }).first().click();
-
-    // Submit the updated form
-    await page.getByRole("button", { name: "Update" }).click();
-
-    // Search for the location to verify changes were saved
-    await page
-      .getByRole("textbox", { name: "Search by name" })
-      .fill(existingLocationName);
-
-    // Assert that all updated data is correctly displayed in the table
-    const tableBody = page.locator('[data-slot="table-body"]');
-    await expect(tableBody).toContainText(existingLocationName);
-    await expect(tableBody).toContainText(status);
-
-    // Verify the updated data is correctly displayed in edit form
-    await page.locator("button[title='Edit Location']").first().click();
-
-    // Verify all updated values are correctly saved and displayed
-    const updatedDescriptionTextbox = page.getByRole("textbox", {
-      name: "Description",
+    await test.step("Create a new location", async () => {
+      await page.getByRole("button", { name: "Add Location" }).click();
+      await page.getByRole("textbox", { name: "Name" }).fill(locationName);
+      await page.getByRole("button", { name: "Create" }).click();
+      await expect(
+        page.locator("li[data-sonner-toast]").getByText("Location Created"),
+      ).toBeVisible({ timeout: 10000 });
     });
-    await expect(updatedDescriptionTextbox).toHaveValue(locationDescription);
 
-    const updatedStatusCombobox = page.getByRole("combobox", {
-      name: "Status",
-      exact: true,
+    await test.step("Search and open edit form", async () => {
+      await page
+        .getByRole("textbox", { name: "Search by name" })
+        .fill(locationName);
+      await page.locator("button[title='Edit Location']").first().click();
     });
-    await expect(updatedStatusCombobox).toContainText(status);
 
-    const updatedOperationalStatusCombobox = page.getByRole("combobox", {
-      name: "Operational Status",
+    await test.step("Determine different values", async () => {
+      const currentStatusText = await page
+        .getByRole("combobox", { name: "Status", exact: true })
+        .textContent();
+
+      newStatus = currentStatusText?.includes("Active") ? "Inactive" : "Active";
+
+      const currentOperationalStatusText = await page
+        .getByRole("combobox", { name: "Operational Status" })
+        .textContent();
+
+      newOperationalStatus =
+        operationalStatusOptions.find(
+          (option) => !currentOperationalStatusText?.includes(option),
+        ) || "Closed";
     });
-    await expect(updatedOperationalStatusCombobox).toContainText(
-      operationalStatus,
-    );
+
+    await test.step("Update location fields", async () => {
+      await page
+        .getByRole("textbox", { name: "Description" })
+        .fill(updatedDescription);
+
+      await page.getByRole("combobox", { name: "Status", exact: true }).click();
+      await page.getByRole("option", { name: newStatus }).first().click();
+
+      await page.getByRole("combobox", { name: "Operational Status" }).click();
+      await page
+        .getByRole("option", { name: newOperationalStatus })
+        .first()
+        .click();
+    });
+
+    await test.step("Submit updated location", async () => {
+      await page.getByRole("button", { name: "Update" }).click();
+    });
+
+    await test.step("Verify updates in table", async () => {
+      await page
+        .getByRole("textbox", { name: "Search by name" })
+        .fill(locationName);
+
+      const tableBody = page.locator('[data-slot="table-body"]');
+      await expect(tableBody).toContainText(locationName);
+      await expect(tableBody).toContainText(newStatus);
+    });
+
+    await test.step("Verify updates in edit form", async () => {
+      await page.locator("button[title='Edit Location']").first().click();
+
+      await expect(
+        page.getByRole("textbox", { name: "Description" }),
+      ).toHaveValue(updatedDescription);
+
+      await expect(
+        page.getByRole("combobox", { name: "Status", exact: true }),
+      ).toContainText(newStatus);
+
+      await expect(
+        page.getByRole("combobox", { name: "Operational Status" }),
+      ).toContainText(newOperationalStatus);
+    });
   });
 });
