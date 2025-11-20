@@ -71,7 +71,7 @@ export default function UserHome(props: UserHomeProps) {
   );
 
   if (isError) {
-    goBack("/");
+    goBack();
   }
 
   if (isLoading || !userData) {

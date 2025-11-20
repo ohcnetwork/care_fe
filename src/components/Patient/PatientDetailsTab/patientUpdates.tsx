@@ -31,11 +31,7 @@ export const Updates = (props: PatientProps) => {
   useEffect(() => {
     if (!canViewPatientQuestionnaireResponses) {
       toast.error(t("no_permission_to_view_page"));
-      goBack(
-        facilityId
-          ? `/facility/${facilityId}/patient/${patientId}`
-          : `/patient/${patientId}`,
-      );
+      goBack();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canViewPatientQuestionnaireResponses]);

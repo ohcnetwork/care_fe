@@ -312,7 +312,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   useEffect(() => {
     if (!isFacilityLoading && !canViewAppointments && !facility) {
       toast.error(t("no_permission_to_view_page"));
-      goBack("/");
+      goBack();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canViewAppointments, facility, isFacilityLoading]);

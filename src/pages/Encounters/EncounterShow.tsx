@@ -106,7 +106,7 @@ export const EncounterShow = (props: Props) => {
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
       toast.error(t("permission_denied_encounter"));
-      goBack("/");
+      goBack();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPrimaryEncounterLoading, isPatientLoading]);

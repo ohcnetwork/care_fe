@@ -508,7 +508,7 @@ export function ValueSetForm({
             variant="outline"
             disabled={isSubmitting}
             type="button"
-            onClick={() => goBack("/admin/valuesets")}
+            onClick={() => goBack()}
           >
             {t("cancel")}
           </Button>

@@ -76,7 +76,7 @@ export function FacilityDetailsPage({ id }: Props) {
           <Button
             variant="outline"
             className="border border-secondary-400"
-            onClick={() => goBack("/facilities")}
+            onClick={() => goBack()}
           >
             {t("back_to_facilities")}
           </Button>
@@ -91,7 +91,7 @@ export function FacilityDetailsPage({ id }: Props) {
         <Button
           variant="outline"
           className="border border-secondary-400"
-          onClick={() => goBack("/facilities")}
+          onClick={() => goBack()}
         >
           <CareIcon icon="l-arrow-left" className="size-4 mr-1" />
           <span className="text-sm underline">{t("back")}</span>

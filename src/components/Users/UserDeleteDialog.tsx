@@ -35,7 +35,7 @@ const UserDeleteDialog = (props: ConfirmDialogProps) => {
     onSuccess: () => {
       toast.success(t("user_deleted_successfully"));
       setOpen(false);
-      goBack("/");
+      goBack();
     },
     onError: () => {
       setOpen(false);
