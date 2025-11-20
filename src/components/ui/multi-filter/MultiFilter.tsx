@@ -173,7 +173,7 @@ export default function MultiFilter({
           />
         );
       })}
-      {hasAnyFilters && (
+      {nonClearableFilterCount > 1 && (
         <Button
           variant="ghost"
           onClick={handleClearAll}
