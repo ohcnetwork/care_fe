@@ -115,12 +115,15 @@ test.describe("Charge Item Definition Creation", () => {
     await page.getByRole("checkbox").first().click();
     await page.getByRole("button", { name: "Done" }).click();
     await page.getByRole("button", { name: "Add Condition" }).click();
-    await page.getByRole("combobox").filter({ hasText: "Metric" }).click();
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: /^Metric|Patient Age$/ })
+      .click();
     await page.getByRole("option", { name: "Patient Age" }).click();
-    await page.getByRole("combobox").filter({ hasText: "equality" }).click();
-    await page.getByRole("option", { name: "in_range" }).click();
-    await page.getByPlaceholder("Min Value").fill("60");
-    await page.getByPlaceholder("Max Value").fill("120");
+    await page.getByRole("combobox").filter({ hasText: "In range" }).click();
+    await page.getByRole("option", { name: "In range" }).click();
+    await page.getByPlaceholder("Min").fill("60");
+    await page.getByPlaceholder("Max").fill("120");
     await page.getByRole("button", { name: "Add" }).click();
 
     await page.getByRole("button", { name: /create/i }).click();
@@ -141,6 +144,8 @@ test.describe("Charge Item Definition Creation", () => {
     await expect(page.getByText(purchasePrice)).toBeVisible();
     await expect(page.getByText("9%")).toBeVisible();
     await expect(page.getByText("6%")).toBeVisible();
-    await expect(page.getByText("Age In Range 60 - 120")).toBeVisible();
+    await expect(
+      page.getByText("Patient Age is in range 60 to 120 years"),
+    ).toBeVisible();
   });
 });
