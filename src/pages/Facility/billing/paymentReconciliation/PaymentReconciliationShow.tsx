@@ -531,9 +531,7 @@ export function PaymentReconciliationShow({
                 <Button
                   className="w-full flex items-center relative"
                   variant="outline"
-                  onClick={() =>
-                    goBack(`/facility/${facilityId}/billing/payments`)
-                  }
+                  onClick={() => goBack()}
                   data-shortcut-id="go-back"
                 >
                   <CareIcon icon="l-arrow-left" className="mr-2 size-4" />

@@ -243,7 +243,7 @@ export default function PatientLogin({
         className="border border-secondary-400"
         onClick={() =>
           page === "send"
-            ? goBack(`/facility/${facilityId}`)
+            ? goBack()
             : navigate(
                 `/facility/${facilityId}/appointments/${staffId}/otp/send`,
               )

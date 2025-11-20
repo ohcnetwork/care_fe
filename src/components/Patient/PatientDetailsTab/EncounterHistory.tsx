@@ -57,7 +57,7 @@ const EncounterHistory = (props: PatientProps) => {
   useEffect(() => {
     if (!canViewPatients) {
       toast.error(t("no_permission_to_view_page"));
-      goBack(`/facility/${facilityId}/patient/${patientId}`);
+      goBack();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canViewPatients]);

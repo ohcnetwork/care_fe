@@ -609,13 +609,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
             variant="outline"
             type="button"
             className="m-4"
-            onClick={() => {
-              if (device) {
-                goBack(`/facility/${facilityId}/settings/devices/${device.id}`);
-              } else {
-                goBack(`/facility/${facilityId}/settings/devices`);
-              }
-            }}
+            onClick={() => goBack()}
             data-cy="cancel-button"
           >
             {t("cancel")}

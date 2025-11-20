@@ -212,11 +212,7 @@ export function AccountShow({
         <div className="text-center">
           <h2 className="text-2xl font-bold">{t("account_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("account_may_not_exist")}</p>
-          <Button asChild className="mt-4">
-            <Link href={`/facility/${facilityId}/billing/accounts`}>
-              {t("back_to_accounts")}
-            </Link>
-          </Button>
+          <BackButton className="mt-4">{t("back_to_accounts")}</BackButton>
         </div>
       </div>
     );

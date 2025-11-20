@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, PlusIcon } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { navigate } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -63,6 +63,7 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 
 import BackButton from "@/components/Common/BackButton";
+import useAppHistory from "@/hooks/useAppHistory";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 
@@ -81,7 +82,6 @@ interface CreateInvoicePageProps {
   facilityId: string;
   accountId: string;
   preSelectedChargeItems?: ChargeItemRead[];
-  redirectInNewTab?: boolean;
   onSuccess?: () => void;
   onCancel?: () => void;
   showHeader?: boolean;
@@ -138,7 +138,6 @@ export function CreateInvoicePage({
   facilityId,
   accountId,
   preSelectedChargeItems,
-  redirectInNewTab = false,
   onSuccess,
   onCancel,
   showHeader = true,
@@ -151,6 +150,7 @@ export function CreateInvoicePage({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const hasInitializedSelections = useRef(false);
+  const { popHistory } = useAppHistory();
 
   useShortcutSubContext("facility:billing");
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>(
@@ -234,13 +234,9 @@ export function CreateInvoicePage({
       toast.success(t("invoice_created_successfully"));
       // Navigate to the new invoice
       const invoiceUrl = `/facility/${facilityId}/billing/invoices/${invoice.id}?${sourceUrl ? `sourceUrl=${sourceUrl}` : ""}`;
-      if (redirectInNewTab) {
-        window.open(invoiceUrl, "_blank");
-        onSuccess?.();
-      } else {
-        onSuccess?.();
-        navigate(invoiceUrl);
-      }
+      onSuccess?.();
+      popHistory();
+      navigate(invoiceUrl);
     },
     onError: (error) => {
       toast.error(error.message || t("failed_to_create_invoice"));
@@ -339,13 +335,12 @@ export function CreateInvoicePage({
     <div className="container mx-auto md:px-4 pb-6">
       {showHeader && (
         <div className="mb-6">
-          <Link
-            href={`/facility/${facilityId}/billing/account/${accountId}`}
+          <BackButton
             className="text-xs text-gray-500 hover:text-gray-700"
-            data-shortcut-id="go-back"
+            variant="link"
           >
             ← {t("back_to_account")}
-          </Link>
+          </BackButton>
           <h3 className="pt-2">{t("create_invoice")}</h3>
         </div>
       )}

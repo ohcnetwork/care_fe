@@ -3,7 +3,7 @@ import { ReactNode, createContext, useState } from "react";
 
 export const HistoryContext = createContext<string[]>([]);
 
-export const ResetHistoryContext = createContext(() => {});
+export const PopHistoryContext = createContext(() => {});
 
 export default function HistoryAPIProvider(props: { children: ReactNode }) {
   const [history, setHistory] = useState<string[]>([]);
@@ -26,13 +26,16 @@ export default function HistoryAPIProvider(props: { children: ReactNode }) {
     },
     { onInitial: true },
   );
-  const resetHistory = () => setHistory((history) => history.slice(0, 1));
+
+  console.log("history", history);
 
   return (
     <HistoryContext.Provider value={history}>
-      <ResetHistoryContext.Provider value={resetHistory}>
+      <PopHistoryContext.Provider
+        value={() => setHistory((history) => history.slice(1))}
+      >
         {props.children}
-      </ResetHistoryContext.Provider>
+      </PopHistoryContext.Provider>
     </HistoryContext.Provider>
   );
 }

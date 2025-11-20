@@ -52,7 +52,7 @@ export default function UpdateDevice({ facilityId, deviceId }: Props) {
             device={device}
             onSuccess={() => {
               toast.success(t("device_updated"));
-              goBack(`/facility/${facilityId}/settings/devices/${device.id}`);
+              goBack();
             }}
           />
         </div>

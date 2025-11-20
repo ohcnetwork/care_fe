@@ -182,7 +182,7 @@ export default function VerifyPatient() {
               <Button
                 variant={"primary_gradient"}
                 className="gap-3 group"
-                onClick={() => goBack(`/facility/${facilityId}/patients`)}
+                onClick={() => goBack()}
               >
                 {t("go_back")}
               </Button>
