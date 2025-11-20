@@ -123,7 +123,6 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
             className="absolute inset-0 bg-cover bg-center rounded-lg"
             style={{ backgroundImage: "url('/images/home_banner.svg')" }}
             aria-hidden="true"
-            role="img"
           />
           <div className="relative z-10 p-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
