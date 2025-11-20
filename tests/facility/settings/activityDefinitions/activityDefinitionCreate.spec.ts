@@ -339,7 +339,9 @@ test.describe("activity definition form", () => {
           }),
         });
         await expect(specimenCard).toBeVisible();
-        await expect(specimenCard.getByText(selectedSpecimen)).toBeVisible();
+        await expect(
+          specimenCard.getByText(selectedSpecimen).first(),
+        ).toBeVisible();
 
         const observationCard = page.locator('[data-slot="card"]').filter({
           has: page.locator('[data-slot="card-title"]', {
@@ -348,7 +350,7 @@ test.describe("activity definition form", () => {
         });
         await expect(observationCard).toBeVisible();
         await expect(
-          observationCard.getByText(selectedObservation),
+          observationCard.getByText(selectedObservation).first(),
         ).toBeVisible();
 
         const chargeItemCard = page.locator('[data-slot="card"]').filter({
@@ -358,7 +360,7 @@ test.describe("activity definition form", () => {
         });
         await expect(chargeItemCard).toBeVisible();
         await expect(
-          chargeItemCard.getByText(selectedChargeItem),
+          chargeItemCard.getByText(selectedChargeItem).first(),
         ).toBeVisible();
 
         const locationCard = page.locator('[data-slot="card"]').filter({
