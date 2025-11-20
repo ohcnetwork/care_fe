@@ -38,8 +38,6 @@ test.describe("activity definition form", () => {
 
     await expect(page.getByText(/title.*required/i)).toBeVisible();
     await expect(page.getByText(/slug.*required/i)).toBeVisible();
-
-    await expect(page.getByText(/slug.*required/i)).toBeVisible();
     await expect(page.getByText(/description.*required/i)).toBeVisible();
     await expect(page.getByText(/usage.*required/i)).toBeVisible();
     await expect(page.getByText(/category.*required/i)).toBeVisible();
