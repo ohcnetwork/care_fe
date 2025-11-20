@@ -150,164 +150,134 @@ test.describe("Encounter vs Patient Notes Isolation", () => {
   });
 });
 
-// test.describe("Thread Messaging - Multi-user & Single-user", () => {
-//   let encounterUrl: string;
-//   let threadTitle: string;
-//   let userAMessage1: string;
-//   let userAMessage2: string;
-//   let userAMessage3: string;
-//   let userBMessage: string;
+test.describe("Thread Messaging - Multi-user & Single-user", () => {
+  let encounterUrl: string;
+  let threadTitle: string;
+  let userAMessage1: string;
+  let userAMessage2: string;
+  let userAMessage3: string;
+  let userBMessage: string;
 
-//   test.beforeEach(async ({ page }) => {
-//     const facilityId = getFacilityId();
-//     const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
-//     const createdDateBefore = format(new Date(), "yyyy-MM-dd");
+  test.beforeEach(async ({ page }) => {
+    const facilityId = getFacilityId();
+    const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
+    const createdDateBefore = format(new Date(), "yyyy-MM-dd");
 
-//     // Generate unique data for this test run
-//     threadTitle = `Thread ${faker.string.alphanumeric(8)}`;
-//     userAMessage1 = `User A message 1: ${faker.lorem.sentence()}`;
-//     userAMessage2 = `User A message 2: ${faker.lorem.sentence()}`;
-//     userAMessage3 = `User A message 3: ${faker.lorem.sentence()}`;
-//     userBMessage = `User B message: ${faker.lorem.sentence()}`;
+    // Generate unique data for this test run
+    threadTitle = `Thread ${faker.string.alphanumeric(8)}`;
+    userAMessage1 = `User A message 1: ${faker.lorem.sentence()}`;
+    userAMessage2 = `User A message 2: ${faker.lorem.sentence()}`;
+    userAMessage3 = `User A message 3: ${faker.lorem.sentence()}`;
+    userBMessage = `User B message: ${faker.lorem.sentence()}`;
 
-//     // Navigate to encounters and open first encounter
-//     await page.goto(
-//       `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
-//     );
-//     await page.getByRole("link", { name: "Patient Home" }).first().click();
-//     await page
-//       .getByRole("link", { name: /Encounter/ })
-//       .first()
-//       .click();
-//     encounterUrl = page.url();
-//     await page.getByRole("tab", { name: "Notes" }).click();
-//   });
+    // Navigate to encounters and open first encounter
+    await page.goto(
+      `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
+    );
+    await page.getByRole("link", { name: "View Encounter" }).first().click();
+    encounterUrl = page.url();
+    await page.getByRole("tab", { name: "Notes" }).click();
+    await page.waitForLoadState("networkidle");
+  });
 
-//   test("should support multi-user messaging in same thread", async ({
-//     page,
-//     browser,
-//   }) => {
-//     // User A (admin) creates thread and sends message
-//     await page.getByRole("button", { name: /New/i }).first().click();
-//     await page.getByPlaceholder("Type your message...").fill(threadTitle);
+  test("should support multi-user messaging in same thread", async ({
+    page,
+    browser,
+  }) => {
+    // User A (admin) creates thread and sends message
+    await page.getByRole("button", { name: /New/i }).click();
+    await page.getByPlaceholder("Enter discussion title...").fill(threadTitle);
 
-//     const createThreadResponse = page.waitForResponse(
-//       (response) =>
-//         response.url().includes("/thread/") &&
-//         response.request().method() === "POST" &&
-//         response.status() === 201,
-//     );
-//     await page.getByRole("button", { name: /Create/i }).click();
-//     await createThreadResponse;
+    await page.getByRole("button", { name: /Create/i }).click();
+    await expect(page.getByText("Thread created successfully")).toBeVisible();
 
-//     // User A sends first message
-//     await page.getByPlaceholder("Type your message...").fill(userAMessage1);
-//     let sendMessageResponse = page.waitForResponse(
-//       (response) =>
-//         response.url().includes("/note/") &&
-//         response.request().method() === "POST" &&
-//         response.status() === 201,
-//     );
-//     await page.getByRole("button", { name: /Send/i, exact: false }).click();
-//     await sendMessageResponse;
+    // User A sends first message
+    await page.getByPlaceholder("Type your message...").fill(userAMessage1);
+    await page
+      .getByRole("button", { name: "send-chat-message-button" })
+      .click();
+    await page.waitForLoadState("networkidle");
 
-//     // Verify User A's message
-//     await expect(page.getByText(userAMessage1)).toBeVisible();
+    // Verify User A's message
+    await expect(page.getByText(userAMessage1)).toBeVisible();
 
-//     // Create User B context with facility admin authentication
-//     const userBContext = await browser.newContext({
-//       storageState: "tests/.auth/facilityAdmin.json",
-//     });
-//     const userBPage = await userBContext.newPage();
+    // Create User B context with facility admin authentication
+    const userBContext = await browser.newContext({
+      storageState: "tests/.auth/facilityAdmin.json",
+    });
+    const userBPage = await userBContext.newPage();
 
-//     // User B navigates to the same encounter
-//     await userBPage.goto(encounterUrl);
-//     await userBPage.getByRole("tab", { name: "Notes" }).click();
+    // User B navigates to the same encounter
+    await userBPage.goto(encounterUrl);
+    await userBPage.getByRole("tab", { name: "Notes" }).click();
 
-//     // Select the thread created by User A
-//     await userBPage
-//       .getByRole("button")
-//       .filter({ hasText: threadTitle })
-//       .click();
+    // Select the thread created by User A
+    await userBPage
+      .getByRole("button")
+      .filter({ hasText: threadTitle })
+      .click();
 
-//     // Verify User A's message is visible to User B
-//     await expect(userBPage.getByText(userAMessage1)).toBeVisible();
+    // Verify User A's message is visible to User B
+    await expect(userBPage.getByText(userAMessage1)).toBeVisible();
 
-//     // User B sends a message
-//     await userBPage.getByPlaceholder("Type your message...").fill(userBMessage);
-//     sendMessageResponse = userBPage.waitForResponse(
-//       (response) =>
-//         response.url().includes("/note/") &&
-//         response.request().method() === "POST" &&
-//         response.status() === 201,
-//     );
-//     await userBPage
-//       .getByRole("button", { name: /Send/i, exact: false })
-//       .click();
-//     await sendMessageResponse;
+    // User B sends a message
+    await userBPage.getByPlaceholder("Type your message...").fill(userBMessage);
+    await userBPage
+      .getByRole("button", { name: /Send/i, exact: false })
+      .click();
+    await userBPage.waitForLoadState("networkidle");
 
-//     // Verify User B's message appears for User B
-//     await expect(userBPage.getByText(userBMessage)).toBeVisible();
+    // Verify User B's message appears for User B
+    await expect(userBPage.getByText(userBMessage)).toBeVisible();
 
-//     // Refresh User A's view and verify both messages appear
-//     await page.reload();
-//     await page.getByRole("tab", { name: "Notes" }).click();
-//     await page.getByRole("button").filter({ hasText: threadTitle }).click();
+    // Refresh User A's view and verify both messages appear
+    await page.reload();
+    await page.getByRole("tab", { name: "Notes" }).click();
+    await page.getByRole("button").filter({ hasText: threadTitle }).click();
 
-//     await expect(page.getByText(userAMessage1)).toBeVisible();
-//     await expect(page.getByText(userBMessage)).toBeVisible();
+    await expect(page.getByText(userAMessage1)).toBeVisible();
+    await expect(page.getByText(userBMessage)).toBeVisible();
 
-//     // Clean up User B context
-//     await userBContext.close();
-//   });
+    // Clean up User B context
+    await userBContext.close();
+  });
 
-//   test("should maintain correct order for consecutive messages from same user", async ({
-//     page,
-//   }) => {
-//     // Create thread
-//     await page.getByRole("button", { name: /New/i }).first().click();
-//     await page.getByPlaceholder("Type your message...").fill(threadTitle);
+  test("should maintain correct order for consecutive messages from same user", async ({
+    page,
+  }) => {
+    // Create thread
+    await page.getByRole("button", { name: /New/i }).click();
+    await page.getByPlaceholder("Enter discussion title...").fill(threadTitle);
+    await page.getByRole("button", { name: /Create/i }).click();
+    await expect(page.getByText("Thread created successfully")).toBeVisible();
 
-//     const createThreadResponse = page.waitForResponse(
-//       (response) =>
-//         response.url().includes("/thread/") &&
-//         response.request().method() === "POST" &&
-//         response.status() === 201,
-//     );
-//     await page.getByRole("button", { name: /Create/i }).click();
-//     await createThreadResponse;
+    // Send multiple consecutive messages
+    const messages = [userAMessage1, userAMessage2, userAMessage3];
 
-//     // Send multiple consecutive messages
-//     const messages = [userAMessage1, userAMessage2, userAMessage3];
+    for (const message of messages) {
+      await page.getByPlaceholder("Type your message...").fill(message);
+      await page
+        .getByRole("button", { name: "send-chat-message-button" })
+        .click();
+      await page.waitForLoadState("networkidle");
+    }
 
-//     for (const message of messages) {
-//       await page.getByPlaceholder("Type your message...").fill(message);
-//       const sendMessageResponse = page.waitForResponse(
-//         (response) =>
-//           response.url().includes("/note/") &&
-//           response.request().method() === "POST" &&
-//           response.status() === 201,
-//       );
-//       await page.getByRole("button", { name: /Send/i, exact: false }).click();
-//       await sendMessageResponse;
-//     }
+    // Verify all messages appear
+    await expect(page.getByText(userAMessage1)).toBeVisible();
+    await expect(page.getByText(userAMessage2)).toBeVisible();
+    await expect(page.getByText(userAMessage3)).toBeVisible();
 
-//     // Verify all messages appear
-//     await expect(page.getByText(userAMessage1)).toBeVisible();
-//     await expect(page.getByText(userAMessage2)).toBeVisible();
-//     await expect(page.getByText(userAMessage3)).toBeVisible();
+    // Verify message order by checking their positions
+    const chatMessages = page.locator('[class*="flex-col-reverse"]').first();
+    const allMessages = await chatMessages.getByText(
+      new RegExp(`${userAMessage1}|${userAMessage2}|${userAMessage3}`),
+    );
 
-//     // Verify message order by checking their positions
-//     const chatMessages = page.locator('[class*="flex-col-reverse"]').first();
-//     const allMessages = await chatMessages.getByText(
-//       new RegExp(`${userAMessage1}|${userAMessage2}|${userAMessage3}`),
-//     );
-
-//     // Since messages are in reverse order (newest at top), check count
-//     const messageCount = await allMessages.count();
-//     expect(messageCount).toBe(3);
-//   });
-// });
+    // Since messages are in reverse order (newest at top), check count
+    const messageCount = await allMessages.count();
+    expect(messageCount).toBe(3);
+  });
+});
 
 test.describe("Thread Creation", () => {
   let thread1Title: string;
@@ -328,7 +298,7 @@ test.describe("Thread Creation", () => {
     await page.goto(
       `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
     );
-    await page.getByRole("link", { name: "View Encounter" }).first().click();
+    await page.getByRole("link", { name: "View Encounter" }).nth(2).click();
 
     await page.getByRole("tab", { name: "Notes" }).click();
   });
@@ -395,7 +365,7 @@ test.describe("Thread Visibility & Switching", () => {
     await page.goto(
       `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
     );
-    await page.getByRole("link", { name: "View Encounter" }).first().click();
+    await page.getByRole("link", { name: "View Encounter" }).nth(3).click();
     await page.getByRole("tab", { name: "Notes" }).click();
 
     // Create three threads with messages
