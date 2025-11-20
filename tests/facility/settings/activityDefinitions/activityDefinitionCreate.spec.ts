@@ -2,6 +2,14 @@ import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
 import {
+  ACTIVITY_DEFINITION_CODES,
+  BODY_SITES,
+  CHARGE_ITEM_CATEGORIES,
+  CHARGE_ITEM_DEFINITIONS,
+  DIAGNOSTIC_REPORT_CODES,
+  LOCATIONS,
+  OBSERVATION_REQUIREMENTS,
+  SPECIMEN_DEFINITIONS,
   generateActivityDefinitionData,
   generateExpectedSlug,
 } from "tests/helpers/activityDefinition";
@@ -87,8 +95,9 @@ test.describe("activity definition form", () => {
     await page.getByRole("option", { name: /service request/i }).click();
 
     const codeCombobox = page.getByRole("combobox", { name: /^code/i });
+    const selectedCode = faker.helpers.arrayElement(ACTIVITY_DEFINITION_CODES);
     await selectFromValueSet(page, codeCombobox, {
-      itemIndex: faker.number.int({ min: 0, max: 4 }),
+      search: selectedCode,
     });
 
     await closeAnyOpenPopovers(page);
@@ -151,6 +160,21 @@ test.describe("activity definition form", () => {
   }) => {
     const testData = generateActivityDefinitionData();
 
+    const selectedCode = faker.helpers.arrayElement(ACTIVITY_DEFINITION_CODES);
+    const selectedBodySite = faker.helpers.arrayElement(BODY_SITES);
+    const selectedSpecimen = faker.helpers.arrayElement(SPECIMEN_DEFINITIONS);
+    const selectedObservation = faker.helpers.arrayElement(
+      OBSERVATION_REQUIREMENTS,
+    );
+    const selectedCategory = faker.helpers.arrayElement(CHARGE_ITEM_CATEGORIES);
+    const selectedChargeItem = faker.helpers.arrayElement(
+      CHARGE_ITEM_DEFINITIONS,
+    );
+    const selectedLocation = faker.helpers.arrayElement(LOCATIONS);
+    const selectedDiagCode = faker.helpers.arrayElement(
+      DIAGNOSTIC_REPORT_CODES,
+    );
+
     await test.step("create activity definition", async () => {
       await test.step("fill basic information", async () => {
         await page
@@ -187,7 +211,7 @@ test.describe("activity definition form", () => {
 
         const codeCombobox = page.getByRole("combobox", { name: /^code/i });
         await selectFromValueSet(page, codeCombobox, {
-          itemIndex: faker.number.int({ min: 0, max: 4 }),
+          search: selectedCode,
         });
 
         await page
@@ -198,7 +222,7 @@ test.describe("activity definition form", () => {
       await test.step("fill additional details", async () => {
         const bodySite = page.getByRole("combobox", { name: /body site/i });
         await selectFromValueSet(page, bodySite, {
-          itemIndex: faker.number.int({ min: 0, max: 4 }),
+          search: selectedBodySite,
         });
       });
 
@@ -208,7 +232,7 @@ test.describe("activity definition form", () => {
           .locator("..");
         const specimenTrigger = specimenContainer.getByRole("combobox").first();
         await selectFromRequirements(page, specimenTrigger, {
-          itemIndex: faker.number.int({ min: 0, max: 2 }),
+          search: selectedSpecimen,
         });
         await closeAnyOpenPopovers(page);
 
@@ -217,7 +241,7 @@ test.describe("activity definition form", () => {
           .locator("..");
         const obsTrigger = obsContainer.getByRole("combobox").first();
         await selectFromRequirements(page, obsTrigger, {
-          itemIndex: faker.number.int({ min: 0, max: 2 }),
+          search: selectedObservation,
         });
         await closeAnyOpenPopovers(page);
 
@@ -226,6 +250,8 @@ test.describe("activity definition form", () => {
           .locator("..");
         const chargePicker = chargeContainer.getByRole("combobox").first();
         await selectFromCategoryPicker(page, chargePicker, {
+          navigateCategories: [selectedCategory],
+          search: selectedChargeItem,
           closeAfterSelect: true,
         });
 
@@ -233,7 +259,7 @@ test.describe("activity definition form", () => {
         await locationsSection.scrollIntoViewIfNeeded();
         const locationsTrigger = locationsSection.getByRole("combobox").first();
         await selectFromLocationMultiSelect(page, locationsTrigger, {
-          itemIndex: faker.number.int({ min: 0, max: 2 }),
+          search: selectedLocation,
         });
       });
 
@@ -243,7 +269,7 @@ test.describe("activity definition form", () => {
           .locator("..");
         const diagCombobox = diagSection.getByRole("combobox").first();
         await selectFromValueSet(page, diagCombobox, {
-          itemIndex: faker.number.int({ min: 0, max: 4 }),
+          search: selectedDiagCode,
         });
       });
 
@@ -307,8 +333,12 @@ test.describe("activity definition form", () => {
         await expect(
           technicalDetailsCard.getByText("Service Request"),
         ).toBeVisible();
-
-        await expect(page.getByText("Body Site")).toBeVisible();
+        await expect(
+          technicalDetailsCard.getByText(selectedCode),
+        ).toBeVisible();
+        await expect(
+          technicalDetailsCard.getByText(selectedBodySite),
+        ).toBeVisible();
 
         const specimenCard = page.locator('[data-slot="card"]').filter({
           has: page.locator('[data-slot="card-title"]', {
@@ -316,6 +346,7 @@ test.describe("activity definition form", () => {
           }),
         });
         await expect(specimenCard).toBeVisible();
+        await expect(specimenCard.getByText(selectedSpecimen)).toBeVisible();
 
         const observationCard = page.locator('[data-slot="card"]').filter({
           has: page.locator('[data-slot="card-title"]', {
@@ -323,6 +354,9 @@ test.describe("activity definition form", () => {
           }),
         });
         await expect(observationCard).toBeVisible();
+        await expect(
+          observationCard.getByText(selectedObservation),
+        ).toBeVisible();
 
         const chargeItemCard = page.locator('[data-slot="card"]').filter({
           has: page.locator('[data-slot="card-title"]', {
@@ -330,6 +364,9 @@ test.describe("activity definition form", () => {
           }),
         });
         await expect(chargeItemCard).toBeVisible();
+        await expect(
+          chargeItemCard.getByText(selectedChargeItem),
+        ).toBeVisible();
 
         const locationCard = page.locator('[data-slot="card"]').filter({
           has: page.locator('[data-slot="card-title"]', {
@@ -337,6 +374,7 @@ test.describe("activity definition form", () => {
           }),
         });
         await expect(locationCard).toBeVisible();
+        await expect(locationCard.getByText(selectedLocation)).toBeVisible();
 
         const diagnosticCard = page.locator('[data-slot="card"]').filter({
           has: page.locator('[data-slot="card-title"]', {
@@ -344,6 +382,7 @@ test.describe("activity definition form", () => {
           }),
         });
         await expect(diagnosticCard).toBeVisible();
+        await expect(diagnosticCard.getByText(selectedDiagCode)).toBeVisible();
 
         const derivedFromCard = page.locator('[data-slot="card"]').filter({
           has: page.locator('[data-slot="card-title"]', {

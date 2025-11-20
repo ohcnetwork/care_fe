@@ -8,6 +8,70 @@ import {
 
 import { closeAnyOpenPopovers, expectToast, selectFromValueSet } from "./ui";
 
+export const ACTIVITY_DEFINITION_CODES = [
+  "Fluoroscopic venography of left limb with contrast",
+  "Post-exposure herpesvirus infection prophylaxis",
+  "Percutaneous ligation of left atrial appendage",
+  "Mepolizumab therapy",
+  "Toilet and suture of wound",
+  "Canakinumab therapy",
+  "Urinary tract infection prophylaxis",
+  "Anifrolumab therapy",
+  "Open excision of left atrial appendage",
+  "Voclosporin therapy",
+];
+
+export const BODY_SITES = [
+  "Structure of product of conception of ectopic pregnancy",
+  "Structure of left deltoid muscle",
+  "Structure of right deltoid muscle",
+  "Structure of right supraclavicular lymph node",
+  "Structure of left supraclavicular lymph node",
+  "Structure of colonic submucosa and/or colonic muscularis propria",
+  "Structure of lymphatic vessel and/or small blood vessel",
+  "Structure of neuroretinal rim of right optic disc",
+  "Structure of neuroretinal rim of left optic disc",
+  "Structure of epithelium of right lens",
+];
+
+export const SPECIMEN_DEFINITIONS = [
+  "Urinalysis Specimen",
+  "Lipid Panel Blood Specimen",
+  "CBC Blood Specimen",
+  "Blood Glucose Test Specimen",
+];
+
+export const OBSERVATION_REQUIREMENTS = [
+  "Urinalysis Observation",
+  "Lipid Panel Observation",
+  "Complete Blood Count",
+  "Fasting Blood Glucose",
+];
+
+export const LOCATIONS = ["Pharmacy", "Bal-Gandhi", "Bio-Chemistry Lab"];
+
+export const DIAGNOSTIC_REPORT_CODES = [
+  "Acyclovir [Susceptibility]",
+  "Amdinocillin [Susceptibility] by Serum bactericidal titer",
+  "Cefoperazone [Susceptibility] by Minimum inhibitory concentration (MIC)",
+  "DBG Ab [Presence] in Serum or Plasma from Blood product unit",
+  "R wave duration in lead AVR",
+  "Health informatics pioneer and the father of LOINC",
+  "Health informatics pioneer and cofounder of LOINC",
+  "Specimen care is maintained",
+  "Team communication is maintained throughout care",
+  "Demonstrates knowledge of the expected psychosocial responses to the procedure",
+];
+
+export const CHARGE_ITEM_CATEGORIES = ["Lab Tests"];
+
+export const CHARGE_ITEM_DEFINITIONS = [
+  "Urinalysis Test",
+  "Lipid Panel Test",
+  "Complete Blood Count (CBC) Test",
+  "Fasting Blood Glucose Test",
+];
+
 export function generateActivityDefinitionData() {
   const status = faker.helpers.arrayElement(Object.values(Status));
   const classification = faker.helpers.arrayElement(
