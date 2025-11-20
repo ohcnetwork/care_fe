@@ -57,7 +57,7 @@ interface Props {
   className?: string;
   patientId?: string;
   patientName?: string;
-  align?: string;
+  align?: "start" | "center" | "end";
 }
 
 interface IdentifierConfig {
@@ -433,7 +433,7 @@ export default function PatientIdentifierFilter({
             <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
             <PopoverContent
               className="w-80 p-0 overflow-hidden rounded-lg"
-              align={align as "start" | "center" | "end"}
+              align={align}
             >
               <PatientSearchSelector
                 allIdentifierConfigs={allIdentifierConfigs}
