@@ -56,11 +56,7 @@ test.describe("activity definition deletion", () => {
 
     await page.getByText(resourceCategoryName).click();
 
-    await page
-      .getByRole("button")
-      .filter({ has: page.locator("svg.lucide-x") })
-      .first()
-      .click();
+    await clearFilter(page);
 
     await page.getByPlaceholder(/search/i).fill(createdAD.title);
 
