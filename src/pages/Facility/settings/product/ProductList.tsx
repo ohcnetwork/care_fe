@@ -145,9 +145,15 @@ export default function ProductList({ facilityId }: { facilityId: string }) {
                 <FilterSelect
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
-                  options={Object.values(ProductStatusOptions)}
+                  options={Object.values(ProductStatusOptions).map(
+                    (status) => ({
+                      value: status,
+                      label: t(status),
+                    }),
+                  )}
                   label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
+                  conjunctionText={t("is")}
                 />
               </div>
             </div>

@@ -350,9 +350,15 @@ export default function MedicationDispenseList({
                       | keyof typeof MedicationRequestDispenseStatus) ?? "all",
                   )
                 }
-                options={["all", "pending", "partial", "complete"]}
+                options={["all", "pending", "partial", "complete"].map(
+                  (status) => ({
+                    value: status,
+                    label: t(status),
+                  }),
+                )}
                 label={t("dispense_status") as string}
                 onClear={() => setDispenseFilter("all")}
+                conjunctionText={t("is")}
               />
             </div>
             <div className="flex items-center gap-2 ml-auto">

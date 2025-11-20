@@ -229,9 +229,15 @@ export default function PatientIdentifierConfigList({
                 <FilterSelect
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
-                  options={Object.values(PatientIdentifierConfigStatus)}
+                  options={Object.values(PatientIdentifierConfigStatus).map(
+                    (status) => ({
+                      value: status,
+                      label: t(status),
+                    }),
+                  )}
                   label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
+                  conjunctionText={t("is")}
                 />
               </div>
             </div>

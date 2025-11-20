@@ -93,9 +93,13 @@ export const EncounterServiceRequestTab = () => {
           <FilterSelect
             value={qParams.status || ""}
             onValueChange={(value) => updateQuery({ status: value })}
-            options={Object.values(Status)}
+            options={Object.values(Status).map((status) => ({
+              value: status,
+              label: t(status),
+            }))}
             label={t("status")}
             onClear={handleClearStatus}
+            conjunctionText={t("is")}
           />
         </div>
 
@@ -103,9 +107,13 @@ export const EncounterServiceRequestTab = () => {
           <FilterSelect
             value={qParams.priority || ""}
             onValueChange={(value) => updateQuery({ priority: value })}
-            options={Object.values(Priority)}
+            options={Object.values(Priority).map((priority) => ({
+              value: priority,
+              label: t(priority),
+            }))}
             label={t("priority")}
             onClear={handleClearPriority}
+            conjunctionText={t("is")}
           />
         </div>
 

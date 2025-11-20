@@ -212,9 +212,15 @@ export function ChargeItemList({
             <FilterSelect
               value={qParams.status || ""}
               onValueChange={(value) => updateQuery({ status: value })}
-              options={Object.values(ChargeItemDefinitionStatus)}
+              options={Object.values(ChargeItemDefinitionStatus).map(
+                (status) => ({
+                  value: status,
+                  label: t(status),
+                }),
+              )}
               label={t("status")}
               onClear={() => updateQuery({ status: undefined })}
+              conjunctionText={t("is")}
             />
           </div>
         </div>

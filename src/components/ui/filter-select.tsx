@@ -1,5 +1,4 @@
 import { X } from "lucide-react";
-import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -14,14 +13,24 @@ import {
 } from "@/components/ui/select";
 
 export interface FilterSelectProps {
-  value: string;
-  onValueChange: (value: string | undefined) => void;
-  options: string[];
+  /** Already translated label text */
   label: string;
+  /** Current selected value (should match one of the option values) */
+  value: string;
+  /** Callback when selection changes */
+  onValueChange: (value: string | undefined) => void;
+  /** Array of option objects with value (for selection) and label (already translated for display) */
+  options: Array<{ value: string; label: string }>;
+  /** Callback when clear button is clicked */
   onClear: () => void;
+  /** Optional icon to display instead of default filter icon */
   icon?: React.ReactNode;
+  /** Optional CSS class name */
   className?: string;
+  /** Optional already translated placeholder text */
   placeholder?: string;
+  /** Already translated text for the "is" conjunction (defaults to "is") */
+  conjunctionText?: string;
 }
 
 export function FilterSelect({
@@ -33,8 +42,12 @@ export function FilterSelect({
   icon,
   className,
   placeholder,
+  conjunctionText = "is",
 }: FilterSelectProps) {
-  const { t } = useTranslation();
+  // Find the label for the selected value
+  const selectedOption = options.find((opt) => opt.value === value);
+  const selectedLabel = selectedOption?.label || value;
+
   return (
     <div
       className={cn(
@@ -51,21 +64,21 @@ export function FilterSelect({
             {icon || <CareIcon icon="l-filter" className="size-4" />}
             {value ? (
               <>
-                <span className="text-gray-950">{t(label)}</span>
-                <span className="text-gray-600 lowercase">{t("is")}</span>
-                <span className="text-gray-950 underline">{t(value)}</span>
+                <span className="text-gray-950">{label}</span>
+                <span className="text-gray-600 lowercase">
+                  {conjunctionText}
+                </span>
+                <span className="text-gray-950 underline">{selectedLabel}</span>
               </>
             ) : (
-              <span className="text-gray-500">
-                {placeholder ? t(placeholder) : t(label)}
-              </span>
+              <span className="text-gray-500">{placeholder || label}</span>
             )}
           </div>
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (
-            <SelectItem key={option} value={option}>
-              {t(option)}
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
             </SelectItem>
           ))}
         </SelectContent>

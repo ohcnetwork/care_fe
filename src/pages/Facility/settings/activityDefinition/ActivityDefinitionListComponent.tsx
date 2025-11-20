@@ -225,9 +225,13 @@ export function ActivityDefinitionList({
             <FilterSelect
               value={qParams.status || ""}
               onValueChange={(value) => updateQuery({ status: value })}
-              options={Object.values(Status)}
+              options={Object.values(Status).map((status) => ({
+                value: status,
+                label: t(status),
+              }))}
               label={t("status")}
               onClear={() => updateQuery({ status: undefined })}
+              conjunctionText={t("is")}
             />
           </div>
 
@@ -236,9 +240,13 @@ export function ActivityDefinitionList({
             <FilterSelect
               value={qParams.classification || ""}
               onValueChange={(value) => updateQuery({ classification: value })}
-              options={Object.values(Classification)}
+              options={Object.values(Classification).map((classification) => ({
+                value: classification,
+                label: t(classification),
+              }))}
               label={t("category")}
               onClear={() => updateQuery({ classification: undefined })}
+              conjunctionText={t("is")}
             />
           </div>
         </div>

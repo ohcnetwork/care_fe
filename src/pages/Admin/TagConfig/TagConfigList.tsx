@@ -109,27 +109,39 @@ export default function TagConfigList({ facilityId }: TagConfigListProps) {
                 <FilterSelect
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
-                  options={Object.values(TagStatus)}
+                  options={Object.values(TagStatus).map((status) => ({
+                    value: status,
+                    label: t(status),
+                  }))}
                   label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
+                  conjunctionText={t("is")}
                 />
               </div>
               <div className="flex-1 sm:flex-initial sm:w-auto">
                 <FilterSelect
                   value={qParams.category || ""}
                   onValueChange={(value) => updateQuery({ category: value })}
-                  options={Object.values(TagCategory)}
+                  options={Object.values(TagCategory).map((category) => ({
+                    value: category,
+                    label: t(category),
+                  }))}
                   label={t("category")}
                   onClear={() => updateQuery({ category: undefined })}
+                  conjunctionText={t("is")}
                 />
               </div>
               <div className="flex-1 sm:flex-initial sm:w-auto">
                 <FilterSelect
                   value={qParams.resource || ""}
                   onValueChange={(value) => updateQuery({ resource: value })}
-                  options={Object.values(TagResource)}
+                  options={Object.values(TagResource).map((resource) => ({
+                    value: resource,
+                    label: t(resource),
+                  }))}
                   label={t("resource")}
                   onClear={() => updateQuery({ resource: undefined })}
+                  conjunctionText={t("is")}
                 />
               </div>
             </div>

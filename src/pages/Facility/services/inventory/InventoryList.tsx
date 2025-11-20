@@ -104,11 +104,15 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
             <FilterSelect
               value={qParams.status || ""}
               onValueChange={(value) => updateQuery({ status: value })}
-              options={Object.values(InventoryStatusOptions)}
-              label="status"
+              options={Object.values(InventoryStatusOptions).map((status) => ({
+                value: status,
+                label: t(status),
+              }))}
+              label={t("status")}
               onClear={() => updateQuery({ status: undefined })}
               className="w-full sm:w-auto h-9 border-gray-300"
-              placeholder="filter_by_status"
+              placeholder={t("filter_by_status")}
+              conjunctionText={t("is")}
             />
           </div>
           <div className="w-full sm:w-auto">
@@ -126,11 +130,15 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                     : undefined,
                 })
               }
-              options={Object.keys(SORT_OPTIONS)}
+              options={Object.keys(SORT_OPTIONS).map((key) => ({
+                value: key,
+                label: t(key),
+              }))}
               label={t("net_content")}
               onClear={() => updateQuery({ ordering: undefined })}
               className="w-full sm:w-auto h-9 border-gray-300"
               placeholder={t("sort_by_net_content")}
+              conjunctionText={t("is")}
             />
           </div>
         </div>

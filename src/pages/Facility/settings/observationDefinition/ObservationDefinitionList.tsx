@@ -161,18 +161,28 @@ export default function ObservationDefinitionList({
                 <FilterSelect
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
-                  options={OBSERVATION_DEFINITION_STATUS as unknown as string[]}
+                  options={(
+                    OBSERVATION_DEFINITION_STATUS as unknown as string[]
+                  ).map((status) => ({
+                    value: status,
+                    label: t(status),
+                  }))}
                   label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
+                  conjunctionText={t("is")}
                 />
               </div>
               <div className="flex-1 sm:flex-initial sm:w-auto">
                 <FilterSelect
                   value={qParams.category || ""}
                   onValueChange={(value) => updateQuery({ category: value })}
-                  options={OBSERVATION_DEFINITION_CATEGORY}
+                  options={OBSERVATION_DEFINITION_CATEGORY.map((category) => ({
+                    value: category,
+                    label: t(category),
+                  }))}
                   label={t("category")}
                   onClear={() => updateQuery({ category: undefined })}
+                  conjunctionText={t("is")}
                 />
               </div>
             </div>

@@ -194,11 +194,15 @@ function OutgoingOrdersTab({
           <FilterSelect
             value={qParams.priority || ""}
             onValueChange={(value) => updateQuery({ priority: value })}
-            options={Object.values(RequestOrderPriority)}
+            options={Object.values(RequestOrderPriority).map((priority) => ({
+              value: priority,
+              label: t(priority),
+            }))}
             label={t("priority")}
             onClear={() => updateQuery({ priority: undefined })}
             className="w-full sm:w-auto h-9"
             placeholder={t("filter_by_priority")}
+            conjunctionText={t("is")}
           />
         </div>
       </div>

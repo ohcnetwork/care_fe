@@ -238,9 +238,13 @@ export function ProductKnowledgeList({
             <FilterSelect
               value={qParams.status || ""}
               onValueChange={(value) => updateQuery({ status: value })}
-              options={Object.values(ProductKnowledgeStatus)}
+              options={Object.values(ProductKnowledgeStatus).map((status) => ({
+                value: status,
+                label: t(status),
+              }))}
               label={t("status")}
               onClear={() => updateQuery({ status: undefined })}
+              conjunctionText={t("is")}
             />
           </div>
 
@@ -249,9 +253,13 @@ export function ProductKnowledgeList({
             <FilterSelect
               value={qParams.product_type || ""}
               onValueChange={(value) => updateQuery({ product_type: value })}
-              options={Object.values(ProductKnowledgeType)}
+              options={Object.values(ProductKnowledgeType).map((type) => ({
+                value: type,
+                label: t(type),
+              }))}
               label={t("product_type")}
               onClear={() => updateQuery({ product_type: undefined })}
+              conjunctionText={t("is")}
             />
           </div>
         </div>
