@@ -39,6 +39,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import FacilityOrganizationFormSheet from "./components/FacilityOrganizationFormSheet";
 
 interface Props {
@@ -191,6 +192,7 @@ export default function FacilityOrganizationView({
     disableCache: true,
   });
 
+  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
 
   const { data: children, isLoading } = useQuery({
@@ -216,6 +218,10 @@ export default function FacilityOrganizationView({
 
   const { canCreateFacilityOrganization, canManageFacilityOrganization } =
     getPermissions(hasPermission, permissions);
+  const { isGeoAdmin } = getPermissions(
+    hasPermission,
+    authUser?.permissions || [],
+  );
 
   return (
     <div className="space-y-6 mx-auto max-w-4xl md:pt-3">
@@ -236,7 +242,7 @@ export default function FacilityOrganizationView({
           />
         </div>
 
-        {canCreateFacilityOrganization && (
+        {(canCreateFacilityOrganization || isGeoAdmin) && (
           <div className="w-full sm:w-auto flex justify-center sm:justify-start">
             <FacilityOrganizationFormSheet
               facilityId={facilityId}
