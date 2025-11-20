@@ -1,14 +1,21 @@
-import { useQuery } from "@tanstack/react-query";
-import { Box, Calendar, Users } from "lucide-react";
-import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
-
 import {
   Card,
   CardContent,
   CardDescription,
   CardTitle,
 } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import {
+  ArrowUpRight,
+  Box,
+  Calendar,
+  ChartLine,
+  HeartPulse,
+  Stethoscope,
+  Users,
+} from "lucide-react";
+import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
 
@@ -46,11 +53,18 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     facilityData?.permissions ?? [],
   );
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Morning";
+    if (hour < 18) return "Afternoon";
+    return "Evening";
+  };
+
   // Default shortcuts
   const defaultShortcuts = [
     {
-      title: t("my_schedules"),
-      description: t("manage_my_schedule"),
+      title: t("appointments"),
+      description: t("view_appointments"),
       icon: Calendar,
       href: `/facility/${facilityId}/users/${user?.username}/availability`,
       visible: canViewSchedule,
@@ -58,15 +72,22 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     {
       title: t("encounters"),
       description: t("manage_facility_users"),
-      icon: Users,
+      icon: Stethoscope,
       href: `/facility/${facilityId}/encounters/patients/${careConfig.defaultEncounterType || "all"}`,
       visible: canListEncounters,
     },
     {
       title: t("services"),
       description: t("view_services"),
-      icon: Box,
+      icon: HeartPulse,
       href: `/facility/${facilityId}/services`,
+      visible: true,
+    },
+    {
+      title: t("analytics"),
+      description: t("view_analytics"),
+      icon: ChartLine,
+      href: `/facility/${facilityId}/analytics`,
       visible: true,
     },
   ];
@@ -97,29 +118,28 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     <Page title="">
       <div className="container mx-auto space-y-8">
         {/* Welcome Header */}
-        <div className="rounded-lg">
-          <div className="flex items-center gap-4 mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900">
-                {t("hey_user", {
-                  user: [user.prefix, user.first_name]
-                    .filter(Boolean)
-                    .join(" "),
-                })}
-              </h1>
-              <p className="text-gray-500">
-                {t("welcome_back_to_hospital_dashboard")}
-              </p>
-            </div>
+        <div className="relative rounded-lg overflow-hidden text-black">
+          <div
+            className="absolute inset-0 bg-cover bg-center rounded-lg"
+            style={{ backgroundImage: "url('/images/home_banner.svg')" }}
+          />
+          <div className="relative z-10 p-8">
+            <h1 className="text-4xl font-bol mb-2">
+              {t("hey_user", {
+                time_of_day: getGreeting(),
+                user: [user.prefix, user.first_name].filter(Boolean).join(" "),
+              })}
+            </h1>
+            <p>{t("welcome_back")}</p>
           </div>
         </div>
 
         {/* Quick Actions Section */}
         <div className="">
           <h2 className="mb-6 text-xl font-semibold text-gray-900">
-            {t("quick_actions")}
+            {t("quick_links")}
           </h2>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4">
             {shortcuts
               .filter((shortcut) => shortcut.visible)
               .map((shortcut) => (
@@ -128,18 +148,24 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   href={shortcut.href}
                   className="block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-xl ring-offset-2"
                 >
-                  <Card className="h-full border-0 shadow rounded-xl p-4">
-                    <CardContent className="p-0 flex flex-row items-center h-full gap-4">
-                      <div className="p-2 rounded-lg bg-primary/10">
-                        <shortcut.icon className="size-6 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">
+                  <Card className="h-full border-0 shadow rounded-xl overflow-hidden">
+                    <CardContent className="p-1 flex flex-col h-full">
+                      <div className="p-6 bg-gray-100 rounded-xl space-y-3">
+                        <div className="p-3 rounded-lg bg-primary/10 w-fit">
+                          <shortcut.icon className="size-6 text-primary" />
+                        </div>
+                        <CardTitle className="text-lg m-0">
                           {shortcut.title}
                         </CardTitle>
                         <CardDescription className="text-gray-500">
                           {shortcut.description}
                         </CardDescription>
+                      </div>
+                      <div className="p-4 flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700">
+                          {t("go_to")} {shortcut.title}
+                        </span>
+                        <ArrowUpRight className="size-4 text-gray-400" />
                       </div>
                     </CardContent>
                   </Card>
