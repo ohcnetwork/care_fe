@@ -148,7 +148,7 @@ export default function FacilityOrganizationUsers({
                 <UserCard
                   key={userRole.user.id}
                   user={userRole.user}
-                  roleName={userRole.role.name + `${isGeoAdmin}`}
+                  roleName={userRole.role.name}
                   facility={facilityId}
                   actions={
                     (isGeoAdmin || canManageFacilityOrganizationUsers) && (
