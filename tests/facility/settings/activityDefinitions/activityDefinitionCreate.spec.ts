@@ -14,6 +14,7 @@ import {
   generateExpectedSlug,
 } from "tests/helpers/activityDefinition";
 import {
+  clearFilter,
   closeAnyOpenPopovers,
   expectToast,
   selectFromCategoryPicker,
@@ -111,11 +112,7 @@ test.describe("activity definition form", () => {
 
     await page.getByText(resourceCategoryName).click();
 
-    const clearButton = page
-      .getByRole("button")
-      .filter({ has: page.locator("svg.lucide-x") })
-      .first();
-    await clearButton.click();
+    await clearFilter(page);
 
     const searchInput = page.getByPlaceholder(/search/i);
     await searchInput.fill(testData.title);
@@ -284,11 +281,7 @@ test.describe("activity definition form", () => {
       await test.step("navigate and verify details", async () => {
         await page.getByText(resourceCategoryName).click();
 
-        const clearButton = page
-          .getByRole("button")
-          .filter({ has: page.locator("svg.lucide-x") })
-          .first();
-        await clearButton.click();
+        await clearFilter(page);
 
         const searchInput = page.getByPlaceholder(/search/i);
         await searchInput.fill(testData.title);

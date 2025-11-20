@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { createActivityDefinition } from "tests/helpers/activityDefinition";
-import { expectToast } from "tests/helpers/ui";
+import { clearFilter, expectToast } from "tests/helpers/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -25,11 +25,7 @@ test.describe("activity definition deletion", () => {
     await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
     await page.getByText(resourceCategoryName).click();
 
-    const clearButton = page
-      .getByRole("button")
-      .filter({ has: page.locator("svg.lucide-x") })
-      .first();
-    await clearButton.click();
+    await clearFilter(page);
 
     const searchInput = page.getByPlaceholder(/search/i);
     await searchInput.fill(createdAD.title);

@@ -15,6 +15,7 @@ import {
   generateExpectedSlug,
 } from "tests/helpers/activityDefinition";
 import {
+  clearFilter,
   closeAnyOpenPopovers,
   expectToast,
   selectFromCategoryPicker,
@@ -62,11 +63,7 @@ test.describe("activity definition edit", () => {
     await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
     await page.getByText(resourceCategoryName).click();
 
-    const clearButton = page
-      .getByRole("button")
-      .filter({ has: page.locator("svg.lucide-x") })
-      .first();
-    await clearButton.click();
+    await clearFilter(page);
 
     const searchInput = page.getByPlaceholder(/search/i);
     await searchInput.fill(createdAD.title);
@@ -139,11 +136,7 @@ test.describe("activity definition edit", () => {
     await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
     await page.getByText(resourceCategoryName).click();
 
-    const clearButton2 = page
-      .getByRole("button")
-      .filter({ has: page.locator("svg.lucide-x") })
-      .first();
-    await clearButton2.click();
+    await clearFilter(page);
 
     const searchInput2 = page.getByPlaceholder(/search/i);
     await searchInput2.fill(createdAD.title);
@@ -225,11 +218,7 @@ test.describe("activity definition edit", () => {
       await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
       await page.getByText(resourceCategoryName).click();
 
-      const clearButton = page
-        .getByRole("button")
-        .filter({ has: page.locator("svg.lucide-x") })
-        .first();
-      await clearButton.click();
+      await clearFilter(page);
 
       const searchInput = page.getByPlaceholder(/search/i);
       await searchInput.fill(createdAD.title);

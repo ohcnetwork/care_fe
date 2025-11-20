@@ -134,20 +134,10 @@ export async function createActivityDefinition(
 ): Promise<CreatedActivityDefinition> {
   const resourceCategoryName = options.resourceCategoryName || "Lab Tests";
 
-  // Generate test data with random values
+  // Generate test data with random values, then apply any overrides
   const testData = {
-    title:
-      options.overrides?.title ||
-      `${faker.science.chemicalElement().name.slice(0, 16)}_${faker.string.uuid().slice(0, 8)}`,
-    description: options.overrides?.description || faker.lorem.sentence(),
-    usage: options.overrides?.usage || faker.lorem.sentences(2),
-    status:
-      options.overrides?.status ||
-      faker.helpers.arrayElement(Object.values(Status)),
-    classification:
-      options.overrides?.classification ||
-      faker.helpers.arrayElement(Object.values(Classification)),
-    derivedFromUri: options.overrides?.derivedFromUri || faker.internet.url(),
+    ...generateActivityDefinitionData(),
+    ...options.overrides,
   };
 
   await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
