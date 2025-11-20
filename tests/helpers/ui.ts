@@ -350,3 +350,16 @@ export async function expectToast(
   const toaster = page.locator(".toaster.group");
   await expect(toaster.getByText(text)).toBeVisible(options);
 }
+
+/**
+ * Clears the filter/search by clicking the clear button (X icon)
+ * This helper finds the first button with a lucide-x icon and clicks it
+ * @param page - Playwright page object
+ */
+export async function clearFilter(page: Page) {
+  const clearButton = page
+    .getByRole("button")
+    .filter({ has: page.locator("svg.lucide-x") })
+    .first();
+  await clearButton.click();
+}
