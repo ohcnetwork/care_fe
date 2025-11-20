@@ -30,6 +30,27 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("activity definition form", () => {
+  test("validate required fields", async ({ page }) => {
+    await page
+      .getByRole("button", { name: /add activity definition/i })
+      .click();
+    await page.getByRole("button", { name: /^create$/i }).click();
+
+    await expect(page.getByText(/title.*required/i)).toBeVisible();
+    await expect(page.getByText(/slug.*required/i)).toBeVisible();
+
+    await expect(page.getByText(/slug.*required/i)).toBeVisible();
+    await expect(page.getByText(/description.*required/i)).toBeVisible();
+    await expect(page.getByText(/usage.*required/i)).toBeVisible();
+    await expect(page.getByText(/category.*required/i)).toBeVisible();
+    await expect(page.getByText(/code.*required/i)).toBeVisible();
+
+    const slugInput = page.getByLabel(/slug/i);
+    await slugInput.click();
+    await slugInput.fill("abc");
+    await expect(page.getByText(/slug.*atleast 5.*atmost 25/i)).toBeVisible();
+  });
+
   test("should create activity definition with required fields", async ({
     page,
   }) => {
