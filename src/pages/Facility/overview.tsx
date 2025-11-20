@@ -126,7 +126,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
           />
           <div className="relative z-10 p-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              {t("hey_user", {
+              {t("greet_user", {
                 time_of_day: getGreeting(),
                 user: [user.prefix, user.first_name].filter(Boolean).join(" "),
               })}
