@@ -1,5 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
-import { Status } from "src/types/emr/activityDefinition/activityDefinition";
+import {
+  Classification,
+  Status,
+} from "src/types/emr/activityDefinition/activityDefinition";
 
 import { createActivityDefinition } from "tests/helpers/activityDefinition";
 import { clearFilter, selectFromFilterSelect } from "tests/helpers/ui";
@@ -31,7 +34,6 @@ async function filterAndVerifyByStatus(
 
   await page.waitForLoadState("networkidle");
 
-  // Wait for table body and all rows to be loaded
   const tableBody = page.locator('[data-slot="table-body"]');
   await tableBody.waitFor({ state: "visible" });
 
@@ -50,48 +52,152 @@ async function filterAndVerifyByStatus(
   await expect(adRow).toBeVisible();
 }
 
+async function filterAndVerifyByClassification(
+  page: Page,
+  classification: Classification,
+  createdADTitle: string,
+) {
+  const categorySlug = `f-${facilityId}-${categorySlugSuffix}`;
+  await page.goto(
+    `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
+  );
+  await clearFilter(page);
+  await page.locator('[data-slot="table-body"]').waitFor({ state: "visible" });
+
+  // Convert classification enum to display format (replace underscores with spaces)
+  const classificationDisplayText = classification.replace(/_/g, " ");
+  await selectFromFilterSelect(page, /category/i, classificationDisplayText);
+
+  await page.waitForLoadState("networkidle");
+
+  // Wait for table body and all rows to be loaded
+  const tableBody = page.locator('[data-slot="table-body"]');
+  await tableBody.waitFor({ state: "visible" });
+
+  const tableBodyRows = tableBody.locator('[data-slot="table-row"]');
+  await tableBodyRows.first().waitFor({ state: "visible" });
+  const rowCount = await tableBodyRows.count();
+
+  if (rowCount > 0) {
+    const allBadges = tableBody.locator('[data-slot="badge"]');
+    const classificationBadges = allBadges.filter({
+      hasText: new RegExp(`^${classificationDisplayText}$`, "i"),
+    });
+    await expect(classificationBadges).toHaveCount(rowCount);
+  }
+
+  const adRow = page.locator('[data-slot="table-row"]', {
+    hasText: createdADTitle,
+  });
+  await expect(adRow).toBeVisible();
+}
+
 test.describe("Activity Definition List Filter", () => {
-  test("should filter activity definitions by draft status", async ({
-    page,
-  }) => {
-    const draftAD = await createActivityDefinition(page, facilityId, {
-      resourceCategoryName,
-      overrides: { status: Status.draft },
+  test.describe("Status Filter", () => {
+    test("should filter activity definitions by draft status", async ({
+      page,
+    }) => {
+      const draftAD = await createActivityDefinition(page, facilityId, {
+        resourceCategoryName,
+        overrides: { status: Status.draft },
+      });
+
+      await filterAndVerifyByStatus(page, Status.draft, draftAD.title);
     });
 
-    await filterAndVerifyByStatus(page, Status.draft, draftAD.title);
+    test("should filter activity definitions by active status", async ({
+      page,
+    }) => {
+      const activeAD = await createActivityDefinition(page, facilityId, {
+        resourceCategoryName,
+        overrides: { status: Status.active },
+      });
+
+      await filterAndVerifyByStatus(page, Status.active, activeAD.title);
+    });
+
+    test("should filter activity definitions by retired status", async ({
+      page,
+    }) => {
+      const retiredAD = await createActivityDefinition(page, facilityId, {
+        resourceCategoryName,
+        overrides: { status: Status.retired },
+      });
+
+      await filterAndVerifyByStatus(page, Status.retired, retiredAD.title);
+    });
+
+    test("should filter activity definitions by unknown status", async ({
+      page,
+    }) => {
+      const unknownAD = await createActivityDefinition(page, facilityId, {
+        resourceCategoryName,
+        overrides: { status: Status.unknown },
+      });
+
+      await filterAndVerifyByStatus(page, Status.unknown, unknownAD.title);
+    });
   });
 
-  test("should filter activity definitions by active status", async ({
-    page,
-  }) => {
-    const activeAD = await createActivityDefinition(page, facilityId, {
-      resourceCategoryName,
-      overrides: { status: Status.active },
+  test.describe("Classification Filter", () => {
+    test("should filter activity definitions by laboratory classification", async ({
+      page,
+    }) => {
+      const laboratoryAD = await createActivityDefinition(page, facilityId, {
+        resourceCategoryName,
+        overrides: { classification: Classification.laboratory },
+      });
+
+      await filterAndVerifyByClassification(
+        page,
+        Classification.laboratory,
+        laboratoryAD.title,
+      );
     });
 
-    await filterAndVerifyByStatus(page, Status.active, activeAD.title);
-  });
+    test("should filter activity definitions by imaging classification", async ({
+      page,
+    }) => {
+      const imagingAD = await createActivityDefinition(page, facilityId, {
+        resourceCategoryName,
+        overrides: { classification: Classification.imaging },
+      });
 
-  test("should filter activity definitions by retired status", async ({
-    page,
-  }) => {
-    const retiredAD = await createActivityDefinition(page, facilityId, {
-      resourceCategoryName,
-      overrides: { status: Status.retired },
+      await filterAndVerifyByClassification(
+        page,
+        Classification.imaging,
+        imagingAD.title,
+      );
     });
 
-    await filterAndVerifyByStatus(page, Status.retired, retiredAD.title);
-  });
+    test("should filter activity definitions by surgical procedure classification", async ({
+      page,
+    }) => {
+      const surgicalAD = await createActivityDefinition(page, facilityId, {
+        resourceCategoryName,
+        overrides: { classification: Classification.surgical_procedure },
+      });
 
-  test("should filter activity definitions by unknown status", async ({
-    page,
-  }) => {
-    const unknownAD = await createActivityDefinition(page, facilityId, {
-      resourceCategoryName,
-      overrides: { status: Status.unknown },
+      await filterAndVerifyByClassification(
+        page,
+        Classification.surgical_procedure,
+        surgicalAD.title,
+      );
     });
 
-    await filterAndVerifyByStatus(page, Status.unknown, unknownAD.title);
+    test("should filter activity definitions by counselling classification", async ({
+      page,
+    }) => {
+      const counsellingAD = await createActivityDefinition(page, facilityId, {
+        resourceCategoryName,
+        overrides: { classification: Classification.counselling },
+      });
+
+      await filterAndVerifyByClassification(
+        page,
+        Classification.counselling,
+        counsellingAD.title,
+      );
+    });
   });
 });
