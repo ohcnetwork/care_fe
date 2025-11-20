@@ -68,7 +68,7 @@ test.describe("Encounter vs Patient Notes Isolation", () => {
       .getByRole("button", { name: "send-chat-message-button" })
       .click();
 
-    await page.waitForLoadState("networkidle");
+    await expect(messageInput).toBeEmpty();
     // Verify message appears in encounter notes
     await expect(page.getByText(encounterNoteMessage)).toBeVisible();
 
@@ -131,7 +131,7 @@ test.describe("Encounter vs Patient Notes Isolation", () => {
       .getByRole("button", { name: "send-chat-message-button" })
       .click();
 
-    await page.waitForLoadState("networkidle");
+    await expect(messageInput).toBeEmpty();
 
     // Verify message appears in patient notes
     await expect(page.getByText(patientNoteMessage)).toBeVisible();
@@ -196,7 +196,7 @@ test.describe("Thread Messaging - Multi-user & Single-user", () => {
     await page
       .getByRole("button", { name: "send-chat-message-button" })
       .click();
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByPlaceholder("Type your message...")).toBeEmpty();
 
     // Verify User A's message
     await expect(page.getByText(userAMessage1)).toBeVisible();
@@ -259,7 +259,7 @@ test.describe("Thread Messaging - Multi-user & Single-user", () => {
       await page
         .getByRole("button", { name: "send-chat-message-button" })
         .click();
-      await page.waitForLoadState("networkidle");
+      await expect(page.getByPlaceholder("Type your message...")).toBeEmpty();
     }
 
     // Verify all messages appear
@@ -388,7 +388,7 @@ test.describe("Thread Visibility & Switching", () => {
       await page
         .getByRole("button", { name: "send-chat-message-button" })
         .click();
-      await page.waitForLoadState("networkidle");
+      await expect(messageInput).toBeEmpty();
       // Verify message appears
       await expect(page.getByText(thread.message)).toBeVisible();
     }
@@ -436,7 +436,7 @@ test.describe("Thread Visibility & Switching", () => {
     await page
       .getByRole("button", { name: "send-chat-message-button" })
       .click();
-    await page.waitForLoadState("networkidle");
+    await expect(messageInput).toBeEmpty();
 
     // Verify new message in Thread 1
     await expect(page.getByText(newThread1Message)).toBeVisible();
@@ -449,7 +449,7 @@ test.describe("Thread Visibility & Switching", () => {
     await page
       .getByRole("button", { name: "send-chat-message-button" })
       .click();
-    await page.waitForLoadState("networkidle");
+    await expect(messageInput).toBeEmpty();
 
     // Verify new message in Thread 2, and Thread 1 messages are not visible
     await expect(page.getByText(newThread2Message)).toBeVisible();
