@@ -118,13 +118,15 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     <Page title="">
       <div className="container mx-auto space-y-8">
         {/* Welcome Header */}
-        <div className="relative rounded-lg overflow-hidden text-black">
+        <div className="relative rounded-lg overflow-hidden text-gray-900">
           <div
             className="absolute inset-0 bg-cover bg-center rounded-lg"
             style={{ backgroundImage: "url('/images/home_banner.svg')" }}
+            aria-hidden="true"
+            role="img"
           />
           <div className="relative z-10 p-8">
-            <h1 className="text-4xl font-bol mb-2">
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
               {t("hey_user", {
                 time_of_day: getGreeting(),
                 user: [user.prefix, user.first_name].filter(Boolean).join(" "),
