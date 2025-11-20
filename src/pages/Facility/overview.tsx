@@ -48,7 +48,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     }),
   });
 
-  const { canViewSchedule, canListEncounters } = getPermissions(
+  const { canViewAppointments, canListEncounters } = getPermissions(
     hasPermission,
     facilityData?.permissions ?? [],
   );
@@ -66,8 +66,8 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       title: t("appointments"),
       description: t("view_appointments"),
       icon: Calendar,
-      href: `/facility/${facilityId}/users/${user?.username}/availability`,
-      visible: canViewSchedule,
+      href: `/facility/${facilityId}/appointments`,
+      visible: canViewAppointments,
     },
     {
       title: t("encounters"),
