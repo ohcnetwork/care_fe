@@ -139,6 +139,12 @@ test.describe("Symptom Questionnaire", () => {
       .getByRole("option")
       .filter({ hasText: duplicateSymptomName })
       .click();
-    await expect(page.getByText("Symptom already exists!")).toBeVisible();
+
+    await expect(
+      page
+        .getByRole("region", { name: "Notifications alt+T" })
+        .getByRole("listitem")
+        .filter({ hasText: "Symptom already exists!" }),
+    ).toBeVisible();
   });
 });

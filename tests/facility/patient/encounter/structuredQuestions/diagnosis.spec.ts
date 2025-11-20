@@ -163,7 +163,12 @@ test.describe("Diagnosis", () => {
       .getByRole("option", { name: duplicateDiagnosisName, exact: true })
       .click();
 
-    await expect(page.getByText("Diagnosis already exists")).toBeVisible();
+    await expect(
+      page
+        .getByRole("region", { name: "Notifications alt+T" })
+        .getByRole("listitem")
+        .filter({ hasText: "Diagnosis already exists" }),
+    ).toBeVisible();
   });
 
   test("add and display diagnosis with severity", async ({ page }) => {
