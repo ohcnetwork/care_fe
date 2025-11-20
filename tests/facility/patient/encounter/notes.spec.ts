@@ -223,7 +223,7 @@ test.describe("Thread Messaging - Multi-user & Single-user", () => {
     // User B sends a message
     await userBPage.getByPlaceholder("Type your message...").fill(userBMessage);
     await userBPage
-      .getByRole("button", { name: /Send/i, exact: false })
+      .getByRole("button", { name: "send-chat-message-button" })
       .click();
     await userBPage.waitForLoadState("networkidle");
 
