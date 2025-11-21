@@ -2,11 +2,24 @@ export const getInventoryBasePath = (
   facilityId: string,
   locationId: string,
   internal: boolean,
-  order: boolean,
+  isOrder: boolean,
   isRequester: boolean,
   tail: string = "",
 ) => {
-  return `/facility/${facilityId}/locations/${locationId}/inventory/${
-    internal ? "internal" : "external"
-  }/${order ? "orders" : "deliveries"}/${order ? (isRequester ? "outgoing" : "incoming") : isRequester ? "incoming" : "outgoing"}/${tail}`;
+  const base = `/facility/${facilityId}/locations/${locationId}/inventory`;
+  const tab = isOrder
+    ? isRequester
+      ? "outgoing"
+      : "incoming"
+    : isRequester
+      ? "incoming"
+      : "outgoing";
+  const resourceType = isOrder ? "orders" : "deliveries";
+
+  if (internal) {
+    const type = isRequester ? "receive" : "dispatch";
+    return `${base}/internal/${type}/${resourceType}/${tail}`;
+  } else {
+    return `${base}/external/${resourceType}/${tab}/${tail}`;
+  }
 };

@@ -114,16 +114,7 @@ export function AddSupplyDeliveryForm({
     resolver: zodResolver(createFormSchema),
     defaultValues: {
       supplied_item_type: SupplyDeliveryType.product,
-      items: [
-        {
-          supplied_inventory_item: "",
-          supplied_item_quantity: 1,
-          product_knowledge: {} as ProductKnowledgeBase,
-          supplied_item: undefined,
-          supply_request: undefined,
-          _is_inward_stock: !origin,
-        },
-      ],
+      items: [],
     },
   });
 
@@ -277,128 +268,92 @@ export function AddSupplyDeliveryForm({
     <>
       <Card className="bg-gray-50 py-4 rounded-md">
         <CardContent className="space-y-4 ">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
-                <FormField
-                  control={form.control}
-                  name="supplied_item_type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("item_type")}</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          value={field.value}
-                          className="flex flex-col sm:flex-row gap-2"
-                        >
-                          {Object.values(SupplyDeliveryType).map((type) => (
-                            <div
-                              key={type}
-                              className={cn(
-                                "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
-                                field.value === type &&
-                                  "border-primary bg-primary/10",
-                              )}
-                            >
-                              <RadioGroupItem value={type} id={type} />
-                              <Label htmlFor={type}>{t(type)}</Label>
-                            </div>
-                          ))}
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+          {fields.length > 0 ? (
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="supplied_item_type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("item_type")}</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            value={field.value}
+                            className="flex flex-col sm:flex-row gap-2"
+                          >
+                            {Object.values(SupplyDeliveryType).map((type) => (
+                              <div
+                                key={type}
+                                className={cn(
+                                  "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
+                                  field.value === type &&
+                                    "border-primary bg-primary/10",
+                                )}
+                              >
+                                <RadioGroupItem value={type} id={type} />
+                                <Label htmlFor={type}>{t(type)}</Label>
+                              </div>
+                            ))}
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <div className="rounded-md border border-gray-200 bg-gray-50 shadow">
-                <Table>
-                  <TableHeader className="bg-gray-200/80">
-                    <TableRow className="divide-x divide-gray-300">
-                      <TableHead>{t("product_knowledge")}</TableHead>
-                      {origin && <TableHead>{t("inventory_item")}</TableHead>}
-                      {!origin && <TableHead>{t("product")}</TableHead>}
-                      <TableHead>{t("quantity")}</TableHead>
-                      <TableHead className="w-28">{t("actions")}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {fields.map((field, index) => (
-                      <TableRow
-                        key={field.id}
-                        className="divide-x divide-gray-300"
-                      >
-                        <TableCell className="align-top">
-                          <FormField
-                            control={form.control}
-                            name={`items.${index}.product_knowledge`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <ProductKnowledgeSelect
-                                    ref={(element) =>
-                                      setProductKnowledgeRef(element, index)
-                                    }
-                                    value={field.value}
-                                    onChange={(productKnowledge) => {
-                                      field.onChange(productKnowledge);
-                                      // Reset inventory item when product changes
-                                      form.setValue(
-                                        `items.${index}.supplied_inventory_item`,
-                                        "",
-                                      );
-                                      form.setValue(
-                                        `items.${index}.supplied_item`,
-                                        undefined,
-                                      );
-                                    }}
-                                    placeholder={t("select_product")}
-                                    className="w-full"
-                                    disableFavorites
-                                    hideClearButton
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </TableCell>
-                        {origin && (
+                <div className="rounded-md border border-gray-200 bg-gray-50 shadow">
+                  <Table>
+                    <TableHeader className="bg-gray-200/80">
+                      <TableRow className="divide-x divide-gray-300">
+                        <TableHead>{t("product_knowledge")}</TableHead>
+                        {origin && <TableHead>{t("inventory_item")}</TableHead>}
+                        {!origin && <TableHead>{t("product")}</TableHead>}
+                        <TableHead>{t("quantity")}</TableHead>
+                        <TableHead className="w-28">{t("actions")}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {fields.map((field, index) => (
+                        <TableRow
+                          key={field.id}
+                          className="divide-x divide-gray-300"
+                        >
                           <TableCell className="align-top">
                             <FormField
                               control={form.control}
-                              name={`items.${index}.supplied_inventory_item`}
+                              name={`items.${index}.product_knowledge`}
                               render={({ field }) => (
                                 <FormItem>
                                   <FormControl>
-                                    <StockLotSelector
-                                      selectedLots={
-                                        field.value
-                                          ? [
-                                              {
-                                                selectedInventoryId:
-                                                  field.value,
-                                                quantity: 1,
-                                              },
-                                            ]
-                                          : []
+                                    <ProductKnowledgeSelect
+                                      ref={(element) =>
+                                        setProductKnowledgeRef(element, index)
                                       }
-                                      onLotSelectionChange={(lots) =>
-                                        field.onChange(
-                                          lots[0]?.selectedInventoryId || "",
-                                        )
-                                      }
-                                      facilityId={facilityId}
-                                      locationId={origin || ""}
-                                      productKnowledge={form.watch(
-                                        `items.${index}.product_knowledge`,
-                                      )}
-                                      enableSearch={true}
-                                      multiSelect={false}
-                                      className="w-full h-9"
+                                      value={field.value}
+                                      onChange={(productKnowledge) => {
+                                        field.onChange(productKnowledge);
+                                        // Reset inventory item when product changes
+                                        form.setValue(
+                                          `items.${index}.supplied_inventory_item`,
+                                          "",
+                                        );
+                                        form.setValue(
+                                          `items.${index}.supplied_item`,
+                                          undefined,
+                                        );
+                                      }}
+                                      placeholder={t("select_product")}
+                                      className="w-full"
+                                      disableFavorites
+                                      hideClearButton
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -406,98 +361,183 @@ export function AddSupplyDeliveryForm({
                               )}
                             />
                           </TableCell>
-                        )}
-                        {!origin && (
-                          <TableCell className="align-top">
-                            <ProductSelect
-                              facilityId={facilityId}
-                              productKnowledgeSlug={
-                                form.watch(`items.${index}.product_knowledge`)
-                                  ?.slug
-                              }
-                              receivingItem={
-                                form.watch(`items.${index}.product_knowledge`)
-                                  ?.name
-                              }
-                              quantity={form
-                                .watch(`items.${index}.supplied_item_quantity`)
-                                .toString()}
-                              onSelect={(product: ProductRead) => {
-                                if (
-                                  index !== null &&
+                          {origin && (
+                            <TableCell className="align-top">
+                              <FormField
+                                control={form.control}
+                                name={`items.${index}.supplied_inventory_item`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <StockLotSelector
+                                        selectedLots={
+                                          field.value
+                                            ? [
+                                                {
+                                                  selectedInventoryId:
+                                                    field.value,
+                                                  quantity: 1,
+                                                },
+                                              ]
+                                            : []
+                                        }
+                                        onLotSelectionChange={(lots) =>
+                                          field.onChange(
+                                            lots[0]?.selectedInventoryId || "",
+                                          )
+                                        }
+                                        facilityId={facilityId}
+                                        locationId={origin || ""}
+                                        productKnowledge={form.watch(
+                                          `items.${index}.product_knowledge`,
+                                        )}
+                                        enableSearch={true}
+                                        multiSelect={false}
+                                        className="w-full h-9"
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </TableCell>
+                          )}
+                          {!origin && (
+                            <TableCell className="align-top">
+                              <ProductSelect
+                                facilityId={facilityId}
+                                productKnowledgeSlug={
                                   form.watch(`items.${index}.product_knowledge`)
-                                ) {
-                                  form.setValue(`items.${index}`, {
-                                    ...form.watch(`items.${index}`),
-                                    supplied_item: product,
-                                  });
+                                    ?.slug
                                 }
-                              }}
-                              selectedProduct={form.watch(
-                                `items.${index}.supplied_item`,
+                                receivingItem={
+                                  form.watch(`items.${index}.product_knowledge`)
+                                    ?.name
+                                }
+                                quantity={form
+                                  .watch(
+                                    `items.${index}.supplied_item_quantity`,
+                                  )
+                                  .toString()}
+                                onSelect={(product: ProductRead) => {
+                                  if (
+                                    index !== null &&
+                                    form.watch(
+                                      `items.${index}.product_knowledge`,
+                                    )
+                                  ) {
+                                    form.setValue(`items.${index}`, {
+                                      ...form.watch(`items.${index}`),
+                                      supplied_item: product,
+                                    });
+                                  }
+                                }}
+                                selectedProduct={form.watch(
+                                  `items.${index}.supplied_item`,
+                                )}
+                                disabled={
+                                  !form.watch(
+                                    `items.${index}.product_knowledge`,
+                                  )
+                                }
+                              />
+                            </TableCell>
+                          )}
+                          <TableCell className="align-top">
+                            <FormField
+                              control={form.control}
+                              name={`items.${index}.supplied_item_quantity`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min={1}
+                                      {...field}
+                                      onChange={(e) =>
+                                        field.onChange(parseInt(e.target.value))
+                                      }
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
                               )}
-                              disabled={
-                                !form.watch(`items.${index}.product_knowledge`)
-                                  .slug
-                              }
                             />
                           </TableCell>
-                        )}
-                        <TableCell className="align-top">
-                          <FormField
-                            control={form.control}
-                            name={`items.${index}.supplied_item_quantity`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    min={1}
-                                    {...field}
-                                    onChange={(e) =>
-                                      field.onChange(parseInt(e.target.value))
-                                    }
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => remove(index)}
-                            disabled={fields.length === 1}
-                          >
-                            <Trash2 className="size-4" />
-                            {t("remove")}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                          <TableCell>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => remove(index)}
+                              disabled={fields.length === 1}
+                            >
+                              <Trash2 className="size-4" />
+                              {t("remove")}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
 
-              <div className="flex flex-row gap-2 mt-4">
+                <div className="flex flex-row gap-2 mt-4">
+                  {supplyRequests?.results?.length &&
+                    supplyRequests?.results?.length > 0 && (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={loadFromSupplyRequests}
+                      >
+                        {t("load_from_order")} ({supplyRequests?.count}{" "}
+                        {t("items")}
+                        )
+                        <ShortcutBadge actionId="load-from-order" />
+                      </Button>
+                    )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleAddAnotherItem()}
+                  >
+                    <PlusCircle className="mr-2 size-4" />
+                    {t("add_another_item")}
+                    <ShortcutBadge actionId="add-item" />
+                  </Button>
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <Button type="submit" disabled={isPending}>
+                    {isPending ? t("creating") : t("add_items")}
+                    <ShortcutBadge actionId="submit-action" />
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          ) : (
+            <div className="flex flex-col gap-3 items-center">
+              <h4>{t("add_items_to_delivery")}</h4>
+              <p>{t("add_items_to_delivery_description")}</p>
+              <div className="flex flex-row gap-2 items-center mt-2">
                 {supplyRequests?.results?.length &&
                   supplyRequests?.results?.length > 0 && (
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={loadFromSupplyRequests}
-                    >
-                      {t("load_from_order")} ({supplyRequests?.count}{" "}
-                      {t("items")}
-                      )
-                      <ShortcutBadge actionId="load-from-order" />
-                    </Button>
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline_primary"
+                        onClick={loadFromSupplyRequests}
+                      >
+                        {t("load_from_order")} ({supplyRequests?.count}{" "}
+                        {t("items")}
+                        )
+                        <ShortcutBadge actionId="load-from-order" />
+                      </Button>
+                      <p>- {t("or")} -</p>
+                    </>
                   )}
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="outline_primary"
                   onClick={() => handleAddAnotherItem()}
                 >
                   <PlusCircle className="mr-2 size-4" />
@@ -505,15 +545,8 @@ export function AddSupplyDeliveryForm({
                   <ShortcutBadge actionId="add-item" />
                 </Button>
               </div>
-
-              <div className="flex justify-end space-x-3">
-                <Button type="submit" disabled={isPending}>
-                  {isPending ? t("creating") : t("add_items")}
-                  <ShortcutBadge actionId="submit-action" />
-                </Button>
-              </div>
-            </form>
-          </Form>
+            </div>
+          )}
         </CardContent>
       </Card>
       {supplyRequests && (

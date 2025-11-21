@@ -166,21 +166,20 @@ export default function TokenCategoryView({
               </p>
             )}
           </div>
-
-          <div className="flex gap-2">
-            {!tokenCategory.default && (
-              <Button
-                variant="outline"
-                onClick={handleSetDefault}
-                disabled={isSettingDefault}
-              >
-                <CareIcon icon="l-star" className="mr-2 size-4" />
-                {isSettingDefault
-                  ? t("setting_as_default")
-                  : t("set_as_default")}
-              </Button>
-            )}
-            {canWriteTokenCategory && (
+          {canWriteTokenCategory && (
+            <div className="flex gap-2">
+              {!tokenCategory.default && (
+                <Button
+                  variant="outline"
+                  onClick={handleSetDefault}
+                  disabled={isSettingDefault}
+                >
+                  <CareIcon icon="l-star" className="mr-2 size-4" />
+                  {isSettingDefault
+                    ? t("setting_as_default")
+                    : t("set_as_default")}
+                </Button>
+              )}
               <Button variant="outline">
                 <Link
                   basePath="/"
@@ -190,8 +189,8 @@ export default function TokenCategoryView({
                   {t("edit")}
                 </Link>
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         <Card>
