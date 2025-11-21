@@ -35,7 +35,7 @@ alwaysApply: false
 - Use camelCase for utility files: `useAuth.ts`
 
 ## Testing
-- Write tests in Cypress for E2E testing
-- Follow testing guidelines in `cypress/docs/`
+- Write tests in Playwright for E2E testing
+- Follow testing guidelines in https://playwright.dev/docs/writing-tests
 - Test components in isolation
 - Write meaningful test descriptions
