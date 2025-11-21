@@ -207,15 +207,14 @@ test.describe("Patient Notes - Thread Messaging (Multi-user & Single-user)", () 
     await expect(page.getByText(userAMessage2)).toBeVisible();
     await expect(page.getByText(userAMessage3)).toBeVisible();
 
-    // Count messages to verify all are present (messages are in reverse order - newest at top)
-    const chatMessages = page.locator('[class*="flex-col-reverse"]').first();
-    const allMessages = await chatMessages.getByText(
-      new RegExp(`${userAMessage1}|${userAMessage2}|${userAMessage3}`),
-    );
+    // Count each message individually to verify exactly one of each appears
+    const message1Count = await page.getByText(userAMessage1).count();
+    const message2Count = await page.getByText(userAMessage2).count();
+    const message3Count = await page.getByText(userAMessage3).count();
 
-    // Verify exactly 3 messages are present
-    const messageCount = await allMessages.count();
-    expect(messageCount).toBe(3);
+    expect(message1Count).toBe(1);
+    expect(message2Count).toBe(1);
+    expect(message3Count).toBe(1);
   });
 });
 
@@ -238,7 +237,7 @@ test.describe("Patient Notes - Thread Creation", () => {
     await page.goto(
       `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
     );
-    await page.getByRole("link", { name: "View Encounter" }).nth(2).click();
+    await page.getByRole("link", { name: "View Encounter" }).first().click();
 
     // Navigate to patient profile notes
     await page
@@ -311,7 +310,7 @@ test.describe("Patient Notes - Thread Visibility & Switching", () => {
     await page.goto(
       `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
     );
-    await page.getByRole("link", { name: "View Encounter" }).nth(3).click();
+    await page.getByRole("link", { name: "View Encounter" }).first().click();
 
     // Navigate to patient profile notes
     await page
