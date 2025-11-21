@@ -212,9 +212,8 @@ test.describe("Patient Registration", () => {
       await page
         .getByRole("button", { name: /register patient/i })
         .scrollIntoViewIfNeeded();
-      const stateCombobox = stateRegion.getByRole("combobox", {
-        name: /state/i,
-      });
+      const stateCombobox = stateRegion.getByRole("combobox");
+      await stateCombobox.waitFor({ state: "visible", timeout: 5000 });
       await stateCombobox.click();
 
       // Select the state option by visible text
@@ -224,7 +223,7 @@ test.describe("Patient Registration", () => {
       await stateOption.click();
     });
 
-    // Submit registration
+    // Submit the registration
     await test.step("Submit patient registration", async () => {
       await page.getByRole("button", { name: /register patient/i }).click();
 
@@ -345,9 +344,8 @@ test.describe("Patient Registration", () => {
       await page
         .getByRole("button", { name: /register patient/i })
         .scrollIntoViewIfNeeded();
-      const stateCombobox = stateRegion.getByRole("combobox", {
-        name: /state/i,
-      });
+      const stateCombobox = stateRegion.getByRole("combobox");
+      await stateCombobox.waitFor({ state: "visible", timeout: 5000 });
       await stateCombobox.click();
 
       // Select the state option by visible text
