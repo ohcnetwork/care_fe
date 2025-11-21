@@ -207,7 +207,7 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
               </Card>
             )}
           </div>
-          {children?.count && children.count > resultsPerPage && (
+          {children && children.count > resultsPerPage && (
             <div className="flex justify-center">
               <Pagination totalCount={children.count} />
             </div>
