@@ -1,24 +1,112 @@
+/**
+ * Remove unused i18n keys from locale files
+ *
+ * This script uses AST-based traversal (via Babel) to extract i18n keys from the codebase
+ * and remove unused keys from locale JSON files. It replaces the previous regex-based approach
+ * for more reliable and accurate key detection.
+ *
+ * Features:
+ * - ✅ Detects static keys: t("key") and i18n.t("key")
+ * - ✅ Detects plural keys: Automatically adds _one and _other variants when count is present
+ *   - t("key", { count: ... })
+ *   - i18n.t("key", { count: ... })
+ *   - <Trans i18nKey="key" values={{ count: ... }} />
+ * - ✅ Detects Trans components: <Trans i18nKey="key">...</Trans>
+ * - ✅ Detects dynamic keys: t(`prefix__${variable}`) extracts "prefix__" as dynamic prefix
+ * - ✅ Handles multiline and nested expressions correctly
+ *
+ * Usage:
+ *   node scripts/remove-unused-i18n.js
+ *
+ * For testing:
+ *   const { extractUsedKeys } = require('./scripts/remove-unused-i18n.js');
+ *   const { usedKeys, dynamicPrefixes } = await extractUsedKeys('./src', ['tsx', 'ts']);
+ */
+
 const fs = require("fs");
 const path = require("path");
 const glob = require("glob");
 const babel = require("@babel/core");
-const { Parser } = require("i18next-scanner");
+const traverse = require("@babel/traverse").default;
 
+/**
+ * Check if an object expression has a 'count' property
+ */
+function hasCountProperty(objectExpression) {
+  if (!objectExpression || objectExpression.type !== "ObjectExpression") {
+    return false;
+  }
+  return objectExpression.properties.some(
+    (prop) =>
+      prop.type === "ObjectProperty" &&
+      prop.key &&
+      ((prop.key.type === "Identifier" && prop.key.name === "count") ||
+        (prop.key.type === "StringLiteral" && prop.key.value === "count")),
+  );
+}
+
+/**
+ * Extract static string value from a node
+ */
+function getStaticValue(node) {
+  if (node.type === "StringLiteral") {
+    return node.value;
+  }
+  if (
+    node.type === "TemplateLiteral" &&
+    node.expressions.length === 0 &&
+    node.quasis?.length > 0
+  ) {
+    return node.quasis[0].value.cooked;
+  }
+  return null;
+}
+
+/**
+ * Extract dynamic prefix from template literal (e.g., "status__" from `status__${x}`)
+ */
+function getDynamicPrefix(node) {
+  if (node.type === "TemplateLiteral" && node.expressions.length > 0) {
+    // Get the first quasi (the part before the first ${})
+    const firstQuasi = node.quasis[0];
+    if (firstQuasi && firstQuasi.value.cooked) {
+      return firstQuasi.value.cooked;
+    }
+  }
+  return null;
+}
+
+/**
+ * Check if a CallExpression callee is a t() function call
+ */
+function isTCall(callee) {
+  return callee.type === "Identifier" && callee.name === "t";
+}
+
+/**
+ * Check if a CallExpression callee is an i18n.t() function call
+ */
+function isI18nTCall(callee) {
+  return (
+    callee.type === "MemberExpression" &&
+    callee.object?.type === "Identifier" &&
+    callee.object.name === "i18n" &&
+    callee.property?.type === "Identifier" &&
+    callee.property.name === "t"
+  );
+}
+
+/**
+ * Extract i18n keys used in the codebase via AST traversal
+ *
+ * @param {string} src - Source directory to scan
+ * @param {string[]} extensions - File extensions to process (e.g., ['ts', 'tsx'])
+ * @returns {Promise<{usedKeys: Set<string>, dynamicPrefixes: Set<string>}>}
+ */
 async function extractUsedKeys(src, extensions) {
   const files = glob.sync(`**/*.+(${extensions.join("|")})`, {
     cwd: src,
     ignore: ["node_modules/**", "dist/**"],
-  });
-
-  const parser = new Parser({
-    lngs: ["en"],
-    ns: ["translation"],
-    defaultNs: "translation",
-    keySeparator: false,
-    nsSeparator: false,
-    plural: true,
-    func: { list: ["t", "i18n.t"] },
-    trans: { component: "Trans", extensions: [".ts", ".tsx"] },
   });
 
   const usedKeys = new Set();
@@ -29,44 +117,104 @@ async function extractUsedKeys(src, extensions) {
     const content = fs.readFileSync(filePath, "utf-8");
 
     try {
-      // ✅ Convert TypeScript/JSX → plain JS before scanning
-      const { code: jsContent } = babel.transformSync(content, {
+      // Parse the file to AST
+      const ast = babel.parseSync(content, {
         filename: filePath,
         presets: ["@babel/preset-typescript", "@babel/preset-react"],
+        sourceType: "module",
       });
 
-      // ✅ Extract static i18n keys: t("...")
-      parser.parseFuncFromString(
-        jsContent,
-        { list: ["t", "i18n.t"] },
-        (key) => {
-          usedKeys.add(key);
+      // Traverse the AST to find i18n usage
+      traverse(ast, {
+        // Handle t("key") and t("key", { count: ... })
+        CallExpression(path) {
+          const { callee, arguments: args } = path.node;
+
+          // Check if it's t() or i18n.t() call
+          const isTFunction = isTCall(callee) || isI18nTCall(callee);
+
+          if (!isTFunction || args.length === 0) {
+            return;
+          }
+
+          const keyArg = args[0];
+          const optionsArg = args[1];
+
+          // Extract static key
+          const staticKey = getStaticValue(keyArg);
+          if (staticKey) {
+            usedKeys.add(staticKey);
+
+            // Check if it has count property for plural
+            if (hasCountProperty(optionsArg)) {
+              usedKeys.add(`${staticKey}_one`);
+              usedKeys.add(`${staticKey}_other`);
+            }
+          }
+
+          // Extract dynamic prefix
+          const dynamicPrefix = getDynamicPrefix(keyArg);
+          if (dynamicPrefix) {
+            dynamicPrefixes.add(dynamicPrefix);
+          }
         },
-      );
 
-      const transRegex = /i18nKey=["'`]([^"'`]+)["'`]/g;
-      let match;
-      while ((match = transRegex.exec(content)) !== null) {
-        usedKeys.add(match[1]); // only the key value
-      }
+        // Handle <Trans i18nKey="key" values={{ count: ... }} />
+        JSXElement(path) {
+          const openingElement = path.node.openingElement;
 
-      // ✅ Detect plural usage (adds `_one`, `_other`)
-      const pluralRegex =
-        /t\(\s*["'`]([a-zA-Z0-9_]+)["'`]\s*,\s*{\s*(?:[^\n]*\n?\s*)?count\s*:/g;
-      let match1;
-      while ((match1 = pluralRegex.exec(jsContent)) !== null) {
-        const baseKey = match1[1];
-        usedKeys.add(baseKey);
-        usedKeys.add(`${baseKey}_one`);
-        usedKeys.add(`${baseKey}_other`);
-      }
+          // Check if it's a Trans component
+          if (
+            openingElement.name.type === "JSXIdentifier" &&
+            openingElement.name.name === "Trans"
+          ) {
+            let i18nKey = null;
+            let hasCount = false;
 
-      // ✅ Detect dynamic keys like t(`status__${x}`)
-      const dynamicRegex = /t\(\s*`([^`]+)\$\{[^}]+\}[^`]*`\s*\)/g;
-      let dynMatch;
-      while ((dynMatch = dynamicRegex.exec(jsContent)) !== null) {
-        dynamicPrefixes.add(dynMatch[1]);
-      }
+            // Find i18nKey and values attributes
+            for (const attr of openingElement.attributes) {
+              if (
+                attr.type !== "JSXAttribute" ||
+                attr.name?.type !== "JSXIdentifier"
+              )
+                continue;
+
+              const attrName = attr.name.name;
+              const attrValue = attr.value;
+
+              // Extract i18nKey
+              if (attrName === "i18nKey" && attrValue) {
+                if (attrValue.type === "StringLiteral") {
+                  i18nKey = attrValue.value;
+                } else if (
+                  attrValue.type === "JSXExpressionContainer" &&
+                  attrValue.expression?.type === "StringLiteral"
+                ) {
+                  i18nKey = attrValue.expression.value;
+                }
+              }
+
+              // Check if values prop has count
+              if (
+                attrName === "values" &&
+                attrValue?.type === "JSXExpressionContainer" &&
+                attrValue.expression
+              ) {
+                hasCount = hasCountProperty(attrValue.expression);
+              }
+            }
+
+            // Add the key and plural variants if count is present
+            if (i18nKey) {
+              usedKeys.add(i18nKey);
+              if (hasCount) {
+                usedKeys.add(`${i18nKey}_one`);
+                usedKeys.add(`${i18nKey}_other`);
+              }
+            }
+          }
+        },
+      });
     } catch (err) {
       // Log and continue on parse errors so the script can process other files
       console.error(
