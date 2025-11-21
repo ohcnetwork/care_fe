@@ -231,7 +231,7 @@ export default function TokenCategoryList({
                             }
                           >
                             {t(
-                              `schedule_resource__${tokenCategory.resource_type} `,
+                              `schedule_resource__${tokenCategory.resource_type}`,
                             )}
                           </Badge>
                         </TableCell>
