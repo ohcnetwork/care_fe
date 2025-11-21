@@ -62,7 +62,7 @@ function ProductKnowledgeCard({
                   variant={PRODUCT_KNOWLEDGE_TYPE_COLORS[product.product_type]}
                   className="text-xs"
                 >
-                  {t(product.product_type)}
+                  {t(`product_knowledge_type__${product.product_type}`)}
                 </Badge>
                 <Badge
                   variant={PRODUCT_KNOWLEDGE_STATUS_COLORS[product.status]}
@@ -139,7 +139,7 @@ function ProductKnowledgeTableRow({
           variant={PRODUCT_KNOWLEDGE_TYPE_COLORS[product.product_type]}
           className="text-xs"
         >
-          {t(product.product_type)}
+          {t(`product_knowledge_type__${product.product_type}`)}
         </Badge>
       </TableCell>
       <TableCell>

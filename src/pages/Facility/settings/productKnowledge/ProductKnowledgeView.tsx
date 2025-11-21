@@ -190,7 +190,9 @@ export default function ProductKnowledgeView({ facilityId, slug }: Props) {
           <CardContent className="space-y-4">
             <div>
               <p className="text-sm text-gray-500">{t("product_type")}</p>
-              <p className="font-medium">{t(product.product_type)}</p>
+              <p className="font-medium">
+                {t(`product_knowledge_type__${product.product_type}`)}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-500">

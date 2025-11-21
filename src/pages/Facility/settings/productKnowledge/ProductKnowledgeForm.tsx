@@ -428,7 +428,7 @@ function ProductKnowledgeFormContent({
                           <SelectContent>
                             {Object.values(ProductKnowledgeType).map((type) => (
                               <SelectItem key={type} value={type}>
-                                {t(type)}
+                                {t(`product_knowledge_type__${type}`)}
                               </SelectItem>
                             ))}
                           </SelectContent>
