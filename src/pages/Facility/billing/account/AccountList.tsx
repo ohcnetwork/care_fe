@@ -239,11 +239,11 @@ export function AccountList({
                     <div className="flex items-center gap-3">
                       <Avatar name={account.name} className="size-8 shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <div className="text-base font-semibold leading-6 wrap-break-words">
+                        <div className="text-base font-semibold leading-6 break-words">
                           {account.name}
                         </div>
                         {!hidePatientName && (
-                          <div className="flex items-center gap-1 text-sm text-gray-600 wrap-break-words">
+                          <div className="flex items-center gap-1 text-sm text-gray-600 break-words">
                             {account.patient.name}
                           </div>
                         )}
