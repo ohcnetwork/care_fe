@@ -206,7 +206,8 @@ test.describe("Patient Files", () => {
         response.request().method() === "GET",
     );
 
-    await filterPromise;
+    const filterResponse = await filterPromise;
+    expect(filterResponse.status()).toBe(200);
 
     // Wait for active files badge
     await expect(page.getByText("Active Files")).toBeVisible();
