@@ -257,7 +257,7 @@ test.describe("Patient Notes - Thread Creation", () => {
 
     // Create three threads by iterating through titles
     for (const title of threadTitles) {
-      await page.getByRole("button", { name: /New /i }).first().click();
+      await page.getByRole("button", { name: /New/i }).first().click();
       await threadTitleInput.fill(title);
 
       await page.getByRole("button", { name: /Create/i }).click();
