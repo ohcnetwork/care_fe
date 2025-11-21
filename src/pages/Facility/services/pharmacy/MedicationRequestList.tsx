@@ -160,7 +160,6 @@ export default function MedicationRequestList({
             className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
             patientId={qParams.patient_external_id}
             patientName={qParams.patient_name}
-            align="start"
           />
         </div>
         <div className="flex flex-col sm:flex-row">

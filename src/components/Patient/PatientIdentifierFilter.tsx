@@ -255,7 +255,7 @@ export default function PatientIdentifierFilter({
   className,
   patientId,
   patientName,
-  align = "end",
+  align = "start",
 }: Props) {
   const { t } = useTranslation();
   const { facility, facilityId } = useCurrentFacility();
