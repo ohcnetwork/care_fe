@@ -57,6 +57,7 @@ interface Props {
   className?: string;
   patientId?: string;
   patientName?: string;
+  align?: "start" | "center" | "end";
 }
 
 interface IdentifierConfig {
@@ -254,6 +255,7 @@ export default function PatientIdentifierFilter({
   className,
   patientId,
   patientName,
+  align = "start",
 }: Props) {
   const { t } = useTranslation();
   const { facility, facilityId } = useCurrentFacility();
@@ -429,7 +431,10 @@ export default function PatientIdentifierFilter({
         ) : (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-            <PopoverContent className="w-80 p-0 overflow-hidden rounded-lg">
+            <PopoverContent
+              className="w-80 p-0 overflow-hidden rounded-lg"
+              align={align}
+            >
               <PatientSearchSelector
                 allIdentifierConfigs={allIdentifierConfigs}
                 searchType={searchType}
