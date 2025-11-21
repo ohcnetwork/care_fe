@@ -139,7 +139,7 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
   });
 
   const { data: children, isLoading } = useQuery({
-    queryKey: ["organization", "list", organizationType, id, qParams.search],
+    queryKey: ["organization", "list", organizationType, id, qParams],
     queryFn: query.debounced(organizationApi.list, {
       pathParams: { id: id },
       queryParams: {
@@ -207,7 +207,7 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
               </Card>
             )}
           </div>
-          {children && children.count > resultsPerPage && (
+          {children?.count && children.count > resultsPerPage && (
             <div className="flex justify-center">
               <Pagination totalCount={children.count} />
             </div>
