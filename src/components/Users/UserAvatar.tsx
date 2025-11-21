@@ -123,7 +123,6 @@ export default function UserAvatar({ username }: { username: string }) {
                     onClick={() => setEditAvatar(!editAvatar)}
                     type="button"
                     id="change-avatar"
-                    data-cy="change-avatar"
                     disabled
                   >
                     {t("change_avatar")}
@@ -135,7 +134,6 @@ export default function UserAvatar({ username }: { username: string }) {
                   onClick={() => setEditAvatar(!editAvatar)}
                   type="button"
                   id="change-avatar"
-                  data-cy="change-avatar"
                 >
                   {t("change_avatar")}
                 </Button>

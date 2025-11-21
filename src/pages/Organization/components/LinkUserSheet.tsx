@@ -176,7 +176,6 @@ export default function LinkUserSheet({
                 className="w-full"
                 onClick={handleAddUser}
                 disabled={!selectedRole}
-                data-cy="link-user-button"
               >
                 {t("link_to_organization")}
               </Button>

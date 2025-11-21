@@ -104,14 +104,10 @@ export default function OrganizationFacilities({
                   })
                 }
                 className="w-full max-w-sm"
-                data-cy="search-facility"
               />
             </div>
 
-            <div
-              className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4"
-              data-cy="facility-cards"
-            >
+            <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4">
               {isFetching ? (
                 <CardGridSkeleton count={6} />
               ) : facilities?.results?.length === 0 ? (
@@ -156,7 +152,6 @@ export default function OrganizationFacilities({
                     <CardFooter className="flex justify-end">
                       <div className="flex">
                         <Button
-                          data-cy="view-facility-button"
                           variant="link"
                           size="icon"
                           className="text-primary"
@@ -176,7 +171,6 @@ export default function OrganizationFacilities({
                         {/* GeoAdmin Button to Manage Departments */}
                         {isGeoAdmin && (
                           <Button
-                            data-cy="manage-facility-users-button"
                             variant="outline"
                             size="icon"
                             className="text-primary ml-4 p-2"

@@ -96,7 +96,6 @@ test.describe("Patient Registration", () => {
 
     // Fill additional details
     await test.step("Fill additional details", async () => {
-      // Use data-cy selector for state dropdown
       // fill address
       await page
         .getByRole("textbox", { name: "Address" })
@@ -213,7 +212,9 @@ test.describe("Patient Registration", () => {
       await page
         .getByRole("button", { name: /register patient/i })
         .scrollIntoViewIfNeeded();
-      const stateCombobox = stateRegion.locator('[data-cy="select-state"]');
+      const stateCombobox = stateRegion.getByRole("combobox", {
+        name: /state/i,
+      });
       await stateCombobox.click();
 
       // Select the state option by visible text
@@ -344,7 +345,9 @@ test.describe("Patient Registration", () => {
       await page
         .getByRole("button", { name: /register patient/i })
         .scrollIntoViewIfNeeded();
-      const stateCombobox = stateRegion.locator('[data-cy="select-state"]');
+      const stateCombobox = stateRegion.getByRole("combobox", {
+        name: /state/i,
+      });
       await stateCombobox.click();
 
       // Select the state option by visible text

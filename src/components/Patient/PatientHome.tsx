@@ -95,7 +95,6 @@ export const PatientHome = (props: {
             ? "md:max-w-[calc(100vw-25rem)]"
             : "md:max-w-[calc(100vw-8rem)]",
         )}
-        data-testid="patient-dashboard"
       >
         <div className="flex flex-col gap-2">
           <PatientHeader
@@ -115,7 +114,6 @@ export const PatientHome = (props: {
               {tabs.map((tab) => (
                 <Link
                   key={tab.route}
-                  data-cy={`tab-${tab.route}`}
                   href={
                     facilityId
                       ? `/facility/${facilityId}/patient/${id}/${tab.route}`

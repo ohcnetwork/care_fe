@@ -470,7 +470,6 @@ export default function PatientIdentifierFilter({
               type="text"
               placeholder={`${t("year_of_birth")} (YYYY)`}
               value={yearOfBirth}
-              data-cy="year-of-birth-input"
               onChange={(e) => {
                 const value = e.target.value;
                 if (/^\d{0,4}$/.test(value)) {
@@ -491,15 +490,10 @@ export default function PatientIdentifierFilter({
                 setVerificationOpen(false);
                 setPendingPatient(null);
               }}
-              data-cy="cancel-verification-button"
             >
               {t("cancel")}
             </Button>
-            <Button
-              className="mb-2"
-              onClick={handleVerify}
-              data-cy="confirm-verification-button"
-            >
+            <Button className="mb-2" onClick={handleVerify}>
               {t("verify")}
             </Button>
           </DialogFooter>

@@ -194,7 +194,6 @@ export default function UserSelector({
       variant="outline"
       role="combobox"
       className="min-w-60 w-full justify-start"
-      data-cy="select-assigned-user"
       disabled={disabled}
     >
       {selected ? (

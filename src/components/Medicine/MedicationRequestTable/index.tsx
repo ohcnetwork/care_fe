@@ -134,7 +134,6 @@ export default function MedicationRequestTable() {
                       asChild
                       variant="outline"
                       className="text-gray-950 hover:text-gray-700 h-9 mt-2"
-                      data-cy="edit-prescription"
                     >
                       <Link href={`questionnaire/medication_request`}>
                         <PlusIcon className="mr-2 size-4" />
