@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, PlusIcon } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { navigate } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -339,13 +339,12 @@ export function CreateInvoicePage({
     <div className="container mx-auto md:px-4 pb-6">
       {showHeader && (
         <div className="mb-6">
-          <Link
-            href={`/facility/${facilityId}/billing/account/${accountId}`}
+          <BackButton
             className="text-xs text-gray-500 hover:text-gray-700"
-            data-shortcut-id="go-back"
+            variant="ghost"
           >
             ← {t("back_to_account")}
-          </Link>
+          </BackButton>
           <h3 className="pt-2">{t("create_invoice")}</h3>
         </div>
       )}

@@ -79,7 +79,6 @@ export default function PrescriptionView({
               variant="outline"
               size="sm"
               className="text-gray-950 hover:text-gray-700 h-9"
-              data-cy="edit-prescription"
             >
               <Link href={`questionnaire/medication_request`}>
                 {!prescription.medications?.length ? (

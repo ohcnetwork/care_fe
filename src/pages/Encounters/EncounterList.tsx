@@ -301,10 +301,7 @@ export function EncounterList({
           </div>
         </div>
 
-        <div
-          className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
-          data-cy="encounter-list-cards"
-        >
+        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
           {isFetching ? (
             <CardGridSkeleton count={6} />
           ) : encounters.length === 0 ? (
