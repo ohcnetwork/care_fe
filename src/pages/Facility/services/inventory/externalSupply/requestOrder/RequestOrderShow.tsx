@@ -373,11 +373,7 @@ export function RequestOrderShow({
               requestOrder.status !== RequestOrderStatus.entered_in_error && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      data-cy="invoice-actions-button"
-                      className="border-gray-400 px-2"
-                    >
+                    <Button variant="outline" className="border-gray-400 px-2">
                       <CareIcon icon="l-ellipsis-v" />
                     </Button>
                   </DropdownMenuTrigger>

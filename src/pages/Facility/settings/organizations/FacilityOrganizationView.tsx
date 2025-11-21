@@ -39,6 +39,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import FacilityOrganizationFormSheet from "./components/FacilityOrganizationFormSheet";
 
 interface Props {
@@ -74,7 +75,6 @@ function DeleteOrgDialog({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            data-cy="delete-organization-button"
             variant="ghost"
             size="icon"
             onClick={() => setShowDeleteDialog(true)}
@@ -154,12 +154,7 @@ function OrganizationCard({
               parentId={parentId}
               org={org}
               trigger={
-                <Button
-                  data-cy="edit-department-team"
-                  variant="white"
-                  size="sm"
-                  className="font-semibold"
-                >
+                <Button variant="white" size="sm" className="font-semibold">
                   {t("edit")}
                 </Button>
               }
@@ -167,10 +162,7 @@ function OrganizationCard({
           )}
 
           <Button variant="white" size="sm" className="font-semibold" asChild>
-            <Link
-              href={`/departments/${org.id}/departments`}
-              data-cy="view-department-team"
-            >
+            <Link href={`/departments/${org.id}/departments`}>
               {t("see_details")}
             </Link>
           </Button>
@@ -191,6 +183,7 @@ export default function FacilityOrganizationView({
     disableCache: true,
   });
 
+  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
 
   const { data: children, isLoading } = useQuery({
@@ -216,6 +209,10 @@ export default function FacilityOrganizationView({
 
   const { canCreateFacilityOrganization, canManageFacilityOrganization } =
     getPermissions(hasPermission, permissions);
+  const { isGeoAdmin } = getPermissions(
+    hasPermission,
+    authUser?.permissions || [],
+  );
 
   return (
     <div className="space-y-6 mx-auto max-w-4xl md:pt-3">
@@ -228,7 +225,6 @@ export default function FacilityOrganizationView({
           <Input
             placeholder={t("search_by_department_team_name")}
             value={qParams.search || ""}
-            data-cy="search-department-team"
             onChange={(e) => {
               updateQuery({ search: e.target.value || undefined });
             }}
@@ -236,13 +232,13 @@ export default function FacilityOrganizationView({
           />
         </div>
 
-        {canCreateFacilityOrganization && (
+        {(canCreateFacilityOrganization || isGeoAdmin) && (
           <div className="w-full sm:w-auto flex justify-center sm:justify-start">
             <FacilityOrganizationFormSheet
               facilityId={facilityId}
               parentId={id}
               trigger={
-                <Button className="w-full" data-cy="add-department/team-button">
+                <Button className="w-full">
                   <CareIcon icon="l-plus" className="mr-2 size-4" />
                   {t("add_department_team")}
                 </Button>
@@ -259,10 +255,7 @@ export default function FacilityOrganizationView({
         <div className="space-y-6 md:pb-6">
           {children?.results?.length ? (
             <>
-              <div
-                className="hidden sm:block rounded-lg border"
-                data-cy="department-team-list"
-              >
+              <div className="hidden sm:block rounded-lg border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -325,11 +318,7 @@ export default function FacilityOrganizationView({
                                 org={org}
                                 tooltip={t("edit")}
                                 trigger={
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    data-cy="edit-department-button"
-                                  >
+                                  <Button variant="ghost" size="icon">
                                     <PenLine className="size-4" />
                                   </Button>
                                 }

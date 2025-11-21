@@ -151,7 +151,6 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                 onSearch={handleSearch}
                 onFieldChange={handleFieldChange}
                 className="w-full"
-                data-cy="search-user"
               />
             </div>
             {isFetchingUsers ? (

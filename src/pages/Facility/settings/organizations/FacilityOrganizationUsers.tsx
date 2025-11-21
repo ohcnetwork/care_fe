@@ -21,6 +21,7 @@ import AddUserSheet from "@/pages/Organization/components/AddUserSheet";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 import { OrganizationUserRole } from "@/types/organization/organization";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import EditFacilityUserRoleSheet from "./components/EditFacilityUserRoleSheet";
 import LinkFacilityUserSheet from "./components/LinkFacilityUserSheet";
 
@@ -47,6 +48,8 @@ export default function FacilityOrganizationUsers({
     disableCache: true,
   });
   const { t } = useTranslation();
+
+  const authUser = useAuthUser();
 
   const openAddUserSheet = sheetState.sheet === "add";
   const openLinkUserSheet = sheetState.sheet === "link";
@@ -75,6 +78,11 @@ export default function FacilityOrganizationUsers({
     permissions,
   );
 
+  const { isGeoAdmin } = getPermissions(
+    hasPermission,
+    authUser?.permissions || [],
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row items-center md:items-end gap-4 w-full justify-between">
@@ -90,11 +98,10 @@ export default function FacilityOrganizationUsers({
               updateQuery({ search: e.target.value || undefined });
             }}
             className="w-full pl-8"
-            data-cy="search-by-username"
           />
         </div>
         <div className="flex gap-2 w-full md:w-auto justify-end">
-          {canCreateUser && (
+          {(isGeoAdmin || canCreateUser) && (
             <AddUserSheet
               open={openAddUserSheet}
               setOpen={(open) => {
@@ -105,7 +112,7 @@ export default function FacilityOrganizationUsers({
               }}
             />
           )}
-          {canManageFacilityOrganizationUsers && (
+          {(isGeoAdmin || canManageFacilityOrganizationUsers) && (
             <LinkFacilityUserSheet
               facilityId={facilityId}
               organizationId={id}
@@ -143,17 +150,13 @@ export default function FacilityOrganizationUsers({
                   roleName={userRole.role.name}
                   facility={facilityId}
                   actions={
-                    canManageFacilityOrganizationUsers && (
+                    (isGeoAdmin || canManageFacilityOrganizationUsers) && (
                       <EditFacilityUserRoleSheet
                         facilityId={facilityId}
                         organizationId={id}
                         userRole={userRole}
                         trigger={
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            data-cy="edit-user-role"
-                          >
+                          <Button variant="outline" size="sm">
                             <span>{t("edit_role")}</span>
                           </Button>
                         }

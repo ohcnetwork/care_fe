@@ -162,7 +162,6 @@ export default function OrganizationLayout({
             .map((item) => (
               <MenubarMenu key={item.url}>
                 <MenubarTrigger
-                  data-cy={`org-nav-${item.name.toLowerCase()}`}
                   className={`${
                     path === item.url
                       ? "font-medium text-primary-700 bg-gray-100"
