@@ -311,11 +311,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          data-cy="view-history"
-          className="border-gray-400 flex ml-auto"
-        >
+        <Button variant="outline" className="border-gray-400 flex ml-auto">
           <Clock className="size-4" />
           <span className="font-semibold">
             {buttonLabel || t("view_history")}

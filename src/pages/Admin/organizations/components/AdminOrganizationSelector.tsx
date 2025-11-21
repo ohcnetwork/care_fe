@@ -267,7 +267,6 @@ export default function FacilityOrganizationSelector(
                 className="h-8 gap-2"
                 onClick={() => handleConfirmSelection(currentSelection)}
                 disabled={isDisabled}
-                data-cy="confirm-organization"
               >
                 {isDisabled ? (
                   <>
@@ -354,7 +353,6 @@ export default function FacilityOrganizationSelector(
                         role="combobox"
                         aria-expanded={open}
                         className="w-full justify-between border-dashed"
-                        data-cy="facility-organization"
                         onClick={() => setOpen(true)}
                         type="button" // Prevents unintended form submission
                       >
@@ -379,7 +377,6 @@ export default function FacilityOrganizationSelector(
                       role="combobox"
                       aria-expanded={open}
                       className="w-full justify-between border-dashed"
-                      data-cy="facility-organization"
                     >
                       <span className="truncate text-gray-500">
                         {currentSelection
