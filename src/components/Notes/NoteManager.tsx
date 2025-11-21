@@ -722,6 +722,7 @@ export function NoteManager({
                             className="flex-1 min-h-10 max-h-[50vh]"
                           />
                           <Button
+                            aria-label="send message"
                             type="submit"
                             size="icon"
                             disabled={
