@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run lint`: Run ESLint
 - `npm run lint-fix`: Run ESLint with auto-fix
 - `npm run format`: Format code with Prettier
-- `npm run cypress:open`: Open Cypress UI for interactive testing
-- Single test: `npm run cypress:run -- --spec "cypress/e2e/path/to/spec.cy.ts"`
+- `npm run playwright:test`: Run Playwright tests
+- `npm run playwright:test:ui`: Open Playwright UI for interactive testing
 
 ## Code Style Guidelines
 - **TypeScript**: Strict mode, ES2022 target, path aliases (`@/*` for src)

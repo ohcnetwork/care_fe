@@ -30,7 +30,7 @@
     "src/**/*.d.ts",
     "care.config.ts",
     "scripts/**/*.ts",
-    "cypress.config.ts",
+
     "plugins/**/*.ts"
   ]
 }
