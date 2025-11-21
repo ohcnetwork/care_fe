@@ -51,10 +51,6 @@ export function ChargeItemDefinitionDetail({
       pathParams: { facilityId, slug },
     }),
   });
-  const { data: availableMetrics = [] } = useQuery({
-    queryKey: ["metrics"],
-    queryFn: query(chargeItemDefinitionApi.listMetrics, {}),
-  });
 
   const { mutate: updateChargeItemDefinition, isPending: isDeleting } =
     useMutation({
