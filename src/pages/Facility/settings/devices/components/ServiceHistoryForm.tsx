@@ -135,7 +135,6 @@ export default function ServiceHistoryForm({
               <FormLabel aria-required>{t("service_notes")}</FormLabel>
               <FormControl>
                 <Textarea
-                  data-cy="service-notes-input"
                   placeholder={t("service_notes_placeholder")}
                   {...field}
                   rows={5}
@@ -146,11 +145,7 @@ export default function ServiceHistoryForm({
           )}
         />
         <div className="flex justify-end space-x-2 pt-4">
-          <Button
-            type="submit"
-            disabled={!form.formState.isDirty || isPending}
-            data-cy="submit-button"
-          >
+          <Button type="submit" disabled={!form.formState.isDirty || isPending}>
             {isPending
               ? isEditMode
                 ? t("updating")

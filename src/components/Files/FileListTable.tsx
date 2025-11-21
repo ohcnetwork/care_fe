@@ -106,7 +106,6 @@ export function FileListTable({
             <Button
               variant="secondary"
               onClick={() => fileManager.viewFile(file, associatingId)}
-              data-cy="file-view-button"
             >
               <span className="flex flex-row items-center gap-1">
                 <CareIcon icon="l-eye" />
@@ -116,7 +115,7 @@ export function FileListTable({
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="secondary" data-cy="file-options-button">
+              <Button variant="secondary" aria-label="actions">
                 <CareIcon icon="l-ellipsis-h" />
               </Button>
             </DropdownMenuTrigger>
@@ -127,7 +126,6 @@ export function FileListTable({
                   onClick={() => fileManager.downloadFile(file, associatingId)}
                   variant="ghost"
                   className="w-full flex flex-row justify-stretch items-center"
-                  data-cy="file-download-button"
                 >
                   <CareIcon icon="l-arrow-circle-down" className="mr-1" />
                   <span>{t("download")}</span>
@@ -143,7 +141,6 @@ export function FileListTable({
                       }
                       variant="ghost"
                       className="w-full flex flex-row justify-stretch items-center"
-                      data-cy="file-archive-option"
                     >
                       <CareIcon icon="l-archive-alt" className="mr-1" />
                       <span>{t("archive")}</span>
@@ -155,7 +152,6 @@ export function FileListTable({
                       onClick={() => fileManager.editFile(file, associatingId)}
                       variant="ghost"
                       className="w-full flex flex-row justify-stretch items-center"
-                      data-cy="file-rename-button"
                     >
                       <CareIcon icon="l-pen" className="mr-1" />
                       <span>{t("rename")}</span>
@@ -266,7 +262,6 @@ export function FileListTable({
                 return (
                   <TableRow
                     key={file.id}
-                    data-cy={fileName}
                     className={cn("shadow-sm rounded-md overflow-hidden group")}
                   >
                     <TableCell

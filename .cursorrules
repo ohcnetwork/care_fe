@@ -38,4 +38,4 @@ General Guidelines
 
 # Testing Guidelines
 
-For Cypress testing guidelines, refer to cypress/docs/*.md
+For Playwright testing guidelines, use official documentation from https://playwright.dev/docs/writing-tests

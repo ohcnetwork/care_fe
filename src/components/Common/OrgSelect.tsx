@@ -14,7 +14,6 @@ interface OrgSelectProps {
   orgType: string;
   disabled?: boolean;
   className?: string;
-  "data-cy"?: string;
   placeholder?: string;
   inputPlaceholder?: string;
   noOptionsMessage?: string;
@@ -26,7 +25,6 @@ export function OrgSelect({
   orgType,
   disabled,
   className,
-  "data-cy": dataCy,
   placeholder,
   inputPlaceholder,
   noOptionsMessage,
@@ -87,7 +85,6 @@ export function OrgSelect({
       noOptionsMessage={noOptionsMessage || t("no_organization_found")}
       disabled={disabled}
       className={className}
-      data-cy={dataCy}
       closeOnSelect
     />
   );

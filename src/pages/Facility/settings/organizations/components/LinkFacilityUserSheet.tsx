@@ -99,7 +99,7 @@ export default function LinkFacilityUserSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button data-cy="link-user">
+        <Button>
           <CareIcon icon="l-plus" className="mr-2 size-4" />
           {t("link_user")}
         </Button>
@@ -178,7 +178,6 @@ export default function LinkFacilityUserSheet({
                 className="w-full"
                 onClick={handleAddUser}
                 disabled={!selectedRole}
-                data-cy="add-user-to-organization"
               >
                 {t("add_to_organization")}
               </Button>
