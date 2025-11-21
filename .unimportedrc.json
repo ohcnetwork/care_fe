@@ -73,6 +73,42 @@
       [
         "src/index.tsx"
       ]
+    ],
+    [
+      "bufferutil",
+      [
+        "node_modules/playwright-core/lib/utilsBundleImpl/index.js"
+      ]
+    ],
+    [
+      "utf-8-validate",
+      [
+        "node_modules/playwright-core/lib/utilsBundleImpl/index.js"
+      ]
+    ],
+    [
+      "chromium-bidi/lib/cjs/bidiMapper/BidiMapper",
+      [
+        "node_modules/playwright-core/lib/server/bidi/bidiOverCdp.js"
+      ]
+    ],
+    [
+      "chromium-bidi/lib/cjs/cdp/CdpConnection",
+      [
+        "node_modules/playwright-core/lib/server/bidi/bidiOverCdp.js"
+      ]
+    ],
+    [
+      "electron/index.js",
+      [
+        "node_modules/playwright-core/lib/server/electron/electron.js"
+      ]
+    ],
+    [
+      "fsevents",
+      [
+        "node_modules/playwright/lib/utilsBundleImpl.js"
+      ]
     ]
   ],
   "respectGitignore": true,
