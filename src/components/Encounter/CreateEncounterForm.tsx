@@ -230,7 +230,6 @@ export default function CreateEncounterForm({
                           <Button
                             key={value}
                             type="button"
-                            data-cy={`encounter-type-${value}`}
                             className={cn(
                               "h-auto min-h-24 w-full justify-center text-lg",
                               field.value === value &&
@@ -267,10 +266,7 @@ export default function CreateEncounterForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger
-                          data-cy="encounter-status"
-                          ref={field.ref}
-                        >
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -298,10 +294,7 @@ export default function CreateEncounterForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger
-                          data-cy="encounter-priority"
-                          ref={field.ref}
-                        >
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
                       </FormControl>
@@ -370,7 +363,6 @@ export default function CreateEncounterForm({
                 <ShortcutBadge actionId="cancel-action" />
               </Button>
               <Button
-                data-cy="create-encounter-button"
                 type="submit"
                 disabled={isPending || !form.watch("organizations").length}
               >

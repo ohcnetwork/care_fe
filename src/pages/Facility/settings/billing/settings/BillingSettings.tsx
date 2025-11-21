@@ -79,7 +79,6 @@ export function BillingSettings() {
                   onChange={(e) => setExpression(e.target.value)}
                   className="w-full text-base"
                   autoFocus
-                  data-cy="invoice-number-expression-input"
                   aria-label={t("invoice_number_expression")}
                 />
                 <div className="flex flex-col gap-2 sm:flex-row sm:gap-2 w-full">
@@ -88,7 +87,6 @@ export function BillingSettings() {
                       saveExpression({ invoice_number_expression: expression })
                     }
                     disabled={isPending || !expression.trim()}
-                    data-cy="save-invoice-number-expression"
                     className="w-full sm:w-auto"
                   >
                     {isPending ? t("saving") : t("save")}
@@ -100,7 +98,6 @@ export function BillingSettings() {
                       setExpression(facility.invoice_number_expression || "");
                       reset();
                     }}
-                    data-cy="cancel-invoice-number-expression"
                     className="w-full sm:w-auto"
                   >
                     {t("cancel")}
@@ -117,7 +114,6 @@ export function BillingSettings() {
                 <Button
                   variant="outline"
                   onClick={() => setEditing(true)}
-                  data-cy="edit-invoice-number-expression"
                   className="w-full sm:w-auto mt-2"
                 >
                   {t("edit")}

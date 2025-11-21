@@ -124,7 +124,6 @@ export function QuestionnaireSearch({
         <DrawerTrigger asChild>
           {trigger || (
             <Button
-              data-cy="add-questionnaire-button"
               variant="outline"
               role="combobox"
               disabled={disabled || isLoading}
@@ -161,7 +160,6 @@ export function QuestionnaireSearch({
         {trigger || (
           <Button
             size={size}
-            data-cy="add-questionnaire-button"
             variant="outline"
             role="combobox"
             className="w-full border border-primary-600"
