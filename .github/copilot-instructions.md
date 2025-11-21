@@ -225,7 +225,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - [shadcn/ui](https://ui.shadcn.com/) - Primary component library documentation
 
 ### Testing and Quality
-- [Cypress Documentation](https://docs.cypress.io/) - E2E testing for healthcare workflows
+- [Playwright Documentation](https://playwright.dev/) - E2E testing for healthcare workflows
 - [React Hook Form](https://react-hook-form.com/) - Form handling for medical data
 - [Zod](https://zod.dev/) - Schema validation for healthcare data integrity
 

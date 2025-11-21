@@ -86,7 +86,7 @@
     "src/index.tsx",
     "vite.config.mts",
     "tailwind.config.js",
-    "cypress.config.ts",
+    "playwright.config.ts",
     "scripts/**"
   ]
 }
