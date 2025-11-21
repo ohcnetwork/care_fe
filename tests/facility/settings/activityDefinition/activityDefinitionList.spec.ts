@@ -11,11 +11,13 @@ import { getFacilityId } from "tests/support/facilityId";
 test.use({ storageState: "tests/.auth/user.json" });
 
 let facilityId: string;
+let categorySlug: string;
 const resourceCategoryName = "Lab Tests";
 const categorySlugSuffix = "lab-tests-activity_definition";
 
 test.beforeAll(() => {
   facilityId = getFacilityId();
+  categorySlug = `f-${facilityId}-${categorySlugSuffix}`;
 });
 
 async function filterAndVerifyByStatus(
@@ -23,7 +25,6 @@ async function filterAndVerifyByStatus(
   status: Status,
   createdADTitle: string,
 ) {
-  const categorySlug = `f-${facilityId}-${categorySlugSuffix}`;
   await page.goto(
     `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
   );
@@ -57,7 +58,6 @@ async function filterAndVerifyByClassification(
   classification: Classification,
   createdADTitle: string,
 ) {
-  const categorySlug = `f-${facilityId}-${categorySlugSuffix}`;
   await page.goto(
     `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
   );
@@ -199,5 +199,86 @@ test.describe("Activity Definition List Filter", () => {
         counsellingAD.title,
       );
     });
+  });
+
+  test("should verify row content and navigate to view and edit pages", async ({
+    page,
+  }) => {
+    const testAD = await createActivityDefinition(page, facilityId, {
+      resourceCategoryName,
+      overrides: {
+        status: Status.active,
+        classification: Classification.laboratory,
+      },
+    });
+
+    await page.goto(
+      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
+    );
+    await clearFilter(page);
+    await page
+      .locator('[data-slot="table-body"]')
+      .waitFor({ state: "visible" });
+
+    const adRow = page.locator('[data-slot="table-row"]', {
+      hasText: testAD.title,
+    });
+    await expect(adRow).toBeVisible();
+
+    await expect(adRow.getByText(testAD.title)).toBeVisible();
+    if (testAD.description) {
+      await expect(
+        adRow.getByText(testAD.description, { exact: false }),
+      ).toBeVisible();
+    }
+
+    const classificationDisplayText = testAD.classification.replace(/_/g, " ");
+    const classificationBadge = adRow
+      .locator('[data-slot="badge"]')
+      .filter({ hasText: new RegExp(classificationDisplayText, "i") });
+    await expect(classificationBadge).toBeVisible();
+
+    const statusBadge = adRow
+      .locator('[data-slot="badge"]')
+      .filter({ hasText: new RegExp(testAD.status, "i") });
+    await expect(statusBadge).toBeVisible();
+
+    await expect(adRow.getByText(/service request/i)).toBeVisible();
+
+    const viewLink = adRow.getByRole("link", { name: /view/i });
+    await expect(viewLink).toBeVisible();
+    const viewHref = await viewLink.getAttribute("href");
+    expect(viewHref).toBeTruthy();
+
+    const slugMatch = viewHref!.match(
+      /\/settings\/activity_definitions\/([^/]+)/,
+    );
+    expect(slugMatch).toBeTruthy();
+    const activityDefinitionSlug = slugMatch![1];
+
+    await viewLink.click();
+    await expect(page).toHaveURL(
+      `/facility/${facilityId}/settings/activity_definitions/${activityDefinitionSlug}`,
+    );
+
+    await page.goto(
+      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
+    );
+    await page
+      .locator('[data-slot="table-body"]')
+      .waitFor({ state: "visible" });
+
+    const adRowAfterBack = page.locator('[data-slot="table-row"]', {
+      hasText: testAD.title,
+    });
+    await expect(adRowAfterBack).toBeVisible();
+
+    const editLink = adRowAfterBack.getByRole("link", { name: /edit/i });
+    await expect(editLink).toBeVisible();
+    await editLink.click();
+
+    await expect(page).toHaveURL(
+      `/facility/${facilityId}/settings/activity_definitions/${activityDefinitionSlug}/edit`,
+    );
   });
 });
