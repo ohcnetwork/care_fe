@@ -56,6 +56,7 @@ export interface BaseFilterConfig {
   getOperations?: (selected: FilterValues) => Operation[];
   mode?: FilterMode;
   disableClear?: boolean;
+  showColorIndicators?: boolean;
 }
 
 export interface CommandFilterConfig extends BaseFilterConfig {
@@ -141,6 +142,7 @@ export function createFilterConfig(
     dateRangeOptions?: DateRangeOption[];
     operationKey?: string;
     disableClear?: boolean;
+    showColorIndicators?: boolean;
   },
 ): FilterConfig {
   const {
@@ -152,6 +154,7 @@ export function createFilterConfig(
     dateRangeOptions,
     operationKey,
     disableClear,
+    showColorIndicators,
   } = meta || {};
   const baseConfig: BaseFilterConfig = {
     key,
@@ -163,6 +166,7 @@ export function createFilterConfig(
     icon,
     operationKey,
     disableClear,
+    showColorIndicators,
   };
   switch (type) {
     case "date":
