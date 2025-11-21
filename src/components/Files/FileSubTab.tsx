@@ -220,7 +220,7 @@ export const FilesPage = ({
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="secondary">
+              <Button variant="secondary" aria-label="actions">
                 <CareIcon icon="l-ellipsis-h" />
               </Button>
             </DropdownMenuTrigger>

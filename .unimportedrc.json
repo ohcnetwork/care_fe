@@ -75,12 +75,6 @@
       ]
     ],
     [
-      "tsx/cjs",
-      [
-        "node_modules/find-cypress-specs/src/index.js"
-      ]
-    ],
-    [
       "virtual:pwa-register",
       [
         "src/index.tsx"
@@ -92,7 +86,6 @@
     "src/index.tsx",
     "vite.config.mts",
     "tailwind.config.js",
-    "cypress.config.ts",
     "scripts/**"
   ]
 }

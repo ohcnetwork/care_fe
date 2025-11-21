@@ -6,7 +6,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   dateFilter,
   encounterPriorityFilter,
@@ -101,7 +100,6 @@ export function EncounterList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: [
-      "name",
       "encounter_id",
       "external_identifier",
       "tags",
@@ -112,7 +110,6 @@ export function EncounterList({
   const {
     status,
     priority,
-    name,
     encounter_id,
     external_identifier,
     patient_filter,
@@ -131,7 +128,6 @@ export function EncounterList({
           created_date_after,
           created_date_before,
         ),
-        name,
         encounter_class: encounterClass,
         external_identifier,
         limit: resultsPerPage,
@@ -263,14 +259,6 @@ export function EncounterList({
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <div>
-                  <Input
-                    type="text"
-                    placeholder={t("search")}
-                    value={name || ""}
-                    onChange={(e) => updateQuery({ name: e.target.value })}
-                  />
-                </div>
                 <PatientIdentifierFilter
                   onSelect={(patientId, patientName) =>
                     updateQuery({
