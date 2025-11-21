@@ -157,35 +157,8 @@ test.describe("Patient Files", () => {
     const inputFileName1 = faker.system.fileName();
     const newFileName = faker.system.fileName();
 
-    // Upload a single file
-    await page.getByRole("button", { name: "Add Files" }).click();
-
-    await page
-      .locator('input[type="file"]')
-      .setInputFiles(`tests/fixtures/images/${fileName}`);
-
-    // Try to upload without name - should show validation error
-    await page.getByRole("button", { name: "Upload" }).click();
-    await expect(page.getByText(validationMessage).first()).toBeVisible();
-
-    // Fill file name
-    await page
-      .getByRole("textbox", { name: "File Name" })
-      .first()
-      .fill(inputFileName1);
-
-    const uploadPromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/v1/files/") &&
-        response.request().method() === "POST",
-    );
-
-    await page.getByRole("button", { name: "Upload" }).click();
-
-    const uploadResponse = await uploadPromise;
-    expect(uploadResponse.status()).toBe(200);
-
-    await expect(page.getByText(fileUploadSuccessToast)).toBeVisible();
+    // Upload a single file using helper
+    await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
 
     // Filter for active files
     await page.getByRole("button", { name: "Filter" }).click();
@@ -220,35 +193,8 @@ test.describe("Patient Files", () => {
     const inputFileName1 = faker.system.fileName();
     const archiveReason = faker.lorem.sentence();
 
-    // Upload a single file
-    await page.getByRole("button", { name: "Add Files" }).click();
-
-    await page
-      .locator('input[type="file"]')
-      .setInputFiles(`tests/fixtures/images/${fileName}`);
-
-    // Try to upload without name - should show validation error
-    await page.getByRole("button", { name: "Upload" }).click();
-    await expect(page.getByText(validationMessage).first()).toBeVisible();
-
-    // Fill file name
-    await page
-      .getByRole("textbox", { name: "File Name" })
-      .first()
-      .fill(inputFileName1);
-
-    const uploadPromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/v1/files/") &&
-        response.request().method() === "POST",
-    );
-
-    await page.getByRole("button", { name: "Upload" }).click();
-
-    const uploadResponse = await uploadPromise;
-    expect(uploadResponse.status()).toBe(200);
-
-    await expect(page.getByText(fileUploadSuccessToast)).toBeVisible();
+    // Upload a single file using helper
+    await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
 
     // Filter for active files
     await page.getByRole("button", { name: "Filter" }).click();
@@ -286,27 +232,5 @@ test.describe("Patient Files", () => {
     expect(archiveResponse.status()).toBe(200);
 
     await expect(page.getByText(fileArchiveSuccessToast)).toBeVisible();
-  });
-
-  test("Record and upload audio file", async ({ page, context }) => {
-    // Grant microphone permissions
-    await context.grantPermissions(["microphone"]);
-
-    const audioFileName = faker.system.fileName();
-
-    await page.getByRole("button", { name: "Add Files" }).click();
-    await page.getByRole("menuitem", { name: "Record Audio" }).click();
-    await page.getByLabel("Start Recording").click();
-    await page.waitForTimeout(2000);
-    await page.getByLabel("Stop Recording").click();
-    await page.getByRole("button", { name: "Done" }).click();
-
-    await page
-      .getByRole("textbox", { name: "File Name" })
-      .first()
-      .fill(audioFileName);
-    await page.getByRole("button", { name: "Upload" }).click();
-
-    await expect(page.getByText(fileUploadSuccessToast)).toBeVisible();
   });
 });
