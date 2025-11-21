@@ -43,12 +43,10 @@ test.describe("Encounter vs Patient Notes Isolation", () => {
     await page.getByRole("tab", { name: "Notes" }).click();
 
     // Wait for notes section to load
-    await expect(
-      page.getByRole("button", { name: /New/i }).first(),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /New/i })).toBeVisible();
 
     // Create new thread
-    await page.getByRole("button", { name: /New/i }).first().click();
+    await page.getByRole("button", { name: /New/i }).click();
 
     // Enter thread title
     await threadTitleInput.fill(encounterNoteTitle);
@@ -104,12 +102,10 @@ test.describe("Encounter vs Patient Notes Isolation", () => {
     await page.getByRole("tab", { name: "Notes" }).click();
 
     // Wait for notes section to load
-    await expect(
-      page.getByRole("button", { name: /New/i }).first(),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /New/i })).toBeVisible();
 
     // Create new thread in patient notes
-    await page.getByRole("button", { name: /New/i }).first().click();
+    await page.getByRole("button", { name: /New/i }).click();
 
     // Enter thread title
     await page
@@ -317,7 +313,7 @@ test.describe("Thread Creation", () => {
     // Create three threads by iterating through titles
     for (const title of threadTitles) {
       // Click New button, fill title, and create thread
-      await page.getByRole("button", { name: /New/i }).first().click();
+      await page.getByRole("button", { name: /New/i }).click();
       await threadTitleInput.fill(title);
 
       await page.getByRole("button", { name: /Create/i }).click();
@@ -383,7 +379,7 @@ test.describe("Thread Visibility & Switching", () => {
 
     for (const thread of threadsData) {
       // Create thread with title
-      await page.getByRole("button", { name: /New/i }).first().click();
+      await page.getByRole("button", { name: /New/i }).click();
       await threadTitleInput.fill(thread.title);
 
       await page.getByRole("button", { name: /Create/i }).click();
