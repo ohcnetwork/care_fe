@@ -30,6 +30,7 @@
     "src/**/*.d.ts",
     "care.config.ts",
     "scripts/**/*.ts",
+    "vitest.config.ts",
     "playwright.config.ts",
     "plugins/**/*.ts"
   ]
