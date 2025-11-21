@@ -5,22 +5,22 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
+const allergyOptions = [
+  "Fezolinetant",
+  "Anifrolumab",
+  "Live attenuated virus antigen",
+  "Isomaltose",
+  "Cetrimonium bromide",
+  "Benzenesulfonic acid",
+  "Inclisiran",
+  "Purified water",
+  "Olipudase alfa",
+];
+
 test.describe("Allergy in Encounter", () => {
   let allergyName: string;
 
   test.beforeEach(async () => {
-    faker.seed();
-    const allergyOptions = [
-      "Fezolinetant",
-      "Anifrolumab",
-      "Live attenuated virus antigen",
-      "Isomaltose",
-      "Cetrimonium bromide",
-      "Benzenesulfonic acid",
-      "Inclisiran",
-      "Purified water",
-      "Olipudase alfa",
-    ];
     allergyName = faker.helpers.arrayElement(allergyOptions);
   });
 
