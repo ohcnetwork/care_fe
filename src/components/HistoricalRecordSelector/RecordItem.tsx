@@ -72,7 +72,7 @@ export function RecordItem<T>({
             <TableCell
               key={field.key.toString()}
               className={cn(
-                "p-2 text-sm whitespace-pre-wrap border border-gray-200 bg-white",
+                "p-2 text-sm whitespace-pre-wrap border border-gray-200 bg-white min-w-[150px]",
                 "[&:nth-child(even)]:bg-gray-100",
                 "[&:nth-child(2)]:rounded-l-md",
                 "[&:nth-last-child(1)]:rounded-r-md",

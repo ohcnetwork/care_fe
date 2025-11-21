@@ -543,13 +543,13 @@ export function MedicationRequestQuestion({
               },
               {
                 key: "dosage_text",
-                label: t("dosage"),
+                label: t("dosage_instruction"),
                 render: (dosage) => dosage,
               },
               {
                 key: "status",
                 label: t("status"),
-                render: (status: string) => t(status),
+                render: (status: string) => t(`medication_status__${status}`),
               },
               {
                 key: "created_by",

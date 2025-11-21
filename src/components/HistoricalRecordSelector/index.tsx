@@ -365,13 +365,13 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                 <div className="px-2">
                   <p className="text-sm text-indigo-700 font-medium">{date}</p>
                 </div>
-                <div className="overflow-x-auto p-2">
+                <div className="lg:overflow-visible overflow-x-auto p-2">
                   {isLoadingRecords ? (
                     <div className="space-y-2 p-2">
                       <Skeleton className="h-8 w-full" />
                     </div>
                   ) : records.length ? (
-                    <Table className="w-full max-w-3xl table-fixed border-separate border-spacing-y-2">
+                    <Table className="w-full lg:max-w-3xl min-w-fit border-separate border-spacing-y-2">
                       <TableHeader>
                         <TableRow className="border-0">
                           <TableHead className="border-0 bg-transparent p-2 w-12">
@@ -391,7 +391,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                             <TableHead
                               key={String(field.label)}
                               className={cn(
-                                "border border-gray-200 bg-gray-50 [&:nth-child(2)]:rounded-l-md [&:nth-last-child(1)]:rounded-r-md",
+                                "border border-gray-200 bg-gray-50 [&:nth-child(2)]:rounded-l-md [&:nth-last-child(1)]:rounded-r-md min-w-[150px]",
                               )}
                             >
                               {field.label}
