@@ -157,7 +157,7 @@ export default function TokenCategoryView({
                   SCHEDULABLE_RESOURCE_TYPE_COLORS[tokenCategory.resource_type]
                 }
               >
-                {t(tokenCategory.resource_type)}
+                {t(`schedule_resource__${tokenCategory.resource_type}`)}
               </Badge>
             </div>
             {tokenCategory.shorthand && (
@@ -204,7 +204,9 @@ export default function TokenCategoryView({
             </div>
             <div>
               <p className="text-sm text-gray-500">{t("resource_type")}</p>
-              <p className="text-gray-700">{t(tokenCategory.resource_type)}</p>
+              <p className="text-gray-700">
+                {t(`schedule_resource__${tokenCategory.resource_type}`)}
+              </p>
             </div>
             {tokenCategory.shorthand && (
               <div>

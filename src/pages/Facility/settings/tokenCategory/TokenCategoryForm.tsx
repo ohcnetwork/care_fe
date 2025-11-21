@@ -259,7 +259,7 @@ export function TokenCategoryFormContent({
                       {Object.keys(SCHEDULABLE_RESOURCE_TYPE_COLORS).map(
                         (type) => (
                           <SelectItem key={type} value={type}>
-                            {t(type)}
+                            {t(`schedule_resource__${type}`)}
                           </SelectItem>
                         ),
                       )}
