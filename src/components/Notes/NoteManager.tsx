@@ -734,7 +734,7 @@ export function NoteManager({
                           />
                           <Button
                             data-cy="send-chat-message-button"
-                            aria-label="send-chat-message-button"
+                            aria-label="send message"
                             type="submit"
                             size="icon"
                             disabled={

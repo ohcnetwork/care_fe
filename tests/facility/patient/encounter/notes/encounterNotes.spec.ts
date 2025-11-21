@@ -57,9 +57,7 @@ test.describe("Encounter Notes - Isolation from Patient Notes", () => {
     // Fill message input and send message in the encounter thread
     await messageInput.fill(encounterNoteMessage);
 
-    await page
-      .getByRole("button", { name: "send-chat-message-button" })
-      .click();
+    await page.getByRole("button", { name: "Send message" }).click();
 
     // Verify message input is cleared after sending
     await expect(messageInput).toBeEmpty();
@@ -127,9 +125,7 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
 
     // User A fills message input and sends first message
     await page.getByPlaceholder("Type your message...").fill(userAMessage1);
-    await page
-      .getByRole("button", { name: "send-chat-message-button" })
-      .click();
+    await page.getByRole("button", { name: "Send message" }).click();
     // Verify message input is cleared
     await expect(page.getByPlaceholder("Type your message...")).toBeEmpty();
 
@@ -157,9 +153,7 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
 
     // User B fills message input and sends a message
     await userBPage.getByPlaceholder("Type your message...").fill(userBMessage);
-    await userBPage
-      .getByRole("button", { name: "send-chat-message-button" })
-      .click();
+    await userBPage.getByRole("button", { name: "Send message" }).click();
     await userBPage.waitForLoadState("networkidle");
 
     // Verify User B's message appears for User B
@@ -192,9 +186,7 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     for (const message of messages) {
       // Fill and send each message
       await page.getByPlaceholder("Type your message...").fill(message);
-      await page
-        .getByRole("button", { name: "send-chat-message-button" })
-        .click();
+      await page.getByRole("button", { name: "Send message" }).click();
       await expect(page.getByPlaceholder("Type your message...")).toBeEmpty();
     }
 
@@ -323,9 +315,7 @@ test.describe("Encounter Notes - Thread Visibility & Switching", () => {
       // Fill message input and send message
       await messageInput.fill(thread.message);
 
-      await page
-        .getByRole("button", { name: "send-chat-message-button" })
-        .click();
+      await page.getByRole("button", { name: "Send message" }).click();
       // Verify message input is cleared
       await expect(messageInput).toBeEmpty();
       // Verify message appears
@@ -372,9 +362,7 @@ test.describe("Encounter Notes - Thread Visibility & Switching", () => {
     await page.getByRole("button").filter({ hasText: thread1Title }).click();
     await messageInput.fill(newThread1Message);
 
-    await page
-      .getByRole("button", { name: "send-chat-message-button" })
-      .click();
+    await page.getByRole("button", { name: "Send message" }).click();
     // Verify message input is cleared
     await expect(messageInput).toBeEmpty();
 
@@ -386,9 +374,7 @@ test.describe("Encounter Notes - Thread Visibility & Switching", () => {
     await page.getByRole("button").filter({ hasText: thread2Title }).click();
     await messageInput.fill(newThread2Message);
 
-    await page
-      .getByRole("button", { name: "send-chat-message-button" })
-      .click();
+    await page.getByRole("button", { name: "Send message" }).click();
     // Verify message input is cleared
     await expect(messageInput).toBeEmpty();
 
