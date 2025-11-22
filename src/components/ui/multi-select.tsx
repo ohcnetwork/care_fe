@@ -1,4 +1,4 @@
-import { ChevronDown, XCircle, XIcon } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
   CommandGroup,
+  CommandInput,
   CommandItem,
   CommandList,
   CommandSeparator,
@@ -22,11 +23,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
-interface MultiSelectProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+type ButtonProps = Omit<
+  React.ComponentProps<typeof Button>,
+  keyof MultiSelectProps
+>;
+interface MultiSelectProps {
   options: {
     label: string;
     value: string;
@@ -35,9 +39,9 @@ interface MultiSelectProps
   onValueChange: (value: string[]) => void;
   value: string[];
   placeholder: string;
-  modalPopover?: boolean;
-  asChild?: boolean;
   className?: string;
+  selectedPlaceholder?: string;
+  translationBasekey?: string;
 }
 
 export function MultiSelect({
@@ -45,11 +49,12 @@ export function MultiSelect({
   onValueChange,
   value = [],
   placeholder,
-  modalPopover = false,
   className,
   ref,
+  selectedPlaceholder,
+  translationBasekey,
   ...props
-}: React.ComponentProps<"button"> & MultiSelectProps) {
+}: ButtonProps & MultiSelectProps) {
   const [selectedValues, setSelectedValues] = React.useState<string[]>(value);
   const [open, setOpen] = React.useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -60,167 +65,149 @@ export function MultiSelect({
 
   const { t } = useTranslation();
 
-  const toggleOption = (option: string) => {
+  const handleToggleOption = (option: string) => {
     const newSelectedValues = selectedValues.includes(option)
       ? selectedValues.filter((value) => value !== option)
       : [...selectedValues, option];
     setSelectedValues(newSelectedValues);
-    onValueChange(newSelectedValues);
   };
 
-  const handleClear = () => {
-    setSelectedValues([]);
-    onValueChange([]);
-  };
-
-  const handleToggle = () => {
-    setOpen((prev) => !prev);
-  };
-
-  const toggleAll = () => {
+  const handleSelectAll = () => {
     if (selectedValues.length === options.length) {
-      handleClear();
+      setSelectedValues([]);
     } else {
       const allValues = options.map((option) => option.value);
       setSelectedValues(allValues);
-      onValueChange(allValues);
     }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    e.stopPropagation();
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    e.stopPropagation();
   };
 
   const triggerButton = (
     <Button
+      variant="outline"
       ref={ref}
-      {...props}
-      onClick={handleToggle}
+      role="combobox"
+      onClick={() => setOpen((open) => !open)}
       className={cn(
-        "flex w-full p-1 rounded-md border min-h-10 h-auto items-center justify-between bg-inherit hover:bg-inherit [&_svg]:pointer-events-auto",
+        "flex w-full p-1 rounded-md border min-h-10 items-center justify-between",
         className,
       )}
+      {...props}
     >
-      {selectedValues.length > 0 ? (
-        <div className="flex justify-between items-center w-full">
-          <div className="flex flex-wrap items-center">
-            {selectedValues.map((value) => {
-              const option = options.find((o) => o.value === value);
-              return (
-                <Badge
-                  key={value}
-                  className="m-1 cursor-pointer"
-                  variant="secondary"
-                >
-                  {option?.icon && (
-                    <CareIcon icon={option.icon} className="size-4 mr-2" />
-                  )}
-                  {option?.label}
-                  <XCircle
-                    className="ml-2 size-4 cursor-pointer opacity-50 hover:opacity-100 hover:text-black"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      toggleOption(value);
-                    }}
-                    aria-label={`Remove ${option?.label}`}
-                  />
-                </Badge>
-              );
-            })}
-          </div>
-          <div className="flex items-center justify-between">
-            <XIcon
-              className="h-4 mx-2 cursor-pointer text-black"
-              onClick={(event) => {
-                event.stopPropagation();
-                handleClear();
-              }}
-            />
-            <ChevronDown
-              id="dropdown-toggle"
-              className="h-4 mx-2 cursor-pointer text-black"
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between w-full mx-auto">
+      <div className="flex justify-between items-center w-full">
+        {value.length == 0 ? (
           <span className="text-sm text-black mx-3">{placeholder}</span>
-          <ChevronDown
-            id="dropdown-toggle"
-            className="h-4 mx-2 cursor-pointer text-black"
-          />
-        </div>
-      )}
+        ) : (
+          <Badge className="m-1" variant="secondary">
+            {selectedPlaceholder
+              ? selectedPlaceholder
+              : t("options_selected", { count: value.length })}
+          </Badge>
+        )}
+
+        <ChevronDown
+          id="dropdown-toggle"
+          className="h-4 mx-2 cursor-pointer text-black"
+        />
+      </div>
     </Button>
   );
 
   const listContent = (
-    <Command>
-      <CommandList
-        className="max-h-64 overflow-y-auto overflow-x-hidden touch-auto"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-      >
-        <CommandGroup>
-          <CommandItem key="all" onSelect={toggleAll}>
-            <Checkbox
-              checked={selectedValues.length === options.length}
-              aria-label="Select all options"
-            />
-            <span>{t("select_all")}</span>
-          </CommandItem>
-          {options.map((option) => {
-            const isSelected = selectedValues.includes(option.value);
-            return (
-              <CommandItem
-                key={option.value}
-                onSelect={() => toggleOption(option.value)}
-                className="cursor-pointer"
-              >
-                <Checkbox
-                  className="data-[state=checked]:bg-white"
-                  checked={isSelected}
-                  aria-label={`Select ${option.label}`}
-                />
-                {option?.icon && (
-                  <CareIcon icon={option.icon} className="size-4" />
-                )}
-                <span>{option.label}</span>
-              </CommandItem>
-            );
-          })}
-        </CommandGroup>
-        <CommandSeparator />
-        <CommandGroup>
-          <div className="flex items-center justify-between">
-            {selectedValues.length > 0 && (
-              <>
-                <CommandItem
-                  onSelect={handleClear}
-                  className="flex-1 justify-center cursor-pointer"
-                >
-                  {t("clear")}
-                </CommandItem>
-                <Separator
-                  orientation="vertical"
-                  className="flex min-h-6 h-full"
-                />
-              </>
-            )}
+    <div>
+      <Command className="flex-1 overflow-hidden">
+        <div className="border border-gray-200 rounded-md m-1 mb-2">
+          <CommandInput
+            placeholder={
+              translationBasekey
+                ? t(`search_${translationBasekey}`)
+                : t("search_options_here")
+            }
+            className="outline-hidden border-none ring-0 shadow-none"
+            autoFocus
+          />
+        </div>
+        <CommandList>
+          <CommandGroup>
             <CommandItem
-              onSelect={() => setOpen(false)}
-              className="flex-1 justify-center cursor-pointer max-w-full"
+              key="all"
+              onSelect={handleSelectAll}
+              className="cursor-pointer"
             >
-              {t("close")}
+              <Checkbox
+                checked={selectedValues.length === options.length}
+                aria-label="Select all options"
+                className="data-[state=checked]:text-white"
+              />
+              <span>{t("select_all")}</span>
             </CommandItem>
-          </div>
-        </CommandGroup>
-      </CommandList>
-    </Command>
+          </CommandGroup>
+
+          <CommandSeparator />
+
+          {value.length > 0 && (
+            <>
+              <CommandGroup heading={t("selected")}>
+                {options
+                  .filter((option) => value.includes(option.value))
+                  .map((option) => (
+                    <CommandItem
+                      key={option.value}
+                      onSelect={() => handleToggleOption(option.value)}
+                      className="cursor-pointer"
+                    >
+                      <Checkbox
+                        checked={selectedValues.includes(option.value)}
+                        className="data-[state=checked]:text-white"
+                      />
+                      {option?.icon && (
+                        <CareIcon icon={option.icon} className="size-4" />
+                      )}
+                      <span>{option.label}</span>
+                    </CommandItem>
+                  ))}
+              </CommandGroup>
+
+              <CommandSeparator />
+            </>
+          )}
+
+          {value.length < options.length && (
+            <CommandGroup>
+              {options
+                .filter((option) => !value.includes(option.value))
+                .map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    onSelect={() => handleToggleOption(option.value)}
+                    className="cursor-pointer"
+                  >
+                    <Checkbox
+                      checked={selectedValues.includes(option.value)}
+                      className="data-[state=checked]:text-white"
+                    />
+                    {option?.icon && (
+                      <CareIcon icon={option.icon} className="size-4" />
+                    )}
+                    <span>{option.label}</span>
+                  </CommandItem>
+                ))}
+            </CommandGroup>
+          )}
+        </CommandList>
+      </Command>
+      <div className="flex justify-end space-x-2 p-3 border-t border-t-gray-200 shrink-0">
+        <Button
+          variant="link"
+          className="underline"
+          onSelect={() => alert("cancel")}
+        >
+          {t("cancel")}
+        </Button>
+        <Button onSelect={() => onValueChange(selectedValues)}>
+          {t("done")} <ShortcutBadge actionId="enter-action" />
+        </Button>
+      </div>
+    </div>
   );
 
   if (isMobile) {
@@ -240,15 +227,11 @@ export function MultiSelect({
 
   return (
     <div className="w-full">
-      <Popover open={open} onOpenChange={setOpen} modal={modalPopover}>
+      <Popover open={open} onOpenChange={setOpen} modal>
         <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
         <PopoverContent
-          className="p-0 w-[var(--radix-popover-trigger-width)]"
+          className="p-0 w-(--radix-popover-trigger-width) max-h-96 overflow-y-hidden flex flex-col"
           align="center"
-          onEscapeKeyDown={() => setOpen(false)}
-          onWheel={(e) => e.stopPropagation()}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
         >
           {listContent}
         </PopoverContent>
