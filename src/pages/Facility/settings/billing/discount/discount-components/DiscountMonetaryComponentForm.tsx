@@ -67,17 +67,16 @@ export function DiscountMonetaryComponentForm({
           }, z.number().min(0).max(100).optional()),
           amount: z.preprocess(
             (v) => {
-              if (v === null || v === undefined) return "";
-              if (typeof v === "string") return v;
-              return String(v ?? ""); // always a string
+              if (v === null || v === undefined || v === "") return undefined;
+              const str = typeof v === "string" ? v.trim() : String(v);
+              return str === "" ? undefined : str;
             },
             z
               .string()
-              .trim()
-              .refine((v) => v === "" || !isNaN(Number(v)), {
+              .refine((v) => !isNaN(Number(v)), {
                 message: t("amount_must_be_a_valid_number"),
               })
-              .refine((v) => v === "" || Number(v) >= 0, {
+              .refine((v) => Number(v) >= 0, {
                 message: t("amount_must_be_greater_than_or_equal_to_0"),
               })
               .optional(),
@@ -90,8 +89,7 @@ export function DiscountMonetaryComponentForm({
         })
         .superRefine((data, ctx) => {
           const hasFactor = data.factor !== undefined && data.factor !== null;
-          const hasAmount =
-            data.amount !== undefined && data.amount?.trim() !== "";
+          const hasAmount = data.amount !== undefined;
 
           if (!hasFactor && !hasAmount) {
             // attach to BOTH fields
@@ -146,7 +144,7 @@ export function DiscountMonetaryComponentForm({
   const handleValueTypeChange = (value: "factor" | "amount") => {
     setValueType(value);
     if (value === "factor") {
-      form.setValue("amount", "");
+      form.setValue("amount", undefined);
     } else {
       form.setValue("factor", undefined);
     }
@@ -179,7 +177,7 @@ export function DiscountMonetaryComponentForm({
               <FormControl>
                 <Input
                   {...field}
-                  onChange={(e) => field.onChange(e.target.value.trimStart())}
+                  onChange={(e) => field.onChange(e.target.value.trim())}
                 />
               </FormControl>
               <FormDescription>
