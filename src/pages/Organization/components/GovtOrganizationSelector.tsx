@@ -91,11 +91,6 @@ function OrganizationLevelSelect({
           options={options}
           onChange={handleChange}
           onSearch={handleSearch}
-          data-cy={`select-${
-            currentLevel?.metadata?.govt_org_type?.toLowerCase() ||
-            previousLevel?.metadata?.govt_org_children_type?.toLowerCase() ||
-            "state"
-          }`}
         />
       </div>
     </div>

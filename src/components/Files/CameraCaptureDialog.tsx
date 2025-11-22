@@ -268,7 +268,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       onResetCapture();
                       setPreview?.(false);
                     }}
-                    data-cy="retake-button"
                     className="rounded-full size-13"
                   >
                     <RotateCcw className="size-6" />
@@ -281,7 +280,6 @@ export default function CameraCaptureDialog(props: CameraCaptureDialogProps) {
                       setPreviewImage(null);
                       setPreview?.(false);
                     }}
-                    data-cy="capture-submit-button"
                     className="size-18 rounded-full flex items-center justify-center [&_svg]:size-7"
                   >
                     <Check className="text-white" />

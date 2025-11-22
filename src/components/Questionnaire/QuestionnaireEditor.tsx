@@ -920,16 +920,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             variant="outline"
             onClick={handleCancel}
             disabled={isCreating || isUpdating}
-            data-cy="cancel-questionnaire-form"
           >
             {t("cancel")}
           </Button>
           {id && (
-            <Button
-              variant="outline"
-              onClick={handleDownload}
-              data-cy="download-questionnaire-form"
-            >
+            <Button variant="outline" onClick={handleDownload}>
               <CareIcon icon="l-import" className="mr-1 size-4" />
               {t("download")}
             </Button>
@@ -958,7 +953,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             type="submit"
             onClick={handleSave}
             disabled={!isDirty || isCreating || isUpdating}
-            data-cy="save-questionnaire-form"
           >
             <CareIcon icon="l-save" className="mr-2 size-4" />
             {id ? t("save") : t("create")}

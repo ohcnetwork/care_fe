@@ -255,10 +255,14 @@ export function EditInvoiceTable({
     );
 
     if (selectedComponent) {
-      form.setValue(
-        `items.${itemIndex}.discounts.${discountIndex}`,
-        selectedComponent,
-      );
+      form.setValue(`items.${itemIndex}.discounts.${discountIndex}`, {
+        ...selectedComponent,
+        conditions:
+          selectedComponent.conditions?.map((condition) => ({
+            ...condition,
+            _conditionType: `${condition.metric}_${condition.operation}`,
+          })) || [],
+      });
     }
   };
 

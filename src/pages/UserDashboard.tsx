@@ -95,7 +95,6 @@ export default function UserDashboard() {
               size="sm"
               className="w-auto min-w-max"
               asChild
-              data-cy="admin-dashboard-button"
             >
               <Link
                 href="/admin/questionnaire"
@@ -125,7 +124,6 @@ export default function UserDashboard() {
                 size="sm"
                 className="flex items-center gap-2 flex-1"
                 onClick={signOut}
-                data-cy="sign-out-button"
               >
                 <LogOut className="size-4" />
                 {t("sign_out")}
@@ -134,12 +132,7 @@ export default function UserDashboard() {
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  data-cy="user-dashboard-menu-trigger"
-                  variant="outline"
-                  size="sm"
-                  className="w-auto"
-                >
+                <Button variant="outline" size="sm" className="w-auto">
                   <CareIcon icon="l-ellipsis-v" className="text-inherit" />
                 </Button>
               </DropdownMenuTrigger>
@@ -157,7 +150,6 @@ export default function UserDashboard() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  data-cy="sign-out-button"
                   className="cursor-pointer flex items-center gap-2 text-xs w-full"
                   onClick={signOut}
                 >
@@ -175,7 +167,6 @@ export default function UserDashboard() {
           <div
             className="flex border-b border-gray-200"
             role="tablist"
-            data-cy="dashboard-sections"
             aria-label="Dashboard Sections"
           >
             {availableTabs.map((tab) => (
@@ -326,10 +317,7 @@ const TabContent = ({
     >
       <p className="text-sm text-gray-800 font-normal px-1">{description}</p>
 
-      <div
-        className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-        data-cy={`${tabId}-list`}
-      >
+      <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {tabItems.map((item: FacilityBareMinimum | Organization) => {
           return renderChild(item);
         })}

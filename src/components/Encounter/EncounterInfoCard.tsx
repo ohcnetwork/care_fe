@@ -38,7 +38,6 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
 
   return (
     <Card
-      data-cy={`encounter-card-${encounter.id}`}
       data-status={encounter.status}
       key={props.encounter.id}
       className={cn(
@@ -60,10 +59,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           {encounter.patient.deceased_datetime && (
             <Badge variant="destructive">{t("deceased")}</Badge>
           )}
-          <Badge
-            data-cy="encounter-status-badge"
-            variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
-          >
+          <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
             {t(`encounter_status__${encounter.status}`)}
           </Badge>
         </div>

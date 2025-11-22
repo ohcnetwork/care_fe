@@ -109,7 +109,7 @@ test.describe("Purchase Delivery", () => {
     await page.getByRole("button", { name: "Mark as Completed" }).click();
 
     await expect(
-      page.getByText(/Order marked as completed successfully/i),
+      page.getByText(/Order successfully marked as completed/i),
     ).toBeVisible();
   });
 });

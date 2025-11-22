@@ -404,10 +404,14 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
             </Button>
           )}
           <PatientIdentifierFilter
-            onSelect={(patientId) => updateQuery({ patient: patientId })}
+            onSelect={(patientId, patientName) =>
+              updateQuery({ patient: patientId, patient_name: patientName })
+            }
             placeholder={t("search_patients")}
             className="w-full sm:w-auto"
             patientId={qParams.patient}
+            patientName={qParams.patient_name}
+            align="end"
           />
         </div>
       </div>

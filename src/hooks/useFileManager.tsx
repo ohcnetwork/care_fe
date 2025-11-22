@@ -315,7 +315,6 @@ export default function useFileManager(
                   archiveReasonError &&
                     "border-red-500 focus-visible:ring-red-500",
                 )}
-                data-cy="archive-reason-textarea"
               />
               {archiveReasonError && (
                 <p className="text-sm text-red-500">{archiveReasonError}</p>
@@ -463,7 +462,6 @@ export default function useFileManager(
                     });
                   }
                 }}
-                data-cy="edit-filename-input"
               />
               {editError && <p className="text-sm text-red-500">{editError}</p>}
             </div>
