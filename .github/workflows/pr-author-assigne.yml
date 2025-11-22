@@ -16,21 +16,20 @@ jobs:
       - name: Validate linked issue
         id: validate
         run: |
-          PR_BODY="${{ github.event.pull_request.body }}"
+            printf "%s" "${{ github.event.pull_request.body }}" > pr_body.txt
 
-          # Look for "Fixes #<number>", "Closes #<number>", or "Resolves #<number>"
-          ISSUE_REF=$(echo "$PR_BODY" | grep -Eo '(Fixes|Closes|Resolves)\s*#([0-9]+)' | head -n1 || true)
+            ISSUE_REF=$(grep -Eo '(Fixes|Closes|Resolves)\s*#([0-9]+)' pr_body.txt | head -n1 || true)
 
-          if [ -z "$ISSUE_REF" ]; then
-            echo "no_issue=true" >> $GITHUB_OUTPUT
-            echo "there is no issue"
-          else
-            ISSUE_NUMBER=$(echo "$ISSUE_REF" | grep -Eo '[0-9]+')
-            echo "no_issue=false" >> $GITHUB_OUTPUT
-            echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
-            echo "issue_url=https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE_NUMBER" >> $GITHUB_OUTPUT
-            echo "there is issue"
-          fi
+            if [ -z "$ISSUE_REF" ]; then
+              echo "no_issue=true" >> "$GITHUB_OUTPUT"
+              echo "there is no issue"
+            else
+              ISSUE_NUMBER=$(printf "%s" "$ISSUE_REF" | grep -Eo '[0-9]+')
+              echo "no_issue=false" >> "$GITHUB_OUTPUT"
+              echo "issue_number=$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
+              echo "issue_url=https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
+              echo "there is issue"
+            fi
 
       - name: Reopen PR if issue is now linked
         if: steps.validate.outputs.no_issue == 'false'
@@ -80,15 +79,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ISSUE_JSON=$(gh api "${{ steps.validate.outputs.issue_url }}" --jq '{assignee: .assignee.login}')
+          ISSUE_JSON=$(gh api "${{ steps.validate.outputs.issue_url }}" --jq '{assignee: (.assignee.login // "unassigned")}')
           echo "$ISSUE_JSON"
           echo "issue_json=$ISSUE_JSON" >> $GITHUB_OUTPUT
-          ASSIGNEE=$(echo "$ISSUE_JSON" | jq -r '.assignee')
+          ASSIGNEE=$(echo "$ISSUE_JSON" | jq -r '.assignee // "unassigned"')
           echo "$ASSIGNEE"
           echo "assignee=$ASSIGNEE" >> $GITHUB_OUTPUT
 
       - name: Close PR if issue unassigned
-        if: steps.issue.outputs.assignee == 'null' && steps.check-core.outputs.is_core == 'false'
+        if: steps.issue.outputs.assignee == 'unassigned' && steps.check-core.outputs.is_core == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -97,7 +96,7 @@ jobs:
           exit 0
 
       - name: Close PR if author not same as assignee
-        if: steps.issue.outputs.assignee != 'null' && steps.issue.outputs.assignee != github.event.pull_request.user.login && steps.check-core.outputs.is_core == 'false'
+        if: steps.issue.outputs.assignee != 'unassigned' && steps.issue.outputs.assignee != github.event.pull_request.user.login && steps.check-core.outputs.is_core == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
