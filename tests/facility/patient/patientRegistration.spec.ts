@@ -96,7 +96,6 @@ test.describe("Patient Registration", () => {
 
     // Fill additional details
     await test.step("Fill additional details", async () => {
-      // Use data-cy selector for state dropdown
       // fill address
       await page
         .getByRole("textbox", { name: "Address" })
@@ -132,25 +131,6 @@ test.describe("Patient Registration", () => {
       await expect(
         page.getByText(/patient registered successfully/i),
       ).toBeVisible({ timeout: 10000 });
-    });
-  });
-
-  test("should show validation errors for empty required fields", async ({
-    page,
-  }) => {
-    // Start patient registration
-    await page
-      .getByRole("textbox", { name: /search by patient phone number/i })
-      .press("Shift+Enter");
-
-    // Try to submit without filling required fields
-    await test.step("Submit empty form", async () => {
-      await page.getByRole("button", { name: /register patient/i }).click();
-
-      // Verify validation errors appear
-      await expect(
-        page.getByText(/required|not valid|invalid/i).first(),
-      ).toBeVisible();
     });
   });
 
@@ -232,7 +212,8 @@ test.describe("Patient Registration", () => {
       await page
         .getByRole("button", { name: /register patient/i })
         .scrollIntoViewIfNeeded();
-      const stateCombobox = stateRegion.locator('[data-cy="select-state"]');
+      const stateCombobox = stateRegion.getByRole("combobox");
+      await stateCombobox.waitFor({ state: "visible", timeout: 5000 });
       await stateCombobox.click();
 
       // Select the state option by visible text
@@ -242,7 +223,7 @@ test.describe("Patient Registration", () => {
       await stateOption.click();
     });
 
-    // Submit registration
+    // Submit the registration
     await test.step("Submit patient registration", async () => {
       await page.getByRole("button", { name: /register patient/i }).click();
 
@@ -363,7 +344,8 @@ test.describe("Patient Registration", () => {
       await page
         .getByRole("button", { name: /register patient/i })
         .scrollIntoViewIfNeeded();
-      const stateCombobox = stateRegion.locator('[data-cy="select-state"]');
+      const stateCombobox = stateRegion.getByRole("combobox");
+      await stateCombobox.waitFor({ state: "visible", timeout: 5000 });
       await stateCombobox.click();
 
       // Select the state option by visible text

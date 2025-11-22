@@ -79,7 +79,6 @@ export default function GeoLocationPicker({
             onClick={onGetCurrentLocation}
             disabled={isGettingLocation}
             className="flex items-center gap-2"
-            data-cy="get-location-button"
           >
             {isGettingLocation ? (
               <CareIcon icon="l-spinner" className="size-4 animate-spin mr-1" />
@@ -118,7 +117,6 @@ export default function GeoLocationPicker({
               : t("type_to_search")
           }
           disabled={isGettingLocation}
-          data-cy="location-search"
         />
       </div>
 

@@ -154,7 +154,6 @@ export function ConsentDetailPage({ consentId }: ConsentDetailPageProps) {
                     <Button
                       variant="outline"
                       className="flex flex-row items-center"
-                      data-cy="add-files-button"
                       asChild
                     >
                       <Label className="flex flex-row items-center cursor-pointer w-fit">

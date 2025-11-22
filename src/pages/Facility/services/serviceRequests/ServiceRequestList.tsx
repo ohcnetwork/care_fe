@@ -272,7 +272,7 @@ export default function ServiceRequestList({
         locationId={locationId}
       />
       <div className="container mx-auto pb-8">
-        <div className="mb-6 sm:mb-8">
+        <div className="mb-4">
           <div className="mb-4">
             <p className="text-sm text-gray-600">{location?.name}</p>
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
@@ -308,8 +308,19 @@ export default function ServiceRequestList({
             />
           </div>
 
-          <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+          <div className="flex flex-col md:flex-row items-start gap-2">
             <div className="w-full md:w-auto">
+              <PatientIdentifierFilter
+                onSelect={(patientId, patientName) =>
+                  updateQuery({ patient: patientId, patient_name: patientName })
+                }
+                placeholder={t("filter_by_identifier")}
+                className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+                patientId={qParams.patient}
+                patientName={qParams.patient_name}
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row">
               <MultiFilter
                 selectedFilters={selectedFilters}
                 onFilterChange={handleFilterChange}
@@ -321,14 +332,6 @@ export default function ServiceRequestList({
                 triggerButtonClassName="self-start sm:self-center"
                 clearAllButtonClassName="self-center"
                 facilityId={facilityId}
-              />
-            </div>
-            <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto">
-              <PatientIdentifierFilter
-                onSelect={(patientId) => updateQuery({ patient: patientId })}
-                placeholder={t("filter_by_identifier")}
-                className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
-                patientId={qParams.patient}
               />
             </div>
           </div>
