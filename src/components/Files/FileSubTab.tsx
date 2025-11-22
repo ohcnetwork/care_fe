@@ -211,7 +211,6 @@ export const FilesPage = ({
             <Button
               variant="secondary"
               onClick={() => fileManager.viewFile(file, associatingId)}
-              data-cy="file-view-button"
             >
               <span className="flex flex-row items-center gap-1">
                 <CareIcon icon="l-eye" />
@@ -221,7 +220,7 @@ export const FilesPage = ({
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="secondary" data-cy="file-options-button">
+              <Button variant="secondary" aria-label="actions">
                 <CareIcon icon="l-ellipsis-h" />
               </Button>
             </DropdownMenuTrigger>
@@ -247,7 +246,6 @@ export const FilesPage = ({
                       }
                       variant="ghost"
                       className="w-full flex flex-row justify-stretch items-center"
-                      data-cy="file-archive-option"
                     >
                       <CareIcon icon="l-archive-alt" className="mr-1" />
                       <span>{t("archive")}</span>
@@ -259,7 +257,6 @@ export const FilesPage = ({
                       onClick={() => fileManager.editFile(file, associatingId)}
                       variant="ghost"
                       className="w-full flex flex-row justify-stretch items-center"
-                      data-cy="file-rename-button"
                     >
                       <CareIcon icon="l-pen" className="mr-1" />
                       <span>{t("rename")}</span>
@@ -278,11 +275,7 @@ export const FilesPage = ({
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="secondary"
-            className="text-sm text-secondary-800"
-            data-cy="files-filter-button"
-          >
+          <Button variant="secondary" className="text-sm text-secondary-800">
             <span className="flex flex-row items-center gap-1">
               <CareIcon icon="l-filter" />
               <span>{t("filter")}</span>
@@ -298,7 +291,6 @@ export const FilesPage = ({
             onClick={() => {
               updateQuery({ is_archived: "false" });
             }}
-            data-cy="active-files-button"
           >
             <span>{t("active_files")}</span>
           </DropdownMenuItem>
@@ -320,7 +312,6 @@ export const FilesPage = ({
     return (
       <div className="flex flex-row gap-2 mt-2 mx-2">
         <Badge
-          data-cy="file-status-badge"
           variant="outline"
           className="cursor-pointer"
           onClick={() => updateQuery({ is_archived: undefined })}
@@ -342,7 +333,6 @@ export const FilesPage = ({
           <Button
             variant="outline_primary"
             className="flex flex-row items-center mr-2"
-            data-cy="add-files-button"
           >
             <CareIcon icon="l-file-upload" className="mr-1" />
             <span>{t("add_files")}</span>
@@ -362,7 +352,6 @@ export const FilesPage = ({
           >
             <Label
               htmlFor={`file_upload_${type}`}
-              data-cy="choose-file-option"
               className="flex items-center w-full text-primary-900 hover:text-black py-1 font-medium"
             >
               <CareIcon icon="l-file-upload-alt" />
@@ -381,7 +370,6 @@ export const FilesPage = ({
           <DropdownMenuItem
             onSelect={() => fileUpload.handleAudioCapture()}
             className="flex items-center text-primary-900 font-medium"
-            data-cy="record-audio-button"
             aria-label={t("record")}
           >
             <CareIcon icon="l-microphone" />
@@ -614,7 +602,6 @@ export const FilesPage = ({
             value={qParams.name || ""}
             onChange={(e) => updateQuery({ name: e.target.value })}
             className="pointer-events-auto pl-10"
-            data-cy="search-input"
           />
         </div>
 

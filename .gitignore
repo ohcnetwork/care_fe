@@ -55,10 +55,6 @@ yarn.lock
 pnpm-lock.yaml
 bun.lockb
 
-# Cypress
-cypress/downloads
-cypress/fixtures/token.json
-
 # Playwright
 /test-results/
 /playwright-report/

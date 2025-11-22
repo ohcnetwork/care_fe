@@ -222,7 +222,6 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                 size="sm"
                 className="h-8 gap-2"
                 disabled={alreadySelected}
-                data-cy="confirm-organization"
               >
                 <span>{t("already_selected")}</span>
                 <CareIcon icon="l-multiply" className="h-4 w-4" />
@@ -234,7 +233,6 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                 className="h-8 gap-2"
                 onClick={() => handleConfirmSelection(currentSelection)}
                 disabled={isDisabled}
-                data-cy="confirm-organization"
               >
                 <span>{t("confirm")}</span>
                 <CareIcon icon="l-check" className="h-4 w-4" />
@@ -301,7 +299,6 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                         role="combobox"
                         aria-expanded={open}
                         className="w-full justify-between border-dashed"
-                        data-cy="role-organization"
                         onClick={() => setOpen(true)}
                         type="button" // Prevents unintended form submission
                       >
@@ -326,7 +323,6 @@ export default function RoleOrgSelector(props: RoleOrgSelectorProps) {
                       role="combobox"
                       aria-expanded={open}
                       className="w-full justify-between border-dashed"
-                      data-cy="role-organization"
                     >
                       <span className="truncate text-gray-500">
                         {currentSelection
