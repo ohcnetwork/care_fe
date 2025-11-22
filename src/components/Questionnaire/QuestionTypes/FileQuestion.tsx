@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import useFileDrop from "@/hooks/useFileDropZone";
 
 import useFileUpload from "@/hooks/useFileUpload";
 
@@ -134,6 +135,24 @@ export function FilesQuestion(props: FilesQuestionProps) {
     compress: false,
   });
 
+  const { isDragging, dragHandlers } = useFileDrop({
+    onFilesDropped: (validFiles) => {
+      const dataTransfer = new DataTransfer();
+      validFiles.forEach((file) => dataTransfer.items.add(file));
+
+      const input = document.getElementById(
+        "file_upload_encounter",
+      ) as HTMLInputElement;
+      if (input) {
+        input.files = dataTransfer.files;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    },
+    allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
+    existingFiles: fileUpload.files,
+    canEdit: true,
+  });
+
   useEffect(() => {
     if (fileUpload.files.length > 0) {
       setDropdownOpen(false);
@@ -160,7 +179,26 @@ export function FilesQuestion(props: FilesQuestionProps) {
   }, [fileUpload.files]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 relative" {...dragHandlers}>
+      {/* Drag and Drop Overlay */}
+      {isDragging && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary-500/20 backdrop-blur-sm">
+          <div className="rounded-lg bg-white p-8 shadow-2xl border-4 border-dashed border-primary-500">
+            <div className="flex flex-col items-center gap-4">
+              <CareIcon
+                icon="l-cloud-upload"
+                className="text-6xl text-primary-500"
+              />
+              <p className="text-xl font-semibold text-gray-900">
+                {t("drop_files_here")}
+              </p>
+              <p className="text-sm text-gray-600">
+                {t("release_to_upload_files")}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       {values.map((value, index) => (
         <div key={index} className="flex items-stretch gap-2">
           <Input
