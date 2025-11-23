@@ -268,17 +268,64 @@ test.describe("Activity Definition List Filter", () => {
       .locator('[data-slot="table-body"]')
       .waitFor({ state: "visible" });
 
-    const adRowAfterBack = page.locator('[data-slot="table-row"]', {
-      hasText: testAD.title,
-    });
-    await expect(adRowAfterBack).toBeVisible();
+    await expect(adRow).toBeVisible();
 
-    const editLink = adRowAfterBack.getByRole("link", { name: /edit/i });
+    const editLink = adRow.getByRole("link", { name: /edit/i });
     await expect(editLink).toBeVisible();
     await editLink.click();
 
     await expect(page).toHaveURL(
       `/facility/${facilityId}/settings/activity_definitions/${activityDefinitionSlug}/edit`,
+    );
+  });
+
+  test("should navigate to create page when clicking add activity definition button", async ({
+    page,
+  }) => {
+    await page.goto(
+      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
+    );
+
+    const addButton = page.getByRole("button", {
+      name: /add activity definition/i,
+    });
+    await expect(addButton).toBeVisible();
+    await addButton.click();
+
+    await expect(page).toHaveURL(
+      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}/new`,
+    );
+  });
+
+  test("should navigate via breadcrumbs", async ({ page }) => {
+    await page.goto(
+      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
+    );
+
+    const breadcrumb = page.locator('[data-slot="breadcrumb"]');
+    await expect(breadcrumb).toBeVisible();
+
+    const resourceCategoryBreadcrumb =
+      breadcrumb.getByText(resourceCategoryName);
+    await expect(resourceCategoryBreadcrumb).toBeVisible();
+    const resourceCategoryElement = breadcrumb.locator(
+      `span[data-slot="breadcrumb-page"]`,
+    );
+    await expect(resourceCategoryElement).toHaveText(resourceCategoryName);
+    await expect(resourceCategoryElement).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+
+    const activityDefinitionLink = breadcrumb
+      .locator('[data-slot="breadcrumb-link"]')
+      .first();
+    await expect(activityDefinitionLink).toBeVisible();
+    await expect(activityDefinitionLink).toContainText(/activity definition/i);
+    await activityDefinitionLink.click();
+
+    await expect(page).toHaveURL(
+      `/facility/${facilityId}/settings/activity_definitions`,
     );
   });
 });
