@@ -66,7 +66,7 @@ export default function TagConfigForm({
     category: z.nativeEnum(TagCategory, {
       required_error: t("field_required"),
     }),
-    description: z.string().trim().optional(),
+    description: z.string().optional(),
     priority: z.number().min(0, t("priority_non_negative")),
     status: z.nativeEnum(TagStatus, {
       required_error: t("field_required"),
@@ -120,7 +120,7 @@ export default function TagConfigForm({
       form.reset({
         display: existingConfig.display,
         category: existingConfig.category,
-        description: existingConfig.description || "",
+        description: existingConfig.description ?? "",
         priority: existingConfig.priority,
         status: existingConfig.status,
         resource: existingConfig.resource,
@@ -178,7 +178,7 @@ export default function TagConfigForm({
     const payload: TagConfigRequest = {
       display: data.display,
       category: data.category,
-      description: data.description || "",
+      description: data.description?.trim() ? data.description.trim() : null,
       priority: data.priority,
       status: data.status,
       resource: data.resource,
