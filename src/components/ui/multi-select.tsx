@@ -137,7 +137,7 @@ export function MultiSelect({
             autoFocus
           />
         </div>
-        <CommandList>
+        <CommandList className="max-h-none">
           <CommandEmpty>{t("no_results_found")}</CommandEmpty>
           <CommandGroup>
             <CommandItem
@@ -239,7 +239,7 @@ export function MultiSelect({
       <div className="w-full">
         <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-          <DrawerContent className="px-0 pt-2 flex flex-col max-h-[85vh]">
+          <DrawerContent className="px-0 pt-2 flex flex-col h-[85vh]">
             <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex flex-col flex-1 overflow-hidden">
               {listContent}
             </div>
