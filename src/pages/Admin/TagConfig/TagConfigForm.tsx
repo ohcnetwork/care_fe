@@ -178,7 +178,7 @@ export default function TagConfigForm({
     const payload: TagConfigRequest = {
       display: data.display,
       category: data.category,
-      description: data.description?.trim() ? data.description.trim() : null,
+      description: data.description?.trim() || "",
       priority: data.priority,
       status: data.status,
       resource: data.resource,

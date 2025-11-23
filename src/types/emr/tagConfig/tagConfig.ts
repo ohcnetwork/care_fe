@@ -66,7 +66,7 @@ export interface TagConfigRead extends TagConfig {
 export interface TagConfigRequest {
   display: string;
   category: TagCategory;
-  description?: string | null;
+  description?: string;
   priority?: number;
   status: TagStatus;
   parent?: string | null;
