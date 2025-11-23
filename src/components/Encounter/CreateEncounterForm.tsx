@@ -62,6 +62,7 @@ interface Props {
   trigger?: React.ReactNode;
   onSuccess?: () => void;
   disableRedirectOnSuccess?: boolean;
+  defaultStatus?: "planned" | "in_progress" | "on_hold";
 }
 
 export default function CreateEncounterForm({
@@ -72,6 +73,7 @@ export default function CreateEncounterForm({
   trigger,
   onSuccess,
   disableRedirectOnSuccess = false,
+  defaultStatus = "planned",
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -92,7 +94,7 @@ export default function CreateEncounterForm({
   const form = useForm({
     resolver: zodResolver(encounterFormSchema),
     defaultValues: {
-      status: "planned",
+      status: defaultStatus,
       encounter_class: careConfig.defaultEncounterType,
       priority: "routine",
       organizations: [],
@@ -228,7 +230,6 @@ export default function CreateEncounterForm({
                           <Button
                             key={value}
                             type="button"
-                            data-cy={`encounter-type-${value}`}
                             className={cn(
                               "h-auto min-h-24 w-full justify-center text-lg",
                               field.value === value &&
@@ -242,7 +243,7 @@ export default function CreateEncounterForm({
                               <div className="text-sm font-bold">
                                 {t(`encounter_class__${value}`)}
                               </div>
-                              <div className="text-wrap text-center text-xs text-gray-500">
+                              <div className="whitespace-normal break-words text-center text-xs text-gray-500">
                                 {t(`encounter_class_description__${value}`)}
                               </div>
                             </div>
@@ -265,10 +266,7 @@ export default function CreateEncounterForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger
-                          data-cy="encounter-status"
-                          ref={field.ref}
-                        >
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -296,10 +294,7 @@ export default function CreateEncounterForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger
-                          data-cy="encounter-priority"
-                          ref={field.ref}
-                        >
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
                       </FormControl>
@@ -368,7 +363,6 @@ export default function CreateEncounterForm({
                 <ShortcutBadge actionId="cancel-action" />
               </Button>
               <Button
-                data-cy="create-encounter-button"
                 type="submit"
                 disabled={isPending || !form.watch("organizations").length}
               >

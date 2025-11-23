@@ -1,4 +1,5 @@
 import { Code } from "@/types/base/code/code";
+import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
 import { QuestionType } from "@/types/questionnaire/question";
 import { SubjectType } from "@/types/questionnaire/questionnaire";
@@ -21,10 +22,9 @@ export interface Performer {
 }
 
 export interface ObservationReferenceRange {
-  low?: number;
-  high?: number;
-  unit?: string;
-  text?: string;
+  min?: number;
+  max?: number;
+  interpretation?: Interpretation;
 }
 
 export type QuestionnaireSubmitResultValue = {

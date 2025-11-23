@@ -28,8 +28,6 @@ import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDial
 import { Button } from "@/components/ui/button";
 import { PermissionProvider } from "@/context/PermissionContext";
 import { useShortcuts } from "@/context/ShortcutContext";
-import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
-import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import UserDashboard from "@/pages/UserDashboard";
 
 // List of paths and patterns where the sidebar should be hidden
@@ -39,7 +37,8 @@ const PATHS_WITHOUT_SIDEBAR = [
   "/login",
   "/session-expired",
   // Pattern matches (using regex)
-  /^\/facility\/[^/]+\/services_requests\/[^/]+$/,
+  /^\/facility\/[^/]+\/service_requests\/[^/]+$/,
+  /^\/facility\/[^/]+\/locations\/[^/]+\/service_requests\/[^/]+$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/to_receive\/[^/]+$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/to_dispatch\/[^/]+$/,
   /^\/facility\/[^/]+\/locations\/[^/]+\/internal_transfers\/create_delivery$/,
@@ -82,9 +81,6 @@ const Routes: AppRoutes = {
 
   // Only include the icon route in development environment
   ...(import.meta.env.PROD ? { "/icons": () => <IconIndex /> } : {}),
-
-  "/apps": () => <PlugConfigList />,
-  "/apps/plug-configs/:slug": ({ slug }) => <PlugConfigEdit slug={slug} />,
 };
 
 const AdminRouter: AppRoutes = {

@@ -60,23 +60,13 @@ export function LocationNav() {
               url: `${baseUrl}/inventory/summary`,
             },
             {
-              header: t("orders"),
-              name: t("outgoing_orders"),
-              url: `${baseUrl}/inventory/internal/orders/outgoing`,
+              header: t("internal_transfers"),
+              name: t("to_receive"),
+              url: `${baseUrl}/inventory/internal/receive/`,
             },
             {
-              name: t("incoming_orders"),
-              url: `${baseUrl}/inventory/internal/orders/incoming`,
-            },
-
-            {
-              header: t("deliveries"),
-              name: t("outgoing_deliveries"),
-              url: `${baseUrl}/inventory/internal/deliveries/outgoing`,
-            },
-            {
-              name: t("incoming_deliveries"),
-              url: `${baseUrl}/inventory/internal/deliveries/incoming`,
+              name: t("to_dispatch"),
+              url: `${baseUrl}/inventory/internal/dispatch/`,
             },
             {
               header: t("external_supply"),

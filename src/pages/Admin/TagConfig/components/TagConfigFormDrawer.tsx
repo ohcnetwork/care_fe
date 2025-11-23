@@ -3,6 +3,7 @@ import React from "react";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -10,10 +11,13 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+
+import { useTranslation } from "react-i18next";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 import TagConfigForm from "@/pages/Admin/TagConfig/TagConfigForm";
@@ -40,6 +44,7 @@ export default function TagConfigFormDrawer({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
 }: TagConfigFormDrawerProps) {
+  const { t } = useTranslation();
   const isMobile = useBreakpoints({ default: true, sm: false });
 
   const [internalOpen, setInternalOpen] = React.useState(false);
@@ -73,6 +78,11 @@ export default function TagConfigFormDrawer({
               <DrawerTitle className="text-xl font-semibold">
                 {title}
               </DrawerTitle>
+              <DrawerDescription className="sr-only">
+                {configId
+                  ? t("edit_tag_config")
+                  : t("manage_tag_config_description")}
+              </DrawerDescription>
             </DrawerHeader>
             <div className="overflow-y-auto flex-1 px-3 pb-2">
               <TagConfigForm
@@ -90,6 +100,11 @@ export default function TagConfigFormDrawer({
           <SheetContent className="overflow-y-auto">
             <SheetHeader className="flex flex-row items-center justify-between">
               <SheetTitle>{title}</SheetTitle>
+              <SheetDescription className="sr-only">
+                {configId
+                  ? t("edit_tag_config")
+                  : t("manage_tag_config_description")}
+              </SheetDescription>
             </SheetHeader>
             <div className="mt-6 pb-6">
               <TagConfigForm

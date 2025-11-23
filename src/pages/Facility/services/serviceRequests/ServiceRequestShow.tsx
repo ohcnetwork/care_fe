@@ -372,7 +372,6 @@ export default function ServiceRequestShow({
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        data-cy="invoice-actions-button"
                         className="border-gray-400 px-2"
                       >
                         <CareIcon icon="l-ellipsis-v" />
@@ -476,8 +475,7 @@ export default function ServiceRequestShow({
               resourceId={serviceRequestId}
               encounterId={request.encounter.id}
               serviceResourceType={ChargeItemServiceResource.service_request}
-              sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/services_requests/${serviceRequestId}`}
-              locationId={locationId}
+              sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/service_requests/${serviceRequestId}`}
               patientId={request.encounter.patient.id}
               viewOnly={disableEdit}
             />

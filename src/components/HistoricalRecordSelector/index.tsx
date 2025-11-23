@@ -14,6 +14,7 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -336,11 +337,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          data-cy="view-history"
-          className="border-gray-400 flex ml-auto"
-        >
+        <Button variant="outline" className="border-gray-400 flex ml-auto">
           <Clock className="size-4" />
           <span className="font-semibold">
             {buttonLabel || t("view_history")}
@@ -353,6 +350,9 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
             <SheetTitle className="text-lg font-medium text-center">
               {title || t("history")}
             </SheetTitle>
+            <SheetDescription className="sr-only">
+              {title || t("history")}
+            </SheetDescription>
           </SheetHeader>
           {structuredTypes.length > 1 && (
             <Tabs
@@ -496,7 +496,6 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
               onClick={handleAddSelected}
               disabled={(state.selectedRecords[activeType] || []).length === 0}
               className="bg-emerald-600 hover:bg-emerald-700"
-              data-cy="add-selected-records"
             >
               {t("add_selected")}
             </Button>

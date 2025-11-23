@@ -234,12 +234,7 @@ function ServiceRequestForm({
           {renderInfoSection()}
           <div className="flex w-full justify-end items-center mt-2 gap-2">
             {onRemove && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onRemove}
-                data-cy="remove-service-request"
-              >
+              <Button variant="ghost" size="icon" onClick={onRemove}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
@@ -323,9 +318,7 @@ function ServiceRequestForm({
         </div>
         {isPreview && (
           <div className="flex justify-end">
-            <Button onClick={onAdd} data-cy="add-service-request">
-              {t("add")}
-            </Button>
+            <Button onClick={onAdd}>{t("add")}</Button>
           </div>
         )}
       </div>
@@ -358,7 +351,6 @@ function ServiceRequestForm({
                   onRemove();
                 }}
                 disabled={disabled}
-                data-cy="remove-service-request"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -735,12 +727,7 @@ export function ServiceRequestQuestion({
             queryFn: activityDefinitionApi.listActivityDefinition,
             pathParams: { facilityId },
           }}
-          translations={{
-            searchPlaceholder: "search_activity_definitions",
-            selectPlaceholder: "select_activity_definition",
-            noResultsFound: "no_activity_definitions_found_for",
-            noItemsFound: "no_activity_definitions_found",
-          }}
+          translationBaseKey="activity_definition"
         />
       </div>
     </div>

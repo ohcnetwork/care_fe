@@ -28,6 +28,7 @@ interface ProductKnowledgeSelectProps {
   disableFavorites?: boolean;
   ref?: React.Ref<HTMLButtonElement>;
   hideClearButton?: boolean;
+  alignContent?: "start" | "center" | "end";
 }
 
 export function ProductKnowledgeSelect({
@@ -39,6 +40,7 @@ export function ProductKnowledgeSelect({
   disableFavorites = false,
   ref,
   hideClearButton = false,
+  alignContent = "start",
 }: ProductKnowledgeSelectProps) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
@@ -74,12 +76,7 @@ export function ProductKnowledgeSelect({
         },
       }}
       mapper={productKnowledgeMapper}
-      translations={{
-        searchPlaceholder: "search_product_knowledge",
-        selectPlaceholder: "select_product_knowledge",
-        noResultsFound: "no_product_knowledge_found_for",
-        noItemsFound: "no_product_knowledge_found",
-      }}
+      translationBaseKey="product_knowledge"
       enableFavorites={!disableFavorites}
       favoritesConfig={
         !disableFavorites
@@ -98,6 +95,7 @@ export function ProductKnowledgeSelect({
       }
       ref={ref}
       hideClearButton={hideClearButton}
+      alignContent={alignContent}
     />
   );
 }

@@ -2,13 +2,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle, X } from "lucide-react";
 import { navigate } from "raviger";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -32,9 +32,19 @@ import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
+import { CodeSchema } from "@/types/base/code/code";
+import { removeConditionType } from "@/types/base/condition/condition";
 import {
   InterpretationType,
   QualifiedRange,
@@ -49,69 +59,10 @@ import {
   QuestionType,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { generateSlug } from "@/Utils/utils";
 import { ObservationInterpretation } from "./ObservationInterpretation";
-
-const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug_value: z.string().min(1, "Slug is required"),
-  description: z.string().min(1, "Description is required"),
-  status: z.enum(OBSERVATION_DEFINITION_STATUS),
-  category: z.enum(OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]]),
-  permitted_data_type: z.nativeEnum(QuestionType),
-  code: z.object({
-    code: z.string().min(1, "Code is required"),
-    display: z.string().min(1, "Display name is required"),
-    system: z.string().min(1, "System is required"),
-  }),
-  body_site: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  method: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  permitted_unit: z
-    .object({
-      code: z.string().min(1, "Code is required"),
-      display: z.string().min(1, "Display name is required"),
-      system: z.string().min(1, "System is required"),
-    })
-    .nullable(),
-  component: z
-    .array(
-      z.object({
-        code: z
-          .object({
-            code: z.string(),
-            display: z.string(),
-            system: z.string(),
-          })
-          .refine((data) => data.code && data.display && data.system, {
-            message: "Required",
-          }),
-        permitted_data_type: z.nativeEnum(QuestionType),
-        permitted_unit: z
-          .object({
-            code: z.string(),
-            display: z.string(),
-            system: z.string(),
-          })
-          .refine((data) => data.code && data.display && data.system, {
-            message: "Required",
-          }),
-        qualified_ranges: qualifiedRangeSchema,
-      }),
-    )
-    .default([]),
-  qualified_ranges: qualifiedRangeSchema,
-});
 
 export default function ObservationDefinitionForm({
   facilityId,
@@ -177,8 +128,63 @@ function ObservationDefinitionFormContent({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
+
+  const formSchema = z
+    .object({
+      title: z.string().min(1, t("field_required")),
+      slug_value: z
+        .string()
+        .min(5, t("character_count_validation", { min: 5, max: 25 }))
+        .max(25, t("character_count_validation", { min: 5, max: 25 })),
+      description: z.string().min(1, t("field_required")),
+      status: z.enum(OBSERVATION_DEFINITION_STATUS),
+      category: z.enum(
+        OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]],
+      ),
+      permitted_data_type: z.nativeEnum(QuestionType),
+      code: CodeSchema,
+      body_site: CodeSchema.nullable(),
+      method: CodeSchema.nullable(),
+      permitted_unit: CodeSchema.nullable(),
+      component: z
+        .array(
+          z.object({
+            code: CodeSchema,
+            permitted_data_type: z.nativeEnum(QuestionType),
+            permitted_unit: CodeSchema,
+            qualified_ranges: qualifiedRangeSchema.default([]),
+          }),
+        )
+        .default([]),
+      qualified_ranges: qualifiedRangeSchema.default([]),
+    })
+    .refine(
+      (data) => {
+        const hasRootQualifiedRanges =
+          data.qualified_ranges && data.qualified_ranges.length > 0;
+        const hasComponentQualifiedRanges = data.component.some(
+          (c) => c.qualified_ranges && c.qualified_ranges.length > 0,
+        );
+
+        // Valid if only one level has qualified ranges, or neither has any
+        return !(hasRootQualifiedRanges && hasComponentQualifiedRanges);
+      },
+      {
+        message: t(
+          "observation_interpretation_root_component_conflict_message",
+        ),
+        path: ["qualified_ranges"],
+      },
+    );
+
   const queryClient = useQueryClient();
   const isEditMode = Boolean(observationSlug);
+  const [
+    showClearObsInterpretationWarning,
+    setshowClearObsInterpretationWarning,
+  ] = useState(false);
+  const [clearRootLevel, setClearRootLevel] = useState(false);
+  const qualifiedRangesRef = useRef<QualifiedRange[]>([]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -198,21 +204,28 @@ function ObservationDefinitionFormContent({
             component:
               existingData.component?.map((c) => ({
                 ...c,
-                qualified_ranges: c.qualified_ranges?.map((range, index) => ({
-                  ...range,
-                  id: index,
-                  conditions: range?.conditions,
-                  _interpretation_type:
-                    range?.ranges?.length > 0
-                      ? InterpretationType.ranges
-                      : InterpretationType.valuesets,
-                })),
+                qualified_ranges:
+                  c.qualified_ranges?.map((range, index) => ({
+                    ...range,
+                    id: index,
+                    conditions: range?.conditions.map((condition) => ({
+                      ...condition,
+                      _conditionType: `${condition.metric}_${condition.operation}`,
+                    })),
+                    _interpretation_type:
+                      range?.ranges?.length > 0
+                        ? InterpretationType.ranges
+                        : InterpretationType.valuesets,
+                  })) || [],
               })) || [],
             qualified_ranges:
               existingData.qualified_ranges?.map((range, index) => ({
                 ...range,
                 id: index,
-                conditions: range?.conditions,
+                conditions: range?.conditions.map((condition) => ({
+                  ...condition,
+                  _conditionType: `${condition.metric}_${condition.operation}`,
+                })),
                 _interpretation_type:
                   range?.ranges?.length > 0
                     ? InterpretationType.ranges
@@ -228,12 +241,24 @@ function ObservationDefinitionFormContent({
           },
   });
 
+  const rootQualifiedRanges = form.watch("qualified_ranges");
+  const componentQualifiedRanges =
+    form.watch("component")?.flatMap((c) => c.qualified_ranges || []) || [];
+
+  // Mutual exclusivity logic: only one level can have qualified ranges at a time
+  const hasRootQualifiedRanges =
+    rootQualifiedRanges && rootQualifiedRanges.length > 0;
+  const hasComponentQualifiedRanges = componentQualifiedRanges.length > 0;
+
+  const disableRootObsInterpretation = hasComponentQualifiedRanges;
+  const disableComponentObsInterpretation = hasRootQualifiedRanges;
+
   React.useEffect(() => {
     if (isEditMode) return;
 
     const subscription = form.watch((value, { name }) => {
       if (name === "title") {
-        form.setValue("slug_value", generateSlug(value.title || ""), {
+        form.setValue("slug_value", generateSlug(value.title || "", 25), {
           shouldValidate: true,
         });
       }
@@ -270,13 +295,39 @@ function ObservationDefinitionFormContent({
 
   const isPending = isCreating || isUpdating;
 
+  const handleClearObservationInterpretation = (
+    clearRootObsInterp: boolean,
+  ) => {
+    setshowClearObsInterpretationWarning(false);
+    if (clearRootObsInterp) {
+      form.setValue("qualified_ranges", []);
+    } else {
+      form.setValue(
+        "component",
+        form.watch("component")?.map((c) => ({
+          ...c,
+          qualified_ranges: [],
+        })),
+      );
+    }
+    setClearRootLevel(!clearRootObsInterp);
+  };
+
   function onSubmit(data: z.infer<typeof formSchema>) {
+    const cleanData = {
+      ...data,
+      qualified_ranges: removeConditionType(data.qualified_ranges || []),
+      component: data.component?.map((c) => ({
+        ...c,
+        qualified_ranges: removeConditionType(c.qualified_ranges || []),
+      })),
+    };
     if (isEditMode && observationSlug) {
-      updateObservationDefinition(data as ObservationDefinitionUpdateSpec);
+      updateObservationDefinition(cleanData as ObservationDefinitionUpdateSpec);
     } else {
       const payload: ObservationDefinitionCreateSpec = {
-        ...data,
-        facility: facilityId,
+        ...cleanData,
+        facility: facilityId as string,
       };
       createObservationDefinition(payload);
     }
@@ -299,6 +350,45 @@ function ObservationDefinitionFormContent({
               : t("create_observation_definition")}
           </h1>
         </div>
+
+        <AlertDialog
+          open={showClearObsInterpretationWarning}
+          onOpenChange={setshowClearObsInterpretationWarning}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {clearRootLevel
+                  ? t("remove_root_observation_interpretation")
+                  : t("remove_component_observation_interpretation")}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {clearRootLevel
+                  ? t("remove_root_observation_interpretation_description")
+                  : t(
+                      "remove_component_observation_interpretation_description",
+                    )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                onClick={() => setshowClearObsInterpretationWarning(false)}
+                className="w-full sm:w-auto"
+              >
+                {t("cancel")}
+              </AlertDialogCancel>
+
+              <AlertDialogAction
+                onClick={() => {
+                  handleClearObservationInterpretation(clearRootLevel);
+                }}
+                className={cn(buttonVariants({ variant: "destructive" }))}
+              >
+                {t("remove")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <Form {...form}>
           <form
@@ -349,7 +439,9 @@ function ObservationDefinitionFormContent({
                               const sanitizedValue = e.target.value
                                 .toLowerCase()
                                 .replace(/[^a-z0-9_-]/g, "");
-                              field.onChange(sanitizedValue);
+                              form.setValue("slug_value", sanitizedValue, {
+                                shouldValidate: true,
+                              });
                             }}
                           />
                         </FormControl>
@@ -497,20 +589,28 @@ function ObservationDefinitionFormContent({
               </div>
             </div>
 
-            <FormField
-              control={form.control}
-              name="qualified_ranges"
-              render={({ field }) => {
-                return (
-                  <FormItem>
-                    <ObservationInterpretation
-                      qualifiedRanges={field.value}
-                      setQualifiedRanges={(value: QualifiedRange[]) =>
-                        field.onChange(value)
-                      }
-                    />
-                  </FormItem>
-                );
+            <ObservationInterpretation
+              form={form}
+              qualifiedRanges={form.watch("qualified_ranges") || []}
+              setQualifiedRanges={(value: QualifiedRange[]) =>
+                form.setValue("qualified_ranges", value)
+              }
+              disabled={disableRootObsInterpretation}
+              onClearRequest={() => {
+                setClearRootLevel(false);
+                setshowClearObsInterpretationWarning(true);
+              }}
+              conflictMessage={
+                hasComponentQualifiedRanges
+                  ? t("component_qualified_ranges_exist_message")
+                  : undefined
+              }
+              onCancel={() => {
+                form.setValue("qualified_ranges", qualifiedRangesRef.current);
+              }}
+              onSheetOpen={() => {
+                const ranges = form.getValues("qualified_ranges") || [];
+                qualifiedRangesRef.current = JSON.parse(JSON.stringify(ranges));
               }}
             />
 
@@ -809,21 +909,45 @@ function ObservationDefinitionFormContent({
                             />
                           </div>
 
-                          <FormField
-                            control={form.control}
+                          <ObservationInterpretation
+                            form={form}
+                            qualifiedRanges={
+                              form.watch(
+                                `component.${index}.qualified_ranges`,
+                              ) || []
+                            }
+                            setQualifiedRanges={(value: QualifiedRange[]) =>
+                              form.setValue(
+                                `component.${index}.qualified_ranges`,
+                                value,
+                              )
+                            }
+                            disabled={disableComponentObsInterpretation}
+                            onClearRequest={() => {
+                              setClearRootLevel(true);
+                              setshowClearObsInterpretationWarning(true);
+                            }}
+                            conflictMessage={
+                              hasRootQualifiedRanges
+                                ? t("root_qualified_ranges_exist_message")
+                                : undefined
+                            }
                             name={`component.${index}.qualified_ranges`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <ObservationInterpretation
-                                    qualifiedRanges={field.value}
-                                    setQualifiedRanges={(
-                                      value: QualifiedRange[],
-                                    ) => field.onChange(value)}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
+                            onCancel={() => {
+                              form.setValue(
+                                `component.${index}.qualified_ranges`,
+                                qualifiedRangesRef.current,
+                              );
+                            }}
+                            onSheetOpen={() => {
+                              const ranges =
+                                form.getValues(
+                                  `component.${index}.qualified_ranges`,
+                                ) || [];
+                              qualifiedRangesRef.current = JSON.parse(
+                                JSON.stringify(ranges),
+                              );
+                            }}
                           />
                         </div>
                       </div>

@@ -54,6 +54,7 @@ export const PERMISSION_MANAGE_ORGANIZATION = "can_manage_organization";
 export const PERMISSION_MANAGE_ORGANIZATION_USERS =
   "can_manage_organization_users";
 export const PERMISSION_LIST_ORGANIZATION_USERS = "can_list_organization_users";
+export const PERMISSION_GEO_ADMIN = "is_geo_admin";
 
 // Questionnaire Permissions
 export const PERMISSION_WRITE_QUESTIONNAIRE = "can_write_questionnaire";
@@ -69,6 +70,7 @@ export const PERMISSION_WRITE_BOOKING = "can_write_booking";
 // Schedule Permissions
 export const PERMISSION_WRITE_SCHEDULE = "can_write_schedule";
 export const PERMISSION_LIST_SCHEDULE = "can_list_schedule";
+export const PERMISSION_RESCHEDULE_APPOINTMENT = "can_reschedule_booking";
 
 // User Permissions
 export const PERMISSION_CREATE_USER = "can_create_user";
@@ -81,6 +83,17 @@ export const PERMISSION_CREATE_CHARGE_ITEM_DEFINITION =
   "can_create_charge_item_definition";
 export const PERMISSION_SET_CHARGE_ITEM_DEFINITION =
   "can_set_charge_item_definition";
+
+// Token Permissions
+export const PERMISSION_WRITE_TOKEN_CATEGORY = "can_write_token_category";
+export const PERMISSION_LIST_TOKEN_CATEGORIES = "can_list_token_category";
+export const PERMISSION_WRITE_TOKEN = "can_write_token";
+export const PERMISSION_LIST_TOKENS = "can_list_token";
+
+// Healthcare Permissions
+export const PERMISSION_WRITE_HEALTHCARE_SERVICE =
+  "can_write_healthcare_service";
+export const PERMISSION_READ_HEALTHCARE_SERVICE = "can_read_healthcare_service";
 
 export interface Permissions {
   // Patient Permissions
@@ -156,6 +169,8 @@ export interface Permissions {
   canManageOrganizationUsers: boolean;
   /** Permission slug: "can_list_organization_users" */
   canListOrganizationUsers: boolean;
+  /** Permission slug: "is_geo_admin" */
+  isGeoAdmin: boolean;
 
   // Questionnaire Permissions
   /** Permission slug: "can_write_questionnaire" */
@@ -180,6 +195,8 @@ export interface Permissions {
   canWriteSchedule: boolean;
   /** Permission slug: "can_list_user_schedule" */
   canViewSchedule: boolean;
+  /** Permission slug: "can_reschedule_booking" */
+  canRescheduleAppointment: boolean;
 
   // User Permissions
   /** Permission slug: "can_create_user" */
@@ -194,6 +211,21 @@ export interface Permissions {
   canManageTemplate: boolean;
   /** Permission slug: "can_create_charge_item_definition" */
   canSetChargeItemDefinition: boolean;
+
+  // Token Permissions
+  /** Permission slug: "can_write_token_category" */
+  canWriteTokenCategory: boolean;
+  /** Permission slug: "can_list_token_category" */
+  canListTokenCategories: boolean;
+  /** Permission slug: "can_write_token" */
+  canWriteToken: boolean;
+  /** Permission slug: "can_list_token" */
+  canListTokens: boolean;
+
+  /** Permission slug: "can_write_healthcare_service" */
+  canWriteHealthcareService: boolean;
+  /** Permission slug: "can_read_healthcare_service" */
+  canReadHealthcareService: boolean;
 }
 
 export type HasPermissionFn = (
@@ -311,6 +343,7 @@ export function getPermissions(
       PERMISSION_LIST_ORGANIZATION_USERS,
       permissions,
     ),
+    isGeoAdmin: hasPermission(PERMISSION_GEO_ADMIN, permissions),
 
     // Questionnaire
     canWriteQuestionnaire: hasPermission(
@@ -341,6 +374,10 @@ export function getPermissions(
     // Schedules and Availability
     canWriteSchedule: hasPermission(PERMISSION_WRITE_SCHEDULE, permissions),
     canViewSchedule: hasPermission(PERMISSION_LIST_SCHEDULE, permissions),
+    canRescheduleAppointment: hasPermission(
+      PERMISSION_RESCHEDULE_APPOINTMENT,
+      permissions,
+    ),
 
     // User
     canCreateUser: hasPermission(PERMISSION_CREATE_USER, permissions),
@@ -352,6 +389,28 @@ export function getPermissions(
     canManageTemplate: hasPermission(PERMISSION_MANAGE_TEMPLATE, permissions),
     canSetChargeItemDefinition: hasPermission(
       PERMISSION_SET_CHARGE_ITEM_DEFINITION,
+      permissions,
+    ),
+
+    // Tokens
+    canWriteTokenCategory: hasPermission(
+      PERMISSION_WRITE_TOKEN_CATEGORY,
+      permissions,
+    ),
+    canListTokenCategories: hasPermission(
+      PERMISSION_LIST_TOKEN_CATEGORIES,
+      permissions,
+    ),
+    canWriteToken: hasPermission(PERMISSION_WRITE_TOKEN, permissions),
+    canListTokens: hasPermission(PERMISSION_LIST_TOKENS, permissions),
+
+    //Healthcare Services
+    canWriteHealthcareService: hasPermission(
+      PERMISSION_WRITE_HEALTHCARE_SERVICE,
+      permissions,
+    ),
+    canReadHealthcareService: hasPermission(
+      PERMISSION_READ_HEALTHCARE_SERVICE,
       permissions,
     ),
   };
