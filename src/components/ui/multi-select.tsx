@@ -40,7 +40,7 @@ interface MultiSelectProps {
   value: string[];
   placeholder: string;
   className?: string;
-  selectedPlaceholder?: string;
+  selectionSummary?: string;
   translationBasekey?: string;
 }
 
@@ -51,7 +51,7 @@ export function MultiSelect({
   placeholder,
   className,
   ref,
-  selectedPlaceholder,
+  selectionSummary,
   translationBasekey,
   ...props
 }: ButtonProps & MultiSelectProps) {
@@ -99,8 +99,8 @@ export function MultiSelect({
           <span className="text-sm text-gray-500 mx-3">{placeholder}</span>
         ) : (
           <Badge className="m-1" variant="secondary">
-            {selectedPlaceholder
-              ? selectedPlaceholder
+            {selectionSummary
+              ? selectionSummary
               : t("options_selected", { count: value.length })}
           </Badge>
         )}
@@ -165,6 +165,7 @@ export function MultiSelect({
                     <CommandItem
                       key={option.value}
                       onSelect={() => handleToggleOption(option.value)}
+                      aria-label={`Select ${option.label}`}
                       className="cursor-pointer"
                     >
                       <Checkbox
@@ -192,6 +193,7 @@ export function MultiSelect({
                     key={option.value}
                     onSelect={() => handleToggleOption(option.value)}
                     className="cursor-pointer"
+                    aria-label={`Select ${option.label}`}
                   >
                     <Checkbox
                       checked={selectedValues.includes(option.value)}

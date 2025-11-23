@@ -69,7 +69,6 @@ test.describe("Facility Creation", () => {
       .getByRole("textbox", { name: "Facility Name *" })
       .fill(facilityName);
 
-    await page.getByRole("dialog", { name: "Add New Facility" }).click();
     await page
       .getByRole("textbox", { name: "Phone Number *" })
       .fill(phoneNumber);
@@ -116,22 +115,16 @@ test.describe("Facility Creation", () => {
       .getByRole("textbox", { name: "Facility Name *" })
       .fill(facilityName);
     await page.getByRole("textbox", { name: "Description" }).fill(description);
-    await page
-      .getByRole("button", { name: "Select Facility Features" })
-      .click();
+    await page.getByRole("combobox", { name: "Features" }).click();
 
-    // Wait for the multi-select popover/drawer to open
-    await page.waitForSelector('text="Select All"', { state: "visible" });
-
-    // Select features by clicking on their checkboxes
     for (const feature of facilityFeatures) {
-      await page.getByRole("checkbox", { name: `Select ${feature}` }).click();
+      await page
+        .getByRole("option", { name: new RegExp(`Select ${feature}`) })
+        .click();
     }
-
     // Click the Done button to confirm selection
     await page.getByRole("button", { name: "Done" }).click();
 
-    await page.getByRole("dialog", { name: "Add New Facility" }).click();
     await page
       .getByRole("textbox", { name: "Phone Number *" })
       .fill(phoneNumber);
@@ -197,10 +190,10 @@ test.describe("Facility Creation", () => {
       editDialog.getByRole("textbox", { name: "Description" }),
     ).toHaveValue(description);
 
-    // Verify facility features are displayed in the form
-    for (const feature of facilityFeatures) {
-      await expect(editDialog.getByText(feature)).toBeVisible();
-    }
+    // Verify no. of facility features badge is displayed in the form
+    await expect(
+      editDialog.getByText(`${facilityFeatures.length} features selected`),
+    ).toBeVisible();
 
     // Verify phone number (it's displayed with country code)
     await expect(
@@ -284,16 +277,10 @@ test.describe("Facility Creation", () => {
     ).toHaveValue("");
 
     // Verify no facility features are selected
-    const featuresButton = editDialog.getByRole("button", {
+    const featuresButton = editDialog.getByRole("combobox", {
       name: /^(Select Facility Features|Features)$/,
     });
     await expect(featuresButton).toBeVisible();
-
-    // Check that no feature badges are displayed in the form
-    for (const feature of FACILITY_FEATURES) {
-      const featureBadge = editDialog.getByText(feature, { exact: true });
-      await expect(featureBadge).not.toBeVisible();
-    }
   });
 
   test("Validate required fields in facility creation form", async ({
