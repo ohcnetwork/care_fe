@@ -3303,6 +3303,7 @@
   "no_results_found": "No Results Found",
   "no_results_found_for": "No results found for {{term}}",
   "no_roles_found": "No roles found",
+  "non_selected": "Non Selected",
   "no_routes_added": "No routes added",
   "no_schedule_templates_found": "No schedule templates found for this month.",
   "no_scheduled_exceptions_found": "No scheduled exceptions found",

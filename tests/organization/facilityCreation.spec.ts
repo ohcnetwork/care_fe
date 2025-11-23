@@ -120,11 +120,16 @@ test.describe("Facility Creation", () => {
       .getByRole("button", { name: "Select Facility Features" })
       .click();
 
+    // Wait for the multi-select popover/drawer to open
+    await page.waitForSelector('text="Select All"', { state: "visible" });
+
+    // Select features by clicking on their checkboxes
     for (const feature of facilityFeatures) {
-      await page
-        .getByRole("option", { name: new RegExp(`Select ${feature}`) })
-        .click();
+      await page.getByRole("checkbox", { name: `Select ${feature}` }).click();
     }
+
+    // Click the Done button to confirm selection
+    await page.getByRole("button", { name: "Done" }).click();
 
     await page.getByRole("dialog", { name: "Add New Facility" }).click();
     await page

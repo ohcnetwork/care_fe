@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
+  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -24,7 +25,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import useBreakpoints from "@/hooks/useBreakpoints";
-import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 
 type ButtonProps = Omit<
   React.ComponentProps<typeof Button>,
@@ -61,7 +61,7 @@ export function MultiSelect({
 
   React.useEffect(() => {
     setSelectedValues(value);
-  }, [value]);
+  }, [value, open]);
 
   const { t } = useTranslation();
 
@@ -88,14 +88,15 @@ export function MultiSelect({
       role="combobox"
       onClick={() => setOpen((open) => !open)}
       className={cn(
-        "flex w-full p-1 rounded-md border min-h-10 items-center justify-between",
+        "flex w-full p-1 rounded-md border items-center justify-between",
+        open && "ring-2 ring-blue-500 border-0",
         className,
       )}
       {...props}
     >
       <div className="flex justify-between items-center w-full">
         {value.length == 0 ? (
-          <span className="text-sm text-black mx-3">{placeholder}</span>
+          <span className="text-sm text-gray-500 mx-3">{placeholder}</span>
         ) : (
           <Badge className="m-1" variant="secondary">
             {selectedPlaceholder
@@ -113,8 +114,18 @@ export function MultiSelect({
   );
 
   const listContent = (
-    <div>
-      <Command className="flex-1 overflow-hidden">
+    <div
+      className="flex flex-col h-full overflow-hidden"
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          e.stopPropagation();
+          onValueChange(selectedValues);
+          setOpen(false);
+        }
+      }}
+    >
+      <Command className="flex-1 overflow-hidden min-h-0">
         <div className="border border-gray-200 rounded-md m-1 mb-2">
           <CommandInput
             placeholder={
@@ -127,6 +138,7 @@ export function MultiSelect({
           />
         </div>
         <CommandList>
+          <CommandEmpty>{t("no_results_found")}</CommandEmpty>
           <CommandGroup>
             <CommandItem
               key="all"
@@ -172,7 +184,7 @@ export function MultiSelect({
           )}
 
           {value.length < options.length && (
-            <CommandGroup>
+            <CommandGroup heading={t("non_selected")}>
               {options
                 .filter((option) => !value.includes(option.value))
                 .map((option) => (
@@ -199,12 +211,22 @@ export function MultiSelect({
         <Button
           variant="link"
           className="underline"
-          onSelect={() => alert("cancel")}
+          onClick={() => setOpen(false)}
         >
           {t("cancel")}
         </Button>
-        <Button onSelect={() => onValueChange(selectedValues)}>
-          {t("done")} <ShortcutBadge actionId="enter-action" />
+        <Button
+          variant="primary_gradient"
+          className="flex items-center gap-2 px-2"
+          onClick={() => {
+            onValueChange(selectedValues);
+            setOpen(false);
+          }}
+        >
+          {t("done")}
+          <span className="flex items-center justify-center rounded-md border px-1.5 py-0.5 text-xs font-medium border-white/25 bg-white/15">
+            <CareIcon icon="l-enter" className="size-4" />
+          </span>
         </Button>
       </div>
     </div>
@@ -215,8 +237,8 @@ export function MultiSelect({
       <div className="w-full">
         <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-          <DrawerContent className="px-0 pt-2">
-            <div className="mt-3 pb-[env(safe-area-inset-bottom)]">
+          <DrawerContent className="px-0 pt-2 flex flex-col max-h-[85vh]">
+            <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex flex-col flex-1 overflow-hidden">
               {listContent}
             </div>
           </DrawerContent>
@@ -230,7 +252,7 @@ export function MultiSelect({
       <Popover open={open} onOpenChange={setOpen} modal>
         <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
         <PopoverContent
-          className="p-0 w-(--radix-popover-trigger-width) max-h-96 overflow-y-hidden flex flex-col"
+          className="p-0 w-(--radix-popover-trigger-width) max-h-[35vh] flex flex-col overflow-hidden"
           align="center"
         >
           {listContent}
