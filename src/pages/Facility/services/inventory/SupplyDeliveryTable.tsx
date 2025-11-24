@@ -203,18 +203,39 @@ export function SupplyDeliveryTable({
                 }
               />
             </TableCell>
-            <TableCell>
-              <MonetaryDisplay
-                factor={
-                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
-                    .filter(
-                      (c) =>
-                        c.monetary_component_type ===
-                        MonetaryComponentType.discount,
-                    )
-                    .reduce((sum, c) => sum + (c.factor || 0), 0) || undefined
-                }
-              />
+            <TableCell className="line">
+              {delivery.supplied_inventory_item?.product.charge_item_definition?.price_components?.some(
+                (c) =>
+                  c.monetary_component_type ===
+                    MonetaryComponentType.discount && c.amount,
+              ) && (
+                <div>
+                  <MonetaryDisplay
+                    amount={String(
+                      delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
+                        .filter(
+                          (c) =>
+                            c.monetary_component_type ===
+                            MonetaryComponentType.discount,
+                        )
+                        .reduce((sum, c) => sum + Number(c.amount || 0), 0),
+                    )}
+                  />
+                </div>
+              )}
+              <div>
+                <MonetaryDisplay
+                  factor={
+                    delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
+                      .filter(
+                        (c) =>
+                          c.monetary_component_type ===
+                          MonetaryComponentType.discount,
+                      )
+                      .reduce((sum, c) => sum + (c.factor || 0), 0) || undefined
+                  }
+                />
+              </div>
             </TableCell>
             <TableCell>
               <Badge variant={SUPPLY_DELIVERY_STATUS_COLORS[delivery.status]}>
