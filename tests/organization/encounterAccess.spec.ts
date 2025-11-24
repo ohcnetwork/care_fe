@@ -115,14 +115,6 @@ test.describe("Patient Encounter Access via Organization", () => {
 
     // Navigate via organization route
     const orgEncounterUrl = `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/overview`;
-
-    // TODO: Currently the UI crashes when accessing encounter via organization route
-    // This test will fail until the issue is fixed. Once fixed, remove test.fail()
-    test.fail(
-      true,
-      "Known issue: UI crashes when accessing encounter via organization route",
-    );
-
     await page.goto(orgEncounterUrl);
 
     // Verify the encounter page loads correctly via organization route
@@ -149,13 +141,6 @@ test.describe("Patient Encounter Access via Organization", () => {
 
     test.skip(!encounterId, "No encounters found for patient");
 
-    // TODO: Currently the UI crashes when accessing encounter via organization route
-    // This test will fail until the issue is fixed. Once fixed, remove test.fail()
-    test.fail(
-      true,
-      "Known issue: UI crashes when accessing encounter via organization route",
-    );
-
     // Test direct navigation to encounter via organization URL
     const orgEncounterUrl = `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/overview`;
     await page.goto(orgEncounterUrl);
@@ -180,13 +165,6 @@ test.describe("Patient Encounter Access via Organization", () => {
     );
 
     test.skip(!encounterId, "No encounters found for patient");
-
-    // TODO: Currently the UI crashes when accessing encounter via organization route
-    // This test will fail until the issue is fixed. Once fixed, remove test.fail()
-    test.fail(
-      true,
-      "Known issue: UI crashes when accessing encounter via organization route",
-    );
 
     // Navigate via organization route
     await page.goto(
@@ -225,13 +203,6 @@ test.describe("Patient Encounter Access via Organization", () => {
     );
 
     test.skip(!encounterId, "No encounters found for patient");
-
-    // TODO: Currently the UI crashes when accessing encounter via organization route
-    // This test will fail until the issue is fixed. Once fixed, remove test.fail()
-    test.fail(
-      true,
-      "Known issue: UI crashes when accessing encounter via organization route",
-    );
 
     // Navigate via organization route
     await page.goto(
