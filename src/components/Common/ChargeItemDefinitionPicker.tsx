@@ -165,11 +165,6 @@ export function ChargeItemDefinitionPicker({
             pathParams: { facilityId },
           }}
           translationBaseKey="charge_item_definition"
-          mapper={(item) => ({
-            id: item.id,
-            title: item.title,
-            slug: item.slug,
-          })}
         />
       </div>
 
