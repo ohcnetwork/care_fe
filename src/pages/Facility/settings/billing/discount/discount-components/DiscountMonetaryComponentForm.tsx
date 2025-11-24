@@ -60,39 +60,46 @@ export function DiscountMonetaryComponentForm({
         .object({
           monetary_component_type: z.literal(MonetaryComponentType.discount),
           code: CodeSchema.optional(),
-          factor: z.preprocess((v) => {
-            if (v === "" || v === null || v === undefined) return undefined;
-            const n = Number(v);
-            return isNaN(n) ? undefined : n;
-          }, z.number().min(0).max(100).optional()),
-          amount: z.preprocess(
+          factor: z.preprocess(
             (v) => {
-              if (v === null || v === undefined || v === "") return undefined;
-              const str = typeof v === "string" ? v.trim() : String(v);
-              return str === "" ? undefined : str;
+              if (v === "" || v === null || v === undefined) {
+                return undefined;
+              }
+              return v;
             },
-            z
-              .string()
-              .refine((v) => !isNaN(Number(v)), {
-                message: t("amount_must_be_a_valid_number"),
+            z.coerce
+              .number({
+                invalid_type_error: t("field_required"),
               })
-              .refine((v) => Number(v) >= 0, {
-                message: t("amount_must_be_greater_than_or_equal_to_0"),
-              })
+              .min(0, { message: t("discount_factor_range_description") })
+              .max(100, { message: t("discount_factor_range_description") })
               .optional(),
           ),
+          amount: z
+            .string()
+            .refine((v) => !isNaN(Number(v)), {
+              message: t("field_required"),
+            })
+            .refine((v) => Number(v) >= 0, {
+              message: t("amount_must_be_greater_than_or_equal_to_0"),
+            })
+            .optional(),
           title: z
             .string()
             .trim()
+            .regex(/^[a-zA-Z\s]+$/, {
+              message: t("only_alphabets_are_allowed"),
+            })
             .min(1, { message: t("field_required") }),
           conditions: z.array(conditionSchema).default([]),
         })
         .superRefine((data, ctx) => {
-          const hasFactor = data.factor !== undefined && data.factor !== null;
-          const hasAmount = data.amount !== undefined;
+          const hasFactor = typeof data.factor === "number" && data.factor >= 0;
+
+          const hasAmount =
+            typeof data.amount === "string" && data.amount.trim() !== "";
 
           if (!hasFactor && !hasAmount) {
-            // attach to BOTH fields
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: t("either_amount_or_factor_required"),
@@ -177,7 +184,15 @@ export function DiscountMonetaryComponentForm({
               <FormControl>
                 <Input
                   {...field}
-                  onChange={(e) => field.onChange(e.target.value.trim())}
+                  value={field.value}
+                  onChange={(e) => {
+                    const onlyChars = e.target.value.replace(
+                      /[^a-zA-Z\s]/g,
+                      "",
+                    );
+                    field.onChange(onlyChars);
+                  }}
+                  onBlur={() => field.onChange(field.value.trim())}
                 />
               </FormControl>
               <FormDescription>
@@ -201,7 +216,7 @@ export function DiscountMonetaryComponentForm({
                       <FormControl>
                         <div className="relative">
                           <Input
-                            type="number"
+                            type=""
                             {...field}
                             value={
                               typeof field.value === "number" ||
@@ -210,8 +225,11 @@ export function DiscountMonetaryComponentForm({
                                 : ""
                             }
                             onChange={(e) => {
-                              const v = e.target.value;
-                              field.onChange(v === "" ? undefined : v);
+                              const numbersOnly = e.target.value.replace(
+                                /[^0-9.]/g,
+                                "",
+                              );
+                              field.onChange(numbersOnly);
                             }}
                             className="pr-8"
                           />
@@ -236,6 +254,7 @@ export function DiscountMonetaryComponentForm({
                             ₹
                           </span>
                           <Input
+                            type=""
                             {...field}
                             value={
                               typeof field.value === "string" ||
@@ -243,7 +262,13 @@ export function DiscountMonetaryComponentForm({
                                 ? field.value
                                 : ""
                             }
-                            onChange={(e) => field.onChange(e.target.value)}
+                            onChange={(e) => {
+                              const numbersOnly = e.target.value.replace(
+                                /[^0-9.]/g,
+                                "",
+                              );
+                              field.onChange(numbersOnly);
+                            }}
                             className="pl-8"
                           />
                         </div>
