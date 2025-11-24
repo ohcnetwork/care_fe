@@ -304,22 +304,6 @@ export default function PatientIdentifierFilter({
     }
   }, [allIdentifierConfigs, searchType]);
 
-  // Fetch patient details when patientId is provided
-  const { data: patientDetails } = useQuery({
-    queryKey: ["patient-details", patientId],
-    queryFn: query(patientApi.get, {
-      pathParams: { id: patientId! },
-    }),
-    enabled: !!patientId,
-  });
-
-  // Update selectedPatient when patientDetails are fetched
-  useEffect(() => {
-    if (patientDetails) {
-      setSelectedPatient(patientDetails);
-    }
-  }, [patientDetails]);
-
   // Check if current search type is phone number
   const isPhoneNumberConfig =
     allIdentifierConfigs.find((c) => c.id === searchType)?.config.system ===
