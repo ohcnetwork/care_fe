@@ -115,7 +115,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
           <img
             src={careConfig.mainLogo?.dark}
             alt="Care Logo"
-            className="h-10 w-auto object-contain mb-2 sm:mb-0 order-2"
+            className="h-10 w-auto object-contain mb-2 sm:mb-0 order-2 print:scale-170"
           />
           <div className="text-left">
             <h1 className="text-3xl font-semibold">{facility.name}</h1>
