@@ -287,12 +287,14 @@ export function EncounterProvider({
         }}
       />
 
-      <DispenseButton
-        open={activeAction === EncounterAction.Dispense}
-        setOpen={(open) => {
-          setActiveAction(open ? EncounterAction.Dispense : null);
-        }}
-      />
+      {facilityId && (
+        <DispenseButton
+          open={activeAction === EncounterAction.Dispense}
+          setOpen={(open) => {
+            setActiveAction(open ? EncounterAction.Dispense : null);
+          }}
+        />
+      )}
     </encounterContext.Provider>
   );
 }
