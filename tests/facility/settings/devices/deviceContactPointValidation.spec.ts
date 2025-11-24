@@ -373,9 +373,10 @@ test.describe("Device Contact Point Validation", () => {
     await page.getByRole("button", { name: "Add Contact Point" }).click();
     await page.getByRole("button", { name: "Add Contact Point" }).click();
 
-    // Remove the middle one
-    const deleteButtons = page.locator('[data-slot="icon-wrapper"]', {
-      has: page.locator('svg[class*="l-trash"]'),
+    // Remove the middle one using a more robust selector
+    // Find all delete buttons by their role and icon
+    const deleteButtons = page.getByRole("button").filter({
+      has: page.locator('[icon="l-trash"]'),
     });
 
     const deleteCount = await deleteButtons.count();

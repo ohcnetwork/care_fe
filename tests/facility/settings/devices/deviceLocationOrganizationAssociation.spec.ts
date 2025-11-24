@@ -38,12 +38,14 @@ test.describe("Device Location and Organization Association", () => {
   });
 
   test("should open location association sheet", async ({ page }) => {
-    // Click associate button for location
-    const locationSection = page.locator("text=Location").first();
-    await locationSection
-      .locator("..")
+    // Click associate button for location - using a more robust selector
+    const associateButton = page
+      .locator('[class*="grid"]')
+      .filter({ hasText: "Location" })
       .getByRole("button", { name: "Associate" })
-      .click();
+      .first();
+
+    await associateButton.click();
 
     // Sheet should open
     await expect(page.getByText("Associate Location")).toBeVisible();
@@ -73,7 +75,7 @@ test.describe("Device Location and Organization Association", () => {
     await locationSearch.press("Enter");
 
     // Wait for search results and select first location
-    await page.waitForTimeout(1000); // Wait for search results
+    await page.waitForLoadState("networkidle");
 
     // Click on first location result if available
     const locationResults = page.locator('[role="button"]', {
@@ -121,7 +123,7 @@ test.describe("Device Location and Organization Association", () => {
     const locationSearch = page.getByPlaceholder("Search location...");
     await locationSearch.fill("ward");
     await locationSearch.press("Enter");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("networkidle");
 
     const locationResults = page.locator('[role="button"]', {
       hasText: /ward/i,
@@ -193,14 +195,14 @@ test.describe("Device Location and Organization Association", () => {
   });
 
   test("should open organization association sheet", async ({ page }) => {
-    // Click associate button for organization
-    const organizationSection = page.locator("text=Managing Organization");
-    await organizationSection
-      .locator("..")
-      .locator("..")
+    // Click associate button for organization - using a more robust selector
+    const associateButton = page
+      .locator('[class*="md:col-span-2"]')
+      .filter({ hasText: "Managing Organization" })
       .getByRole("button", { name: "Associate" })
-      .first()
-      .click();
+      .first();
+
+    await associateButton.click();
 
     // Sheet should open
     await expect(
@@ -226,7 +228,7 @@ test.describe("Device Location and Organization Association", () => {
     // Search for an organization/department
     const orgSearch = page.getByPlaceholder("Search departments...");
     await orgSearch.fill("cardiology");
-    await page.waitForTimeout(1000); // Wait for search results
+    await page.waitForLoadState("networkidle");
 
     // Click on first organization result if available
     const orgResults = page.locator('[role="button"]', {
@@ -273,7 +275,7 @@ test.describe("Device Location and Organization Association", () => {
 
     const orgSearch = page.getByPlaceholder("Search departments...");
     await orgSearch.fill("cardiology");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("networkidle");
 
     const orgResults = page.locator('[role="button"]', {
       hasText: /cardiology/i,
@@ -308,7 +310,7 @@ test.describe("Device Location and Organization Association", () => {
       // Search for a different organization
       const newOrgSearch = page.getByPlaceholder("Search departments...");
       await newOrgSearch.fill("surgery");
-      await page.waitForTimeout(1000);
+      await page.waitForLoadState("networkidle");
 
       const newOrgResults = page.locator('[role="button"]', {
         hasText: /surgery/i,
@@ -350,7 +352,7 @@ test.describe("Device Location and Organization Association", () => {
     const locationSearch = page.getByPlaceholder("Search location...");
     await locationSearch.fill("ward");
     await locationSearch.press("Enter");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("networkidle");
 
     const locationResults = page.locator('[role="button"]', {
       hasText: /ward/i,
@@ -385,7 +387,7 @@ test.describe("Device Location and Organization Association", () => {
 
     const orgSearch = page.getByPlaceholder("Search departments...");
     await orgSearch.fill("cardiology");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("networkidle");
 
     const orgResults = page.locator('[role="button"]', {
       hasText: /cardiology/i,
