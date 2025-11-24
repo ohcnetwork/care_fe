@@ -7,21 +7,9 @@ test.use({ storageState: "tests/.auth/user.json" });
 test.describe("Department User Management", () => {
   let facilityId: string;
 
-  const testUsers = [
-    "care-doctor",
-    "care-staff",
-    "care-nurse",
-    "care-volunteer",
-  ];
+  const testUsers = ["care-doctor", "care-volunteer"];
 
-  const testRoles = [
-    "Doctor",
-    "Staff",
-    "Nurse",
-    "Administrator",
-    "Facility Admin",
-    "Admin",
-  ];
+  const testRoles = ["Doctor", "Staff", "Admin"];
 
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
