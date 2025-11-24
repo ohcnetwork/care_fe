@@ -80,7 +80,6 @@ export default function UserSummaryTab({
           <Button
             variant="outline"
             className="w-fit self-end"
-            data-cy="edit-user-button"
             onClick={() => setShowEditUserSheet(true)}
           >
             <CareIcon icon="l-pen" className="mr-2 size-4" />

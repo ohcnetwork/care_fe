@@ -372,7 +372,6 @@ export default function ServiceRequestShow({
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        data-cy="invoice-actions-button"
                         className="border-gray-400 px-2"
                       >
                         <CareIcon icon="l-ellipsis-v" />

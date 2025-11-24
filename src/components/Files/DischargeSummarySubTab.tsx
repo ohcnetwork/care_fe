@@ -591,7 +591,6 @@ export const DischargeTab = ({
             value={qParams.name || ""}
             onChange={(e) => updateQuery({ name: e.target.value })}
             className="pl-10"
-            data-cy="search-input"
           />
         </div>
 

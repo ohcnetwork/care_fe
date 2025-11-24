@@ -59,9 +59,10 @@ export default function PluginEngine({
             .then((manifest) => {
               return manifest;
             })
-            .catch(() =>
+            .catch((e) =>
               console.error(
                 `There was an error enabling the app ${plugin.slug}`,
+                e,
               ),
             );
         }),
