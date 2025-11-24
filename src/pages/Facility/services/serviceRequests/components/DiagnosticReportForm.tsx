@@ -539,7 +539,7 @@ export function DiagnosticReportForm({
         observations,
       )
         .flatMap(([definitionId, obsList]) =>
-          obsList.map((obsData) => {
+          obsList.map((obsData): ObservationUpsertRequest | null => {
             const observationDefinition = observationDefinitions.find(
               (def) => def.id === definitionId,
             );
@@ -628,7 +628,7 @@ export function DiagnosticReportForm({
                     ? ObservationStatus.ENTERED_IN_ERROR
                     : ObservationStatus.FINAL,
                 value_type:
-                  observationDefinition?.permitted_data_type || "float",
+                  observationDefinition?.permitted_data_type || "decimal",
                 effective_datetime: new Date().toISOString(),
                 value,
                 interpretation: obsData.interpretation || "",
@@ -637,7 +637,7 @@ export function DiagnosticReportForm({
             };
           }),
         )
-        .filter(Boolean) as ObservationUpsertRequest[];
+        .filter((obs): obs is ObservationUpsertRequest => obs !== null);
 
       if (fullReport) {
         // Upsert observations

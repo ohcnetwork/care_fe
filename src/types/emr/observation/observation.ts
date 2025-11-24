@@ -103,8 +103,8 @@ export interface ObservationAnalyzeResponse {
 
 export interface ObservationUpsertRequest {
   observation: ObservationUpsert;
-  observation_id: string | null;
-  observation_definition: string | null;
+  observation_id?: string | null;
+  observation_definition?: string | null;
 }
 
 export interface ObservationBatchUpsertRequest {
