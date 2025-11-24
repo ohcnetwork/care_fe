@@ -197,8 +197,10 @@ export const PractitionerSelector = ({
   };
   const filteredPractitioners = useMemo(() => {
     if (!organizationUsers?.users) return [];
+    const term = practitionerSearch.trim().toLowerCase();
+    if (!term) return organizationUsers.users;
     return organizationUsers.users.filter((p) =>
-      getItemValue(p).toLowerCase().includes(practitionerSearch.toLowerCase()),
+      getItemValue(p).toLowerCase().includes(term),
     );
   }, [organizationUsers?.users, practitionerSearch]);
   const handleUserSelect = (user: UserReadMinimal) => {
@@ -504,10 +506,14 @@ export const PractitionerSelector = ({
             {/* Practitioner Search Inside Department */}
             {currentOrganizationId && (
               <div className="px-3 py-2 border-b bg-white sticky top-0 z-10">
+                <label className="sr-only" htmlFor="practitioner-search">
+                  {t("search_practitioners")}
+                </label>
                 <div className="relative flex items-center h-10">
                   <SearchIcon className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                   <input
                     type="text"
+                    id="practitioner-search"
                     placeholder={t("search_practitioners")}
                     value={practitionerSearch}
                     onChange={(e) => setPractitionerSearch(e.target.value)}
