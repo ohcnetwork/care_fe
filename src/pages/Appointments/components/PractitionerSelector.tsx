@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Loader2,
   Search,
+  SearchIcon,
   X,
   XIcon,
 } from "lucide-react";
@@ -79,6 +80,7 @@ export const PractitionerSelector = ({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [practitionerSearch, setPractitionerSearch] = useState("");
   const [navigationStack, setNavigationStack] = useState<
     FacilityOrganizationRead[]
   >([]);
@@ -193,7 +195,12 @@ export const PractitionerSelector = ({
     );
     onSelect(remainingSelected);
   };
-
+  const filteredPractitioners = useMemo(() => {
+    if (!organizationUsers?.users) return [];
+    return organizationUsers.users.filter((p) =>
+      formatName(p).toLowerCase().includes(practitionerSearch.toLowerCase()),
+    );
+  }, [organizationUsers?.users, practitionerSearch]);
   const handleUserSelect = (user: UserReadMinimal) => {
     if (selected && multiple) {
       onSelect([...selected, user]);
@@ -493,6 +500,31 @@ export const PractitionerSelector = ({
 
           {/* Sidebar Content */}
           <div className="flex-1 overflow-y-auto max-h-[400px]">
+            {/* Practitioner Search Inside Department */}
+            {currentOrganizationId && (
+              <div className="px-3 py-2 border-b bg-white sticky top-0 z-10">
+                <div className="relative flex items-center h-10">
+                  <SearchIcon className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <input
+                    type="text"
+                    placeholder={t("search_practitioners")}
+                    value={practitionerSearch}
+                    autoFocus
+                    onChange={(e) => setPractitionerSearch(e.target.value)}
+                    className="w-full pl-10 pr-3
+                      rounded-md 
+                      text-sm 
+                      h-full
+                      leading-9
+                      outline-none 
+                      focus:outline-none 
+                      focus:ring-0 
+                      border-none
+                      cursor-text"
+                  />
+                </div>
+              </div>
+            )}
             {/* Show child organizations if current org has children */}
             {childOrganizations?.results?.length ? (
               <div className="p-2">
@@ -577,7 +609,7 @@ export const PractitionerSelector = ({
                         </div>
                       )}
                     </div>
-                    {organizationUsers.users.map((user) => {
+                    {filteredPractitioners.map((user) => {
                       const isSelected = selected?.some(
                         (s) => s.id === user.id,
                       );
