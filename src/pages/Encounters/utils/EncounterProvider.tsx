@@ -293,6 +293,7 @@ export function EncounterProvider({
           setOpen={(open) => {
             setActiveAction(open ? EncounterAction.Dispense : null);
           }}
+          facilityId={facilityId}
         />
       )}
     </encounterContext.Provider>
