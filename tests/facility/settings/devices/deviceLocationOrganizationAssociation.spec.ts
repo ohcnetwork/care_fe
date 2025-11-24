@@ -87,20 +87,15 @@ test.describe("Device Location and Organization Association", () => {
       await locationResults.first().click();
 
       // Click associate button in the sheet
-      await page
-        .getByRole("button", { name: "Associate" })
-        .last()
-        .click({ timeout: 5000 });
+      await page.getByRole("button", { name: "Associate" }).last().click();
 
       // Should show success message
       await expect(
         page.getByText("Location associated successfully"),
-      ).toBeVisible({ timeout: 5000 });
+      ).toBeVisible();
 
       // Location should now be displayed
-      await expect(page.getByText("No location associated")).not.toBeVisible({
-        timeout: 2000,
-      });
+      await expect(page.getByText("No location associated")).not.toBeVisible();
     }
   });
 
@@ -132,14 +127,11 @@ test.describe("Device Location and Organization Association", () => {
 
     if (count > 0) {
       await locationResults.first().click();
-      await page
-        .getByRole("button", { name: "Associate" })
-        .last()
-        .click({ timeout: 5000 });
+      await page.getByRole("button", { name: "Associate" }).last().click();
 
       await expect(
         page.getByText("Location associated successfully"),
-      ).toBeVisible({ timeout: 5000 });
+      ).toBeVisible();
 
       // Close the sheet by clicking outside or pressing Escape
       await page.keyboard.press("Escape");
@@ -161,7 +153,7 @@ test.describe("Device Location and Organization Association", () => {
       // Should show success message
       await expect(
         page.getByText("Location disassociated successfully"),
-      ).toBeVisible({ timeout: 5000 });
+      ).toBeVisible();
     }
   });
 
@@ -240,10 +232,7 @@ test.describe("Device Location and Organization Association", () => {
       await orgResults.first().click();
 
       // Click link button in the sheet
-      await page
-        .getByRole("button", { name: "Link" })
-        .last()
-        .click({ timeout: 5000 });
+      await page.getByRole("button", { name: "Link" }).last().click();
 
       // Should show success message
       await expect(page.getByText(/linked successfully/i)).toBeVisible({
@@ -253,7 +242,7 @@ test.describe("Device Location and Organization Association", () => {
       // Organization should now be displayed
       await expect(
         page.getByText("No organization associated"),
-      ).not.toBeVisible({ timeout: 2000 });
+      ).not.toBeVisible();
     }
   });
 
@@ -284,10 +273,7 @@ test.describe("Device Location and Organization Association", () => {
 
     if (count > 0) {
       await orgResults.first().click();
-      await page
-        .getByRole("button", { name: "Link" })
-        .last()
-        .click({ timeout: 5000 });
+      await page.getByRole("button", { name: "Link" }).last().click();
 
       await expect(page.getByText(/linked successfully/i)).toBeVisible({
         timeout: 5000,
@@ -319,10 +305,7 @@ test.describe("Device Location and Organization Association", () => {
 
       if (newCount > 0) {
         await newOrgResults.first().click();
-        await page
-          .getByRole("button", { name: "Link" })
-          .last()
-          .click({ timeout: 5000 });
+        await page.getByRole("button", { name: "Link" }).last().click();
 
         // Should show success message
         await expect(page.getByText(/linked successfully/i)).toBeVisible({
@@ -361,14 +344,11 @@ test.describe("Device Location and Organization Association", () => {
 
     if (locationCount > 0) {
       await locationResults.first().click();
-      await page
-        .getByRole("button", { name: "Associate" })
-        .last()
-        .click({ timeout: 5000 });
+      await page.getByRole("button", { name: "Associate" }).last().click();
 
       await expect(
         page.getByText("Location associated successfully"),
-      ).toBeVisible({ timeout: 5000 });
+      ).toBeVisible();
 
       await page.keyboard.press("Escape");
     }
@@ -396,10 +376,7 @@ test.describe("Device Location and Organization Association", () => {
 
     if (orgCount > 0) {
       await orgResults.first().click();
-      await page
-        .getByRole("button", { name: "Link" })
-        .last()
-        .click({ timeout: 5000 });
+      await page.getByRole("button", { name: "Link" }).last().click();
 
       await expect(page.getByText(/linked successfully/i)).toBeVisible({
         timeout: 5000,

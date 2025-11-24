@@ -41,7 +41,7 @@ test.describe("Device Contact Point Validation", () => {
       // Should show validation error
       await expect(
         page.locator("text=Invalid phone number").first(),
-      ).toBeVisible({ timeout: 2000 });
+      ).toBeVisible();
 
       // Clear for next test
       await phoneInput.clear();
@@ -84,9 +84,7 @@ test.describe("Device Contact Point Validation", () => {
       await page.getByRole("button", { name: "Save" }).click();
 
       // Should show validation error
-      await expect(page.locator("text=Invalid email").first()).toBeVisible({
-        timeout: 2000,
-      });
+      await expect(page.locator("text=Invalid email").first()).toBeVisible();
 
       // Clear for next test
       await emailInput.clear();
@@ -126,9 +124,7 @@ test.describe("Device Contact Point Validation", () => {
       await page.getByRole("button", { name: "Save" }).click();
 
       // Should show validation error
-      await expect(page.locator("text=Invalid url").first()).toBeVisible({
-        timeout: 2000,
-      });
+      await expect(page.locator("text=Invalid url").first()).toBeVisible();
 
       // Clear for next test
       await urlInput.clear();
@@ -158,9 +154,9 @@ test.describe("Device Contact Point Validation", () => {
     // Test invalid fax number
     await faxInput.fill("123");
     await page.getByRole("button", { name: "Save" }).click();
-    await expect(page.locator("text=Invalid phone number").first()).toBeVisible(
-      { timeout: 2000 },
-    );
+    await expect(
+      page.locator("text=Invalid phone number").first(),
+    ).toBeVisible();
 
     // Test valid fax number (same format as phone)
     const validFax =
@@ -190,7 +186,7 @@ test.describe("Device Contact Point Validation", () => {
     await smsInput.fill("abc");
     await page.getByRole("button", { name: "Save" }).click();
     await expect(page.locator("text=Invalid phone number").first()).toBeVisible(
-      { timeout: 2000 },
+      ),
     );
 
     // Test valid SMS number (same format as phone)
@@ -221,14 +217,14 @@ test.describe("Device Contact Point Validation", () => {
     await page.getByRole("button", { name: "Save" }).click();
     await expect(
       page.locator("text=This field is required").first(),
-    ).toBeVisible({ timeout: 2000 });
+    ).toBeVisible();
 
     // Test pager that's too long (over 20 characters)
     await pagerInput.fill("a".repeat(21));
     await page.getByRole("button", { name: "Save" }).click();
     await expect(
       page.locator("text=Must be between 1 and 20 characters").first(),
-    ).toBeVisible({ timeout: 2000 });
+    ).toBeVisible();
 
     // Test valid pager
     const validPager = faker.string.alphanumeric(10);
@@ -254,9 +250,7 @@ test.describe("Device Contact Point Validation", () => {
 
     // Test empty value (should fail)
     await page.getByRole("button", { name: "Save" }).click();
-    await expect(page.locator("text=Required").first()).toBeVisible({
-      timeout: 2000,
-    });
+    await expect(page.locator("text=Required").first()).toBeVisible();
 
     // Test valid value
     const validOther = faker.lorem.words(3);
@@ -288,7 +282,7 @@ test.describe("Device Contact Point Validation", () => {
     // Should show duplicate error
     await expect(
       page.locator("text=Duplicate contact values are not allowed").first(),
-    ).toBeVisible({ timeout: 2000 });
+    ).toBeVisible();
   });
 
   test("should allow duplicate values if they are case-insensitive or have different systems", async ({
@@ -317,7 +311,7 @@ test.describe("Device Contact Point Validation", () => {
     // Should show duplicate error (case-insensitive check)
     await expect(
       page.locator("text=Duplicate contact values are not allowed").first(),
-    ).toBeVisible({ timeout: 2000 });
+    ).toBeVisible();
   });
 
   test("should allow multiple contact points with different values", async ({
