@@ -1,0 +1,86 @@
+name: PR Checklist Validator
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - edited
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  checklist:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Validate Checklist
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prAuthor = context.payload.pull_request.user.login;
+
+            if (context.payload.pull_request.user.type === 'Bot') {
+              return;
+            }
+
+            const response = await fetch(`https://raw.githubusercontent.com/ohcnetwork/leaderboard-data/main/contributors/${prAuthor}.md`);
+            if (response.ok) {
+              const userData = await response.text();
+              if (userData.includes('role: core')) return;
+            }
+
+            const prBody = context.payload.pull_request.body || '';
+
+            const checklist = [
+              'Add specs that demonstrate the bug or test the new feature.',
+              'Update \\[product documentation\\]\\(https://docs\\.ohc\\.network\\)\\.',
+              'Ensure that UI text is placed in I18n files.',
+              'Prepare a screenshot or demo video for the changelog entry and attach it to the issue.',
+              'Request peer reviews.',
+              'Complete QA on mobile devices.',
+              'Complete QA on desktop devices.'
+            ];
+
+            const checked = checklist.filter(item => {
+              const pattern = new RegExp(`-\\s*\\[\\s*[xX]\\s*\\]\\s*${item}`, 'i');
+              return pattern.test(prBody);
+            });
+
+            const prState = context.payload.pull_request.state;
+
+            if (checked.length > 0 && prState === 'open') {
+              return;
+            }
+
+            if (checked.length === 0 && prState === 'open') {
+              const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              });
+
+              const alreadyCommented = comments.data.some(c => 
+              c.user.type === "Bot" && 
+              c.body.includes("merge checklist")
+              );
+
+              if (!alreadyCommented) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.pull_request.number,
+                  body: `Hi @${prAuthor}!
+                  It looks like you haven't completed the **merge checklist** yet.
+
+                  Please update your PR body and mark the relevant checklist items using:
+
+                  \`- [x]\` instead of \`- [ ]\`
+
+                  Thanks!`
+                });
+              }
+
+              core.setFailed('Checklist incomplete.');
+            }
