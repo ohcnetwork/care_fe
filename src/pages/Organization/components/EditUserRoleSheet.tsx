@@ -180,7 +180,6 @@ export default function EditUserRoleSheet({
                 variant="destructive"
                 className="w-full"
                 onClick={() => setShowRemoveDialog(true)}
-                data-cy="remove-user"
               >
                 {t("remove_user")}
               </Button>
@@ -189,7 +188,6 @@ export default function EditUserRoleSheet({
                 <Button
                   variant="outline"
                   className="w-full"
-                  data-cy="edit-user-button"
                   onClick={() => setShowEditUserSheet(true)}
                 >
                   {t("edit_user")}

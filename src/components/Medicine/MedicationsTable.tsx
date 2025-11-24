@@ -76,10 +76,7 @@ export const MedicationsTable = ({
   }
 
   return (
-    <div
-      className=" @container border border-gray-200 rounded-lg"
-      data-cy="medications-table"
-    >
+    <div className=" @container border border-gray-200 rounded-lg">
       <Table className="@lg:min-w-auto min-w-6xl">
         <TableHeader>
           <TableRow className="divide-x bg-gray-100">

@@ -210,11 +210,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel aria-required>{t("registered_name")}</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={t("enter_registered_name")}
-                    data-cy="registered-name-input"
-                  />
+                  <Input {...field} placeholder={t("enter_registered_name")} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -231,7 +227,6 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                   <Input
                     {...field}
                     placeholder={t("enter_user_friendly_name")}
-                    data-cy="user-friendly-name-input"
                   />
                 </FormControl>
                 <FormMessage />
@@ -247,10 +242,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 <FormLabel aria-required>{t("status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger
-                      data-cy="device-status-select"
-                      ref={field.ref}
-                    >
+                    <SelectTrigger ref={field.ref}>
                       <SelectValue placeholder={t("select_status")} />
                     </SelectTrigger>
                   </FormControl>
@@ -275,10 +267,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 <FormLabel aria-required>{t("availability_status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger
-                      data-cy="device-availability-status-select"
-                      ref={field.ref}
-                    >
+                    <SelectTrigger ref={field.ref}>
                       <SelectValue
                         placeholder={t("select_availability_status")}
                       />
@@ -304,11 +293,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("identifier")}</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={t("enter_identifier")}
-                    data-cy="identifier-input"
-                  />
+                  <Input {...field} placeholder={t("enter_identifier")} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -322,11 +307,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("manufacturer")}</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={t("enter_manufacturer")}
-                    data-cy="manufacturer-input"
-                  />
+                  <Input {...field} placeholder={t("enter_manufacturer")} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -373,11 +354,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("lot_number")}</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={t("enter_lot_number")}
-                    data-cy="lot-number-input"
-                  />
+                  <Input {...field} placeholder={t("enter_lot_number")} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -391,11 +368,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("serial_number")}</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={t("enter_serial_number")}
-                    data-cy="serial-number-input"
-                  />
+                  <Input {...field} placeholder={t("enter_serial_number")} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -409,11 +382,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("model_number")}</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={t("enter_model_number")}
-                    data-cy="model-number-input"
-                  />
+                  <Input {...field} placeholder={t("enter_model_number")} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -427,11 +396,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>{t("part_number")}</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder={t("enter_part_number")}
-                    data-cy="part-number-input"
-                  />
+                  <Input {...field} placeholder={t("enter_part_number")} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -616,15 +581,10 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 goBack(`/facility/${facilityId}/settings/devices`);
               }
             }}
-            data-cy="cancel-button"
           >
             {t("cancel")}
           </Button>
-          <Button
-            type="submit"
-            disabled={isPending || !form.formState.isDirty}
-            data-cy="save-device-button"
-          >
+          <Button type="submit" disabled={isPending || !form.formState.isDirty}>
             {isPending ? t("saving") : t("save")}
           </Button>
         </div>
