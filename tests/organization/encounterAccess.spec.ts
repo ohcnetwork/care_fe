@@ -58,13 +58,14 @@ async function getFirstEncounterId(page: Page): Promise<string | null> {
   await page.waitForURL(/\/patient\/([^/]+)\/encounters/);
 
   // Check if there are any encounters
-  const encounterCards = page
-    .locator('[data-testid="encounter-card"], .cursor-pointer')
-    .filter({
+  // Using data-testid as primary selector, with cursor-pointer as fallback for cards
+  const encounterCards = page.locator('[data-testid="encounter-card"]').or(
+    page.locator(".cursor-pointer").filter({
       has: page.locator(
         "text=/Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i",
       ),
-    });
+    }),
+  );
 
   const encounterCount = await encounterCards.count();
   if (encounterCount === 0) {
@@ -82,10 +83,21 @@ async function getFirstEncounterId(page: Page): Promise<string | null> {
   return urlMatch[1];
 }
 
+/**
+ * Helper function to setup patient and encounter for testing
+ * Returns an object with patientId and encounterId
+ */
+async function setupPatientAndEncounter(
+  page: Page,
+  organizationId: string,
+): Promise<{ patientId: string; encounterId: string | null }> {
+  const patientId = await navigateToPatient(page, organizationId);
+  const encounterId = await getFirstEncounterId(page);
+  return { patientId, encounterId };
+}
+
 test.describe("Patient Encounter Access via Organization", () => {
   let organizationId: string;
-  let patientId: string;
-  let encounterId: string | null;
 
   test.beforeEach(async ({ page }) => {
     organizationId = await navigateToOrganization(page);
@@ -94,8 +106,10 @@ test.describe("Patient Encounter Access via Organization", () => {
   test("Access patient encounter through organization patients list", async ({
     page,
   }) => {
-    patientId = await navigateToPatient(page, organizationId);
-    encounterId = await getFirstEncounterId(page);
+    const { patientId, encounterId } = await setupPatientAndEncounter(
+      page,
+      organizationId,
+    );
 
     test.skip(!encounterId, "No encounters found for patient");
 
@@ -120,8 +134,10 @@ test.describe("Patient Encounter Access via Organization", () => {
   });
 
   test("Direct access to encounter via organization URL", async ({ page }) => {
-    patientId = await navigateToPatient(page, organizationId);
-    encounterId = await getFirstEncounterId(page);
+    const { patientId, encounterId } = await setupPatientAndEncounter(
+      page,
+      organizationId,
+    );
 
     test.skip(!encounterId, "No encounters found for patient");
 
@@ -143,8 +159,10 @@ test.describe("Patient Encounter Access via Organization", () => {
   test("Navigate between encounter tabs using organization route", async ({
     page,
   }) => {
-    patientId = await navigateToPatient(page, organizationId);
-    encounterId = await getFirstEncounterId(page);
+    const { patientId, encounterId } = await setupPatientAndEncounter(
+      page,
+      organizationId,
+    );
 
     test.skip(!encounterId, "No encounters found for patient");
 
@@ -179,8 +197,10 @@ test.describe("Patient Encounter Access via Organization", () => {
   test("Verify organization context when accessing encounter", async ({
     page,
   }) => {
-    patientId = await navigateToPatient(page, organizationId);
-    encounterId = await getFirstEncounterId(page);
+    const { patientId, encounterId } = await setupPatientAndEncounter(
+      page,
+      organizationId,
+    );
 
     test.skip(!encounterId, "No encounters found for patient");
 
