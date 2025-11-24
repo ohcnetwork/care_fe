@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 import {
   Classification,
@@ -327,5 +328,43 @@ test.describe("Activity Definition List Filter", () => {
     await expect(page).toHaveURL(
       `/facility/${facilityId}/settings/activity_definitions`,
     );
+  });
+
+  test("should search for activity definitions", async ({ page }) => {
+    const testAD = await createActivityDefinition(page, facilityId, {
+      resourceCategoryName,
+      overrides: {
+        status: Status.active,
+        classification: Classification.laboratory,
+      },
+    });
+
+    await page.goto(
+      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
+    );
+    await clearFilter(page);
+    await page
+      .locator('[data-slot="table-body"]')
+      .waitFor({ state: "visible" });
+
+    const searchInput = page.getByPlaceholder(/search activity definition/i);
+    await searchInput.fill(testAD.title);
+
+    await expect(
+      page.locator('[data-slot="table-row"]', { hasText: testAD.title }),
+    ).toBeVisible();
+
+    await searchInput.clear();
+    await searchInput.fill(faker.string.uuid());
+
+    await expect(
+      page.locator('[data-slot="table-row"]', { hasText: testAD.title }),
+    ).not.toBeVisible();
+
+    await searchInput.clear();
+
+    await expect(
+      page.locator('[data-slot="table-row"]', { hasText: testAD.title }),
+    ).toBeVisible();
   });
 });
