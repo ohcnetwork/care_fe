@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -104,11 +104,17 @@ export function MultiSelect({
               : t("options_selected", { count: value.length })}
           </Badge>
         )}
-
-        <ChevronDown
-          id="dropdown-toggle"
-          className="h-4 mx-2 cursor-pointer text-black"
-        />
+        {open ? (
+          <ChevronUp
+            id="dropdown-toggle"
+            className="h-4 mx-2 cursor-pointer text-black"
+          />
+        ) : (
+          <ChevronDown
+            id="dropdown-toggle"
+            className="h-4 mx-2 cursor-pointer text-black"
+          />
+        )}
       </div>
     </Button>
   );
@@ -133,7 +139,7 @@ export function MultiSelect({
                 ? t(`search_${translationBasekey}`)
                 : t("search_options_here")
             }
-            className="outline-hidden border-none ring-0 shadow-none"
+            className="outline-hidden border-none ring-0 shadow-none -ml-3"
             autoFocus
           />
         </div>
@@ -143,18 +149,18 @@ export function MultiSelect({
             <CommandItem
               key="all"
               onSelect={handleSelectAll}
-              className="cursor-pointer"
+              className="cursor-pointer h-10"
             >
               <Checkbox
                 checked={selectedValues.length === options.length}
                 aria-label="Select all options"
                 className="data-[state=checked]:text-white"
               />
-              <span>{t("select_all")}</span>
+              <span className="font-medium">{t("select_all")}</span>
             </CommandItem>
           </CommandGroup>
 
-          <CommandSeparator />
+          <CommandSeparator className="mx-auto w-[95%]" />
 
           {value.length > 0 && (
             <>
@@ -166,43 +172,49 @@ export function MultiSelect({
                       key={option.value}
                       onSelect={() => handleToggleOption(option.value)}
                       aria-label={`Select ${option.label}`}
-                      className="cursor-pointer"
+                      className="cursor-pointer h-10 flex gap-3"
                     >
                       <Checkbox
                         checked={selectedValues.includes(option.value)}
                         className="data-[state=checked]:text-white"
                       />
-                      {option?.icon && (
-                        <CareIcon icon={option.icon} className="size-4" />
-                      )}
-                      <span>{option.label}</span>
+
+                      <div className="flex items-center gap-1">
+                        {option?.icon && (
+                          <CareIcon icon={option.icon} className="size-4" />
+                        )}
+                        <span>{option.label}</span>
+                      </div>
                     </CommandItem>
                   ))}
               </CommandGroup>
 
-              <CommandSeparator />
+              <CommandSeparator className="mx-auto w-[95%]" />
             </>
           )}
 
           {value.length < options.length && (
-            <CommandGroup heading={t("non_selected")}>
+            <CommandGroup>
               {options
                 .filter((option) => !value.includes(option.value))
                 .map((option) => (
                   <CommandItem
                     key={option.value}
                     onSelect={() => handleToggleOption(option.value)}
-                    className="cursor-pointer"
                     aria-label={`Select ${option.label}`}
+                    className="cursor-pointer h-10 flex gap-3"
                   >
                     <Checkbox
                       checked={selectedValues.includes(option.value)}
                       className="data-[state=checked]:text-white"
                     />
-                    {option?.icon && (
-                      <CareIcon icon={option.icon} className="size-4" />
-                    )}
-                    <span>{option.label}</span>
+
+                    <div className="flex items-center gap-1">
+                      {option?.icon && (
+                        <CareIcon icon={option.icon} className="size-4" />
+                      )}
+                      <span>{option.label}</span>
+                    </div>
                   </CommandItem>
                 ))}
             </CommandGroup>
@@ -212,6 +224,7 @@ export function MultiSelect({
       <div className="flex justify-end space-x-2 p-3 border-t border-t-gray-200 shrink-0">
         <Button
           variant="link"
+          size="md"
           className="underline"
           onClick={() => setOpen(false)}
         >
@@ -219,15 +232,16 @@ export function MultiSelect({
         </Button>
         <Button
           variant="primary_gradient"
-          className="flex items-center gap-2 px-2"
+          size="md"
+          className="flex items-center gap-1 p-3"
           onClick={() => {
             onValueChange(selectedValues);
             setOpen(false);
           }}
         >
           {t("done")}
-          <span className="flex items-center justify-center rounded-md border px-1.5 py-0.5 text-xs font-medium border-white/25 bg-white/15">
-            <CareIcon icon="l-enter" className="size-4" />
+          <span className="flex items-center justify-center size-5 rounded-sm border border-white/25 bg-white/15 font-medium">
+            <CareIcon icon="l-enter" className="size-3" />
           </span>
         </Button>
       </div>
@@ -239,7 +253,7 @@ export function MultiSelect({
       <div className="w-full">
         <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
-          <DrawerContent className="px-0 pt-2 flex flex-col h-[85vh]">
+          <DrawerContent className="px-0 pt-2 flex flex-col h-[50vh]">
             <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex flex-col flex-1 overflow-hidden">
               {listContent}
             </div>
