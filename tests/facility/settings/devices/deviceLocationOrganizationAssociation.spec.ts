@@ -244,9 +244,9 @@ test.describe("Device Location and Organization Association", () => {
         .click({ timeout: 5000 });
 
       // Should show success message
-      await expect(
-        page.getByText(/linked successfully/i),
-      ).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(/linked successfully/i)).toBeVisible({
+        timeout: 5000,
+      });
 
       // Organization should now be displayed
       await expect(
@@ -287,9 +287,9 @@ test.describe("Device Location and Organization Association", () => {
         .last()
         .click({ timeout: 5000 });
 
-      await expect(
-        page.getByText(/linked successfully/i),
-      ).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(/linked successfully/i)).toBeVisible({
+        timeout: 5000,
+      });
 
       // Close the sheet
       await page.keyboard.press("Escape");
@@ -323,9 +323,9 @@ test.describe("Device Location and Organization Association", () => {
           .click({ timeout: 5000 });
 
         // Should show success message
-        await expect(
-          page.getByText(/linked successfully/i),
-        ).toBeVisible({ timeout: 5000 });
+        await expect(page.getByText(/linked successfully/i)).toBeVisible({
+          timeout: 5000,
+        });
       }
     }
   });
@@ -399,9 +399,9 @@ test.describe("Device Location and Organization Association", () => {
         .last()
         .click({ timeout: 5000 });
 
-      await expect(
-        page.getByText(/linked successfully/i),
-      ).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(/linked successfully/i)).toBeVisible({
+        timeout: 5000,
+      });
     }
 
     // Both should be visible and independent

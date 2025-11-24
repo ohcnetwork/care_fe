@@ -84,9 +84,9 @@ test.describe("Device Contact Point Validation", () => {
       await page.getByRole("button", { name: "Save" }).click();
 
       // Should show validation error
-      await expect(
-        page.locator("text=Invalid email").first(),
-      ).toBeVisible({ timeout: 2000 });
+      await expect(page.locator("text=Invalid email").first()).toBeVisible({
+        timeout: 2000,
+      });
 
       // Clear for next test
       await emailInput.clear();
