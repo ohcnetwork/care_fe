@@ -198,7 +198,7 @@ export const PractitionerSelector = ({
   const filteredPractitioners = useMemo(() => {
     if (!organizationUsers?.users) return [];
     return organizationUsers.users.filter((p) =>
-      formatName(p).toLowerCase().includes(practitionerSearch.toLowerCase()),
+      getItemValue(p).toLowerCase().includes(practitionerSearch.toLowerCase()),
     );
   }, [organizationUsers?.users, practitionerSearch]);
   const handleUserSelect = (user: UserReadMinimal) => {
@@ -216,6 +216,7 @@ export const PractitionerSelector = ({
   };
 
   const handleBackNavigation = () => {
+    setPractitionerSearch("");
     if (navigationStack.length > 0) {
       const newStack = navigationStack.slice(0, -1);
       setNavigationStack(newStack);
@@ -509,7 +510,6 @@ export const PractitionerSelector = ({
                     type="text"
                     placeholder={t("search_practitioners")}
                     value={practitionerSearch}
-                    autoFocus
                     onChange={(e) => setPractitionerSearch(e.target.value)}
                     className="w-full pl-10 pr-3
                       rounded-md 
@@ -694,6 +694,7 @@ export const PractitionerSelector = ({
             setOpen(newOpen);
             if (!newOpen) {
               setSearchQuery("");
+              setPractitionerSearch("");
               setCurrentOrganizationId(null);
               setNavigationStack([]);
             }
