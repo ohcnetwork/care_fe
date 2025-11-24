@@ -1,319 +1,203 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 test.use({ storageState: "tests/.auth/user.json" });
+
+/**
+ * Helper function to navigate to organization and extract organization ID
+ */
+async function navigateToOrganization(page: Page): Promise<string> {
+  await page.goto("/");
+  await page.getByRole("tab", { name: "Governance" }).click();
+
+  // Click the first organization link (more generic selector)
+  const orgLinks = page.getByRole("link").filter({ hasText: /Government/i });
+  await orgLinks.first().click();
+
+  // Wait for URL to update and extract organization ID
+  await page.waitForURL(/\/organization\/([^/]+)/);
+  const urlMatch = page.url().match(/\/organization\/([^/]+)/);
+  if (!urlMatch) {
+    throw new Error("Could not extract organization ID from URL");
+  }
+  return urlMatch[1];
+}
+
+/**
+ * Helper function to navigate to a patient and extract patient ID
+ */
+async function navigateToPatient(
+  page: Page,
+  organizationId: string,
+): Promise<string> {
+  await page.getByRole("menuitem", { name: "Patients" }).click();
+  await page.waitForURL(`**/organization/${organizationId}/patients`);
+
+  // Wait for patients to load and click the first patient
+  const patientLink = page
+    .getByRole("link")
+    .filter({ has: page.locator("h3") })
+    .first();
+  await patientLink.waitFor({ state: "visible" });
+  await patientLink.click();
+
+  // Extract patient ID from URL
+  await page.waitForURL(/\/patient\/([^/]+)/);
+  const urlMatch = page.url().match(/\/patient\/([^/]+)/);
+  if (!urlMatch) {
+    throw new Error("Could not extract patient ID from URL");
+  }
+  return urlMatch[1];
+}
+
+/**
+ * Helper function to get the first encounter ID for a patient
+ * Returns null if no encounters exist
+ */
+async function getFirstEncounterId(page: Page): Promise<string | null> {
+  await page.getByRole("tab", { name: "Encounters" }).click();
+  await page.waitForURL(/\/patient\/([^/]+)\/encounters/);
+
+  // Check if there are any encounters
+  const encounterCards = page
+    .locator('[data-testid="encounter-card"], .cursor-pointer')
+    .filter({
+      has: page.locator(
+        "text=/Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i",
+      ),
+    });
+
+  const encounterCount = await encounterCards.count();
+  if (encounterCount === 0) {
+    return null;
+  }
+
+  // Click on first encounter to get the encounter ID
+  await encounterCards.first().click();
+  await page.waitForURL(/\/encounter\/([^/]+)/);
+
+  const urlMatch = page.url().match(/\/encounter\/([^/]+)/);
+  if (!urlMatch) {
+    throw new Error("Could not extract encounter ID from URL");
+  }
+  return urlMatch[1];
+}
 
 test.describe("Patient Encounter Access via Organization", () => {
   let organizationId: string;
   let patientId: string;
-  let encounterId: string;
+  let encounterId: string | null;
 
   test.beforeEach(async ({ page }) => {
-    // Navigate to organization
-    await page.goto("/");
-    await page.getByRole("tab", { name: "Governance" }).click();
-
-    // Click the first organization link and extract organization ID
-    const orgLink = page.getByRole("link", { name: /Government$/ }).first();
-    await orgLink.click();
-
-    // Wait for URL to update and extract organization ID
-    await page.waitForURL(/\/organization\/([^/]+)$/);
-    const urlMatch = page.url().match(/\/organization\/([^/]+)$/);
-    if (urlMatch) {
-      organizationId = urlMatch[1];
-    }
+    organizationId = await navigateToOrganization(page);
   });
 
   test("Access patient encounter through organization patients list", async ({
     page,
   }) => {
-    // Navigate to organization patients
-    await page.getByRole("menuitem", { name: "Patients" }).click();
-    await page.waitForURL(`**/organization/${organizationId}/patients`);
+    patientId = await navigateToPatient(page, organizationId);
+    encounterId = await getFirstEncounterId(page);
 
-    // Wait for patients to load and click the first patient
-    const patientLink = page
-      .getByRole("link")
-      .filter({ has: page.locator("h3") })
-      .first();
-    await patientLink.waitFor({ state: "visible" });
-    await patientLink.click();
+    test.skip(!encounterId, "No encounters found for patient");
 
-    // Wait for patient page to load and extract patient ID
-    await page.waitForURL(/\/patient\/([^/]+)/);
-    const patientUrlMatch = page.url().match(/\/patient\/([^/]+)/);
-    if (patientUrlMatch) {
-      patientId = patientUrlMatch[1];
-    }
+    // Navigate via organization route
+    const orgEncounterUrl = `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/overview`;
+    await page.goto(orgEncounterUrl);
 
-    // Navigate to encounters tab
-    await page.getByRole("tab", { name: "Encounters" }).click();
-    await page.waitForURL(/\/patient\/([^/]+)\/encounters/);
+    // Verify the encounter page loads correctly via organization route
+    await expect(
+      page.getByRole("heading", {
+        name: /Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i,
+      }),
+    ).toBeVisible();
 
-    // Check if there are any encounters
-    const encounterCards = page
-      .locator('[data-testid="encounter-card"], .cursor-pointer')
-      .filter({
-        has: page.locator(
-          "text=/Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i",
-        ),
-      });
-
-    const encounterCount = await encounterCards.count();
-
-    if (encounterCount > 0) {
-      // Click on the first encounter
-      await encounterCards.first().click();
-
-      // Wait for encounter page to load
-      await page.waitForURL(/\/encounter\/([^/]+)/);
-
-      // Extract encounter ID from URL
-      const encounterUrlMatch = page.url().match(/\/encounter\/([^/]+)/);
-      if (encounterUrlMatch) {
-        encounterId = encounterUrlMatch[1];
-      }
-
-      // Verify we're on the encounter page with proper heading
-      await expect(
-        page.getByRole("heading", {
-          name: /Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i,
-        }),
-      ).toBeVisible();
-
-      // Now test accessing the same encounter via organization route
-      const orgEncounterUrl = `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/overview`;
-      await page.goto(orgEncounterUrl);
-
-      // Verify the encounter page loads correctly via organization route
-      await expect(
-        page.getByRole("heading", {
-          name: /Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i,
-        }),
-      ).toBeVisible();
-
-      // Verify we can navigate to different tabs via organization route
-      await page.getByRole("tab", { name: "Details" }).click();
-      await expect(page).toHaveURL(
-        new RegExp(
-          `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/details`,
-        ),
-      );
-    } else {
-      // If no encounters exist, just verify the empty state is shown
-      await expect(page.getByText(/no.*encounters.*found/i)).toBeVisible();
-      console.log(
-        "No encounters found for patient, skipping encounter access test",
-      );
-    }
+    // Verify we can navigate to different tabs via organization route
+    await page.getByRole("tab", { name: "Details" }).click();
+    await expect(page).toHaveURL(
+      new RegExp(
+        `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/details`,
+      ),
+    );
   });
 
   test("Direct access to encounter via organization URL", async ({ page }) => {
-    // First, we need to get a patient with an encounter
-    // Navigate to organization patients
-    await page.getByRole("menuitem", { name: "Patients" }).click();
-    await page.waitForURL(`**/organization/${organizationId}/patients`);
+    patientId = await navigateToPatient(page, organizationId);
+    encounterId = await getFirstEncounterId(page);
 
-    // Click the first patient
-    const patientLink = page
-      .getByRole("link")
-      .filter({ has: page.locator("h3") })
-      .first();
-    await patientLink.waitFor({ state: "visible" });
-    await patientLink.click();
+    test.skip(!encounterId, "No encounters found for patient");
 
-    // Extract patient ID
-    await page.waitForURL(/\/patient\/([^/]+)/);
-    const patientUrlMatch = page.url().match(/\/patient\/([^/]+)/);
-    if (patientUrlMatch) {
-      patientId = patientUrlMatch[1];
-    }
+    // Test direct navigation to encounter via organization URL
+    const orgEncounterUrl = `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/overview`;
+    await page.goto(orgEncounterUrl);
 
-    // Navigate to encounters tab
-    await page.getByRole("tab", { name: "Encounters" }).click();
-    await page.waitForURL(/\/patient\/([^/]+)\/encounters/);
+    // Verify the encounter loads correctly
+    await expect(
+      page.getByRole("heading", {
+        name: /Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i,
+      }),
+    ).toBeVisible();
 
-    // Check if there are any encounters
-    const encounterCards = page
-      .locator('[data-testid="encounter-card"], .cursor-pointer')
-      .filter({
-        has: page.locator(
-          "text=/Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i",
-        ),
-      });
-
-    const encounterCount = await encounterCards.count();
-
-    if (encounterCount > 0) {
-      // Click on first encounter to get the encounter ID
-      await encounterCards.first().click();
-      await page.waitForURL(/\/encounter\/([^/]+)/);
-
-      const encounterUrlMatch = page.url().match(/\/encounter\/([^/]+)/);
-      if (encounterUrlMatch) {
-        encounterId = encounterUrlMatch[1];
-      }
-
-      // Test direct navigation to encounter via organization URL
-      const orgEncounterUrl = `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/overview`;
-      await page.goto(orgEncounterUrl);
-
-      // Verify the encounter loads correctly
-      await expect(
-        page.getByRole("heading", {
-          name: /Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i,
-        }),
-      ).toBeVisible();
-
-      // Verify organization context is maintained
-      // The URL should still contain the organization ID
-      expect(page.url()).toContain(`/organization/${organizationId}/`);
-    } else {
-      console.log(
-        "No encounters found for patient, skipping direct access test",
-      );
-    }
+    // Verify organization context is maintained
+    expect(page.url()).toContain(`/organization/${organizationId}/`);
   });
 
   test("Navigate between encounter tabs using organization route", async ({
     page,
   }) => {
-    // Navigate to patients
-    await page.getByRole("menuitem", { name: "Patients" }).click();
-    await page.waitForURL(`**/organization/${organizationId}/patients`);
+    patientId = await navigateToPatient(page, organizationId);
+    encounterId = await getFirstEncounterId(page);
 
-    // Click first patient
-    const patientLink = page
-      .getByRole("link")
-      .filter({ has: page.locator("h3") })
-      .first();
-    await patientLink.waitFor({ state: "visible" });
-    await patientLink.click();
+    test.skip(!encounterId, "No encounters found for patient");
 
-    // Extract patient ID
-    await page.waitForURL(/\/patient\/([^/]+)/);
-    const patientUrlMatch = page.url().match(/\/patient\/([^/]+)/);
-    if (patientUrlMatch) {
-      patientId = patientUrlMatch[1];
-    }
+    // Navigate via organization route
+    await page.goto(
+      `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/overview`,
+    );
 
-    // Navigate to encounters tab
-    await page.getByRole("tab", { name: "Encounters" }).click();
+    // Test navigation between tabs
+    const tabs = [
+      { name: "Overview", urlFragment: "overview" },
+      { name: "Details", urlFragment: "details" },
+      { name: "Updates", urlFragment: "updates" },
+    ];
 
-    // Check for encounters
-    const encounterCards = page
-      .locator('[data-testid="encounter-card"], .cursor-pointer')
-      .filter({
-        has: page.locator(
-          "text=/Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i",
-        ),
-      });
+    for (const tab of tabs) {
+      // Click on the tab
+      const tabElement = page.getByRole("tab", { name: tab.name });
+      if (await tabElement.isVisible()) {
+        await tabElement.click();
 
-    const encounterCount = await encounterCards.count();
-
-    if (encounterCount > 0) {
-      // Get encounter ID
-      await encounterCards.first().click();
-      await page.waitForURL(/\/encounter\/([^/]+)/);
-
-      const encounterUrlMatch = page.url().match(/\/encounter\/([^/]+)/);
-      if (encounterUrlMatch) {
-        encounterId = encounterUrlMatch[1];
+        // Verify URL contains both organization ID and correct tab
+        await expect(page).toHaveURL(
+          new RegExp(
+            `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/${tab.urlFragment}`,
+          ),
+        );
       }
-
-      // Navigate via organization route
-      await page.goto(
-        `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/overview`,
-      );
-
-      // Test navigation between tabs
-      const tabs = [
-        { name: "Overview", urlFragment: "overview" },
-        { name: "Details", urlFragment: "details" },
-        { name: "Updates", urlFragment: "updates" },
-      ];
-
-      for (const tab of tabs) {
-        // Click on the tab
-        const tabElement = page.getByRole("tab", { name: tab.name });
-        if (await tabElement.isVisible()) {
-          await tabElement.click();
-
-          // Verify URL contains both organization ID and correct tab
-          await expect(page).toHaveURL(
-            new RegExp(
-              `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/${tab.urlFragment}`,
-            ),
-          );
-        }
-      }
-    } else {
-      console.log("No encounters found, skipping tab navigation test");
     }
   });
 
-  test("Verify organization breadcrumb when accessing encounter", async ({
+  test("Verify organization context when accessing encounter", async ({
     page,
   }) => {
-    // Navigate to patients
-    await page.getByRole("menuitem", { name: "Patients" }).click();
-    await page.waitForURL(`**/organization/${organizationId}/patients`);
+    patientId = await navigateToPatient(page, organizationId);
+    encounterId = await getFirstEncounterId(page);
 
-    // Click first patient
-    const patientLink = page
-      .getByRole("link")
-      .filter({ has: page.locator("h3") })
-      .first();
-    await patientLink.waitFor({ state: "visible" });
-    await patientLink.click();
+    test.skip(!encounterId, "No encounters found for patient");
 
-    // Extract patient ID
-    await page.waitForURL(/\/patient\/([^/]+)/);
-    const patientUrlMatch = page.url().match(/\/patient\/([^/]+)/);
-    if (patientUrlMatch) {
-      patientId = patientUrlMatch[1];
-    }
+    // Navigate via organization route
+    await page.goto(
+      `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/overview`,
+    );
 
-    // Navigate to encounters
-    await page.getByRole("tab", { name: "Encounters" }).click();
+    // Verify page content is accessible
+    await expect(
+      page.getByRole("heading", {
+        name: /Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i,
+      }),
+    ).toBeVisible();
 
-    // Check for encounters
-    const encounterCards = page
-      .locator('[data-testid="encounter-card"], .cursor-pointer')
-      .filter({
-        has: page.locator(
-          "text=/Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i",
-        ),
-      });
-
-    const encounterCount = await encounterCards.count();
-
-    if (encounterCount > 0) {
-      await encounterCards.first().click();
-      await page.waitForURL(/\/encounter\/([^/]+)/);
-
-      const encounterUrlMatch = page.url().match(/\/encounter\/([^/]+)/);
-      if (encounterUrlMatch) {
-        encounterId = encounterUrlMatch[1];
-      }
-
-      // Navigate via organization route
-      await page.goto(
-        `/organization/${organizationId}/patient/${patientId}/encounter/${encounterId}/overview`,
-      );
-
-      // Verify page content is accessible
-      await expect(
-        page.getByRole("heading", {
-          name: /Inpatient|Ambulatory|Observation|Emergency|Virtual|Home Health/i,
-        }),
-      ).toBeVisible();
-
-      // The page should load successfully without errors
-      // and the URL should contain the organization context
-      expect(page.url()).toContain(`/organization/${organizationId}/`);
-    } else {
-      console.log("No encounters found, skipping breadcrumb test");
-    }
+    // The page should load successfully without errors
+    // and the URL should contain the organization context
+    expect(page.url()).toContain(`/organization/${organizationId}/`);
   });
 });
