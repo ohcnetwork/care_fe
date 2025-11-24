@@ -61,11 +61,11 @@ export function DiscountMonetaryComponentForm({
           monetary_component_type: z.literal(MonetaryComponentType.discount),
           code: CodeSchema.optional(),
           factor: z.preprocess(
-            (val) => {
-              if (val === "" || val === null || val === undefined) {
+            (v) => {
+              if (v === "" || v === null || v === undefined) {
                 return undefined;
               }
-              return val;
+              return v;
             },
             z.coerce
               .number({
