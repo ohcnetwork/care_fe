@@ -12,7 +12,6 @@ import query from "@/Utils/request/query";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
-import { DispenseMedicineButton } from "@/pages/Encounters/tabs/overview/summary-panel-details-tab/dispense-medicine";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -279,13 +278,6 @@ export function EncounterProvider({
           trigger={<span />}
         />
       )}
-
-      <DispenseMedicineButton
-        open={activeAction === EncounterAction.DispenseMedicine}
-        setOpen={(open) => {
-          setActiveAction(open ? EncounterAction.DispenseMedicine : null);
-        }}
-      />
 
       {facilityId && (
         <DispenseButton
