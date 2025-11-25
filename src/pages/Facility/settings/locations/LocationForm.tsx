@@ -296,11 +296,7 @@ export default function LocationForm({
                 disabled={!!locationId}
               >
                 <FormControl>
-                  <SelectTrigger
-                    className="w-full"
-                    data-cy="location-form-options"
-                    ref={field.ref}
-                  >
+                  <SelectTrigger className="w-full" ref={field.ref}>
                     <SelectValue />
                   </SelectTrigger>
                 </FormControl>
@@ -328,7 +324,6 @@ export default function LocationForm({
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    data-cy="enable-bulk-creation-checkbox"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
@@ -351,7 +346,7 @@ export default function LocationForm({
                 <FormLabel>{t("number_of_beds")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger data-cy="bed-counts-select" ref={field.ref}>
+                    <SelectTrigger ref={field.ref}>
                       <SelectValue placeholder={t("select_number_of_beds")} />
                     </SelectTrigger>
                   </FormControl>
@@ -376,7 +371,7 @@ export default function LocationForm({
             <FormItem>
               <FormLabel aria-required>{t("name")}</FormLabel>
               <FormControl>
-                <Input {...field} data-cy="location-name-input" />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -490,11 +485,7 @@ export default function LocationForm({
             <FormItem>
               <FormLabel>{t("description")}</FormLabel>
               <FormControl>
-                <Textarea
-                  {...field}
-                  placeholder="Description"
-                  data-cy="location-description"
-                />
+                <Textarea {...field} placeholder="Description" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -510,7 +501,7 @@ export default function LocationForm({
                 <FormLabel>{t("status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger data-cy="location-status" ref={field.ref}>
+                    <SelectTrigger ref={field.ref}>
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
@@ -535,7 +526,7 @@ export default function LocationForm({
                 <FormLabel>{t("operational_status")}</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger data-cy="operational-status" ref={field.ref}>
+                    <SelectTrigger ref={field.ref}>
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
