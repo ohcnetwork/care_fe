@@ -16,6 +16,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FileType } from "@/types/files/file";
+import { ReportSubTab } from "./ReportSubTab";
 
 interface FilesTabsProps {
   type: FileType.ENCOUNTER | FileType.PATIENT;
@@ -25,10 +26,15 @@ interface FilesTabsProps {
 }
 
 type QueryParams = {
-  file: "all" | "discharge_summary" | "drawings";
+  file: "all" | "discharge_summary" | "reports" | "drawings";
 };
 
-const allowedTabs = ["all", "discharge_summary", "drawings"] as const;
+const allowedTabs = [
+  "all",
+  "discharge_summary",
+  "reports",
+  "drawings",
+] as const;
 type TabType = (typeof allowedTabs)[number];
 
 export const FilesTab = ({
@@ -92,6 +98,12 @@ export const FilesTab = ({
             </TabsTrigger>
           )}
           <TabsTrigger
+            value="reports"
+            className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
+          >
+            {t("reports")}
+          </TabsTrigger>
+          <TabsTrigger
             value="drawings"
             className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
           >
@@ -119,6 +131,14 @@ export const FilesTab = ({
             />
           </TabsContent>
         )}
+
+        <TabsContent value="reports">
+          <ReportSubTab
+            encounter={encounter}
+            patient={patient}
+            associatingId={associatingId}
+          />
+        </TabsContent>
 
         <TabsContent value="drawings">
           <div>

@@ -2,16 +2,13 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
 import {
-  BaseTemplateRead,
-  ReportArchiveRead,
-  ReportCreate,
-  ReportDownloadRead,
-  ReportRead,
+  TemplateBaseRead,
   TemplateCreate,
   TemplatePreviewCreate,
   TemplatePreviewRead,
   TemplateRead,
   TemplateSchemaRead,
+  TemplateUpdate,
 } from "./template";
 
 export default {
@@ -24,7 +21,13 @@ export default {
     path: "/api/v1/template/",
     method: HttpMethod.POST,
     TBody: Type<TemplateCreate>(),
-    TRes: Type<BaseTemplateRead>(),
+    TRes: Type<TemplateRead>(),
+  },
+  updateTemplate: {
+    path: "/api/v1/template/{slug}/",
+    method: HttpMethod.PUT,
+    TBody: Type<TemplateUpdate>(),
+    TRes: Type<TemplateRead>(),
   },
   createTemplatePreview: {
     path: "/api/v1/template/preview/",
@@ -35,36 +38,11 @@ export default {
   listTemplates: {
     path: "/api/v1/template/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<BaseTemplateRead>>(),
+    TRes: Type<PaginatedResponse<TemplateBaseRead>>(),
   },
   retrieveTemplate: {
-    path: "/api/v1/template/{template_id}/",
+    path: "/api/v1/template/{slug}/",
     method: HttpMethod.GET,
     TRes: Type<TemplateRead>(),
-  },
-  createReport: {
-    path: "/api/v1/report/generate/",
-    method: HttpMethod.POST,
-    TBody: Type<ReportCreate>(),
-  },
-  listReports: {
-    path: "/api/v1/report/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<ReportRead>>(),
-    defaultQueryParams: {
-      associating_id: "{encounter_id}",
-      upload_completed: "true",
-    },
-  },
-  downloadReport: {
-    path: "/api/v1/report/{report_id}/download/",
-    method: HttpMethod.GET,
-    TRes: Type<ReportDownloadRead>(),
-  },
-  archiveReport: {
-    path: "/api/v1/report/{report_id}/archive/",
-    method: HttpMethod.POST,
-    TBody: Type<{ archive_reason: string }>(),
-    TRes: Type<ReportArchiveRead>(),
   },
 };

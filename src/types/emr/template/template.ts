@@ -1,26 +1,27 @@
-import { FileCategory, FileType } from "@/types/files/file";
+import { SlugConfig } from "@/types/base/slug/slugConfig";
 import {
   ALLERGY_CATEGORY,
   ALLERGY_CLINICAL_STATUS,
   ALLERGY_CRITICALITY,
   ALLERGY_VERIFICATION_STATUS,
-} from "../allergyIntolerance/allergyIntolerance";
+} from "@/types/emr/allergyIntolerance/allergyIntolerance";
 import {
   DIAGNOSIS_CLINICAL_STATUS,
   DIAGNOSIS_SEVERITY,
   DIAGNOSIS_VERIFICATION_STATUS,
-} from "../diagnosis/diagnosis";
+} from "@/types/emr/diagnosis/diagnosis";
 import {
   MEDICATION_REQUEST_INTENT,
   MEDICATION_REQUEST_STATUS,
   MedicationPriority,
-} from "../medicationRequest/medicationRequest";
-import { ObservationStatus } from "../observation/observation";
+} from "@/types/emr/medicationRequest/medicationRequest";
+import { ObservationStatus } from "@/types/emr/observation/observation";
 import {
   SYMPTOM_CLINICAL_STATUS,
   SYMPTOM_SEVERITY,
   SYMPTOM_VERIFICATION_STATUS,
-} from "../symptom/symptom";
+} from "@/types/emr/symptom/symptom";
+import { FileCategory, FileType } from "@/types/files/file";
 
 export interface TemplateSchemaRead {
   single_objects: SingleObjectSchema;
@@ -60,36 +61,48 @@ export interface QuerySetAttributeSchema {
 }
 
 export interface ContextConfig {
-  fields: string[];
   filters?: Record<string, string>;
   limit?: number | null;
 }
 
-export interface TemplateCreate {
-  name: string;
-  slug: string;
-  status: string;
-  format: string;
-  facility?: string;
-  template_data: string;
-  context_config: Record<string, ContextConfig>;
-}
+export const TemplateStatuses = ["draft", "active", "retired"] as const;
+export type TemplateStatus = (typeof TemplateStatuses)[number];
 
-export interface BaseTemplateRead {
+export const TemplateFormats = ["html", "pdf"] as const;
+export type TemplateFormat = (typeof TemplateFormats)[number];
+export const TemplateTypes = ["discharge_summary"] as const;
+export type TemplateType = (typeof TemplateTypes)[number];
+export interface TemplateBase {
   id: string;
   name: string;
-  slug: string;
-  status: string;
-  template_type: string;
-  format: string;
+  status: TemplateStatus;
+  template_type: TemplateType;
+  default_format: TemplateFormat;
   created_date: string;
 }
 
-export interface TemplateRead extends BaseTemplateRead {
+export interface TemplateBaseRead extends TemplateBase {
+  slug: string;
+  slug_config: SlugConfig;
+}
+
+export interface TemplateRead extends TemplateBaseRead {
   template_data: string;
   context_config: Record<string, ContextConfig>;
   facility?: string;
   modified_date: string;
+}
+
+export interface TemplateCreate
+  extends Omit<TemplateBase, "id" | "created_date"> {
+  slug_value: string;
+  facility?: string;
+  template_data: string;
+  context_config: Record<string, ContextConfig>;
+}
+
+export interface TemplateUpdate extends Omit<TemplateCreate, "id"> {
+  slug_value: string;
 }
 
 export interface TemplatePreviewCreate {
@@ -110,41 +123,7 @@ export interface TemplatePreviewRead {
   };
 }
 
-export interface ReportCreate {
-  template_id: string;
-  report_type: string;
-  associating_id: string;
-  patient_id?: string;
-  encounter_id?: string;
-  context_config: Record<string, ContextConfig> | null;
-  output_format: string;
-  options: Record<string, string>;
-}
-
-export interface ReportRead {
-  id: string;
-  name: string;
-  template: Partial<BaseTemplateRead>;
-  report_type: string;
-  associating_id: string;
-  upload_completed: boolean;
-  is_archived: boolean;
-  created_date: string;
-  meta: Record<string, string>;
-}
-
-export interface ReportDownloadRead {
-  download_url: string;
-  file_name: string;
-  mime_type: string;
-}
-
-export interface ReportArchiveRead {
-  detail: string;
-  archived_datetime: string;
-  archived_by: string;
-}
-
+//eslint-disable-next-line @typescript-eslint/no-unused-vars
 const FILTER_CONFIG = {
   allergies: {
     clinical_status: {
