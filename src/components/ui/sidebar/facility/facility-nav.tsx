@@ -186,10 +186,10 @@ function generateFacilityLinks(
           name: t("tag_config"),
           url: `${baseUrl}/settings/tag_config`,
         },
-        // {
-        //   name: t("report_builder"),
-        //   url: `${baseUrl}/settings/report_builder/`,
-        // },
+        {
+          name: t("template_builder"),
+          url: `${baseUrl}/template/builder/`,
+        },
       ],
     },
   ];

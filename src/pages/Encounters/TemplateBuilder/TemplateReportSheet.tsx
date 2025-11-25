@@ -96,6 +96,16 @@ export default function TemplateReportSheet({
         <SheetHeader>
           <SheetTitle className="flex flex-col sm:flex-row justify-between mt-4">
             <span>{t("available_templates")}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto"
+              onClick={() =>
+                navigate(`/facility/${facilityId}/template/builder/`)
+              }
+            >
+              {t("create_template")}
+            </Button>
           </SheetTitle>
         </SheetHeader>
         <div className="space-y-4 mt-6">
