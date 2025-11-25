@@ -39,6 +39,7 @@ import {
 } from "@/types/emr/template/template";
 import templateApi from "@/types/emr/template/templateApi";
 
+import queryClient from "@/Utils/request/queryClient";
 import { generateSlug } from "@/Utils/utils";
 import { cn } from "@/lib/utils";
 import reportApi from "@/types/emr/report/reportApi";
@@ -153,6 +154,7 @@ export default function TemplateBuilder({
     }),
     onSuccess: () => {
       toast.success(t("template_updated"));
+      queryClient.invalidateQueries({ queryKey: ["template", template?.slug] });
     },
     onError: (error) => {
       toast.error(error.message);

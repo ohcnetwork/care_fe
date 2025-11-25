@@ -59,6 +59,7 @@ export default function TemplateReportSheet({
     queryFn: query(templateApi.listTemplates, {
       queryParams: {
         facility: facilityId,
+        status: "active",
       },
     }),
     enabled: open && canListTemplate,
@@ -108,7 +109,7 @@ export default function TemplateReportSheet({
             </Button>
           </SheetTitle>
         </SheetHeader>
-        <div className="space-y-4 mt-6">
+        <div className="space-y-4 mt-3">
           {isTemplatesLoading ? (
             <CardGridSkeleton count={5} />
           ) : !templatesData?.results ||
@@ -133,7 +134,7 @@ export default function TemplateReportSheet({
             </div>
           ) : (
             <ScrollArea className="h-[calc(100vh-10rem)]">
-              <div className="space-y-2 m-4">
+              <div className="space-y-2 mt-3">
                 {templatesData?.results?.map((template) => (
                   <TemplateCard
                     key={template.id}
