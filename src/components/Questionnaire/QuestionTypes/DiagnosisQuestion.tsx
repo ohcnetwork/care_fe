@@ -634,6 +634,7 @@ export function DiagnosisQuestion({
         ]}
         buttonLabel={t("diagnosis_history")}
         onAddSelected={handleAddHistoricalDiagnoses}
+        disableAPI={isPreview}
       />
 
       {sortedDiagnoses.length > 0 && (

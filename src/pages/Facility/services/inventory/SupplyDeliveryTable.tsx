@@ -193,30 +193,33 @@ export function SupplyDeliveryTable({
             </TableCell>
             <TableCell>
               <MonetaryDisplay
-                amount={String(
+                factor={
                   delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
                     .filter(
                       (c) =>
                         c.monetary_component_type === MonetaryComponentType.tax,
                     )
-                    .reduce((acc, curr) => acc + Number(curr.amount || 0), 0),
-                )}
-                hideCurrency
+                    .reduce((sum, c) => sum + (c.factor || 0), 0) || undefined
+                }
               />
             </TableCell>
             <TableCell>
-              <MonetaryDisplay
-                amount={String(
-                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components
-                    .filter(
-                      (c) =>
-                        c.monetary_component_type ===
-                        MonetaryComponentType.discount,
-                    )
-                    .reduce((acc, curr) => acc + Number(curr.amount || 0), 0),
-                )}
-                hideCurrency
-              />
+              {(() => {
+                const discountComponents =
+                  delivery.supplied_inventory_item?.product.charge_item_definition?.price_components?.filter(
+                    (c) =>
+                      c.monetary_component_type ===
+                      MonetaryComponentType.discount,
+                  );
+
+                return discountComponents && discountComponents.length
+                  ? discountComponents.map((component, index) => (
+                      <div key={index}>
+                        <MonetaryDisplay {...component} />
+                      </div>
+                    ))
+                  : "-";
+              })()}
             </TableCell>
             <TableCell>
               <Badge variant={SUPPLY_DELIVERY_STATUS_COLORS[delivery.status]}>

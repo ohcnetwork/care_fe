@@ -10,7 +10,7 @@ applyTo: "**/*.config.{js,mjs,cjs,ts,mts,cts,json,yml,yaml}"
 - `vite.config.mts` - Main Vite build configuration
 - `tsconfig.json` - TypeScript compiler configuration
 - `tailwind.config.js` - Tailwind CSS configuration
-- `cypress.config.ts` - Cypress testing configuration
+- `playwright.config.ts` - Playwright testing configuration
 
 ### Code Quality Configuration
 - `eslint.config.mjs` - ESLint linting rules
