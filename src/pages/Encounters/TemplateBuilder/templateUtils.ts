@@ -171,6 +171,7 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
     </style>
 </head>
 <body>
+    <!-- Add your content here -->
     <div class="header">
         <h1>DISCHARGE SUMMARY</h1>
         <h3>{{ encounter.facility_name }}</h3>

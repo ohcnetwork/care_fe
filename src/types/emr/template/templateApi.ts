@@ -8,7 +8,6 @@ import {
   TemplatePreviewRead,
   TemplateRead,
   TemplateSchemaRead,
-  TemplateUpdate,
 } from "./template";
 
 export default {
@@ -26,7 +25,7 @@ export default {
   updateTemplate: {
     path: "/api/v1/template/{slug}/",
     method: HttpMethod.PUT,
-    TBody: Type<TemplateUpdate>(),
+    TBody: Type<TemplateCreate>(),
     TRes: Type<TemplateRead>(),
   },
   createTemplatePreview: {

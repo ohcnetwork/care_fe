@@ -101,10 +101,6 @@ export interface TemplateCreate
   context_config: Record<string, ContextConfig>;
 }
 
-export interface TemplateUpdate extends Omit<TemplateCreate, "id"> {
-  slug_value: string;
-}
-
 export interface TemplatePreviewCreate {
   template_data: string;
   context_config: Record<string, ContextConfig>;
