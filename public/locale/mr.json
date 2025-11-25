@@ -92,5 +92,6 @@
   "present_health": "सध्याचे आरोग्य",
   "ongoing_medications": "चालू औषधे",
   "allergies": "अॅलर्जी",
-  "is_pregnant": "गर्भवती आहे"
+  "is_pregnant": "गर्भवती आहे",
+  "file_upload_area": "फाइल अपलोड क्षेत्र - येथे फाइल्स ओढा आणि सोडा किंवा फाइल्स जोडा बटण वापरा"
 }

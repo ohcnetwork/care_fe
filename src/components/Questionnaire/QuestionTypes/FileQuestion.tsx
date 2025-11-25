@@ -181,7 +181,13 @@ export function FilesQuestion(props: FilesQuestionProps) {
   }, [fileUpload.files]);
 
   return (
-    <div className="flex flex-col gap-2 relative" {...dragHandlers}>
+    <div
+      className="flex flex-col gap-2 relative"
+      role="region"
+      aria-label={t("file_upload_area")}
+      tabIndex={0}
+      {...dragHandlers}
+    >
       {/* Drag and Drop Overlay */}
       {isDragging && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary-500/20 backdrop-blur-sm">
