@@ -356,7 +356,7 @@ const AddMedicationSheet = ({
                           {t("dosage")}
                           <span className="text-red-500 ml-0.5">*</span>
                         </Label>
-                        <div data-cy="dosage">
+                        <div>
                           {localDosageInstruction?.dose_and_rate?.dose_range ? (
                             <Input
                               readOnly
@@ -371,7 +371,6 @@ const AddMedicationSheet = ({
                               <div className="flex gap-2">
                                 <div className="flex-1">
                                   <ComboboxQuantityInput
-                                    data-cy="dosage-input"
                                     quantity={
                                       localDosageInstruction?.dose_and_rate
                                         ?.dose_quantity
@@ -464,10 +463,7 @@ const AddMedicationSheet = ({
                             }
                           }}
                         >
-                          <SelectTrigger
-                            data-cy="frequency"
-                            className={cn("h-9 text-sm")}
-                          >
+                          <SelectTrigger className={cn("h-9 text-sm")}>
                             <SelectValue placeholder={t("select_frequency")} />
                           </SelectTrigger>
                           <SelectContent>
@@ -576,7 +572,7 @@ const AddMedicationSheet = ({
                       </div>
 
                       {/* Method */}
-                      <div data-cy="method">
+                      <div>
                         <Label className="mb-1.5 block text-sm">
                           {t("method")}
                         </Label>
@@ -593,7 +589,7 @@ const AddMedicationSheet = ({
                     </div>
 
                     {/* Instructions */}
-                    <div data-cy="instructions">
+                    <div>
                       <Label className="mb-1.5 block text-sm">
                         {t("instructions")}
                       </Label>
@@ -634,7 +630,7 @@ const AddMedicationSheet = ({
                     {/* Route and Site Row */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Route */}
-                      <div data-cy="route">
+                      <div>
                         <Label className="mb-1.5 block text-sm">
                           {t("route")}
                         </Label>
@@ -649,7 +645,7 @@ const AddMedicationSheet = ({
                       </div>
 
                       {/* Site */}
-                      <div data-cy="site">
+                      <div>
                         <Label className="mb-1.5 block text-sm">
                           {t("site")}
                         </Label>
@@ -1056,6 +1052,7 @@ export default function MedicationBillForm({ patientId }: Props) {
     const medsWithZeroQuantity = selectedItems.filter((item) => {
       return item.lots.every(
         (lot) =>
+          !lot.quantity ||
           lot.quantity === 0 ||
           !lot.selectedInventoryId ||
           !lot.selectedInventoryId.length,
@@ -2095,7 +2092,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                           formField.onChange(
                                                             parseInt(
                                                               e.target.value,
-                                                            ) || 0,
+                                                            ),
                                                           );
                                                         }}
                                                         className="border-gray-300 border rounded-none w-24"

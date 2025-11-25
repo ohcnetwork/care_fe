@@ -30,7 +30,7 @@
     "src/**/*.d.ts",
     "care.config.ts",
     "scripts/**/*.ts",
-    "cypress.config.ts",
+    "playwright.config.ts",
     "plugins/**/*.ts"
   ]
 }

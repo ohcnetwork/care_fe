@@ -100,7 +100,6 @@ const ThreadItem = ({
         : "hover:bg-gray-100 hover:border-gray-200",
     )}
     onClick={onClick}
-    data-cy="thread-title"
   >
     <div className="flex items-start justify-between gap-3">
       <div className="flex-1 min-w-0">
@@ -258,7 +257,6 @@ const NewThreadDialog = ({
               placeholder={t("notes__enter_discussion_title")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              data-cy="new-thread-title-input"
             />
           </div>
         </div>
@@ -271,7 +269,6 @@ const NewThreadDialog = ({
           <Button
             onClick={() => onCreate(title)}
             disabled={!title.trim() || isCreating}
-            data-cy="create-thread-button"
           >
             {isCreating ? (
               <Loader2 className="size-4 animate-spin mr-2" />
@@ -514,7 +511,6 @@ export function NoteManager({
             </div>
             {canWrite && (
               <Button
-                data-cy="new-thread-button"
                 variant="outline"
                 size="sm"
                 onClick={() => setShowNewThreadDialog(true)}
@@ -655,10 +651,7 @@ export function NoteManager({
                   {/* Messages List */}
                   {isMobile ? (
                     <div className="flex-1 overflow-y-auto overscroll-y-contain -mx-2 px-2">
-                      <div
-                        className="flex flex-col-reverse py-2 min-h-full"
-                        data-cy="chat-messages"
-                      >
+                      <div className="flex flex-col-reverse py-2 min-h-full">
                         {messages.map((message, i) => (
                           <MessageItem
                             key={message.id}
@@ -683,10 +676,7 @@ export function NoteManager({
                     </div>
                   ) : (
                     <ScrollArea className="flex-1 px-4 h-[calc(100vh-16rem)] overflow-y-auto">
-                      <div
-                        className="flex flex-col-reverse py-4 min-h-full"
-                        data-cy="chat-messages"
-                      >
+                      <div className="flex flex-col-reverse py-4 min-h-full">
                         {messages.map((message, i) => (
                           <MessageItem
                             key={message.id}
@@ -717,7 +707,6 @@ export function NoteManager({
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea
-                            data-cy="encounter-notes-chat-message-input"
                             placeholder={t("notes__type_message")}
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
@@ -733,7 +722,7 @@ export function NoteManager({
                             className="flex-1 min-h-10 max-h-[50vh]"
                           />
                           <Button
-                            data-cy="send-chat-message-button"
+                            aria-label="send message"
                             type="submit"
                             size="icon"
                             disabled={

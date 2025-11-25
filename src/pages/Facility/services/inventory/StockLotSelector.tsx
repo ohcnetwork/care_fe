@@ -222,7 +222,7 @@ export default function StockLotSelector({
                   className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent"
                   onClick={() => toggleLotSelection(inv.id)}
                 >
-                  <Checkbox checked={isSelected} className="mr-2" />
+                  <Checkbox checked={isSelected} />
                   <div className="flex-1 flex items-center justify-between gap-2">
                     <span>{inv.product.batch?.lot_number}</span>
                     <div className="flex items-center gap-1">
