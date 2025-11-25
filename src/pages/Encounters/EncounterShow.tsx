@@ -201,14 +201,15 @@ export const EncounterShow = (props: Props) => {
         {
           "--encounter-header-offset":
             primaryEncounter?.appointment?.id && canWritePrimaryEncounter
-              ? "3rem"
-              : "0rem",
+              ? "3.5rem"
+              : "0.5rem",
         } as React.CSSProperties
       }
     >
       {primaryEncounter &&
         primaryEncounter.appointment?.id &&
-        canWritePrimaryEncounter && (
+        canWritePrimaryEncounter &&
+        primaryEncounter.status !== "discharged" && (
           <div className="flex items-center justify-center -mt-2 mb-2">
             <AppointmentEncounterHeader
               appointment={primaryEncounter.appointment}

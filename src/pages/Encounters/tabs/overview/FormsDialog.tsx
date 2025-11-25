@@ -110,7 +110,7 @@ export const FormDialog = ({
                   >
                     <CommandItem
                       key={questionnaire.slug}
-                      value={questionnaire.slug}
+                      value={`${questionnaire.slug} - ${questionnaire.title}`}
                       className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
                       autoFocus={false}
                     >

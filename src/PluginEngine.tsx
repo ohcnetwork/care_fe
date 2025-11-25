@@ -1,11 +1,22 @@
-import React, { Suspense } from "react";
-
 import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
+import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
+import { useQuery } from "@tanstack/react-query";
+import {
+  __federation_method_getRemote as getFederationRemote,
+  __federation_method_setRemote as setFederationRemote,
+  __federation_method_unwrapDefault as unwrapModule,
+} from "__federation__";
+import { Loader2Icon } from "lucide-react";
+import React, { Suspense, useEffect, useState } from "react";
 
 import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
+import query from "@/Utils/request/query";
 
-import { SupportedPluginComponents, pluginMap } from "@/pluginTypes";
+import { PluginManifest, SupportedPluginComponents } from "@/pluginTypes";
+import plugConfigApi from "@/types/plugConfig/plugConfigApi";
+import { t } from "i18next";
+import { z } from "zod";
 
 // Import the remote component synchronously
 export default function PluginEngine({
@@ -13,6 +24,71 @@ export default function PluginEngine({
 }: {
   children: React.ReactNode;
 }) {
+  const [pluginManifests, setPluginManifests] = useState<PluginManifest[]>([]);
+
+  // Fetch enabled plugins from the backend API
+  const { data: enabledPlugins } = useQuery({
+    queryKey: ["enabled-plugins"],
+    queryFn: query(plugConfigApi.list),
+  });
+
+  useEffect(() => {
+    const fetchPluginManifests = async () => {
+      if (!enabledPlugins) return;
+
+      const manifests = await Promise.all(
+        enabledPlugins.configs.map(async (plugin) => {
+          if (
+            !plugin.meta.url ||
+            !z.string().url().safeParse(plugin.meta.url).success
+          ) {
+            console.error(
+              `Plugin ${plugin.slug} has an invalid URL (${plugin.meta.url}) in meta`,
+            );
+            return undefined;
+          }
+
+          setFederationRemote(plugin.slug, {
+            url: () => Promise.resolve(plugin.meta.url),
+            format: "esm",
+            from: "vite",
+            externalType: "promise",
+          });
+
+          return await getFederationRemote(plugin.slug, "./manifest")
+            .then((manifest) => {
+              return manifest;
+            })
+            .catch((e) =>
+              console.error(
+                `There was an error enabling the app ${plugin.slug}`,
+                e,
+              ),
+            );
+        }),
+      );
+      const filteredManifests = manifests.filter(
+        (m): m is PluginManifest => m !== undefined,
+      );
+      const availablePlugins = filteredManifests.map((manifest) =>
+        unwrapModule(manifest),
+      );
+
+      if (availablePlugins.length === 0) {
+        console.log("No plugins found");
+        return;
+      }
+
+      console.log(
+        `Loading ${filteredManifests.length} plugins; available plugins`,
+        availablePlugins,
+      );
+      setPluginManifests(availablePlugins);
+    };
+
+    fetchPluginManifests();
+  }, [enabledPlugins]);
+
   return (
     <Suspense fallback={<Loading />}>
       <ErrorBoundary
@@ -22,7 +98,7 @@ export default function PluginEngine({
           </div>
         }
       >
-        <CareAppsContext.Provider value={pluginMap}>
+        <CareAppsContext.Provider value={pluginManifests}>
           <Suspense fallback={<Loading />}></Suspense>
           {children}
         </CareAppsContext.Provider>
@@ -52,9 +128,22 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
         }
 
         return (
-          <React.Suspense key={plugin.plugin} fallback={<div>Loading...</div>}>
-            <Component {...props} />
-          </React.Suspense>
+          <PluginErrorBoundary key={plugin.plugin} pluginName={plugin.plugin}>
+            <React.Suspense
+              fallback={
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2Icon
+                    role="status"
+                    aria-label="Loading"
+                    className="size-4 animate-spin"
+                  />
+                  <p className="text-sm text-gray-600">{t("loading")}</p>
+                </div>
+              }
+            >
+              <Component {...props} />
+            </React.Suspense>
+          </PluginErrorBoundary>
         );
       })}
     </>

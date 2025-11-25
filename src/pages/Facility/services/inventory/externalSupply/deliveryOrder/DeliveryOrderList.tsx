@@ -142,7 +142,7 @@ export function DeliveryOrderList({
                       locationId,
                       internal,
                       false,
-                      false,
+                      isRequester,
                       "new",
                     ),
                   )
