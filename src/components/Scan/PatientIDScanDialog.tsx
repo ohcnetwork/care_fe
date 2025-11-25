@@ -1,4 +1,4 @@
-import { Scanner } from "@yudiel/react-qr-scanner";
+import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
 import { Camera, QrCode, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -53,8 +53,7 @@ export function PatientIDScanDialog({
     return trimmedInput;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function handleScan(result: any) {
+  function handleScan(result: IDetectedBarcode[]) {
     if (result && result.length > 0) {
       const scannedCode = result[0].rawValue.trim();
       if (scannedCode && scannedCode.length > 3) {
