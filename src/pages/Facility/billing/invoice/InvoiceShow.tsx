@@ -1094,6 +1094,11 @@ export function InvoiceShow({
         facilityId={facilityId}
         invoice={invoice}
         accountId={invoice.account.id}
+        onSuccess={() => {
+          navigate(
+            `/facility/${facilityId}/billing/invoice/${invoiceId}/print`,
+          );
+        }}
       />
 
       <AlertDialog
