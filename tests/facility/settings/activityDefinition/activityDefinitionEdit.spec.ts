@@ -22,7 +22,7 @@ import {
   selectFromRequirements,
   selectFromValueSet,
 } from "tests/helpers/ui";
-import { generateExpectedSlug } from "tests/helpers/utils";
+import { expectedSlug } from "tests/helpers/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -44,9 +44,7 @@ test.beforeAll(() => {
 });
 
 test.beforeEach(async ({ page }) => {
-  createdAD = await createActivityDefinition(page, facilityId, {
-    resourceCategoryName,
-  });
+  createdAD = await createActivityDefinition(page, facilityId);
 
   selectedCode = faker.helpers.arrayElement(ACTIVITY_DEFINITION_CODES);
   selectedBodySite = faker.helpers.arrayElement(BODY_SITES);
@@ -148,8 +146,7 @@ test.describe("activity definition edit", () => {
     await page.getByRole("button", { name: /edit/i }).click();
 
     await expect(page.getByLabel(/title.*\*/i)).toHaveValue(createdAD.title);
-    const expectedSlug = generateExpectedSlug(createdAD.title);
-    await expect(page.getByLabel(/slug/i)).toHaveValue(expectedSlug);
+    await expect(page.getByLabel(/slug/i)).toHaveValue(expectedSlug(createdAD.title));
     await expect(page.getByLabel(/description.*\*/i)).toHaveValue(
       createdAD.description,
     );

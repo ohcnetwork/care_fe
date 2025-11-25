@@ -1,12 +1,19 @@
 import { faker } from "@faker-js/faker";
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 import {
-  Classification,
-  Status,
-} from "src/types/emr/activityDefinition/activityDefinition";
+  closeAnyOpenPopovers,
+  expectToast,
+  selectFromCategoryPicker,
+  selectFromLocationMultiSelect,
+  selectFromRequirements,
+  selectFromValueSet,
+} from "./ui";
+import { expectedSlug } from "tests/helpers/utils";
 
-import { closeAnyOpenPopovers, expectToast, selectFromValueSet } from "./ui";
+export const RESOURCE_CATEGORY_SLUG = "lab-tests-activity_definition";
+
+export const RESOURCE_CATEGORY_NAME = "Lab Tests";
 
 export const ACTIVITY_DEFINITION_CODES = [
   "Fluoroscopic venography of left limb with contrast",
@@ -72,11 +79,18 @@ export const CHARGE_ITEM_DEFINITIONS = [
   "Fasting Blood Glucose Test",
 ];
 
+export const STATUS_OPTIONS = ["Active", "Draft", "Retired", "Unknown"];
+
+export const CLASSIFICATION_OPTIONS = [
+  "Laboratory",
+  "Imaging",
+  "Surgical Procedure",
+  "Counselling",
+];
+
 export function generateActivityDefinitionData() {
-  const status = faker.helpers.arrayElement(Object.values(Status));
-  const classification = faker.helpers.arrayElement(
-    Object.values(Classification),
-  );
+  const status = faker.helpers.arrayElement(STATUS_OPTIONS);
+  const classification = faker.helpers.arrayElement(CLASSIFICATION_OPTIONS);
   return {
     title: faker.commerce.productName(),
     description: faker.commerce.productDescription(),
@@ -87,25 +101,24 @@ export function generateActivityDefinitionData() {
   };
 }
 
-interface CreateActivityDefinitionOptions {
-  resourceCategoryName?: string;
-  overrides?: Partial<{
-    title: string;
-    description: string;
-    usage: string;
-    status: Status;
-    classification: Classification;
-    derivedFromUri: string;
-  }>;
-}
 
 interface CreatedActivityDefinition {
   title: string;
+  slug: string;
   description: string;
   usage: string;
-  status: Status;
-  classification: Classification;
+  status: string;
+  classification: string;
   derivedFromUri: string;
+  resourceCategoryName: string;
+  code: string;
+  bodySite?: string;
+  specimen?: string;
+  observation?: string;
+  chargeItemCategory?: string;
+  chargeItem?: string;
+  location?: string;
+  diagnosticReportCode?: string;
 }
 
 /**
@@ -118,56 +131,138 @@ interface CreatedActivityDefinition {
 export async function createActivityDefinition(
   page: Page,
   facilityId: string,
-  options: CreateActivityDefinitionOptions = {},
+  allFields: boolean = false,
+  options: Partial<CreatedActivityDefinition> = {},
 ): Promise<CreatedActivityDefinition> {
-  const resourceCategoryName = options.resourceCategoryName || "Lab Tests";
+  let title = faker.commerce.productName();
+  let description = faker.commerce.productDescription();
+  let usage = faker.lorem.sentences(2);
+  let status = faker.helpers.arrayElement(STATUS_OPTIONS);
+  let classification = faker.helpers.arrayElement(CLASSIFICATION_OPTIONS);
+  let derivedFromUri = faker.internet.url();
 
-  // Generate test data with random values, then apply any overrides
-  const testData = {
-    ...generateActivityDefinitionData(),
-    ...options.overrides,
-  };
+  // Additional fields for allFields mode
+  let selectedCode = faker.helpers.arrayElement(ACTIVITY_DEFINITION_CODES);
+  let selectedBodySite = faker.helpers.arrayElement(BODY_SITES);
+  let selectedSpecimen = faker.helpers.arrayElement(SPECIMEN_DEFINITIONS);
+  let selectedObservation = faker.helpers.arrayElement(OBSERVATION_REQUIREMENTS);
+  let selectedCategory = faker.helpers.arrayElement(CHARGE_ITEM_CATEGORIES);
+  let selectedChargeItem = faker.helpers.arrayElement(CHARGE_ITEM_DEFINITIONS);
+  let selectedLocation = faker.helpers.arrayElement(LOCATIONS);
+  let selectedDiagCode = faker.helpers.arrayElement(DIAGNOSTIC_REPORT_CODES);
 
-  await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
-  await page.getByText(resourceCategoryName).click();
+  await page.goto(
+    `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}`,
+  );
 
   await page.getByRole("button", { name: /add activity definition/i }).click();
 
-  await page.getByLabel(/title.*\*/i).fill(testData.title);
-  await page.getByLabel(/description.*\*/i).fill(testData.description);
-  await page.getByLabel(/usage.*\*/i).fill(testData.usage);
+  await page.getByLabel(/title.*\*/i).fill(title);
+  await page.getByLabel(/description.*\*/i).fill(description);
+  await page.getByLabel(/usage.*\*/i).fill(usage);
 
   await page.getByLabel(/^status$/i).click();
-  await page
-    .getByRole("option", { name: new RegExp(testData.status, "i") })
-    .click();
+  await page.getByRole("option", { name: status }).click();
 
   await page.getByRole("combobox", { name: /^category\s*\*$/i }).click();
   await page
     .getByRole("option", {
-      name: new RegExp(testData.classification.replace(/_/g, "\\s"), "i"),
+      name: classification,
     })
     .click();
+
+  await expect(page.getByText(RESOURCE_CATEGORY_NAME)).toBeVisible();
 
   await page.getByLabel(/^kind$/i).click();
   await page.getByRole("option", { name: /service request/i }).click();
 
   const codeCombobox = page.getByRole("combobox", { name: /^code/i });
   await selectFromValueSet(page, codeCombobox, {
-    itemIndex: 0,
+    search: selectedCode,
   });
+
+  if (allFields) {
+    await page.getByLabel(/^derived from uri$/i).fill(derivedFromUri);
+
+    const bodySite = page.getByRole("combobox", { name: /body site/i });
+    await selectFromValueSet(page, bodySite, {
+      search: selectedBodySite,
+    });
+
+    // Specimen Requirements - directly target the button by its text
+    const specimenTrigger = page
+      .getByRole("combobox")
+      .filter({ hasText: /select specimen requirements/i });
+    await specimenTrigger.scrollIntoViewIfNeeded();
+    await selectFromRequirements(page, specimenTrigger, {
+      search: selectedSpecimen,
+    });
+    await closeAnyOpenPopovers(page);
+
+    // Observation Requirements - directly target the button by its text
+    const obsTrigger = page
+      .getByRole("combobox")
+      .filter({ hasText: /select observation requirements/i });
+    await selectFromRequirements(page, obsTrigger, {
+      search: selectedObservation,
+    });
+    await closeAnyOpenPopovers(page);
+
+    // Charge Item Definitions - directly target the button by its text
+    const chargePicker = page
+      .getByRole("combobox")
+      .filter({ hasText: /select.*charge item/i });
+    await selectFromCategoryPicker(page, chargePicker, {
+      navigateCategories: [selectedCategory],
+      search: selectedChargeItem,
+      closeAfterSelect: true,
+    });
+
+    const locationsTrigger = page
+      .getByRole("combobox")
+      .filter({ hasText: /select.*location/i });
+    await selectFromLocationMultiSelect(page, locationsTrigger, {
+      search: selectedLocation,
+    });
+
+    const diagCombobox = page
+      .getByRole("combobox")
+      .filter({ hasText: /search.*diagnostic/i });
+    await selectFromValueSet(page, diagCombobox, {
+      search: selectedDiagCode,
+    });
+  }
 
   await closeAnyOpenPopovers(page);
   await page.getByRole("button", { name: /^create$/i }).click();
 
   await expectToast(page, /activity definition created successfully/i);
 
-  return {
-    title: testData.title,
-    description: testData.description,
-    usage: testData.usage,
-    status: testData.status,
-    classification: testData.classification,
-    derivedFromUri: testData.derivedFromUri,
+  await expect(page).toHaveURL(
+    `/facility/${facilityId}/settings/activity_definitions`,
+  );
+
+  const result: CreatedActivityDefinition = {
+    title: title,
+    slug: expectedSlug(title),
+    description: description,
+    usage: usage,
+    status: status,
+    classification: classification,
+    derivedFromUri: derivedFromUri,
+    resourceCategoryName: RESOURCE_CATEGORY_NAME,
+    code: selectedCode,
   };
+
+  if (allFields) {
+    result.bodySite = selectedBodySite;
+    result.specimen = selectedSpecimen;
+    result.observation = selectedObservation;
+    result.chargeItemCategory = selectedCategory;
+    result.chargeItem = selectedChargeItem;
+    result.location = selectedLocation;
+    result.diagnosticReportCode = selectedDiagCode;
+  }
+
+  return result;
 }
