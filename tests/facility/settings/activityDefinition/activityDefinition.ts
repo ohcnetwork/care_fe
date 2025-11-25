@@ -8,7 +8,7 @@ import {
   selectFromLocationMultiSelect,
   selectFromRequirements,
   selectFromValueSet,
-} from "./ui";
+} from "../../../helpers/ui";
 import { expectedSlug } from "tests/helpers/utils";
 
 export const RESOURCE_CATEGORY_SLUG = "lab-tests-activity_definition";
@@ -189,7 +189,6 @@ export async function createActivityDefinition(
       search: selectedBodySite,
     });
 
-    // Specimen Requirements - directly target the button by its text
     const specimenTrigger = page
       .getByRole("combobox")
       .filter({ hasText: /select specimen requirements/i });
@@ -199,7 +198,6 @@ export async function createActivityDefinition(
     });
     await closeAnyOpenPopovers(page);
 
-    // Observation Requirements - directly target the button by its text
     const obsTrigger = page
       .getByRole("combobox")
       .filter({ hasText: /select observation requirements/i });
@@ -208,7 +206,6 @@ export async function createActivityDefinition(
     });
     await closeAnyOpenPopovers(page);
 
-    // Charge Item Definitions - directly target the button by its text
     const chargePicker = page
       .getByRole("combobox")
       .filter({ hasText: /select.*charge item/i });

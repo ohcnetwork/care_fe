@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { createActivityDefinition } from "tests/helpers/activityDefinition";
+import { createActivityDefinition } from "tests/facility/settings/activityDefinition/activityDefinition";
 import { clearFilter, expectToast } from "tests/helpers/ui";
 import { getFacilityId } from "tests/support/facilityId";
 

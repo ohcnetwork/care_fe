@@ -4,7 +4,7 @@ import { getFieldErrorMessage } from "tests/helper/error";
 import {
   createActivityDefinition,
   RESOURCE_CATEGORY_SLUG,
-} from "tests/helpers/activityDefinition";
+} from "tests/facility/settings/activityDefinition/activityDefinition";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });

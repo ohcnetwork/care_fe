@@ -12,7 +12,7 @@ import {
   SPECIMEN_DEFINITIONS,
   createActivityDefinition,
   generateActivityDefinitionData,
-} from "tests/helpers/activityDefinition";
+} from "tests/facility/settings/activityDefinition/activityDefinition";
 import {
   clearFilter,
   closeAnyOpenPopovers,
