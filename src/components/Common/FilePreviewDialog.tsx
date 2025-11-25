@@ -248,7 +248,6 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                 {file_state.extension === "pdf" && fileUrl && (
                   <Button
                     variant="outline"
-                    data-cy="file-preview-open-browser"
                     onClick={() => {
                       window.open(fileUrl, "_blank", "noopener,noreferrer");
                     }}
@@ -258,11 +257,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                   </Button>
                 )}
                 {downloadURL && downloadURL.length > 0 && (
-                  <Button
-                    variant="primary"
-                    data-cy="file-preview-download"
-                    onClick={handleDownload}
-                  >
+                  <Button variant="primary" onClick={handleDownload}>
                     <CareIcon icon="l-file-download" className="size-4" />
                     <span>{t("download")}</span>
                   </Button>

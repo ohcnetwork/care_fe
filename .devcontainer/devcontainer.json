@@ -91,7 +91,6 @@
   "containerEnv": {
     "REACT_CARE_API_URL": "https://careapi.ohc.network",
     "NODE_OPTIONS": "--max-old-space-size=4096",
-    "CYPRESS_CACHE_FOLDER": "/tmp/.cypress",
     "npm_config_cache": "/tmp/.npm"
   },
   "remoteEnv": {

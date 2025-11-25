@@ -201,8 +201,8 @@ export const EncounterShow = (props: Props) => {
         {
           "--encounter-header-offset":
             primaryEncounter?.appointment?.id && canWritePrimaryEncounter
-              ? "3rem"
-              : "0rem",
+              ? "3.5rem"
+              : "0.5rem",
         } as React.CSSProperties
       }
     >

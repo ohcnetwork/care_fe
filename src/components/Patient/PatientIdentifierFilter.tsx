@@ -57,6 +57,7 @@ interface Props {
   className?: string;
   patientId?: string;
   patientName?: string;
+  align?: "start" | "center" | "end";
 }
 
 interface IdentifierConfig {
@@ -254,6 +255,7 @@ export default function PatientIdentifierFilter({
   className,
   patientId,
   patientName,
+  align = "start",
 }: Props) {
   const { t } = useTranslation();
   const { facility, facilityId } = useCurrentFacility();
@@ -429,7 +431,10 @@ export default function PatientIdentifierFilter({
         ) : (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-            <PopoverContent className="w-80 p-0 overflow-hidden rounded-lg">
+            <PopoverContent
+              className="w-80 p-0 overflow-hidden rounded-lg"
+              align={align}
+            >
               <PatientSearchSelector
                 allIdentifierConfigs={allIdentifierConfigs}
                 searchType={searchType}
@@ -470,7 +475,6 @@ export default function PatientIdentifierFilter({
               type="text"
               placeholder={`${t("year_of_birth")} (YYYY)`}
               value={yearOfBirth}
-              data-cy="year-of-birth-input"
               onChange={(e) => {
                 const value = e.target.value;
                 if (/^\d{0,4}$/.test(value)) {
@@ -491,15 +495,10 @@ export default function PatientIdentifierFilter({
                 setVerificationOpen(false);
                 setPendingPatient(null);
               }}
-              data-cy="cancel-verification-button"
             >
               {t("cancel")}
             </Button>
-            <Button
-              className="mb-2"
-              onClick={handleVerify}
-              data-cy="confirm-verification-button"
-            >
+            <Button className="mb-2" onClick={handleVerify}>
               {t("verify")}
             </Button>
           </DialogFooter>

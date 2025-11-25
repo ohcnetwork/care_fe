@@ -269,10 +269,7 @@ export const Demography = (props: PatientProps) => {
 
   return (
     <div>
-      <section
-        className="mt-8 w-full items-start gap-6 px-3 md:px-0 lg:flex 2xl:gap-8"
-        data-testid="patient-details"
-      >
+      <section className="mt-8 w-full items-start gap-6 px-3 md:px-0 lg:flex 2xl:gap-8">
         <div className="sticky top-20 hidden text-sm font-medium text-gray-600 lg:flex lg:basis-1/5 lg:flex-col gap-2">
           {data
             .filter((s) => !s.hidden)
@@ -324,7 +321,6 @@ export const Demography = (props: PatientProps) => {
                         subtab.editComponent
                       ) : (
                         <Button
-                          data-cy="edit-patient-button"
                           variant="outline"
                           disabled={false}
                           onClick={() => handleEditClick(subtab.id)}
