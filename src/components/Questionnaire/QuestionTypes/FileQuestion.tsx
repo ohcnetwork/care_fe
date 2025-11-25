@@ -108,6 +108,8 @@ export function FilesQuestion(props: FilesQuestionProps) {
   const { t } = useTranslation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const canEdit = !props.disabled;
+
   const values =
     (questionnaireResponse.values?.[0]?.value as FileUploadQuestion[]) || [];
 
@@ -150,7 +152,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
     },
     allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
     existingFiles: fileUpload.files,
-    canEdit: true,
+    canEdit: canEdit,
   });
 
   useEffect(() => {
@@ -206,6 +208,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
             className="flex-1"
             value={value.name}
             onChange={(e) => handleUpdate({ name: e.target.value }, index)}
+            disabled={!canEdit}
           />
           <div className="bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 flex items-center gap-2 max-w-[150px]">
             <span className="text-sm truncate">{value.original_name}</span>
@@ -226,6 +229,7 @@ export function FilesQuestion(props: FilesQuestionProps) {
                 questionnaireResponse.note,
               );
             }}
+            disabled={!canEdit}
           >
             <CareIcon icon="l-trash" className="size-4" />
           </Button>
@@ -233,7 +237,11 @@ export function FilesQuestion(props: FilesQuestionProps) {
       ))}
       <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant={"secondary"} className="border border-secondary-300">
+          <Button
+            variant={"secondary"}
+            className="border border-secondary-300"
+            disabled={!canEdit}
+          >
             <CareIcon icon="l-file-upload-alt" />
             {t("add_files")}
           </Button>
