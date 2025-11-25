@@ -463,7 +463,7 @@ export function AccountShow({
           <div className="flex items-center gap-2">
             <Button variant="link" asChild className="text-gray-950 underline">
               <Link
-                href={`/facility/${facilityId}/patient/${account.patient.id}/account`}
+                href={`/facility/${facilityId}/patient/${account.patient.id}/accounts`}
               >
                 {t("past_accounts")}
               </Link>
