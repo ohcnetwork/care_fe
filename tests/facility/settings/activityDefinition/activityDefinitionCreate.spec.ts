@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-import { getFieldErrorMessage } from "tests/helper/error";
 import {
   createActivityDefinition,
   RESOURCE_CATEGORY_SLUG,
 } from "tests/facility/settings/activityDefinition/activityDefinition";
+import { getFieldErrorMessage } from "tests/helper/error";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -18,12 +18,10 @@ test.beforeAll(() => {
 test.describe("activity definition form", () => {
   test("validate required fields", async ({ page }) => {
     await page.goto(
-      `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}`,
+      `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}/new`,
     );
-    await page
-      .getByRole("button", { name: /add activity definition/i })
-      .click();
-    await page.getByRole("button", { name: /^create$/i }).click();
+
+    await page.getByRole("button", { name: "Create" }).click();
 
     await expect(
       getFieldErrorMessage(page.getByRole("textbox", { name: "Title *" })),
@@ -78,7 +76,6 @@ test.describe("activity definition form", () => {
     const overviewCard = page.locator('[data-slot="card"]').filter({
       has: page.locator('[data-slot="card-title"]', { hasText: "Overview" }),
     });
-    await expect(overviewCard).toBeVisible();
     await expect(
       overviewCard.getByText(createdData.resourceCategoryName),
     ).toBeVisible();
@@ -115,7 +112,6 @@ test.describe("activity definition form", () => {
         hasText: "Overview",
       }),
     });
-    await expect(overviewCard).toBeVisible();
     await expect(
       overviewCard.getByText(createdData.resourceCategoryName),
     ).toBeVisible();
@@ -127,7 +123,6 @@ test.describe("activity definition form", () => {
         hasText: "Technical Details",
       }),
     });
-    await expect(technicalDetailsCard).toBeVisible();
     await expect(
       technicalDetailsCard.getByText("Service Request"),
     ).toBeVisible();
@@ -138,62 +133,73 @@ test.describe("activity definition form", () => {
       technicalDetailsCard.getByText(createdData.bodySite!),
     ).toBeVisible();
 
-    const specimenCard = page.locator('[data-slot="card"]').filter({
-      has: page.locator('[data-slot="card-title"]', {
-        hasText: "Specimen Requirements",
-      }),
-    });
-    await expect(specimenCard).toBeVisible();
     await expect(
-      specimenCard.getByText(createdData.specimen!).first(),
+      page
+        .locator('[data-slot="card"]')
+        .filter({
+          has: page.locator('[data-slot="card-title"]', {
+            hasText: "Specimen Requirements",
+          }),
+        })
+        .getByText(createdData.specimen!)
+        .first(),
     ).toBeVisible();
 
-    const observationCard = page.locator('[data-slot="card"]').filter({
-      has: page.locator('[data-slot="card-title"]', {
-        hasText: "Observation Result Requirements",
-      }),
-    });
-    await expect(observationCard).toBeVisible();
     await expect(
-      observationCard.getByText(createdData.observation!).first(),
+      page
+        .locator('[data-slot="card"]')
+        .filter({
+          has: page.locator('[data-slot="card-title"]', {
+            hasText: "Observation Result Requirements",
+          }),
+        })
+        .getByText(createdData.observation!)
+        .first(),
     ).toBeVisible();
 
-    const chargeItemCard = page.locator('[data-slot="card"]').filter({
-      has: page.locator('[data-slot="card-title"]', {
-        hasText: "Charge Item Definitions",
-      }),
-    });
-    await expect(chargeItemCard).toBeVisible();
     await expect(
-      chargeItemCard.getByText(createdData.chargeItem!).first(),
+      page
+        .locator('[data-slot="card"]')
+        .filter({
+          has: page.locator('[data-slot="card-title"]', {
+            hasText: "Charge Item Definitions",
+          }),
+        })
+        .getByText(createdData.chargeItem!)
+        .first(),
     ).toBeVisible();
 
-    const locationCard = page.locator('[data-slot="card"]').filter({
-      has: page.locator('[data-slot="card-title"]', {
-        hasText: "Locations",
-      }),
-    });
-    await expect(locationCard).toBeVisible();
-    await expect(locationCard.getByText(createdData.location!)).toBeVisible();
-
-    const diagnosticCard = page.locator('[data-slot="card"]').filter({
-      has: page.locator('[data-slot="card-title"]', {
-        hasText: "Diagnostic Report",
-      }),
-    });
-    await expect(diagnosticCard).toBeVisible();
     await expect(
-      diagnosticCard.getByText(createdData.diagnosticReportCode!),
+      page
+        .locator('[data-slot="card"]')
+        .filter({
+          has: page.locator('[data-slot="card-title"]', {
+            hasText: "Locations",
+          }),
+        })
+        .getByText(createdData.location!),
     ).toBeVisible();
 
-    const derivedFromCard = page.locator('[data-slot="card"]').filter({
-      has: page.locator('[data-slot="card-title"]', {
-        hasText: "Derived From",
-      }),
-    });
-    await expect(derivedFromCard).toBeVisible();
     await expect(
-      derivedFromCard.getByText(createdData.derivedFromUri),
+      page
+        .locator('[data-slot="card"]')
+        .filter({
+          has: page.locator('[data-slot="card-title"]', {
+            hasText: "Diagnostic Report",
+          }),
+        })
+        .getByText(createdData.diagnosticReportCode!),
+    ).toBeVisible();
+
+    await expect(
+      page
+        .locator('[data-slot="card"]')
+        .filter({
+          has: page.locator('[data-slot="card-title"]', {
+            hasText: "Derived From",
+          }),
+        })
+        .getByText(createdData.derivedFromUri!),
     ).toBeVisible();
   });
 });

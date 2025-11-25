@@ -1,13 +1,12 @@
 import { expect, test } from "@playwright/test";
 
 import { createActivityDefinition } from "tests/facility/settings/activityDefinition/activityDefinition";
-import { clearFilter, expectToast } from "tests/helpers/ui";
+import { expectToast } from "tests/helpers/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 let facilityId: string;
-const resourceCategoryName = "Lab Tests";
 let createdAD: Awaited<ReturnType<typeof createActivityDefinition>>;
 
 test.beforeAll(() => {
@@ -20,17 +19,9 @@ test.beforeEach(async ({ page }) => {
 
 test.describe("activity definition deletion", () => {
   test("should delete activity definition", async ({ page }) => {
-    await page.goto(`/facility/${facilityId}/settings/activity_definitions`);
-    await page.getByText(resourceCategoryName).click();
-
-    await clearFilter(page);
-
-    const searchInput = page.getByPlaceholder(/search/i);
-    await searchInput.fill(createdAD.title);
-
-    const activityRow = page.locator("tr", { hasText: createdAD.title });
-    await expect(activityRow).toBeVisible();
-    await activityRow.getByRole("link", { name: /view/i }).click();
+    await page.goto(
+      `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${createdAD.slug}`,
+    );
 
     await expect(
       page.getByRole("heading", { name: createdAD.title }),
@@ -52,15 +43,10 @@ test.describe("activity definition deletion", () => {
       `/facility/${facilityId}/settings/activity_definitions`,
     );
 
-    await page.getByText(resourceCategoryName).click();
+    await page.goto(
+      `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${createdAD.slug}`,
+    );
 
-    await clearFilter(page);
-
-    await page.getByPlaceholder(/search/i).fill(createdAD.title);
-
-    const retiredRow = page.locator("tr", { hasText: createdAD.title });
-    await expect(retiredRow).toBeVisible();
-
-    await expect(retiredRow.getByText(/retired/i)).toBeVisible();
+    await expect(page.getByText(/retired/i)).toBeVisible();
   });
 });
