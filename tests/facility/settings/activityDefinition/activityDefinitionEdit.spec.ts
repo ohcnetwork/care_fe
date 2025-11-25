@@ -12,7 +12,6 @@ import {
   SPECIMEN_DEFINITIONS,
   createActivityDefinition,
   generateActivityDefinitionData,
-  generateExpectedSlug,
 } from "tests/helpers/activityDefinition";
 import {
   clearFilter,
@@ -23,6 +22,7 @@ import {
   selectFromRequirements,
   selectFromValueSet,
 } from "tests/helpers/ui";
+import { generateExpectedSlug } from "tests/helpers/utils";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });

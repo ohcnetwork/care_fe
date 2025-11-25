@@ -48,7 +48,7 @@ export const OBSERVATION_REQUIREMENTS = [
   "Fasting Blood Glucose",
 ];
 
-export const LOCATIONS = ["Pharmacy", "Bal-Gandhi", "Bio-Chemistry Lab"];
+export const LOCATIONS = ["Pharmacy", "Bio-Chemistry Lab"];
 
 export const DIAGNOSTIC_REPORT_CODES = [
   "Acyclovir [Susceptibility]",
@@ -78,25 +78,13 @@ export function generateActivityDefinitionData() {
     Object.values(Classification),
   );
   return {
-    title: `${faker.science.chemicalElement().name.slice(0, 16)}_${faker.string.uuid().slice(0, 8)}`,
-    description: faker.lorem.sentence(),
+    title: faker.commerce.productName(),
+    description: faker.commerce.productDescription(),
     usage: faker.lorem.sentences(2),
     derivedFromUri: faker.internet.url(),
     status: status,
     classification: classification,
   };
-}
-
-/**
- * Generate expected slug from title based on the application's slug generation logic
- * @param title - The title to convert to a slug
- * @returns The expected slug value
- */
-export function generateExpectedSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-_]/g, "");
 }
 
 interface CreateActivityDefinitionOptions {
