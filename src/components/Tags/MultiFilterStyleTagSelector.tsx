@@ -1,11 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import {
+  ArrowDown,
   ArrowLeft,
   ArrowRight,
+  ArrowUp,
   Check,
   ChevronLeft,
   Component,
   Loader2,
+  Space,
   Tag as TagIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -247,7 +250,7 @@ export function MultiFilterStyleTagSelector({
                 <div className="px-4 pb-3">
                   <input
                     type="text"
-                    placeholder="Search tags..."
+                    placeholder={t("search_tags")}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-xs transition-colors file:border-0 file:bg-transparent focus:ring-primary-500 focus:border-primary-500 file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-300 h-8 text-sm"
@@ -411,37 +414,42 @@ export function MultiFilterStyleTagSelector({
           >
             <div className="p-0">
               {/* Header */}
-              <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200">
-                <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 hover:bg-gray-100 hover:text-gray-900 rounded-md text-xs h-6 w-6 p-0">
+              <div className="flex items-center gap-2 p-2 border-b border-gray-200">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setOpen(false)}
+                  className="h-6 w-6 p-0"
+                >
                   <ArrowLeft className="h-4 w-4" />
-                </button>
+                </Button>
                 <span className="text-sm font-medium">
                   {t("tags", { count: selected.length })}
                 </span>
               </div>
 
               {/* Content */}
-              <div className="p-3 max-h-[calc(100vh-28rem)] overflow-y-auto">
+              <div className="p-2 max-h-[calc(100vh-28rem)] overflow-y-auto">
                 {/* Search */}
                 <input
                   type="text"
-                  placeholder="Search tags..."
+                  placeholder={t("search_tags")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-xs transition-colors file:border-0 file:bg-transparent focus:ring-primary-500 focus:border-primary-500 file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-300 h-8 text-sm mb-3"
+                  className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-xs transition-colors file:border-0 file:bg-transparent focus:ring-primary-500 focus:border-primary-500 file:text-sm file:font-medium file:text-gray-950 placeholder:text-gray-500 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 md:text-sm duration-300 h-10 text-sm mb-2"
                 />
 
                 <div>
                   {/* Selected Tags */}
                   {selected.length > 0 && (
                     <>
-                      <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      <div className="px-2 py-0.5 text-xs font-medium text-gray-500 uppercase tracking-wide">
                         {t("selected_tags")}
                       </div>
                       {selected.map((tag) => (
                         <div
                           key={tag.id}
-                          className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-1 cursor-pointer"
+                          className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"
                           onClick={() => handleSelect(tag)}
                         >
                           <button
@@ -483,7 +491,7 @@ export function MultiFilterStyleTagSelector({
                     rootTags.results.filter((tag) => tag.has_children).length >
                       0 && (
                       <>
-                        <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                        <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide mt-2">
                           {t("tag_groups")}
                         </div>
                         {rootTags?.results
@@ -497,7 +505,7 @@ export function MultiFilterStyleTagSelector({
                                 }
                               >
                                 <PopoverTrigger asChild>
-                                  <div className="focus:bg-gray-100 focus:text-gray-900 cursor-default rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-1">
+                                  <div className="focus:bg-gray-100 focus:text-gray-900 cursor-default rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5">
                                     <div className="flex items-center gap-2 flex-1 justify-between">
                                       <div className="flex items-center gap-1">
                                         <Component className="h-4 w-4 text-black/80" />
@@ -577,7 +585,7 @@ export function MultiFilterStyleTagSelector({
                     rootTags.results.filter((tag) => !tag.has_children).length >
                       0 && (
                       <>
-                        <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                        <div className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide mt-2">
                           {t("other_tags")}
                         </div>
                         {rootTags?.results
@@ -585,7 +593,7 @@ export function MultiFilterStyleTagSelector({
                           .map((tag) => (
                             <div
                               key={tag.id}
-                              className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-1 cursor-pointer"
+                              className="focus:bg-gray-100 focus:text-gray-900 relative rounded-sm text-sm outline-hidden select-none flex items-center gap-2 px-2 py-2.5 cursor-pointer"
                               onClick={() => handleSelect(tag)}
                             >
                               <button
@@ -630,27 +638,24 @@ export function MultiFilterStyleTagSelector({
 
               {/* Footer Navigation */}
               <div className="bg-gray-200 h-px"></div>
-              <div className="flex justify-between">
-                <div className="flex gap-1 my-2 mx-2">
-                  <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                    <ArrowLeft className="h-4 w-4" />
+              <div className="flex justify-between items-center h-11">
+                <div className="flex gap-1 my-3.5 mx-4">
+                  <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
+                    <ArrowUp className="size-3" />
                   </div>
-                  <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                    <ArrowRight className="h-4 w-4" />
+                  <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
+                    <ArrowDown className="size-3" />
                   </div>
-                  <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                    <ArrowRight className="h-4 w-4" />
-                  </div>
-                  <span className="text-xs text-gray-500 self-center">
+                  <span className="text-xs text-gray-700 self-center">
                     {t("navigate")}
                   </span>
                 </div>
-                <div className="flex gap-1 my-2 mx-2">
-                  <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300">
-                    <div className="h-4 w-4" />
+                <div className="flex gap-1 my-3.5 mx-4">
+                  <div className="bg-gray-100 shadow-full rounded-md px-1 border border-gray-300 flex items-center">
+                    <Space className="size-3" />
                   </div>
-                  <span className="text-xs text-gray-500 self-center">
-                    {t("select")}
+                  <span className="text-xs text-gray-700 self-center">
+                    {t("to_select")}
                   </span>
                 </div>
               </div>

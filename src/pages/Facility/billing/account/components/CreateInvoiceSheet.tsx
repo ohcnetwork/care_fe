@@ -58,6 +58,7 @@ export function CreateInvoiceSheet({
             accountId={accountId}
             preSelectedChargeItems={preSelectedChargeItems}
             onSuccess={onSuccess}
+            onCancel={() => onOpenChange(false)}
             showHeader={false}
             sourceUrl={sourceUrl}
             locationId={locationId}

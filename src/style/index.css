@@ -103,6 +103,10 @@
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
+
+  [data-slot="textarea"]:disabled {
+    cursor: not-allowed;
+  }
 }
 
 @theme {

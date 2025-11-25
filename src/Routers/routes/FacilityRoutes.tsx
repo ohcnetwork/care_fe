@@ -52,7 +52,7 @@ const FacilityRoutes: AppRoutes = {
   "/facility/:facilityId/services/:serviceId*": ({ facilityId, serviceId }) => (
     <ServiceLayout facilityId={facilityId} serviceId={serviceId} />
   ),
-  "/facility/:facilityId/services_requests/:serviceRequestId": ({
+  "/facility/:facilityId/service_requests/:serviceRequestId": ({
     facilityId,
     serviceRequestId,
   }) => (

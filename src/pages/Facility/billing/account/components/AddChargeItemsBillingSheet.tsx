@@ -1,10 +1,10 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { InfoIcon, Trash2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import Autocomplete from "@/components/ui/autocomplete";
+import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,13 +32,16 @@ import ChargeItemPriceDisplay from "@/components/Billing/ChargeItem/ChargeItemPr
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
+import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { ApplyChargeItemDefinitionRequest } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
-import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import {
+  ChargeItemDefinitionBase,
+  ChargeItemDefinitionRead,
+} from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 
 interface AddChargeItemsBillingSheetProps {
   open: boolean;
@@ -67,20 +70,9 @@ export default function AddChargeItemsBillingSheet({
   const [selectedItems, setSelectedItems] = useState<
     ApplyChargeItemDefinitionRequestWithObject[]
   >([]);
-  const [search, setSearch] = useState("");
-  const [selectedDefinitionId, setSelectedDefinitionId] = useState<
-    string | null
-  >(null);
+  const [selectedDefinition, setSelectedDefinition] =
+    useState<ChargeItemDefinitionRead | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { data: chargeItemDefinitions, isLoading } = useQuery({
-    queryKey: ["chargeItemDefinitions", search],
-    queryFn: query.debounced(chargeItemDefinitionApi.listChargeItemDefinition, {
-      pathParams: { facilityId },
-      queryParams: { limit: 100, status: "active", title: search },
-    }),
-    enabled: open,
-  });
 
   const { mutate: applyChargeItems, isPending } = useMutation({
     mutationFn: mutate(chargeItemApi.applyChargeItemDefinitions, {
@@ -98,30 +90,20 @@ export default function AddChargeItemsBillingSheet({
     },
   });
 
-  const handleSelectChargeItem = (value: string) => {
-    if (!value) return;
-    setSelectedDefinitionId(value);
-  };
-
   useEffect(() => {
-    if (selectedDefinitionId) {
-      const selectedCID = chargeItemDefinitions?.results.find(
-        (cid) => cid.id === selectedDefinitionId,
-      );
-      if (!selectedCID) return;
-
+    if (selectedDefinition) {
       setSelectedItems([
         ...selectedItems,
         {
           quantity: "1",
-          charge_item_definition: selectedCID.slug,
-          charge_item_definition_object: selectedCID,
+          charge_item_definition: selectedDefinition.slug,
+          charge_item_definition_object: selectedDefinition,
           patient: patientId,
         },
       ]);
-      setSelectedDefinitionId(null);
+      setSelectedDefinition(null);
     }
-  }, [selectedDefinitionId, chargeItemDefinitions, selectedItems, patientId]);
+  }, [selectedDefinition, selectedItems, patientId]);
 
   const handleRemoveItem = (index: number) => {
     setSelectedItems(selectedItems.filter((_, i) => i !== index));
@@ -310,21 +292,30 @@ export default function AddChargeItemsBillingSheet({
             )}
 
             <div className="space-y-2">
-              <Autocomplete
-                options={
-                  chargeItemDefinitions?.results?.map((cid) => ({
-                    label: cid.title,
-                    value: cid.id,
-                  })) || []
-                }
-                value=""
-                onChange={handleSelectChargeItem}
-                onSearch={setSearch}
+              <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
+                facilityId={facilityId}
+                value={selectedDefinition || undefined}
+                onValueChange={(selectedDef) => {
+                  if (!selectedDef) {
+                    setSelectedDefinition(null);
+                    return;
+                  }
+                  setSelectedDefinition(
+                    selectedDef as ChargeItemDefinitionRead,
+                  );
+                }}
                 placeholder={t("select_charge_item_definition")}
-                isLoading={isLoading}
-                noOptionsMessage={t("no_charge_item_definitions_found")}
                 disabled={disabled}
-                shortcutId="open-dropdown"
+                className="w-full"
+                resourceType={
+                  ResourceCategoryResourceType.charge_item_definition
+                }
+                listDefinitions={{
+                  queryFn: chargeItemDefinitionApi.listChargeItemDefinition,
+                  pathParams: { facilityId },
+                  queryParams: { status: "active" },
+                }}
+                translationBaseKey="charge_item_definition"
               />
             </div>
 

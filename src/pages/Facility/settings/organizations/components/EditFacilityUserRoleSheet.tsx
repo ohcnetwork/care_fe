@@ -166,14 +166,12 @@ export default function EditUserRoleSheet({
                 className="w-full"
                 onClick={handleUpdateRole}
                 disabled={!selectedRole || selectedRole.id === userRole.role.id}
-                data-cy="update-user-role"
               >
                 {t("update_role")}
               </Button>
               <Button
                 variant="destructive"
                 className="w-full"
-                data-cy="remove-user"
                 onClick={() => setShowRemoveDialog(true)}
               >
                 {t("remove_user")}

@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, PlusIcon } from "lucide-react";
-import { Link, navigate } from "raviger";
+import { navigate } from "raviger";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -62,6 +62,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 
+import BackButton from "@/components/Common/BackButton";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import AddChargeItemsBillingSheet from "./components/AddChargeItemsBillingSheet";
 
@@ -82,6 +83,7 @@ interface CreateInvoicePageProps {
   preSelectedChargeItems?: ChargeItemRead[];
   redirectInNewTab?: boolean;
   onSuccess?: () => void;
+  onCancel?: () => void;
   showHeader?: boolean;
   sourceUrl?: string;
   locationId?: string;
@@ -138,6 +140,7 @@ export function CreateInvoicePage({
   preSelectedChargeItems,
   redirectInNewTab = false,
   onSuccess,
+  onCancel,
   showHeader = true,
   sourceUrl,
   locationId,
@@ -336,13 +339,12 @@ export function CreateInvoicePage({
     <div className="container mx-auto md:px-4 pb-6">
       {showHeader && (
         <div className="mb-6">
-          <Link
-            href={`/facility/${facilityId}/billing/account/${accountId}`}
+          <BackButton
             className="text-xs text-gray-500 hover:text-gray-700"
-            data-shortcut-id="go-back"
+            variant="ghost"
           >
             ← {t("back_to_account")}
-          </Link>
+          </BackButton>
           <h3 className="pt-2">{t("create_invoice")}</h3>
         </div>
       )}
@@ -606,16 +608,16 @@ export function CreateInvoicePage({
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Button
+            <BackButton
               type="button"
               variant="ghost"
               className="text-base font-semibold"
-              onClick={() => window.history.back()}
+              {...(onCancel && { onClick: onCancel })}
               disabled={createMutation.isPending}
               data-shortcut-id="go-back"
             >
               <span className="underline">{t("cancel")}</span>
-            </Button>
+            </BackButton>
             {showDispenseNowButton && (
               <Button
                 type="button"

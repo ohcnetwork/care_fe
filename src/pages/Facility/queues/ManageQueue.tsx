@@ -151,7 +151,7 @@ export function ManageQueuePage({
                       </Badge>
                     )}
                   </div>
-                  <span className="text-xs font-medium text-gray-500">
+                  <span className="text-xs font-medium text-gray-500 break-all">
                     {!queue.system_generated && `${queue.name} - `}
                     {formatDate(queue.date, "dd MMM yyyy")}
                   </span>
@@ -160,7 +160,7 @@ export function ManageQueuePage({
             )}
           </div>
           <div className="flex gap-5 items-center justify-center">
-            <div className="flex flex-col-reverse sm:flex-row gap-2 items-center text-black font-medium text-md">
+            <div className="hidden sm:flex flex-col-reverse sm:flex-row gap-2 items-center text-black font-medium text-md">
               <Switch
                 checked={autoRefresh === "true"}
                 onCheckedChange={(checked) =>
@@ -173,7 +173,7 @@ export function ManageQueuePage({
                 <Label className="whitespace-nowrap">{t("auto_refresh")}</Label>
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger asChild className="hidden sm:block">
+                    <TooltipTrigger asChild>
                       <span className="cursor-help">
                         <InfoIcon className="size-4 text-gray-500" />
                       </span>
@@ -190,6 +190,22 @@ export function ManageQueuePage({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <div className="sm:hidden px-2 py-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <Label className="text-sm font-medium">
+                      {t("auto_refresh")}
+                    </Label>
+                    <Switch
+                      checked={autoRefresh === "true"}
+                      onCheckedChange={(checked) =>
+                        setQueryParams({
+                          autoRefresh: checked ? "true" : "false",
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <DropdownMenuSeparator className="sm:hidden" />
                 <ManageServicePointsDialog
                   trigger={
                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>

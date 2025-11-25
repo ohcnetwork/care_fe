@@ -18,8 +18,8 @@ import { Textarea } from "@/components/ui/textarea";
 import DischargeConfirmationDialog from "@/components/Patient/DischargeConfirmationDialog";
 
 import query from "@/Utils/request/query";
+import { cn } from "@/lib/utils";
 import {
-  DEFAULT_DISCHARGE_DISPOSITION,
   ENCOUNTER_ADMIT_SOURCE,
   ENCOUNTER_DIET_PREFERENCE,
   ENCOUNTER_DISCHARGE_DISPOSITION,
@@ -35,11 +35,17 @@ import {
   type EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import { QuestionValidationError } from "@/types/questionnaire/batch";
 import type {
   QuestionnaireResponse,
   ResponseValue,
 } from "@/types/questionnaire/form";
 import type { Question } from "@/types/questionnaire/question";
+import {
+  FieldDefinitions,
+  useFieldError,
+  validateFields,
+} from "@/types/questionnaire/validation";
 import careConfig from "@careConfig";
 
 interface EncounterQuestionProps {
@@ -56,6 +62,31 @@ interface EncounterQuestionProps {
   organizations?: string[];
   patientId?: string;
   facilityId: string;
+  errors?: QuestionValidationError[];
+}
+
+const ENCOUNTER_FIELDS: FieldDefinitions = {
+  DISCHARGE_DISPOSITION: {
+    key: "hospitalization.discharge_disposition",
+    required: true,
+  },
+} as const;
+
+export function validateEncounterQuestion(
+  value: EncounterEdit | undefined,
+  questionId: string,
+): QuestionValidationError[] {
+  const errors: QuestionValidationError[] = [];
+
+  if (
+    value?.status === "discharged" &&
+    ["imp", "obsenc", "emer"].includes(value.encounter_class) &&
+    !value?.hospitalization?.discharge_disposition
+  ) {
+    errors.push(...validateFields(value, questionId, ENCOUNTER_FIELDS));
+  }
+
+  return errors;
 }
 
 export function EncounterQuestion({
@@ -66,6 +97,7 @@ export function EncounterQuestion({
   encounterId,
   patientId = "",
   facilityId,
+  errors = [],
 }: EncounterQuestionProps) {
   // Fetch encounter data
   const { data: encounterData, isLoading } = useQuery({
@@ -77,6 +109,10 @@ export function EncounterQuestion({
     enabled: !!encounterId,
   });
   const { t } = useTranslation();
+  const { hasError, getError } = useFieldError(
+    questionnaireResponse.question_id,
+    errors,
+  );
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
     status: "unknown",
@@ -90,7 +126,7 @@ export function EncounterQuestion({
     hospitalization: {
       re_admission: false,
       admit_source: "other",
-      discharge_disposition: DEFAULT_DISCHARGE_DISPOSITION,
+      discharge_disposition: careConfig.defaultDischargeDisposition,
       diet_preference: "none",
     },
     facility: "",
@@ -173,7 +209,13 @@ export function EncounterQuestion({
         ...newEncounter.hospitalization,
         discharge_disposition:
           newEncounter.hospitalization?.discharge_disposition ??
-          DEFAULT_DISCHARGE_DISPOSITION,
+          careConfig.defaultDischargeDisposition,
+      };
+    } else if ("hospitalization" in newEncounter) {
+      newEncounter.hospitalization = {
+        ...newEncounter.hospitalization,
+        discharge_disposition:
+          encounterData?.hospitalization?.discharge_disposition,
       };
     }
 
@@ -381,11 +423,14 @@ export function EncounterQuestion({
               encounter.hospitalization?.discharge_disposition) && (
               <>
                 <div className="space-y-2">
-                  <Label>{t("discharge_disposition")}</Label>
+                  <Label>
+                    {t("discharge_disposition")}
+                    <span className="text-red-500">*</span>
+                  </Label>
                   <Select
                     value={
                       encounter.hospitalization?.discharge_disposition ??
-                      DEFAULT_DISCHARGE_DISPOSITION
+                      careConfig.defaultDischargeDisposition
                     }
                     onValueChange={(value: EncounterDischargeDisposition) => {
                       if (!encounter.hospitalization) return;
@@ -398,7 +443,12 @@ export function EncounterQuestion({
                     }}
                     disabled={disabled}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger
+                      className={cn(
+                        hasError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key) &&
+                          "ring-1 ring-red-500",
+                      )}
+                    >
                       <SelectValue
                         placeholder={t("select_discharge_disposition")}
                       />
@@ -411,6 +461,14 @@ export function EncounterQuestion({
                       ))}
                     </SelectContent>
                   </Select>
+                  {hasError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key) && (
+                    <p className="text-red-500 text-sm">
+                      {
+                        getError(ENCOUNTER_FIELDS.DISCHARGE_DISPOSITION.key)
+                          ?.msg
+                      }
+                    </p>
+                  )}
                 </div>
 
                 {encounter.status === "discharged" && (

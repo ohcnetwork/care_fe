@@ -222,7 +222,15 @@ export default function PatientIndex({ facilityId }: { facilityId: string }) {
                             {t("no_patient_record_found")}
                           </h3>
                           <p className="text-sm text-gray-500 mb-6">
-                            {t("no_patient_record_text")}
+                            {t("no_patient_record_text", {
+                              text: getSearchOptions(
+                                t,
+                                identifierSearch,
+                                allIdentifierConfigs,
+                              ).find(
+                                (opt) => opt.key === identifierSearch.config,
+                              )?.display,
+                            })}
                           </p>
                           <AddPatientButton
                             facilityId={facilityId}

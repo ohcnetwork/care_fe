@@ -22,6 +22,7 @@ import { formatName } from "@/Utils/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import {
   DIAGNOSIS_CLINICAL_STATUS_COLORS,
+  DIAGNOSIS_SEVERITY_COLORS,
   DIAGNOSIS_VERIFICATION_STATUS_COLORS,
   type Diagnosis,
 } from "@/types/emr/diagnosis/diagnosis";
@@ -114,6 +115,14 @@ const DiagnosisCard = ({
             {t(diagnosis.verification_status)}
           </Badge>
         </div>
+        {diagnosis.severity && (
+          <div>
+            <div className="text-sm text-gray-600 mb-1">{t("severity")}</div>
+            <Badge variant={DIAGNOSIS_SEVERITY_COLORS[diagnosis.severity]}>
+              {t(diagnosis.severity)}
+            </Badge>
+          </div>
+        )}
         <div>
           <div className="text-sm text-gray-600 mb-1">{t("onset")}</div>
           {diagnosis.onset?.onset_datetime ? (
@@ -188,13 +197,17 @@ export const DiagnosisTable = ({
       {/* Desktop: Table layout */}
       <div className="overflow-x-auto hidden sm:block">
         <div className="min-w-xl pb-2">
-          <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-y-2">
+          <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-y-2">
             <div className="px-3 border border-gray-200 rounded-tl-lg bg-gray-50 py-1 text-gray-700 text-sm">
               {t("diagnosis")}
             </div>
 
             <div className={cn(baseHeaderClasses, "border-r")}>
               {t("status")}
+            </div>
+
+            <div className={cn(baseHeaderClasses, "border-r")}>
+              {t("severity")}
             </div>
 
             <div className={cn(baseHeaderClasses)}>{t("verification")}</div>
@@ -244,6 +257,21 @@ export const DiagnosisTable = ({
                         {t(diagnosis.clinical_status)}
                       </Badge>
                     ),
+                  },
+                  {
+                    key: "severity",
+                    render: () =>
+                      diagnosis.severity ? (
+                        <Badge
+                          variant={
+                            DIAGNOSIS_SEVERITY_COLORS[diagnosis.severity]
+                          }
+                        >
+                          {t(diagnosis.severity)}
+                        </Badge>
+                      ) : (
+                        "-"
+                      ),
                   },
                   {
                     key: "verification",

@@ -6,7 +6,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   dateFilter,
   encounterPriorityFilter,
@@ -101,7 +100,6 @@ export function EncounterList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: [
-      "name",
       "encounter_id",
       "external_identifier",
       "tags",
@@ -112,7 +110,6 @@ export function EncounterList({
   const {
     status,
     priority,
-    name,
     encounter_id,
     external_identifier,
     patient_filter,
@@ -131,14 +128,13 @@ export function EncounterList({
           created_date_after,
           created_date_before,
         ),
-        name,
         encounter_class: encounterClass,
         external_identifier,
         limit: resultsPerPage,
         offset: ((qParams.page || 1) - 1) * resultsPerPage,
         tags: qParams.tags,
         tags_behavior: qParams.tags_behavior,
-        patient: patient_filter,
+        patient_filter: patient_filter,
       },
     }),
     enabled: !propEncounters && !encounter_id,
@@ -263,21 +259,17 @@ export function EncounterList({
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <div>
-                  <Input
-                    type="text"
-                    placeholder={t("search")}
-                    value={name || ""}
-                    onChange={(e) => updateQuery({ name: e.target.value })}
-                  />
-                </div>
                 <PatientIdentifierFilter
-                  onSelect={(patientId) =>
-                    updateQuery({ patient_filter: patientId })
+                  onSelect={(patientId, patientName) =>
+                    updateQuery({
+                      patient_filter: patientId,
+                      patient_name: patientName,
+                    })
                   }
                   placeholder={t("filter_by_identifier")}
                   className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
                   patientId={qParams.patient_filter}
+                  patientName={qParams.patient_name}
                 />
                 <MultiFilter
                   selectedFilters={selectedFilters}
@@ -297,10 +289,7 @@ export function EncounterList({
           </div>
         </div>
 
-        <div
-          className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
-          data-cy="encounter-list-cards"
-        >
+        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
           {isFetching ? (
             <CardGridSkeleton count={6} />
           ) : encounters.length === 0 ? (

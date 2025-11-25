@@ -52,6 +52,18 @@ export default function MultiFilter({
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
   const { t } = useTranslation();
 
+  const activeFiltersCount = Object.values(selectedFilters).reduce(
+    (sum, filterState) => {
+      if (Array.isArray(filterState.selected)) {
+        if (filterState.selected.length === 0) {
+          return sum;
+        }
+      }
+      return sum + 1;
+    },
+    0,
+  );
+
   const nonClearableFilterCount = Object.values(selectedFilters).reduce(
     (sum, filterState) => {
       if (filterState.filter.disableClear) {
@@ -173,7 +185,7 @@ export default function MultiFilter({
           />
         );
       })}
-      {hasAnyFilters && (
+      {activeFiltersCount > 1 && (
         <Button
           variant="ghost"
           onClick={handleClearAll}

@@ -20,7 +20,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import BackButton from "@/components/Common/BackButton";
 import { getCurrencySymbol } from "@/components/ui/monetary-display";
-import { getConditionValue } from "@/types/base/condition/condition";
+import { ConditionOperationSummary } from "@/types/base/condition/condition";
 import {
   MonetaryComponent,
   MonetaryComponentOrder,
@@ -60,7 +60,9 @@ export function ChargeItemDefinitionDetail({
       onSuccess: () => {
         toast.success(t("definition_deleted_successfully"));
         queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
-        navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
+        navigate(
+          `/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition?.category.slug}`,
+        );
       },
     });
 
@@ -147,7 +149,9 @@ export function ChargeItemDefinitionDetail({
   return (
     <Page title={chargeItemDefinition.title} hideTitleOnPage={true}>
       <div className="container mx-auto max-w-3xl space-y-6">
-        <BackButton>
+        <BackButton
+          to={`/facility/${facilityId}/settings/charge_item_definitions/categories/${chargeItemDefinition.category.slug}`}
+        >
           <ArrowLeft />
           {t("back")}
         </BackButton>
@@ -218,43 +222,47 @@ export function ChargeItemDefinitionDetail({
             disabled={isDeleting}
           />
 
-          <Card className="mb-4">
-            <CardHeader>
-              <CardTitle>{t("details")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {chargeItemDefinition.description && (
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">
-                    {t("description")}
-                  </h3>
-                  <p className="whitespace-pre-wrap">
-                    {chargeItemDefinition.description}
-                  </p>
-                </div>
-              )}
-              {chargeItemDefinition.purpose && (
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">
-                    {t("purpose")}
-                  </h3>
-                  <p className="whitespace-pre-wrap">
-                    {chargeItemDefinition.purpose}
-                  </p>
-                </div>
-              )}
-              {chargeItemDefinition.derived_from_uri && (
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">
-                    {t("derived_from")}
-                  </h3>
-                  <p className="font-mono text-sm">
-                    {chargeItemDefinition.derived_from_uri}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {(chargeItemDefinition.description ||
+            chargeItemDefinition.purpose ||
+            chargeItemDefinition.derived_from_uri) && (
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle>{t("details")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {chargeItemDefinition.description && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-medium text-gray-500">
+                      {t("description")}
+                    </h3>
+                    <p className="whitespace-pre-wrap">
+                      {chargeItemDefinition.description}
+                    </p>
+                  </div>
+                )}
+                {chargeItemDefinition.purpose && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-medium text-gray-500">
+                      {t("purpose")}
+                    </h3>
+                    <p className="whitespace-pre-wrap">
+                      {chargeItemDefinition.purpose}
+                    </p>
+                  </div>
+                )}
+                {chargeItemDefinition.derived_from_uri && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-medium text-gray-500">
+                      {t("derived_from")}
+                    </h3>
+                    <p className="font-mono text-sm">
+                      {chargeItemDefinition.derived_from_uri}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>
@@ -286,22 +294,20 @@ export function ChargeItemDefinitionDetail({
                             <p className="text-sm text-gray-500">
                               {t("conditions")}
                             </p>
-                            {component.conditions.map((condition, index) => {
-                              return (
-                                <div
-                                  key={index}
-                                  className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
-                                >
-                                  <span>
-                                    {condition.metric}{" "}
-                                    <span className="font-mono pr-2 ">
-                                      {condition.operation}
-                                    </span>
-                                    {getConditionValue(condition)}
-                                  </span>
-                                </div>
-                              );
-                            })}
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {component.conditions?.map((condition, index) => {
+                                return (
+                                  <div
+                                    key={index}
+                                    className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
+                                  >
+                                    <ConditionOperationSummary
+                                      condition={condition}
+                                    />
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         )}
                       </div>

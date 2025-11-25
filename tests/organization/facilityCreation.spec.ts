@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -34,18 +34,58 @@ test.describe("Facility Creation", () => {
     "X-Ray",
   ];
 
+  const CITIES = [
+    "Mumbai",
+    "Delhi",
+    "Bangalore",
+    "Hyderabad",
+    "Chennai",
+    "Kolkata",
+    "Pune",
+    "Ahmedabad",
+    "Jaipur",
+    "Kochi",
+  ];
+
   let facilityType: string;
   let facilityName: string;
   let facilityFeatures: string[];
+  let locationName: string;
   let description: string;
   let phoneNumber: string;
   let pinCode: string;
   let address: string;
 
+  // Helper function to create a facility with mandatory fields only
+  async function createFacilityWithMandatoryFields(page: Page) {
+    await page.getByRole("button", { name: "Add Facility" }).click();
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Select Facility Type" })
+      .click();
+    await page.getByPlaceholder("Search facility type").fill(facilityType);
+    await page.getByRole("option", { name: facilityType }).click();
+    await page
+      .getByRole("textbox", { name: "Facility Name *" })
+      .fill(facilityName);
+
+    await page.getByRole("dialog", { name: "Add New Facility" }).click();
+    await page
+      .getByRole("textbox", { name: "Phone Number *" })
+      .fill(phoneNumber);
+    await page.getByRole("spinbutton", { name: "PIN Code *" }).fill(pinCode);
+    await page.getByRole("textbox", { name: "Address *" }).fill(address);
+    await page.getByRole("button", { name: "Create Facility" }).click();
+
+    // Verify facility was created successfully
+    await expect(page.getByText("Facility created successfully")).toBeVisible();
+  }
+
   test.beforeEach(async ({ page }) => {
     // Generate unique test data for each test run
     facilityType = faker.helpers.arrayElement(FACILITY_TYPES);
-    facilityName = `${faker.company.name()} ${faker.location.city()}`;
+    locationName = faker.helpers.arrayElement(CITIES);
+    facilityName = `${faker.company.name()} ${locationName}`;
     facilityFeatures = faker.helpers.arrayElements(FACILITY_FEATURES, 2);
     description = faker.lorem.sentence();
     phoneNumber = `987${faker.string.numeric(7)}`.replace(
@@ -174,31 +214,9 @@ test.describe("Facility Creation", () => {
   });
 
   test("Create a facility with only mandatory fields", async ({ page }) => {
-    await page.getByRole("button", { name: "Add Facility" }).click();
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: "Select Facility Type" })
-      .click();
-    await page.getByPlaceholder("Search facility type").fill(facilityType);
-    await page.getByRole("option", { name: facilityType }).click();
-    await page
-      .getByRole("textbox", { name: "Facility Name *" })
-      .fill(facilityName);
-
-    // Skip description field (optional)
-    // Skip facility features (optional)
-
-    await page.getByRole("dialog", { name: "Add New Facility" }).click();
-    await page
-      .getByRole("textbox", { name: "Phone Number *" })
-      .fill(phoneNumber);
-    await page.getByRole("spinbutton", { name: "PIN Code *" }).fill(pinCode);
-    await page.getByRole("textbox", { name: "Address *" }).fill(address);
-    // Skip location search (optional)
-    await page.getByRole("button", { name: "Create Facility" }).click();
-
-    // Verify facility was created successfully
-    await expect(page.getByText("Facility created successfully")).toBeVisible();
+    await test.step("Create facility with mandatory fields", async () => {
+      await createFacilityWithMandatoryFields(page);
+    });
 
     // Navigate to the created facility
     await page
@@ -382,5 +400,115 @@ test.describe("Facility Creation", () => {
     await expect(
       editDialog.getByRole("textbox", { name: "Address" }),
     ).toHaveValue(address);
+  });
+
+  test("Verify phone number link redirects to calling app from facility details page", async ({
+    page,
+  }) => {
+    // Click on the first View Facility link to open a random facility
+    await page.getByRole("link", { name: "View Facility" }).first().click();
+
+    // Find the phone number link - it should start with "Call +91"
+    const phoneLink = page.getByRole("link", { name: /^Call \+91/ });
+
+    // Verify the phone link is visible
+    await expect(phoneLink).toBeVisible();
+
+    // Verify the href attribute contains tel: link with phone number format
+    const href = await phoneLink.getAttribute("href");
+    expect(href).toMatch(/^tel:\+91\s\d{5}\s\d{5}$/);
+  });
+
+  test("Add location to an existing facility and verify Show on Map link redirection", async ({
+    page,
+  }) => {
+    // Click on the first View Facility link to open a random facility
+    await page.getByRole("link", { name: "View Facility" }).first().click();
+
+    // Click Edit Facility Details button
+    await page.getByRole("button", { name: "Edit Facility Details" }).click();
+
+    // Wait for edit dialog
+    const editDialog = page.getByRole("dialog", { name: "Edit Facility" });
+    await expect(editDialog).toBeVisible();
+
+    // Add location to the facility
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Search for a location" })
+      .click();
+    await page.getByPlaceholder("Search option...").fill(locationName);
+    // Select the first location option that appears from the search results
+    const locationOption = page.getByRole("option").first();
+    await locationOption.waitFor({ state: "visible" });
+    await locationOption.click();
+
+    // Save changes
+    const updateButton = editDialog.getByRole("button", {
+      name: "Update Facility",
+    });
+    await updateButton.scrollIntoViewIfNeeded();
+    await updateButton.click();
+
+    // Verify success message
+    await expect(
+      page.getByText(/Facility updated successfully|Updated successfully/i),
+    ).toBeVisible();
+
+    // Wait for dialog to close
+    await expect(editDialog).not.toBeVisible();
+
+    // Verify "Show on Map" link is now visible
+    const mapLink = page.getByRole("link", { name: "Show on Map" });
+    await expect(mapLink).toBeVisible();
+
+    // Verify the href contains a map URL (Google Maps or similar)
+    const mapHref = await mapLink.getAttribute("href");
+    expect(mapHref).toMatch(/maps\.google\.com|openstreetmap\.org/);
+  });
+
+  test("Create facility with mandatory fields and delete it", async ({
+    page,
+  }) => {
+    await test.step("Create facility with mandatory fields", async () => {
+      await createFacilityWithMandatoryFields(page);
+    });
+
+    // Navigate to the created facility
+    await page
+      .getByRole("textbox", { name: "Search by facility name" })
+      .fill(facilityName);
+    await page.getByRole("link", { name: "View Facility" }).click();
+
+    // Verify we're on the facility details page
+    await expect(
+      page.getByRole("heading", { name: facilityName }),
+    ).toBeVisible();
+
+    // Click Delete Facility button
+    await page.getByRole("button", { name: "Delete Facility" }).click();
+
+    // Type the confirmation text
+    await page
+      .getByRole("textbox", { name: `Delete ${facilityName}` })
+      .fill(`Delete ${facilityName}`);
+
+    // Click the final Delete Facility button
+    await page.getByRole("button", { name: "Delete Facility" }).click();
+
+    // Verify deletion success message
+    await expect(
+      page.getByText(/Facility deleted successfully|Deleted successfully/i),
+    ).toBeVisible();
+
+    // Search for the deleted facility
+    await page
+      .getByRole("textbox", { name: "Search by facility name" })
+      .fill(facilityName);
+
+    // Verify the facility is no longer visible in the list
+    await expect(
+      page.getByRole("link", { name: "View Facility" }),
+    ).not.toBeVisible();
   });
 });
