@@ -32,30 +32,24 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
     });
     await searchInput.fill("9");
 
-    // Wait for search results
-    await page.waitForTimeout(1000); // Allow debounce
-
-    // Look for patient info hover card trigger
+    // Wait for patient hover card trigger to appear
     const hoverCardTrigger = page
       .locator("[data-slot='patient-info-hover-card-trigger']")
       .first();
+    await hoverCardTrigger.waitFor({ state: "visible", timeout: 10000 });
 
-    // Check if the trigger is visible and click it
-    if (await hoverCardTrigger.isVisible()) {
-      await hoverCardTrigger.click();
+    // Click the hover card trigger
+    await hoverCardTrigger.click();
 
-      // Verify that Patient Home button is visible
-      await expect(
-        page.getByRole("link", { name: "Patient Home" }),
-      ).toBeVisible({ timeout: 5000 });
+    // Verify that Patient Home button is visible
+    await expect(page.getByRole("link", { name: "Patient Home" })).toBeVisible({
+      timeout: 5000,
+    });
 
-      // Verify that View Profile button is also visible
-      await expect(
-        page.getByRole("link", { name: "View Profile" }),
-      ).toBeVisible({ timeout: 5000 });
-    } else {
-      test.skip();
-    }
+    // Verify that View Profile button is also visible
+    await expect(page.getByRole("link", { name: "View Profile" })).toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test("should NOT show Patient Home button when accessed via organization route", async ({
@@ -94,27 +88,24 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
         // Wait for patient page to load
         await page.waitForURL("**/patient/**");
 
-        // Look for patient info hover card trigger on the patient details page
+        // Wait for patient info hover card trigger on the patient details page
         const hoverCardTrigger = page
           .locator("[data-slot='patient-info-hover-card-trigger']")
           .first();
+        await hoverCardTrigger.waitFor({ state: "visible", timeout: 10000 });
 
-        // Check if the trigger is visible and click it
-        if (await hoverCardTrigger.isVisible()) {
-          await hoverCardTrigger.click();
+        // Click the hover card trigger
+        await hoverCardTrigger.click();
 
-          // Verify that Patient Home button is NOT visible (because facilityId is not available)
-          await expect(
-            page.getByRole("link", { name: "Patient Home" }),
-          ).not.toBeVisible({ timeout: 2000 });
+        // Verify that Patient Home button is NOT visible (because facilityId is not available)
+        await expect(
+          page.getByRole("link", { name: "Patient Home" }),
+        ).not.toBeVisible({ timeout: 2000 });
 
-          // But View Profile button should still be visible
-          await expect(
-            page.getByRole("link", { name: "View Profile" }),
-          ).toBeVisible({ timeout: 5000 });
-        } else {
-          test.skip();
-        }
+        // But View Profile button should still be visible
+        await expect(
+          page.getByRole("link", { name: "View Profile" }),
+        ).toBeVisible({ timeout: 5000 });
       } else {
         test.skip();
       }
@@ -153,27 +144,24 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
       name: /search by patient phone number/i,
     });
     await searchInput.fill("9");
-    await page.waitForTimeout(1000);
 
-    // Click on hover card trigger
+    // Wait for hover card trigger to appear
     const hoverCardTrigger = page
       .locator("[data-slot='patient-info-hover-card-trigger']")
       .first();
+    await hoverCardTrigger.waitFor({ state: "visible", timeout: 10000 });
 
-    if (await hoverCardTrigger.isVisible()) {
-      await hoverCardTrigger.click();
+    // Click the hover card trigger
+    await hoverCardTrigger.click();
 
-      // Get the View Profile link and verify it contains the facilityId
-      const viewProfileLink = page.getByRole("link", {
-        name: "View Profile",
-      });
-      await expect(viewProfileLink).toBeVisible();
+    // Get the View Profile link and verify it contains the facilityId
+    const viewProfileLink = page.getByRole("link", {
+      name: "View Profile",
+    });
+    await expect(viewProfileLink).toBeVisible();
 
-      const href = await viewProfileLink.getAttribute("href");
-      expect(href).toContain(`/facility/${facilityId}/patient/`);
-    } else {
-      test.skip();
-    }
+    const href = await viewProfileLink.getAttribute("href");
+    expect(href).toContain(`/facility/${facilityId}/patient/`);
   });
 
   test("should not show Patient Home button on patient home page", async ({
@@ -201,27 +189,24 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
       name: /search by patient phone number/i,
     });
     await searchInput.fill("9");
-    await page.waitForTimeout(1000);
 
-    // Click on hover card trigger if it appears
+    // Wait for hover card trigger to appear
     const hoverCardTrigger = page
       .locator("[data-slot='patient-info-hover-card-trigger']")
       .first();
+    await hoverCardTrigger.waitFor({ state: "visible", timeout: 10000 });
 
-    if (await hoverCardTrigger.isVisible()) {
-      await hoverCardTrigger.click();
+    // Click the hover card trigger
+    await hoverCardTrigger.click();
 
-      // Verify that Patient Home button is NOT visible (because we're already on patient home page)
-      await expect(
-        page.getByRole("link", { name: "Patient Home" }),
-      ).not.toBeVisible({ timeout: 2000 });
+    // Verify that Patient Home button is NOT visible (because we're already on patient home page)
+    await expect(
+      page.getByRole("link", { name: "Patient Home" }),
+    ).not.toBeVisible({ timeout: 2000 });
 
-      // But View Profile button should still be visible
-      await expect(
-        page.getByRole("link", { name: "View Profile" }),
-      ).toBeVisible({ timeout: 5000 });
-    } else {
-      test.skip();
-    }
+    // But View Profile button should still be visible
+    await expect(page.getByRole("link", { name: "View Profile" })).toBeVisible({
+      timeout: 5000,
+    });
   });
 });
