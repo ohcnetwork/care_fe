@@ -42,7 +42,6 @@ interface ReportTabProps {
   encounter?: EncounterRead;
   patient?: PatientRead;
   associatingId: string;
-  canEdit?: boolean;
   permissions?: string[];
 }
 
@@ -50,7 +49,6 @@ export function ReportSubTab({
   encounter,
   patient,
   associatingId,
-  canEdit = false,
   permissions = [],
 }: ReportTabProps) {
   const { t } = useTranslation();
@@ -69,6 +67,7 @@ export function ReportSubTab({
   } = useReportManager({
     associatingId,
     enabled: true,
+    qParams,
   });
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -78,13 +77,7 @@ export function ReportSubTab({
     const matchesSearch = report.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesArchived =
-      qParams.is_archived === undefined
-        ? !report.is_archived
-        : qParams.is_archived === "true"
-          ? report.is_archived
-          : !report.is_archived;
-    return matchesSearch && matchesArchived;
+    return matchesSearch;
   });
 
   const getReportTypeIcon = (reportType: string): IconName => {
@@ -116,19 +109,17 @@ export function ReportSubTab({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {canEdit && (
-              <DropdownMenuItem asChild className="text-primary-900">
-                <Button
-                  size="sm"
-                  onClick={() => archiveReport(report as unknown as ReportRead)}
-                  variant="ghost"
-                  className="w-full flex flex-row justify-stretch items-center"
-                >
-                  <CareIcon icon="l-archive-alt" className="mr-1" />
-                  <span>{t("archive")}</span>
-                </Button>
-              </DropdownMenuItem>
-            )}
+            <DropdownMenuItem asChild className="text-primary-900">
+              <Button
+                size="sm"
+                onClick={() => archiveReport(report as unknown as ReportRead)}
+                variant="ghost"
+                className="w-full flex flex-row justify-stretch items-center"
+              >
+                <CareIcon icon="l-archive-alt" className="mr-1" />
+                <span>{t("archive")}</span>
+              </Button>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -173,7 +164,7 @@ export function ReportSubTab({
           <DropdownMenuItem
             className="text-primary-900"
             onClick={() => {
-              updateQuery({ is_archived: "false" });
+              updateQuery({ is_archived: "false", include_archived: false });
             }}
           >
             <span>{t("active_reports")}</span>
@@ -181,7 +172,7 @@ export function ReportSubTab({
           <DropdownMenuItem
             className="text-primary-900"
             onClick={() => {
-              updateQuery({ is_archived: "true" });
+              updateQuery({ is_archived: "true", include_archived: true });
             }}
           >
             <span>{t("archived_reports")}</span>
@@ -198,7 +189,9 @@ export function ReportSubTab({
         <Badge
           variant="outline"
           className="cursor-pointer"
-          onClick={() => updateQuery({ is_archived: undefined })}
+          onClick={() =>
+            updateQuery({ is_archived: undefined, include_archived: false })
+          }
         >
           {t(
             qParams.is_archived === "false"

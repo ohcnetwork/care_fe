@@ -27,6 +27,7 @@ import reportApi from "@/types/emr/report/reportApi";
 export interface UseReportManagerOptions {
   associatingId: string;
   enabled?: boolean;
+  qParams?: Record<string, string>;
 }
 
 export interface UseReportManagerResult {
@@ -41,6 +42,7 @@ export interface UseReportManagerResult {
 export default function useReportManager({
   associatingId,
   enabled = true,
+  qParams,
 }: UseReportManagerOptions): UseReportManagerResult {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -56,9 +58,10 @@ export default function useReportManager({
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["reports", associatingId],
+    queryKey: ["reports", associatingId, qParams],
     queryFn: query(reportApi.listReports, {
       queryParams: {
+        ...qParams,
         associating_id: associatingId,
         upload_completed: "true",
       },
