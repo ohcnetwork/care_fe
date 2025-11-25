@@ -53,7 +53,7 @@ const SymptomCard = ({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="link"
-                className=" hover:text-gray-700"
+                className="hover:text-gray-700"
                 aria-label={symptom.note ? t("has_note") : undefined}
               >
                 <span className="relative inline-flex">

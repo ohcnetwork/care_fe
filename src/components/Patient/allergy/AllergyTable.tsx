@@ -55,7 +55,7 @@ const AllergyCard = ({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="link"
-                className=" hover:text-gray-700"
+                className="hover:text-gray-700"
                 aria-label={allergy.note ? t("has_note") : undefined}
               >
                 <span className="relative inline-flex">
