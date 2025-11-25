@@ -7,6 +7,7 @@ import {
 import {
   closeAnyOpenPopovers,
   expectToast,
+  getCardByTitle,
   selectFromCategoryPicker,
   selectFromLocationMultiSelect,
   selectFromRequirements,
@@ -203,22 +204,14 @@ test.describe("activity definition edit", () => {
     ).toBeVisible();
     await expect(page.getByText(updatedData.status)).toBeVisible();
 
-    const overviewCard = page.locator('[data-slot="card"]').filter({
-      has: page.locator('[data-slot="card-title"]', {
-        hasText: "Overview",
-      }),
-    });
+    const overviewCard = getCardByTitle(page, "Overview");
     await expect(
       overviewCard.getByText(createdAD.resourceCategoryName),
     ).toBeVisible();
     await expect(overviewCard.getByText(updatedData.description)).toBeVisible();
     await expect(overviewCard.getByText(updatedData.usage)).toBeVisible();
 
-    const technicalDetailsCard = page.locator('[data-slot="card"]').filter({
-      has: page.locator('[data-slot="card-title"]', {
-        hasText: "Technical Details",
-      }),
-    });
+    const technicalDetailsCard = getCardByTitle(page, "Technical Details");
     await expect(
       technicalDetailsCard.getByText("Service Request"),
     ).toBeVisible();
@@ -228,72 +221,37 @@ test.describe("activity definition edit", () => {
     ).toBeVisible();
 
     await expect(
-      page
-        .locator('[data-slot="card"]')
-        .filter({
-          has: page.locator('[data-slot="card-title"]', {
-            hasText: "Specimen Requirements",
-          }),
-        })
+      getCardByTitle(page, "Specimen Requirements")
         .getByText(updatedData.specimen!)
         .first(),
     ).toBeVisible();
 
     await expect(
-      page
-        .locator('[data-slot="card"]')
-        .filter({
-          has: page.locator('[data-slot="card-title"]', {
-            hasText: "Observation Result Requirements",
-          }),
-        })
+      getCardByTitle(page, "Observation Result Requirements")
         .getByText(updatedData.observation!)
         .first(),
     ).toBeVisible();
 
     await expect(
-      page
-        .locator('[data-slot="card"]')
-        .filter({
-          has: page.locator('[data-slot="card-title"]', {
-            hasText: "Charge Item Definitions",
-          }),
-        })
+      getCardByTitle(page, "Charge Item Definitions")
         .getByText(updatedData.chargeItem!)
         .first(),
     ).toBeVisible();
 
     await expect(
-      page
-        .locator('[data-slot="card"]')
-        .filter({
-          has: page.locator('[data-slot="card-title"]', {
-            hasText: "Locations",
-          }),
-        })
-        .getByText(updatedData.location!),
+      getCardByTitle(page, "Locations").getByText(updatedData.location!),
     ).toBeVisible();
 
     await expect(
-      page
-        .locator('[data-slot="card"]')
-        .filter({
-          has: page.locator('[data-slot="card-title"]', {
-            hasText: "Diagnostic Report",
-          }),
-        })
-        .getByText(updatedData.diagnosticReportCode!),
+      getCardByTitle(page, "Diagnostic Report").getByText(
+        updatedData.diagnosticReportCode!,
+      ),
     ).toBeVisible();
 
     await expect(
-      page
-        .locator('[data-slot="card"]')
-        .filter({
-          has: page.locator('[data-slot="card-title"]', {
-            hasText: "Derived From",
-          }),
-        })
-        .getByText(updatedData.derivedFromUri!),
+      getCardByTitle(page, "Derived From").getByText(
+        updatedData.derivedFromUri!,
+      ),
     ).toBeVisible();
   });
 });

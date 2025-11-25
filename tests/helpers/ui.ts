@@ -350,3 +350,15 @@ export async function expectToast(
   const toaster = page.locator(".toaster.group");
   await expect(toaster.getByText(text)).toBeVisible(options);
 }
+
+/**
+ * Gets a card element by its title
+ * @param page - Playwright page object
+ * @param title - Card title to search for (can be string or RegExp)
+ * @returns Locator for the card element
+ */
+export function getCardByTitle(page: Page, title: string | RegExp) {
+  return page.locator('[data-slot="card"]').filter({
+    has: page.locator('[data-slot="card-title"]', { hasText: title }),
+  });
+}
