@@ -51,11 +51,18 @@ const SymptomCard = ({
           </Badge>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="link" className=" hover:text-gray-700">
+              <Button
+                variant="link"
+                className=" hover:text-gray-700"
+                aria-label={symptom.note ? t("has_note") : undefined}
+              >
                 <span className="relative inline-flex">
                   <BadgeInfo size={16} />
                   {symptom.note && (
-                    <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-green-600 ring-2 ring-white"></span>
+                    <span
+                      className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-green-600 ring-2 ring-white"
+                      aria-hidden="true"
+                    ></span>
                   )}
                 </span>
               </Button>
