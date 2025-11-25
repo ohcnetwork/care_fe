@@ -55,7 +55,7 @@ export default function FilterRenderer({
           <GenericFilter
             {...commonProps}
             selectedValues={selected as string[]}
-            showColorIndicators={true}
+            showColorIndicators={filter.showColorIndicators ?? true}
           />
           <NavigationHelper isActiveFilter={true} />
         </>

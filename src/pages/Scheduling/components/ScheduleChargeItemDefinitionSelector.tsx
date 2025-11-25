@@ -17,7 +17,7 @@ import {
 
 import { ChargeItemDefinitionPicker } from "@/components/Common/ChargeItemDefinitionPicker";
 
-import { ResourceCategorySubType } from "@/types/base/resourceCategory/resourceCategory";
+import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { ScheduleTemplate } from "@/types/scheduling/schedule";
 
 interface ScheduleChargeItemDefinitionSelectorProps {
@@ -37,21 +37,26 @@ export default function ScheduleChargeItemDefinitionSelector({
 }: ScheduleChargeItemDefinitionSelectorProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCSlug, setSelectedCSlug] = useState<string | undefined>(
-    scheduleTemplate.charge_item_definition?.slug,
-  );
   const [reVisitDays, setReVisitDays] = useState(
     scheduleTemplate.revisit_allowed_days,
   );
-  const [reVisitCSlug, setReVisitCSlug] = useState<string | undefined>(
-    scheduleTemplate.revisit_charge_item_definition?.slug,
-  );
+
+  const [selectedDefinitionState, setSelectedDefinitionState] = useState<{
+    charge_item_definition: ChargeItemDefinitionBase | undefined;
+    re_visit_charge_item_definition: ChargeItemDefinitionBase | undefined;
+  }>({
+    charge_item_definition: scheduleTemplate.charge_item_definition,
+    re_visit_charge_item_definition:
+      scheduleTemplate.revisit_charge_item_definition,
+  });
 
   const handleSubmit = () => {
     onChange({
-      charge_item_definition_slug: selectedCSlug!,
+      charge_item_definition_slug:
+        selectedDefinitionState.charge_item_definition?.slug || "",
       re_visit_allowed_days: reVisitDays,
-      re_visit_charge_item_definition_slug: reVisitCSlug || null,
+      re_visit_charge_item_definition_slug:
+        selectedDefinitionState.re_visit_charge_item_definition?.slug || null,
     });
     setIsOpen(false);
   };
@@ -60,9 +65,12 @@ export default function ScheduleChargeItemDefinitionSelector({
     setIsOpen(open);
     if (!open) {
       // Reset to original values when closing
-      setSelectedCSlug(scheduleTemplate.charge_item_definition?.slug);
-      setReVisitCSlug(scheduleTemplate.revisit_charge_item_definition?.slug);
       setReVisitDays(scheduleTemplate.revisit_allowed_days);
+      setSelectedDefinitionState({
+        charge_item_definition: scheduleTemplate.charge_item_definition,
+        re_visit_charge_item_definition:
+          scheduleTemplate.revisit_charge_item_definition,
+      });
     }
   };
 
@@ -90,16 +98,26 @@ export default function ScheduleChargeItemDefinitionSelector({
             <div className="flex flex-col gap-4">
               <div>
                 <Label>{t("consulation charge")}</Label>
-                <div className="mt-2 flex gap-2 flex-row">
+                <div className="mt-2 flex gap-2 flex-col sm:flex-row">
                   <ChargeItemDefinitionPicker
                     facilityId={facilityId}
-                    resourceSubType={
-                      ResourceCategorySubType.charge_item_definition_schedule_practitioner
-                    }
-                    value={selectedCSlug}
-                    onValueChange={setSelectedCSlug}
+                    value={selectedDefinitionState.charge_item_definition}
+                    onValueChange={(selectedDef) => {
+                      if (!selectedDef) {
+                        setSelectedDefinitionState({
+                          ...selectedDefinitionState,
+                          charge_item_definition: undefined,
+                        });
+                        return;
+                      }
+                      setSelectedDefinitionState({
+                        ...selectedDefinitionState,
+                        charge_item_definition:
+                          selectedDef as ChargeItemDefinitionBase,
+                      });
+                    }}
                     placeholder={t("select_charge_item_definition")}
-                    className="flex-1"
+                    className="grow-1"
                     showCreateButton={true}
                   />
                 </div>
@@ -122,14 +140,26 @@ export default function ScheduleChargeItemDefinitionSelector({
 
               <div>
                 <Label>{t("re_visit_consultation_charge")}</Label>
-                <div className="mt-2 flex gap-2 flex-row">
+                <div className="mt-2 flex gap-2 flex-col sm:flex-row">
                   <ChargeItemDefinitionPicker
                     facilityId={facilityId}
-                    resourceSubType={
-                      ResourceCategorySubType.charge_item_definition_schedule_practitioner
+                    value={
+                      selectedDefinitionState.re_visit_charge_item_definition
                     }
-                    value={reVisitCSlug}
-                    onValueChange={setReVisitCSlug}
+                    onValueChange={(selectedDef) => {
+                      if (!selectedDef) {
+                        setSelectedDefinitionState({
+                          ...selectedDefinitionState,
+                          re_visit_charge_item_definition: undefined,
+                        });
+                        return;
+                      }
+                      setSelectedDefinitionState({
+                        ...selectedDefinitionState,
+                        re_visit_charge_item_definition:
+                          selectedDef as ChargeItemDefinitionBase,
+                      });
+                    }}
                     placeholder={t("select_charge_item_definition")}
                     className="flex-1"
                     showCreateButton={true}
@@ -149,7 +179,11 @@ export default function ScheduleChargeItemDefinitionSelector({
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!selectedCSlug || !reVisitDays}
+              disabled={
+                !selectedDefinitionState.charge_item_definition ||
+                !selectedDefinitionState.re_visit_charge_item_definition ||
+                !reVisitDays
+              }
               className="w-full sm:w-auto"
             >
               {t("save")}
