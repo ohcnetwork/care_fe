@@ -960,7 +960,8 @@ export function InvoiceShow({
                 </div>
               ) : (
                 payments.results.map((payment, index) => (
-                  <div
+                  <Link
+                    href={`/facility/${facilityId}/billing/payments/${payment.id}/print`}
                     key={payment.id}
                     className="relative flex items-start py-8 px-3  group"
                   >
@@ -1011,7 +1012,7 @@ export function InvoiceShow({
                         </Badge>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>
@@ -1094,11 +1095,6 @@ export function InvoiceShow({
         facilityId={facilityId}
         invoice={invoice}
         accountId={invoice.account.id}
-        onSuccess={() => {
-          navigate(
-            `/facility/${facilityId}/billing/invoice/${invoiceId}/print`,
-          );
-        }}
       />
 
       <AlertDialog
