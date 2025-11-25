@@ -114,7 +114,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
             <div className="flex flex-wrap items-center justify-between gap-2 p-4 sm:pb-4 pb-0">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                 <SearchInput
-                  data-cy="resource-search"
                   className="w-full sm:w-48"
                   options={[
                     {
@@ -137,7 +136,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         value="outgoing"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
                         onClick={() => updateQuery({ incoming: false })}
-                        data-cy="tab-outgoing"
                       >
                         {t("outgoing")}
                       </TabsTrigger>
@@ -145,7 +143,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                         value="incoming"
                         className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full"
                         onClick={() => updateQuery({ incoming: true })}
-                        data-cy="tab-incoming"
                       >
                         {t("incoming")}
                       </TabsTrigger>
@@ -234,7 +231,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       key={statusOption}
                       value={statusOption}
                       className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                      data-cy={`tab-${statusOption}`}
                       onClick={() => updateQuery({ status: statusOption })}
                     >
                       <CareIcon
@@ -268,7 +264,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                   <Card
                     key={index}
                     className="hover:shadow-lg transition-shadow group flex flex-col justify-between"
-                    data-cy={`resource-card-${index}`}
                   >
                     <CardHeader className="space-y-1 pb-2">
                       <div className="flex items-center justify-between">
@@ -307,7 +302,6 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
                       <Link
                         href={`/facility/${resource.origin_facility.id}/resource/${resource.id}`}
                         className="items-center self-end pt-2 pr-4 pb-3 text-sm text-primary hover:underline text-right flex justify-end group-hover:translate-x-1 transition-transform"
-                        data-cy={`resource-view-details-${index}`}
                       >
                         {t("view_details")}
                         <CareIcon

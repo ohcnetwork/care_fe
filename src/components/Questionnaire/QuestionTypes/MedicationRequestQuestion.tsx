@@ -694,7 +694,6 @@ export function MedicationRequestQuestion({
                                           }}
                                           disabled={isInactive || disabled}
                                           className="size-10 p-4 border border-gray-400 bg-white shadow text-destructive"
-                                          data-cy="remove-medication"
                                           aria-label="Remove medication"
                                         >
                                           <MinusCircledIcon className="size-5" />
@@ -807,7 +806,7 @@ export function MedicationRequestQuestion({
           {newMedicationSheetContent}
         </EntitySelectionDrawer>
       ) : (
-        <div className="max-w-4xl" data-cy="add-medication-request">
+        <div className="max-w-4xl">
           <MedicationValueSetSelect
             placeholder={addMedicationPlaceholder}
             onSelect={handleAddMedication}
@@ -1000,10 +999,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     >
       {/* Medicine Name */}
       {desktopLayout && (
-        <div
-          className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm"
-          data-cy="medicine-name-view"
-        >
+        <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
           <span
             className={cn(
               "break-words line-clamp-2 hidden lg:block",
@@ -1022,7 +1018,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {t("dosage")}
           <span className="text-red-500 ml-0.5">*</span>
         </Label>
-        <div data-cy="dosage">
+        <div>
           {dosageInstruction?.dose_and_rate?.dose_range ? (
             <Input
               readOnly
@@ -1045,7 +1041,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 )}
               >
                 <ComboboxQuantityInput
-                  data-cy="dosage-input"
                   quantity={dosageInstruction?.dose_and_rate?.dose_quantity}
                   onChange={(value) => {
                     if (value) {
@@ -1142,7 +1137,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           disabled={disabled || isReadOnly}
         >
           <SelectTrigger
-            data-cy="frequency"
             className={cn(
               "h-9 text-sm",
               hasError(MEDICATION_REQUEST_FIELDS.FREQUENCY.key) &&
@@ -1310,10 +1304,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         )}
       </div>
       {/* Route */}
-      <div
-        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
-        data-cy="route"
-      >
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("route")}</Label>
         <ValueSetSelect
           system="system-route"
@@ -1324,10 +1315,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Site */}
-      <div
-        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
-        data-cy="site"
-      >
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("site")}</Label>
         <ValueSetSelect
           system="system-body-site"
@@ -1338,10 +1326,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Method */}
-      <div
-        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
-        data-cy="method"
-      >
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("method")}</Label>
         <ValueSetSelect
           system="system-administration-method"
@@ -1409,10 +1394,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Notes */}
-      <div
-        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
-        data-cy="notes"
-      >
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("note")}</Label>
         <Input
           value={medication.note || ""}
@@ -1426,7 +1408,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       {/* Remove Button */}
       <div className="hidden lg:flex lg:px-2 lg:py-1 items-center justify-center sticky right-0 bg-white shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12">
         <Button
-          data-cy="remove-medication"
           variant="ghost"
           size="icon"
           onClick={onRemove}

@@ -189,7 +189,6 @@ export default function FacilityOrganizationFormSheet({
                   <FormControl>
                     <Input
                       {...field}
-                      data-cy="department-team-name-input"
                       placeholder={t("enter_department_team_name")}
                     />
                   </FormControl>
@@ -206,10 +205,7 @@ export default function FacilityOrganizationFormSheet({
                   <FormLabel>{t(`type`)}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
-                      <SelectTrigger
-                        data-cy="select-type-dropdown"
-                        ref={field.ref}
-                      >
+                      <SelectTrigger ref={field.ref}>
                         <SelectValue
                           placeholder={t("select_organization_type")}
                         />
@@ -243,7 +239,6 @@ export default function FacilityOrganizationFormSheet({
                   <FormControl>
                     <Textarea
                       {...field}
-                      data-cy="department-team-description-input"
                       placeholder={t("enter_department_team_description")}
                     />
                   </FormControl>
@@ -268,11 +263,6 @@ export default function FacilityOrganizationFormSheet({
                   isPending ||
                   !form.formState.isValid ||
                   !form.formState.isDirty
-                }
-                data-cy={
-                  isEditMode
-                    ? "update-organization-button"
-                    : "create-organization-button"
                 }
               >
                 {isPending

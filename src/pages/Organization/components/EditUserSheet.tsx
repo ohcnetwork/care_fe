@@ -28,10 +28,7 @@ export default function EditUserSheet({
   const { t } = useTranslation();
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent
-        className="w-full sm:max-w-2xl overflow-y-auto"
-        data-cy="add-user-form"
-      >
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("edit_user")}</SheetTitle>
           <SheetDescription>{t("edit_user_description")}</SheetDescription>

@@ -11,9 +11,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import {
   ObservationComponent,
   ObservationRead,
+  ObservationReferenceRange,
+  QuestionnaireSubmitResultValue,
 } from "@/types/emr/observation/observation";
 
 interface DiagnosticReportResultsTableProps {
@@ -23,15 +26,70 @@ interface DiagnosticReportResultsTableProps {
 export function DiagnosticReportResultsTable({
   observations,
 }: DiagnosticReportResultsTableProps) {
-  const renderReferenceRange = (referenceRange: any) => {
+  const renderReferenceRange = (
+    referenceRange: ObservationReferenceRange[],
+    value: QuestionnaireSubmitResultValue,
+  ) => {
     if (!referenceRange || !referenceRange[0]) return "-";
-    const range = referenceRange[0];
+    let range = null;
+    if (value.value) {
+      for (const r of referenceRange) {
+        if (r.min && Number(value.value) < r.min) {
+          continue;
+        }
+        if (r.max && Number(value.value) > r.max) {
+          continue;
+        }
+        range = r;
+        break;
+      }
+    }
+    if (!range) return "-";
     return (
       <div className="flex items-center gap-1 text-gray-500">
         <span>
-          {range.low?.value} - {range.high?.value}{" "}
-          {range.low?.unit?.display || range.high?.unit?.display}
+          {range.min} - {range.max}
         </span>
+      </div>
+    );
+  };
+
+  const parseInterpretationValue = (value: string): Interpretation | string => {
+    if (typeof value === "object") {
+      return value as Interpretation;
+    }
+
+    if (typeof value === "string" && value.startsWith("{")) {
+      try {
+        const jsonString = value.replace(/'/g, '"');
+        return JSON.parse(jsonString) as Interpretation;
+      } catch {
+        return value;
+      }
+    }
+
+    return value;
+  };
+
+  const renderInterpretation = (interpretationValue: string) => {
+    if (!interpretationValue) return "-";
+
+    const parsedInterpretation = parseInterpretationValue(interpretationValue);
+
+    if (typeof parsedInterpretation === "object") {
+      const { display, color = "#000000" } = parsedInterpretation;
+      return (
+        <div className="flex items-center gap-1">
+          <span className="capitalize" style={{ color }}>
+            {display}
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-1 text-gray-500">
+        <span className="capitalize">{parsedInterpretation}</span>
       </div>
     );
   };
@@ -43,7 +101,7 @@ export function DiagnosticReportResultsTable({
         className={cn(
           "bg-gray-50/50 border-0 text-sm text-gray-950",
           index === components.length - 1 && "border-b",
-          component.interpretation == "abnormal" && "font-semibold",
+          component.interpretation && "font-semibold",
         )}
       >
         <TableCell className="pl-4 border-r border-b border-gray-300">
@@ -63,12 +121,11 @@ export function DiagnosticReportResultsTable({
           </div>
         </TableCell>
         <TableCell className="border-r border-b border-gray-300">
-          {renderReferenceRange(component.reference_range)}
+          {component.reference_range &&
+            renderReferenceRange(component.reference_range, component.value)}
         </TableCell>
         <TableCell className="border-b border-gray-300">
-          <span className="capitalize">
-            {t(component.interpretation || "")}
-          </span>
+          {renderInterpretation(component.interpretation || "")}
         </TableCell>
       </TableRow>
     ));
@@ -85,7 +142,7 @@ export function DiagnosticReportResultsTable({
           className={cn(
             "divide-x divide-gray-300 text-sm text-gray-950",
             hasComponents && "border-b-0",
-            observation.interpretation == "abnormal" && "font-semibold",
+            observation.interpretation && "font-semibold",
           )}
         >
           <TableCell>
@@ -106,14 +163,15 @@ export function DiagnosticReportResultsTable({
           </TableCell>
           <TableCell>
             {!hasComponents &&
-              renderReferenceRange(observation.reference_range)}
+              renderReferenceRange(
+                observation.reference_range || [],
+                observation.value,
+              )}
           </TableCell>
           <TableCell>
-            {!hasComponents && observation.interpretation && (
-              <span className="capitalize">
-                {t(observation.interpretation)}
-              </span>
-            )}
+            {!hasComponents &&
+              observation.interpretation &&
+              renderInterpretation(observation.interpretation)}
           </TableCell>
         </TableRow>
         {hasComponents &&

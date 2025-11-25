@@ -208,7 +208,8 @@ export const EncounterShow = (props: Props) => {
     >
       {primaryEncounter &&
         primaryEncounter.appointment?.id &&
-        canWritePrimaryEncounter && (
+        canWritePrimaryEncounter &&
+        primaryEncounter.status !== "discharged" && (
           <div className="flex items-center justify-center -mt-2 mb-2">
             <AppointmentEncounterHeader
               appointment={primaryEncounter.appointment}

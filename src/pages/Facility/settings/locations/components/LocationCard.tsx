@@ -205,7 +205,6 @@ export function LocationCard({
                       onSelect={(e) => e.preventDefault()}
                       onClick={() => setShowDeleteDialog(true)}
                       className="text-destructive"
-                      data-cy="delete-location-button"
                     >
                       <Trash className="size-4 mr-2" />
                       {t("delete")}
@@ -222,7 +221,6 @@ export function LocationCard({
             <div className="ml-auto">
               {location.form !== "bd" && onView && (
                 <Button
-                  data-cy="view-details-location-button"
                   variant="outline"
                   className="flex items-center gap-2"
                   onClick={() => onView?.(location)}
