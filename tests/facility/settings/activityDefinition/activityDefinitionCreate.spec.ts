@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { getFieldErrorMessage } from "tests/helper/error";
 import {
   createActivityDefinition,
   RESOURCE_CATEGORY_SLUG,
@@ -24,17 +25,38 @@ test.describe("activity definition form", () => {
       .click();
     await page.getByRole("button", { name: /^create$/i }).click();
 
-    await expect(page.getByText(/title.*required/i)).toBeVisible();
-    await expect(page.getByText(/slug.*required/i)).toBeVisible();
-    await expect(page.getByText(/description.*required/i)).toBeVisible();
-    await expect(page.getByText(/usage.*required/i)).toBeVisible();
-    await expect(page.getByText(/category.*required/i)).toBeVisible();
-    await expect(page.getByText(/code.*required/i)).toBeVisible();
+    await expect(
+      getFieldErrorMessage(page.getByRole("textbox", { name: "Title *" })),
+    ).toBeVisible();
 
-    const slugInput = page.getByLabel(/slug/i);
+    await expect(
+      getFieldErrorMessage(page.getByRole("textbox", { name: "Slug *" })),
+    ).toBeVisible();
+
+    await expect(
+      getFieldErrorMessage(
+        page.getByRole("textbox", { name: "Description *" }),
+      ),
+    ).toBeVisible();
+
+    await expect(
+      getFieldErrorMessage(page.getByRole("textbox", { name: "Usage *" })),
+    ).toBeVisible();
+
+    await expect(
+      getFieldErrorMessage(page.getByRole("combobox", { name: "Category *" })),
+    ).toBeVisible();
+
+    await expect(
+      getFieldErrorMessage(page.getByRole("combobox", { name: "Code *" })),
+    ).toBeVisible();
+
+    const slugInput = page.getByRole("textbox", { name: "Slug *" });
     await slugInput.click();
     await slugInput.fill("abc");
-    await expect(page.getByText(/slug.*atleast 5.*atmost 25/i)).toBeVisible();
+    await expect(getFieldErrorMessage(slugInput)).toContainText(
+      /atleast 5.*atmost 25/i,
+    );
   });
 
   test("should create activity definition with required fields", async ({
