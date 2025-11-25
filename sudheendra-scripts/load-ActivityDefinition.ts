@@ -17,6 +17,7 @@ import {
   createSlug,
   ensureActivityDefinitionCategories,
   ensureAuthentication,
+  fetchLocationData,
   getAuthHeaders,
   getLogger,
   loadData,
@@ -260,6 +261,26 @@ async function processCsvData(
       );
     }
   }
+
+  const locationData = await fetchLocationData(
+    Array.from(new Set(results.map((result) => result.locations || []).flat())),
+    config,
+  );
+
+  const locationDataMap = new Map(
+    locationData.map((location) => [location.name, location.id]),
+  );
+
+  results.forEach((result) => {
+    let locationIds: string[] = [];
+    result.locations?.forEach((locationName) => {
+      const locationId = locationDataMap.get(locationName);
+      if (locationId) {
+        locationIds.push(locationId);
+      }
+    });
+    result.locations = locationIds;
+  });
 
   return { data: results, substitutions };
 }

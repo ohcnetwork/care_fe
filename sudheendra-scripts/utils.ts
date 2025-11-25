@@ -1625,3 +1625,15 @@ export async function validateSingleCodeField(
 }> {
   return validateRowCodes(rows, config, [rule]);
 }
+
+export async function fetchLocationData(
+  locationSlugs: string[],
+  config: BaseConfig,
+): Promise<{ name: string; id: string }[]> {
+  const locationData = makeApiCall(
+    "/location/0/get_location_ids_from_name/",
+    locationSlugs,
+    config,
+  );
+  return locationData;
+}
