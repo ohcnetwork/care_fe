@@ -143,7 +143,6 @@ export function generateActivityDefinitionData(
  * Helper function to create an Activity Definition via UI
  * @param page - Playwright page object
  * @param facilityId - Facility ID where the AD will be created
- * @param options - Optional overrides for default values
  * @returns Object containing the created AD data
  */
 export async function createActivityDefinition(
