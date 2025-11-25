@@ -66,52 +66,53 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
       has: page.locator("text=/organization/i"),
     });
 
-    // If there are organizations, click the first one
+    // Verify that at least one organization exists
     const orgCount = await organizationLink.count();
-    if (orgCount > 0) {
-      await organizationLink.first().click();
+    expect(orgCount).toBeGreaterThan(
+      0,
+      "Expected at least one organization to be available for testing",
+    );
 
-      // Navigate to patients tab
-      await page.getByRole("link", { name: "Patients" }).click();
+    await organizationLink.first().click();
 
-      // Wait for patients to load
-      await page.waitForLoadState("networkidle");
+    // Navigate to patients tab
+    await page.getByRole("link", { name: "Patients" }).click();
 
-      // Check if there are any patient cards
-      const patientCards = page.locator("a[href*='/patient/']");
-      const patientCount = await patientCards.count();
+    // Wait for patients to load
+    await page.waitForLoadState("networkidle");
 
-      if (patientCount > 0) {
-        // Click on a patient card to go to patient detail page
-        await patientCards.first().click();
+    // Verify that at least one patient exists
+    const patientCards = page.locator("a[href*='/patient/']");
+    const patientCount = await patientCards.count();
+    expect(patientCount).toBeGreaterThan(
+      0,
+      "Expected at least one patient to be available for testing",
+    );
 
-        // Wait for patient page to load
-        await page.waitForURL("**/patient/**");
+    // Click on a patient card to go to patient detail page
+    await patientCards.first().click();
 
-        // Wait for patient info hover card trigger on the patient details page
-        const hoverCardTrigger = page
-          .locator("[data-slot='patient-info-hover-card-trigger']")
-          .first();
-        await hoverCardTrigger.waitFor({ state: "visible", timeout: 10000 });
+    // Wait for patient page to load
+    await page.waitForURL("**/patient/**");
 
-        // Click the hover card trigger
-        await hoverCardTrigger.click();
+    // Wait for patient info hover card trigger on the patient details page
+    const hoverCardTrigger = page
+      .locator("[data-slot='patient-info-hover-card-trigger']")
+      .first();
+    await hoverCardTrigger.waitFor({ state: "visible", timeout: 10000 });
 
-        // Verify that Patient Home button is NOT visible (because facilityId is not available)
-        await expect(
-          page.getByRole("link", { name: "Patient Home" }),
-        ).not.toBeVisible({ timeout: 2000 });
+    // Click the hover card trigger
+    await hoverCardTrigger.click();
 
-        // But View Profile button should still be visible
-        await expect(
-          page.getByRole("link", { name: "View Profile" }),
-        ).toBeVisible({ timeout: 5000 });
-      } else {
-        test.skip();
-      }
-    } else {
-      test.skip();
-    }
+    // Verify that Patient Home button is NOT visible (because facilityId is not available)
+    await expect(
+      page.getByRole("link", { name: "Patient Home" }),
+    ).not.toBeVisible({ timeout: 2000 });
+
+    // But View Profile button should still be visible
+    await expect(page.getByRole("link", { name: "View Profile" })).toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test("should render correct href for View Profile button based on facilityId", async ({
@@ -129,10 +130,9 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
     const facilityIdMatch = currentUrl.match(/\/facility\/([^/]+)/);
     const facilityId = facilityIdMatch ? facilityIdMatch[1] : null;
 
-    if (!facilityId) {
-      test.skip();
-      return;
-    }
+    // Verify that facilityId was extracted from URL
+    expect(facilityId).toBeTruthy();
+    expect(facilityId).not.toBeNull();
 
     // Navigate to patients section
     await page.getByRole("button", { name: "Toggle Sidebar" }).click();
