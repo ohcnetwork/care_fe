@@ -1,6 +1,8 @@
 import { t } from "i18next";
-import { useState } from "react";
+import { useState, type DragEvent } from "react";
 import { toast } from "sonner";
+
+const MAX_FILE_SIZE = 100_000_000; // 100 MB in bytes
 
 interface UseFileDropZoneOptions {
   onFilesDropped: (files: File[]) => void;
@@ -23,7 +25,7 @@ export default function useFileDropZone({
     );
   };
 
-  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (canEdit && e.dataTransfer.items && e.dataTransfer.items.length > 0) {
@@ -31,7 +33,7 @@ export default function useFileDropZone({
     }
   };
 
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
@@ -47,7 +49,7 @@ export default function useFileDropZone({
     }
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.dataTransfer) {
@@ -55,7 +57,7 @@ export default function useFileDropZone({
     }
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -87,7 +89,7 @@ export default function useFileDropZone({
         return;
       }
 
-      if (file.size > 10e7) {
+      if (file.size > MAX_FILE_SIZE) {
         invalidFiles.push(`${file.name} (${t("file_error__file_size")})`);
         return;
       }
@@ -95,7 +97,7 @@ export default function useFileDropZone({
       const extension = file.name.split(".").pop()?.toLowerCase();
       if (
         !allowedExtensions
-          .map((ext) => ext.replace(".", "").toLowerCase())
+          .map((ext) => ext.toLowerCase())
           .includes(extension || "")
       ) {
         invalidFiles.push(

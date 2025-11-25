@@ -26,6 +26,8 @@ import {
 } from "@/types/files/file";
 import fileApi from "@/types/files/fileApi";
 
+const MAX_FILE_SIZE = 100_000_000; // 100 MB in bytes
+
 export type FileUploadOptions = {
   multiple?: boolean;
   type: FileType;
@@ -193,7 +195,7 @@ export default function useFileUpload(
         setError(t("file_error__file_name"));
         return false;
       }
-      if (file.size > 10e7) {
+      if (file.size > MAX_FILE_SIZE) {
         setError(t("file_error__file_size"));
         return false;
       }
@@ -201,7 +203,7 @@ export default function useFileUpload(
       if (
         "allowedExtensions" in options &&
         !options.allowedExtensions
-          ?.map((extension) => extension.replace(".", "").toLowerCase())
+          ?.map((extension) => extension.toLowerCase())
           ?.includes(extension || "")
       ) {
         setError(
