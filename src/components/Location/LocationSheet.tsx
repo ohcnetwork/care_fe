@@ -650,7 +650,7 @@ export function LocationSheet({
           (!activeLocation && !plannedLocations.length)
         ) {
           return (
-            <div className="space-y-2" data-cy="location-assign-screen">
+            <div className="space-y-2">
               {locationCards}
               <LocationNavigation
                 locations={allLocations}
@@ -678,10 +678,7 @@ export function LocationSheet({
                 onGoBack={goBack}
               />
 
-              <div
-                className="mt-8 flex justify-end gap-2"
-                data-cy="location-navigation-buttons"
-              >
+              <div className="mt-8 flex justify-end gap-2">
                 <Button
                   variant="outline"
                   disabled={!selectedBed}

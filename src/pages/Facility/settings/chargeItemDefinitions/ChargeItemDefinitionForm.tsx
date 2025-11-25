@@ -39,7 +39,7 @@ import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPick
 import { cn } from "@/lib/utils";
 import { CodeSchema } from "@/types/base/code/code";
 import {
-  Condition,
+  ConditionForm,
   conditionSchema,
   Metrics,
 } from "@/types/base/condition/condition";
@@ -87,7 +87,7 @@ interface MonetaryComponentSelectorProps {
   ) => void;
   onConditionsChange: (
     component: MonetaryComponent,
-    conditions: Condition[],
+    conditions: ConditionForm[],
   ) => void;
   type: MonetaryComponentType;
   availableMetrics: Metrics[];
@@ -421,7 +421,12 @@ export function MonetaryComponentSelector({
 
                   {/* Condition editor for discount components */}
                   <CompactConditionEditor
-                    conditions={component.conditions || []}
+                    conditions={
+                      component.conditions?.map((condition) => ({
+                        ...condition,
+                        _conditionType: `${condition.metric}_${condition.operation}`,
+                      })) || []
+                    }
                     availableMetrics={availableMetrics}
                     onChange={(conditions) =>
                       onConditionsChange(
@@ -685,7 +690,11 @@ export function ChargeItemDefinitionForm({
           )
           .map((component) => ({
             ...mapPriceComponent(component),
-            conditions: component.conditions || [],
+            conditions:
+              component.conditions?.map((condition) => ({
+                ...condition,
+                _conditionType: `${condition.metric}_${condition.operation}`,
+              })) || [],
           })) || [],
     };
   };
@@ -703,6 +712,7 @@ export function ChargeItemDefinitionForm({
     if (isUpdate && initialData) {
       form.reset(getDefaultValues());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialData?.slug, isUpdate]);
 
   useEffect(() => {
@@ -858,7 +868,11 @@ export function ChargeItemDefinitionForm({
           factor: component.factor != null ? component.factor : undefined,
           amount:
             component.factor != null ? undefined : String(component.amount),
-          conditions: component.conditions || [],
+          conditions:
+            component.conditions?.map((condition) => ({
+              ...condition,
+              _conditionType: `${condition.metric}_${condition.operation}`,
+            })) || [],
         },
       ];
     } else {
@@ -877,7 +891,7 @@ export function ChargeItemDefinitionForm({
   // Handle component conditions change
   const handleComponentConditionsChange = (
     component: MonetaryComponent,
-    conditions: Condition[],
+    conditions: ConditionForm[],
   ) => {
     const currentComponents = form.getValues("price_components");
     const componentIndex = currentComponents.findIndex((c) =>
@@ -889,7 +903,10 @@ export function ChargeItemDefinitionForm({
     const newComponents = [...currentComponents];
     newComponents[componentIndex] = {
       ...newComponents[componentIndex],
-      conditions,
+      conditions: conditions?.map((condition) => ({
+        ...condition,
+        _conditionType: `${condition.metric}_${condition.operation}`,
+      })),
     };
 
     form.setValue("price_components", newComponents, {

@@ -275,7 +275,7 @@ interface Props {
   facilityId: string;
   patientId: string;
   locationId: string;
-  status?: MedicationDispenseStatus;
+  status: MedicationDispenseStatus;
 }
 
 export default function DispensedMedicationList({
@@ -441,17 +441,19 @@ export default function DispensedMedicationList({
             </div>
           </div>
 
-          {selectedMedications.length > 0 && (
-            <Button
-              onClick={() =>
-                completeMedications({ signal: new AbortController().signal })
-              }
-              disabled={isPending}
-            >
-              {t("complete_dispense")}
-              <ShortcutBadge actionId="dispense-button" />
-            </Button>
-          )}
+          {selectedMedications.length > 0 &&
+            (status === MedicationDispenseStatus.preparation ||
+              status === MedicationDispenseStatus.in_progress) && (
+              <Button
+                onClick={() =>
+                  completeMedications({ signal: new AbortController().signal })
+                }
+                disabled={isPending}
+              >
+                {t("complete_dispense")}
+                <ShortcutBadge actionId="dispense-button" />
+              </Button>
+            )}
         </div>
       </div>
 

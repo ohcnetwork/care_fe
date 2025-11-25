@@ -90,7 +90,7 @@ function InstructionContentSection({
       )}
 
       {!isReadOnly && (
-        <div data-cy="medication-instructions-dropdown">
+        <div>
           <ValueSetSelect
             system="system-additional-instruction"
             value={null}
@@ -104,7 +104,6 @@ function InstructionContentSection({
                 : t("select_additional_instructions")
             }
             disabled={disabled || isReadOnly}
-            data-cy="medication-instructions"
           />
         </div>
       )}
@@ -120,7 +119,6 @@ const TriggerButton = (
   return (
     <Button
       variant="white"
-      data-cy="instructions"
       className={cn(
         "w-full justify-between border-gray-300 font-normal shadow-xs h-auto",
         currentInstructions.length === 0 && "text-gray-500 hover:bg-white",

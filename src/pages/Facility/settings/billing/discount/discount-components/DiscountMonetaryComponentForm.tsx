@@ -25,7 +25,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Condition, conditionSchema } from "@/types/base/condition/condition";
+import {
+  ConditionForm,
+  conditionSchema,
+} from "@/types/base/condition/condition";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { CodeSchema } from "@/types/base/code/code";
@@ -118,7 +121,7 @@ export function DiscountMonetaryComponentForm({
   };
 
   // Handle condition changes
-  const handleConditionsChange = (conditions: Condition[]) => {
+  const handleConditionsChange = (conditions: ConditionForm[]) => {
     form.setValue("conditions", conditions, {
       shouldValidate: true,
       shouldDirty: true,
@@ -291,7 +294,12 @@ export function DiscountMonetaryComponentForm({
           </CardHeader>
           <CardContent className="p-0">
             <CompactConditionEditor
-              conditions={form.watch("conditions") || []}
+              conditions={
+                form.watch("conditions")?.map((condition) => ({
+                  ...condition,
+                  _conditionType: `${condition.metric}_${condition.operation}`,
+                })) || []
+              }
               availableMetrics={availableMetrics}
               onChange={handleConditionsChange}
             />

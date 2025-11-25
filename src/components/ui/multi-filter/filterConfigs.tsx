@@ -71,7 +71,7 @@ export const encounterClassFilter = (
 ) =>
   createFilterConfig(
     key,
-    t("class"),
+    t("encounter_class"),
     "command",
     Array.from(ENCOUNTER_CLASS).map((value) => ({
       value: value,
