@@ -250,17 +250,14 @@ export interface BaseConfig {
 
 // Utility function to create slug from name
 export function createSlug(name: string): string {
-  return (
-    "b-" +
-    name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s_-]/g, "") // Keep letters, numbers, spaces, underscores, and hyphens
-      .replace(/\s+/g, "-") // Replace spaces with hyphens
-      .replace(/-+/g, "-") // Replace multiple hyphens with single
-      .trim()
-      .slice(0, 18)
-      .padEnd(5, "-")
-  );
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s_-]/g, "") // Keep letters, numbers, spaces, underscores, and hyphens
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single
+    .trim()
+    .slice(0, 18)
+    .padEnd(5, "-");
 }
 
 /**
