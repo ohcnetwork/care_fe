@@ -157,7 +157,8 @@ export async function createActivityDefinition(
   );
 
   await page.getByLabel(/title.*\*/i).fill(data.title);
-  await page.getByLabel(/slug/i).fill(data.slug);
+  await expect(page.getByLabel(/slug/i)).toHaveValue(data.slug);
+
   await page.getByLabel(/description.*\*/i).fill(data.description);
   await page.getByLabel(/usage.*\*/i).fill(data.usage);
 
