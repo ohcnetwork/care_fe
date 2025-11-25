@@ -411,6 +411,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
             className="w-full sm:w-auto"
             patientId={qParams.patient}
             patientName={qParams.patient_name}
+            align="end"
           />
         </div>
       </div>
