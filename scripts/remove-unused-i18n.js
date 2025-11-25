@@ -49,6 +49,9 @@ function hasCountProperty(objectExpression) {
  * Extract static string value from a node
  */
 function getStaticValue(node) {
+  if (!node) {
+    return null;
+  }
   if (node.type === "StringLiteral") {
     return node.value;
   }
@@ -66,13 +69,20 @@ function getStaticValue(node) {
  * Extract dynamic prefix from template literal (e.g., "status__" from `status__${x}`)
  */
 function getDynamicPrefix(node) {
-  if (node.type === "TemplateLiteral" && node.expressions.length > 0) {
-    // Get the first quasi (the part before the first ${})
-    const firstQuasi = node.quasis[0];
-    if (firstQuasi && firstQuasi.value.cooked) {
-      return firstQuasi.value.cooked;
-    }
+  if (
+    !node ||
+    node.type !== "TemplateLiteral" ||
+    node.expressions.length === 0
+  ) {
+    return null;
   }
+
+  // Get the first quasi (the part before the first ${})
+  const firstQuasi = node.quasis[0];
+  if (firstQuasi && firstQuasi.value.cooked) {
+    return firstQuasi.value.cooked;
+  }
+
   return null;
 }
 
