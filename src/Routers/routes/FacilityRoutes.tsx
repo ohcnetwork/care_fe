@@ -7,6 +7,7 @@ import BedAvailabilityDashboard from "@/pages/Facility/BedAvailabilityDashboard"
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import TemplateBuilder from "@/pages/Encounters/TemplateBuilder/TemplateBuilder";
+import TemplateList from "@/pages/Encounters/TemplateBuilder/TemplateList";
 import AccountList from "@/pages/Facility/billing/account/AccountList";
 import AccountShow from "@/pages/Facility/billing/account/AccountShow";
 import CreateInvoicePage from "@/pages/Facility/billing/account/CreateInvoice";
@@ -168,6 +169,9 @@ const FacilityRoutes: AppRoutes = {
       facilityId={facilityId}
       paymentReconciliationId={paymentReconciliationId}
     />
+  ),
+  "/facility/:facilityId/template": ({ facilityId }) => (
+    <TemplateList facilityId={facilityId} />
   ),
   "/facility/:facilityId/template/builder": ({ facilityId }) => (
     <TemplateBuilder facilityId={facilityId} />

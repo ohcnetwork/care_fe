@@ -31,7 +31,7 @@ export default function TemplateCard({
         </Badge>
       </div>
       <div className="flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center">
-        <div className="flex flex-row gap-2 justify-start">
+        <div className="flex flex-row gap-2 justify-start items-center">
           <Badge variant="blue" className="text-xs">
             {template.default_format.toUpperCase()}
           </Badge>

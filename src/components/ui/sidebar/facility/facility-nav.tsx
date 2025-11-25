@@ -187,8 +187,8 @@ function generateFacilityLinks(
           url: `${baseUrl}/settings/tag_config`,
         },
         {
-          name: t("template_builder"),
-          url: `${baseUrl}/template/builder/`,
+          name: t("templates"),
+          url: `${baseUrl}/template`,
         },
       ],
     },

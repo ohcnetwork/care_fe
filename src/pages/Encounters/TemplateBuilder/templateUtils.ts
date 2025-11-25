@@ -194,13 +194,16 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
         <div class="section-title">ENCOUNTER DETAILS</div>
         <div class="info-row"><span class="label">Admission Number:</span> {{ encounter.external_identifier }}</div>
         <div class="info-row"><span class="label">Admission Date:</span> {{ encounter.admission_date }}</div>
+        {% if encounter.discharge_date %}
         <div class="info-row"><span class="label">Discharge Date:</span> {{ encounter.discharge_date }}</div>
+        {% endif %}
         <div class="info-row"><span class="label">Encounter Type:</span> {{ encounter.encounter_class }}</div>
         <div class="info-row"><span class="label">Priority:</span> {{ encounter.priority }}</div>
         <div class="info-row"><span class="label">Status:</span> {{ encounter.status }}</div>
     </div>
 
     <!-- Diagnosis -->
+    {% if diagnoses %}
     <div class="section">
         <div class="section-title">DIAGNOSIS</div>
         <table>
@@ -226,8 +229,10 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
             </tbody>
         </table>
     </div>
+    {% endif %}
 
     <!-- Symptoms -->
+    {% if symptoms %}
     <div class="section">
         <div class="section-title">SYMPTOMS</div>
         <table>
@@ -253,8 +258,10 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
             </tbody>
         </table>
     </div>
+    {% endif %}
 
     <!-- Medications -->
+    {% if medications %}
     <div class="section">
         <div class="section-title">MEDICATIONS PRESCRIBED</div>
         {% for medication in medications %}
@@ -273,8 +280,10 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
         </div>
         {% endfor %}
     </div>
+    {% endif %}
 
     <!-- Allergies -->
+    {% if allergies %}
     <div class="section">
         <div class="section-title">ALLERGIES</div>
         <table>
@@ -300,12 +309,15 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
             </tbody>
         </table>
     </div>
+    {% endif %}
 
     <!-- Discharge Summary & Advice -->
+    {% if encounter.discharge_summary_advice %}
     <div class="section">
         <div class="section-title">DISCHARGE SUMMARY & ADVICE</div>
         <p>{{ encounter.discharge_summary_advice }}</p>
     </div>
+    {% endif %}
 
     <!-- Footer -->
     <div class="footer">
