@@ -56,9 +56,8 @@ export function PatientIDScanDialog({
   function handleScan(result: IDetectedBarcode[]) {
     if (result && result.length > 0) {
       const scannedCode = result[0].rawValue.trim();
-      if (scannedCode && scannedCode.length > 3) {
-        const extractedId = extractPatientId(scannedCode);
-
+      const extractedId = extractPatientId(scannedCode);
+      if (extractedId) {
         setPatientId(extractedId);
         setScanning(false);
         handleContinue(extractedId);
@@ -121,6 +120,7 @@ export function PatientIDScanDialog({
                   size="icon"
                   className="absolute top-2 right-2 z-20"
                   onClick={() => setScanning(false)}
+                  aria-label={t("close")}
                 >
                   <X className="size-4" />
                 </Button>
