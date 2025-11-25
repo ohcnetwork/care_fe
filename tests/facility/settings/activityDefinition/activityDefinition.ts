@@ -8,7 +8,7 @@ import {
   selectFromLocationMultiSelect,
   selectFromRequirements,
   selectFromValueSet,
-} from "@/tests/helpers/ui";
+} from "tests/helpers/ui";
 import { expectedSlug } from "tests/helpers/utils";
 
 export const RESOURCE_CATEGORY_SLUG = "lab-tests-activity_definition";
@@ -140,7 +140,7 @@ export function generateActivityDefinitionData(
 }
 
 /**
- * Helper function to create an Activity Definition via UI with required fields only
+ * Helper function to create an Activity Definition via UI
  * @param page - Playwright page object
  * @param facilityId - Facility ID where the AD will be created
  * @param options - Optional overrides for default values
