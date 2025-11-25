@@ -4,14 +4,13 @@ import { getFacilityId } from "tests/support/facilityId";
 
 // Adjust these strings if your i18n produces different visible text
 const LABELS = {
-  billingNav: /billing/i,
   accountsNav: /accounts/i,
   recordPaymentBtn: /record payment/i, // button that opens the PaymentReconciliationSheet
   paymentAmountLabel: /payment amount/i,
   tenderAmountLabel: /tender amount/i,
   submitBtn: /record payment/i,
-  customInvalidMsg: /it can't be less than or equal to 0/i, // expected custom message (case-insensitive)
-  nativeInvalidMsg: /invalid input for default 0 value/i, // message you want to avoid
+  customInvalidMsg: /Please enter a valid amount/i, // expected custom message (case-insensitive)
+  nativeInvalidMsg: /Invalid input/i, // message you want to avoid
 };
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -42,8 +41,9 @@ test.describe("PaymentReconciliationSheet — validation messages", () => {
     await expect(paymentAmountInput).toBeVisible();
 
     // Also ensure the submit button within the sheet is ready.
-    const submitBtn = page.getByRole("button", { name: LABELS.submitBtn });
-    await expect(submitBtn).toBeVisible();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('button', { name: LABELS.submitBtn }).click();
+
   });
 
   test("submitting empty/default form shows custom validation message", async ({
@@ -93,8 +93,9 @@ test.describe("PaymentReconciliationSheet — validation messages", () => {
     const submitBtn = page.getByRole("button", { name: LABELS.submitBtn });
     await submitBtn.click();
 
-    // Assert that no console errors were thrown during the test execution.
-    expect(errors).toHaveLength(0);
+    // Wait for the validation UI to settle, then assert that no console errors were logged.
++   await expect(page.getByText(LABELS.customInvalidMsg)).toBeVisible();
++   expect(errors).toHaveLength(0);
   });
 
   test("submitting valid payment form succeeds", async ({ page }) => {
