@@ -1,7 +1,7 @@
+import { Scanner } from "@yudiel/react-qr-scanner";
 import { Camera, QrCode, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import QrCodeScanner from "react-qr-barcode-scanner";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -54,9 +54,9 @@ export function PatientIDScanDialog({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function handleScan(_result: any, result: any) {
-    if (result?.text) {
-      const scannedCode = result.text.trim();
+  function handleScan(result: any) {
+    if (result && result.length > 0) {
+      const scannedCode = result[0].rawValue.trim();
       if (scannedCode && scannedCode.length > 3) {
         const extractedId = extractPatientId(scannedCode);
 
@@ -102,16 +102,20 @@ export function PatientIDScanDialog({
                   <div className="absolute inset-[15%] sm:inset-[20%]">
                     <div className="absolute inset-0 border-2 border-primary rounded-xl overflow-hidden" />
                   </div>
-                  <div className="absolute inset-0 border border-black/10 rounded-xl overflow-hidden" />
+                  <div className="absolute inset-0 border border-primary/30 rounded-xl overflow-hidden" />
                 </div>
                 <div className="absolute inset-0 bg-black/5 rounded-xl overflow-hidden">
-                  <div className="w-full h-full relative aspect-square scale-[2]">
-                    <QrCodeScanner
-                      onUpdate={handleScan}
-                      onError={handleScanError}
-                      facingMode="environment"
-                    />
-                  </div>
+                  <Scanner
+                    onScan={handleScan}
+                    onError={handleScanError}
+                    constraints={{
+                      facingMode: "environment",
+                    }}
+                    components={{
+                      finder: false,
+                    }}
+                    sound={false}
+                  />
                 </div>
                 <Button
                   variant="outline"
