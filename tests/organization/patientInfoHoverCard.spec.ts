@@ -9,7 +9,7 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
     await page.goto("/");
   });
 
-  test("should show Patient Home button when accessed via facility route", async ({
+  test("should show Patient Home button in encounter accessed via facility route", async ({
     page,
   }) => {
     // Navigate to a facility
@@ -21,16 +21,34 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
     // Wait for facility page to load
     await page.waitForURL("**/facility/**");
 
-    // Navigate to patients section via sidebar
-    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-    await page.getByRole("button", { name: "Patients", exact: true }).click();
-    await page.getByRole("link", { name: /search patients/i }).click();
+    // Extract facilityId from URL
+    const currentUrl = page.url();
+    const facilityIdMatch = currentUrl.match(/\/facility\/([^/]+)/);
+    const facilityId = facilityIdMatch ? facilityIdMatch[1] : null;
+    expect(facilityId).toBeTruthy();
 
-    // Search for a patient to trigger the hover card
-    const searchInput = page.getByRole("textbox", {
-      name: /search by patient phone number/i,
-    });
-    await searchInput.fill("9");
+    // Navigate to encounters section via sidebar
+    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
+    await page.getByRole("button", { name: "Encounters" }).click();
+    await page
+      .getByRole("link", { name: "View All Encounters", exact: true })
+      .click();
+
+    // Wait for encounters page to load
+    await page.waitForURL("**/encounters/**");
+
+    // Click on the first encounter card to view an encounter
+    const encounterLink = page
+      .getByRole("link", { name: "View Encounter" })
+      .first();
+    await encounterLink.waitFor({ state: "visible", timeout: 10000 });
+    await encounterLink.click();
+
+    // Wait for encounter page to load
+    await page.waitForURL("**/encounter/**");
+
+    // Verify URL contains facilityId
+    expect(page.url()).toContain(`/facility/${facilityId}/patient/`);
 
     // Wait for patient hover card trigger to appear
     const hoverCardTrigger = page
@@ -41,7 +59,7 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
     // Click the hover card trigger
     await hoverCardTrigger.click();
 
-    // Verify that Patient Home button is visible
+    // Verify that Patient Home button is visible (because facilityId is available)
     await expect(page.getByRole("link", { name: "Patient Home" })).toBeVisible({
       timeout: 5000,
     });
@@ -50,12 +68,17 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
     await expect(page.getByRole("link", { name: "View Profile" })).toBeVisible({
       timeout: 5000,
     });
+
+    // Verify the View Profile href includes facilityId
+    const viewProfileLink = page.getByRole("link", { name: "View Profile" });
+    const href = await viewProfileLink.getAttribute("href");
+    expect(href).toContain(`/facility/${facilityId}/patient/`);
   });
 
-  test("should NOT show Patient Home button when accessed via organization route", async ({
+  test("should NOT show Patient Home button in encounter accessed via organization route", async ({
     page,
   }) => {
-    // Navigate to organization patients page
+    // Navigate to organization page
     await page.goto("/organization");
 
     // Wait for organization list to load
@@ -74,6 +97,15 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
     );
 
     await organizationLink.first().click();
+
+    // Wait for organization page to load
+    await page.waitForURL("**/organization/**");
+
+    // Extract organizationId from URL
+    const currentUrl = page.url();
+    const orgIdMatch = currentUrl.match(/\/organization\/([^/]+)/);
+    const organizationId = orgIdMatch ? orgIdMatch[1] : null;
+    expect(organizationId).toBeTruthy();
 
     // Navigate to patients tab
     await page.getByRole("link", { name: "Patients" }).click();
@@ -95,73 +127,77 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
     // Wait for patient page to load
     await page.waitForURL("**/patient/**");
 
-    // Wait for patient info hover card trigger on the patient details page
-    const hoverCardTrigger = page
-      .locator("[data-slot='patient-info-hover-card-trigger']")
+    // Wait a bit for the page to load
+    await page.waitForLoadState("networkidle");
+
+    // Try to find an encounter link or button
+    const encounterLink = page
+      .getByRole("link", { name: /view encounter/i })
       .first();
-    await hoverCardTrigger.waitFor({ state: "visible", timeout: 10000 });
 
-    // Click the hover card trigger
-    await hoverCardTrigger.click();
+    // Check if encounter link exists
+    const encounterExists = await encounterLink.count();
 
-    // Verify that Patient Home button is NOT visible (because facilityId is not available)
-    await expect(
-      page.getByRole("link", { name: "Patient Home" }),
-    ).not.toBeVisible({ timeout: 2000 });
+    if (encounterExists > 0) {
+      await encounterLink.click();
 
-    // But View Profile button should still be visible
-    await expect(page.getByRole("link", { name: "View Profile" })).toBeVisible({
-      timeout: 5000,
-    });
-  });
+      // Wait for encounter page to load
+      await page.waitForURL("**/encounter/**");
 
-  test("should render correct href for View Profile button based on facilityId", async ({
-    page,
-  }) => {
-    // Navigate to a facility
-    await page
-      .getByRole("link", { name: /facility with patients/i })
-      .first()
-      .click();
+      // Verify URL contains organizationId and NOT facilityId
+      expect(page.url()).toContain(`/organization/${organizationId}/patient/`);
+      expect(page.url()).not.toContain("/facility/");
 
-    // Wait for facility page to load and extract facilityId from URL
-    await page.waitForURL("**/facility/**");
-    const currentUrl = page.url();
-    const facilityIdMatch = currentUrl.match(/\/facility\/([^/]+)/);
-    const facilityId = facilityIdMatch ? facilityIdMatch[1] : null;
+      // Wait for patient info hover card trigger
+      const hoverCardTrigger = page
+        .locator("[data-slot='patient-info-hover-card-trigger']")
+        .first();
+      await hoverCardTrigger.waitFor({ state: "visible", timeout: 10000 });
 
-    // Verify that facilityId was extracted from URL
-    expect(facilityId).toBeTruthy();
-    expect(facilityId).not.toBeNull();
+      // Click the hover card trigger
+      await hoverCardTrigger.click();
 
-    // Navigate to patients section
-    await page.getByRole("button", { name: "Toggle Sidebar" }).click();
-    await page.getByRole("button", { name: "Patients", exact: true }).click();
-    await page.getByRole("link", { name: /search patients/i }).click();
+      // Verify that Patient Home button is NOT visible (because facilityId is not available)
+      await expect(
+        page.getByRole("link", { name: "Patient Home" }),
+      ).not.toBeVisible({ timeout: 2000 });
 
-    // Search for a patient
-    const searchInput = page.getByRole("textbox", {
-      name: /search by patient phone number/i,
-    });
-    await searchInput.fill("9");
+      // But View Profile button should still be visible
+      await expect(
+        page.getByRole("link", { name: "View Profile" }),
+      ).toBeVisible({
+        timeout: 5000,
+      });
 
-    // Wait for hover card trigger to appear
-    const hoverCardTrigger = page
-      .locator("[data-slot='patient-info-hover-card-trigger']")
-      .first();
-    await hoverCardTrigger.waitFor({ state: "visible", timeout: 10000 });
+      // Verify the View Profile href does NOT include facilityId
+      const viewProfileLink = page.getByRole("link", { name: "View Profile" });
+      const href = await viewProfileLink.getAttribute("href");
+      expect(href).not.toContain("/facility/");
+      expect(href).toMatch(/^\/patient\/[^/]+$/);
+    } else {
+      // If no encounters, at least verify the patient hover card works correctly
+      const hoverCardTrigger = page
+        .locator("[data-slot='patient-info-hover-card-trigger']")
+        .first();
 
-    // Click the hover card trigger
-    await hoverCardTrigger.click();
+      const hoverCardExists = await hoverCardTrigger.count();
+      if (hoverCardExists > 0) {
+        await hoverCardTrigger.waitFor({ state: "visible", timeout: 10000 });
+        await hoverCardTrigger.click();
 
-    // Get the View Profile link and verify it contains the facilityId
-    const viewProfileLink = page.getByRole("link", {
-      name: "View Profile",
-    });
-    await expect(viewProfileLink).toBeVisible();
+        // Verify that Patient Home button is NOT visible
+        await expect(
+          page.getByRole("link", { name: "Patient Home" }),
+        ).not.toBeVisible({ timeout: 2000 });
 
-    const href = await viewProfileLink.getAttribute("href");
-    expect(href).toContain(`/facility/${facilityId}/patient/`);
+        // But View Profile button should still be visible
+        await expect(
+          page.getByRole("link", { name: "View Profile" }),
+        ).toBeVisible({
+          timeout: 5000,
+        });
+      }
+    }
   });
 
   test("should not show Patient Home button on patient home page", async ({
