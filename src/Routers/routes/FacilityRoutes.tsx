@@ -87,7 +87,7 @@ const FacilityRoutes: AppRoutes = {
     );
     return acc;
   }, {}),
-  "/facility/:facilityId/billing/accounts": ({ facilityId }) => (
+  "/facility/:facilityId/billing/account": ({ facilityId }) => (
     <AccountList facilityId={facilityId} />
   ),
   "/facility/:facilityId/billing/account/:accountId": ({
