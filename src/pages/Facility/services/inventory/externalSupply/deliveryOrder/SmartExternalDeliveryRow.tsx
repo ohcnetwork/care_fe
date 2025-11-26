@@ -1,13 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import {
-  Check,
-  ChevronDown,
-  Component,
-  Plus,
-  Search,
-  Trash2,
-} from "lucide-react";
+import { Check, ChevronDown, Component, Plus, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -67,8 +60,6 @@ interface Props {
   index: number;
   facilityId: string;
   informationalCodes: Code[];
-  onRemove: () => void;
-  canRemove: boolean;
 }
 
 // Type-safe field path helper for items array
@@ -438,8 +429,6 @@ export function SmartExternalDeliveryRow({
   index,
   facilityId,
   informationalCodes,
-  onRemove,
-  canRemove,
 }: Props) {
   const { t } = useTranslation();
   const [batchSelectorOpen, setBatchSelectorOpen] = useState(false);
@@ -1045,20 +1034,6 @@ export function SmartExternalDeliveryRow({
             </Badge>
           )}
         </div>
-      </TableCell>
-
-      {/* Remove */}
-      <TableCell className="align-top p-2">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={onRemove}
-          disabled={!canRemove}
-          className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9 w-9"
-        >
-          <Trash2 className="size-4" />
-        </Button>
       </TableCell>
     </TableRow>
   );

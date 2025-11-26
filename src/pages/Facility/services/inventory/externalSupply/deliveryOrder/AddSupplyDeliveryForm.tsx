@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useCallback, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -157,7 +157,7 @@ export function AddSupplyDeliveryForm({
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append } = useFieldArray({
     control: form.control,
     name: "items",
   });
@@ -563,9 +563,6 @@ export function AddSupplyDeliveryForm({
                               </TableHead>
                             </>
                           )}
-                          <TableHead className="w-[50px] text-xs font-semibold">
-                            {t("actions")}
-                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -672,18 +669,6 @@ export function AddSupplyDeliveryForm({
                                   )}
                                 />
                               </TableCell>
-                              <TableCell className="p-2">
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => remove(index)}
-                                  disabled={fields.length === 1}
-                                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                >
-                                  <Trash2 className="size-4" />
-                                </Button>
-                              </TableCell>
                             </TableRow>
                           ) : (
                             <SmartExternalDeliveryRow
@@ -692,8 +677,6 @@ export function AddSupplyDeliveryForm({
                               index={index}
                               facilityId={facilityId}
                               informationalCodes={informationalCodes}
-                              onRemove={() => remove(index)}
-                              canRemove={fields.length > 1}
                             />
                           ),
                         )}
@@ -718,22 +701,32 @@ export function AddSupplyDeliveryForm({
                     )}
                 </div>
 
-                <div className="flex justify-end space-x-3">
+                <div className="flex justify-between">
                   <Button
                     type="button"
                     variant="outline"
                     disabled={isProcessing}
-                    onClick={() => {
-                      addNewAfterSaveRef.current = true;
-                      form.handleSubmit(onSubmit)();
-                    }}
+                    onClick={() => form.reset()}
                   >
-                    {isProcessing ? t("saving") : t("save_and_add_new")}
+                    {t("cancel")}
                   </Button>
-                  <Button type="submit" disabled={isProcessing}>
-                    {isProcessing ? t("saving") : t("save")}
-                    <ShortcutBadge actionId="submit-action" />
-                  </Button>
+                  <div className="flex space-x-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={isProcessing}
+                      onClick={() => {
+                        addNewAfterSaveRef.current = true;
+                        form.handleSubmit(onSubmit)();
+                      }}
+                    >
+                      {isProcessing ? t("saving") : t("save_and_add_new")}
+                    </Button>
+                    <Button type="submit" disabled={isProcessing}>
+                      {isProcessing ? t("saving") : t("save")}
+                      <ShortcutBadge actionId="submit-action" />
+                    </Button>
+                  </div>
                 </div>
               </form>
             </Form>
