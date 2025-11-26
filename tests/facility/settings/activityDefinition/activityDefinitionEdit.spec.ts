@@ -195,9 +195,7 @@ test.describe("activity definition edit", () => {
     await expectToast(page, /activity definition updated successfully/i);
 
     await expect(page).toHaveURL(
-      new RegExp(
-        `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${createdAD.slug}`,
-      ),
+      `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${updatedData.slug}`,
     );
 
     // Verify details
