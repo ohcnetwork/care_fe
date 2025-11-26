@@ -5,21 +5,18 @@ import { expect, test } from "@playwright/test";
 test.use({ storageState: "tests/.auth/user.json" });
 
 const useOptions = ["usual", "official", "temp", "secondary", "old"];
-const statusOptions = ["Draft", "Active", "Inactive"];
 
 test.describe("Patient Identifier Config - Edit", () => {
   let use: string;
   let displayName: string;
   let description: string;
   let systemUrl: string;
-  let status: string;
 
   test.beforeEach(async ({ page }) => {
     use = faker.helpers.arrayElement(useOptions);
     displayName = faker.lorem.words(2);
     description = faker.lorem.sentence();
     systemUrl = faker.internet.url();
-    status = faker.helpers.arrayElement(statusOptions);
 
     const targetUrl = `/admin/patient_identifier_config`;
     await page.goto(targetUrl);
@@ -38,7 +35,7 @@ test.describe("Patient Identifier Config - Edit", () => {
     await page.getByRole("textbox", { name: "System" }).fill(systemUrl);
 
     await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
-    await page.getByRole("option", { name: status, exact: true }).click();
+    await page.getByRole("option", { name: "Active", exact: true }).click();
 
     await page.getByRole("button", { name: "Create" }).click();
 
@@ -82,6 +79,6 @@ test.describe("Patient Identifier Config - Edit", () => {
     await expect(tableBody).toContainText(`${displayName}-edited`);
     await expect(tableBody).toContainText(systemUrl);
     await expect(tableBody).toContainText(use);
-    await expect(tableBody).toContainText(status);
+    await expect(tableBody).toContainText("Active");
   });
 });

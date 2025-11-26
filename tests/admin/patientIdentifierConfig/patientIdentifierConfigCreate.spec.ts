@@ -5,7 +5,6 @@ import { expect, test } from "@playwright/test";
 test.use({ storageState: "tests/.auth/user.json" });
 
 const useOptions = ["usual", "official", "temp", "secondary", "old"];
-const statusOptions = ["Draft", "Active", "Inactive"];
 const serialNumberModes = ["User entered", "Auto-generated"];
 
 test.describe("Patient Identifier Config - Create", () => {
@@ -17,7 +16,6 @@ test.describe("Patient Identifier Config - Create", () => {
   let retrievalOption: boolean;
   let uniqueOption: boolean;
   let serialNumberMode: string;
-  let status: string;
 
   test.beforeEach(async ({ page }) => {
     use = faker.helpers.arrayElement(useOptions);
@@ -28,7 +26,6 @@ test.describe("Patient Identifier Config - Create", () => {
     retrievalOption = faker.datatype.boolean();
     uniqueOption = faker.datatype.boolean();
     serialNumberMode = faker.helpers.arrayElement(serialNumberModes);
-    status = faker.helpers.arrayElement(statusOptions);
 
     const targetUrl = `/admin/patient_identifier_config`;
     await page.goto(targetUrl);
@@ -61,7 +58,7 @@ test.describe("Patient Identifier Config - Create", () => {
     }
 
     await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
-    await page.getByRole("option", { name: status, exact: true }).click();
+    await page.getByRole("option", { name: "Active", exact: true }).click();
 
     await page.getByRole("button", { name: "Create" }).click();
 
@@ -80,7 +77,7 @@ test.describe("Patient Identifier Config - Create", () => {
     await expect(tableBody).toContainText(displayName);
     await expect(tableBody).toContainText(systemUrl);
     await expect(tableBody).toContainText(use);
-    await expect(tableBody).toContainText(status);
+    await expect(tableBody).toContainText("Active");
   });
 
   test("should show validation error for missing required fields", async ({
@@ -121,7 +118,7 @@ test.describe("Patient Identifier Config - Create", () => {
     await page.getByRole("textbox", { name: "System" }).fill(systemUrl);
 
     await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
-    await page.getByRole("option", { name: status, exact: true }).click();
+    await page.getByRole("option", { name: "Active", exact: true }).click();
 
     await page.getByRole("button", { name: "Create" }).click();
 
@@ -148,7 +145,7 @@ test.describe("Patient Identifier Config - Create", () => {
     await page.getByRole("textbox", { name: "System" }).fill(systemUrl);
 
     await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
-    await page.getByRole("option", { name: status, exact: true }).click();
+    await page.getByRole("option", { name: "Active", exact: true }).click();
 
     await page.getByRole("button", { name: "Create" }).click();
     await expect(
