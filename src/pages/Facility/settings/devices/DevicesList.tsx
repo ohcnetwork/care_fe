@@ -127,7 +127,7 @@ export default function DevicesList({ facilityId }: Props) {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button variant="white" asChild data-cy="add-device-button">
+          <Button variant="white" asChild>
             <Link href="/devices/create">
               <PlusIcon className="size-4" />
               {t("add_device")}
@@ -140,7 +140,6 @@ export default function DevicesList({ facilityId }: Props) {
         <div className="relative flex-1">
           <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <Input
-            data-cy="search-devices-input"
             placeholder={t("search_devices")}
             value={qParams.search_text || ""}
             onChange={(e) => handleSearchChange(e.target.value)}
@@ -201,10 +200,7 @@ export default function DevicesList({ facilityId }: Props) {
         </div>
       ) : (
         <div className="space-y-6">
-          <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-            data-cy="devices-list"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {devices?.results?.length ? (
               devices.results.map((device) => (
                 <DeviceCard key={device.id} device={device} />

@@ -48,19 +48,6 @@ jobs:
         run: npm run setup
         timeout-minutes: 2
 
-      - name: Cache Cypress Binary
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/Cypress
-          key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            cypress-${{ runner.os }}-
-
-      - name: Install Cypress
-        run: |
-          npm run cypress:install 2>/dev/null || echo "Cypress install failed (expected in restricted environments)"
-        timeout-minutes: 5
-
       - name: Display Setup Summary
         run: |
           echo "Copilot setup completed successfully!"

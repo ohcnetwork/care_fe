@@ -145,7 +145,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
             <button
               onClick={handleStartRecording}
               className="inline-flex aspect-square w-32 items-center justify-center rounded-full bg-white/10 text-6xl text-white hover:bg-white/20"
-              data-cy="start-recording-button"
+              aria-label="Start Recording"
             >
               <CareIcon icon="l-microphone" />
             </button>
@@ -168,7 +168,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
               onClick={handleStopRecording}
               id="stop-recording"
               className="inline-flex aspect-square w-32 animate-pulse items-center justify-center rounded-full bg-red-500/20 text-2xl text-red-500 hover:bg-red-500/30"
-              data-cy="stop-recording-button"
+              aria-label="Stop Recording"
             >
               {timer.time}
             </button>
@@ -195,7 +195,6 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
               onClick={handleSubmit}
               className="rounded-md bg-primary-500 px-4 py-2 text-white transition-all hover:bg-primary-600"
               id="save-recording"
-              data-cy="save-recording-button"
             >
               <CareIcon icon="l-check" className="mr-2 text-lg" />
               {t("done")}
@@ -203,7 +202,6 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
             <button
               onClick={handleRestartRecording}
               className="rounded-md bg-white/10 px-4 py-2 text-white transition-all hover:bg-white/20"
-              data-cy="start-again-button"
             >
               <CareIcon icon="l-history" className="mr-2 text-lg" />
               {t("audio__start_again")}
@@ -218,7 +216,6 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
           resetRecording();
         }}
         className="rounded-md bg-white/10 px-4 py-2 text-white transition-all hover:bg-white/20"
-        data-cy="cancel-audio-button"
       >
         <CareIcon icon="l-times" className="mr-2 text-lg" />
         {t("cancel")}

@@ -38,10 +38,7 @@ export default function AddServiceHistorySheet({
           {t("service_record_add")}
         </Button>
       </SheetTrigger>
-      <SheetContent
-        className="w-full sm:max-w-2xl overflow-y-auto"
-        data-cy="add-service-form"
-      >
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("service_record_add")}</SheetTitle>
           <SheetDescription>{t("service_record_description")}</SheetDescription>
