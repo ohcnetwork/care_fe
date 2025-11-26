@@ -263,10 +263,10 @@ export const PrintMedicationAdministration = (props: {
           <div className="mt-6">
             <PrintTable
               headers={[
-                { key: t("medicine") },
-                { key: t("administered_at") },
-                { key: t("administered_by") },
-                { key: t("notes") },
+                { key: "medicine" },
+                { key: "administered_at" },
+                { key: "administered_by" },
+                { key: "notes" },
               ]}
               rows={medicationAdministrations?.results
                 .sort(

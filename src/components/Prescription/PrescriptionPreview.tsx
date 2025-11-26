@@ -57,11 +57,11 @@ const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
           <p className="text-base font-semibold mb-2">{t("medicines")}</p>
           <PrintTable
             headers={[
-              { key: t("medicine") },
-              { key: t("dosage") },
-              { key: t("frequency") },
-              { key: t("duration") },
-              { key: t("instructions") },
+              { key: "medicine" },
+              { key: "dosage" },
+              { key: "frequency" },
+              { key: "duration" },
+              { key: "instructions" },
             ]}
             rows={medicationsWithProduct?.map((medication) => {
               const instruction = medication.dosage_instruction[0];
@@ -93,11 +93,11 @@ const PrescriptionContent = ({ prescription }: PrescriptionContentProps) => {
           <p className="text-base font-semibold mb-2">{t("not_in_stock")}</p>
           <PrintTable
             headers={[
-              { key: t("medicine") },
-              { key: t("dosage") },
-              { key: t("frequency") },
-              { key: t("duration") },
-              { key: t("instructions") },
+              { key: "medicine" },
+              { key: "dosage" },
+              { key: "frequency" },
+              { key: "duration" },
+              { key: "instructions" },
             ]}
             rows={medicationsWithoutProduct?.map((medication) => {
               const instruction = medication.dosage_instruction[0];
