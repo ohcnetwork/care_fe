@@ -131,6 +131,7 @@ test.describe("activity definition edit", () => {
     const updatedData = generateActivityDefinitionData(true);
 
     await page.getByLabel(/title.*\*/i).fill(updatedData.title);
+    await page.getByLabel(/slug/i).fill(updatedData.slug);
     await page.getByLabel(/description.*\*/i).fill(updatedData.description);
     await page.getByLabel(/usage.*\*/i).fill(updatedData.usage);
 
