@@ -37,24 +37,23 @@ export default function ScheduleChargeItemDefinitionSelector({
 }: ScheduleChargeItemDefinitionSelectorProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [reVisitDays, setReVisitDays] = useState(
-    scheduleTemplate.revisit_allowed_days,
-  );
 
   const [selectedDefinitionState, setSelectedDefinitionState] = useState<{
     charge_item_definition: ChargeItemDefinitionBase | undefined;
     re_visit_charge_item_definition: ChargeItemDefinitionBase | undefined;
+    reVisitDays: number;
   }>({
     charge_item_definition: scheduleTemplate.charge_item_definition,
     re_visit_charge_item_definition:
       scheduleTemplate.revisit_charge_item_definition,
+    reVisitDays: scheduleTemplate.revisit_allowed_days,
   });
 
   const handleSubmit = () => {
     onChange({
       charge_item_definition_slug:
         selectedDefinitionState.charge_item_definition?.slug || "",
-      re_visit_allowed_days: reVisitDays,
+      re_visit_allowed_days: selectedDefinitionState.reVisitDays,
       re_visit_charge_item_definition_slug:
         selectedDefinitionState.re_visit_charge_item_definition?.slug || null,
     });
@@ -65,11 +64,11 @@ export default function ScheduleChargeItemDefinitionSelector({
     setIsOpen(open);
     if (!open) {
       // Reset to original values when closing
-      setReVisitDays(scheduleTemplate.revisit_allowed_days);
       setSelectedDefinitionState({
         charge_item_definition: scheduleTemplate.charge_item_definition,
         re_visit_charge_item_definition:
           scheduleTemplate.revisit_charge_item_definition,
+        reVisitDays: scheduleTemplate.revisit_allowed_days,
       });
     }
   };
@@ -129,10 +128,19 @@ export default function ScheduleChargeItemDefinitionSelector({
                   <Input
                     type="number"
                     min={0}
-                    value={reVisitDays}
-                    onChange={(e) =>
-                      setReVisitDays(parseInt(e.target.value) || 0)
-                    }
+                    value={selectedDefinitionState.reVisitDays}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      setSelectedDefinitionState({
+                        ...selectedDefinitionState,
+                        reVisitDays: value,
+                        ...(!value || value === 0
+                          ? {
+                              re_visit_charge_item_definition: undefined,
+                            }
+                          : {}),
+                      });
+                    }}
                     placeholder={t("enter_re_visit_allowed_days")}
                   />
                 </div>
@@ -163,6 +171,10 @@ export default function ScheduleChargeItemDefinitionSelector({
                     placeholder={t("select_charge_item_definition")}
                     className="flex-1"
                     showCreateButton={true}
+                    disabled={
+                      selectedDefinitionState.reVisitDays === 0 ||
+                      !selectedDefinitionState.reVisitDays
+                    }
                   />
                 </div>
               </div>
@@ -179,11 +191,7 @@ export default function ScheduleChargeItemDefinitionSelector({
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={
-                !selectedDefinitionState.charge_item_definition ||
-                !selectedDefinitionState.re_visit_charge_item_definition ||
-                !reVisitDays
-              }
+              disabled={!selectedDefinitionState.charge_item_definition}
               className="w-full sm:w-auto"
             >
               {t("save")}

@@ -139,6 +139,7 @@ export function ChargeItemDefinitionPicker({
           onValueChange={(selectedDef) => {
             if (!selectedDef) {
               setSelectedDefinitions([]);
+              onValueChange(undefined);
               return;
             }
             if (allowMultiple) {
