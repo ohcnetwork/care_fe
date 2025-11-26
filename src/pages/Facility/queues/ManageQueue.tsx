@@ -301,28 +301,37 @@ function ManageServicePointsDialog({
           <DialogTitle>{t("assigned_service_points")}</DialogTitle>
         </DialogHeader>
         <div>
-          {allServicePoints.map((subQueue) => {
-            const isSelected = assignedServicePointIds.includes(subQueue.id);
-            return (
-              <div
-                key={subQueue.id}
-                className="flex items-center justify-between rounded-sm w-full p-3 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  toggleServicePoint(subQueue.id, !isSelected);
-                }}
-              >
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    checked={isSelected}
-                    onCheckedChange={(checked) =>
-                      toggleServicePoint(subQueue.id, checked as boolean)
-                    }
-                  />
-                  <span className="text-sm font-medium">{subQueue.name}</span>
+          {/* When a resource has zero service points, show a clear message instead of an empty dialog body. */}
+          {allServicePoints.length === 0 ? (
+            <div className="flex items-center justify-center p-6">
+              <span className="text-sm text-gray-500">
+                {t("no_service_points_available")}
+              </span>
+            </div>
+          ) : (
+            allServicePoints.map((subQueue) => {
+              const isSelected = assignedServicePointIds.includes(subQueue.id);
+              return (
+                <div
+                  key={subQueue.id}
+                  className="flex items-center justify-between rounded-sm w-full p-3 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    toggleServicePoint(subQueue.id, !isSelected);
+                  }}
+                >
+                  <div className="flex items-center space-x-3">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={(checked) =>
+                        toggleServicePoint(subQueue.id, checked as boolean)
+                      }
+                    />
+                    <span className="text-sm font-medium">{subQueue.name}</span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </DialogContent>
     </Dialog>
