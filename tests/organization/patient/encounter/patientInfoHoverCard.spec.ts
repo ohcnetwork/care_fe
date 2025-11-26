@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { navigateToOrganizationPatient } from "@/tests/organization/patient/helpers";
+import { navigateToOrganizationPatient } from "tests/organization/patient/helpers";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
