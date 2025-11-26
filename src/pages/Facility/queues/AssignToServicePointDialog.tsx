@@ -110,6 +110,8 @@ export function AssignToServicePointDialog({
               </span>
             </div>
           ))}
+          {/* If this resource doesn’t have any service points, show a simple empty state
+              so the dialog doesn’t appear blank or broken. */}
           {assignedServicePoints.length === 0 && (
             <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
               <RadioGroupItem value="none" id="none" disabled />
@@ -126,7 +128,12 @@ export function AssignToServicePointDialog({
           <Button
             onClick={handleConfirm}
             className="w-full"
-            disabled={!selectedSubQueueId || isPending}
+            // Disable the action when nothing is selected or when the resource has no service points at all.
+            disabled={
+              !selectedSubQueueId ||
+              isPending ||
+              assignedServicePoints.length === 0
+            }
           >
             <UserCheck className="size-4 mr-2" />
             {t("call_patient")}

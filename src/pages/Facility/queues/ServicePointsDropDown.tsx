@@ -24,6 +24,26 @@ export const ServicePointsDropDown = () => {
     return <Loading />;
   }
 
+  // When a resource has no service points, render a simple fallback message.
+  // This avoids showing an empty or broken dropdown and makes the empty state explicit. (fixes the empty-state issue in #14502).
+  if (allServicePoints.length === 0) {
+    return (
+      <div className="flex">
+        <div className="flex gap-1 rounded-md border border-gray-300 p-1.5 bg-white items-center justify-center w-full">
+          <span className="text-sm font-medium text-gray-500">
+            {t("no_service_points_available")}
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          disabled
+          className="rounded-l-none w-10 h-11 border border-gray-300 bg-gray-50 cursor-not-allowed opacity-50"
+        >
+          <ChevronDownIcon />
+        </Button>
+      </div>
+    );
+  }
   const activeServicePointCount = allServicePoints.filter((subQueue) =>
     assignedServicePointIds.includes(subQueue.id),
   ).length;
