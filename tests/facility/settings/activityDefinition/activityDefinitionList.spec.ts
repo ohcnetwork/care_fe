@@ -38,7 +38,7 @@ async function filterAndVerify(
   await verifyTableBadges(page, filterValue, createdADTitle);
 }
 
-test.describe("Activity Definition List Filter", () => {
+test.describe("Activity Definition List", () => {
   test.describe("Status Filter", () => {
     test("should filter activity definitions by draft status", async ({
       page,
@@ -264,7 +264,9 @@ test.describe("Activity Definition List Filter", () => {
     );
   });
 
-  test("should search for activity definitions", async ({ page }) => {
+  test("should show existing activity definition when searching", async ({
+    page,
+  }) => {
     const testAD = await createActivityDefinition(page, facilityId, false, {
       status: "Active",
       classification: "Laboratory",
