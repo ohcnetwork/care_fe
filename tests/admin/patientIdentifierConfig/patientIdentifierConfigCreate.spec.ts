@@ -1,6 +1,13 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
+import {
+  createPatientIdentifierConfig,
+  searchForConfig,
+  setStatusFilter,
+  verifyConfigInTable,
+} from "./patientIdentifierConfigHelper";
+
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -34,50 +41,26 @@ test.describe("Patient Identifier Config - Create", () => {
   test("should create a Patient Identifier Config with all fields", async ({
     page,
   }) => {
-    await page
-      .getByRole("button", { name: "Add patient identifier config" })
-      .click();
+    await createPatientIdentifierConfig(page, {
+      use,
+      displayName,
+      description,
+      systemUrl,
+      status: "Active",
+      regex,
+      retrievalOption,
+      uniqueOption,
+      serialNumberMode: serialNumberMode as "User entered" | "Auto-generated",
+    });
 
-    await page.getByRole("combobox").filter({ hasText: "usual" }).click();
-    await page.getByRole("option", { name: use }).click();
+    await searchForConfig(page, displayName);
 
-    await page.getByRole("textbox", { name: "Display" }).fill(displayName);
-    await page.getByRole("textbox", { name: "Description" }).fill(description);
-    await page.getByRole("textbox", { name: "System" }).fill(systemUrl);
-    await page.getByRole("textbox", { name: "Regex" }).fill(regex);
-    if (retrievalOption) {
-      await page
-        .getByRole("switch", { name: "Retrieve with year of birth" })
-        .click();
-    }
-    if (uniqueOption) {
-      await page.getByRole("switch", { name: "Unique" }).click();
-    }
-    if (serialNumberMode === "Auto-generated") {
-      await page.getByRole("radio", { name: "Auto-generated" }).click();
-    }
-
-    await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
-    await page.getByRole("option", { name: "Active", exact: true }).click();
-
-    await page.getByRole("button", { name: "Create" }).click();
-
-    // Wait for the sheet to close after successful creation
-    await expect(
-      page.getByRole("heading", { name: "Add patient identifier config" }),
-    ).not.toBeVisible({ timeout: 10000 });
-
-    // Verify that the new config appears in the list
-    await page
-      .getByRole("textbox", { name: "Search configs" })
-      .fill(displayName);
-
-    const tableBody = page.locator('[data-slot="table-body"]');
-
-    await expect(tableBody).toContainText(displayName);
-    await expect(tableBody).toContainText(systemUrl);
-    await expect(tableBody).toContainText(use);
-    await expect(tableBody).toContainText("Active");
+    await verifyConfigInTable(page, {
+      displayName,
+      systemUrl,
+      use,
+      status: "Active",
+    });
   });
 
   test("should show validation error for missing required fields", async ({
@@ -105,27 +88,14 @@ test.describe("Patient Identifier Config - Create", () => {
   });
 
   test("should not allow duplicate system URL", async ({ page }) => {
-    await page
-      .getByRole("button", { name: "Add patient identifier config" })
-      .click();
-
-    //Create a config first
-    await page.getByRole("combobox").filter({ hasText: "usual" }).click();
-    await page.getByRole("option", { name: use }).click();
-
-    await page.getByRole("textbox", { name: "Display" }).fill(displayName);
-    await page.getByRole("textbox", { name: "Description" }).fill(description);
-    await page.getByRole("textbox", { name: "System" }).fill(systemUrl);
-
-    await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
-    await page.getByRole("option", { name: "Active", exact: true }).click();
-
-    await page.getByRole("button", { name: "Create" }).click();
-
-    // Wait for the sheet to close after successful creation
-    await expect(
-      page.getByRole("heading", { name: "Add patient identifier config" }),
-    ).not.toBeVisible({ timeout: 10000 });
+    // Create a config first
+    await createPatientIdentifierConfig(page, {
+      use,
+      displayName,
+      description,
+      systemUrl,
+      status: "Active",
+    });
 
     // Try to create another config with the same system URL
     await page
@@ -158,84 +128,44 @@ test.describe("Patient Identifier Config - Create", () => {
   test("should create a Patient Identifier Config with Draft status", async ({
     page,
   }) => {
-    await page
-      .getByRole("button", { name: "Add patient identifier config" })
-      .click();
+    await createPatientIdentifierConfig(page, {
+      use,
+      displayName,
+      description,
+      systemUrl,
+      status: "Draft",
+    });
 
-    await page.getByRole("combobox").filter({ hasText: "usual" }).click();
-    await page.getByRole("option", { name: use }).click();
+    await setStatusFilter(page, "Draft");
+    await searchForConfig(page, displayName);
 
-    await page.getByRole("textbox", { name: "Display" }).fill(displayName);
-    await page.getByRole("textbox", { name: "Description" }).fill(description);
-    await page.getByRole("textbox", { name: "System" }).fill(systemUrl);
-
-    await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
-    await page.getByRole("option", { name: "Draft", exact: true }).click();
-
-    await page.getByRole("button", { name: "Create" }).click();
-
-    // Wait for the sheet to close after successful creation
-    await expect(
-      page.getByRole("heading", { name: "Add patient identifier config" }),
-    ).not.toBeVisible({ timeout: 10000 });
-
-    // Clear the status filter to show all configs including Draft
-    const statusFilter = page.getByRole("combobox", { name: "Status" });
-    await statusFilter.click();
-    await page.getByRole("option", { name: "Draft" }).click();
-
-    // Search for the created config
-    await page
-      .getByRole("textbox", { name: "Search configs" })
-      .fill(displayName);
-
-    const tableBody = page.locator('[data-slot="table-body"]');
-
-    await expect(tableBody).toContainText(displayName);
-    await expect(tableBody).toContainText(systemUrl);
-    await expect(tableBody).toContainText(use);
-    await expect(tableBody).toContainText("Draft");
+    await verifyConfigInTable(page, {
+      displayName,
+      systemUrl,
+      use,
+      status: "Draft",
+    });
   });
 
   test("should create a Patient Identifier Config with Inactive status", async ({
     page,
   }) => {
-    await page
-      .getByRole("button", { name: "Add patient identifier config" })
-      .click();
+    await createPatientIdentifierConfig(page, {
+      use,
+      displayName,
+      description,
+      systemUrl,
+      status: "Inactive",
+    });
 
-    await page.getByRole("combobox").filter({ hasText: "usual" }).click();
-    await page.getByRole("option", { name: use }).click();
+    await setStatusFilter(page, "Inactive");
+    await searchForConfig(page, displayName);
 
-    await page.getByRole("textbox", { name: "Display" }).fill(displayName);
-    await page.getByRole("textbox", { name: "Description" }).fill(description);
-    await page.getByRole("textbox", { name: "System" }).fill(systemUrl);
-
-    await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
-    await page.getByRole("option", { name: "Inactive", exact: true }).click();
-
-    await page.getByRole("button", { name: "Create" }).click();
-
-    // Wait for the sheet to close after successful creation
-    await expect(
-      page.getByRole("heading", { name: "Add patient identifier config" }),
-    ).not.toBeVisible({ timeout: 10000 });
-
-    // Change the status filter to show Inactive configs
-    const statusFilter = page.getByRole("combobox", { name: "Status" });
-    await statusFilter.click();
-    await page.getByRole("option", { name: "Inactive" }).click();
-
-    // Search for the created config
-    await page
-      .getByRole("textbox", { name: "Search configs" })
-      .fill(displayName);
-
-    const tableBody = page.locator('[data-slot="table-body"]');
-
-    await expect(tableBody).toContainText(displayName);
-    await expect(tableBody).toContainText(systemUrl);
-    await expect(tableBody).toContainText(use);
-    await expect(tableBody).toContainText("Inactive");
+    await verifyConfigInTable(page, {
+      displayName,
+      systemUrl,
+      use,
+      status: "Inactive",
+    });
   });
 });

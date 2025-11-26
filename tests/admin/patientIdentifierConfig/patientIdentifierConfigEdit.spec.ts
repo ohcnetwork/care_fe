@@ -1,6 +1,13 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
 
+import {
+  createPatientIdentifierConfig,
+  searchForConfig,
+  setStatusFilter,
+  verifyConfigInTable,
+} from "./patientIdentifierConfigHelper";
+
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
 
@@ -23,31 +30,15 @@ test.describe("Patient Identifier Config - Edit", () => {
   });
 
   test("should edit a patient identifier config", async ({ page }) => {
-    await page
-      .getByRole("button", { name: "Add patient identifier config" })
-      .click();
+    await createPatientIdentifierConfig(page, {
+      use,
+      displayName,
+      description,
+      systemUrl,
+      status: "Active",
+    });
 
-    await page.getByRole("combobox").filter({ hasText: "usual" }).click();
-    await page.getByRole("option", { name: use }).click();
-
-    await page.getByRole("textbox", { name: "Display" }).fill(displayName);
-    await page.getByRole("textbox", { name: "Description" }).fill(description);
-    await page.getByRole("textbox", { name: "System" }).fill(systemUrl);
-
-    await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
-    await page.getByRole("option", { name: "Active", exact: true }).click();
-
-    await page.getByRole("button", { name: "Create" }).click();
-
-    // Wait for the sheet to close after successful creation
-    await expect(
-      page.getByRole("heading", { name: "Add patient identifier config" }),
-    ).not.toBeVisible({ timeout: 10000 });
-
-    // Verify that the new config appears in the list
-    await page
-      .getByRole("textbox", { name: "Search configs" })
-      .fill(displayName);
+    await searchForConfig(page, displayName);
 
     // Now edit the created config
     await page.getByRole("button", { name: "Edit" }).first().click();
@@ -71,43 +62,26 @@ test.describe("Patient Identifier Config - Edit", () => {
     ).not.toBeVisible({ timeout: 10000 });
 
     // Verify that the edited config appears in the list
-    await page
-      .getByRole("textbox", { name: "Search configs" })
-      .fill(`${displayName}-edited`);
+    await searchForConfig(page, `${displayName}-edited`);
 
-    const tableBody = page.locator('[data-slot="table-body"]');
-    await expect(tableBody).toContainText(`${displayName}-edited`);
-    await expect(tableBody).toContainText(systemUrl);
-    await expect(tableBody).toContainText(use);
-    await expect(tableBody).toContainText("Active");
+    await verifyConfigInTable(page, {
+      displayName: `${displayName}-edited`,
+      systemUrl,
+      use,
+      status: "Active",
+    });
   });
 
   test("should edit status from Active to Draft", async ({ page }) => {
-    await page
-      .getByRole("button", { name: "Add patient identifier config" })
-      .click();
+    await createPatientIdentifierConfig(page, {
+      use,
+      displayName,
+      description,
+      systemUrl,
+      status: "Active",
+    });
 
-    await page.getByRole("combobox").filter({ hasText: "usual" }).click();
-    await page.getByRole("option", { name: use }).click();
-
-    await page.getByRole("textbox", { name: "Display" }).fill(displayName);
-    await page.getByRole("textbox", { name: "Description" }).fill(description);
-    await page.getByRole("textbox", { name: "System" }).fill(systemUrl);
-
-    await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
-    await page.getByRole("option", { name: "Active", exact: true }).click();
-
-    await page.getByRole("button", { name: "Create" }).click();
-
-    // Wait for the sheet to close after successful creation
-    await expect(
-      page.getByRole("heading", { name: "Add patient identifier config" }),
-    ).not.toBeVisible({ timeout: 10000 });
-
-    // Verify that the new config appears in the list
-    await page
-      .getByRole("textbox", { name: "Search configs" })
-      .fill(displayName);
+    await searchForConfig(page, displayName);
 
     // Now edit the created config to change status
     await page.getByRole("button", { name: "Edit" }).first().click();
@@ -129,14 +103,8 @@ test.describe("Patient Identifier Config - Edit", () => {
     ).not.toBeVisible({ timeout: 10000 });
 
     // Change the status filter to Draft to see the config
-    const statusFilter = page.getByRole("combobox", { name: "Status" });
-    await statusFilter.click();
-    await page.getByRole("option", { name: "Draft" }).click();
-
-    // Search for the config
-    await page
-      .getByRole("textbox", { name: "Search configs" })
-      .fill(displayName);
+    await setStatusFilter(page, "Draft");
+    await searchForConfig(page, displayName);
 
     const tableBody = page.locator('[data-slot="table-body"]');
     await expect(tableBody).toContainText(displayName);
@@ -144,31 +112,15 @@ test.describe("Patient Identifier Config - Edit", () => {
   });
 
   test("should edit status from Active to Inactive", async ({ page }) => {
-    await page
-      .getByRole("button", { name: "Add patient identifier config" })
-      .click();
+    await createPatientIdentifierConfig(page, {
+      use,
+      displayName,
+      description,
+      systemUrl,
+      status: "Active",
+    });
 
-    await page.getByRole("combobox").filter({ hasText: "usual" }).click();
-    await page.getByRole("option", { name: use }).click();
-
-    await page.getByRole("textbox", { name: "Display" }).fill(displayName);
-    await page.getByRole("textbox", { name: "Description" }).fill(description);
-    await page.getByRole("textbox", { name: "System" }).fill(systemUrl);
-
-    await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
-    await page.getByRole("option", { name: "Active", exact: true }).click();
-
-    await page.getByRole("button", { name: "Create" }).click();
-
-    // Wait for the sheet to close after successful creation
-    await expect(
-      page.getByRole("heading", { name: "Add patient identifier config" }),
-    ).not.toBeVisible({ timeout: 10000 });
-
-    // Verify that the new config appears in the list
-    await page
-      .getByRole("textbox", { name: "Search configs" })
-      .fill(displayName);
+    await searchForConfig(page, displayName);
 
     // Now edit the created config to change status
     await page.getByRole("button", { name: "Edit" }).first().click();
@@ -190,14 +142,8 @@ test.describe("Patient Identifier Config - Edit", () => {
     ).not.toBeVisible({ timeout: 10000 });
 
     // Change the status filter to Inactive to see the config
-    const statusFilter = page.getByRole("combobox", { name: "Status" });
-    await statusFilter.click();
-    await page.getByRole("option", { name: "Inactive" }).click();
-
-    // Search for the config
-    await page
-      .getByRole("textbox", { name: "Search configs" })
-      .fill(displayName);
+    await setStatusFilter(page, "Inactive");
+    await searchForConfig(page, displayName);
 
     const tableBody = page.locator('[data-slot="table-body"]');
     await expect(tableBody).toContainText(displayName);
