@@ -32,11 +32,13 @@ import Loading from "@/components/Common/Loading";
 import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
 
+import queryClient from "@/Utils/request/queryClient";
 import { formatName } from "@/Utils/utils";
 import TemplateReportSheet from "@/pages/Encounters/TemplateBuilder/TemplateReportSheet";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { ReportRead, ReportReadList } from "@/types/emr/report/report";
+import { toast } from "sonner";
 
 interface ReportTabProps {
   encounter?: EncounterRead;
@@ -408,6 +410,19 @@ export function ReportSubTab({
             />
           </div>
           <FilterButton />
+          <Button
+            variant="outline_primary"
+            className="min-w-24 sm:min-w-28"
+            onClick={async () => {
+              await queryClient.invalidateQueries({
+                queryKey: ["reports", associatingId],
+              });
+              toast.success(t("refreshed"));
+            }}
+          >
+            <CareIcon icon="l-sync" className="mr-2" />
+            {t("refresh")}
+          </Button>
         </div>
         {encounter && (
           <TemplateReportSheet
