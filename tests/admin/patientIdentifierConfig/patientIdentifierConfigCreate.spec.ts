@@ -65,6 +65,11 @@ test.describe("Patient Identifier Config - Create", () => {
 
     await page.getByRole("button", { name: "Create" }).click();
 
+    // Wait for the sheet to close after successful creation
+    await expect(
+      page.getByRole("heading", { name: "Add patient identifier config" }),
+    ).not.toBeVisible({ timeout: 10000 });
+
     // Verify that the new config appears in the list
     await page
       .getByRole("textbox", { name: "Search configs" })
@@ -119,6 +124,11 @@ test.describe("Patient Identifier Config - Create", () => {
     await page.getByRole("option", { name: status, exact: true }).click();
 
     await page.getByRole("button", { name: "Create" }).click();
+
+    // Wait for the sheet to close after successful creation
+    await expect(
+      page.getByRole("heading", { name: "Add patient identifier config" }),
+    ).not.toBeVisible({ timeout: 10000 });
 
     // Try to create another config with the same system URL
     await page

@@ -42,6 +42,11 @@ test.describe("Patient Identifier Config - Edit", () => {
 
     await page.getByRole("button", { name: "Create" }).click();
 
+    // Wait for the sheet to close after successful creation
+    await expect(
+      page.getByRole("heading", { name: "Add patient identifier config" }),
+    ).not.toBeVisible({ timeout: 10000 });
+
     // Verify that the new config appears in the list
     await page
       .getByRole("textbox", { name: "Search configs" })
@@ -50,6 +55,11 @@ test.describe("Patient Identifier Config - Edit", () => {
     // Now edit the created config
     await page.getByRole("button", { name: "Edit" }).first().click();
 
+    // Wait for the edit sheet to open
+    await expect(
+      page.getByRole("heading", { name: "Edit patient identifier config" }),
+    ).toBeVisible();
+
     await page
       .getByRole("textbox", { name: "Display" })
       .fill(`${displayName}-edited`);
@@ -57,6 +67,11 @@ test.describe("Patient Identifier Config - Edit", () => {
       .getByRole("textbox", { name: "Description" })
       .fill(`${description}-edited`);
     await page.getByRole("button", { name: "Update" }).click();
+
+    // Wait for the sheet to close after successful update
+    await expect(
+      page.getByRole("heading", { name: "Edit patient identifier config" }),
+    ).not.toBeVisible({ timeout: 10000 });
 
     // Verify that the edited config appears in the list
     await page
