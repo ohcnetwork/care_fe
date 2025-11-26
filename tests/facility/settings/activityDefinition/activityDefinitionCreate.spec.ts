@@ -17,7 +17,9 @@ test.beforeAll(() => {
 });
 
 test.describe("activity definition form", () => {
-  test("validate required fields", async ({ page }) => {
+  test("should show validation errors when trying to save without required fields", async ({
+    page,
+  }) => {
     await page.goto(
       `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}/new`,
     );

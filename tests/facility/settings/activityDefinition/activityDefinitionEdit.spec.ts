@@ -24,7 +24,7 @@ test.beforeAll(() => {
 });
 
 test.describe("activity definition edit", () => {
-  test("should display all prefilled fields", async ({ page }) => {
+  test("should pre-fill all the fields", async ({ page }) => {
     const createdAD = await createActivityDefinition(page, facilityId, true);
     await page.goto(
       `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${createdAD.slug}/edit`,
@@ -115,7 +115,9 @@ test.describe("activity definition edit", () => {
     ).toBeVisible();
   });
 
-  test("should edit activity definition with all fields", async ({ page }) => {
+  test("should edit activity definition with all the fields", async ({
+    page,
+  }) => {
     const createdAD = await createActivityDefinition(page, facilityId);
 
     await page.goto(
