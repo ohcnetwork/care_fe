@@ -240,24 +240,5 @@ export async function createActivityDefinition(
     `/facility/${facilityId}/settings/activity_definitions`,
   );
 
-  return {
-    title: data.title,
-    slug: data.slug,
-    description: data.description,
-    usage: data.usage,
-    status: data.status,
-    classification: data.classification,
-    derivedFromUri: data.derivedFromUri,
-    resourceCategoryName: RESOURCE_CATEGORY_NAME,
-    code: data.code,
-    ...(allFields && {
-      bodySite: data.bodySite,
-      specimen: data.specimen,
-      observation: data.observation,
-      chargeItemCategory: data.chargeItemCategory,
-      chargeItem: data.chargeItem,
-      location: data.location,
-      diagnosticReportCode: data.diagnosticReportCode,
-    }),
-  };
+  return data;
 }
