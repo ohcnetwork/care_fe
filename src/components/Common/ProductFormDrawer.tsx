@@ -32,12 +32,14 @@ import { Input } from "@/components/ui/input";
 import { ChargeItemDefinitionPicker } from "@/components/Common/ChargeItemDefinitionPicker";
 
 import mutate from "@/Utils/request/mutate";
+import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import {
   ProductCreate,
   ProductRead,
   ProductStatusOptions,
 } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
+import { useState } from "react";
 
 const formSchema = z.object({
   lot_number: z.string().min(1, "Lot/Batch number is required"),
@@ -68,6 +70,9 @@ export function ProductFormDrawer({
 }: ProductFormDrawerProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [chargeItemDefinition, setChargeItemDefinition] = useState<
+    ChargeItemDefinitionBase | undefined
+  >(undefined);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -229,7 +234,6 @@ export function ProductFormDrawer({
                 <p className="text-sm text-gray-600 leading-relaxed px-3">
                   {t("charge_item_for_billing_description")}
                 </p>
-
                 <div className="px-3">
                   <FormField
                     control={form.control}
@@ -242,9 +246,23 @@ export function ProductFormDrawer({
                         <FormControl>
                           <ChargeItemDefinitionPicker
                             facilityId={facilityId}
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            placeholder="Select charge item definition"
+                            value={chargeItemDefinition}
+                            onValueChange={(
+                              value:
+                                | ChargeItemDefinitionBase
+                                | ChargeItemDefinitionBase[]
+                                | undefined,
+                            ) => {
+                              const chargeItemDefinition = Array.isArray(value)
+                                ? value[0]
+                                : value;
+                              setChargeItemDefinition(chargeItemDefinition);
+                              form.setValue(
+                                field.name,
+                                chargeItemDefinition?.slug,
+                              );
+                            }}
+                            placeholder={t("select_charge_item_definition")}
                             className="w-full h-11 text-base"
                             showCreateButton={true}
                             showCopyButton={true}
