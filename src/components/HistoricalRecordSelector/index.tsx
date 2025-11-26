@@ -41,8 +41,7 @@ interface StructuredTypeConfig<T extends BaseRecord> {
   queryKey: string[];
   queryFn: (limit: number, offset: number) => Promise<PaginatedResponse<any>>;
   converter?: (item: any) => T;
-  instructionsField?: DisplayField<T>;
-  notesField?: DisplayField<T>;
+  expandableFields?: DisplayField<T>[];
 }
 
 interface HistoricalRecordSelectorProps<T extends BaseRecord> {
@@ -395,14 +394,14 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                               {field.label}
                             </TableHead>
                           ))}
-                          {(activeTypeConfig?.instructionsField ||
-                            activeTypeConfig?.notesField) && (
-                            <TableHead
-                              className={
-                                "border border-gray-200 bg-gray-50 [&:nth-last-child(1)]:rounded-r-md w-12"
-                              }
-                            ></TableHead>
-                          )}
+                          {activeTypeConfig?.expandableFields &&
+                            activeTypeConfig.expandableFields.length > 0 && (
+                              <TableHead
+                                className={
+                                  "border border-gray-200 bg-gray-50 [&:nth-last-child(1)]:rounded-r-md w-12"
+                                }
+                              ></TableHead>
+                            )}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -423,10 +422,9 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                                 expandedRecordId === id ? undefined : id,
                               )
                             }
-                            instructionsField={
-                              activeTypeConfig?.instructionsField
+                            expandableFields={
+                              activeTypeConfig?.expandableFields || []
                             }
-                            notesField={activeTypeConfig?.notesField}
                           />
                         ))}
                       </TableBody>

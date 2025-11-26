@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { t } from "i18next";
 import { BadgeInfo } from "lucide-react";
 
 export interface DisplayField<T> {
@@ -20,8 +19,7 @@ interface RecordItemProps<T> {
   displayFields: DisplayField<T>[];
   expandedRecordId?: string;
   onToggleExpand?: (recordId: string) => void;
-  instructionsField?: DisplayField<T>;
-  notesField?: DisplayField<T>;
+  expandableFields?: DisplayField<T>[];
 }
 
 export function RecordItem<T>({
@@ -31,8 +29,7 @@ export function RecordItem<T>({
   displayFields,
   expandedRecordId,
   onToggleExpand,
-  instructionsField,
-  notesField,
+  expandableFields,
 }: RecordItemProps<T>) {
   const handleToggle = () => {
     onToggleSelect(record);
@@ -41,14 +38,16 @@ export function RecordItem<T>({
   const recordId = (record as any).id as string;
   const isExpanded = expandedRecordId === recordId;
 
-  const instructionsValue = instructionsField?.render?.(
-    record[instructionsField.key as keyof T],
-  );
-
-  const notesValue = notesField?.render?.(record[notesField.key as keyof T]);
+  const expandableFieldsWithValues = expandableFields
+    ?.map((field) => {
+      const value = record[field.key as keyof T];
+      const displayValue = field.render ? field.render(value) : value;
+      return { field, displayValue };
+    })
+    .filter((item) => item.displayValue != null);
 
   const hasAdditionalInfo =
-    (instructionsField || notesField) && (instructionsValue || notesValue);
+    expandableFieldsWithValues && expandableFieldsWithValues.length > 0;
 
   return (
     <>
@@ -84,24 +83,22 @@ export function RecordItem<T>({
           );
         })}
 
-        {(instructionsField || notesField) && (
-          <TableCell
-            className={
-              "p-2 w-12 text-sm border border-gray-200 bg-white [&:nth-child(even)]:bg-gray-100 [&:nth-last-child(1)]:rounded-r-md"
-            }
-          >
-            {hasAdditionalInfo && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onToggleExpand?.(recordId)}
-                className="size-6"
-              >
-                <BadgeInfo className="size-4" />
-              </Button>
-            )}
-          </TableCell>
-        )}
+        <TableCell
+          className={
+            "p-2 w-12 text-sm border border-gray-200 bg-white [&:nth-child(even)]:bg-gray-100 [&:nth-last-child(1)]:rounded-r-md"
+          }
+        >
+          {hasAdditionalInfo && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onToggleExpand?.(recordId)}
+              className="size-6"
+            >
+              <BadgeInfo className="size-4" />
+            </Button>
+          )}
+        </TableCell>
       </TableRow>
 
       {isExpanded && hasAdditionalInfo && (
@@ -112,27 +109,25 @@ export function RecordItem<T>({
             className="px-4 py-2 border-x border border-gray-200 bg-gray-50 rounded-b-md"
           >
             <div className="space-y-3 ">
-              {instructionsValue && (
-                <div>
-                  <div className="font-medium text-sm mb-1">
-                    {t("instructions")}:
+              {expandableFieldsWithValues!.map(({ field }, index) => {
+                const value = record[field.key as keyof T];
+                const displayValue = field.render
+                  ? field.render(value)
+                  : value?.toString() || "-";
+                const isLastItem =
+                  index === expandableFieldsWithValues!.length - 1;
+                return (
+                  <div key={field.key.toString()}>
+                    <div className="font-medium text-sm mb-1">
+                      {field.label}
+                    </div>
+                    <div className="text-sm break-words whitespace-normal">
+                      {displayValue}
+                    </div>
+                    {!isLastItem && <Separator className="my-2" />}
                   </div>
-                  <div className="text-sm break-words whitespace-normal">
-                    {instructionsValue}
-                  </div>
-                </div>
-              )}
-
-              {instructionsValue && notesValue && <Separator />}
-
-              {notesValue && (
-                <div>
-                  <div className="font-medium text-sm mb-1">{t("notes")}:</div>
-                  <div className="text-sm break-words whitespace-normal">
-                    {notesValue}
-                  </div>
-                </div>
-              )}
+                );
+              })}
             </div>
           </TableCell>
         </TableRow>

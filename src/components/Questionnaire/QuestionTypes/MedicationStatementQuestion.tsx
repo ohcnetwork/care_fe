@@ -368,17 +368,19 @@ export function MedicationStatementQuestion({
                 ),
               },
             ],
-            instructionsField: {
-              key: "dosage_instruction",
-              label: t("instructions"),
-              render: (instructions) =>
-                instructions?.[0]?.additional_instruction?.[0]?.display,
-            },
-            notesField: {
-              key: "note",
-              label: t("notes"),
-              render: (note) => note,
-            },
+            expandableFields: [
+              {
+                key: "dosage_instruction",
+                label: t("instructions"),
+                render: (instructions) =>
+                  instructions?.[0]?.additional_instruction?.[0]?.display,
+              },
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note) => note,
+              },
+            ],
             queryKey: ["medication_requests", patientId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(medicationRequestApi.list, {
@@ -428,11 +430,13 @@ export function MedicationStatementQuestion({
                 ),
               },
             ],
-            notesField: {
-              key: "note",
-              label: t("notes"),
-              render: (note) => note,
-            },
+            expandableFields: [
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note) => note,
+              },
+            ],
             queryKey: ["medication_statements", patientId],
             queryFn: async (limit: number, offset: number) => {
               const response = await query(medicationStatementApi.list, {
