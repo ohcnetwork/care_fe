@@ -81,4 +81,126 @@ test.describe("Patient Identifier Config - Edit", () => {
     await expect(tableBody).toContainText(use);
     await expect(tableBody).toContainText("Active");
   });
+
+  test("should edit status from Active to Draft", async ({ page }) => {
+    await page
+      .getByRole("button", { name: "Add patient identifier config" })
+      .click();
+
+    await page.getByRole("combobox").filter({ hasText: "usual" }).click();
+    await page.getByRole("option", { name: use }).click();
+
+    await page.getByRole("textbox", { name: "Display" }).fill(displayName);
+    await page.getByRole("textbox", { name: "Description" }).fill(description);
+    await page.getByRole("textbox", { name: "System" }).fill(systemUrl);
+
+    await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
+    await page.getByRole("option", { name: "Active", exact: true }).click();
+
+    await page.getByRole("button", { name: "Create" }).click();
+
+    // Wait for the sheet to close after successful creation
+    await expect(
+      page.getByRole("heading", { name: "Add patient identifier config" }),
+    ).not.toBeVisible({ timeout: 10000 });
+
+    // Verify that the new config appears in the list
+    await page
+      .getByRole("textbox", { name: "Search configs" })
+      .fill(displayName);
+
+    // Now edit the created config to change status
+    await page.getByRole("button", { name: "Edit" }).first().click();
+
+    // Wait for the edit sheet to open
+    await expect(
+      page.getByRole("heading", { name: "Edit patient identifier config" }),
+    ).toBeVisible();
+
+    // Change status to Draft
+    await page.getByRole("combobox").filter({ hasText: "Active" }).click();
+    await page.getByRole("option", { name: "Draft", exact: true }).click();
+
+    await page.getByRole("button", { name: "Update" }).click();
+
+    // Wait for the sheet to close after successful update
+    await expect(
+      page.getByRole("heading", { name: "Edit patient identifier config" }),
+    ).not.toBeVisible({ timeout: 10000 });
+
+    // Change the status filter to Draft to see the config
+    const statusFilter = page.getByRole("combobox", { name: "Status" });
+    await statusFilter.click();
+    await page.getByRole("option", { name: "Draft" }).click();
+
+    // Search for the config
+    await page
+      .getByRole("textbox", { name: "Search configs" })
+      .fill(displayName);
+
+    const tableBody = page.locator('[data-slot="table-body"]');
+    await expect(tableBody).toContainText(displayName);
+    await expect(tableBody).toContainText("Draft");
+  });
+
+  test("should edit status from Active to Inactive", async ({ page }) => {
+    await page
+      .getByRole("button", { name: "Add patient identifier config" })
+      .click();
+
+    await page.getByRole("combobox").filter({ hasText: "usual" }).click();
+    await page.getByRole("option", { name: use }).click();
+
+    await page.getByRole("textbox", { name: "Display" }).fill(displayName);
+    await page.getByRole("textbox", { name: "Description" }).fill(description);
+    await page.getByRole("textbox", { name: "System" }).fill(systemUrl);
+
+    await page.getByRole("combobox").filter({ hasText: "Draft" }).click();
+    await page.getByRole("option", { name: "Active", exact: true }).click();
+
+    await page.getByRole("button", { name: "Create" }).click();
+
+    // Wait for the sheet to close after successful creation
+    await expect(
+      page.getByRole("heading", { name: "Add patient identifier config" }),
+    ).not.toBeVisible({ timeout: 10000 });
+
+    // Verify that the new config appears in the list
+    await page
+      .getByRole("textbox", { name: "Search configs" })
+      .fill(displayName);
+
+    // Now edit the created config to change status
+    await page.getByRole("button", { name: "Edit" }).first().click();
+
+    // Wait for the edit sheet to open
+    await expect(
+      page.getByRole("heading", { name: "Edit patient identifier config" }),
+    ).toBeVisible();
+
+    // Change status to Inactive
+    await page.getByRole("combobox").filter({ hasText: "Active" }).click();
+    await page.getByRole("option", { name: "Inactive", exact: true }).click();
+
+    await page.getByRole("button", { name: "Update" }).click();
+
+    // Wait for the sheet to close after successful update
+    await expect(
+      page.getByRole("heading", { name: "Edit patient identifier config" }),
+    ).not.toBeVisible({ timeout: 10000 });
+
+    // Change the status filter to Inactive to see the config
+    const statusFilter = page.getByRole("combobox", { name: "Status" });
+    await statusFilter.click();
+    await page.getByRole("option", { name: "Inactive" }).click();
+
+    // Search for the config
+    await page
+      .getByRole("textbox", { name: "Search configs" })
+      .fill(displayName);
+
+    const tableBody = page.locator('[data-slot="table-body"]');
+    await expect(tableBody).toContainText(displayName);
+    await expect(tableBody).toContainText("Inactive");
+  });
 });
