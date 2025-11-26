@@ -130,8 +130,16 @@ const parseCsv = (content: string) => {
   });
 
   // Check if all rows have the same number of columns
-  if (!result.every((row) => row.length === result[0].length)) {
-    throw new Error("CSV rows have different lengths");
+  const expectedLength = result[0].length;
+  const invalidRow = result.findIndex((row) => row.length !== expectedLength);
+  if (invalidRow !== -1) {
+    console.error(
+      `Row ${invalidRow} has ${result[invalidRow].length} columns, expected ${expectedLength}`,
+    );
+    console.error("Invalid row data:", result[invalidRow]);
+    throw new Error(
+      `CSV rows have different lengths. Row ${invalidRow} has ${result[invalidRow].length} columns, expected ${expectedLength}`,
+    );
   }
 
   return result;
@@ -410,6 +418,12 @@ export const request = async <TResponse = unknown>(
   body?: Record<string, unknown>,
   canRetry = true,
 ): Promise<TResponse> => {
+  console.log(process.env.USERNAME);
+  console.log(process.env.PASSWORD);
+  console.log(
+    process.env.AUTHORIZATION ??
+      `Basic ${btoa(`${process.env.USERNAME}:${process.env.PASSWORD}`)}`,
+  );
   const response = await fetch(`${CARE_API_URL}${url}`, {
     method,
     body: JSON.stringify(body),
@@ -418,7 +432,7 @@ export const request = async <TResponse = unknown>(
       Accept: "application/json",
       Authorization:
         process.env.AUTHORIZATION ??
-        `Basic ${Buffer.from(`${process.env.USERNAME}:${process.env.PASSWORD}`).toString("base64")}`,
+        `Basic ${btoa(`${process.env.USERNAME}:${process.env.PASSWORD}`)}`,
     },
   });
 
