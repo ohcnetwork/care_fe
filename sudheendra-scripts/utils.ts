@@ -571,8 +571,9 @@ export function parseCSV(csvContent: string): Record<string, string>[] {
 
 // Function to read and parse CSV file
 export async function loadCsvFile(
-  filePath: string,
+  inputFile: string,
 ): Promise<Record<string, string>[]> {
+  const filePath = path.resolve(inputFile);
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(filePath)) {
       reject(new Error(`File not found: ${filePath}`));
@@ -1434,13 +1435,7 @@ export async function batchValidateAndSubstituteCodes(
   valuesetUrl: string,
   config: BaseConfig,
   batchSize: number = 50,
-): Promise<Map<number, { code: string; isValid: boolean; rowIndex: number }>> {
-  const logger = getLogger();
-  const results = new Map<
-    number,
-    { code: string; isValid: boolean; rowIndex: number }
-  >();
-
+): Promise<Map<string, { code: string; isValid: boolean }>> {
   // First, validate all codes - try batch endpoint first, fallback to sequential
   const codesToValidate = codes.map(({ code, system, rowIndex }) => ({
     code,
@@ -1467,14 +1462,16 @@ export async function batchValidateAndSubstituteCodes(
     );
   }
 
-  // Process results and apply substitutions
-  codes.forEach(({ code, defaultCode, rowIndex }) => {
+  // Build map keyed by code for O(1) lookup
+  const results = new Map<string, { code: string; isValid: boolean }>();
+
+  codes.forEach(({ code, defaultCode }) => {
     const isValid = validationResults.get(code) || false;
 
     if (isValid) {
-      results.set(rowIndex, { code, isValid, rowIndex });
+      results.set(code, { code, isValid });
     } else {
-      results.set(rowIndex, { code: defaultCode, isValid: false, rowIndex });
+      results.set(code, { code: defaultCode, isValid: false });
     }
   });
 
@@ -1525,21 +1522,32 @@ export async function validateRowCodes(
       fieldName: string;
     }> = [];
 
+    // Track original cleaned codes for each row
+    const originalCleanedCodes = new Map<number, string>();
+
     for (let i = 0; i < validatedRows.length; i++) {
       const row = validatedRows[i];
       const codeValue = row[fieldName];
       const systemValue = row[systemField] || rule.defaultSystem;
-      const displayValue = row[displayField] || rule.defaultDisplay;
+      //const displayValue = row[displayField] || rule.defaultDisplay;
+      const regexMatch = codeValue?.match(/[0-9]{6,18}/g);
+      const cleanedCodes = regexMatch?.join(",");
 
-      // Only validate if code exists and is not empty
-      if (codeValue && codeValue.trim() !== "") {
-        codesToValidate.push({
-          code: codeValue,
-          system: systemValue,
-          defaultCode: rule.defaultCode,
-          rowIndex: i,
-          fieldName: fieldName,
-        });
+      // Store the original cleaned codes for this row
+      if (cleanedCodes) {
+        originalCleanedCodes.set(i, cleanedCodes);
+      }
+
+      if (regexMatch) {
+        for (const match of regexMatch) {
+          codesToValidate.push({
+            code: match,
+            system: systemValue,
+            defaultCode: rule.defaultCode,
+            rowIndex: i,
+            fieldName: fieldName,
+          });
+        }
       }
     }
 
@@ -1559,36 +1567,63 @@ export async function validateRowCodes(
         batchSize,
       );
 
-      // Apply validation results
-      validationResults.forEach((result, rowIndex) => {
-        const codeInfo = codesToValidate.find((c) => c.rowIndex === rowIndex);
-        if (codeInfo) {
-          const row = validatedRows[codeInfo.rowIndex];
-
-          if (!result.isValid) {
-            substitutions.set(
-              `${row.slug}.${rule.rowPrefix}`,
-              `${codeInfo.code} -> ${result.code}`,
-            );
-          }
-
-          // Update the row with validated code
-          validatedRows[codeInfo.rowIndex] = {
-            ...row,
-            [fieldName]: result.code,
-            [displayField]:
-              result.code === rule.defaultCode
-                ? rule.defaultDisplay
-                : row[displayField] || rule.defaultDisplay,
-          };
+      // Apply validation results - loop through each row that had codes
+      for (let i = 0; i < validatedRows.length; i++) {
+        const originalCleaned = originalCleanedCodes.get(i);
+        // Skip rows that had no codes
+        if (!originalCleaned) {
+          continue;
         }
-      });
+
+        const row = validatedRows[i];
+        const originalCodesArray = originalCleaned.split(",");
+        const validatedCodesArray: string[] = [];
+        const invalidSubstitutions: string[] = [];
+
+        // Look up each code's validation result
+        for (const originalCode of originalCodesArray) {
+          const result = validationResults.get(originalCode);
+          if (result) {
+            validatedCodesArray.push(result.code);
+            if (!result.isValid) {
+              invalidSubstitutions.push(`${originalCode} -> ${result.code}`);
+            }
+          }
+        }
+
+        // Build the substitution messages
+        if (invalidSubstitutions.length > 0) {
+          substitutions.set(
+            `${row.slug}.${rule.rowPrefix}`,
+            invalidSubstitutions.join(", "),
+          );
+        }
+
+        // Store only the validated codes as comma-separated values
+        const validatedCodes = validatedCodesArray.join(",");
+
+        // Store original cleaned codes in a separate field for comparison
+        const originalCodeField = `original_${fieldName}`;
+        const validatedCodeField = `validated_${fieldName}`;
+
+        // Update the row with validated codes only (no extra text)
+        validatedRows[i] = {
+          ...row,
+          [originalCodeField]: originalCleaned,
+          [validatedCodeField]: validatedCodes,
+          [displayField]: validatedCodesArray.every(
+            (code) => code === rule.defaultCode,
+          )
+            ? rule.defaultDisplay
+            : row[displayField] || rule.defaultDisplay,
+        };
+      }
     }
 
     // Handle empty codes by setting defaults
     for (let i = 0; i < validatedRows.length; i++) {
       const row = validatedRows[i];
-      const codeValue = row[fieldName];
+      const codeValue = row[`validated_${fieldName}`];
 
       if (!codeValue || codeValue.trim() === "") {
         substitutions.set(
