@@ -1,11 +1,21 @@
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import * as z from "zod";
 
 import { WalletMinimal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
@@ -38,24 +48,68 @@ export default function ScheduleChargeItemDefinitionSelector({
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const [selectedDefinitionState, setSelectedDefinitionState] = useState<{
-    charge_item_definition: ChargeItemDefinitionBase | undefined;
-    re_visit_charge_item_definition: ChargeItemDefinitionBase | undefined;
-    reVisitDays: number;
-  }>({
-    charge_item_definition: scheduleTemplate.charge_item_definition,
-    re_visit_charge_item_definition:
-      scheduleTemplate.revisit_charge_item_definition,
-    reVisitDays: scheduleTemplate.revisit_allowed_days,
+  const chargeItemDefinitionSchema = z
+    .object({
+      charge_item_definition: z
+        .custom<ChargeItemDefinitionBase>()
+        .refine((val) => val !== undefined, {
+          message: t("required"),
+        }),
+      reVisitDays: z
+        .union([z.number(), z.nan()])
+        .refine((val) => !isNaN(val) && val >= 0, {
+          message: t("must_be_greater_than_value", { value: 0 }),
+        }),
+      re_visit_charge_item_definition: z
+        .custom<ChargeItemDefinitionBase>()
+        .optional(),
+    })
+    .refine(
+      (data) => {
+        if (data.reVisitDays > 0) {
+          return data.re_visit_charge_item_definition !== undefined;
+        }
+        return true;
+      },
+      {
+        message: t("revisit_charge_def_required"),
+        path: ["re_visit_charge_item_definition"],
+      },
+    );
+
+  type ChargeItemDefinitionFormValues = z.infer<
+    typeof chargeItemDefinitionSchema
+  >;
+
+  const form = useForm<ChargeItemDefinitionFormValues>({
+    resolver: zodResolver(chargeItemDefinitionSchema),
+    defaultValues: {
+      charge_item_definition: scheduleTemplate.charge_item_definition,
+      re_visit_charge_item_definition:
+        scheduleTemplate.revisit_charge_item_definition,
+      reVisitDays: scheduleTemplate.revisit_allowed_days,
+    },
   });
 
-  const handleSubmit = () => {
+  const reVisitDays = form.watch("reVisitDays");
+  const reVisitChargeItemDefinition = form.watch(
+    "re_visit_charge_item_definition",
+  );
+
+  useEffect(() => {
+    if (reVisitDays === 0 || !reVisitDays) {
+      form.setValue("re_visit_charge_item_definition", undefined, {
+        shouldValidate: true,
+      });
+    }
+  }, [reVisitDays]);
+
+  const handleSubmit = (values: ChargeItemDefinitionFormValues) => {
     onChange({
-      charge_item_definition_slug:
-        selectedDefinitionState.charge_item_definition?.slug || "",
-      re_visit_allowed_days: selectedDefinitionState.reVisitDays,
+      charge_item_definition_slug: values.charge_item_definition.slug,
+      re_visit_allowed_days: values.reVisitDays,
       re_visit_charge_item_definition_slug:
-        selectedDefinitionState.re_visit_charge_item_definition?.slug || null,
+        values.re_visit_charge_item_definition?.slug || null,
     });
     setIsOpen(false);
   };
@@ -63,8 +117,7 @@ export default function ScheduleChargeItemDefinitionSelector({
   const handleSheetOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
-      // Reset to original values when closing
-      setSelectedDefinitionState({
+      form.reset({
         charge_item_definition: scheduleTemplate.charge_item_definition,
         re_visit_charge_item_definition:
           scheduleTemplate.revisit_charge_item_definition,
@@ -92,112 +145,116 @@ export default function ScheduleChargeItemDefinitionSelector({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-6 flex flex-col gap-6">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-4">
-              <div>
-                <Label>{t("consulation charge")}</Label>
-                <div className="mt-2 flex gap-2 flex-col sm:flex-row">
-                  <ChargeItemDefinitionPicker
-                    facilityId={facilityId}
-                    value={selectedDefinitionState.charge_item_definition}
-                    onValueChange={(selectedDef) => {
-                      if (!selectedDef) {
-                        setSelectedDefinitionState({
-                          ...selectedDefinitionState,
-                          charge_item_definition: undefined,
-                        });
-                        return;
-                      }
-                      setSelectedDefinitionState({
-                        ...selectedDefinitionState,
-                        charge_item_definition:
-                          selectedDef as ChargeItemDefinitionBase,
-                      });
-                    }}
-                    placeholder={t("select_charge_item_definition")}
-                    className="grow-1"
-                    showCreateButton={true}
-                  />
-                </div>
-              </div>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="mt-6 flex flex-col gap-6"
+          >
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4">
+                <FormField
+                  control={form.control}
+                  name="charge_item_definition"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("consulation charge")}</FormLabel>
+                      <FormControl>
+                        <div className="mt-2 flex gap-2 flex-col sm:flex-row">
+                          <ChargeItemDefinitionPicker
+                            facilityId={facilityId}
+                            value={field.value}
+                            onValueChange={(selectedDef) => {
+                              field.onChange(
+                                selectedDef as
+                                  | ChargeItemDefinitionBase
+                                  | undefined,
+                              );
+                            }}
+                            placeholder={t("select_charge_item_definition")}
+                            className="grow-1"
+                            showCreateButton={true}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div>
-                <Label>{t("re_visit_allowed_days")}</Label>
-                <div className="mt-2">
-                  <Input
-                    type="number"
-                    min={0}
-                    value={selectedDefinitionState.reVisitDays}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      setSelectedDefinitionState({
-                        ...selectedDefinitionState,
-                        reVisitDays: value,
-                        ...(!value || value === 0
-                          ? {
-                              re_visit_charge_item_definition: undefined,
-                            }
-                          : {}),
-                      });
-                    }}
-                    placeholder={t("enter_re_visit_allowed_days")}
-                  />
-                </div>
-              </div>
+                <FormField
+                  control={form.control}
+                  name="reVisitDays"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("re_visit_allowed_days")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={field.value}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value);
+                            field.onChange(value);
+                          }}
+                          placeholder={t("enter_re_visit_allowed_days")}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div>
-                <Label>{t("re_visit_consultation_charge")}</Label>
-                <div className="mt-2 flex gap-2 flex-col sm:flex-row">
-                  <ChargeItemDefinitionPicker
-                    facilityId={facilityId}
-                    value={
-                      selectedDefinitionState.re_visit_charge_item_definition
-                    }
-                    onValueChange={(selectedDef) => {
-                      if (!selectedDef) {
-                        setSelectedDefinitionState({
-                          ...selectedDefinitionState,
-                          re_visit_charge_item_definition: undefined,
-                        });
-                        return;
-                      }
-                      setSelectedDefinitionState({
-                        ...selectedDefinitionState,
-                        re_visit_charge_item_definition:
-                          selectedDef as ChargeItemDefinitionBase,
-                      });
-                    }}
-                    placeholder={t("select_charge_item_definition")}
-                    className="flex-1"
-                    showCreateButton={true}
-                    disabled={
-                      selectedDefinitionState.reVisitDays === 0 ||
-                      !selectedDefinitionState.reVisitDays
-                    }
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="re_visit_charge_item_definition"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("re_visit_consultation_charge")}</FormLabel>
+                      <FormControl>
+                        <div className="mt-2 flex gap-2 flex-col sm:flex-row">
+                          <ChargeItemDefinitionPicker
+                            facilityId={facilityId}
+                            value={reVisitChargeItemDefinition}
+                            onValueChange={(selectedDef) => {
+                              field.onChange(
+                                selectedDef as
+                                  | ChargeItemDefinitionBase
+                                  | undefined,
+                              );
+                            }}
+                            placeholder={t("select_charge_item_definition")}
+                            className="flex-1"
+                            showCreateButton={true}
+                            disabled={reVisitDays === 0 || !reVisitDays}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
-          </div>
 
-          <div className="flex justify-end gap-4 border-t pt-4">
-            <Button
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-              className="w-full sm:w-auto"
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={!selectedDefinitionState.charge_item_definition}
-              className="w-full sm:w-auto"
-            >
-              {t("save")}
-            </Button>
-          </div>
-        </div>
+            <div className="flex justify-end gap-4 border-t pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+                className="w-full sm:w-auto"
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                className="w-full sm:w-auto"
+                disabled={!form.getValues("charge_item_definition")}
+              >
+                {t("save")}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </SheetContent>
     </Sheet>
   );
