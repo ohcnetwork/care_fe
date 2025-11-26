@@ -1,96 +1,41 @@
 import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
-import {
-  Classification,
-  Status,
-} from "src/types/emr/activityDefinition/activityDefinition";
 
-import { createActivityDefinition } from "tests/helpers/activityDefinition";
-import { clearFilter, selectFromFilterSelect } from "tests/helpers/ui";
+import {
+  createActivityDefinition,
+  RESOURCE_CATEGORY_NAME,
+  RESOURCE_CATEGORY_SLUG,
+} from "tests/facility/settings/activityDefinition/activityDefinition";
+import {
+  applyTableFilter,
+  clearFilter,
+  verifyTableBadges,
+} from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
 let facilityId: string;
 let categorySlug: string;
-const resourceCategoryName = "Lab Tests";
-const categorySlugSuffix = "lab-tests-activity_definition";
 
 test.beforeAll(() => {
   facilityId = getFacilityId();
-  categorySlug = `f-${facilityId}-${categorySlugSuffix}`;
+  categorySlug = `f-${facilityId}-${RESOURCE_CATEGORY_SLUG}`;
 });
 
-async function filterAndVerifyByStatus(
+/**
+ * Convenience wrapper to filter and verify activity definition table content
+ */
+async function filterAndVerify(
   page: Page,
-  status: Status,
+  filterType: "status" | "classification",
+  filterValue: string,
   createdADTitle: string,
 ) {
-  await page.goto(
-    `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
-  );
-  await clearFilter(page);
-  await page.locator('[data-slot="table-body"]').waitFor({ state: "visible" });
-
-  await selectFromFilterSelect(page, /status/i, status);
-
-  await page.waitForLoadState("networkidle");
-
-  const tableBody = page.locator('[data-slot="table-body"]');
-  await tableBody.waitFor({ state: "visible" });
-
-  const tableBodyRows = tableBody.locator('[data-slot="table-row"]');
-  await tableBodyRows.first().waitFor({ state: "visible" });
-  const rowCount = await tableBodyRows.count();
-
-  if (rowCount > 0) {
-    const statusText = tableBody.getByText(new RegExp(status, "i"));
-    await expect(statusText).toHaveCount(rowCount);
-  }
-
-  const adRow = page.locator('[data-slot="table-row"]', {
-    hasText: createdADTitle,
-  });
-  await expect(adRow).toBeVisible();
-}
-
-async function filterAndVerifyByClassification(
-  page: Page,
-  classification: Classification,
-  createdADTitle: string,
-) {
-  await page.goto(
-    `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
-  );
-  await clearFilter(page);
-  await page.locator('[data-slot="table-body"]').waitFor({ state: "visible" });
-
-  // Convert classification enum to display format (replace underscores with spaces)
-  const classificationDisplayText = classification.replace(/_/g, " ");
-  await selectFromFilterSelect(page, /category/i, classificationDisplayText);
-
-  await page.waitForLoadState("networkidle");
-
-  // Wait for table body and all rows to be loaded
-  const tableBody = page.locator('[data-slot="table-body"]');
-  await tableBody.waitFor({ state: "visible" });
-
-  const tableBodyRows = tableBody.locator('[data-slot="table-row"]');
-  await tableBodyRows.first().waitFor({ state: "visible" });
-  const rowCount = await tableBodyRows.count();
-
-  if (rowCount > 0) {
-    const allBadges = tableBody.locator('[data-slot="badge"]');
-    const classificationBadges = allBadges.filter({
-      hasText: new RegExp(`^${classificationDisplayText}$`, "i"),
-    });
-    await expect(classificationBadges).toHaveCount(rowCount);
-  }
-
-  const adRow = page.locator('[data-slot="table-row"]', {
-    hasText: createdADTitle,
-  });
-  await expect(adRow).toBeVisible();
+  const url = `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`;
+  const filterLabel = filterType === "status" ? /status/i : /category/i;
+  await applyTableFilter(page, url, filterLabel, filterValue);
+  await verifyTableBadges(page, filterValue, createdADTitle);
 }
 
 test.describe("Activity Definition List Filter", () => {
@@ -98,45 +43,51 @@ test.describe("Activity Definition List Filter", () => {
     test("should filter activity definitions by draft status", async ({
       page,
     }) => {
-      const draftAD = await createActivityDefinition(page, facilityId, {
-        resourceCategoryName,
-        overrides: { status: Status.draft },
+      const draftAD = await createActivityDefinition(page, facilityId, false, {
+        status: "Draft",
       });
 
-      await filterAndVerifyByStatus(page, Status.draft, draftAD.title);
+      await filterAndVerify(page, "status", "Draft", draftAD.title);
     });
 
     test("should filter activity definitions by active status", async ({
       page,
     }) => {
-      const activeAD = await createActivityDefinition(page, facilityId, {
-        resourceCategoryName,
-        overrides: { status: Status.active },
+      const activeAD = await createActivityDefinition(page, facilityId, false, {
+        status: "Active",
       });
 
-      await filterAndVerifyByStatus(page, Status.active, activeAD.title);
+      await filterAndVerify(page, "status", "Active", activeAD.title);
     });
 
     test("should filter activity definitions by retired status", async ({
       page,
     }) => {
-      const retiredAD = await createActivityDefinition(page, facilityId, {
-        resourceCategoryName,
-        overrides: { status: Status.retired },
-      });
+      const retiredAD = await createActivityDefinition(
+        page,
+        facilityId,
+        false,
+        {
+          status: "Retired",
+        },
+      );
 
-      await filterAndVerifyByStatus(page, Status.retired, retiredAD.title);
+      await filterAndVerify(page, "status", "Retired", retiredAD.title);
     });
 
     test("should filter activity definitions by unknown status", async ({
       page,
     }) => {
-      const unknownAD = await createActivityDefinition(page, facilityId, {
-        resourceCategoryName,
-        overrides: { status: Status.unknown },
-      });
+      const unknownAD = await createActivityDefinition(
+        page,
+        facilityId,
+        false,
+        {
+          status: "Unknown",
+        },
+      );
 
-      await filterAndVerifyByStatus(page, Status.unknown, unknownAD.title);
+      await filterAndVerify(page, "status", "Unknown", unknownAD.title);
     });
   });
 
@@ -144,14 +95,19 @@ test.describe("Activity Definition List Filter", () => {
     test("should filter activity definitions by laboratory classification", async ({
       page,
     }) => {
-      const laboratoryAD = await createActivityDefinition(page, facilityId, {
-        resourceCategoryName,
-        overrides: { classification: Classification.laboratory },
-      });
-
-      await filterAndVerifyByClassification(
+      const laboratoryAD = await createActivityDefinition(
         page,
-        Classification.laboratory,
+        facilityId,
+        false,
+        {
+          classification: "Laboratory",
+        },
+      );
+
+      await filterAndVerify(
+        page,
+        "classification",
+        "Laboratory",
         laboratoryAD.title,
       );
     });
@@ -159,29 +115,34 @@ test.describe("Activity Definition List Filter", () => {
     test("should filter activity definitions by imaging classification", async ({
       page,
     }) => {
-      const imagingAD = await createActivityDefinition(page, facilityId, {
-        resourceCategoryName,
-        overrides: { classification: Classification.imaging },
-      });
-
-      await filterAndVerifyByClassification(
+      const imagingAD = await createActivityDefinition(
         page,
-        Classification.imaging,
-        imagingAD.title,
+        facilityId,
+        false,
+        {
+          classification: "Imaging",
+        },
       );
+
+      await filterAndVerify(page, "classification", "Imaging", imagingAD.title);
     });
 
     test("should filter activity definitions by surgical procedure classification", async ({
       page,
     }) => {
-      const surgicalAD = await createActivityDefinition(page, facilityId, {
-        resourceCategoryName,
-        overrides: { classification: Classification.surgical_procedure },
-      });
-
-      await filterAndVerifyByClassification(
+      const surgicalAD = await createActivityDefinition(
         page,
-        Classification.surgical_procedure,
+        facilityId,
+        false,
+        {
+          classification: "Surgical Procedure",
+        },
+      );
+
+      await filterAndVerify(
+        page,
+        "classification",
+        "Surgical Procedure",
         surgicalAD.title,
       );
     });
@@ -189,28 +150,30 @@ test.describe("Activity Definition List Filter", () => {
     test("should filter activity definitions by counselling classification", async ({
       page,
     }) => {
-      const counsellingAD = await createActivityDefinition(page, facilityId, {
-        resourceCategoryName,
-        overrides: { classification: Classification.counselling },
-      });
-
-      await filterAndVerifyByClassification(
+      const counsellingAD = await createActivityDefinition(
         page,
-        Classification.counselling,
+        facilityId,
+        false,
+        {
+          classification: "Counselling",
+        },
+      );
+
+      await filterAndVerify(
+        page,
+        "classification",
+        "Counselling",
         counsellingAD.title,
       );
     });
   });
 
-  test("should verify row content and navigate to view and edit pages", async ({
+  test("should verify row content and navigation to view and edit pages", async ({
     page,
   }) => {
-    const testAD = await createActivityDefinition(page, facilityId, {
-      resourceCategoryName,
-      overrides: {
-        status: Status.active,
-        classification: Classification.laboratory,
-      },
+    const testAD = await createActivityDefinition(page, facilityId, false, {
+      status: "Active",
+      classification: "Laboratory",
     });
 
     await page.goto(
@@ -224,7 +187,6 @@ test.describe("Activity Definition List Filter", () => {
     const adRow = page.locator('[data-slot="table-row"]', {
       hasText: testAD.title,
     });
-    await expect(adRow).toBeVisible();
 
     await expect(adRow.getByText(testAD.title)).toBeVisible();
     if (testAD.description) {
@@ -233,50 +195,29 @@ test.describe("Activity Definition List Filter", () => {
       ).toBeVisible();
     }
 
-    const classificationDisplayText = testAD.classification.replace(/_/g, " ");
     const classificationBadge = adRow
       .locator('[data-slot="badge"]')
-      .filter({ hasText: new RegExp(classificationDisplayText, "i") });
+      .filter({ hasText: testAD.classification });
     await expect(classificationBadge).toBeVisible();
 
     const statusBadge = adRow
       .locator('[data-slot="badge"]')
-      .filter({ hasText: new RegExp(testAD.status, "i") });
+      .filter({ hasText: testAD.status });
     await expect(statusBadge).toBeVisible();
 
     await expect(adRow.getByText(/service request/i)).toBeVisible();
 
-    const viewLink = adRow.getByRole("link", { name: /view/i });
-    await expect(viewLink).toBeVisible();
-    const viewHref = await viewLink.getAttribute("href");
-    expect(viewHref).toBeTruthy();
-
-    const slugMatch = viewHref!.match(
-      /\/settings\/activity_definitions\/([^/]+)/,
-    );
-    expect(slugMatch).toBeTruthy();
-    const activityDefinitionSlug = slugMatch![1];
-
-    await viewLink.click();
+    await adRow.locator('[data-slot="button"]', { hasText: "View" }).click();
     await expect(page).toHaveURL(
-      `/facility/${facilityId}/settings/activity_definitions/${activityDefinitionSlug}`,
+      `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${testAD.slug}`,
     );
 
-    await page.goto(
-      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
-    );
-    await page
-      .locator('[data-slot="table-body"]')
-      .waitFor({ state: "visible" });
-
+    await page.goBack();
     await expect(adRow).toBeVisible();
 
-    const editLink = adRow.getByRole("link", { name: /edit/i });
-    await expect(editLink).toBeVisible();
-    await editLink.click();
-
+    await adRow.locator('[data-slot="button"]', { hasText: "Edit" }).click();
     await expect(page).toHaveURL(
-      `/facility/${facilityId}/settings/activity_definitions/${activityDefinitionSlug}/edit`,
+      `/facility/${facilityId}/settings/activity_definitions/f-${facilityId}-${testAD.slug}/edit`,
     );
   });
 
@@ -287,11 +228,9 @@ test.describe("Activity Definition List Filter", () => {
       `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
     );
 
-    const addButton = page.getByRole("button", {
-      name: /add activity definition/i,
-    });
-    await expect(addButton).toBeVisible();
-    await addButton.click();
+    await page
+      .getByRole("button", { name: /add activity definition/i })
+      .click();
 
     await expect(page).toHaveURL(
       `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}/new`,
@@ -304,24 +243,19 @@ test.describe("Activity Definition List Filter", () => {
     );
 
     const breadcrumb = page.locator('[data-slot="breadcrumb"]');
-    await expect(breadcrumb).toBeVisible();
 
-    const resourceCategoryBreadcrumb =
-      breadcrumb.getByText(resourceCategoryName);
-    await expect(resourceCategoryBreadcrumb).toBeVisible();
     const resourceCategoryElement = breadcrumb.locator(
-      `span[data-slot="breadcrumb-page"]`,
+      'span[data-slot="breadcrumb-page"]',
     );
-    await expect(resourceCategoryElement).toHaveText(resourceCategoryName);
+    await expect(resourceCategoryElement).toHaveText(RESOURCE_CATEGORY_NAME);
     await expect(resourceCategoryElement).toHaveAttribute(
       "aria-disabled",
       "true",
     );
 
-    const activityDefinitionLink = breadcrumb
-      .locator('[data-slot="breadcrumb-link"]')
-      .first();
-    await expect(activityDefinitionLink).toBeVisible();
+    const activityDefinitionLink = breadcrumb.locator(
+      '[data-slot="breadcrumb-link"]',
+    );
     await expect(activityDefinitionLink).toContainText(/activity definition/i);
     await activityDefinitionLink.click();
 
@@ -331,12 +265,9 @@ test.describe("Activity Definition List Filter", () => {
   });
 
   test("should search for activity definitions", async ({ page }) => {
-    const testAD = await createActivityDefinition(page, facilityId, {
-      resourceCategoryName,
-      overrides: {
-        status: Status.active,
-        classification: Classification.laboratory,
-      },
+    const testAD = await createActivityDefinition(page, facilityId, false, {
+      status: "Active",
+      classification: "Laboratory",
     });
 
     await page.goto(

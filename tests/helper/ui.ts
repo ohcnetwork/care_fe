@@ -352,10 +352,17 @@ export async function expectToast(
 }
 
 /**
- * Clears the filter/search by clicking the clear button (X icon)
- * This helper finds the first button with a lucide-x icon and clicks it
+ * Gets a card element by its title
  * @param page - Playwright page object
+ * @param title - Card title to search for (can be string or RegExp)
+ * @returns Locator for the card element
  */
+export function getCardByTitle(page: Page, title: string | RegExp) {
+  return page.locator('[data-slot="card"]').filter({
+    has: page.locator('[data-slot="card-title"]', { hasText: title }),
+  });
+}
+
 export async function clearFilter(page: Page) {
   const clearButton = page
     .getByRole("button")
@@ -396,4 +403,68 @@ export async function selectFromFilterSelect(
   });
   await option.waitFor({ state: "visible" });
   await option.click();
+}
+
+/**
+ * Apply a filter to a table view with navigation and filter selection
+ * @param page - Playwright page object
+ * @param url - Full URL to navigate to
+ * @param filterLabel - Filter label regex (e.g., /status/i, /category/i)
+ * @param filterValue - Value to filter by
+ *
+ * @example
+ * await applyTableFilter(page, "/facility/123/settings/definitions", /status/i, "Active");
+ */
+export async function applyTableFilter(
+  page: Page,
+  url: string,
+  filterLabel: RegExp,
+  filterValue: string,
+) {
+  await page.goto(url);
+  await clearFilter(page);
+  await page.locator('[data-slot="table-body"]').waitFor({ state: "visible" });
+
+  await selectFromFilterSelect(page, filterLabel, filterValue);
+  await page.waitForLoadState("networkidle");
+
+  const tableBody = page.locator('[data-slot="table-body"]');
+  await tableBody.waitFor({ state: "visible" });
+
+  const tableBodyRows = tableBody.locator('[data-slot="table-row"]');
+  await tableBodyRows.first().waitFor({ state: "visible" });
+}
+
+/**
+ * Verify all badges in table match expected text and optionally verify specific row exists
+ * @param page - Playwright page object
+ * @param badgeText - Expected badge text to verify
+ * @param specificRowText - Optional text to find specific row
+ *
+ * @example
+ * await verifyTableBadges(page, "Active", "My Activity");
+ * await verifyTableBadges(page, "Laboratory"); // Without specific row check
+ */
+export async function verifyTableBadges(
+  page: Page,
+  badgeText: string,
+  specificRowText?: string,
+) {
+  const tableBody = page.locator('[data-slot="table-body"]');
+  const tableBodyRows = tableBody.locator('[data-slot="table-row"]');
+  const rowCount = await tableBodyRows.count();
+
+  if (rowCount > 0) {
+    const badges = tableBody
+      .locator('[data-slot="badge"]')
+      .filter({ hasText: badgeText });
+    await expect(badges).toHaveCount(rowCount);
+  }
+
+  if (specificRowText) {
+    const specificRow = page.locator('[data-slot="table-row"]', {
+      hasText: specificRowText,
+    });
+    await expect(specificRow).toBeVisible();
+  }
 }
