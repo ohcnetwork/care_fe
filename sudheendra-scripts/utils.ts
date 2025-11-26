@@ -415,15 +415,9 @@ const CARE_API_URL = process.env.REACT_CARE_API_URL ?? "http://127.0.0.1:8000";
 export const request = async <TResponse = unknown>(
   url: string,
   method: "GET" | "POST" | "PUT" | "DELETE",
-  body?: Record<string, unknown>,
+  body?: object,
   canRetry = true,
 ): Promise<TResponse> => {
-  console.log(process.env.USERNAME);
-  console.log(process.env.PASSWORD);
-  console.log(
-    process.env.AUTHORIZATION ??
-      `Basic ${btoa(`${process.env.USERNAME}:${process.env.PASSWORD}`)}`,
-  );
   const response = await fetch(`${CARE_API_URL}${url}`, {
     method,
     body: JSON.stringify(body),

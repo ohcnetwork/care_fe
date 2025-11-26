@@ -9,8 +9,10 @@ import {
   ProductKnowledgeCreate,
   ProductKnowledgeStatus,
   ProductKnowledgeType,
+  ProductNameTypes,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { createHash } from "crypto";
 import {
   createSlug,
   fetchCsvFromGoogleSheet,
@@ -51,42 +53,108 @@ const headerMap = {
   // status: 4,
   alternateIdentifier: 6,
   alternateNameType: 8,
-  // alternateNameValue: 9,
+  alternateNameValue: 9,
 };
+
+const requiredHeaderKeys = [
+  "resourceCategory",
+  "name",
+  "productType",
+  "baseUnitDisplay",
+] satisfies (keyof typeof headerMap)[];
+
+function createProductKnowledgeSlug(name: string) {
+  // this will hash the name and return a slug unlike `createSlug`
+  return `${createSlug(name).slice(0, 20)}-${createHash("sha256").update(name).digest("hex").slice(0, 5)}`;
+}
 
 async function main() {
   const { facilityIds, googleSheetId, sheetName } = getConfig();
   const csvData = await fetchCsvFromGoogleSheet(googleSheetId, sheetName);
-  const datapoints = transformCsvToObjects(csvData, headerMap);
+  const datapoints = transformCsvToObjects(csvData, headerMap).map(
+    getValidatedDatapoint,
+  );
 
   const resourceCategories = [
     ...new Set(datapoints.map((dp) => dp.resourceCategory)),
   ];
 
   for (const facilityId of facilityIds) {
-    logger(`Processing facility ${facilityId}`);
-
-    const categoryMap = await ensureResourceCategories(
-      facilityId,
-      resourceCategories,
+    logger(
+      `Upserting resource categories and product knowledges for facility ${facilityId}`,
     );
-
-    await ensureProductKnowledges(
-      facilityId,
-      datapoints,
-      categoryMap as ResourceCategoryRead[],
-    );
+    await upsertResourceCategories(facilityId, resourceCategories);
+    await upsertProductKnowledges(facilityId, datapoints);
   }
 }
 
 main();
 
-async function ensureResourceCategories(
+function getValidatedDatapoint(
+  datapoint: Record<keyof typeof headerMap, string>,
+) {
+  if (requiredHeaderKeys.some((key) => !datapoint[key].trim())) {
+    throw new Error(
+      `Missing required header in datapoint ${JSON.stringify(datapoint)}`,
+    );
+  }
+
+  const baseUnit = DOSAGE_UNITS_CODES.find(
+    (unit) => unit.display === datapoint.baseUnitDisplay.toLowerCase(),
+  );
+  if (!baseUnit) {
+    throw new Error(
+      `Could not resolve base unit for '${datapoint.baseUnitDisplay}'`,
+    );
+  }
+
+  const slug = datapoint.slug || createProductKnowledgeSlug(datapoint.name);
+
+  const productType = [
+    ProductKnowledgeType.consumable,
+    ProductKnowledgeType.medication,
+    ProductKnowledgeType.nutritional_product,
+  ].find((type) => type === datapoint.productType.toLowerCase());
+
+  if (!productType) {
+    throw new Error(`Product type '${datapoint.productType}' is not valid`);
+  }
+
+  let alternateNameType: ProductNameTypes | undefined;
+
+  if (datapoint.alternateNameType) {
+    alternateNameType = [
+      ProductNameTypes.trade_name,
+      ProductNameTypes.alias,
+      ProductNameTypes.original_name,
+      ProductNameTypes.preferred,
+    ].find(
+      (type) =>
+        type === datapoint.alternateNameType.toLowerCase().replaceAll(" ", "_"),
+    );
+
+    if (!alternateNameType) {
+      throw new Error(
+        `Alternate name type '${datapoint.alternateNameType}' is not valid`,
+      );
+    }
+  }
+
+  return {
+    ...datapoint,
+    baseUnit,
+    slug,
+    productType,
+    alternateNameType,
+  };
+}
+
+async function upsertResourceCategories(
   facilityId: string,
   resourceCategories: string[],
 ) {
   const existingCategories = (await request(
-    `/api/v1/facility/${facilityId}/resource_category/?limit=100`,
+    `/api/v1/facility/${facilityId}/resource_category/?limit=100&resource_type=${ResourceCategoryResourceType.product_knowledge}&resource_sub_type=${ResourceCategorySubType.other}`,
     "GET",
   )) as PaginatedResponse<ResourceCategoryRead>;
 
@@ -119,35 +187,20 @@ async function ensureResourceCategories(
       })),
     },
   );
-
-  // Fetch all categories again to get the complete list
-  const allCategories = (await request(
-    `/api/v1/facility/${facilityId}/resource_category/?limit=100`,
-    "GET",
-  )) as PaginatedResponse<ResourceCategoryRead>;
-
-  return allCategories.results;
 }
 
-async function ensureProductKnowledges(
-  facilityId: string,
-  datapoints: Record<keyof typeof headerMap, string>[],
-  categoryMap: ResourceCategoryRead[],
-) {
-  logger(
-    `Processing ${datapoints.length} product knowledges for facility ${facilityId}`,
-  );
-
-  const results = [];
+async function getExistingProductKnowledgeSlugs(facilityId: string) {
+  const results: ProductKnowledgeBase[] = [];
 
   let hasNextPage = true;
   let page = 0;
 
   while (hasNextPage) {
-    const existingProductKnowledges = (await request(
-      `/api/v1/product_knowledge/?facility=${facilityId}&limit=100&offset=${page * 100}`,
-      "GET",
-    )) as PaginatedResponse<ProductKnowledgeBase>;
+    const existingProductKnowledges: PaginatedResponse<ProductKnowledgeBase> =
+      await request(
+        `/api/v1/product_knowledge/?facility=${facilityId}&limit=100&offset=${page * 100}`,
+        "GET",
+      );
 
     results.push(...existingProductKnowledges.results);
 
@@ -158,52 +211,41 @@ async function ensureProductKnowledges(
     page++;
   }
 
-  const existingPKSlugs = new Set(
-    results.map((pk) => pk.slug_config.slug_value),
+  return new Set(results.map((pk) => pk.slug_config.slug_value));
+}
+
+async function upsertProductKnowledges(
+  facilityId: string,
+  datapoints: ReturnType<typeof getValidatedDatapoint>[],
+) {
+  logger(
+    `Processing ${datapoints.length} product knowledges for facility ${facilityId}`,
   );
 
-  let created = 0;
-  let skipped = 0;
+  const existingProductKnowledgeSlugs =
+    await getExistingProductKnowledgeSlugs(facilityId);
 
-  for (const datapoint of datapoints) {
-    const productSlug = createSlug(datapoint.name);
+  const newDatapoints = datapoints.filter(
+    (dp) => !existingProductKnowledgeSlugs.has(dp.slug),
+  );
 
-    // Skip if product knowledge already exists
-    if (existingPKSlugs.has(productSlug)) {
-      logger(`Skipping existing product knowledge: ${productSlug}`);
-      skipped++;
-      continue;
-    }
+  if (newDatapoints.length === 0) {
+    logger("No new product knowledges to create");
+    return;
+  }
 
-    // Get the category for this product
-    const category = categoryMap.find(
-      (cat) =>
-        cat.slug_config.slug_value ===
-        `pk-${createSlug(datapoint.resourceCategory)}`,
-    );
-    if (!category) {
-      logger(
-        `Category not found for ${datapoint.resourceCategory}, skipping product ${datapoint.name}`,
-      );
-      continue;
-    }
+  logger(
+    `${newDatapoints.length} new product knowledges to create (${datapoints.length - newDatapoints.length} already exist)`,
+  );
 
-    const baseUnitMap = DOSAGE_UNITS_CODES.find(
-      (unit) =>
-        unit.display.toLowerCase() === datapoint.baseUnitDisplay.toLowerCase(),
-    );
-    if (!baseUnitMap) {
-      throw new Error(`Base unit not found for ${datapoint.baseUnitDisplay}`);
-    }
-
-    // Create the product knowledge
+  for (const datapoint of newDatapoints) {
     const productKnowledge: ProductKnowledgeCreate = {
-      slug_value: createSlug(datapoint.name),
+      slug_value: datapoint.slug,
       name: datapoint.name,
       facility: facilityId,
-      product_type: ProductKnowledgeType.consumable,
+      product_type: datapoint.productType,
       status: ProductKnowledgeStatus.active,
-      base_unit: baseUnitMap,
+      base_unit: datapoint.baseUnit,
       category: `f-${facilityId}-pk-${createSlug(datapoint.resourceCategory)}`,
       names: [],
       storage_guidelines: [],
@@ -215,29 +257,21 @@ async function ensureProductKnowledges(
     }
 
     // Add alternate name if provided
-    // if (datapoint.alternateNameType && datapoint.alternateNameValue) {
-    //   productKnowledge.names = [
-    //     {
-    //       name_type: datapoint.alternateNameType as any,
-    //       name: datapoint.alternateNameValue,
-    //     },
-    //   ];
-    // }
+    if (datapoint.alternateNameType && datapoint.alternateNameValue) {
+      productKnowledge.names = [
+        {
+          name_type: datapoint.alternateNameType,
+          name: datapoint.alternateNameValue,
+        },
+      ];
+    }
 
     try {
-      await request(
-        "/api/v1/product_knowledge/",
-        "POST",
-        productKnowledge as unknown as Record<string, unknown>,
-      );
-      logger(`Created product knowledge: ${productSlug}`);
-      created++;
+      await request("/api/v1/product_knowledge/", "POST", productKnowledge);
+      logger(`Created product knowledge: ${datapoint.slug}`);
     } catch (error) {
-      logger(`Error creating product knowledge ${productSlug}: ${error}`);
+      logger(`Error creating product knowledge: ${JSON.stringify(datapoint)}`);
+      throw error;
     }
   }
-
-  logger(
-    `Product knowledge summary for facility ${facilityId}: ${created} created, ${skipped} skipped`,
-  );
 }
