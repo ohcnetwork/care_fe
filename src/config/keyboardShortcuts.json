@@ -16,8 +16,8 @@
     { "key": "shift+6", "action": "tab-index-6", "description": "Switch to Tab 6", "when": "always" },
     { "key": "shift+7", "action": "tab-index-7", "description": "Switch to Tab 7", "when": "always" },
     { "key": "shift+8", "action": "tab-index-8", "description": "Switch to Tab 8", "when": "always" },
-    { "key": "shift+9", "action": "tab-index-9", "description": "Switch to Tab 9", "when": "always" }
-
+    { "key": "shift+9", "action": "tab-index-9", "description": "Switch to Tab 9", "when": "always" },
+    { "key": "shift+f", "action": "scan-patient", "description": "Scan Patient QR Code", "when": "always" }
   ],
 
   "facility": [
