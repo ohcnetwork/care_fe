@@ -298,4 +298,18 @@ test.describe("Activity Definition List Filter", () => {
       page.locator('[data-slot="table-row"]', { hasText: testAD.title }),
     ).toBeVisible();
   });
+
+  test("should show no results message when searching for non-existent activity definition", async ({
+    page,
+  }) => {
+    await page.goto(
+      `/facility/${facilityId}/settings/activity_definitions/categories/${categorySlug}`,
+    );
+
+    await page
+      .getByPlaceholder(/search activity definition/i)
+      .fill(faker.string.alphanumeric(10));
+
+    await expect(page.getByText(/no activity definition found/i)).toBeVisible();
+  });
 });
