@@ -65,6 +65,9 @@ test.describe("Patient Identifier Config - Create", () => {
 
     await page.getByRole("button", { name: "Create" }).click();
 
+    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
+    await page.getByRole("option", { name: status, exact: true }).click();
+
     // Verify that the new config appears in the list
     await page
       .getByRole("textbox", { name: "Search configs" })
