@@ -12,7 +12,7 @@ import {
   selectFromLocationMultiSelect,
   selectFromRequirements,
   selectFromValueSet,
-} from "tests/helpers/ui";
+} from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });

@@ -8,8 +8,8 @@ import {
   selectFromLocationMultiSelect,
   selectFromRequirements,
   selectFromValueSet,
-} from "tests/helpers/ui";
-import { expectedSlug } from "tests/helpers/utils";
+} from "tests/helper/ui";
+import { expectedSlug } from "tests/helper/utils";
 
 export const RESOURCE_CATEGORY_SLUG = "lab-tests-activity_definition";
 

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { createActivityDefinition } from "tests/facility/settings/activityDefinition/activityDefinition";
-import { expectToast } from "tests/helpers/ui";
+import { expectToast } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });

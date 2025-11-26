@@ -5,7 +5,7 @@ import {
   RESOURCE_CATEGORY_SLUG,
 } from "tests/facility/settings/activityDefinition/activityDefinition";
 import { getFieldErrorMessage } from "tests/helper/error";
-import { getCardByTitle } from "tests/helpers/ui";
+import { getCardByTitle } from "tests/helper/ui";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
