@@ -1,28 +1,20 @@
 import { expect, test } from "@playwright/test";
+
+import { navigateToOrganizationPatient } from "tests/organization/patient/helpers";
+
 test.use({ storageState: "tests/.auth/user.json" });
 
 test.describe("PatientInfoHoverCard Conditional Rendering", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/");
-    await page.getByRole("tab", { name: "Governance" }).click();
-    await page
-      .getByRole("link", { name: /Government$/ })
-      .first()
-      .click();
-    await page.getByRole("menuitem", { name: "patients" }).click();
-  });
-
   test("should NOT show Patient Home button in encounter accessed via organization route", async ({
     page,
   }) => {
-    await page.waitForLoadState("networkidle");
-    await page.locator("[data-slot='card-content']").first().click();
+    await navigateToOrganizationPatient(page);
 
+    // Go to Encounters tab
     await page.getByRole("tab", { name: "Encounters" }).click();
 
+    // Click "View Encounter" link
     await page.getByRole("link", { name: "View Encounter" }).click();
-
-    await page.getByRole("link", { name: /view encounter/i }).first();
 
     // Verify URL contains organizationId and NOT facilityId
     expect(page.url()).toContain(`/organization/organizationId/patient/`);
