@@ -777,12 +777,12 @@ export function SmartExternalDeliveryRow({
       </TableCell>
 
       {/* Batch Number - Combined Selector + Input */}
-      <TableCell className="align-top p-2">
+      <TableCell className="align-top p-2 pb-4!">
         <Popover open={batchSelectorOpen} onOpenChange={setBatchSelectorOpen}>
           <PopoverTrigger asChild>
             <div
               className={cn(
-                "flex items-center border rounded-md h-9 px-3 cursor-pointer hover:border-gray-400 transition-colors",
+                "flex items-center border rounded-md h-9 p-1! cursor-pointer hover:border-gray-400 transition-colors",
                 !productKnowledge && "opacity-50 pointer-events-none",
                 isCreatingNew && "border-green-500 bg-green-50",
               )}
@@ -803,7 +803,10 @@ export function SmartExternalDeliveryRow({
                 }}
                 placeholder={t("batch_no")}
                 disabled={!productKnowledge}
-                className="border-0 h-7 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-w-[100px]"
+                className={cn(
+                  "border-0 h-7 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-w-[100px] border-none! shadow-none!",
+                  isCreatingNew && "bg-green-50",
+                )}
               />
               <ChevronDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
             </div>
@@ -856,7 +859,7 @@ export function SmartExternalDeliveryRow({
                       .map((product) => (
                         <CommandItem
                           key={product.id}
-                          value={product.batch?.lot_number || product.id}
+                          value={product.id}
                           onSelect={() => handleProductSelect(product)}
                           className="cursor-pointer"
                         >
@@ -884,6 +887,14 @@ export function SmartExternalDeliveryRow({
             </Command>
           </PopoverContent>
         </Popover>
+        {isCreatingNew && (
+          <Badge
+            variant="outline"
+            className="text-[10px] mt-1 text-green-600 border-green-300"
+          >
+            {t("new")}
+          </Badge>
+        )}
       </TableCell>
 
       {/* Expiry Date */}
@@ -902,7 +913,7 @@ export function SmartExternalDeliveryRow({
                     markAsEdited();
                   }}
                   disabled={!productKnowledge}
-                  className="w-full min-w-[130px]"
+                  className="w-full min-w-[10rem]"
                 />
               </FormControl>
               <FormMessage />
@@ -957,7 +968,7 @@ export function SmartExternalDeliveryRow({
       </TableCell>
 
       {/* Base Price */}
-      <TableCell className="align-top p-2">
+      <TableCell className="align-top p-2!">
         <div className="flex flex-col gap-1">
           <div className="flex items-center">
             <span className="text-xs text-gray-500 mr-1">
