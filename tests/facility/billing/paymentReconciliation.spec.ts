@@ -1,4 +1,4 @@
-// tests/payment-reconciliation.validation.spec.ts
+// tests/facility/billing/paymentReconciliation.spec.ts
 import { expect, test } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
 
