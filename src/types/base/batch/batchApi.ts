@@ -7,7 +7,7 @@ const batchApi = {
   batchRequest: {
     path: "/api/v1/batch_requests/",
     method: HttpMethod.POST,
-    TRes: Type<BatchRequestResponse>(),
+    TRes: Type<BatchRequestResponse<any>>(),
     TBody: Type<BatchRequestBody>(),
   },
 } as const;

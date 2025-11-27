@@ -5,6 +5,7 @@ import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
 import { PrintAppointments } from "@/pages/Appointments/components/PrintAppointments";
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
+import { TokenDisplay } from "@/pages/Facility/queues/TokenDisplay";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { Redirect } from "raviger";
 
@@ -61,6 +62,20 @@ const ScheduleRoutes: AppRoutes = {
         tab="completed"
       />
     ),
+
+  "/facility/:facilityId/token-display/:resourceType/:encodedResourceServicePoints":
+    ({ facilityId, resourceType, encodedResourceServicePoints }) => {
+      const decodedResourceServicePoints = atob(encodedResourceServicePoints);
+      const resourceServicePoints = JSON.parse(decodedResourceServicePoints);
+      console.log(resourceServicePoints);
+      return (
+        <TokenDisplay
+          facilityId={facilityId}
+          resourceType={resourceType}
+          resourceServicePoints={resourceServicePoints}
+        />
+      );
+    },
 };
 
 export default ScheduleRoutes;
