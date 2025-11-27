@@ -62,7 +62,12 @@ function MonetaryDisplay({
   );
 }
 
-function MonetaryAmountInput(props: React.ComponentProps<typeof Input>) {
+function MonetaryAmountInput({
+  hideCurrency = false,
+  ...props
+}: React.ComponentProps<typeof Input> & {
+  hideCurrency?: boolean;
+}) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // Allow empty value, numbers with up to 2 decimal places
@@ -73,7 +78,9 @@ function MonetaryAmountInput(props: React.ComponentProps<typeof Input>) {
 
   return (
     <div className="flex items-center space-x-2">
-      <span className="text-lg font-medium">{CURRENCY_SYMBOL}</span>
+      {!hideCurrency && (
+        <span className="text-lg font-medium">{CURRENCY_SYMBOL}</span>
+      )}
       <Input
         type="text"
         inputMode="decimal"

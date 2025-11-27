@@ -80,7 +80,6 @@ export default function UserSummaryTab({
           <Button
             variant="outline"
             className="w-fit self-end"
-            data-cy="edit-user-button"
             onClick={() => setShowEditUserSheet(true)}
           >
             <CareIcon icon="l-pen" className="mr-2 size-4" />
@@ -160,7 +159,7 @@ export default function UserSummaryTab({
               childProps={userColumnsData}
             />
             <UserColumns
-              heading={t("software_update")}
+              heading={t("software_update_cache")}
               note={t("check_for_available_update")}
               Child={UserSoftwareUpdate}
               childProps={userColumnsData}

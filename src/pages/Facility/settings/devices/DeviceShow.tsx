@@ -127,16 +127,12 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 xl:gap-6" data-cy="device-details">
+      <div className="flex flex-col gap-4 xl:gap-6">
         <Card>
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle>{t("device_information")}</CardTitle>
             <Link href={`/devices/${deviceId}/edit`}>
-              <Button
-                variant="outline_primary"
-                size="sm"
-                data-cy="edit-device-button"
-              >
+              <Button variant="outline_primary" size="sm">
                 <CareIcon icon="l-pen" className="size-4" />
                 {t("edit")}
               </Button>
@@ -424,7 +420,6 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
               </div>
               <Button
                 variant="destructive"
-                data-cy="delete-device-button"
                 className="w-fit"
                 onClick={() => setShowDeleteDialog(true)}
               >
