@@ -313,7 +313,7 @@ export function ProductKnowledgeList({
                         {t("product_type")}
                       </TableHead>
                       <TableHead className="w-[15%]">{t("status")}</TableHead>
-                      <TableHead className="w-[5%]">{t("actions")}</TableHead>
+                      <TableHead className="w-[20%]">{t("actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
