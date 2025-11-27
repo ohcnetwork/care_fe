@@ -80,7 +80,7 @@ export function DiscountMonetaryComponentForm({
             .refine((v) => !isNaN(Number(v)), {
               message: t("field_required"),
             })
-            .refine((v) => Number(v) >= 0, {
+            .refine((val) => Number(val) >= 0, {
               message: t("amount_must_be_greater_than_or_equal_to_0"),
             })
             .optional(),
