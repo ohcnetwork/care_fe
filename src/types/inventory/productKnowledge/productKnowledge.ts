@@ -91,8 +91,8 @@ export interface ProductKnowledgeCreate
     "id" | "category" | "slug_config" | "slug"
   > {
   slug_value: string;
-  facility: string;
-  category: string;
+  facility?: string;
+  category?: string;
 }
 
 export interface ProductKnowledgeUpdate
