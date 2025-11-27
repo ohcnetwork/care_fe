@@ -72,7 +72,7 @@ jobs:
           gh pr edit $PR_NUMBER --add-label "changes required" --repo $REPO
 
       - name: Handle Review Re-Request
-        if: github.event.action == 'review_requested'
+        if: github.event.action == 'review_requested' && github.event.requested_reviewer.type != 'Bot'
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
