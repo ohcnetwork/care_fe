@@ -54,6 +54,7 @@ export const PERMISSION_MANAGE_ORGANIZATION = "can_manage_organization";
 export const PERMISSION_MANAGE_ORGANIZATION_USERS =
   "can_manage_organization_users";
 export const PERMISSION_LIST_ORGANIZATION_USERS = "can_list_organization_users";
+export const PERMISSION_GEO_ADMIN = "is_geo_admin";
 
 // Questionnaire Permissions
 export const PERMISSION_WRITE_QUESTIONNAIRE = "can_write_questionnaire";
@@ -168,6 +169,8 @@ export interface Permissions {
   canManageOrganizationUsers: boolean;
   /** Permission slug: "can_list_organization_users" */
   canListOrganizationUsers: boolean;
+  /** Permission slug: "is_geo_admin" */
+  isGeoAdmin: boolean;
 
   // Questionnaire Permissions
   /** Permission slug: "can_write_questionnaire" */
@@ -340,6 +343,7 @@ export function getPermissions(
       PERMISSION_LIST_ORGANIZATION_USERS,
       permissions,
     ),
+    isGeoAdmin: hasPermission(PERMISSION_GEO_ADMIN, permissions),
 
     // Questionnaire
     canWriteQuestionnaire: hasPermission(

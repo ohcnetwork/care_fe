@@ -16,8 +16,8 @@
     { "key": "shift+6", "action": "tab-index-6", "description": "Switch to Tab 6", "when": "always" },
     { "key": "shift+7", "action": "tab-index-7", "description": "Switch to Tab 7", "when": "always" },
     { "key": "shift+8", "action": "tab-index-8", "description": "Switch to Tab 8", "when": "always" },
-    { "key": "shift+9", "action": "tab-index-9", "description": "Switch to Tab 9", "when": "always" }
-
+    { "key": "shift+9", "action": "tab-index-9", "description": "Switch to Tab 9", "when": "always" },
+    { "key": "shift+f", "action": "scan-patient", "description": "Scan Patient QR Code", "when": "always" }
   ],
 
   "facility": [
@@ -49,7 +49,9 @@
     { "key": "2", "action": "create-encounter", "description": "Create Encounter", "when": "always" },
     { "key": "1", "action": "start-consultation", "description": "Start Consultation", "when": "always" },
     { "key": "3", "action": "print-appointment", "description": "Print Appointment", "when": "always" },
-    { "key": "c", "action": "check-in-action", "description": "Check-in Appointment", "when": "always" }
+    { "key": "c", "action": "check-in-action", "description": "Check-in Appointment", "when": "always" },
+    { "key": "i", "action": "create-an-invoice", "description": "Create Invoice", "when": "always" },
+    { "key": "a", "action": "add-a-charge-item", "description": "Add Charge Items", "when": "always" }
   ],
 
   "facility:billing": [
@@ -99,6 +101,7 @@
     { "key": "v", "action": "view-invoice", "description": "View Invoice", "when": "always" }
   ],
   "facility:inventory": [
+    { "key": "r", "action": "raise-stock-request", "description": "Raise Stock Request", "when": "always" },
     { "key": "c", "action": "create-order", "description": "Create Order", "when": "always" },
     { "key": "a", "action": "add-item", "description": "Add Item", "when": "always" },
     { "key": "e", "action": "edit-order", "description": "Edit Order", "when": "always" },
