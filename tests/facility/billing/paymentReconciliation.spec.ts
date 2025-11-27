@@ -40,17 +40,20 @@ test.describe("PaymentReconciliationSheet — validation messages", () => {
     const paymentAmountInput = page.getByLabel(LABELS.paymentAmountLabel);
     await expect(paymentAmountInput).toBeVisible();
 
-    // Also ensure the submit button within the sheet is ready.
-    const dialog = page.getByRole('dialog');
-    await dialog.getByRole('button', { name: LABELS.submitBtn }).click();
+      // Also ensure the submit button within the sheet is ready.
++   const dialog = page.getByRole('dialog');
++   await expect(
++     dialog.getByRole('button', { name: LABELS.submitBtn }),
++   ).toBeVisible();
 
   });
 
   test("submitting empty/default form shows custom validation message", async ({
     page,
   }) => {
-    // Directly submit the form without changing any values
-    const submitBtn = page.getByRole("button", { name: LABELS.submitBtn });
+    
+    const dialog = page.getByRole("dialog");
+    const submitBtn = dialog.getByRole("button", { name: LABELS.submitBtn });
     await submitBtn.click();
 
     // Expect the custom validation message to be visible
