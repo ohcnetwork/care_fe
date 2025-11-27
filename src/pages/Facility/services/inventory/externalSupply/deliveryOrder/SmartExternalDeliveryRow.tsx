@@ -61,6 +61,8 @@ interface Props {
   index: number;
   facilityId: string;
   informationalCodes: Code[];
+  autoOpenProductSelect?: boolean;
+  onProductSelectOpened?: () => void;
 }
 
 // Type-safe field path helper for items array
@@ -430,6 +432,8 @@ export function SmartExternalDeliveryRow({
   index,
   facilityId,
   informationalCodes,
+  autoOpenProductSelect = false,
+  onProductSelectOpened,
 }: Props) {
   const { t } = useTranslation();
   const [batchSelectorOpen, setBatchSelectorOpen] = useState(false);
@@ -723,6 +727,8 @@ export function SmartExternalDeliveryRow({
                   value={field.value}
                   onChange={(value) => {
                     field.onChange(value);
+                    // Clear the auto-open flag once user interacts
+                    onProductSelectOpened?.();
                     // Clear everything when PK changes
                     form.setValue(
                       getItemFieldPath(index, "supplied_item"),
@@ -761,6 +767,7 @@ export function SmartExternalDeliveryRow({
                   className="w-full min-w-[180px]"
                   disableFavorites
                   hideClearButton
+                  defaultOpen={autoOpenProductSelect}
                 />
               </FormControl>
               <FormMessage />

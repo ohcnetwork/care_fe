@@ -127,7 +127,9 @@ export function AddSupplyDeliveryForm({
   const [qParams] = useQueryParams();
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const productKnowledgeRef = useRef<HTMLButtonElement | null>(null);
+  const [newlyAddedRowIndex, setNewlyAddedRowIndex] = useState<number | null>(
+    null,
+  );
   const addNewAfterSaveRef = useRef(false);
 
   // Fetch facility data for informational codes
@@ -181,7 +183,17 @@ export function AddSupplyDeliveryForm({
         // Reset form but add a new empty item immediately
         form.reset();
         addNewAfterSaveRef.current = false;
-        handleAddAnotherItem();
+        // Append new item and set index to 0 (since form was just reset)
+        append({
+          product_knowledge: {} as ProductKnowledgeBase,
+          supplied_inventory_item: "",
+          supplied_item_quantity: 1,
+          supplied_item: undefined,
+          supply_request: undefined,
+          _is_inward_stock: !origin,
+          is_tax_inclusive: careConfig.inventory.defaultTaxInclusive,
+        });
+        setNewlyAddedRowIndex(0);
       } else {
         onSuccess();
         form.reset();
@@ -231,16 +243,8 @@ export function AddSupplyDeliveryForm({
     setSelectedItems([]);
   };
 
-  const setProductKnowledgeRef = useCallback(
-    (element: HTMLButtonElement | null, index: number) => {
-      if (element && index === fields.length - 1) {
-        productKnowledgeRef.current = element;
-      }
-    },
-    [fields.length],
-  );
-
   const handleAddAnotherItem = () => {
+    const newIndex = fields.length;
     append({
       product_knowledge: {} as ProductKnowledgeBase,
       supplied_inventory_item: "",
@@ -250,12 +254,7 @@ export function AddSupplyDeliveryForm({
       _is_inward_stock: !origin,
       is_tax_inclusive: careConfig.inventory.defaultTaxInclusive,
     });
-    setTimeout(() => {
-      if (productKnowledgeRef.current) {
-        productKnowledgeRef.current.click();
-      }
-    });
-    // Set ref to the newly added item's product knowledge select
+    setNewlyAddedRowIndex(newIndex);
   };
 
   const { mutateAsync: createProduct } = useMutation({
@@ -584,15 +583,10 @@ export function AddSupplyDeliveryForm({
                                     <FormItem>
                                       <FormControl>
                                         <ProductKnowledgeSelect
-                                          ref={(element) =>
-                                            setProductKnowledgeRef(
-                                              element,
-                                              index,
-                                            )
-                                          }
                                           value={field.value}
                                           onChange={(productKnowledge) => {
                                             field.onChange(productKnowledge);
+                                            setNewlyAddedRowIndex(null);
                                             // Reset inventory item when product changes
                                             form.setValue(
                                               `items.${index}.supplied_inventory_item`,
@@ -603,6 +597,9 @@ export function AddSupplyDeliveryForm({
                                           className="w-full"
                                           disableFavorites
                                           hideClearButton
+                                          defaultOpen={
+                                            newlyAddedRowIndex === index
+                                          }
                                         />
                                       </FormControl>
                                       <FormMessage />
@@ -681,6 +678,12 @@ export function AddSupplyDeliveryForm({
                               index={index}
                               facilityId={facilityId}
                               informationalCodes={informationalCodes}
+                              autoOpenProductSelect={
+                                newlyAddedRowIndex === index
+                              }
+                              onProductSelectOpened={() =>
+                                setNewlyAddedRowIndex(null)
+                              }
                             />
                           ),
                         )}
