@@ -113,8 +113,6 @@ test.describe("PaymentReconciliationSheet — validation messages", () => {
     // Expect the payment form/sheet to close or success message to be visible
     // Check that the payment amount input is no longer visible, implying form closed
     await expect(paymentAmountInput).toBeHidden();
-
-    // Optionally, if a toast or success message appears, add check here (adjust selector accordingly)
-    // await expect(page.getByText(/payment recorded successfully/i)).toBeVisible();
+    
   });
 });
