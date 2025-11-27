@@ -5166,6 +5166,7 @@
   "tax_components": "Tax Components",
   "tax_explanation": "Taxes applied to the price after discounts",
   "tax_factor_applies_to_subtotal_after_discounts": "Factor applies to subtotal after discounts",
+  "tax_inclusive": "Tax Inclusive",
   "tax_invoice": "Tax Invoice",
   "taxes": "Taxes",
   "team": "Team",

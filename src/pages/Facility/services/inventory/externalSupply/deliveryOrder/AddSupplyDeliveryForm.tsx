@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import careConfig from "@/../care.config";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -89,6 +90,7 @@ const supplyDeliveryItemSchema = z.object({
   charge_item_definition: z.custom<ChargeItemDefinitionBase>().optional(),
   unit_price: z.number().optional(),
   is_manually_edited: z.boolean().optional(),
+  is_tax_inclusive: z.boolean().optional(),
   charge_item_category: z.string().optional(),
   informational_components: z.array(z.custom<MonetaryComponent>()).optional(),
   tax_components: z.array(z.custom<MonetaryComponent>()).optional(),
@@ -222,6 +224,7 @@ export function AddSupplyDeliveryForm({
       supplied_item: undefined,
       supply_request: request,
       _is_inward_stock: !origin,
+      is_tax_inclusive: careConfig.inventory.defaultTaxInclusive,
     }));
     form.setValue("items", itemsFromRequests || []);
     setIsSelectDialogOpen(false);
@@ -245,6 +248,7 @@ export function AddSupplyDeliveryForm({
       supplied_item: undefined,
       supply_request: undefined,
       _is_inward_stock: !origin,
+      is_tax_inclusive: careConfig.inventory.defaultTaxInclusive,
     });
     setTimeout(() => {
       if (productKnowledgeRef.current) {

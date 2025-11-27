@@ -9,6 +9,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
   CommandEmpty,
@@ -479,6 +480,11 @@ export function SmartExternalDeliveryRow({
     name: getItemFieldPath(index, "charge_item_category"),
   });
 
+  const isTaxInclusive = useWatch({
+    control: form.control,
+    name: getItemFieldPath(index, "is_tax_inclusive"),
+  });
+
   // Fetch facility data for tax/discount/informational components
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
@@ -669,6 +675,33 @@ export function SmartExternalDeliveryRow({
       })) as MonetaryComponentRead[],
     [facilityData],
   );
+
+  // MRP code constant
+  const MRP_CODE = "mrp";
+
+  // Get MRP value from informational components
+  const mrpValue = useMemo(() => {
+    const mrpComponent = informationalComponents?.find(
+      (c) => c.code?.code === MRP_CODE,
+    );
+    return mrpComponent?.amount ? parseFloat(mrpComponent.amount) : 0;
+  }, [informationalComponents]);
+
+  // Calculate total tax factor (sum of all tax percentages)
+  const totalTaxFactor = useMemo(() => {
+    if (!taxComponents?.length) return 0;
+    return taxComponents.reduce((sum, tax) => sum + (tax.factor || 0), 0);
+  }, [taxComponents]);
+
+  // Calculate base price from MRP when tax inclusive is enabled
+  // Formula: base_price = mrp / (1 + totalTaxRate/100)
+  useEffect(() => {
+    if (isTaxInclusive && mrpValue > 0) {
+      const calculatedBasePrice = mrpValue / (1 + totalTaxFactor / 100);
+      const roundedBasePrice = Math.round(calculatedBasePrice * 100) / 100;
+      form.setValue(getItemFieldPath(index, "unit_price"), roundedBasePrice);
+    }
+  }, [isTaxInclusive, mrpValue, totalTaxFactor, form, index]);
 
   const getExpirationDisplay = (product: ProductRead) => {
     return product.expiration_date
@@ -918,24 +951,48 @@ export function SmartExternalDeliveryRow({
 
       {/* Base Price */}
       <TableCell className="align-top p-2">
-        <div className="flex items-center">
-          <span className="text-xs text-gray-500 mr-1">{CURRENCY_SYMBOL}</span>
-          <Input
-            type="number"
-            min={0}
-            step="0.01"
-            value={unitPrice || ""}
-            placeholder="0.00"
-            onChange={(e) => {
-              form.setValue(
-                `items.${index}.unit_price`,
-                parseFloat(e.target.value) || 0,
-              );
-              markAsEdited();
-            }}
-            disabled={!productKnowledge}
-            className="w-[90px] text-right"
-          />
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center">
+            <span className="text-xs text-gray-500 mr-1">
+              {CURRENCY_SYMBOL}
+            </span>
+            <Input
+              type="number"
+              min={0}
+              step="0.01"
+              value={unitPrice || ""}
+              placeholder="0.00"
+              onChange={(e) => {
+                form.setValue(
+                  `items.${index}.unit_price`,
+                  parseFloat(e.target.value) || 0,
+                );
+                markAsEdited();
+              }}
+              disabled={!productKnowledge || isTaxInclusive}
+              className={cn(
+                "w-[90px] text-right",
+                isTaxInclusive && "bg-gray-100 text-gray-600",
+              )}
+            />
+          </div>
+          <label className="flex items-center gap-1.5 cursor-pointer">
+            <Checkbox
+              checked={isTaxInclusive || false}
+              onCheckedChange={(checked) => {
+                form.setValue(
+                  getItemFieldPath(index, "is_tax_inclusive"),
+                  !!checked,
+                );
+                markAsEdited();
+              }}
+              disabled={!productKnowledge}
+              className="h-3.5 w-3.5"
+            />
+            <span className="text-[10px] text-gray-500 whitespace-nowrap">
+              {t("tax_inclusive")}
+            </span>
+          </label>
         </div>
       </TableCell>
 
