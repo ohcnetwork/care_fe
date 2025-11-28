@@ -97,7 +97,7 @@ export default function ServiceRequestTable({
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
-                  {request.tags.map((tag) => (
+                  {(request.tags ?? []).map((tag) => (
                     <Badge key={tag.id} variant="secondary" className="text-xs">
                       {tag.display}
                     </Badge>
@@ -109,12 +109,15 @@ export default function ServiceRequestTable({
                     currentTags={request.tags ?? []}
                     onUpdate={() => {
                       queryClient.invalidateQueries({
+                        queryKey: ["serviceRequests"],
+                      });
+                      queryClient.invalidateQueries({
                         queryKey: ["serviceRequests", facilityId, locationId],
                       });
                     }}
                     patientId={request.encounter.patient.id}
                     trigger={
-                      request.tags && request.tags.length > 0 ? (
+                      (request.tags?.length ?? 0) > 0 ? (
                         <Button variant="outline" size="xs">
                           <Hash className="size-3" /> {t("tags")}
                         </Button>
