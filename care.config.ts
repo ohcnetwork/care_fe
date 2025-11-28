@@ -38,6 +38,7 @@ const careConfig = {
   urls: {
     github: env.REACT_GITHUB_URL || "https://github.com/ohcnetwork",
     ohcn: env.REACT_OHCN_URL || "https://ohc.network?ref=care",
+    about_us: env.REACT_ABOUT_US_URL || "https://ohc.network/",
   },
 
   mainLogo: logo(env.REACT_MAIN_LOGO, {

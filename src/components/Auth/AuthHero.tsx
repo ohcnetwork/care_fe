@@ -111,6 +111,15 @@ export const AuthHero = () => {
             >
               {t("third_party_software_licenses")}
             </Link>
+            <span className="mx-2 text-primary-400">|</span>
+            <Link
+              href={urls.about_us}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-400 hover:text-primary-500"
+            >
+              {t("about_us")}
+            </Link>
           </div>
         </div>
       </div>
