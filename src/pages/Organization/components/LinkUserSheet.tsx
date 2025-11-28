@@ -34,6 +34,7 @@ interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
   preSelectedUsername?: string;
+  onAddUserSheetOpen?: () => void;
 }
 
 export default function LinkUserSheet({
@@ -41,12 +42,12 @@ export default function LinkUserSheet({
   open,
   setOpen,
   preSelectedUsername,
+  onAddUserSheetOpen,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedUser, setSelectedUser] = useState<UserReadMinimal>();
   const [selectedRole, setSelectedRole] = useState<RoleBase>();
-
   const { data: preSelectedUser } = useQuery({
     queryKey: ["user", preSelectedUsername],
     queryFn: query(UserApi.get, {
@@ -115,8 +116,18 @@ export default function LinkUserSheet({
             selected={selectedUser}
             onChange={handleUserChange}
             placeholder={t("search_for_a_user")}
-            noOptionsMessage={t("no_users_found")}
+            noOptionsMessage={t("no_users_found_want_to_add", {
+              defaultValue: "No users found. Want to add a new user?",
+            })}
             popoverClassName="w-full"
+            onAddUser={() => {
+              if (onAddUserSheetOpen) {
+                setOpen(false);
+                setTimeout(() => {
+                  onAddUserSheetOpen();
+                }, 300);
+              }
+            }}
           />
           {selectedUser && (
             <div className="space-y-4">

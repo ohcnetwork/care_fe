@@ -3363,6 +3363,7 @@
   "no_updates_found": "No updates found",
   "no_user_assigned": "No User Assigned to this patient",
   "no_users_found": "No Users Found",
+  "no_users_found_want_to_add": "No users found. Want to add a new user?",
   "no_users_in_organization": "No users in organization",
   "no_valid_requests_to_dispense": "No valid requests to dispense",
   "no_valuesets_found": "No value sets found",

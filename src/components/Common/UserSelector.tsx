@@ -41,6 +41,7 @@ interface Props {
   facilityId?: string;
   organizationId?: string;
   disabled?: boolean;
+  onAddUser?: () => void;
 }
 
 const PAGE_LIMIT = 50;
@@ -55,6 +56,7 @@ interface UserCommandContentProps {
   onChange: (user: UserReadMinimal) => void;
   setOpen: (value: boolean) => void;
   ref: (node?: Element | null) => void;
+  onAddUser?: () => void;
 }
 
 function UserCommandContent({
@@ -67,6 +69,7 @@ function UserCommandContent({
   onChange,
   setOpen,
   ref,
+  onAddUser,
 }: UserCommandContentProps) {
   const { t } = useTranslation();
 
@@ -79,7 +82,24 @@ function UserCommandContent({
       />
       <CommandList>
         <CommandEmpty>
-          {isFetching ? t("searching") : noOptionsMessage || t("no_results")}
+          {isFetching ? (
+            t("searching")
+          ) : onAddUser ? (
+            <div className="flex flex-col items-center gap-2 py-4">
+              <div>{noOptionsMessage || t("no_results")}</div>
+              <button
+                type="button"
+                className="mt-2 px-4 py-2 border border-primary-500 text-primary-600 rounded flex items-center gap-1 hover:bg-primary-50 transition"
+                onClick={onAddUser}
+                data-testid="add-user-btn"
+              >
+                <span className="text-lg font-bold">+</span>
+                {t("add_user", { defaultValue: "+ Add User" })}
+              </button>
+            </div>
+          ) : (
+            noOptionsMessage || t("no_results")
+          )}
         </CommandEmpty>
         <CommandGroup>
           {usersList?.map((user: UserReadMinimal, i) => (
@@ -132,6 +152,7 @@ export default function UserSelector({
   facilityId,
   organizationId,
   disabled,
+  onAddUser,
 }: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -234,6 +255,7 @@ export default function UserSelector({
               onChange={onChange}
               setOpen={setOpen}
               ref={ref}
+              onAddUser={onAddUser}
             />
           </div>
         </DrawerContent>
@@ -261,6 +283,7 @@ export default function UserSelector({
           onChange={onChange}
           setOpen={setOpen}
           ref={ref}
+          onAddUser={onAddUser}
         />
       </PopoverContent>
     </Popover>

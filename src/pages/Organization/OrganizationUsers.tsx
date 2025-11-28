@@ -141,6 +141,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                       updateQuery({ sheet: open ? "link" : "", username: "" });
                     }}
                     preSelectedUsername={qParams.username}
+                    onAddUserSheetOpen={() => updateQuery({ sheet: "add" })}
                   />
                 )}
               </div>
