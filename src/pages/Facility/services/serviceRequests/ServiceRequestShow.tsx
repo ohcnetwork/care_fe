@@ -395,27 +395,24 @@ export default function ServiceRequestShow({
                           </Button>
                         </DropdownMenuItem>
                       )}
-                      {request.status === Status.on_hold ||
-                        (request.status === Status.revoked && (
-                          <DropdownMenuItem
-                            asChild
-                            className="text-primary-900"
+                      {(request.status === Status.on_hold ||
+                        request.status === Status.revoked) && (
+                        <DropdownMenuItem asChild className="text-primary-900">
+                          <Button
+                            variant="ghost"
+                            onClick={() =>
+                              updateServiceRequest({
+                                status: Status.active,
+                              })
+                            }
+                            className="w-full flex flex-row justify-stretch items-center"
+                            disabled={isUpdatingServiceRequest}
                           >
-                            <Button
-                              variant="ghost"
-                              onClick={() =>
-                                updateServiceRequest({
-                                  status: Status.active,
-                                })
-                              }
-                              className="w-full flex flex-row justify-stretch items-center"
-                              disabled={isUpdatingServiceRequest}
-                            >
-                              <CareIcon icon="l-play" className="mr-1" />
-                              {t("mark_as_active")}
-                            </Button>
-                          </DropdownMenuItem>
-                        ))}
+                            <CareIcon icon="l-play" className="mr-1" />
+                            {t("mark_as_active")}
+                          </Button>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem asChild className="text-primary-900">
                         <Button
                           variant="ghost"
