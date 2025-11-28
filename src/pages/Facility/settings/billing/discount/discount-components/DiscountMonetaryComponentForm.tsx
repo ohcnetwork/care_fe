@@ -87,12 +87,15 @@ export function DiscountMonetaryComponentForm({
           title: z
             .string()
             .trim()
-            .regex(/^[a-zA-Z\s]+$/, {
+            .min(1, { message: t("field_required") })
+            .refine((val) => val.length === 0 || /^[a-zA-Z\s]+$/.test(val), {
               message: t("only_alphabets_are_allowed"),
-            })
-            .min(1, { message: t("field_required") }),
+            }),
+
           conditions: z.array(conditionSchema).default([]),
         })
+
+        // ✅ factor/amount requirement
         .superRefine((data, ctx) => {
           const hasFactor = typeof data.factor === "number" && data.factor >= 0;
 
@@ -105,6 +108,7 @@ export function DiscountMonetaryComponentForm({
               message: t("either_amount_or_factor_required"),
               path: ["factor"],
             });
+
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: t("either_amount_or_factor_required"),
@@ -112,9 +116,11 @@ export function DiscountMonetaryComponentForm({
             });
           }
         })
+
+        // ✅ code display text validation
         .refine(
           (data) => {
-            return data.code == null || data.code.display.length > 0;
+            return !data.code || (data.code && data.code.display.length > 0);
           },
           {
             message: t("display_text_is_required_for_custom_codes"),
