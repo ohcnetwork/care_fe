@@ -107,47 +107,9 @@ export default function ServiceRequestTable({
                     entityId={request.id}
                     facilityId={facilityId}
                     currentTags={request.tags ?? []}
-                    onUpdate={(
-                      updatedTags?: { id: string; display: string }[],
-                    ) => {
-                      try {
-                        queryClient.setQueryData(
-                          ["serviceRequests", facilityId, locationId],
-                          (oldData: any) => {
-                            if (!oldData) return oldData;
-
-                            if (Array.isArray(oldData)) {
-                              return oldData.map((r) =>
-                                r.id === request.id
-                                  ? { ...r, tags: updatedTags ?? r.tags }
-                                  : r,
-                              );
-                            }
-
-                            if (oldData?.data && Array.isArray(oldData.data)) {
-                              return {
-                                ...oldData,
-                                data: oldData.data.map((r: any) =>
-                                  r.id === request.id
-                                    ? { ...r, tags: updatedTags ?? r.tags }
-                                    : r,
-                                ),
-                              };
-                            }
-                            return oldData;
-                          },
-                        );
-                      } catch (err) {
-                        console.warn(
-                          "cache update for serviceRequests failed",
-                          err,
-                        );
-                      }
-
+                    onUpdate={() => {
                       queryClient.invalidateQueries({
-                        queryKey: ["serviceRequests", facilityId],
-
-                        exact: false,
+                        queryKey: ["serviceRequests", facilityId, locationId],
                       });
                     }}
                     patientId={request.encounter.patient.id}
