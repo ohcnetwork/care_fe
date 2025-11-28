@@ -25,6 +25,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -511,22 +512,13 @@ export const PractitionerSelector = ({
                 </label>
                 <div className="relative flex items-center h-10">
                   <SearchIcon className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                  <input
+                  <Input
                     type="text"
                     id="practitioner-search"
                     placeholder={t("search_practitioners")}
                     value={practitionerSearch}
                     onChange={(e) => setPractitionerSearch(e.target.value)}
-                    className="w-full pl-10 pr-3
-                      rounded-md 
-                      text-sm 
-                      h-full
-                      leading-9
-                      outline-none 
-                      focus:outline-none 
-                      focus:ring-0 
-                      border-none
-                      cursor-text"
+                    className="w-full pl-10 pr-3 rounded-md text-sm h-full leading-9 shadow-none outline-none focus:outline-none focus:ring-0 border-none cursor-text"
                   />
                 </div>
               </div>
