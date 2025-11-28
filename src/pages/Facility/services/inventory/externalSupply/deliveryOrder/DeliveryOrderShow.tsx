@@ -3,6 +3,7 @@ import {
   ChevronLeft,
   Edit,
   EllipsisVertical,
+  Hash,
   MoreVertical,
   Truck,
 } from "lucide-react";
@@ -16,6 +17,7 @@ import BackButton from "@/components/Common/BackButton";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -494,7 +496,7 @@ export function DeliveryOrderShow({
         {/* Delivery Order Details */}
         <Card>
           <CardContent className="space-y-1 p-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">
                   {t("deliver_to")}
@@ -539,18 +541,59 @@ export function DeliveryOrderShow({
                   </Badge>
                 </div>
               </div>
-            </div>
 
-            {deliveryOrder.note && (
-              <div className="pt-3">
-                <label className="text-sm font-medium text-gray-700">
-                  {t("note")}
-                </label>
-                <p className="text-sm whitespace-pre-wrap">
-                  {deliveryOrder.note}
-                </p>
+              {deliveryOrder.note && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    {t("note")}
+                  </label>
+                  <p className="text-sm whitespace-pre-wrap">
+                    {deliveryOrder.note}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-1">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    {t("tags_other")}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <TagAssignmentSheet
+                      entityType="delivery_order"
+                      entityId={deliveryOrder.id}
+                      facilityId={facilityId}
+                      currentTags={deliveryOrder.tags ?? []}
+                      onUpdate={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: ["deliveryOrders", deliveryOrderId],
+                        });
+                      }}
+                      trigger={
+                        deliveryOrder.tags && deliveryOrder.tags.length > 0 ? (
+                          <Button variant="outline" size="xs">
+                            <Hash className="size-3" /> {t("tags")}
+                          </Button>
+                        ) : (
+                          <Button variant="outline" size="xs">
+                            <Hash className="size-3" /> {t("add_tags")}
+                          </Button>
+                        )
+                      }
+                    />
+                    {deliveryOrder?.tags?.map((tag) => (
+                      <Badge
+                        key={tag.id}
+                        variant="secondary"
+                        className="rounded-sm"
+                      >
+                        {tag.display}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 
