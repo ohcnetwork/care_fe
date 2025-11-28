@@ -62,7 +62,7 @@ export const structuredHandlers: {
         return [];
       }
 
-      const alternateIdentifier = `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+      const prescriptionIdentifier = `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`;
 
       return [
         {
@@ -75,7 +75,7 @@ export const structuredHandlers: {
                 ? undefined
                 : {
                     status: PrescriptionStatus.active,
-                    alternate_identifier: alternateIdentifier,
+                    alternate_identifier: prescriptionIdentifier,
                   },
               note: sanitizeNote(medication.note),
               encounter: encounterId,

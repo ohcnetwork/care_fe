@@ -1,5 +1,8 @@
 import { Code } from "@/types/base/code/code";
-import { PrescriptionRead } from "@/types/emr/prescription/prescription";
+import {
+  PrescriptionCreate,
+  PrescriptionRead,
+} from "@/types/emr/prescription/prescription";
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { UserReadMinimal } from "@/types/user/user";
@@ -217,8 +220,9 @@ export interface MedicationRequest {
   requester: UserReadMinimal;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface MedicationRequestCreate extends MedicationRequest {}
+export interface MedicationRequestCreate extends MedicationRequest {
+  create_prescription?: PrescriptionCreate;
+}
 
 export interface MedicationRequestRequest
   extends Omit<MedicationRequest, "requester"> {
