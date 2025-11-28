@@ -88,14 +88,14 @@ export function DiscountMonetaryComponentForm({
             .string()
             .trim()
             .min(1, { message: t("field_required") })
-            .refine((val) => val.length === 0 || /^[a-zA-Z\s]+$/.test(val), {
+            .refine((val) => /^[a-zA-Z\s]+$/.test(val), {
               message: t("only_alphabets_are_allowed"),
             }),
 
           conditions: z.array(conditionSchema).default([]),
         })
 
-        // ✅ factor/amount requirement
+        // Factor OR amount must be present
         .superRefine((data, ctx) => {
           const hasFactor = typeof data.factor === "number" && data.factor >= 0;
 
@@ -117,10 +117,10 @@ export function DiscountMonetaryComponentForm({
           }
         })
 
-        // ✅ code display text validation
+        // Custom code display validation
         .refine(
           (data) => {
-            return !data.code || (data.code && data.code.display.length > 0);
+            return !data.code || data.code.display?.length > 0;
           },
           {
             message: t("display_text_is_required_for_custom_codes"),
