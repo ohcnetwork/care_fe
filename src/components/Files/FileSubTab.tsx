@@ -132,7 +132,7 @@ export const FilesPage = ({
     type: type,
     multiple: true,
     allowedExtensions: BACKEND_ALLOWED_EXTENSIONS,
-    allowNameFallback: true,
+    allowNameFallback: false,
     compress: false,
   });
 
