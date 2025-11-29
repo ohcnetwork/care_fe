@@ -254,13 +254,19 @@ export function EncounterQuestion({
                 status: value,
               })
             }
-            disabled={disabled}
+            disabled={disabled || encounter.status === "discharged"}
           >
             <SelectTrigger>
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
-              {ENCOUNTER_STATUS.map((encounterStatus) => (
+              {ENCOUNTER_STATUS.filter((status) => {
+                if (status === "unknown") return false;
+                if (status === "discharged") {
+                  return encounter.status === "discharged";
+                }
+                return true;
+              }).map((encounterStatus) => (
                 <SelectItem key={encounterStatus} value={encounterStatus}>
                   {t(`encounter_status__${encounterStatus}`)}
                 </SelectItem>
