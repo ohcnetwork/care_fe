@@ -8,11 +8,9 @@ import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
+import Loading from "@/components/Common/Loading";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-
-import { DebugPreview } from "@/components/Common/DebugPreview";
-import Loading from "@/components/Common/Loading";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
@@ -975,11 +973,11 @@ export function QuestionnaireForm({
           setFormState={setQuestionnaireForms}
         />
 
-        <DebugPreview
+        {/* <DebugPreview
           data={questionnaireForms}
           title={t("questionnaire_form")}
           className="p-4 space-y-6 max-w-4xl m-2"
-        />
+        /> */}
       </div>
     </div>
   );
