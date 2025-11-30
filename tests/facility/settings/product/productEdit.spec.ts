@@ -27,10 +27,9 @@ test.describe("Product Edit", () => {
     // Revert status to active as part of cleanup
     await page.getByRole("button", { name: "Edit" }).click();
     await page.getByLabel("Status").click();
-    await page.getByRole("option", { name: "Active" }).click();
+    await page.getByRole("option", { name: "Active", exact: true }).click();
     await page.getByRole("button", { name: "Update" }).click();
 
-    // Verify success toast again
     await expect(page.getByText("Product updated successfully")).toBeVisible();
   });
 });
