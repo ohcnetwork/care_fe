@@ -199,9 +199,9 @@ export function EncounterCommandDialog({
             icon: <Building2 />,
           },
           {
-            id: "dispense-medicine",
-            label: t("dispense_medicine"),
-            shortcut: getShortcutDisplay("dispense-medicine"),
+            id: "dispense",
+            label: t("dispense"),
+            shortcut: getShortcutDisplay("dispense"),
             icon: <Pill />,
           },
         ],
