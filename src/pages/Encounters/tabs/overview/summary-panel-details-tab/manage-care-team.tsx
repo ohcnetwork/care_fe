@@ -12,6 +12,25 @@ import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 import { EmptyState } from "./empty-state";
 
+// Helper to build a full name from available fields
+const buildFullName = (m: any) => {
+  if (!m) return "";
+  // Common fields: prefix, first_name, middle_name, last_name, suffix
+  const prefix = (m.prefix || m.title || "").toString().trim();
+  const first = (m.first_name || "").toString().trim();
+  const middle = (m.middle_name || "").toString().trim();
+  const last = (m.last_name || "").toString().trim();
+  const suffix = (m.suffix || "").toString().trim();
+
+  const nameParts = [prefix, first, middle, last].filter(Boolean);
+  let full = nameParts.join(" ");
+  if (suffix) {
+    // append suffix with a comma if there's already a name
+    full = full ? `${full}, ${suffix}` : suffix;
+  }
+  return full || m.username || m.email || ""; // fallback
+};
+
 export const ManageCareTeam = () => {
   const { t } = useTranslation();
   const {
@@ -43,34 +62,38 @@ export const ManageCareTeam = () => {
             {(showAllMembers
               ? encounter.care_team
               : encounter.care_team.slice(0, 3)
-            ).map((member, index) => (
-              <div
-                key={member.member.id}
-                className="flex items-center gap-2 p-2 rounded-md border border-gray-100 bg-gray-200/20"
-              >
-                <Avatar
-                  key={member.member.id}
-                  name={member.member.first_name}
-                  imageUrl={member.member.profile_picture_url}
-                  className="size-9 rounded-full border border-white shadow-sm"
-                />{" "}
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex flex-col">
-                    <span className="font-medium text-black text-sm">
-                      {member.member.first_name}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {member.role.display}
-                    </span>
+            ).map((member: any, index: number) => {
+              const person = member.member || {};
+              const fullName = buildFullName(person);
+
+              return (
+                <div
+                  key={person.id ?? index}
+                  className="flex items-center gap-2 p-2 rounded-md border border-gray-100 bg-gray-200/20"
+                >
+                  <Avatar
+                    name={fullName || person.first_name}
+                    imageUrl={person.profile_picture_url}
+                    className="size-9 rounded-full border border-white shadow-sm"
+                  />
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-black text-sm">
+                        {fullName || person.first_name}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {member.role?.display}
+                      </span>
+                    </div>
+                    {index === 0 && (
+                      <Badge variant="primary" className="font-normal">
+                        {t("primary")}
+                      </Badge>
+                    )}
                   </div>
-                  {index === 0 && (
-                    <Badge variant="primary" className="font-normal">
-                      {t("primary")}
-                    </Badge>
-                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {encounter.care_team.length > 3 && !showAllMembers && (
               <div
                 onClick={() => setShowAllMembers(true)}
