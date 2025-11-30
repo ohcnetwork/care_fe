@@ -6,7 +6,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   dateFilter,
   encounterPriorityFilter,
@@ -101,7 +100,6 @@ export function EncounterList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     cacheBlacklist: [
-      "name",
       "encounter_id",
       "external_identifier",
       "tags",
@@ -112,7 +110,6 @@ export function EncounterList({
   const {
     status,
     priority,
-    name,
     encounter_id,
     external_identifier,
     patient_filter,
@@ -131,7 +128,6 @@ export function EncounterList({
           created_date_after,
           created_date_before,
         ),
-        name,
         encounter_class: encounterClass,
         external_identifier,
         limit: resultsPerPage,
@@ -167,8 +163,8 @@ export function EncounterList({
     .filter(Boolean) as TagConfig[];
 
   useEffect(() => {
-    // Set default date range if no dates are present
-    if (!created_date_after && !created_date_before) {
+    // Set default date range if no dates are present and no patient filter is active
+    if (!created_date_after && !created_date_before && !patient_filter) {
       const today = new Date();
       const defaultDays = careConfig.encounterDateFilter;
       if (defaultDays === 0) {
@@ -184,7 +180,7 @@ export function EncounterList({
         });
       }
     }
-  }, [created_date_after, created_date_before, updateQuery]);
+  }, [created_date_after, created_date_before, patient_filter, updateQuery]);
 
   const filters = [
     encounterStatusFilter("status"),
@@ -240,6 +236,17 @@ export function EncounterList({
         : undefined,
   });
 
+  const displaySelectedFilters =
+    patient_filter && !created_date_after && !created_date_before
+      ? {
+          ...selectedFilters,
+          created_date: {
+            ...selectedFilters.created_date,
+            selected: [],
+          },
+        }
+      : selectedFilters;
+
   return (
     <Page
       title={t("encounter_class_encounters", {
@@ -263,24 +270,22 @@ export function EncounterList({
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <div>
-                  <Input
-                    type="text"
-                    placeholder={t("search")}
-                    value={name || ""}
-                    onChange={(e) => updateQuery({ name: e.target.value })}
-                  />
-                </div>
                 <PatientIdentifierFilter
-                  onSelect={(patientId) =>
-                    updateQuery({ patient_filter: patientId })
+                  onSelect={(patientId, patientName) =>
+                    updateQuery({
+                      patient_filter: patientId,
+                      patient_name: patientName,
+                      created_date_after: undefined,
+                      created_date_before: undefined,
+                    })
                   }
                   placeholder={t("filter_by_identifier")}
                   className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
                   patientId={qParams.patient_filter}
+                  patientName={qParams.patient_name}
                 />
                 <MultiFilter
-                  selectedFilters={selectedFilters}
+                  selectedFilters={displaySelectedFilters}
                   onFilterChange={handleFilterChange}
                   onOperationChange={handleOperationChange}
                   onClearAll={handleClearAll}
@@ -297,10 +302,7 @@ export function EncounterList({
           </div>
         </div>
 
-        <div
-          className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
-          data-cy="encounter-list-cards"
-        >
+        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
           {isFetching ? (
             <CardGridSkeleton count={6} />
           ) : encounters.length === 0 ? (

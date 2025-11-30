@@ -1,13 +1,14 @@
-import careConfig from "@careConfig";
-import * as Sentry from "@sentry/browser";
-import React from "react";
-import { createRoot } from "react-dom/client";
+import "@/style/index.css";
 import "reactflow/dist/style.css";
-import { registerSW } from "virtual:pwa-register";
+
+import * as Sentry from "@sentry/browser";
 
 import App from "@/App";
-import "@/i18n";
-import "@/style/index.css";
+import { initI18n } from "@/i18n";
+import careConfig from "@careConfig";
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { registerSW } from "virtual:pwa-register";
 
 // Extend Window interface to include CARE_API_URL
 declare global {
@@ -32,9 +33,23 @@ if (import.meta.env.PROD) {
   });
 }
 
-const root = createRoot(document.getElementById("root") as HTMLElement);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-);
+// Initialize i18n with namespaces from API before rendering the app
+initI18n()
+  .then(() => {
+    const root = createRoot(document.getElementById("root") as HTMLElement);
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>,
+    );
+  })
+  .catch((error) => {
+    console.error("Failed to initialize i18n:", error);
+    // Still render the app even if i18n initialization fails
+    const root = createRoot(document.getElementById("root") as HTMLElement);
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>,
+    );
+  });

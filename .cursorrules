@@ -1,72 +1,41 @@
-# CARE Frontend
+You are an expert in TypeScript, React, Shadcn UI, Tailwind.
 
-You are an expert in TypeScript, React, Shadcn UI, Tailwind, and CARE frontend development.
+Key Principles
 
-CARE is a Digital Public Good and Hospital Management Information System (HMIS) that enables TeleICU operations and decentralized administration of healthcare capacity across healthcare facilities.
+- Write concise, technical TypeScript code with accurate examples.
+- Use functional and declarative programming patterns; avoid classes.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
 
-## Key Principles
+Naming Conventions
 
-- Write concise, technical TypeScript code with accurate examples
-- Use functional and declarative programming patterns; avoid classes
-- Prefer iteration and modularization over code duplication
-- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
+- Use lowercase with dashes for directories (e.g., components/auth-wizard).
+- Favor named exports for components.
 
-## Naming Conventions
+TypeScript Usage
 
-- Use lowercase with dashes for directories (e.g., patient-management/, facility-overview/)
-- Favor named exports for components
-- Use PascalCase for components (PatientOverview, FacilityList)
-- Use camelCase for functions and variables (fetchData, isLoading)
+- Use TypeScript for all code; prefer interfaces over types.
+- Avoid enums; use maps instead.
+- Use functional components with TypeScript interfaces.
 
-## TypeScript Usage
+Syntax and Formatting
 
-- Use TypeScript for all code; prefer interfaces over types for data structures
-- Avoid enums; use maps instead (except for medical constants like BloodGroupChoices)
-- Use functional components with TypeScript interfaces
-- Strict typing for all data and API interfaces
+- Use the "function" keyword for pure functions.
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
+- Use declarative JSX.
 
-## Syntax and Formatting
+UI and Styling
 
-- Use the "function" keyword for pure functions
-- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements
-- Use declarative JSX
-- Export page components as default exports
-- Handle data with proper null checks and error boundaries
+- Use Shadcn UI, Radix, and Tailwind for components and styling.
+- Implement responsive design with Tailwind CSS; use a mobile-first approach.
 
-## UI and Styling
+General Guidelines
 
-- Use Shadcn UI, Radix, and Tailwind for components and styling
-- Use CAREUI for custom components (Calendar, forms)
-- Implement responsive design with Tailwind CSS; use a mobile-first approach
+- Care uses TanStack Query for data fetching from the API along with query and mutate utilities for the queryFn and mutationFn. (Docs @ /Utils/request/README.md)
+- APIs are defined in the api.tsx file.
+- Use raviger for routing.
+- Add and reuse proper translations for the components in the en.json file.
 
-## Data & API Guidelines
+# Testing Guidelines
 
-- CARE uses TanStack Query for data fetching with query and mutate utilities (src/Utils/request/README.md)
-- APIs are defined in *.Api.ts files under src/types/ directories
-- Use zod validation for all data inputs
-- Handle data with appropriate security measures
-
-## Routing & Navigation
-
-- Use raviger for routing
-- Organize routes by domains (Patient/, Facility/, etc.)
-- Implement proper navigation history
-
-## Internationalization
-
-- Add and reuse proper translations in en.json
-- Use consistent term translations across components
-- Support date/time formatting
-
-## Standards
-
-- WCAG 2.1 AA accessibility compliance
-- Proper error boundaries for critical data
-
-## Testing Guidelines
-
-For Playwright testing guidelines, refer to tests/README.md for testing patterns.
-
-## Reference
-
-See .github/copilot-instructions.md and .cursor/rules/*.mdc for comprehensive guidance.
+For Playwright testing guidelines, use official documentation from https://playwright.dev/docs/writing-tests

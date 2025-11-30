@@ -549,43 +549,41 @@ export default function PatientIdentifierConfigForm({
               )}
 
               {/* Status Section */}
-              {!isAutoMaintained && (
-                <div>
-                  <h2 className="text-lg font-semibold mb-1">{t("status")}</h2>
-                  <FormDescription>{t("status_help")}</FormDescription>
-                  <div className="max-w-xs">
-                    <FormField
-                      control={form.control}
-                      name="status"
-                      render={({ field }) => (
-                        <FormItem className="mt-2">
-                          <FormLabel>{t("status")}</FormLabel>
-                          <FormControl>
-                            <Select
-                              onValueChange={field.onChange}
-                              value={field.value}
-                            >
-                              <SelectTrigger ref={field.ref}>
-                                <SelectValue placeholder={t("select_status")} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {Object.values(
-                                  PatientIdentifierConfigStatus,
-                                ).map((status) => (
+              <div>
+                <h2 className="text-lg font-semibold mb-1">{t("status")}</h2>
+                <FormDescription>{t("status_help")}</FormDescription>
+                <div className="max-w-xs">
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem className="mt-2">
+                        <FormLabel>{t("status")}</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <SelectTrigger ref={field.ref}>
+                              <SelectValue placeholder={t("select_status")} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.values(PatientIdentifierConfigStatus).map(
+                                (status) => (
                                   <SelectItem key={status} value={status}>
                                     {t(status)}
                                   </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                                ),
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-              )}
+              </div>
             </div>
             <Button
               type="submit"

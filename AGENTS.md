@@ -1,32 +1,21 @@
 # AGENTS.md
 
-This file provides guidance for AI coding agents working with the CARE frontend repository.
-
-## Complete Instructions System
-
-This repository uses a comprehensive instructions system:
-
-- Main Instructions: Complete project overview and workflows (`.github/copilot-instructions.md`)
-- Agent Environment: Pre-configured development environment (`.github/workflows/copilot-setup-steps.yml`)
-
-## Project Context
-
-CARE is a Digital Public Good and Hospital Management Information System (HMIS) that enables TeleICU operations and decentralized administration of healthcare capacity across healthcare facilities. This is a React + TypeScript + Vite frontend application.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Build/Lint/Test Commands
+- `npm run dev`: Start development server
+- `npm run build`: Build for production 
+- `npm run lint`: Run ESLint
+- `npm run lint-fix`: Run ESLint with auto-fix
+- `npm run format`: Format code with Prettier
+- `npm run playwright:test`: Run Playwright tests in headless mode
+- `npm run playwright:test:ui`: Run Playwright tests in interactive UI mode
 
-```bash
-npm run dev          # Start development server on http://localhost:4000
-npm run build        # Build for production (~2 minutes)
-npm run lint         # Run ESLint (~85 seconds)
-npm run format       # Format code with Prettier
-npm run playwright:test:ui # Open Playwright UI for testing
-```
-
-## Code Style Standards
-
-- TypeScript: Strict mode for data safety, type definitions
-- Components: Feature-based organization (Patient/, Facility/, etc.)
-- State Management: @tanstack/react-query for server data, React hooks for UI state
-- UI System: shadcn/ui for standard components, CAREUI for custom components
-- Testing: Playwright E2E testing for critical workflows
+## Code Style Guidelines
+- **TypeScript**: Strict mode, ES2022 target, path aliases (`@/*` for src)
+- **Formatting**: Double quotes, 2-space indent, semicolons required
+- **Imports**: Order by 3rd-party → library → CAREUI → UI → components → hooks → utils → relative
+- **Types**: Use `interface` for objects, avoid explicit `any`, proper nullability
+- **Naming**: PascalCase for components/classes, camelCase for variables/functions
+- **Components**: Organized by feature, maintain separation of concerns
+- **Error Handling**: Use dedicated error handlers, TypeScript strict null checks

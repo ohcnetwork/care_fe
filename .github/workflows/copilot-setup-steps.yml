@@ -48,19 +48,6 @@ jobs:
         run: npm run setup
         timeout-minutes: 2
 
-      - name: Cache Playwright Browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
-      - name: Install Playwright
-        run: |
-          npm run playwright:install 2>/dev/null || echo "Playwright install failed (expected in restricted environments)"
-        timeout-minutes: 5
-
       - name: Display Setup Summary
         run: |
           echo "Copilot setup completed successfully!"
