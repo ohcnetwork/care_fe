@@ -23,6 +23,12 @@
   ],
   "ignoreUnresolved": [
     [
+      "__federation__",
+      [
+        "src/PluginEngine.tsx"
+      ]
+    ],
+    [
       "./pluginMap",
       [
         "src/pluginTypes.ts"
@@ -63,12 +69,6 @@
       ]
     ],
     [
-      "tsx/cjs",
-      [
-        "node_modules/find-cypress-specs/src/index.js"
-      ]
-    ],
-    [
       "virtual:pwa-register",
       [
         "src/index.tsx"
@@ -80,7 +80,6 @@
     "src/index.tsx",
     "vite.config.mts",
     "tailwind.config.js",
-    "cypress.config.ts",
     "scripts/**"
   ]
 }

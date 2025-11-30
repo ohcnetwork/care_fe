@@ -73,11 +73,11 @@ export function LocationPicker({
     queryFn: query(locationApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
-        parent: currentParent || "",
+        parent: currentParent ? currentParent : undefined,
         mode: "kind",
         ordering: "sort_index",
         status: "active",
-        mine: true,
+        mine: currentParent ? undefined : true,
       },
     }),
   });

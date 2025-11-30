@@ -168,7 +168,6 @@ export function LocationCardWrapper({
                 {t("cancel")}
               </Button>
               <Button
-                data-cy="location-card-wrapper-save-button"
                 variant="primary"
                 onClick={handleConfirm}
                 disabled={isPending}
