@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Box, ChevronLeft, Edit, Truck } from "lucide-react";
+import { Box, ChevronLeft, Edit, Hash, Truck } from "lucide-react";
 import { Link } from "raviger";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/Common/Table";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -446,7 +447,7 @@ export function RequestOrderShow({
 
         <Card className="border-none rounded-lg">
           <CardContent className="space-y-1 p-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-700">
                   {t("deliver_to")}
@@ -491,6 +492,46 @@ export function RequestOrderShow({
                   >
                     {t(requestOrder.priority)}
                   </Badge>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  {t("tags_other")}
+                </label>
+                <div className="flex flex-wrap gap-1">
+                  <TagAssignmentSheet
+                    entityType="request_order"
+                    entityId={requestOrder.id}
+                    facilityId={facilityId}
+                    currentTags={requestOrder.tags ?? []}
+                    onUpdate={async () => {
+                      await queryClient.invalidateQueries({
+                        queryKey: ["requestOrders"],
+                        exact: false,
+                      });
+                      await queryClient.refetchQueries({
+                        queryKey: ["requestOrders"],
+                        exact: false,
+                      });
+                    }}
+                    trigger={
+                      requestOrder.tags && requestOrder.tags.length > 0 ? (
+                        <Button variant="outline" size="xs">
+                          <Hash className="size-3" /> {t("tags")}
+                        </Button>
+                      ) : (
+                        <Button variant="outline" size="xs">
+                          <Hash className="size-3" /> {t("add_tags")}
+                        </Button>
+                      )
+                    }
+                  />
+                  {requestOrder.tags.map((tag) => (
+                    <Badge key={tag.id} variant="secondary" className="text-xs">
+                      {tag.display}
+                    </Badge>
+                  ))}
                 </div>
               </div>
 
