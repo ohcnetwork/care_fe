@@ -39,19 +39,36 @@ export const UserStatusIndicator = ({
   const { t } = useTranslation();
 
   return (
-    <span className={cn(addPadding ? "px-3 py-1" : "py-px", className)}>
+    // make this an inline-flex container so the badge can be constrained/truncated
+    <span
+      className={cn(
+        addPadding ? "px-3 py-1" : "py-px",
+        className,
+        "inline-flex",
+      )}
+    >
       {isUserOnline(user) || isAuthUser ? (
-        <Badge variant="primary" className="whitespace-nowrap">
+        // limit badge width and allow truncation if necessary
+        <Badge
+          variant="primary"
+          className="whitespace-nowrap max-w-[9rem] truncate"
+        >
           <span className="inline-block size-2 shrink-0 rounded-full bg-green-500" />
           <span>{t("online")}</span>
         </Badge>
       ) : user.last_login ? (
-        <Badge variant="yellow" className="whitespace-nowrap">
+        <Badge
+          variant="yellow"
+          className="whitespace-nowrap max-w-[9rem] truncate"
+        >
           <span className="inline-block size-2 shrink-0 rounded-full bg-yellow-500" />
           <RelativeDateTooltip date={user.last_login} />
         </Badge>
       ) : (
-        <Badge variant="secondary" className="whitespace-nowrap">
+        <Badge
+          variant="secondary"
+          className="whitespace-nowrap max-w-[9rem] truncate"
+        >
           <span className="inline-block size-2 shrink-0 rounded-full bg-gray-500" />
           <span className="hidden lg:inline">{t("never_logged_in")}</span>
           <span className="lg:hidden">{t("never")}</span>
@@ -66,8 +83,9 @@ export function UserCard(props: UserCardProps) {
   const { t } = useTranslation();
 
   return (
+    // ensure content overflow is clipped at the card level
     <Card key={user.id} className={cn("h-full", user.deleted && "opacity-60")}>
-      <CardContent className="p-4 flex flex-col h-full justify-between">
+      <CardContent className="p-4 flex flex-col h-full justify-between overflow-hidden">
         <div className="flex items-start gap-3">
           <Avatar
             name={`${user.first_name} ${user.last_name}`}
@@ -75,13 +93,16 @@ export function UserCard(props: UserCardProps) {
             className="h-12 w-12 sm:h-14 sm:w-14 text-xl sm:text-2xl flex-shrink-0"
           />
 
+          {/* make this column shrinkable (min-w-0) so children can truncate correctly */}
           <div className="flex flex-col min-w-0 flex-1">
             <div className="flex flex-col gap-1">
-              <div className="flex items-start justify-between">
-                <h1 className="text-base font-bold break-words pr-2">
+              {/* Add min-w-0 and full width to the row so the status can be constrained */}
+              <div className="flex items-start justify-between min-w-0 w-full">
+                <h1 className="text-base font-bold break-words pr-2 min-w-0">
                   {formatName(user)}
                 </h1>
-                <span className="text-sm text-gray-500">
+                {/* prevent the status from growing and pushing layout; keep it shrink-0 */}
+                <span className="text-sm text-gray-500 flex-shrink-0 ml-2">
                   <UserStatusIndicator user={user} />
                 </span>
               </div>
