@@ -163,12 +163,10 @@ export function EncounterList({
     .filter(Boolean) as TagConfig[];
 
   useEffect(() => {
-    // Set default date range if no dates are present and no patient filter is active
     if (!created_date_after && !created_date_before && !patient_filter) {
       const today = new Date();
       const defaultDays = careConfig.encounterDateFilter;
       if (defaultDays === 0) {
-        // Today only
         updateQuery({
           created_date_after: dateQueryString(today),
           created_date_before: dateQueryString(today),
@@ -196,7 +194,6 @@ export function EncounterList({
           query.tags = (value as TagConfig[])?.map((tag) => tag.id).join(",");
           break;
         case "tags_behavior":
-          // tags_behavior is already handled by the filter system
           break;
         case "created_date":
           {
@@ -246,6 +243,33 @@ export function EncounterList({
           },
         }
       : selectedFilters;
+
+  const isActiveEncounter = (enc: any) => {
+    if (typeof enc?.live === "boolean") return !!enc.live;
+    if (typeof enc?.status === "string") {
+      const s = enc.status.toLowerCase();
+      return s === "live" || s === "active";
+    }
+    return false;
+  };
+
+  const getTimestamp = (enc: any) => {
+    const dateStr =
+      enc?.updated_at || enc?.ended_at || enc?.created_at || enc?.start_date;
+    const d = dateStr ? new Date(dateStr) : new Date(0);
+    return d.getTime();
+  };
+
+  const sortedEncounters = Array.isArray(encounters)
+    ? [...encounters].sort((a, b) => {
+        const aActive = isActiveEncounter(a);
+        const bActive = isActiveEncounter(b);
+        if (aActive && !bActive) return -1;
+        if (!aActive && bActive) return 1;
+        // Within same group, show most recently updated/ended/created first
+        return getTimestamp(b) - getTimestamp(a);
+      })
+    : [];
 
   return (
     <Page
@@ -305,13 +329,13 @@ export function EncounterList({
         <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
           {isFetching ? (
             <CardGridSkeleton count={6} />
-          ) : encounters.length === 0 ? (
+          ) : sortedEncounters.length === 0 ? (
             <div className="col-span-full">
               <EmptyState />
             </div>
           ) : (
             <>
-              {encounters.map((encounter: EncounterRead) => (
+              {sortedEncounters.map((encounter: EncounterRead) => (
                 <EncounterInfoCard
                   key={encounter.id}
                   encounter={encounter}
