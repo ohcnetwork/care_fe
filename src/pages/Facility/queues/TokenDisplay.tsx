@@ -1,7 +1,17 @@
+import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
+import { useScheduleResource } from "@/components/Schedule/useScheduleResource";
 import { BatchRequestResponse } from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
-import { renderTokenNumber, TokenStatus } from "@/types/tokens/token/token";
+import {
+  formatScheduleResourceName,
+  SchedulableResourceType,
+} from "@/types/scheduling/schedule";
+import {
+  renderTokenNumber,
+  TokenRead,
+  TokenStatus,
+} from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import { TokenQueueRead } from "@/types/tokens/tokenQueue/tokenQueue";
 import {
@@ -12,116 +22,130 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 interface TokenDisplayProps {
   facilityId: string;
+  config: { resourceType: SchedulableResourceType; resourceId: string }[];
 }
 
 const REFRESH_INTERVAL = 10000; // 10 seconds
 
-export const TokenDisplay = ({ facilityId }: TokenDisplayProps) => {
-  const [qParams] = useQueryParams();
+export const TokenDisplay = ({ facilityId, config }: TokenDisplayProps) => {
   const { t } = useTranslation();
 
-  const resourcesObj: Record<string, string> = qParams.resources
-    ? Object.fromEntries(
-        qParams.resources.split(",").map((resource: string) => {
-          const [resourceType, resourceId] = resource.split(":");
-          return [resourceId, resourceType];
-        }),
-      )
-    : {};
-
   const { data: resourceQueues } = useQuery({
-    queryKey: ["queues", facilityId, resourcesObj],
+    queryKey: ["queues", facilityId, config],
     queryFn: query(batchApi.batchRequest, {
       body: {
-        requests: Object.entries(resourcesObj).map(
-          ([resourceId, resouceType]) => ({
-            url: `/api/v1/facility/${facilityId}/token/queue/?resource_type=${resouceType}&resource_id=${resourceId}&date=${dayjs().format("YYYY-MM-DD")}`,
-            method: "GET",
-            reference_id: resourceId,
-          }),
-        ),
+        requests: config.map(({ resourceType, resourceId }, index) => ({
+          url: `/api/v1/facility/${facilityId}/token/queue/?resource_type=${resourceType}&resource_id=${resourceId}&date=${dayjs().format("YYYY-MM-DD")}`,
+          method: "GET",
+          reference_id: `${index}`,
+        })),
       },
     }),
-    select: (data: BatchRequestResponse<PaginatedResponse<TokenQueueRead>>) => {
-      const obj: Record<string, string> = {};
-      data.results.forEach((result) => {
-        obj[result.reference_id] =
-          result.data?.results.find((queue) => queue.is_primary)?.id ?? "";
-      });
-
-      return obj;
-    },
+    select: (data: BatchRequestResponse<PaginatedResponse<TokenQueueRead>>) =>
+      data.results.map((queues) => {
+        console.log(queues.data?.results, "queues");
+        const queueId =
+          queues.data?.results.find((q) => q.is_primary)?.id ?? "";
+        if (!queueId) {
+          toast.error("No queue found");
+        }
+        return { queueId, ...config[parseInt(queues.reference_id)] };
+      }),
   });
 
-  const { data: resourceServicePoints } = useQuery({
-    queryKey: ["servicePoints", facilityId, resourcesObj],
+  console.log("resourceQueues", resourceQueues);
+
+  const { data: servicePoints } = useQuery({
+    queryKey: ["servicePoints", facilityId, resourceQueues],
     queryFn: query(batchApi.batchRequest, {
       body: {
-        requests: Object.entries(resourcesObj).map(
-          ([resourceId, resourceType]) => ({
+        requests: (resourceQueues ?? []).map(
+          ({ resourceId, resourceType }, index) => ({
             url: `/api/v1/facility/${facilityId}/token/sub_queue/?resource_type=${resourceType}&resource_id=${resourceId}&status=${TokenSubQueueStatus.ACTIVE}`,
             method: "GET",
-            reference_id: resourceId,
+            reference_id: `${index}`,
           }),
         ),
       },
     }),
+    enabled: !!resourceQueues?.length,
     select: (
       data: BatchRequestResponse<PaginatedResponse<TokenSubQueueRead>>,
-    ) => {
-      const obj: Record<
-        string,
-        { servicePointId: string; servicePointName: string }[]
-      > = {};
-
-      data.results.forEach((result) => {
-        obj[result.reference_id] =
-          result.data?.results.map((subQueue) => ({
-            servicePointId: subQueue.id,
-            servicePointName: subQueue.name,
-          })) ?? [];
-      });
-
-      return obj;
-    },
+    ) =>
+      data.results.flatMap((subQueues) =>
+        (subQueues.data?.results ?? []).map((subQueue) => ({
+          servicePoint: subQueue,
+          ...(resourceQueues ?? [])[parseInt(subQueues.reference_id)],
+        })),
+      ),
   });
 
-  // Combine resourceQueues and resourceServicePoints by matching reference_id
-  const queueServicePointsMap: Record<
-    string,
-    { servicePointId: string; servicePointName: string }[]
-  > = {};
+  console.log("servicePoints", servicePoints);
 
-  if (resourceQueues && resourceServicePoints) {
-    Object.keys(resourceQueues).forEach((referenceId) => {
-      const queueId = resourceQueues[referenceId];
-      const servicePoints = resourceServicePoints[referenceId];
-
-      if (queueId && servicePoints) {
-        queueServicePointsMap[queueId] = servicePoints;
-      }
-    });
+  if (!servicePoints) {
+    return <Loading />;
   }
+
+  const itemCount = servicePoints.length;
+
+  // Get grid layout class based on item count
+  const getGridClass = () => {
+    switch (itemCount) {
+      case 1:
+        return "grid-cols-1";
+      case 2:
+        return "grid-cols-2";
+      case 3:
+        return "grid-cols-3";
+      case 4:
+        return "grid-cols-2";
+      case 5:
+        return "grid-cols-6";
+      case 6:
+        return "grid-cols-3";
+      case 7:
+        return "grid-cols-8";
+      case 8:
+        return "grid-cols-4";
+      case 9:
+        return "grid-cols-3";
+      default:
+        return "grid-cols-4";
+    }
+  };
+
+  // Calculate column span for each item
+  const getColSpan = (index: number) => {
+    if (itemCount === 5) {
+      return index < 2 ? 3 : 2;
+    }
+    if (itemCount === 7) {
+      return 2;
+    }
+    return 1;
+  };
 
   return (
     <Page title={t("token_display")} hideTitleOnPage>
-      <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(500px,1fr))] p-4 bg-[#1FB6C9] h-[calc(100vh-3rem)]">
-        {Object.entries(queueServicePointsMap).map(([queueId, servicePoints]) =>
-          servicePoints.map((servicePoint) => (
-            <TokenCard
-              key={servicePoint.servicePointId}
-              facilityId={facilityId}
-              queue_id={queueId}
-              servicePointId={servicePoint.servicePointId}
-              servicePointName={servicePoint.servicePointName}
-            />
-          )),
-        )}
+      <div
+        className={`grid gap-2 -mx-12 -my-12 bg-[#1FB6C9] h-screen p-3 ${getGridClass()}`}
+      >
+        {servicePoints.map((servicePoint, index) => (
+          <TokenCard
+            key={servicePoint.servicePoint.id}
+            facilityId={facilityId}
+            colSpan={getColSpan(index)}
+            resourceType={servicePoint.resourceType}
+            resourceId={servicePoint.resourceId}
+            queueId={servicePoint.queueId}
+            servicePoint={servicePoint.servicePoint}
+          />
+        ))}
       </div>
     </Page>
   );
@@ -129,42 +153,63 @@ export const TokenDisplay = ({ facilityId }: TokenDisplayProps) => {
 
 const TokenCard = ({
   facilityId,
-  queue_id,
-  servicePointId,
-  servicePointName,
+  queueId,
+  servicePoint,
+  resourceId,
+  resourceType,
+  colSpan = 1,
 }: {
   facilityId: string;
-  queue_id: string;
-  servicePointId: string;
-  servicePointName: string;
+  queueId: string;
+  servicePoint: { id: string; name: string };
+  resourceType: SchedulableResourceType;
+  resourceId: string;
+  colSpan?: number;
 }) => {
-  const { data: tokens } = useQuery({
-    queryKey: ["tokens", facilityId, queue_id, servicePointId],
+  const { data: token } = useQuery({
+    queryKey: ["tokens", facilityId, queueId, servicePoint.id],
     queryFn: query(tokenApi.list, {
-      pathParams: { facility_id: facilityId, queue_id: queue_id },
+      pathParams: { facility_id: facilityId, queue_id: queueId },
       queryParams: {
-        sub_queue: servicePointId,
+        sub_queue: servicePoint.id,
         status: TokenStatus.IN_PROGRESS,
         limit: 1,
       },
+      silent: true,
     }),
     refetchInterval: REFRESH_INTERVAL,
+    select: (data: PaginatedResponse<TokenRead>) => data.results[0],
   });
 
+  const resource = useScheduleResource({
+    resourceType,
+    resourceId,
+    facilityId,
+  });
+
+  const colSpanClass =
+    colSpan === 2
+      ? "col-span-2"
+      : colSpan === 3
+        ? "col-span-3"
+        : colSpan === 4
+          ? "col-span-4"
+          : "";
+
   return (
-    <div
-      key={servicePointId}
-      className="flex flex-col bg-[#07131F] border-2 border-[#1FB6C9] p-1"
-    >
-      <div className="bg-[#122235] font-bold text-white text-6xl w-full text-center p-10">
-        {servicePointName}
+    <div className={`flex flex-col bg-[#07131F] h-full ${colSpanClass}`}>
+      <div className="bg-[#122235] w-full text-center p-4">
+        <span className="font-bold text-white text-6xl">
+          {servicePoint.name}
+        </span>
+        {resource && (
+          <div className="text-2xl text-white">
+            {formatScheduleResourceName(resource)}
+          </div>
+        )}
       </div>
       <div className="flex items-center justify-center text-7xl font-bold text-[#FFD83D] h-full">
-        {tokens?.results[0] ? (
-          <span>{renderTokenNumber(tokens?.results[0])}</span>
-        ) : (
-          <span>--</span>
-        )}
+        {token ? <span>{renderTokenNumber(token)}</span> : <span>--</span>}
       </div>
     </div>
   );
