@@ -48,9 +48,19 @@ export function useScheduleResourceFromPath() {
   return extractPathParams(path);
 }
 
-export function useScheduleResource(): ScheduleResource | undefined {
+interface UseScheduleResourceProps {
+  resourceType: SchedulableResourceType;
+  resourceId: string;
+}
+
+export function useScheduleResource({
+  props,
+}: { props?: UseScheduleResourceProps } = {}): ScheduleResource | undefined {
   const path = useFullPath();
-  const { facilityId, resourceType, resourceId } = extractPathParams(path);
+  const facilityId = extractPathParams(path).facilityId;
+  const resourceId = props?.resourceId || extractPathParams(path).resourceId;
+  const resourceType =
+    props?.resourceType || extractPathParams(path).resourceType;
 
   const practitionerQuery = useQuery({
     queryKey: ["facility-user", facilityId, resourceId],

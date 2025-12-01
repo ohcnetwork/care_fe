@@ -5230,6 +5230,7 @@
   "token_created": "Token created successfully",
   "token_creation_not_configured": "Token creation is not configured for this facility. Please contact your administrator.",
   "token_details": "Token Details",
+  "token_display": "Token Display",
   "token_generated_successfully": "Token generated successfully",
   "token_has_been_completed": "Token has been completed",
   "token_id": "Token ID",

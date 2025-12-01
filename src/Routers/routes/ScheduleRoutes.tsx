@@ -63,19 +63,9 @@ const ScheduleRoutes: AppRoutes = {
       />
     ),
 
-  "/facility/:facilityId/token-display/:resourceType/:encodedResourceServicePoints":
-    ({ facilityId, resourceType, encodedResourceServicePoints }) => {
-      const decodedResourceServicePoints = atob(encodedResourceServicePoints);
-      const resourceServicePoints = JSON.parse(decodedResourceServicePoints);
-      console.log(resourceServicePoints);
-      return (
-        <TokenDisplay
-          facilityId={facilityId}
-          resourceType={resourceType}
-          resourceServicePoints={resourceServicePoints}
-        />
-      );
-    },
+  "/facility/:facilityId/token-display": ({ facilityId }) => {
+    return <TokenDisplay facilityId={facilityId} />;
+  },
 };
 
 export default ScheduleRoutes;
