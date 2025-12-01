@@ -352,7 +352,7 @@ const AppointmentEncounterHeaderActions = ({
             <ChevronDown className="size-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="min-w-59x`" align="start">
+        <DropdownMenuContent className="min-w-[59px]" align="start">
           {options.map((option) => (
             <DropdownMenuItem
               key={option}
