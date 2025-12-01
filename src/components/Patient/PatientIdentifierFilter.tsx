@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Search, X } from "lucide-react";
+import { QrCode, Search, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
@@ -38,8 +38,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
+import PatientIDScanDialog from "@/components/Scan/PatientIDScanDialog";
 import { Card } from "@/components/ui/card";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
@@ -57,6 +59,8 @@ interface Props {
   className?: string;
   patientId?: string;
   patientName?: string;
+  align?: "start" | "center" | "end";
+  hideScanButton?: boolean;
 }
 
 interface IdentifierConfig {
@@ -254,6 +258,8 @@ export default function PatientIdentifierFilter({
   className,
   patientId,
   patientName,
+  align = "start",
+  hideScanButton = false,
 }: Props) {
   const { t } = useTranslation();
   const { facility, facilityId } = useCurrentFacility();
@@ -269,6 +275,32 @@ export default function PatientIdentifierFilter({
   const [yearOfBirth, setYearOfBirth] = useState("");
   const [verificationOpen, setVerificationOpen] = useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
+  const [scanDialogOpen, setScanDialogOpen] = useState(false);
+
+  // Enable external scanner detection when not in a dialog
+  useBarcodeScanner({
+    onScan: (scannedPatientId: string) => {
+      if (!open && !verificationOpen && !scanDialogOpen) {
+        let extractedId = scannedPatientId;
+
+        try {
+          const parsed = JSON.parse(scannedPatientId);
+          if (parsed.uuid && typeof parsed.uuid === "string") {
+            extractedId = parsed.uuid;
+          }
+        } catch {
+          extractedId = scannedPatientId;
+        }
+
+        handleScanSuccess(extractedId);
+        toast.success(t("patient_details_scanned_successfully"));
+      }
+    },
+    enabled: !open && !verificationOpen && !scanDialogOpen,
+    preventDefault: false,
+    maxLength: 500,
+    timeout: 500,
+  });
 
   // Set initial patient ID and name if provided
   useEffect(() => {
@@ -380,6 +412,14 @@ export default function PatientIdentifierFilter({
     onSelect(undefined);
   };
 
+  const handleScanSuccess = (scannedPatientId: string) => {
+    onSelect(scannedPatientId, t("scanned_patient"));
+    setSelectedPatient({
+      id: scannedPatientId,
+      name: t("scanned_patient"),
+    } as PatientRead);
+  };
+
   const selectedConfig = allIdentifierConfigs.find((c) => c.id === searchType);
 
   const triggerButton = (
@@ -408,6 +448,18 @@ export default function PatientIdentifierFilter({
           className,
         )}
       >
+        {!hideScanButton && (
+          <Button
+            variant="ghost"
+            onClick={() => setScanDialogOpen(true)}
+            className="shrink-0 text-gray-950 px-2 border-r rounded-r-none bg-white"
+            aria-label={t("scan_patient_qr")}
+            data-shortcut-id="scan-patient"
+          >
+            <QrCode className="size-4" />
+            <span className="hidden md:block">{t("scan")}</span>
+          </Button>
+        )}
         {isMobile ? (
           <Drawer open={open} onOpenChange={setOpen}>
             <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
@@ -429,7 +481,10 @@ export default function PatientIdentifierFilter({
         ) : (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-            <PopoverContent className="w-80 p-0 overflow-hidden rounded-lg">
+            <PopoverContent
+              className="w-80 p-0 overflow-hidden rounded-lg"
+              align={align}
+            >
               <PatientSearchSelector
                 allIdentifierConfigs={allIdentifierConfigs}
                 searchType={searchType}
@@ -456,6 +511,12 @@ export default function PatientIdentifierFilter({
           </Button>
         )}
       </div>
+
+      <PatientIDScanDialog
+        open={scanDialogOpen}
+        onOpenChange={setScanDialogOpen}
+        onScanSuccess={handleScanSuccess}
+      />
 
       <Dialog open={verificationOpen} onOpenChange={setVerificationOpen}>
         <DialogContent>

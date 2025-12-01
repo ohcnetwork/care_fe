@@ -28,57 +28,6 @@ function getDescriptionHtml(description: string) {
   return JSON.stringify(sanitizedHtml);
 }
 
-/**
- * Parses a remote app configuration string into its components
- * @param appConfig - Configuration string for a remote app
- * @returns Parsed configuration object
- */
-interface ParsedRemoteConfig {
-  url: string;
-  org: string;
-  repo: string;
-}
-
-function parseRemoteConfig(appConfig: string): ParsedRemoteConfig {
-  if (!appConfig.includes("/")) {
-    throw new Error(
-      `Invalid app configuration format: ${appConfig}. Expected 'org/repo' or 'org/repo@url'.`,
-    );
-  }
-  // Handle custom URLs (both localhost and custom hosted)
-  if (appConfig.includes("@")) {
-    const [package_, url] = appConfig.split("@");
-    const [org, repo] = package_.split("/");
-    if (!org || !repo || !url) {
-      throw new Error(
-        `Invalid custom URL configuration: ${appConfig}. Expected 'org/repo@url'.`,
-      );
-    }
-    // Add appropriate protocol based on whether it's localhost
-    const protocol = url.includes("localhost") ? "http://" : "https://";
-    const fullUrl = url.startsWith("http") ? url : `${protocol}${url}`;
-
-    return {
-      url: `${fullUrl}/assets/remoteEntry.js`,
-      org,
-      repo,
-    };
-  }
-
-  // Handle GitHub Pages URLs
-  const [org, repo] = appConfig.split("/");
-  if (!org || !repo) {
-    throw new Error(
-      `Invalid GitHub Pages configuration: ${appConfig}. Expected 'org/repo'.`,
-    );
-  }
-  return {
-    url: `https://${org}.github.io/${repo}/assets/remoteEntry.js`,
-    org,
-    repo,
-  };
-}
-
 export default defineConfig(async ({ mode }): Promise<UserConfig> => {
   const env = loadEnv(mode, process.cwd(), "");
 
@@ -211,7 +160,6 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       watch: {
         // Ignore test files from file watching to avoid unnecessary HMR triggers
         ignored: [
-          "**/cypress/**",
           "**/tests/**",
           "**/test/**",
           "**/*.test.*",

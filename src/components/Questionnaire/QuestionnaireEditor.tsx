@@ -1350,7 +1350,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 patientId="preview"
                 subjectType={form.watch("subject_type")}
                 encounterId="preview"
-                facilityId="preview"
               />
             </CardContent>
           </Card>

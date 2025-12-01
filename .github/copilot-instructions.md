@@ -16,7 +16,7 @@ Always reference these instructions first and fallback to search or bash command
 - Routing: raviger for application routing
 - Forms: react-hook-form with zod validation for medical data integrity
 - Internationalization: i18next for multi-language healthcare interfaces
-- Testing: Cypress for E2E testing of critical healthcare workflows
+- Testing: Playwright for E2E testing of critical healthcare workflows
 
 ### Project Structure
 - `src/components/` - React components organized by feature and domain
@@ -24,7 +24,6 @@ Always reference these instructions first and fallback to search or bash command
 - `src/pages/` - Page-level components and routing
 - `src/Utils/` - Utility functions and helpers
 - `src/types/` - TypeScript type definitions for medical data
-- `cypress/` - End-to-end tests for healthcare workflows
 
 ## Cross-Cutting Concerns
 
@@ -47,7 +46,6 @@ Multi-language support for global healthcare deployment:
 Specialized guidance automatically applied based on file paths:
 - `careui.instructions.md` - Healthcare-specific component development
 - `react-components.instructions.md` - React component architecture and patterns  
-- `cypress-tests.instructions.md` - E2E testing for healthcare workflows
 - `utils.instructions.md` - Utility function standards and medical data helpers
 - `typescript-types.instructions.md` - Type definitions for medical data structures
 - `pages.instructions.md` - Page component architecture and routing patterns
@@ -88,7 +86,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - Or use nvm: `nvm install 22 && nvm use 22`
 
 ### Bootstrap, Build, and Test the Repository
-- `npm install --ignore-scripts` -- installs dependencies without Cypress binary (takes ~16 seconds)
+- `npm install --ignore-scripts` -- installs dependencies without platform-specific binaries (takes ~16 seconds)
 - `npm run postinstall` -- installs platform-specific dependencies and generates headers (takes ~3 seconds)
 - `npm run setup` -- generates plugin map and setup (takes ~1 second)
 - `npm run build` -- production build. NEVER CANCEL: Takes 2+ minutes. Set timeout to 180+ seconds.
@@ -102,11 +100,12 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - `npm run unimported` -- checks for unused imports (takes ~7 seconds)
 
 ### Testing
-- Cypress E2E Testing:
-  - `npm run cypress:install` -- FAILS due to network restrictions. Document this limitation.
-  - `npm run cypress:open` -- opens Cypress UI (requires backend setup)
-  - `npm run cypress:run` -- runs all tests headlessly (requires backend setup)
-  - `npm run cypress:run:gui` -- runs tests in headed mode
+- Playwright E2E Testing:
+  - `npm run playwright:install` -- installs Playwright browsers
+  - `npm run playwright:test` -- runs all tests headlessly
+  - `npm run playwright:test:ui` -- runs tests in interactive UI mode
+  - `npm run playwright:test:headed` -- runs tests in headed mode
+  - `npm run playwright:show-report` -- views the HTML test report
 - Testing requires local backend: Follow [CARE backend setup docs](https://github.com/ohcnetwork/care#self-hosting)
 - Environment setup for testing:
   ```env
@@ -152,7 +151,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 ### Development Tools
 - ESLint 9.18.0 with TypeScript plugin
 - Prettier 3.3.3 with Tailwind plugin
-- Cypress 14.5.4 for E2E testing
+- Playwright for E2E testing
 - Vite PWA plugin for service worker
 
 ## Configuration Files & Environment
@@ -162,12 +161,11 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - `care.config.ts` -- application configuration
 - `vite.config.mts` -- Vite build configuration
 - `tsconfig.json` -- TypeScript configuration with path aliases
-- `cypress.config.ts` -- Cypress test configuration
+- `playwright.config.ts` -- Playwright test configuration
 
 ## Common Issues and Solutions
 
 ### Known Limitations
-- Cypress binary download fails in restricted environments -- this is expected and documented
 - Network errors when running without backend configuration -- application still loads UI correctly
 - Translation loading errors without proper backend setup -- expected behavior
 
@@ -186,7 +184,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 
 ### CI/CD Pipeline
 - Linting: Runs on every PR to `develop` branch
-- Cypress Tests: Runs with parallel execution and Docker backend
+- Playwright Tests: Runs E2E tests with Docker backend
 - Docker Build: Multi-platform builds for production
 - Deployment: Automatic staging deployment on `develop` branch
 
@@ -227,7 +225,7 @@ Refer to specific instruction files in `.github/instructions/` for detailed guid
 - [shadcn/ui](https://ui.shadcn.com/) - Primary component library documentation
 
 ### Testing and Quality
-- [Cypress Documentation](https://docs.cypress.io/) - E2E testing for healthcare workflows
+- [Playwright Documentation](https://playwright.dev/) - E2E testing for healthcare workflows
 - [React Hook Form](https://react-hook-form.com/) - Form handling for medical data
 - [Zod](https://zod.dev/) - Schema validation for healthcare data integrity
 
