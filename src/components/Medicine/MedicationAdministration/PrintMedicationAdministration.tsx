@@ -285,7 +285,7 @@ export const PrintMedicationAdministration = (props: {
                       new Date(administration.occurrence_period_start),
                       "dd MMM yyyy, hh:mm a",
                     ),
-                    administered_by: `Dr. ${formatName(administration.created_by)}`,
+                    administered_by: formatName(administration.created_by),
                     notes: administration.note,
                   };
                 })}
@@ -299,7 +299,7 @@ export const PrintMedicationAdministration = (props: {
                 return (
                   <div key={administraterId} className="text-center">
                     <p className="text-sm text-gray-600 font-semibold">
-                      Dr. {formatName(administrater)}
+                      {formatName(administrater)}
                     </p>
                   </div>
                 );
