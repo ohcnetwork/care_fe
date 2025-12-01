@@ -161,27 +161,23 @@ export default function UserResetPassword({
                               successMessage={t("password_success_message")}
                               validations={[
                                 {
-                                  description: t("password_length_validation"),
+                                  description: "password_length_validation",
                                   fulfilled: field.value.length >= 8,
                                 },
                                 {
-                                  description: t(
-                                    "password_lowercase_validation",
-                                  ),
+                                  description: "password_lowercase_validation",
                                   fulfilled: /[a-z]/.test(field.value),
                                 },
                                 {
-                                  description: t(
-                                    "password_uppercase_validation",
-                                  ),
+                                  description: "password_uppercase_validation",
                                   fulfilled: /[A-Z]/.test(field.value),
                                 },
                                 {
-                                  description: t("password_number_validation"),
+                                  description: "password_number_validation",
                                   fulfilled: /\d/.test(field.value),
                                 },
                                 {
-                                  description: t("new_password_same_as_old"),
+                                  description: "new_password_same_as_old",
                                   fulfilled:
                                     field.value !== form.watch("old_password"),
                                 },

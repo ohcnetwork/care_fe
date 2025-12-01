@@ -1,3 +1,5 @@
+import { Trans } from "react-i18next";
+
 import { cn } from "@/lib/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -30,14 +32,14 @@ export const ValidationHelper = ({
       {isInputEmpty &&
         validations.map((validation, index) => (
           <div key={index} className="text-gray-500 mb-2 text-sm">
-            {validation.description}
+            <Trans i18nKey={validation.description} />
           </div>
         ))}
       {!isInputEmpty &&
         !allValid &&
         unfulfilledValidations.map((validation, index) => (
           <div key={index} className="text-gray-500 mb-2 text-sm">
-            {validation.description}
+            <Trans i18nKey={validation.description} />
           </div>
         ))}
       {allValid && (

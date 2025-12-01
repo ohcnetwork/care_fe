@@ -476,27 +476,27 @@ export default function UserForm({
                           successMessage={t("username_success_message")}
                           validations={[
                             {
-                              description: t("username_min_length_validation"),
+                              description: "username_min_length_validation",
                               fulfilled: (field.value || "").length >= 4,
                             },
                             {
-                              description: t("username_max_length_validation"),
+                              description: "username_max_length_validation",
                               fulfilled: (field.value || "").length <= 16,
                             },
                             {
-                              description: t("username_characters_validation"),
+                              description: "username_characters_validation",
                               fulfilled: /^[a-z0-9._-]*$/.test(
                                 field.value || "",
                               ),
                             },
                             {
-                              description: t("username_start_end_validation"),
+                              description: "username_start_end_validation",
                               fulfilled: /^[a-z0-9].*[a-z0-9]$/.test(
                                 field.value || "",
                               ),
                             },
                             {
-                              description: t("username_consecutive_validation"),
+                              description: "username_consecutive_validation",
                               fulfilled: !/(?:[._-]{2,})/.test(
                                 field.value || "",
                               ),
@@ -637,19 +637,19 @@ export default function UserForm({
                           successMessage={t("password_success_message")}
                           validations={[
                             {
-                              description: t("password_length_validation"),
+                              description: "password_length_validation",
                               fulfilled: (field.value || "").length >= 8,
                             },
                             {
-                              description: t("password_lowercase_validation"),
+                              description: "password_lowercase_validation",
                               fulfilled: /[a-z]/.test(field.value || ""),
                             },
                             {
-                              description: t("password_uppercase_validation"),
+                              description: "password_uppercase_validation",
                               fulfilled: /[A-Z]/.test(field.value || ""),
                             },
                             {
-                              description: t("password_number_validation"),
+                              description: "password_number_validation",
                               fulfilled: /\d/.test(field.value || ""),
                             },
                           ]}
