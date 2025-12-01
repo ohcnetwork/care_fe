@@ -5,6 +5,7 @@ import { DeviceDetail } from "@/types/device/device";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
+import { PlugConfigMeta } from "@/types/plugConfig";
 import { UserReadMinimal } from "@/types/user/user";
 import { LazyExoticComponent } from "react";
 import { UseFormReturn } from "react-hook-form";
@@ -123,6 +124,10 @@ export type PluginManifest = {
     LazyComponent<React.FC<PluginEncounterTabProps>>
   >;
   devices?: readonly PluginDeviceManifest[];
+};
+
+export type PluginManifestWithMeta = PluginManifest & {
+  meta: PlugConfigMeta;
 };
 
 export { pluginMap };

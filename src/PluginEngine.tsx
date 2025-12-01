@@ -1,22 +1,26 @@
-import ErrorBoundary from "@/components/Common/ErrorBoundary";
-import Loading from "@/components/Common/Loading";
-import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
-import { useQuery } from "@tanstack/react-query";
+import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
+import {
+  PluginManifest,
+  PluginManifestWithMeta,
+  SupportedPluginComponents,
+} from "@/pluginTypes";
 import {
   __federation_method_getRemote as getFederationRemote,
   __federation_method_setRemote as setFederationRemote,
   __federation_method_unwrapDefault as unwrapModule,
 } from "__federation__";
-import { Loader2Icon } from "lucide-react";
 import React, { Suspense, useEffect, useState } from "react";
 
-import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
-import query from "@/Utils/request/query";
-
-import { PluginManifest, SupportedPluginComponents } from "@/pluginTypes";
+import ErrorBoundary from "@/components/Common/ErrorBoundary";
+import Loading from "@/components/Common/Loading";
+import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
+import query from "@/Utils/request/query";
+import { useQuery } from "@tanstack/react-query";
 import { t } from "i18next";
+import { Loader2Icon } from "lucide-react";
 import { z } from "zod";
+import { PlugConfigMeta } from "./types/plugConfig";
 
 // Import the remote component synchronously
 export default function PluginEngine({
@@ -24,7 +28,9 @@ export default function PluginEngine({
 }: {
   children: React.ReactNode;
 }) {
-  const [pluginManifests, setPluginManifests] = useState<PluginManifest[]>([]);
+  const [pluginManifests, setPluginManifests] = useState<
+    PluginManifestWithMeta[]
+  >([]);
 
   // Fetch enabled plugins from the backend API
   const { data: enabledPlugins } = useQuery({
@@ -49,15 +55,19 @@ export default function PluginEngine({
           }
 
           setFederationRemote(plugin.slug, {
-            url: () => Promise.resolve(plugin.meta.url),
+            url: () => Promise.resolve(plugin.meta.url as string),
             format: "esm",
             from: "vite",
             externalType: "promise",
           });
 
           return await getFederationRemote(plugin.slug, "./manifest")
-            .then((manifest) => {
-              return manifest;
+            .then((module) => {
+              const manifest = unwrapModule<PluginManifest>(module);
+              return {
+                ...manifest,
+                meta: plugin.meta,
+              } as PluginManifestWithMeta;
             })
             .catch((e) =>
               console.error(
@@ -67,11 +77,8 @@ export default function PluginEngine({
             );
         }),
       );
-      const filteredManifests = manifests.filter(
-        (m): m is PluginManifest => m !== undefined,
-      );
-      const availablePlugins = filteredManifests.map((manifest) =>
-        unwrapModule(manifest),
+      const availablePlugins = manifests.filter(
+        (m): m is PluginManifestWithMeta => m !== undefined,
       );
 
       if (availablePlugins.length === 0) {
@@ -80,7 +87,7 @@ export default function PluginEngine({
       }
 
       console.log(
-        `Loading ${filteredManifests.length} plugins; available plugins`,
+        `Loading ${availablePlugins.length} plugins; available plugins`,
         availablePlugins,
       );
       setPluginManifests(availablePlugins);
@@ -108,7 +115,7 @@ export default function PluginEngine({
 }
 
 type PluginProps<K extends keyof SupportedPluginComponents> =
-  React.ComponentProps<SupportedPluginComponents[K]>;
+  SupportedPluginComponents[K] extends React.FC<infer P> ? P : never;
 
 export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
   __name,
@@ -119,9 +126,13 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
   return (
     <>
       {plugins.map((plugin) => {
-        const Component = plugin.components?.[
-          __name
-        ] as React.ComponentType<unknown>;
+        const Component = plugin.components?.[__name] as React.ComponentType<
+          PluginProps<K> & { __meta: PlugConfigMeta }
+        >;
+        const propsWithMeta = {
+          ...props,
+          __meta: plugin.meta,
+        } as PluginProps<K> & { __meta: PlugConfigMeta };
 
         if (!Component) {
           return null;
@@ -141,7 +152,7 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
                 </div>
               }
             >
-              <Component {...props} />
+              <Component {...propsWithMeta} />
             </React.Suspense>
           </PluginErrorBoundary>
         );
