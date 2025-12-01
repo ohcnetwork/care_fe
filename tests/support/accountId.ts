@@ -32,7 +32,7 @@ export function getAccountId(): string {
   const raw = fs.readFileSync(META_PATH, "utf8");
   try {
     const { id } = JSON.parse(raw);
-    if (!id) throw new Error("Missing id in tests/support/accountMeta.json");
+    if (!id) throw new Error(`Missing id in account meta file: ${META_PATH}`);
     cachedId = id;
     return id;
   } catch (err) {
