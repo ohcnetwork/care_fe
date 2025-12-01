@@ -164,7 +164,7 @@ export function PaymentReconciliationShow({
             <Link
               href={`/facility/${facilityId}/billing/payments/${paymentReconciliationId}/print`}
             >
-              <CareIcon icon="l-print" className="mr-2 size-4" />
+              <PrinterIcon className="size-4" />
               {t("print_receipt")}
               <ShortcutBadge actionId="print-button" />
             </Link>
@@ -395,7 +395,7 @@ export function PaymentReconciliationShow({
                     <Link
                       href={`/facility/${facilityId}/billing/invoice/${payment.target_invoice.id}/print`}
                     >
-                      <CareIcon icon="l-print" className="mr-2 size-4" />
+                      <PrinterIcon className="size-4" />
                       {t("print_invoice")}
                     </Link>
                   </Button>

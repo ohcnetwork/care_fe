@@ -56,7 +56,11 @@ export function InvoiceList({
                   : t("view_and_manage_invoices")}
               </p>
             </div>
-            <Button variant="outline" onClick={() => setScanDialogOpen(true)}>
+            <Button
+              variant="outline"
+              aria-label={t("scan_qr")}
+              onClick={() => setScanDialogOpen(true)}
+            >
               <QrCode className="size-4" />
               <span className="hidden md:block"> {t("scan_qr")}</span>
             </Button>
