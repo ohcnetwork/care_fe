@@ -9,7 +9,8 @@ import { Avatar } from "@/components/Common/Avatar";
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { formatUserName } from "@/Utils/userUtils";
+
+import { formatName } from "@/Utils/utils";
 
 import { EmptyState } from "./empty-state";
 
@@ -51,14 +52,14 @@ export const ManageCareTeam = () => {
               >
                 <Avatar
                   key={member.member.id}
-                  name={formatUserName(member.member)}
+                  name={formatName(member.member)}
                   imageUrl={member.member.profile_picture_url}
                   className="size-9 rounded-full border border-white shadow-sm"
                 />{" "}
                 <div className="flex items-center justify-between w-full">
                   <div className="flex flex-col">
                     <span className="font-medium text-black text-sm">
-                      {formatUserName(member.member)}
+                      {formatName(member.member)}
                     </span>
                     <span className="text-xs text-gray-500">
                       {member.role.display}
