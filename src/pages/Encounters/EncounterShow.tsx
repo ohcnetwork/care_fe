@@ -103,11 +103,13 @@ export const EncounterShow = (props: Props) => {
   );
 
   const canAccess = canViewClinicalData || canViewEncounter;
-  const canViewAppointmentEncounterHeader =
-    primaryEncounter &&
-    (primaryEncounter.appointment?.token ||
-      (primaryEncounter.appointment?.id &&
-        !inactiveEncounterStatus.includes(primaryEncounter.status)));
+  const hasToken = primaryEncounter?.appointment?.token;
+  const isEncounterActive =
+    primaryEncounter?.appointment?.id &&
+    !inactiveEncounterStatus.includes(primaryEncounter?.status ?? "");
+
+  // Header is shown either when token is present or encounter is active and has an appointment
+  const canViewAppointmentEncounterHeader = hasToken || isEncounterActive;
 
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
