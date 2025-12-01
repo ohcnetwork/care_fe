@@ -59,7 +59,7 @@ function RoleCommandContent({
   ref,
 }: RoleCommandContentProps) {
   const { t } = useTranslation();
-  const visibleRoles = rolesList?.filter((role) => !role.is_archived) || [];
+  const filteredRoles = rolesList?.filter((role) => !role.is_archived) || [];
 
   return (
     <Command>
@@ -74,7 +74,7 @@ function RoleCommandContent({
           {isFetching ? t("searching") : t("no_roles_found")}
         </CommandEmpty>
         <CommandGroup>
-          {visibleRoles?.map((role, i) => (
+          {filteredRoles?.map((role, i) => (
             <CommandItem
               key={role.id}
               value={role.name}
@@ -83,7 +83,7 @@ function RoleCommandContent({
                 setOpen(false);
               }}
               className="cursor-pointer"
-              ref={i === visibleRoles.length - 1 ? ref : undefined}
+              ref={i === filteredRoles.length - 1 ? ref : undefined}
             >
               <CheckIcon
                 className={cn(
