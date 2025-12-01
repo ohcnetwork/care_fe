@@ -13,8 +13,6 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -387,7 +385,7 @@ export function PaymentReconciliationShow({
                     <Link
                       href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
                     >
-                      <CareIcon icon="l-eye" className="mr-2 size-4" />
+                      <Eye className="size-4" />
                       {t("view_invoice")}
                     </Link>
                   </Button>
