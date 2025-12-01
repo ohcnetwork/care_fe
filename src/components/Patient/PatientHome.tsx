@@ -193,7 +193,7 @@ export const PatientHome = (props: {
                     <div className="text-xs font-normal leading-5 text-gray-600">
                       {t("last_updated_by")}
                       <div className="font-semibold text-gray-900">
-                        {formatName(patientData.updated_by)}
+                        {formatName(patientData.updated_by || undefined)}
                       </div>
                     </div>
 
@@ -210,7 +210,7 @@ export const PatientHome = (props: {
                     <div className="text-xs font-normal leading-5 text-gray-600">
                       {t("patient_profile_created_by")}
                       <div className="font-semibold text-gray-900">
-                        {formatName(patientData.created_by)}
+                        {formatName(patientData.created_by || undefined)}
                       </div>
                     </div>
                     <div className="whitespace-normal text-xs font-normal text-gray-900">
