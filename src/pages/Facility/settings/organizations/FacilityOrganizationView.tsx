@@ -310,7 +310,7 @@ export default function FacilityOrganizationView({
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="flex items-center justify-end gap-1">
-                            {canManageFacilityOrganization &&
+                            {(canManageFacilityOrganization || isGeoAdmin) &&
                             org.org_type !== "root" ? (
                               <FacilityOrganizationFormSheet
                                 facilityId={facilityId}
@@ -327,7 +327,9 @@ export default function FacilityOrganizationView({
                               <div className="size-10" />
                             )}
 
-                            {!org.has_children && org.org_type !== "root" ? (
+                            {(canManageFacilityOrganization || isGeoAdmin) &&
+                            !org.has_children &&
+                            org.org_type !== "root" ? (
                               <DeleteOrgDialog
                                 org={org}
                                 facilityId={facilityId}
