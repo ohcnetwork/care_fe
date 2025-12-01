@@ -20,7 +20,7 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import BackButton from "@/components/Common/BackButton";
 import { getCurrencySymbol } from "@/components/ui/monetary-display";
-import { getConditionValue } from "@/types/base/condition/condition";
+import { ConditionOperationSummary } from "@/types/base/condition/condition";
 import {
   MonetaryComponent,
   MonetaryComponentOrder,
@@ -294,20 +294,20 @@ export function ChargeItemDefinitionDetail({
                             <p className="text-sm text-gray-500">
                               {t("conditions")}
                             </p>
-                            {component.conditions.map((condition, index) => {
-                              return (
-                                <div
-                                  key={index}
-                                  className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
-                                >
-                                  <span>
-                                    {t(condition.metric)}{" "}
-                                    <span>{t(condition.operation)}</span>{" "}
-                                    {getConditionValue(condition)}
-                                  </span>
-                                </div>
-                              );
-                            })}
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {component.conditions?.map((condition, index) => {
+                                return (
+                                  <div
+                                    key={index}
+                                    className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded border"
+                                  >
+                                    <ConditionOperationSummary
+                                      condition={condition}
+                                    />
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         )}
                       </div>

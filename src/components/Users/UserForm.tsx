@@ -361,7 +361,7 @@ export default function UserForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger data-cy="user-type-select" ref={field.ref}>
+                    <SelectTrigger ref={field.ref}>
                       <SelectValue placeholder={t("select_user_type")} />
                     </SelectTrigger>
                   </FormControl>
@@ -413,11 +413,7 @@ export default function UserForm({
               <FormItem className="flex-1">
                 <FormLabel aria-required>{t("first_name")}</FormLabel>
                 <FormControl>
-                  <Input
-                    data-cy="first-name-input"
-                    placeholder={t("first_name")}
-                    {...field}
-                  />
+                  <Input placeholder={t("first_name")} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -430,11 +426,7 @@ export default function UserForm({
               <FormItem className="flex-1">
                 <FormLabel aria-required>{t("last_name")}</FormLabel>
                 <FormControl>
-                  <Input
-                    data-cy="last-name-input"
-                    placeholder={t("last_name")}
-                    {...field}
-                  />
+                  <Input placeholder={t("last_name")} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -446,11 +438,7 @@ export default function UserForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t("suffix")}</FormLabel>
-                <Input
-                  data-cy="suffix-input"
-                  placeholder={t("suffix")}
-                  {...field}
-                />
+                <Input placeholder={t("suffix")} {...field} />
 
                 <FormMessage />
               </FormItem>
@@ -469,7 +457,6 @@ export default function UserForm({
                   <FormControl>
                     <div className="relative">
                       <Input
-                        data-cy="username-input"
                         placeholder={t("username")}
                         {...field}
                         onFocus={() => setIsUsernameFieldFocused(true)}
@@ -537,12 +524,7 @@ export default function UserForm({
                   <FormItem>
                     <FormLabel aria-required>{t("email")}</FormLabel>
                     <FormControl>
-                      <Input
-                        data-cy="email-input"
-                        type="email"
-                        placeholder={t("email")}
-                        {...field}
-                      />
+                      <Input type="email" placeholder={t("email")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -635,7 +617,6 @@ export default function UserForm({
                       <FormControl>
                         <div className="relative">
                           <PasswordInput
-                            data-cy="password-input"
                             placeholder={t("password")}
                             {...field}
                             onFocus={() => setIsPasswordFieldFocused(true)}
@@ -692,7 +673,6 @@ export default function UserForm({
                       </FormLabel>
                       <FormControl>
                         <PasswordInput
-                          data-cy="confirm-password-input"
                           placeholder={t("confirm_password")}
                           {...field}
                         />
@@ -715,7 +695,6 @@ export default function UserForm({
                 <FormLabel aria-required>{t("phone_number")}</FormLabel>
                 <FormControl>
                   <PhoneInput
-                    data-cy="phone-number-input"
                     placeholder={t("enter_phone_number")}
                     {...field}
                   />
@@ -737,17 +716,13 @@ export default function UserForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger data-cy="gender-select" ref={field.ref}>
+                    <SelectTrigger ref={field.ref}>
                       <SelectValue placeholder={t("select_gender")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {GENDER_TYPES.map((gender) => (
-                      <SelectItem
-                        key={gender.id}
-                        value={gender.id}
-                        data-cy={`gender-${gender.id}`}
-                      >
+                      <SelectItem key={gender.id} value={gender.id}>
                         {gender.text}
                       </SelectItem>
                     ))}
@@ -770,7 +745,6 @@ export default function UserForm({
                 <FormLabel>{t("qualification")}</FormLabel>
                 <FormControl>
                   <Input
-                    data-cy="qualification-input"
                     placeholder={t("qualification")}
                     {...field}
                   />
@@ -792,7 +766,6 @@ export default function UserForm({
                     <FormLabel>{t("years_of_experience")}</FormLabel>
                     <FormControl>
                       <Input
-                        data-cy="experience-input"
                         type="number"
                         placeholder={t("years_of_experience")}
                         {...field}
@@ -811,7 +784,6 @@ export default function UserForm({
                     <FormLabel>{t("medical_council_registration")}</FormLabel>
                     <FormControl>
                       <Input
-                        data-cy="medical-registration-input"
                         placeholder={t("medical_council_registration")}
                         {...field}
                       />
@@ -849,7 +821,6 @@ export default function UserForm({
         <Button
           type="submit"
           className="w-full"
-          data-cy="submit-user-form"
           variant="primary"
           disabled={
             isLoadingUser ||

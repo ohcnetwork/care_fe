@@ -95,6 +95,9 @@ export default function PatientIdentifierConfigList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: PatientIdentifierConfigStatus.active,
+    },
   });
 
   const [selectedConfig, setSelectedConfig] = React.useState<
