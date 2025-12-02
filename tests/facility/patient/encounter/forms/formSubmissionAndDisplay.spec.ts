@@ -5,7 +5,7 @@ import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-test.describe("Respiratory Status Form Submission", () => {
+test.describe("Form Submission and Display in Encounter Overview", () => {
   /**
    * Helper function to interact with form fields by their label text
    */
@@ -46,7 +46,7 @@ test.describe("Respiratory Status Form Submission", () => {
     }
   }
 
-  test("should open a random encounter and fill the Respiratory Status form", async ({
+  test("should submit form from encounter page and verify values display in overview", async ({
     page,
   }) => {
     const facilityId = getFacilityId();
@@ -83,21 +83,20 @@ test.describe("Respiratory Status Form Submission", () => {
     // Search for Respiratory Status form
     await page.locator("[cmdk-input]").fill("Respiratory Status");
 
-    // Wait for search results
-    await page.waitForTimeout(1000);
-
     // Click on Respiratory Status form
     const formOption = page.getByRole("option", {
       name: /respiratory status/i,
     });
-    await expect(formOption).toBeVisible({ timeout: 5000 });
+    await formOption.waitFor({ state: "visible", timeout: 5000 });
     await formOption.click();
 
     // Wait for navigation to the questionnaire form page
     await page.waitForURL(/\/questionnaire\//, { timeout: 10000 });
 
-    // Wait for the form to load
-    await page.waitForTimeout(2000);
+    // Wait for the form to load by waiting for a key form field to be visible
+    await expect(page.getByText("Is bilateral air entry present?")).toBeVisible(
+      { timeout: 10000 },
+    );
 
     // Generate random values for form inputs
     const bilateralAirEntry = "yes";
@@ -180,11 +179,13 @@ test.describe("Respiratory Status Form Submission", () => {
         .getByText("Questionnaire submitted successfully"),
     ).toBeVisible({ timeout: 15000 });
 
-    console.log("✓ Respiratory Status form submitted successfully");
-
     // Wait for navigation back to encounter page
     await page.waitForURL(/\/encounter\/[^/]+/, { timeout: 10000 });
-    await page.waitForTimeout(2000);
+
+    // Wait for the first expected value to be visible, indicating the page is loaded
+    await expect(
+      page.getByText(bilateralAirEntry, { exact: true }).first(),
+    ).toBeVisible({ timeout: 10000 });
 
     // Verify radio button selections with scrolling
     const bilateralAirEntryValue = page
@@ -256,7 +257,5 @@ test.describe("Respiratory Status Form Submission", () => {
       .first();
     await airEntryNoteValue.scrollIntoViewIfNeeded();
     await expect(airEntryNoteValue).toBeVisible();
-
-    console.log("✓ Form submission verified on the page");
   });
 });
