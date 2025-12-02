@@ -64,7 +64,7 @@ const ScheduleRoutes: AppRoutes = {
     ),
 
   // `configStr` would be of the format "l:resourceId1,p:resourceId2,"
-  "/facility/:facilityId/token-display/:configStr": ({
+  "/facility/:facilityId/token_display/:configStr": ({
     facilityId,
     configStr,
   }) => {

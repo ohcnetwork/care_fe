@@ -23,7 +23,6 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 interface TokenDisplayProps {
   facilityId: string;
@@ -45,20 +44,27 @@ export const TokenDisplay = ({ facilityId, config }: TokenDisplayProps) => {
           reference_id: `${index}`,
         })),
       },
+      silent: true,
     }),
     select: (data: BatchRequestResponse<PaginatedResponse<TokenQueueRead>>) =>
-      data.results.map((queues) => {
-        console.log(queues.data?.results, "queues");
+      data.results.reduce<
+        {
+          resourceType: SchedulableResourceType;
+          resourceId: string;
+          queueId: string;
+        }[]
+      >((acc, queues) => {
+        if (queues.status_code !== 200) {
+          return acc;
+        }
         const queueId =
           queues.data?.results.find((q) => q.is_primary)?.id ?? "";
         if (!queueId) {
-          toast.error("No queue found");
+          return acc;
         }
-        return { queueId, ...config[parseInt(queues.reference_id)] };
-      }),
+        return [...acc, { queueId, ...config[parseInt(queues.reference_id)] }];
+      }, []),
   });
-
-  console.log("resourceQueues", resourceQueues);
 
   const { data: servicePoints } = useQuery({
     queryKey: ["servicePoints", facilityId, resourceQueues],
@@ -72,6 +78,7 @@ export const TokenDisplay = ({ facilityId, config }: TokenDisplayProps) => {
           }),
         ),
       },
+      silent: true,
     }),
     enabled: !!resourceQueues?.length,
     select: (
@@ -85,15 +92,12 @@ export const TokenDisplay = ({ facilityId, config }: TokenDisplayProps) => {
       ),
   });
 
-  console.log("servicePoints", servicePoints);
-
   if (!servicePoints) {
     return <Loading />;
   }
 
   const itemCount = servicePoints.length;
 
-  // Get grid layout class based on item count
   const getGridClass = () => {
     switch (itemCount) {
       case 1:
