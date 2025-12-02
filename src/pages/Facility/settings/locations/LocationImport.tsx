@@ -165,7 +165,7 @@ export default function LocationImport({ facilityId }: LocationImportProps) {
         setUploadError("");
         setProcessedLocations(processRowLocations(data));
         setCurrentStep("review");
-      } catch {
+      } catch (_error) {
         setUploadError("Error processing CSV file");
       }
     };
@@ -499,9 +499,7 @@ export function useSaveLocations(facilityId: string) {
         return [...rest, ...children];
       });
     },
-    onError: () => {
-      // Error handling can be added here if needed
-    },
+    onError: () => {},
   });
 
   // Effect: process the next batch whenever the queue changes
