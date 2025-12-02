@@ -179,7 +179,6 @@ export default function SearchInput({
   const [searchValue, setSearchValue] = useState("");
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [focusedIndex, setFocusedIndex] = useState(0);
 
   // Safe access to options
   const safeOptions = useMemo(() => options || [], [options]);
@@ -195,7 +194,7 @@ export default function SearchInput({
       setSelectedOptionIndex(index);
       const option = safeOptions[index];
       setSearchValue(option.value || "");
-      setFocusedIndex(safeOptions.findIndex((op) => op.key === option.key));
+
       setOpen(false);
       inputRef.current?.focus();
 
@@ -219,12 +218,6 @@ export default function SearchInput({
   );
 
   useEffect(() => {
-    if (open) {
-      setFocusedIndex(0);
-    }
-  }, [open]);
-
-  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -241,37 +234,11 @@ export default function SearchInput({
           setSearchValue("");
         }
       }
-
-      if (open) {
-        if (e.key === "ArrowDown") {
-          setFocusedIndex((prevIndex) =>
-            prevIndex === unselectedOptions.length - 1 ? 0 : prevIndex + 1,
-          );
-        } else if (e.key === "ArrowUp") {
-          setFocusedIndex((prevIndex) =>
-            prevIndex === 0 ? unselectedOptions.length - 1 : prevIndex - 1,
-          );
-        } else if (e.key === "Enter") {
-          if (focusedIndex >= 0 && focusedIndex < unselectedOptions.length) {
-            const selectedOptionIndex = options.findIndex(
-              (option) => option.key === unselectedOptions[focusedIndex].key,
-            );
-            handleOptionChange(selectedOptionIndex);
-          }
-        }
-      }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [
-    focusedIndex,
-    open,
-    handleOptionChange,
-    safeOptions,
-    unselectedOptions,
-    options,
-  ]);
+  }, [open]);
 
   useEffect(() => {
     if (autoFocus) {
@@ -365,6 +332,7 @@ export default function SearchInput({
                             return (
                               <CommandItem
                                 key={option.key}
+                                value={option.key}
                                 onSelect={() =>
                                   handleOptionChange(
                                     safeOptions.findIndex(
@@ -374,27 +342,17 @@ export default function SearchInput({
                                     ),
                                   )
                                 }
-                                className={cn(
-                                  "flex items-center p-2 rounded-md cursor-pointer",
-                                  {
-                                    "bg-gray-100": focusedIndex === index,
-                                    "hover:bg-secondary-100": true,
-                                  },
-                                )}
-                                onMouseEnter={() => setFocusedIndex(index)}
-                                onMouseLeave={() => setFocusedIndex(-1)}
+                                className="group flex items-center p-2 rounded-md cursor-pointer hover:bg-secondary-100"
                               >
                                 <span className="flex-1 text-sm">
                                   {t(option.display)}
                                 </span>
-                                {focusedIndex === index && (
-                                  <kbd
-                                    className="ml-2 border border-gray-300 rounded px-1 bg-white text-xs text-gray-500"
-                                    title="Press Enter to select"
-                                  >
-                                    ⏎ Enter
-                                  </kbd>
-                                )}
+                                <kbd
+                                  className="ml-2 border border-gray-300 rounded px-1 bg-white text-xs text-gray-500 hidden group-data-[selected=true]:block"
+                                  title="Press Enter to select"
+                                >
+                                  ⏎ Enter
+                                </kbd>
                               </CommandItem>
                             );
                           })}
