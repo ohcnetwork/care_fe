@@ -150,7 +150,7 @@ test.describe("Facility Device Edit", () => {
 
     // Click on the first device to view details
     await firstDeviceLink.click();
-    
+
     // Wait for device details page to load by checking for Edit button
     await expect(page.getByRole("button", { name: "Edit" })).toBeVisible({
       timeout: 10000,
@@ -195,7 +195,7 @@ test.describe("Facility Device Edit", () => {
 
     // Click on the first device to view details
     await firstDeviceLink.click();
-    
+
     // Wait for device details page to load by checking for Edit button
     await expect(page.getByRole("button", { name: "Edit" })).toBeVisible({
       timeout: 10000,

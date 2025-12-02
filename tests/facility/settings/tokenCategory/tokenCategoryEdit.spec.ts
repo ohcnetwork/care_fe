@@ -38,7 +38,7 @@ test.describe("Token Category Edit - Permission Tests", () => {
     }) => {
       // Step 1: Navigate directly to token category page
       await page.goto(`/facility/${facilityId}/settings/token_category`);
-      
+
       // Wait for page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Token Categories" }),
@@ -123,7 +123,7 @@ test.describe("Token Category Edit - Permission Tests", () => {
     }) => {
       // Step 1: Navigate directly to token category page
       await page.goto(`/facility/${facilityId}/settings/token_category`);
-      
+
       // Wait for page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Token Categories" }),

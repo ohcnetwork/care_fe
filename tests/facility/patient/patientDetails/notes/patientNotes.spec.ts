@@ -171,7 +171,7 @@ test.describe("Patient Notes - Thread Messaging (Multi-user & Single-user)", () 
     // User B fills message input and sends a message
     await userBPage.getByPlaceholder("Type your message...").fill(userBMessage);
     await userBPage.getByRole("button", { name: "Send message" }).click();
-    
+
     // Wait for message to be sent by checking if it appears
     await expect(userBPage.getByText(userBMessage)).toBeVisible({
       timeout: 10000,

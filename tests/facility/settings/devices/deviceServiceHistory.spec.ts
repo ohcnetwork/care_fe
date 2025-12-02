@@ -28,9 +28,11 @@ test.describe("Device Service History", () => {
     await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
 
     await firstDeviceLink.click();
-    
+
     // Wait for device details page to load by checking for Add Service Record button
-    await expect(page.getByRole("button", { name: "Add Service Record" })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "Add Service Record" }),
+    ).toBeVisible({
       timeout: 10000,
     });
 
@@ -55,9 +57,11 @@ test.describe("Device Service History", () => {
     await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
 
     await firstDeviceLink.click();
-    
+
     // Wait for device details page to load by checking for Add Service Record button
-    await expect(page.getByRole("button", { name: "Add Service Record" })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "Add Service Record" }),
+    ).toBeVisible({
       timeout: 10000,
     });
 
@@ -113,9 +117,11 @@ test.describe("Device Service History", () => {
     await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
 
     await firstDeviceLink.click();
-    
+
     // Wait for device details page to load by checking for Add Service Record button
-    await expect(page.getByRole("button", { name: "Add Service Record" })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "Add Service Record" }),
+    ).toBeVisible({
       timeout: 10000,
     });
 
@@ -155,9 +161,11 @@ test.describe("Device Service History", () => {
     await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
 
     await firstDeviceLink.click();
-    
+
     // Wait for device details page to load by checking for Add Service Record button
-    await expect(page.getByRole("button", { name: "Add Service Record" })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "Add Service Record" }),
+    ).toBeVisible({
       timeout: 10000,
     });
 

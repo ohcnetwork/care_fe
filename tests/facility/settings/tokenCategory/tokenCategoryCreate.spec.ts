@@ -28,7 +28,7 @@ test.describe("Token Category Create - Permission Tests", () => {
     test("Admin can view Add Token Category button", async ({ page }) => {
       // Navigate directly to token category page
       await page.goto(`/facility/${facilityId}/settings/token_category`);
-      
+
       // Wait for page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Token Categories" }),
@@ -49,7 +49,7 @@ test.describe("Token Category Create - Permission Tests", () => {
     test("Admin can create a token category", async ({ page }) => {
       // Navigate directly to creation page
       await page.goto(`/facility/${facilityId}/settings/token_category/new`);
-      
+
       // Wait for the creation page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Create Token Category" }),
@@ -98,7 +98,7 @@ test.describe("Token Category Create - Permission Tests", () => {
     }) => {
       // Navigate directly to token category page
       await page.goto(`/facility/${facilityId}/settings/token_category`);
-      
+
       // Wait for page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Token Categories" }),
@@ -121,7 +121,7 @@ test.describe("Token Category Create - Permission Tests", () => {
     }) => {
       // Navigate directly to creation page
       await page.goto(`/facility/${facilityId}/settings/token_category/new`);
-      
+
       // Wait for the creation page heading to be visible instead of networkidle
       await expect(
         page.getByRole("heading", { name: "Create Token Category" }),
@@ -175,9 +175,18 @@ test.describe("Token Category Create - Permission Tests", () => {
     test("Nurse cannot see Add Token Category button", async ({ page }) => {
       // Step 1: Navigate directly to token category page
       await page.goto(`/facility/${facilityId}/settings/token_category`);
-      
-      // Wait for page to load - check for either access denied or page content
-      await page.waitForTimeout(2000); // Brief wait for page to settle
+
+      // Wait for page to load by checking for either access denied message or page heading
+      await Promise.race([
+        page
+          .getByText("Access Denied to Token Category")
+          .waitFor({ timeout: 5000 })
+          .catch(() => null),
+        page
+          .getByRole("heading", { name: "Token Categories" })
+          .waitFor({ timeout: 5000 })
+          .catch(() => null),
+      ]);
 
       // Step 2: Check if we have access to the page
       // If nurse has access to the page, verify Add Token Category button is NOT visible
