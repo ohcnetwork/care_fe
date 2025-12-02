@@ -40,9 +40,11 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
     // Click Create Organization button
     await page.getByRole("button", { name: "Create Organization" }).click();
 
-    // Verify that backend rejects the creation (error toast should appear)
+    // Verify that backend rejects the creation with specific error message
     await expect(
-      page.locator("li[data-sonner-toast]").filter({ hasText: /error/i }),
+      page
+        .locator("li[data-sonner-toast]")
+        .getByText("Cannot create organizations under root organization"),
     ).toBeVisible({ timeout: 10000 });
   });
 
@@ -67,9 +69,11 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
     // Click Create Organization button
     await page.getByRole("button", { name: "Create Organization" }).click();
 
-    // Verify that backend rejects the creation (error toast should appear)
+    // Verify that backend rejects the creation with specific error message
     await expect(
-      page.locator("li[data-sonner-toast]").filter({ hasText: /error/i }),
+      page
+        .locator("li[data-sonner-toast]")
+        .getByText("Cannot create organizations under root organization"),
     ).toBeVisible({ timeout: 10000 });
   });
 });
