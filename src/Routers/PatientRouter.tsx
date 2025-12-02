@@ -4,7 +4,6 @@ import { useRoutes } from "raviger";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 
-import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
@@ -20,6 +19,7 @@ import PatientSelect from "@/pages/PublicAppointments/PatientSelect";
 import { ScheduleAppointment } from "@/pages/PublicAppointments/Schedule";
 import { AppointmentSuccess } from "@/pages/PublicAppointments/Success";
 
+import { AppErrorBoundary } from "@/components/Common/AppErrorBoundary";
 import PublicRouter from "./PublicRouter";
 
 const DashboardRoutes = {
@@ -123,9 +123,11 @@ export default function PatientRouter() {
             className="max-w-8xl mx-auto mt-4 min-h-[96vh] rounded-lg border border-gray-200 bg-gray-50 p-3 shadow-sm"
             data-cui-page
           >
-            <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
+            <AppErrorBoundary
+              fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}
+            >
               {pages}
-            </ErrorBoundary>
+            </AppErrorBoundary>
           </div>
         </main>
       </SidebarProvider>

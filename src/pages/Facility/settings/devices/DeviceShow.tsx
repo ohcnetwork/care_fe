@@ -19,7 +19,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
-import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageTitle";
 import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
@@ -35,6 +34,7 @@ import {
 } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
+import { AppErrorBoundary } from "@/components/Common/AppErrorBoundary";
 import DeviceEncounterHistory from "./DeviceEncounterHistory";
 import DeviceServiceHistory from "./components/DeviceServiceHistory";
 import ManageLocationSheet from "./components/ManageLocationSheet";
@@ -377,7 +377,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
         <DeviceServiceHistory facilityId={facilityId} deviceId={deviceId} />
 
         {device.care_type && (
-          <ErrorBoundary
+          <AppErrorBoundary
             fallback={
               <Card className="md:col-span-2 border-red-200 bg-red-50">
                 <CardContent className="pt-6">
@@ -399,7 +399,7 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
               device={device as DeviceDetail & { care_type: string }}
               facilityId={facilityId}
             />
-          </ErrorBoundary>
+          </AppErrorBoundary>
         )}
 
         <Card className="border-red-500">

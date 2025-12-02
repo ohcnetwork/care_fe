@@ -29,11 +29,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import ErrorBoundary from "@/components/Common/ErrorBoundary";
-
 import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
+import { AppErrorBoundary } from "@/components/Common/AppErrorBoundary";
 import {
   usePluginDevice,
   usePluginDevices,
@@ -541,7 +540,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
         </div>
 
         {careType && (
-          <ErrorBoundary
+          <AppErrorBoundary
             fallback={
               <div className="p-4 rounded-md border border-red-200 bg-red-50 text-red-700">
                 <p className="font-medium">Oops, something went wrong</p>
@@ -566,7 +565,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                 </FormItem>
               )}
             />
-          </ErrorBoundary>
+          </AppErrorBoundary>
         )}
 
         <div className="flex items-center justify-end">

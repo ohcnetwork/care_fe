@@ -6,7 +6,6 @@ import IconIndex from "@/CAREUI/icons/Index";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar, SidebarFor } from "@/components/ui/sidebar/app-sidebar";
 
-import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import BrowserWarning from "@/components/ErrorPages/BrowserWarning";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
@@ -24,6 +23,7 @@ import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
 import UserRoutes from "@/Routers/routes/UserRoutes";
 import AdminRoutes from "@/Routers/routes/adminRoutes";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { AppErrorBoundary } from "@/components/Common/AppErrorBoundary";
 import { ShortcutCommandDialog } from "@/components/Facility/ShortcutCommandDialog";
 import { Button } from "@/components/ui/button";
 import { PermissionProvider } from "@/context/PermissionContext";
@@ -155,9 +155,11 @@ export default function AppRouter() {
             </a>
           </div>
           <div className="p-3 mt-4" data-cui-page>
-            <ErrorBoundary fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}>
+            <AppErrorBoundary
+              fallback={<ErrorPage forError="PAGE_LOAD_ERROR" />}
+            >
               {pages}
-            </ErrorBoundary>
+            </AppErrorBoundary>
           </div>
         </main>
       </PermissionProvider>

@@ -67,9 +67,11 @@ const PATHS_WITHOUT_SIDEBAR = [
 ];
 
 // Route wrapper with error boundary
-<ErrorBoundary fallback={<ErrorPage />}>
+import { AppErrorBoundary } from "@/components/Common/AppErrorBoundary";
+
+<AppErrorBoundary fallback={<ErrorPage />}>
   {routes}
-</ErrorBoundary>
+</AppErrorBoundary>
 ```
 
 ## Responsive Design
