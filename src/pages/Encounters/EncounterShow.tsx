@@ -39,6 +39,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import {
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
+  EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
@@ -102,6 +103,14 @@ export const EncounterShow = (props: Props) => {
   );
 
   const canAccess = canViewClinicalData || canViewEncounter;
+  const canShowAppointmentEncounterHeader =
+    primaryEncounter?.appointment?.id &&
+    canWritePrimaryEncounter &&
+    [
+      EncounterStatus.PLANNED,
+      EncounterStatus.IN_PROGRESS,
+      EncounterStatus.ON_HOLD,
+    ].includes(primaryEncounter.status);
 
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
@@ -199,17 +208,14 @@ export const EncounterShow = (props: Props) => {
       hideTitleOnPage
       style={
         {
-          "--encounter-header-offset":
-            primaryEncounter?.appointment?.id && canWritePrimaryEncounter
-              ? "3rem"
-              : "0rem",
+          "--encounter-header-offset": canShowAppointmentEncounterHeader
+            ? "3rem"
+            : "0rem",
         } as React.CSSProperties
       }
     >
-      {primaryEncounter &&
-        primaryEncounter.appointment?.id &&
-        canWritePrimaryEncounter &&
-        primaryEncounter.status !== "discharged" && (
+      {primaryEncounter?.appointment?.id &&
+        canShowAppointmentEncounterHeader && (
           <div className="flex items-center justify-center -mt-2 mb-2">
             <AppointmentEncounterHeader
               appointment={primaryEncounter.appointment}

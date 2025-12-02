@@ -29,4 +29,16 @@ export default {
     TRes: Type<DeliveryOrderRetrieve>(),
     TBody: Type<DeliveryOrderUpdate>(),
   },
+  setTags: {
+    path: "/api/v1/facility/{facilityId}/order/delivery/{external_id}/set_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<DeliveryOrderRetrieve>(),
+    TBody: Type<{ tags: string[] }>(),
+  },
+  removeTags: {
+    path: "/api/v1/facility/{facilityId}/order/delivery/{external_id}/remove_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<DeliveryOrderRetrieve>(),
+    TBody: Type<{ tags: string[] }>(),
+  },
 } as const;
