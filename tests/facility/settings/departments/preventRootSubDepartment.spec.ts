@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { expect, test, type Page } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -22,67 +23,30 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
     await page.getByRole("row").filter({ hasText: departmentName }).click();
   }
 
-  test("Verify Add Department/Team button is hidden or disabled for Administration department", async ({
-    page,
-  }) => {
-    // Navigate to Administration department
-    await openDepartment(page, "Administration");
-
-    // Wait for the page to fully load
-    await page.waitForLoadState("networkidle");
-
-    // Check if the "Add Department/Team" button is visible
-    const addButton = page.getByRole("button", {
-      name: "Add Department/Team",
-    });
-
-    const isButtonVisible = await addButton.isVisible({ timeout: 0 });
-    const isButtonDisabled = isButtonVisible
-      ? await addButton.isDisabled()
-      : true;
-
-    // Assert that the button is either hidden or disabled
-    expect(
-      !isButtonVisible || isButtonDisabled,
-      "Add Department/Team button should be hidden or disabled for Administration department",
-    ).toBeTruthy();
-  });
-
-  test("Verify attempting to create sub-department under Administration fails or is blocked", async ({
+  test("Backend should reject creating sub-department under Administration department", async ({
     page,
   }) => {
     // Navigate to Administration department
     await openDepartment(page, "Administration");
     await page.waitForLoadState("networkidle");
 
-    // Check if the Add Department/Team button exists and is enabled
-    const addButton = page.getByRole("button", {
-      name: "Add Department/Team",
-    });
+    // Click Add Department/Team button
+    await page.getByRole("button", { name: "Add Department/Team" }).click();
 
-    // The button should either not be visible or be disabled
-    const isButtonVisible = await addButton.isVisible({ timeout: 0 });
+    // Fill in department name
+    const departmentName = faker.word.words(2);
+    await page.getByRole("textbox", { name: "Name" }).fill(departmentName);
 
-    if (!isButtonVisible) {
-      // Button is hidden - expected behavior, test passes
-      return;
-    }
+    // Select Department type
+    await page.getByRole("combobox", { name: "Type" }).click();
+    await page.getByRole("option", { name: "Department" }).first().click();
 
-    const isButtonDisabled = await addButton.isDisabled();
+    // Click Create Organization button
+    await page.getByRole("button", { name: "Create Organization" }).click();
 
-    if (isButtonDisabled) {
-      // Button is disabled - expected behavior, test passes
-      expect(isButtonDisabled).toBeTruthy();
-      return;
-    }
-
-    // If we reach here, button is visible and enabled - try to click it and expect the sheet does NOT open
-    await addButton.click();
-
-    // Assert that the create sheet does NOT open (heading is not visible within timeout)
-    const sheetTitle = page.getByRole("heading", {
-      name: /Create Department|Add Department/i,
-    });
-    await expect(sheetTitle).not.toBeVisible({ timeout: 2000 });
+    // Verify that backend rejects the creation (error toast should appear)
+    await expect(
+      page.locator("li[data-sonner-toast]").filter({ hasText: /error/i }),
+    ).toBeVisible({ timeout: 10000 });
   });
 });
