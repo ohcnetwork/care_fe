@@ -34,9 +34,11 @@ import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPick
 import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import LocationMultiSelect from "@/components/Location/LocationMultiSelect";
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
+import { HealthcareServiceSelector } from "@/pages/Facility/services/HealthcareServiceSelector";
 
 import { CodeSchema } from "@/types/base/code/code";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -202,6 +204,10 @@ function ActivityDefinitionFormContent({
   const isEditMode = Boolean(activityDefinitionSlug);
   const [specimenSearch, setSpecimenSearch] = React.useState("");
   const [observationSearch, setObservationSearch] = React.useState("");
+  const [selectedHealthcareService, setSelectedHealthcareService] =
+    React.useState<HealthcareServiceReadSpec | null>(
+      existingData?.healthcare_service || null,
+    );
   const { data: specimenDefinitions, isLoading: isLoadingSpecimens } = useQuery(
     {
       queryKey: ["specimenDefinitions", facilityId, specimenSearch],
@@ -936,6 +942,30 @@ function ActivityDefinitionFormContent({
                         }
                       />
                     </div>
+                  </div>
+
+                  <div className="rounded-lg border border-gray-200 shadow-sm p-4">
+                    <FormField
+                      control={form.control}
+                      name="healthcare_service"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>{t("healthcare_service")}</FormLabel>
+                          <FormControl>
+                            <HealthcareServiceSelector
+                              facilityId={facilityId}
+                              selected={selectedHealthcareService}
+                              onSelect={(service) => {
+                                setSelectedHealthcareService(service);
+                                field.onChange(service?.id || null);
+                              }}
+                              clearSelection={true}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </div>
               </div>
