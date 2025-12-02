@@ -37,11 +37,11 @@ test.describe("Encounter Notes - Isolation from Patient Notes", () => {
 
     // Wait for notes section to load
     await expect(
-      page.getByRole("button", { name: /New/i }).first(),
+      page.getByRole("button", { name: "New", exact: true }),
     ).toBeVisible();
 
     // Create new thread
-    await page.getByRole("button", { name: /New/i }).first().click();
+    await page.getByRole("button", { name: "New", exact: true }).click();
 
     // Enter thread title
     await threadTitleInput.fill(encounterNoteTitle);
@@ -72,7 +72,9 @@ test.describe("Encounter Notes - Isolation from Patient Notes", () => {
     await page.getByRole("link", { name: "View Profile" }).click();
     await page.getByRole("tab", { name: "Notes" }).click();
     // Wait for patient notes to load by checking for the "New" button
-    await expect(page.getByRole("button", { name: /New/i })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "New", exact: true }),
+    ).toBeVisible({
       timeout: 10000,
     });
 
@@ -112,7 +114,9 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     encounterUrl = page.url();
     await page.getByRole("tab", { name: "Notes" }).click();
     // Wait for notes to load by checking for the "New" button
-    await expect(page.getByRole("button", { name: /New/i })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: "New", exact: true }),
+    ).toBeVisible({
       timeout: 10000,
     });
   });
@@ -122,7 +126,7 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     browser,
   }) => {
     // User A creates new thread
-    await page.getByRole("button", { name: /New/i }).click();
+    await page.getByRole("button", { name: "New", exact: true }).click();
     // Fill thread title and create the thread
     await page.getByPlaceholder("Enter discussion title...").fill(threadTitle);
 
@@ -182,7 +186,7 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     page,
   }) => {
     // Create new thread with title
-    await page.getByRole("button", { name: /New/i }).click();
+    await page.getByRole("button", { name: "New", exact: true }).click();
     await page.getByPlaceholder("Enter discussion title...").fill(threadTitle);
     await page.getByRole("button", { name: /Create/i }).click();
     await expect(page.getByText("Thread created successfully")).toBeVisible();
@@ -246,7 +250,7 @@ test.describe("Encounter Notes - Thread Creation", () => {
     // Create three threads by iterating through titles
     for (const title of threadTitles) {
       // Click New button, fill title, and create thread
-      await page.getByRole("button", { name: /New/i }).first().click();
+      await page.getByRole("button", { name: "New", exact: true }).click();
       await threadTitleInput.fill(title);
 
       await page.getByRole("button", { name: /Create/i }).click();
@@ -312,7 +316,7 @@ test.describe("Encounter Notes - Thread Visibility & Switching", () => {
 
     for (const thread of threadsData) {
       // Create thread with title
-      await page.getByRole("button", { name: /New/i }).first().click();
+      await page.getByRole("button", { name: "New", exact: true }).click();
       await threadTitleInput.fill(thread.title);
 
       await page.getByRole("button", { name: /Create/i }).click();
