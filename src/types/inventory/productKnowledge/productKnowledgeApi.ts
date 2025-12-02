@@ -13,6 +13,7 @@ export default {
     TRes: Type<PaginatedResponse<ProductKnowledgeBase>>(),
     defaultQueryParams: {
       ordering: "-created_date",
+      include_instance: true,
     },
   },
   retrieveProductKnowledge: {

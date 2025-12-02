@@ -125,7 +125,7 @@ export function useEncounterShortcuts() {
       "view-location-history": () => actions.viewLocationHistory(),
       "manage-care-team": () => actions.manageCareTeam(),
       "manage-departments": () => actions.manageDepartments(),
-      "dispense-medicine": () => actions.dispenseMedicine(),
+      dispense: () => actions.dispense(),
       "open-command-dialog": () => {
         document.dispatchEvent(
           new CustomEvent("open-encounter-command-dialog"),

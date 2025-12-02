@@ -42,6 +42,9 @@ test.describe("Patient Identifier Config - Edit", () => {
 
     await page.getByRole("button", { name: "Create" }).click();
 
+    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
+    await page.getByRole("option", { name: status, exact: true }).click();
+
     // Verify that the new config appears in the list
     await page
       .getByRole("textbox", { name: "Search configs" })
@@ -57,6 +60,9 @@ test.describe("Patient Identifier Config - Edit", () => {
       .getByRole("textbox", { name: "Description" })
       .fill(`${description}-edited`);
     await page.getByRole("button", { name: "Update" }).click();
+
+    await page.getByRole("combobox").filter({ hasText: "Status" }).click();
+    await page.getByRole("option", { name: status, exact: true }).click();
 
     // Verify that the edited config appears in the list
     await page
