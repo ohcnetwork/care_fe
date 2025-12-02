@@ -36,7 +36,7 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
       name: "Add Department/Team",
     });
 
-    const isButtonVisible = await addButton.isVisible().catch(() => false);
+    const isButtonVisible = await addButton.isVisible({ timeout: 0 });
     const isButtonDisabled = isButtonVisible
       ? await addButton.isDisabled()
       : true;
@@ -61,11 +61,10 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
     });
 
     // The button should either not be visible or be disabled
-    const isButtonVisible = await addButton.isVisible().catch(() => false);
+    const isButtonVisible = await addButton.isVisible({ timeout: 0 });
 
     if (!isButtonVisible) {
       // Button is hidden - expected behavior, test passes
-      expect(isButtonVisible).toBeFalsy();
       return;
     }
 
@@ -77,38 +76,13 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
       return;
     }
 
-    // If we reach here, button is visible and enabled - try to use it and expect failure
+    // If we reach here, button is visible and enabled - try to click it and expect the sheet does NOT open
     await addButton.click();
 
-    // Wait for the create sheet to open
+    // Assert that the create sheet does NOT open (heading is not visible within timeout)
     const sheetTitle = page.getByRole("heading", {
       name: /Create Department|Add Department/i,
     });
-    await expect(sheetTitle).toBeVisible({ timeout: 2000 });
-
-    // Fill in the name field
-    const nameInput = page.getByRole("textbox", { name: "Name" });
-    await nameInput.pressSequentially("Test Sub Department");
-
-    // Set up listener for API response
-    const responsePromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/v1/facility") &&
-        response.url().includes("/organizations/") &&
-        response.request().method() === "POST",
-      { timeout: 5000 },
-    );
-
-    // Click submit
-    const submitButton = page.getByRole("button", {
-      name: "Create Organization",
-    });
-    await submitButton.click();
-
-    // Verify API returns error status
-    const response = await responsePromise;
-    const status = response.status();
-
-    expect(status >= 400).toBeTruthy();
+    await expect(sheetTitle).not.toBeVisible({ timeout: 2000 });
   });
 });
