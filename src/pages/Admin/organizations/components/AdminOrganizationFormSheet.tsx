@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import { PenLine } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -142,8 +143,8 @@ export default function AdminOrganizationFormSheet({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         {isEditMode ? (
-          <Button variant="white" size="sm" className="font-semibold">
-            {t("edit")}
+          <Button variant="ghost" size="icon" aria-label={t("edit")}>
+            <PenLine className="size-4" />
           </Button>
         ) : (
           <Button className="w-full md:w-auto">
