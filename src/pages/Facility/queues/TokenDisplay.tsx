@@ -1,100 +1,80 @@
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { useScheduleResource } from "@/components/Schedule/useScheduleResource";
-import { BatchRequestResponse } from "@/types/base/batch/batch";
-import batchApi from "@/types/base/batch/batchApi";
+import { cn } from "@/lib/utils";
 import {
   formatScheduleResourceName,
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
-import {
-  renderTokenNumber,
-  TokenRead,
-  TokenStatus,
-} from "@/types/tokens/token/token";
-import tokenApi from "@/types/tokens/token/tokenApi";
-import { TokenQueueRead } from "@/types/tokens/tokenQueue/tokenQueue";
+import { renderTokenNumber } from "@/types/tokens/token/token";
 import {
   TokenSubQueueRead,
   TokenSubQueueStatus,
 } from "@/types/tokens/tokenSubQueue/tokenSubQueue";
+import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
+import { useQueries, UseQueryResult } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 interface TokenDisplayProps {
   facilityId: string;
-  config: { resourceType: SchedulableResourceType; resourceId: string }[];
+  resources: { resourceType: SchedulableResourceType; resourceId: string }[];
 }
 
 const REFRESH_INTERVAL = 10000; // 10 seconds
 
-export const TokenDisplay = ({ facilityId, config }: TokenDisplayProps) => {
+const combineResourceSubQueues = (
+  result: UseQueryResult<{
+    subQueues: TokenSubQueueRead[];
+    resourceType: SchedulableResourceType;
+    resourceId: string;
+  }>[],
+) => {
+  // If any query is loading, return null
+  if (result.some((query) => query.isLoading)) {
+    return null;
+  }
+
+  return result
+    .filter((query) => query.data) // Voluntarily ignoring queries that are not successful to make it resilient to errors
+    .flatMap(({ data }) =>
+      (data!.subQueues ?? []).map((subQueue) => ({
+        ...subQueue,
+        resourceType: data!.resourceType,
+        resourceId: data!.resourceId,
+      })),
+    );
+};
+
+export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
   const { t } = useTranslation();
 
-  const { data: resourceQueues } = useQuery({
-    queryKey: ["queues", facilityId, config],
-    queryFn: query(batchApi.batchRequest, {
-      body: {
-        requests: config.map(({ resourceType, resourceId }, index) => ({
-          url: `/api/v1/facility/${facilityId}/token/queue/?resource_type=${resourceType}&resource_id=${resourceId}&date=${dayjs().format("YYYY-MM-DD")}`,
-          method: "GET",
-          reference_id: `${index}`,
-        })),
-      },
-      silent: true,
-    }),
-    select: (data: BatchRequestResponse<PaginatedResponse<TokenQueueRead>>) =>
-      data.results.reduce<
-        {
-          resourceType: SchedulableResourceType;
-          resourceId: string;
-          queueId: string;
-        }[]
-      >((acc, queues) => {
-        if (queues.status_code !== 200) {
-          return acc;
-        }
-        const queueId =
-          queues.data?.results.find((q) => q.is_primary)?.id ?? "";
-        if (!queueId) {
-          return acc;
-        }
-        return [...acc, { queueId, ...config[parseInt(queues.reference_id)] }];
-      }, []),
+  const sp = useQueries({
+    queries: resources.map((resource) => ({
+      queryKey: ["subQueues", facilityId, resource],
+      queryFn: query(tokenSubQueueApi.list, {
+        pathParams: { facility_id: facilityId },
+        queryParams: {
+          resource_type: resource.resourceType,
+          resource_id: resource.resourceId,
+          status: TokenSubQueueStatus.ACTIVE,
+        },
+        silent: true,
+      }),
+      refetchInterval: REFRESH_INTERVAL,
+      select: (data: PaginatedResponse<TokenSubQueueRead>) => ({
+        ...resource,
+        subQueues: data.results,
+      }),
+    })),
+    combine: combineResourceSubQueues,
   });
 
-  const { data: servicePoints } = useQuery({
-    queryKey: ["servicePoints", facilityId, resourceQueues],
-    queryFn: query(batchApi.batchRequest, {
-      body: {
-        requests: (resourceQueues ?? []).map(
-          ({ resourceId, resourceType }, index) => ({
-            url: `/api/v1/facility/${facilityId}/token/sub_queue/?resource_type=${resourceType}&resource_id=${resourceId}&status=${TokenSubQueueStatus.ACTIVE}`,
-            method: "GET",
-            reference_id: `${index}`,
-          }),
-        ),
-      },
-      silent: true,
-    }),
-    enabled: !!resourceQueues?.length,
-    select: (
-      data: BatchRequestResponse<PaginatedResponse<TokenSubQueueRead>>,
-    ) =>
-      data.results.flatMap((subQueues) =>
-        (subQueues.data?.results ?? []).map((subQueue) => ({
-          servicePoint: subQueue,
-          ...(resourceQueues ?? [])[parseInt(subQueues.reference_id)],
-        })),
-      ),
-  });
-
-  if (!servicePoints) {
+  if (!sp) {
     return <Loading />;
   }
+  const servicePoints = [...sp, ...sp, ...sp, ...sp, ...sp, ...sp].slice(0, 10);
 
   const itemCount = servicePoints.length;
 
@@ -103,35 +83,28 @@ export const TokenDisplay = ({ facilityId, config }: TokenDisplayProps) => {
       case 1:
         return "grid-cols-1";
       case 2:
-        return "grid-cols-2";
       case 3:
-        return "grid-cols-3";
       case 4:
         return "grid-cols-2";
-      case 5:
-        return "grid-cols-6";
-      case 6:
-        return "grid-cols-3";
-      case 7:
-        return "grid-cols-8";
-      case 8:
-        return "grid-cols-4";
-      case 9:
-        return "grid-cols-3";
       default:
-        return "grid-cols-4";
+        return "grid-cols-6";
     }
   };
 
-  // Calculate column span for each item
   const getColSpan = (index: number) => {
-    if (itemCount === 5) {
-      return index < 2 ? 3 : 2;
-    }
-    if (itemCount === 7) {
-      return 2;
-    }
-    return 1;
+    // Two-column layout
+    if (itemCount === 3) return index === 2 ? 2 : 1; // For 3 items, the last item should span 2 columns
+    if (itemCount <= 4) return 1; // For all other cases in 4 col layout, column span is 1
+
+    // Three-column layout
+    // For more than 4 items, we first find the number of items in the last row
+    const lastRowCount = itemCount % 3;
+    // If the last row has 1 item, the last item should span 6 columns
+    if (lastRowCount === 1 && index == itemCount - 1) return 6;
+    // If the last row has 2 items, the last 2 items should span 3 columns
+    if (lastRowCount === 2 && index >= itemCount - 2) return 3;
+    // In all other cases, it should span 2 columns
+    return 2;
   };
 
   return (
@@ -140,72 +113,49 @@ export const TokenDisplay = ({ facilityId, config }: TokenDisplayProps) => {
         className={`grid gap-2 -mx-12 -my-12 bg-[#1FB6C9] h-screen p-3 ${getGridClass()}`}
       >
         {servicePoints.map((servicePoint, index) => (
-          <TokenCard
-            key={servicePoint.servicePoint.id}
-            facilityId={facilityId}
-            colSpan={getColSpan(index)}
-            resourceType={servicePoint.resourceType}
-            resourceId={servicePoint.resourceId}
-            queueId={servicePoint.queueId}
-            servicePoint={servicePoint.servicePoint}
-          />
+          <div
+            key={servicePoint.id}
+            className={cn(
+              "flex flex-col bg-[#07131F] h-full",
+              [
+                "col-span-1",
+                "col-span-2",
+                "col-span-3",
+                "col-span-4",
+                "col-span-5",
+                "col-span-6",
+              ][getColSpan(index) - 1],
+            )}
+          >
+            <ServicePointDisplay facilityId={facilityId} {...servicePoint} />
+          </div>
         ))}
       </div>
     </Page>
   );
 };
 
-const TokenCard = ({
-  facilityId,
-  queueId,
-  servicePoint,
-  resourceId,
-  resourceType,
-  colSpan = 1,
-}: {
-  facilityId: string;
-  queueId: string;
-  servicePoint: { id: string; name: string };
-  resourceType: SchedulableResourceType;
-  resourceId: string;
-  colSpan?: number;
-}) => {
-  const { data: token } = useQuery({
-    queryKey: ["tokens", facilityId, queueId, servicePoint.id],
-    queryFn: query(tokenApi.list, {
-      pathParams: { facility_id: facilityId, queue_id: queueId },
-      queryParams: {
-        sub_queue: servicePoint.id,
-        status: TokenStatus.IN_PROGRESS,
-        limit: 1,
-      },
-      silent: true,
-    }),
-    refetchInterval: REFRESH_INTERVAL,
-    select: (data: PaginatedResponse<TokenRead>) => data.results[0],
-  });
+type ServicePointDisplayProps = NonNullable<
+  ReturnType<typeof combineResourceSubQueues>
+>[number] & { facilityId: string };
 
+const ServicePointDisplay = ({
+  facilityId,
+  resourceType,
+  resourceId,
+  current_token,
+  name,
+}: ServicePointDisplayProps) => {
   const resource = useScheduleResource({
     resourceType,
     resourceId,
     facilityId,
   });
 
-  const colSpanClass =
-    colSpan === 2
-      ? "col-span-2"
-      : colSpan === 3
-        ? "col-span-3"
-        : colSpan === 4
-          ? "col-span-4"
-          : "";
-
   return (
-    <div className={`flex flex-col bg-[#07131F] h-full ${colSpanClass}`}>
+    <>
       <div className="bg-[#122235] w-full text-center p-4">
-        <span className="font-bold text-white text-6xl">
-          {servicePoint.name}
-        </span>
+        <span className="font-bold text-white text-6xl">{name}</span>
         {resource && (
           <div className="text-2xl text-white">
             {formatScheduleResourceName(resource)}
@@ -213,8 +163,12 @@ const TokenCard = ({
         )}
       </div>
       <div className="flex items-center justify-center text-7xl font-bold text-[#FFD83D] h-full">
-        {token ? <span>{renderTokenNumber(token)}</span> : <span>--</span>}
+        {current_token ? (
+          <span>{renderTokenNumber(current_token)}</span>
+        ) : (
+          <span>--</span>
+        )}
       </div>
-    </div>
+    </>
   );
 };

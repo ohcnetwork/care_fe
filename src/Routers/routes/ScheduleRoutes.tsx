@@ -63,23 +63,25 @@ const ScheduleRoutes: AppRoutes = {
       />
     ),
 
-  // `configStr` would be of the format "l:resourceId1,p:resourceId2,"
-  "/facility/:facilityId/token_display/:configStr": ({
+  // `encodedResources` would be of the format "l:resourceId1,p:resourceId2,"
+  "/facility/:facilityId/token_display/:encodedResources": ({
     facilityId,
-    configStr,
+    encodedResources,
   }) => {
-    const config = (configStr as string).split(",").map((resourceStr) => {
-      const [type, id] = resourceStr.split(":");
-      return {
-        resourceType: {
-          p: SchedulableResourceType.Practitioner,
-          l: SchedulableResourceType.Location,
-          h: SchedulableResourceType.HealthcareService,
-        }[type]!,
-        resourceId: id,
-      };
-    });
-    return <TokenDisplay facilityId={facilityId} config={config} />;
+    const resources = (encodedResources as string)
+      .split(",")
+      .map((resourceStr) => {
+        const [type, id] = resourceStr.split(":");
+        return {
+          resourceType: {
+            p: SchedulableResourceType.Practitioner,
+            l: SchedulableResourceType.Location,
+            h: SchedulableResourceType.HealthcareService,
+          }[type]!,
+          resourceId: id,
+        };
+      });
+    return <TokenDisplay facilityId={facilityId} resources={resources} />;
   },
 };
 

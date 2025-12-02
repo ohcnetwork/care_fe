@@ -64,12 +64,19 @@ export interface TokenRead extends Token {
   queue: TokenQueueRead;
 }
 
+export type TokenReadMinimal = Pick<
+  TokenRead,
+  "id" | "number" | "category" | "status"
+>;
+
 export type TokenRetrieve = TokenRead & {
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
   booking?: Appointment;
 } & ScheduleResource;
 
-export function renderTokenNumber(token: TokenRead) {
+export function renderTokenNumber(
+  token: Pick<TokenRead, "category" | "number">,
+) {
   return `${token.category.shorthand}-${token.number.toString().padStart(3, "0")}`;
 }
