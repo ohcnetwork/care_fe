@@ -33,13 +33,36 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
     // Click Add Department/Team button
     await page.getByRole("button", { name: "Add Department/Team" }).click();
 
-    // Fill in department name
+    // Fill in department name (Department type is selected by default)
     const departmentName = faker.word.words(2);
     await page.getByRole("textbox", { name: "Name" }).fill(departmentName);
 
-    // Select Department type
+    // Click Create Organization button
+    await page.getByRole("button", { name: "Create Organization" }).click();
+
+    // Verify that backend rejects the creation (error toast should appear)
+    await expect(
+      page.locator("li[data-sonner-toast]").filter({ hasText: /error/i }),
+    ).toBeVisible({ timeout: 10000 });
+  });
+
+  test("Backend should reject creating sub-team under Administration department", async ({
+    page,
+  }) => {
+    // Navigate to Administration department
+    await openDepartment(page, "Administration");
+    await page.waitForLoadState("networkidle");
+
+    // Click Add Department/Team button
+    await page.getByRole("button", { name: "Add Department/Team" }).click();
+
+    // Fill in team name
+    const teamName = faker.word.words(2);
+    await page.getByRole("textbox", { name: "Name" }).fill(teamName);
+
+    // Select Team type
     await page.getByRole("combobox", { name: "Type" }).click();
-    await page.getByRole("option", { name: "Department" }).first().click();
+    await page.getByRole("option", { name: "Team" }).first().click();
 
     // Click Create Organization button
     await page.getByRole("button", { name: "Create Organization" }).click();
