@@ -13,7 +13,7 @@ export interface BatchRequestBody<T = any> {
     url: string;
     method: string;
     reference_id: string;
-    body?: T;
+    body: T;
   }>;
 }
 
