@@ -108,12 +108,10 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
               status >= 400,
               `API should return error status when creating child under Administration, got ${status}`,
             ).toBeTruthy();
-          } catch (error) {
+          } catch {
             // If no API call was made or it timed out, the UI prevented the creation
             // This is also acceptable behavior
-            console.log(
-              "No API call was made, indicating UI-level prevention",
-            );
+            console.log("No API call was made, indicating UI-level prevention");
           }
         } else {
           // Sheet did not open - this is the expected behavior
