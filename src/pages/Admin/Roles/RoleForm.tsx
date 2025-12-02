@@ -39,6 +39,15 @@ interface RoleFormProps {
 }
 
 const PAGE_LIMIT = 100;
+const createRoleSchema = (t: (key: string) => string) =>
+  z.object({
+    name: z.string().trim().min(1, t("name_is_required")),
+    description: z.string().trim().optional(),
+    permissions: z
+      .array(z.string())
+      .min(1, t("at_least_one_permission_required")),
+    is_archived: z.boolean().default(false),
+  });
 
 export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   const { t } = useTranslation();
@@ -48,14 +57,7 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
 
   const isEditMode = !!role?.id;
 
-  const roleSchema = z.object({
-    name: z.string().trim().min(1, t("name_is_required")),
-    description: z.string().trim().optional(),
-    permissions: z
-      .array(z.string())
-      .min(1, t("at_least_one_permission_required")),
-    is_archived: z.boolean().default(false),
-  });
+  const roleSchema = createRoleSchema(t);
 
   const form = useForm({
     resolver: zodResolver(roleSchema),
