@@ -71,7 +71,10 @@ test.describe("Encounter Notes - Isolation from Patient Notes", () => {
 
     await page.getByRole("link", { name: "View Profile" }).click();
     await page.getByRole("tab", { name: "Notes" }).click();
-    await page.waitForLoadState("networkidle");
+    // Wait for patient notes to load by checking for the "New" button
+    await expect(page.getByRole("button", { name: /New/i })).toBeVisible({
+      timeout: 10000,
+    });
 
     // Verify encounter note does NOT appear in patient notes
     await expect(
@@ -108,7 +111,10 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     await page.getByRole("link", { name: "View Encounter" }).first().click();
     encounterUrl = page.url();
     await page.getByRole("tab", { name: "Notes" }).click();
-    await page.waitForLoadState("networkidle");
+    // Wait for notes to load by checking for the "New" button
+    await expect(page.getByRole("button", { name: /New/i })).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test("should support multi-user messaging in same thread", async ({
@@ -154,10 +160,11 @@ test.describe("Encounter Notes - Thread Messaging (Multi-user & Single-user)", (
     // User B fills message input and sends a message
     await userBPage.getByPlaceholder("Type your message...").fill(userBMessage);
     await userBPage.getByRole("button", { name: "Send message" }).click();
-    await userBPage.waitForLoadState("networkidle");
-
-    // Verify User B's message appears for User B
-    await expect(userBPage.getByText(userBMessage)).toBeVisible();
+    
+    // Wait for message to be sent by checking if it appears
+    await expect(userBPage.getByText(userBMessage)).toBeVisible({
+      timeout: 10000,
+    });
 
     // Refresh User A's view and verify both messages appear
     await page.reload();

@@ -18,7 +18,8 @@ test.describe("Charge Item Questionnaire", () => {
 
   test("Create a Medication Charge Item", async ({ page }) => {
     await page.getByRole("link", { name: "View Encounter" }).first().click();
-    await page.waitForLoadState("networkidle");
+    // Wait for URL to change and page to be ready instead of networkidle
+    await expect(page).toHaveURL(/\/encounters\/.*\/updates/, { timeout: 10000 });
     const currentUrl = page.url();
     const targetUrl = currentUrl.replace(
       "/updates",
