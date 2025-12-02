@@ -1,5 +1,6 @@
 import { exportToSvg } from "@excalidraw/excalidraw";
 import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/element/src/types";
+import { BinaryFiles } from "@excalidraw/excalidraw/dist/types/excalidraw/types";
 import { useQuery } from "@tanstack/react-query";
 import { SearchIcon } from "lucide-react";
 import { navigate, usePathParams } from "raviger";
@@ -40,9 +41,11 @@ export interface DrawingsTabProps {
 
 interface ExcalidrawPreviewProps {
   elements: readonly ExcalidrawElement[];
+  files?: BinaryFiles;
 }
 
-const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
+const ExcalidrawPreview = memo(
+  ({ elements, files }: ExcalidrawPreviewProps) => {
   const { t } = useTranslation();
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +54,7 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
   useEffect(() => {
     setIsLoading(true);
     setSvgKey((prev) => prev + 1);
-  }, [elements]);
+  }, [elements, files]);
 
   useEffect(() => {
     let isMounted = true;
@@ -75,7 +78,7 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
             theme: "light",
           },
           exportPadding: 10,
-          files: null,
+          files: files || null,
         });
 
         if (isMounted && svgContainerRef.current) {
@@ -103,7 +106,7 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [elements, svgKey]);
+  }, [elements, files, svgKey]);
 
   return (
     <div className="h-60 md:h-40 w-full overflow-hidden rounded-md border border-gray-200 bg-white flex items-center justify-center">
@@ -127,7 +130,8 @@ const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
       )}
     </div>
   );
-});
+  },
+);
 
 ExcalidrawPreview.displayName = "ExcalidrawPreview";
 
@@ -240,6 +244,7 @@ export const DrawingPage = ({
                     <div className="h-60 md:h-40 w-full bg-gray-50">
                       <ExcalidrawPreview
                         elements={drawing.object_value.elements}
+                        files={drawing.object_value.files}
                         key={drawing.modified_date}
                       />
                     </div>
