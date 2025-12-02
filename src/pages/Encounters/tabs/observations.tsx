@@ -8,11 +8,12 @@ import { Card } from "@/components/ui/card";
 
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 
-import query from "@/Utils/request/query";
-import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ObservationListRead } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
+import query from "@/Utils/request/query";
+import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
+import { formatName } from "@/Utils/utils";
 
 interface GroupedObservations {
   [key: string]: ObservationListRead[];
@@ -167,6 +168,14 @@ export const EncounterObservationsTab = () => {
                             item.main_code?.code ||
                             t("unknown")}
                         </div>
+                        {item.data_entered_by && (
+                          <div className="text-gray-600 text-sm">
+                            {t("filed_by")}{" "}
+                            <span className="font-medium text-gray-800">
+                              {formatName(item.data_entered_by)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </Card>
                   </div>
