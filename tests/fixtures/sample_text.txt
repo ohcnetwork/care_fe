@@ -1,0 +1,3 @@
+This is a sample text file for testing file upload functionality.
+It contains multiple lines of text.
+This file is used to verify that text file uploads work correctly in the encounter files section.
