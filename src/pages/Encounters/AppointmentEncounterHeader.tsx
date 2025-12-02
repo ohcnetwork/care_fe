@@ -10,7 +10,11 @@ import {
   BatchRequestResponse,
 } from "@/types/base/batch/batch";
 import batchApi from "@/types/base/batch/batchApi";
-import { EncounterEdit, EncounterRead } from "@/types/emr/encounter/encounter";
+import {
+  EncounterEdit,
+  EncounterRead,
+  EncounterStatus,
+} from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import {
   AppointmentRead,
@@ -109,7 +113,7 @@ export const AppointmentEncounterHeader = ({
   const handleStartEncounter = () => {
     startEncounter({
       ...encounter,
-      status: "in_progress",
+      status: EncounterStatus.IN_PROGRESS,
       patient: encounter.patient.id,
       facility: encounter.facility.id,
     });
@@ -175,7 +179,7 @@ export const AppointmentEncounterHeader = ({
           ...encounter,
           patient: encounter.patient.id,
           facility: encounter.facility.id,
-          status: "completed",
+          status: EncounterStatus.COMPLETED,
           period: {
             start: encounter.period.start,
             end: encounter.period.end
@@ -265,8 +269,8 @@ export const AppointmentEncounterHeader = ({
       )}
       <div className="flex sm:flex-row flex-col gap-2 sm:items-center items-start">
         <div>
-          {encounter.status !== "in_progress" &&
-          encounter.status !== "completed" ? (
+          {encounter.status !== EncounterStatus.IN_PROGRESS &&
+          encounter.status !== EncounterStatus.COMPLETED ? (
             <span className="text-sm text-black">
               {t("do_you_want_to_start_this_encounter")}
             </span>
@@ -281,8 +285,8 @@ export const AppointmentEncounterHeader = ({
           )}
         </div>
         <div className="w-full sm:w-auto">
-          {encounter.status !== "in_progress" &&
-          encounter.status !== "completed" ? (
+          {encounter.status !== EncounterStatus.IN_PROGRESS &&
+          encounter.status !== EncounterStatus.COMPLETED ? (
             <Button
               variant="outline"
               onClick={() => handleStartEncounter()}

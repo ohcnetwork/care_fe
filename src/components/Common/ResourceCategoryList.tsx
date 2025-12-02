@@ -18,11 +18,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 
+import { getPermissions } from "@/common/Permissions";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { usePermissions } from "@/context/PermissionContext";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { ResourceCategoryForm } from "@/components/Common/ResourceCategoryForm";
 import useFilters from "@/hooks/useFilters";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ResourceCategoryRead,
   ResourceCategoryResourceType,
@@ -184,6 +187,12 @@ export function ResourceCategoryList({
   children,
 }: ResourceCategoryListProps) {
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
+  const { facility } = useCurrentFacility();
+  const { canWriteResourceCategory } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
   // Form state
   const [isCategoryFormOpen, setIsCategoryFormOpen] = React.useState(false);
   const [editingCategory, setEditingCategory] = React.useState<string | null>(
@@ -264,16 +273,18 @@ export function ResourceCategoryList({
             />
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center space-x-2 gap-2">
-            <Button
-              variant="outline"
-              onClick={handleCreateCategory}
-              disabled={isLeafCategory && !allowCategoryCreate}
-              hidden={isLeafCategory}
-              className="w-full sm:w-auto"
-            >
-              <CareIcon icon="l-folder-plus" className="mr-2" />
-              {t("add_category")}
-            </Button>
+            {canWriteResourceCategory && (
+              <Button
+                variant="outline"
+                onClick={handleCreateCategory}
+                disabled={isLeafCategory && !allowCategoryCreate}
+                hidden={isLeafCategory}
+                className="w-full sm:w-auto"
+              >
+                <CareIcon icon="l-folder-plus" className="mr-2" />
+                {t("add_category")}
+              </Button>
+            )}
             {onCreateItem && (
               <div className="w-full sm:w-auto">
                 <Button

@@ -135,33 +135,47 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
         {/* Invoice Information */}
         <div>
           {/* Bill To Section */}
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              {/* <h5 className="text-gray-500 font-semibold mb-2">{t("bill_to")}</h5> */}
-              <DetailRow label={t("inv_no")} value={invoice.number} />
-              <DetailRow
-                label={t("date")}
-                value={
-                  invoice.issue_date
-                    ? format(
-                        new Date(invoice.issue_date),
-                        "dd MMM, yyyy h:mm a",
-                      )
-                    : "-"
-                }
-              />
+          <div className="space-y-6">
+            <div className="flex flex-wrap gap-2">
+              <div className="flex-auto">
+                <DetailRow label={t("inv_no")} value={invoice.number} />
+              </div>
+              <div className="text-right">
+                <DetailRow
+                  label={t("date")}
+                  value={
+                    invoice.issue_date
+                      ? format(
+                          new Date(invoice.issue_date),
+                          "dd MMM, yyyy h:mm a",
+                        )
+                      : "-"
+                  }
+                />
+              </div>
             </div>
-            <div className="flex justify-between">
-              <DetailRow label={t("name")} value={patient.name.toUpperCase()} />
-              <DetailRow
-                label={`${t("age")} / ${t("sex")}`}
-                value={
-                  patient
-                    ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
-                    : undefined
-                }
-              />
-              <DetailRow label={t("address")} value={patient.address} />
+            <div className="flex flex-wrap justify-between gap-2 mb-4 w-full">
+              <div className="flex justify-between flex-1">
+                <div className="min-w-fit mr-4">
+                  <DetailRow
+                    label={t("name")}
+                    value={patient.name.toUpperCase()}
+                  />
+                </div>
+                <div className="min-w-fit mr-4">
+                  <DetailRow
+                    label={`${t("age")} / ${t("sex")}`}
+                    value={
+                      patient
+                        ? `${formatPatientAge(patient, true)}, ${t(`GENDER__${patient.gender}`)}`
+                        : undefined
+                    }
+                  />
+                </div>
+              </div>
+              <div className="flex flex-1 min-w-[50%] break-words whitespace-pre-wrap overflow-hidden justify-start sm:justify-end">
+                <DetailRow label={t("address")} value={patient.address} />
+              </div>
             </div>
           </div>
         </div>
