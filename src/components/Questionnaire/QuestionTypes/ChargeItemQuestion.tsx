@@ -60,8 +60,7 @@ const CHARGE_ITEM_FIELDS = {
   },
 } as const;
 
-interface ApplyChargeItemDefinitionRequestWithObject
-  extends ApplyChargeItemDefinitionRequest {
+interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
   charge_item_definition_object: ChargeItemDefinitionRead;
 }
 
