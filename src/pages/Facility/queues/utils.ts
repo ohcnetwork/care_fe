@@ -1,3 +1,4 @@
+import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import { TokenQueueSummary } from "@/types/tokens/tokenQueue/tokenQueue";
@@ -46,5 +47,39 @@ export function useTokenListInfiniteQuery({
       return currentOffset < lastPage.count ? currentOffset : null;
     },
     refetchInterval: autoRefresh === "true" ? 10000 : false,
+  });
+}
+
+const resourceTypeToPrefix = {
+  [SchedulableResourceType.Practitioner]: "p",
+  [SchedulableResourceType.Location]: "l",
+  [SchedulableResourceType.HealthcareService]: "h",
+} as const;
+
+const prefixToResourceType = {
+  p: SchedulableResourceType.Practitioner,
+  l: SchedulableResourceType.Location,
+  h: SchedulableResourceType.HealthcareService,
+} as const;
+
+export function encodeTokenDisplayResourcesParam(
+  resources: { resourceType: SchedulableResourceType; resourceId: string }[],
+) {
+  return resources
+    .map(
+      ({ resourceType, resourceId }) =>
+        `${resourceTypeToPrefix[resourceType]}:${resourceId}`,
+    )
+    .join(",");
+}
+
+export function decodeTokenDisplayResourcesParam(param: string) {
+  return param.split(",").map((resourceStr) => {
+    const [type, id] = resourceStr.split(":");
+    return {
+      resourceType:
+        prefixToResourceType[type as keyof typeof prefixToResourceType],
+      resourceId: id,
+    };
   });
 }

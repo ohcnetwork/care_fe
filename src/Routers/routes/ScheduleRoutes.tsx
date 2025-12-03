@@ -6,6 +6,7 @@ import { PrintAppointments } from "@/pages/Appointments/components/PrintAppointm
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
 import { TokenDisplay } from "@/pages/Facility/queues/TokenDisplay";
+import { decodeTokenDisplayResourcesParam } from "@/pages/Facility/queues/utils";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { Redirect } from "raviger";
 
@@ -68,20 +69,12 @@ const ScheduleRoutes: AppRoutes = {
     facilityId,
     encodedResources,
   }) => {
-    const resources = (encodedResources as string)
-      .split(",")
-      .map((resourceStr) => {
-        const [type, id] = resourceStr.split(":");
-        return {
-          resourceType: {
-            p: SchedulableResourceType.Practitioner,
-            l: SchedulableResourceType.Location,
-            h: SchedulableResourceType.HealthcareService,
-          }[type]!,
-          resourceId: id,
-        };
-      });
-    return <TokenDisplay facilityId={facilityId} resources={resources} />;
+    return (
+      <TokenDisplay
+        facilityId={facilityId}
+        resources={decodeTokenDisplayResourcesParam(encodedResources)}
+      />
+    );
   },
 };
 

@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   CheckIcon,
+  ExternalLinkIcon,
   MoreVertical,
   Notebook,
   Pencil,
@@ -59,6 +60,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import mutate from "@/Utils/request/mutate";
 import queryClient from "@/Utils/request/queryClient";
 import { dateQueryString } from "@/Utils/utils";
+import { encodeTokenDisplayResourcesParam } from "@/pages/Facility/queues/utils";
 import { startOfDay } from "date-fns";
 import dayjs from "dayjs";
 import { Link } from "raviger";
@@ -327,7 +329,7 @@ export default function QueuesIndex({
                 {t("selected_practitioner")}
               </label>
               <Select
-                value={qParams.resource_id || effectiveResourceId}
+                value={effectiveResourceId}
                 onValueChange={handleResourceChange}
               >
                 <SelectTrigger className="w-64">
@@ -345,15 +347,27 @@ export default function QueuesIndex({
           )}
 
           {/* Create Queue Button */}
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            {effectiveResourceId && (
+              <Button asChild variant="link">
+                <Link
+                  href={`/facility/${facilityId}/token_display/${encodeTokenDisplayResourcesParam([{ resourceType, resourceId: effectiveResourceId }])}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t("token_display")}
+                  <ExternalLinkIcon className="size-4" />
+                </Link>
+              </Button>
+            )}
             <QueueFormSheet
               facilityId={facilityId}
               resourceType={resourceType}
               resourceId={effectiveResourceId}
               initialDate={startOfDay(qParams.date)}
               trigger={
-                <Button size="sm" className="font-bold" disabled={isPast}>
-                  <Plus className="size-4 mr-2" />
+                <Button size="sm" variant="outline" disabled={isPast}>
+                  <Plus className="size-4" />
                   {t("create_queue")}
                 </Button>
               }
