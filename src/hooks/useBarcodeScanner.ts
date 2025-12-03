@@ -48,8 +48,8 @@ export function useBarcodeScanner({
         target.tagName === "TEXTAREA" ||
         target.contentEditable === "true";
 
-      // Skip if modifier keys are pressed (Ctrl, Alt, Meta)
-      if (event.ctrlKey || event.altKey || event.metaKey) {
+      // Skip if typing in input fields or if modifier keys are pressed
+      if (isInputField || event.ctrlKey || event.altKey || event.metaKey) {
         return;
       }
 

@@ -137,7 +137,7 @@ function OrganizationCard({
                 </TooltipProvider>
               )}
             </div>
-            {!org.has_children && org.org_type !== "root" && (
+            {canWrite && !org.has_children && org.org_type !== "root" && (
               <DeleteOrgDialog org={org} facilityId={facilityId} />
             )}
           </div>
@@ -179,7 +179,7 @@ export default function FacilityOrganizationView({
 }: Props) {
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
-    limit: 12,
+    limit: 14,
     disableCache: true,
   });
 
@@ -215,9 +215,9 @@ export default function FacilityOrganizationView({
   );
 
   return (
-    <div className="space-y-6 mx-auto max-w-4xl md:pt-3">
+    <div className="space-y-4 mx-auto max-w-4xl md:px-2">
       <div className="flex flex-col flex-wrap sm:flex-row sm:items-center sm:justify-between w-full gap-4">
-        <div className="relative w-full sm:w-[18rem] max-w-full">
+        <div className="relative w-full sm:w-72 max-w-full">
           <CareIcon
             icon="l-search"
             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
@@ -252,7 +252,7 @@ export default function FacilityOrganizationView({
           <CardListSkeleton count={4} />
         </div>
       ) : (
-        <div className="space-y-6 md:pb-6">
+        <div className="md:pb-4">
           {children?.results?.length ? (
             <>
               <div className="hidden sm:block rounded-lg border">
@@ -310,7 +310,7 @@ export default function FacilityOrganizationView({
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="flex items-center justify-end gap-1">
-                            {canManageFacilityOrganization &&
+                            {(canManageFacilityOrganization || isGeoAdmin) &&
                             org.org_type !== "root" ? (
                               <FacilityOrganizationFormSheet
                                 facilityId={facilityId}
@@ -324,16 +324,18 @@ export default function FacilityOrganizationView({
                                 }
                               />
                             ) : (
-                              <div className="size-10" />
+                              <div className="size-9" />
                             )}
 
-                            {!org.has_children && org.org_type !== "root" ? (
+                            {(canManageFacilityOrganization || isGeoAdmin) &&
+                            !org.has_children &&
+                            org.org_type !== "root" ? (
                               <DeleteOrgDialog
                                 org={org}
                                 facilityId={facilityId}
                               />
                             ) : (
-                              <div className="size-10" />
+                              <div className="size-9" />
                             )}
                           </div>
                         </TableCell>
@@ -348,7 +350,7 @@ export default function FacilityOrganizationView({
                     key={org.id}
                     org={org}
                     facilityId={facilityId}
-                    canWrite={canManageFacilityOrganization}
+                    canWrite={canManageFacilityOrganization || isGeoAdmin}
                     parentId={id}
                   />
                 ))}

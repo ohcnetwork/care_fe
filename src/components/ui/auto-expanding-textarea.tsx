@@ -2,8 +2,7 @@ import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
-interface AutoExpandingTextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface AutoExpandingTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;

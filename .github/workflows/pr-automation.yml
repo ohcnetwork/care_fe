@@ -72,12 +72,24 @@ jobs:
           gh pr edit $PR_NUMBER --add-label "changes required" --repo $REPO
 
       - name: Handle Review Re-Request
-        if: github.event.action == 'review_requested'
+        if: github.event.action == 'review_requested' && github.event.requested_reviewer.type != 'Bot'
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
         run: |
+          CURRENT_LABELS=$(gh pr view $PR_NUMBER --repo $REPO --json labels --jq '.labels[].name')
+
+          HAS_TESTED=$(echo "$CURRENT_LABELS" | grep -x "Tested" || echo "")
+          HAS_NEEDS_TESTING=$(echo "$CURRENT_LABELS" | grep -x "needs testing" || echo "")
+          HAS_NEEDS_REVIEW=$(echo "$CURRENT_LABELS" | grep -x "needs review" || echo "")
+
           gh pr edit $PR_NUMBER --remove-label "changes required" --repo $REPO 2>/dev/null || true
-          gh pr edit $PR_NUMBER --add-label "needs testing" --repo $REPO
-          gh pr edit $PR_NUMBER --add-label "needs review" --repo $REPO
+
+          if [[ -z "$HAS_TESTED" && -z "$HAS_NEEDS_TESTING" ]]; then
+            gh pr edit $PR_NUMBER --add-label "needs testing" --repo $REPO
+          fi
+
+          if [[ -z "$HAS_NEEDS_REVIEW" ]]; then
+            gh pr edit $PR_NUMBER --add-label "needs review" --repo $REPO
+          fi

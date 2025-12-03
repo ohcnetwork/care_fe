@@ -71,8 +71,9 @@ const useVoiceRecorder = (handleMicPermission: (allowed: boolean) => void) => {
 
   const setupAudioAnalyser = () => {
     let animationFrameId: number;
-    audioContext = new (window.AudioContext ||
-      (window as any).webkitAudioContext)();
+    audioContext = new (
+      window.AudioContext || (window as any).webkitAudioContext
+    )();
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 32;
     const bufferLength = analyser.frequencyBinCount;
