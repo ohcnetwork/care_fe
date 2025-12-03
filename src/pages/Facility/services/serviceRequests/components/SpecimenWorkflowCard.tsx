@@ -703,7 +703,8 @@ export function SpecimenWorkflowCard({
                               </TableHead>
                               <TableCell className="text-gray-950 font-semibold">
                                 {new Date(
-                                  collectedSpecimen.collection.collected_date_time,
+                                  collectedSpecimen.collection
+                                    .collected_date_time,
                                 ).toLocaleString()}
                               </TableCell>
                             </TableRow>
