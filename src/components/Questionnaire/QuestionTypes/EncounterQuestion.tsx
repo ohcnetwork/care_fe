@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { DatePicker } from "@/components/ui/date-picker";
@@ -24,7 +24,7 @@ import {
   ENCOUNTER_DIET_PREFERENCE,
   ENCOUNTER_DISCHARGE_DISPOSITION,
   ENCOUNTER_PRIORITY,
-  ENCOUNTER_STATUS,
+  EncounterStatus,
   type EncounterAdmitSources,
   type EncounterClass,
   type EncounterDietPreference,
@@ -32,7 +32,6 @@ import {
   type EncounterEdit,
   type EncounterPriority,
   type EncounterRead,
-  type EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -72,6 +71,14 @@ const ENCOUNTER_FIELDS: FieldDefinitions = {
   },
 } as const;
 
+/**
+ * Validates encounter question responses, specifically checking for required discharge disposition
+ * when the encounter status is "discharged" for inpatient, observation, or emergency encounters.
+ *
+ * @param value - The encounter edit data to validate
+ * @param questionId - The ID of the question being validated
+ * @returns Array of validation errors, empty if no errors
+ */
 export function validateEncounterQuestion(
   value: EncounterEdit | undefined,
   questionId: string,
@@ -89,6 +96,22 @@ export function validateEncounterQuestion(
   return errors;
 }
 
+/**
+ * A questionnaire component for managing encounter details including status, class, priority,
+ * hospitalization details, and discharge information. Handles encounter lifecycle from admission
+ * through discharge with appropriate validations and UI controls.
+ *
+ * @param props - Component props
+ * @param props.questionnaireResponse - Current questionnaire response data
+ * @param props.updateQuestionnaireResponseCB - Callback to update questionnaire response
+ * @param props.disabled - Whether the form fields are disabled
+ * @param props.clearError - Callback to clear validation errors
+ * @param props.encounterId - ID of the encounter being edited
+ * @param props.patientId - ID of the patient (default: "")
+ * @param props.facilityId - ID of the facility
+ * @param props.errors - Array of validation errors (default: [])
+ * @returns The encounter question form component
+ */
 export function EncounterQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
@@ -115,7 +138,7 @@ export function EncounterQuestion({
   );
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
-    status: "unknown",
+    status: EncounterStatus.UNKNOWN,
     encounter_class: careConfig.defaultEncounterType,
     period: {
       start: new Date().toISOString(),
@@ -157,9 +180,16 @@ export function EncounterQuestion({
         },
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [encounter.status]);
 
-  // Transform EncounterRead to EncounterEdit format
+  /**
+   * Transforms an EncounterRead object (from API) to EncounterEdit format (for form state).
+   * Extracts only the editable fields needed for updating an encounter.
+   *
+   * @param read - The encounter data from the API
+   * @returns Partial encounter edit object with only editable fields
+   */
   const transformEncounterForUpdate = (
     read: EncounterRead,
   ): Partial<Omit<EncounterEdit, "organizations" | "patient">> => {
@@ -179,6 +209,7 @@ export function EncounterQuestion({
     if (encounterData) {
       handleUpdateEncounter(transformEncounterForUpdate(encounterData));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [encounterData]);
 
   useEffect(() => {
@@ -192,6 +223,12 @@ export function EncounterQuestion({
     }
   }, [questionnaireResponse]);
 
+  /**
+   * Handles updates to encounter data, applying business logic for hospitalization
+   * and discharge disposition based on encounter class and status.
+   *
+   * @param updates - Partial encounter updates to apply
+   */
   const handleUpdateEncounter = (
     updates: Partial<Omit<EncounterEdit, "patient">>,
   ) => {
@@ -237,6 +274,21 @@ export function EncounterQuestion({
     );
   };
 
+  // Memoize filtered status options for performance
+  const filteredStatusOptions = useMemo(() => {
+    return Object.values(EncounterStatus).filter((status) => {
+      // Never show "unknown" status
+      if (status === "unknown") return false;
+
+      // Only show "discharged" if encounter is already discharged
+      if (status === "discharged") {
+        return encounter.status === "discharged";
+      }
+
+      return true;
+    });
+  }, [encounter.status]);
+
   if (isLoading) {
     return <div>{t("loading_encounter")}</div>;
   }
@@ -260,13 +312,7 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
-              {ENCOUNTER_STATUS.filter((status) => {
-                if (status === "unknown") return false;
-                if (status === "discharged") {
-                  return encounter.status === "discharged";
-                }
-                return true;
-              }).map((encounterStatus) => (
+              {filteredStatusOptions.map((encounterStatus: EncounterStatus) => (
                 <SelectItem key={encounterStatus} value={encounterStatus}>
                   {t(`encounter_status__${encounterStatus}`)}
                 </SelectItem>

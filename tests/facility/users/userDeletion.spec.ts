@@ -36,15 +36,13 @@ test.describe("User Deletion Access Control", () => {
       await page.getByRole("button", { name: "Toggle Sidebar" }).click();
       await page.getByRole("link", { name: "Users" }).click();
 
-      // Wait for users page to load
-      await page.waitForLoadState("networkidle");
-
-      // Find and click on the first user's "See Details" button
+      // Wait for users page to load by checking for See Details button
       const seeDetailsButton = page
         .getByRole("button", { name: "See Details" })
-        .first(); // Take the first user card
-
+        .first();
       await expect(seeDetailsButton).toBeVisible({ timeout: 10000 });
+
+      // Click on the first user's "See Details" button
       await seeDetailsButton.click();
 
       // Verify that delete account button is visible for admin
@@ -84,15 +82,13 @@ test.describe("User Deletion Access Control", () => {
       await page.getByRole("button", { name: "Toggle Sidebar" }).click();
       await page.getByRole("link", { name: "Users" }).click();
 
-      // Wait for users page to load
-      await page.waitForLoadState("networkidle");
-
-      // Find and click on the first user's "See Details" button
+      // Wait for users page to load by checking for See Details button
       const seeDetailsButton = page
         .getByRole("button", { name: "See Details" })
-        .first(); // Take the first user card
-
+        .first();
       await expect(seeDetailsButton).toBeVisible({ timeout: 10000 });
+
+      // Click on the first user's "See Details" button
       await seeDetailsButton.click();
 
       // Verify that delete account button is NOT visible for staff
