@@ -2409,6 +2409,7 @@
   "healthcare_service_created_successfully": "Healthcare service created successfully",
   "healthcare_service_deleted_successfully": "Healthcare service deleted successfully",
   "healthcare_service_details": "Healthcare Service Details",
+  "healthcare_service_for_activity": "Healthcare Service where this activity will be performed",
   "healthcare_service_not_found": "Healthcare service not found",
   "healthcare_service_updated_successfully": "Healthcare service updated successfully",
   "healthcare_services": "Healthcare Services",
