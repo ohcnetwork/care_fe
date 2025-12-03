@@ -223,7 +223,10 @@ test.describe("Patient Files", () => {
 
     // Filter for active files
     await page.getByRole("button", { name: "Filter" }).click();
-    await page.getByText("Active Files").click();
+    await expect(
+      page.getByRole("menuitem", { name: "Active Files" }),
+    ).toBeVisible({ timeout: 5000 });
+    await page.getByRole("menuitem", { name: "Active Files" }).click();
 
     // Wait for filter to be applied and active files badge to appear
     await expect(page.getByText("Active Files")).toBeVisible({
@@ -269,12 +272,15 @@ test.describe("Patient Files", () => {
     const inputFileName1 = faker.system.fileName();
     const archiveReason = faker.lorem.sentence();
 
-    // Upload a single file using helper
-    await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
-
     // Filter for active files
     await page.getByRole("button", { name: "Filter" }).click();
-    await page.getByText("Active Files").click();
+    await expect(
+      page.getByRole("menuitem", { name: "Active Files" }),
+    ).toBeVisible({ timeout: 5000 });
+    await page.getByRole("menuitem", { name: "Active Files" }).click();
+
+    // Upload a single file using helper
+    await uploadFile(page, `tests/fixtures/images/${fileName}`, inputFileName1);
 
     const filterPromise = page.waitForResponse(
       (response) =>
