@@ -96,10 +96,9 @@ test.describe("activity definition edit", () => {
     ).toBeVisible();
 
     await expect(
-      page
-        .getByRole("combobox")
-        .filter({ hasText: /select.*healthcare service/i })
-        .getByText(createdAD.healthcareService!),
+      page.getByRole("combobox").filter({
+        hasText: createdAD.healthcareService!,
+      }),
     ).toBeVisible();
 
     await expect(
