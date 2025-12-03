@@ -1,68 +1,61 @@
 import { SlugConfig } from "@/types/base/slug/slugConfig";
-import {
-  ALLERGY_CATEGORY,
-  ALLERGY_CLINICAL_STATUS,
-  ALLERGY_CRITICALITY,
-  ALLERGY_VERIFICATION_STATUS,
-} from "@/types/emr/allergyIntolerance/allergyIntolerance";
-import {
-  DIAGNOSIS_CLINICAL_STATUS,
-  DIAGNOSIS_SEVERITY,
-  DIAGNOSIS_VERIFICATION_STATUS,
-} from "@/types/emr/diagnosis/diagnosis";
-import {
-  MEDICATION_REQUEST_INTENT,
-  MEDICATION_REQUEST_STATUS,
-  MedicationPriority,
-} from "@/types/emr/medicationRequest/medicationRequest";
-import { ObservationStatus } from "@/types/emr/observation/observation";
-import {
-  SYMPTOM_CLINICAL_STATUS,
-  SYMPTOM_SEVERITY,
-  SYMPTOM_VERIFICATION_STATUS,
-} from "@/types/emr/symptom/symptom";
-import { FileCategory, FileType } from "@/types/files/file";
+import { FacilityBareMinimum } from "@/types/facility/facility";
 
 export interface TemplateSchemaRead {
-  single_objects: SingleObjectSchema;
-  querysets: QuerySetSchema;
+  contexts: Record<string, ContextSchema>;
+  output_formats: Record<string, OutputFormatSchema>;
+  custom_types: Record<string, CustomTypeConfig>;
+  report_types: Record<string, ReportTypeConfig>;
 }
 
-export type SingleObjectSchema = {
-  [key: string]: SingleObjectAttributeSchema;
-};
+export interface ContextSchema {
+  slug: string;
+  display_name: string;
+  description: string;
+  context_type: string;
+  context_key: string;
+  standalone: boolean;
+  fields: FieldSchema[];
+}
 
 export interface FieldSchema {
   key: string;
   display: string;
-  preview_value: string;
   description: string;
+  type: string;
+  preview_value: string[] | Record<string, string[]> | string;
+  is_nested_context?: boolean;
+  nested_context_type?: string;
+  fields?: FieldSchema[];
 }
 
-export interface SingleObjectAttributeSchema {
-  display: string;
-  fields: FieldSchema[];
-  depends_on: string[];
-  description: string;
-  allowed_filters: string[];
+export interface OutputFormatSchema {
+  format: string;
+  generator: string;
+  mime_type: string;
+  file_extension: string;
+  supported_options: Record<string, SupportedOptionConfig>;
 }
+export type SupportedOptionConfig = Record<
+  string,
+  {
+    type: string;
+    default: string;
+    options?: string[];
+  }
+>;
 
-export type QuerySetSchema = {
-  [key: string]: QuerySetAttributeSchema;
+export type CustomTypeConfig = {
+  name: string;
+  description: string;
+  structure: Record<string, string>;
+  example: Record<string, string>;
 };
 
-export interface QuerySetAttributeSchema {
-  display: string;
-  fields: FieldSchema[];
-  depends_on: string[];
+export interface ReportTypeConfig {
+  display_name: string;
   description: string;
-  allowed_filters: string[];
-  preview_value: string[] | Record<string, string>[];
-}
-
-export interface ContextConfig {
-  filters?: Record<string, string>;
-  limit?: number | null;
+  supported_contexts: string[];
 }
 
 export const TemplateStatuses = ["draft", "active", "retired"] as const;
@@ -76,20 +69,21 @@ export interface TemplateBase {
   id: string;
   name: string;
   status: TemplateStatus;
-  template_type: TemplateType;
   default_format: TemplateFormat;
   created_date: string;
+  description: string;
 }
 
 export interface TemplateBaseRead extends TemplateBase {
   slug: string;
   slug_config: SlugConfig;
+  template_type: string;
+  context: string;
 }
 
 export interface TemplateRead extends TemplateBaseRead {
   template_data: string;
-  context_config: Record<string, ContextConfig>;
-  facility?: string;
+  facility?: FacilityBareMinimum;
   modified_date: string;
 }
 
@@ -98,14 +92,14 @@ export interface TemplateCreate
   slug_value: string;
   facility?: string;
   template_data: string;
-  context_config: Record<string, ContextConfig>;
+  template_type: string;
+  context: string;
 }
 
 export interface TemplatePreviewCreate {
   template_data: string;
-  context_config: Record<string, ContextConfig>;
+  context: string;
   output_format: string;
-  options: Record<string, string>;
 }
 
 export interface TemplatePreviewRead {
@@ -118,83 +112,3 @@ export interface TemplatePreviewRead {
     render_error: string | null;
   };
 }
-
-//eslint-disable-next-line @typescript-eslint/no-unused-vars
-const FILTER_CONFIG = {
-  allergies: {
-    clinical_status: {
-      options: ALLERGY_CLINICAL_STATUS,
-    },
-    verification_status: {
-      options: ALLERGY_VERIFICATION_STATUS,
-    },
-    category: {
-      options: ALLERGY_CATEGORY,
-    },
-    criticality: {
-      options: ALLERGY_CRITICALITY,
-    },
-  },
-  care_team: {
-    user_type: {
-      options: ["doctor", "nurse", "staff", "volunteer", "administrator"],
-    },
-    diagnosis: {
-      clinical_status: {
-        options: DIAGNOSIS_CLINICAL_STATUS,
-      },
-      verification_status: {
-        options: DIAGNOSIS_VERIFICATION_STATUS,
-      },
-      severity: {
-        options: DIAGNOSIS_SEVERITY,
-      },
-    },
-    symptoms: {
-      clinical_status: {
-        options: SYMPTOM_CLINICAL_STATUS,
-      },
-      verification_status: {
-        options: SYMPTOM_VERIFICATION_STATUS,
-      },
-      severity: {
-        options: SYMPTOM_SEVERITY,
-      },
-    },
-    file_uploads: {
-      file_category: {
-        options: Object.keys(FileCategory),
-      },
-      file_type: {
-        options: Object.keys(FileType),
-      },
-    },
-    medications: {
-      status: {
-        options: MEDICATION_REQUEST_STATUS,
-      },
-      intent: {
-        options: MEDICATION_REQUEST_INTENT,
-      },
-      priority: {
-        options: Object.keys(MedicationPriority),
-      },
-      authored_on: {
-        options: [
-          "today",
-          "yesterday",
-          "last_7_days",
-          "last_30_days",
-          "last_90_days",
-          "last_180_days",
-          "last_365_days",
-        ],
-      },
-    },
-    observations: {
-      status: {
-        options: Object.keys(ObservationStatus),
-      },
-    },
-  },
-};

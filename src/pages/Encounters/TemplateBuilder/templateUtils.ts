@@ -40,14 +40,18 @@ export function generateSingleObjectInsertion(
 /**
  * Checks if a queryset loop already exists in the template
  * Returns the position where to insert the field, or null if loop doesn't exist
+ * @param template - The template string
+ * @param loopTarget - The full path to loop over (e.g., "encounter.care_team")
  */
 export function findQuerysetLoop(
   template: string,
-  sectionKey: string,
-): { exists: boolean; insertPosition?: number } {
-  // Look for: {% for item in sectionKey %}
+  loopTarget: string,
+): { exists: boolean; insertPosition?: number; itemVar?: string } {
+  // Escape dots for regex
+  const escapedTarget = loopTarget.replace(/\./g, "\\.");
+  // Look for: {% for item in loopTarget %}
   const loopStartRegex = new RegExp(
-    `{%\\s*for\\s+\\w+\\s+in\\s+${sectionKey}\\s*%}`,
+    `{%\\s*for\\s+(\\w+)\\s+in\\s+${escapedTarget}\\s*%}`,
     "i",
   );
   const loopEndRegex = /{%\s*endfor\s*%}/gi;
@@ -58,16 +62,16 @@ export function findQuerysetLoop(
     return { exists: false };
   }
 
+  const itemVar = loopStartMatch[1]; // Capture the loop variable name
   const loopStartPos = loopStartMatch.index! + loopStartMatch[0].length;
 
   // Find the corresponding endfor
   let endforPos = -1;
-  let currentPos = loopStartPos;
   const restOfTemplate = template.slice(loopStartPos);
 
   // Simple depth tracking to handle nested loops
   const forMatches = Array.from(
-    restOfTemplate.matchAll(/{%\s*for\s+\w+\s+in\s+\w+\s*%}/gi),
+    restOfTemplate.matchAll(/{%\s*for\s+\w+\s+in\s+[\w.]+\s*%}/gi),
   );
   const endforMatches = Array.from(restOfTemplate.matchAll(loopEndRegex));
 
@@ -76,8 +80,7 @@ export function findQuerysetLoop(
     const endforPosition = endforMatch.index!;
     // Count how many 'for' statements are between loopStart and this endfor
     const nestedFors = forMatches.filter(
-      (forMatch) =>
-        forMatch.index! < endforPosition && forMatch.index! >= currentPos,
+      (forMatch) => forMatch.index! < endforPosition,
     ).length;
 
     if (nestedFors === 0) {
@@ -91,41 +94,199 @@ export function findQuerysetLoop(
   }
 
   // Insert position is just before the {% endfor %}
-  return { exists: true, insertPosition: endforPos };
+  return { exists: true, insertPosition: endforPos, itemVar };
 }
 
 /**
- * Generates insertion content for a queryset field
- * Handles both new loop creation and adding to existing loop
+ * Represents a for loop in the template */
+interface LoopInfo {
+  /** What to iterate over, e.g., "encounter.medications" or "medication.dosages" */
+  iterateOver: string;
+  /** Loop variable name, e.g., "medication" */
+  as: string;
+}
+
+/**
+ * Generates nested for loops for queryset fields.
+ *
+ * @example
+ * // Single queryset: medications -> drug_name
+ * // Generates:
+ * // {% for medication in encounter.medications %}
+ * //     {{ medication.drug_name }}
+ * // {% endfor %}
+ *
+ * @example
+ * // Nested querysets: questionnaire_responses -> responses -> answer
+ * // Generates:
+ * // {% for questionnaire_response in encounter.questionnaire_responses %}
+ * //     {% for response in questionnaire_response.responses %}
+ * //         {{ response.answer }}
+ * //     {% endfor %}
+ * // {% endfor %}
  */
-export function generateQuerysetInsertion(
+export function generateNestedQuerysetInsertion(
   template: string,
-  sectionKey: string,
-  fieldKey: string,
+  contextKey: string,
+  fieldKeys: string[],
+  querysetLevels: { index: number; key: string }[],
   cursorPosition: number,
 ): InsertionResult {
-  const loopInfo = findQuerysetLoop(template, sectionKey);
+  const loops = buildLoopChain(contextKey, fieldKeys, querysetLevels);
+  console.log("loops", loops);
+  const fieldReference = buildFieldReference(fieldKeys, querysetLevels);
+  console.log("fieldReference", fieldReference);
 
-  if (loopInfo.exists && loopInfo.insertPosition !== undefined) {
-    // Loop exists, add field inside it
-    const itemVar = getSingularForm(sectionKey); // medications -> medication
-    const fieldInsertion = `\n    <li>{{ ${itemVar}.${fieldKey} }}</li>`;
+  // Check if outermost loop already exists in template
+  const existingLoop = findQuerysetLoop(template, loops[0].iterateOver);
 
-    return insertAtCursor(template, fieldInsertion, loopInfo.insertPosition);
-  } else {
-    // Loop doesn't exist, create new loop
-    const itemVar = getSingularForm(sectionKey);
-    const loopContent = `
-<h3>${capitalizeFirst(sectionKey)}</h3>
-<ul>
-{% for ${itemVar} in ${sectionKey} %}
-    <li>{{ ${itemVar}.${fieldKey} }}</li>
-{% endfor %}
-</ul>
-`;
-
-    return insertAtCursor(template, loopContent, cursorPosition);
+  if (existingLoop.exists && existingLoop.insertPosition !== undefined) {
+    // Add to existing loop
+    const content = buildContentForExistingLoop(
+      loops,
+      fieldReference,
+      existingLoop.itemVar,
+    );
+    return insertAtCursor(template, content, existingLoop.insertPosition);
   }
+
+  // Create new nested loop structure
+  const content = buildNewLoopStructure(loops, fieldReference, fieldKeys);
+  return insertAtCursor(template, content, cursorPosition);
+}
+
+/**
+ * Builds the chain of loops needed for nested querysets.
+ *
+ * For path: encounter -> questionnaire_responses -> responses -> answer
+ * With querysets at: questionnaire_responses (index 0), responses (index 1)
+ *
+ * Returns:
+ * [
+ *   { iterateOver: "encounter.questionnaire_responses", as: "questionnaire_response" },
+ *   { iterateOver: "questionnaire_response.responses", as: "response" }
+ * ]
+ */
+function buildLoopChain(
+  contextKey: string,
+  fieldKeys: string[],
+  querysetLevels: { index: number; key: string }[],
+): LoopInfo[] {
+  return querysetLevels.map((level, i) => {
+    const itemVar = getSingularForm(level.key);
+
+    if (i === 0) {
+      // First loop iterates over context.path
+      const path = fieldKeys.slice(0, level.index + 1).join(".");
+      return { iterateOver: `${contextKey}.${path}`, as: itemVar };
+    }
+
+    // Subsequent loops iterate over previous_item.path
+    const prevLevel = querysetLevels[i - 1];
+    const prevItemVar = getSingularForm(prevLevel.key);
+    const pathSegment = fieldKeys
+      .slice(prevLevel.index + 1, level.index + 1)
+      .join(".");
+
+    return { iterateOver: `${prevItemVar}.${pathSegment}`, as: itemVar };
+  });
+}
+
+/**
+ * Builds the final field reference (e.g., "response.answer")
+ */
+function buildFieldReference(
+  fieldKeys: string[],
+  querysetLevels: { index: number; key: string }[],
+): string {
+  const lastQueryset = querysetLevels[querysetLevels.length - 1];
+  const innermostVar = getSingularForm(lastQueryset.key);
+
+  // Path after the last queryset (could be empty, single field, or nested path)
+  const remainingPath = fieldKeys.slice(lastQueryset.index + 1).join(".");
+
+  return remainingPath ? `${innermostVar}.${remainingPath}` : innermostVar;
+}
+
+/**
+ * Builds content to insert into an existing loop
+ */
+function buildContentForExistingLoop(
+  loops: LoopInfo[],
+  fieldReference: string,
+  existingItemVar?: string,
+): string {
+  const depth = loops.length;
+
+  if (depth === 1) {
+    // Single loop - just add the field
+    const itemVar = existingItemVar || loops[0].as;
+    const fieldParts = fieldReference.split(".");
+    const fieldPath = fieldParts.slice(1).join("."); // Remove the item var prefix
+    return `\n    <li>{{ ${itemVar}.${fieldPath} }}</li>`;
+  }
+
+  // Multiple loops - add inner loops
+  let content = "\n";
+  const baseIndent = "    ";
+
+  // Open inner loops (skip first since it already exists)
+  for (let i = 1; i < loops.length; i++) {
+    const loop = loops[i];
+    // Adjust iterateOver to use existing item var for first inner loop
+    const iterateOver =
+      i === 1
+        ? `${existingItemVar || loops[0].as}.${loop.iterateOver.split(".").slice(1).join(".")}`
+        : loop.iterateOver;
+    const indent = baseIndent.repeat(i);
+    content += `${indent}{% for ${loop.as} in ${iterateOver} %}\n`;
+  }
+
+  // Add field
+  const innerIndent = baseIndent.repeat(depth);
+  content += `${innerIndent}<li>{{ ${fieldReference} }}</li>\n`;
+
+  // Close inner loops
+  for (let i = loops.length - 1; i >= 1; i--) {
+    const indent = baseIndent.repeat(i);
+    content += `${indent}{% endfor %}\n`;
+  }
+
+  return content;
+}
+
+/**
+ * Builds a complete new loop structure with HTML wrapper
+ */
+function buildNewLoopStructure(
+  loops: LoopInfo[],
+  fieldReference: string,
+  fieldKeys: string[],
+): string {
+  const sectionName = fieldKeys[fieldKeys.length - 1];
+  const baseIndent = "    ";
+
+  let content = `\n<h3>${capitalizeFirst(sectionName)}</h3>\n<ul>\n`;
+
+  // Open all loops
+  loops.forEach((loop, i) => {
+    const indent = baseIndent.repeat(i + 1);
+    content += `${indent}{% for ${loop.as} in ${loop.iterateOver} %}\n`;
+  });
+
+  // Add field
+  const innerIndent = baseIndent.repeat(loops.length + 1);
+  content += `${innerIndent}<li>{{ ${fieldReference} }}</li>\n`;
+
+  // Close all loops
+  for (let i = loops.length - 1; i >= 0; i--) {
+    const indent = baseIndent.repeat(i + 1);
+    content += `${indent}{% endfor %}\n`;
+  }
+
+  content += `</ul>\n`;
+
+  return content;
 }
 
 /**
@@ -172,119 +333,8 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
 </head>
 <body>
     <!-- Add your content here -->
-    <div class="header">
-        <h1>DISCHARGE SUMMARY</h1>
-        <h3>{{ encounter.facility_name }}</h3>
-        <p>{{ encounter.facility_address }}</p>
-    </div>
-
-    <!-- Patient Information -->
-    <div class="section">
-        <div class="section-title">PATIENT INFORMATION</div>
-        <div class="info-row"><span class="label">Name:</span> {{ patient.name }}</div>
-        <div class="info-row"><span class="label">Age/Gender:</span> {{ patient.age }} / {{ patient.gender }}</div>
-        <div class="info-row"><span class="label">Blood Group:</span> {{ patient.blood_group }}</div>
-        <div class="info-row"><span class="label">Date of Birth:</span> {{ patient.date_of_birth }}</div>
-        <div class="info-row"><span class="label">Contact:</span> {{ patient.phone_number }}</div>
-        <div class="info-row"><span class="label">Emergency Contact:</span> {{ patient.emergency_phone_number }}</div>
-        <div class="info-row"><span class="label">Address:</span> {{ patient.address }}</div>
-    </div>
-
-    <!-- Encounter Details -->
-    <div class="section">
-        <div class="section-title">ENCOUNTER DETAILS</div>
-        <div class="info-row"><span class="label">Admission Number:</span> {{ encounter.external_identifier }}</div>
-        <div class="info-row"><span class="label">Admission Date:</span> {{ encounter.admission_date }}</div>
-        {% if encounter.discharge_date %}
-        <div class="info-row"><span class="label">Discharge Date:</span> {{ encounter.discharge_date }}</div>
-        {% endif %}
-        <div class="info-row"><span class="label">Encounter Type:</span> {{ encounter.encounter_class }}</div>
-        <div class="info-row"><span class="label">Priority:</span> {{ encounter.priority }}</div>
-        <div class="info-row"><span class="label">Status:</span> {{ encounter.status }}</div>
-    </div>
-
-    <!-- Diagnosis -->
-    {% if diagnoses %}
-    <div class="section">
-        <div class="section-title">DIAGNOSIS</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Diagnosis</th>
-                    <th>Code</th>
-                    <th>Status</th>
-                    <th>Severity</th>
-                    <th>Recorded Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for diagnosis in diagnoses %}
-                <tr>
-                    <td>{{ diagnosis.diagnosis_name }}</td>
-                    <td>{{ diagnosis.diagnosis_code }}</td>
-                    <td>{{ diagnosis.clinical_status }}</td>
-                    <td>{{ diagnosis.severity }}</td>
-                    <td>{{ diagnosis.recorded_date }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% endif %}
-
-    <!-- Symptoms -->
-    {% if symptoms %}
-    <div class="section">
-        <div class="section-title">SYMPTOMS</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Symptom</th>
-                    <th>Severity</th>
-                    <th>Onset Date</th>
-                    <th>Duration</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for symptom in symptoms %}
-                <tr>
-                    <td>{{ symptom.symptom_name }}</td>
-                    <td>{{ symptom.severity }}</td>
-                    <td>{{ symptom.onset_date }}</td>
-                    <td>{{ symptom.duration }}</td>
-                    <td>{{ symptom.clinical_status }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% endif %}
-
-    <!-- Medications -->
-    {% if medications %}
-    <div class="section">
-        <div class="section-title">MEDICATIONS PRESCRIBED</div>
-        {% for medication in medications %}
-        <div style="margin-bottom: 15px; padding: 10px; background-color: #f9f9f9; border-left: 3px solid #28a745;">
-            <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">{{ medication.medication_name }}</div>
-            <div class="info-row"><span class="label">Status:</span> {{ medication.status }}</div>
-            <div class="info-row"><span class="label">Intent:</span> {{ medication.intent }}</div>
-            <div class="info-row"><span class="label">Priority:</span> {{ medication.priority }}</div>
-            <div class="info-row"><span class="label">Prescribed Date:</span> {{ medication.prescribed_date }}</div>
-            {% if medication.note %}
-            <div class="info-row" style="margin-top: 8px;"><span class="label">Additional Note:</span> {{ medication.note }}</div>
-            {% endif %}
-            {% if medication.logged_by %}
-            <div class="info-row"><span class="label">Prescribed By:</span> {{ medication.logged_by }}</div>
-            {% endif %}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
 
     <!-- Allergies -->
-    {% if allergies %}
     <div class="section">
         <div class="section-title">ALLERGIES</div>
         <table>
@@ -310,20 +360,10 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
             </tbody>
         </table>
     </div>
-    {% endif %}
-
-    <!-- Discharge Summary & Advice -->
-    {% if encounter.discharge_summary_advice %}
-    <div class="section">
-        <div class="section-title">DISCHARGE SUMMARY & ADVICE</div>
-        <p>{{ encounter.discharge_summary_advice }}</p>
-    </div>
-    {% endif %}
 
     <!-- Footer -->
     <div class="footer">
         <p>This is a computer-generated discharge summary.</p>
-        <p><strong>{{ encounter.facility_name }}</strong> | {{ encounter.facility_address }}</p>
     </div>
 </body>
 </html>`;

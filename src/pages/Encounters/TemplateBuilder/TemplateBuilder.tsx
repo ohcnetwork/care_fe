@@ -1,11 +1,16 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Plus, X } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Form,
   FormControl,
@@ -28,10 +33,10 @@ import { Textarea } from "@/components/ui/textarea";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
-  ContextConfig,
+  ContextSchema,
+  FieldSchema,
   TemplateFormat,
   TemplateFormats,
-  TemplatePreviewRead,
   TemplateRead,
   TemplateStatus,
   TemplateStatuses,
@@ -42,7 +47,6 @@ import templateApi from "@/types/emr/template/templateApi";
 import queryClient from "@/Utils/request/queryClient";
 import { generateSlug } from "@/Utils/utils";
 import { cn } from "@/lib/utils";
-import reportApi from "@/types/emr/report/reportApi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DOMPurify from "dompurify";
 import { t } from "i18next";
@@ -50,12 +54,10 @@ import { navigate } from "raviger";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
-  DEFAULT_CONTEXT_CONFIG,
   DEFAULT_TEMPLATE,
-  generateQuerysetInsertion,
+  generateNestedQuerysetInsertion,
   generateSingleObjectInsertion,
   insertAtCursor,
-  isSectionUsed,
 } from "./templateUtils";
 
 const templateBuilderSchema = z.object({
@@ -75,17 +77,11 @@ const templateBuilderSchema = z.object({
   status: z.enum(TemplateStatuses),
   template_type: z.enum(TemplateTypes),
   default_format: z.enum(TemplateFormats),
-  context_config: z.record(
-    z.string(),
-    z
-      .object({
-        filters: z.record(z.string(), z.string()).optional(),
-        limit: z.number().nullable().optional(),
-      })
-      .optional(),
-  ),
+  context: z.string().min(1),
+  description: z.string().optional(),
   template_data: z.string().min(1),
 });
+
 export default function TemplateBuilder({
   facilityId,
   slug,
@@ -95,17 +91,15 @@ export default function TemplateBuilder({
 }) {
   const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [selectedSection, setSelectedSection] = useState<string>("");
-  const [activeTabs, setActiveTabs] = useState<string[]>(
-    Object.keys(DEFAULT_CONTEXT_CONFIG),
+  const [selectedContext, setSelectedContext] = useState<ContextSchema | null>(
+    null,
   );
-  const [currentTab, setCurrentTab] = useState<string>(
-    Object.keys(DEFAULT_CONTEXT_CONFIG)[0] || "",
-  );
+  const [expandedFields, setExpandedFields] = useState<Set<string>>(new Set());
   const [previewState, setPreviewState] = useState<{
     isActive: boolean;
-    data: TemplatePreviewRead | null;
-  }>({ isActive: false, data: null });
+    data: Blob | null;
+    format: TemplateFormat | null;
+  }>({ isActive: false, data: null, format: null });
 
   const form = useForm({
     resolver: zodResolver(templateBuilderSchema),
@@ -115,7 +109,7 @@ export default function TemplateBuilder({
       status: "draft" as TemplateStatus,
       default_format: "html" as TemplateFormat,
       template_data: DEFAULT_TEMPLATE,
-      context_config: DEFAULT_CONTEXT_CONFIG,
+      context: "",
     },
   });
 
@@ -124,10 +118,7 @@ export default function TemplateBuilder({
     queryFn: query(templateApi.retrieveSchema),
   });
 
-  const { data: reportTypes } = useQuery({
-    queryKey: ["reportTypes"],
-    queryFn: query(reportApi.getReportTypes),
-  });
+  const availableContexts = schema?.contexts ?? {};
 
   const { data: template } = useQuery({
     queryKey: ["template", slug],
@@ -163,8 +154,13 @@ export default function TemplateBuilder({
 
   const { mutate: createTemplatePreview } = useMutation({
     mutationFn: mutate(templateApi.createTemplatePreview),
-    onSuccess: (data: TemplatePreviewRead) => {
-      setPreviewState({ isActive: true, data });
+    onSuccess: (data: Blob) => {
+      const format = form.getValues("default_format");
+      setPreviewState({
+        isActive: true,
+        data: new Blob([data]),
+        format,
+      });
       toast.success(t("template_preview_generated"));
     },
     onError: (error) => {
@@ -187,11 +183,23 @@ export default function TemplateBuilder({
   useEffect(() => {
     if (template) {
       form.reset({
-        ...template,
+        name: template.name,
         slug_value: template.slug_config.slug_value,
+        status: template.status,
+        default_format: template.default_format,
+        template_data: template.template_data,
+        context: template.context,
+        template_type: template.template_type as (typeof TemplateTypes)[number],
+        description: template.description,
       });
     }
   }, [template]);
+
+  useEffect(() => {
+    if (template && availableContexts) {
+      setSelectedContext(availableContexts[template.context]);
+    }
+  }, [template, availableContexts]);
 
   // Handle template save
   const handleSaveTemplate = async () => {
@@ -203,7 +211,8 @@ export default function TemplateBuilder({
       status: formData.status,
       default_format: formData.default_format,
       template_data: formData.template_data,
-      context_config: formData.context_config as Record<string, ContextConfig>,
+      context: selectedContext?.slug ?? "",
+      description: formData.description || "",
       facility: facilityId,
     };
 
@@ -221,9 +230,8 @@ export default function TemplateBuilder({
     const formData = form.getValues();
     const previewData = {
       template_data: formData.template_data,
-      context_config: formData.context_config as Record<string, ContextConfig>,
+      context: selectedContext?.slug ?? "",
       output_format: formData.default_format,
-      options: {},
     };
 
     createTemplatePreview(previewData);
@@ -240,57 +248,29 @@ export default function TemplateBuilder({
     return textareaRef.current?.selectionStart || bodyStart;
   };
 
-  // Add a new tab for a section
-  const addTab = (sectionKey: string) => {
-    if (!activeTabs.includes(sectionKey)) {
-      setActiveTabs([...activeTabs, sectionKey]);
-      setCurrentTab(sectionKey);
-    } else {
-      setCurrentTab(sectionKey);
-    }
-    setSelectedSection("");
+  // Toggle nested field expansion
+  const toggleFieldExpansion = (fieldKey: string) => {
+    setExpandedFields((prev) => {
+      const next = new Set(prev);
+      if (next.has(fieldKey)) {
+        next.delete(fieldKey);
+      } else {
+        next.add(fieldKey);
+      }
+      return next;
+    });
   };
 
-  // Remove a tab
-  const removeTab = (sectionKey: string) => {
-    const newTabs = activeTabs.filter((tab) => tab !== sectionKey);
-    setActiveTabs(newTabs);
+  // Handle simple field insertion
+  const handleSimpleFieldClick = (fieldKey: string) => {
+    if (!selectedContext) return;
 
-    // Switch to another tab if the removed one was active
-    if (currentTab === sectionKey && newTabs.length > 0) {
-      setCurrentTab(newTabs[0]);
-    }
-
-    // Remove from context_config if no fields are left or section not used in template
-    const template = form.getValues("template_data");
-    if (!isSectionUsed(template, sectionKey)) {
-      const contextConfig = form.getValues("context_config");
-      const { [sectionKey]: _removed, ...rest } = contextConfig || {};
-      form.setValue("context_config", rest);
-    }
-  };
-
-  // Add field to context_config
-  const addFieldToContextConfig = (sectionKey: string) => {
-    let contextConfig = form.getValues("context_config");
-
-    if (!contextConfig) {
-      contextConfig = {};
-    }
-
-    if (!contextConfig?.[sectionKey]) {
-      contextConfig[sectionKey] = {};
-    }
-  };
-
-  // Handle field button click for single objects
-  const handleSingleItemSectionClick = (
-    sectionKey: string,
-    fieldKey: string,
-  ) => {
     const template = form.getValues("template_data");
     const cursorPosition = getCursorPosition();
-    const insertion = generateSingleObjectInsertion(sectionKey, fieldKey);
+    const insertion = generateSingleObjectInsertion(
+      selectedContext.context_key,
+      fieldKey,
+    );
 
     const { newTemplate, cursorPosition: newCursorPos } = insertAtCursor(
       template,
@@ -299,7 +279,6 @@ export default function TemplateBuilder({
     );
 
     form.setValue("template_data", newTemplate);
-    addFieldToContextConfig(sectionKey);
 
     // Set cursor position after React renders
     setTimeout(() => {
@@ -311,19 +290,61 @@ export default function TemplateBuilder({
     }, 0);
   };
 
-  // Handle field button click for querysets
-  const handleMultiItemSectionClick = (
-    sectionKey: string,
-    fieldKey: string,
-  ) => {
+  // Handle nested field insertion (for fields within a queryset loop)
+  const handleNestedFieldClick = (fieldKey: string) => {
+    if (!selectedContext) return;
+
+    const fieldKeys = fieldKey.split(".");
+    const contextKey = selectedContext.context_key;
+
+    // Traverse the fields and collect ALL queryset ancestors
+    // Each queryset needs its own for loop
+    let currentField = selectedContext.fields.find(
+      (field) => field.key === fieldKeys[0],
+    );
+
+    // Traverse the tree to find all ancestors
+    const querysetLevels: { index: number; key: string }[] = [];
+
+    for (let i = 0; i < fieldKeys.length - 1; i++) {
+      if (!currentField) break;
+
+      if (currentField.nested_context_type === "queryset") {
+        querysetLevels.push({ index: i, key: fieldKeys[i] });
+      }
+
+      // Move to next level
+      if (i < fieldKeys.length - 2) {
+        currentField = currentField.fields?.find(
+          (field) => field.key === fieldKeys[i + 1],
+        );
+      }
+    }
+
     const template = form.getValues("template_data");
     const cursorPosition = getCursorPosition();
+    let newTemplate: string;
+    let newCursorPos: number;
 
-    const { newTemplate, cursorPosition: newCursorPos } =
-      generateQuerysetInsertion(template, sectionKey, fieldKey, cursorPosition);
+    if (querysetLevels.length > 0) {
+      // There are queryset ancestors - need nested for loops
+      const result = generateNestedQuerysetInsertion(
+        template,
+        contextKey,
+        fieldKeys,
+        querysetLevels,
+        cursorPosition,
+      );
+      newTemplate = result.newTemplate;
+      newCursorPos = result.cursorPosition;
+    } else {
+      const insertion = generateSingleObjectInsertion(contextKey, fieldKey);
+      const result = insertAtCursor(template, insertion, cursorPosition);
+      newTemplate = result.newTemplate;
+      newCursorPos = result.cursorPosition;
+    }
 
     form.setValue("template_data", newTemplate);
-    addFieldToContextConfig(sectionKey);
 
     // Set cursor position after React renders
     setTimeout(() => {
@@ -334,27 +355,6 @@ export default function TemplateBuilder({
       }
     }, 0);
   };
-
-  // Get section schema
-  const getSectionSchema = (sectionKey: string) => {
-    if (!schema) return null;
-    return (
-      schema.single_objects?.[sectionKey] || schema.querysets?.[sectionKey]
-    );
-  };
-
-  // Check if section is a queryset
-  const isMultiItemSection = (sectionKey: string) => {
-    return schema?.querysets?.[sectionKey] !== undefined;
-  };
-
-  // Get available sections (not yet added as tabs)
-  const availableSections = schema
-    ? [
-        ...Object.keys(schema.single_objects || {}),
-        ...Object.keys(schema.querysets || {}),
-      ].filter((key) => !activeTabs.includes(key))
-    : [];
 
   if (isLoading) {
     return (
@@ -377,7 +377,9 @@ export default function TemplateBuilder({
           <div className="flex gap-2">
             <Button
               type="button"
-              onClick={() => setPreviewState({ isActive: false, data: null })}
+              onClick={() =>
+                setPreviewState({ isActive: false, data: null, format: null })
+              }
               disabled={!previewState.isActive}
             >
               {t("clear_preview")}
@@ -495,20 +497,21 @@ export default function TemplateBuilder({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("report_type")}</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value || "discharge_summary"}
+                    onValueChange={field.onChange}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder={t("select_report_type")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.entries(reportTypes || {})?.map(
-                        ([key, value]) => (
-                          <SelectItem key={key} value={key}>
-                            {value.display_name}
-                          </SelectItem>
-                        ),
-                      )}
+                      {TemplateTypes.map((reportType) => (
+                        <SelectItem key={reportType} value={reportType}>
+                          {t(reportType)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -523,7 +526,10 @@ export default function TemplateBuilder({
         {/* Main Editor - 3/4 of screen */}
         <div className="flex-2! p-4 overflow-auto">
           {previewState.isActive ? (
-            <PreviewContent previewData={previewState.data} />
+            <PreviewContent
+              previewData={previewState.data}
+              format={previewState.format}
+            />
           ) : (
             <TemplateEditor form={form} textareaRef={textareaRef} />
           )}
@@ -531,146 +537,65 @@ export default function TemplateBuilder({
 
         {/* Sidebar - 1/4 of screen */}
         <div className="flex-1 border-l p-4 overflow-auto flex flex-col gap-4">
+          {/* Context Selector */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">{t("add_section")}</CardTitle>
+              <CardTitle className="text-lg">{t("select_context")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-2">
-                <Select
-                  value={selectedSection}
-                  onValueChange={setSelectedSection}
-                >
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder={t("select_section")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableSections.map((sectionKey) => {
-                      const sectionSchema = getSectionSchema(sectionKey);
-                      return (
-                        <SelectItem key={sectionKey} value={sectionKey}>
-                          {sectionSchema?.display || sectionKey}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-                <Button
-                  type="button"
-                  size="icon"
-                  onClick={() => selectedSection && addTab(selectedSection)}
-                  disabled={!selectedSection}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+              <Select
+                value={selectedContext?.slug}
+                onValueChange={(value) =>
+                  setSelectedContext(availableContexts[value])
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("select_context")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(availableContexts).map((context) => (
+                    <SelectItem key={context.slug} value={context.slug}>
+                      {context.display_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedContext?.description && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  {selectedContext.description}
+                </p>
+              )}
             </CardContent>
           </Card>
 
-          {/* Section selectors and fields */}
-          {activeTabs.length > 0 && (
-            <Card className="flex-1 flex flex-col overflow-auto">
+          {/* Fields List */}
+          {selectedContext && (
+            <Card className="flex-1 flex flex-col overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-lg">{t("fields")}</CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col p-0">
-                <ScrollArea className="flex-1">
-                  <div className="p-6 flex flex-col gap-2">
-                    <div className="flex flex-row flex-wrap gap-2">
-                      {activeTabs.map((tabKey) => {
-                        const sectionSchema = getSectionSchema(tabKey);
-                        const isActive = currentTab === tabKey;
-
-                        return (
-                          <Button
-                            key={tabKey}
-                            type="button"
-                            variant={isActive ? "outline" : "secondary"}
-                            size="sm"
-                            onClick={() => setCurrentTab(tabKey)}
-                            className={cn("gap-2 pr-2")}
-                          >
-                            <span className="font-medium">
-                              {sectionSchema?.display || tabKey}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeTab(tabKey);
-                              }}
-                              className="ml-1 hover:bg-black/20 rounded-full p-0.5 transition-colors"
-                            >
-                              <X className="h-2 w-2" />
-                            </button>
-                          </Button>
-                        );
-                      })}
-                    </div>
-
-                    {activeTabs.map((tabKey) => {
-                      const sectionSchema = getSectionSchema(tabKey);
-                      const isMultiItem = isMultiItemSection(tabKey);
-                      const isActive = currentTab === tabKey;
-                      return (
-                        <div
-                          key={tabKey}
-                          className="flex flex-row gap-2 bg-white"
-                        >
-                          {isActive && (
-                            <div className="pl-4 space-y-2">
-                              {sectionSchema?.description && (
-                                <p className="text-sm text-muted-foreground mb-3">
-                                  {sectionSchema.description}
-                                </p>
-                              )}
-                              <div className="space-y-1">
-                                {sectionSchema?.fields.map((field) => (
-                                  <Button
-                                    key={field.key}
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() =>
-                                      isMultiItem
-                                        ? handleMultiItemSectionClick(
-                                            tabKey,
-                                            field.key,
-                                          )
-                                        : handleSingleItemSectionClick(
-                                            tabKey,
-                                            field.key,
-                                          )
-                                    }
-                                    className="w-full justify-start text-left h-auto py-2"
-                                  >
-                                    <div className="flex flex-col items-start">
-                                      <span className="font-medium text-sm">
-                                        {field.display}
-                                      </span>
-                                      {field.description && (
-                                        <span className="text-xs text-muted-foreground font-normal">
-                                          {field.description}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </Button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+              <CardContent className="flex-1 overflow-hidden p-0">
+                <ScrollArea className="h-full">
+                  <div className="p-4 space-y-1">
+                    {selectedContext.fields.map((field) => (
+                      <FieldItem
+                        key={field.key}
+                        field={field}
+                        expandedFields={expandedFields}
+                        toggleFieldExpansion={toggleFieldExpansion}
+                        onSimpleFieldClick={handleSimpleFieldClick}
+                        onNestedFieldClick={handleNestedFieldClick}
+                      />
+                    ))}
                   </div>
                 </ScrollArea>
               </CardContent>
             </Card>
           )}
 
-          {activeTabs.length === 0 && (
+          {!selectedContext && (
             <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-4">
-              <p>{t("no_sections_selected")}</p>
+              <p>{t("select_context_to_view_fields")}</p>
             </div>
           )}
         </div>
@@ -678,6 +603,104 @@ export default function TemplateBuilder({
     </div>
   );
 }
+
+function FieldItem({
+  field,
+  expandedFields,
+  toggleFieldExpansion,
+  onSimpleFieldClick,
+  onNestedFieldClick,
+  depth = 0,
+  parentPath = "",
+}: {
+  field: FieldSchema;
+  expandedFields: Set<string>;
+  toggleFieldExpansion: (fieldKey: string) => void;
+  onSimpleFieldClick: (fieldKey: string) => void;
+  onNestedFieldClick: (fieldKey: string) => void;
+  depth?: number;
+  parentPath?: string;
+}) {
+  const isNested = field.is_nested_context;
+  const isExpanded = expandedFields.has(field.key);
+  const currentPath = parentPath ? `${parentPath}.${field.key}` : field.key;
+
+  if (isNested && field.fields) {
+    return (
+      <Collapsible
+        key={field.key}
+        open={isExpanded}
+        onOpenChange={() => toggleFieldExpansion(field.key)}
+      >
+        <CollapsibleTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-left h-auto py-2"
+            style={{ paddingLeft: `${depth * 1.5}rem` }}
+          >
+            <ChevronRight
+              className={cn(
+                "h-4 w-4 mr-2 transition-transform",
+                isExpanded && "rotate-90",
+              )}
+            />
+            <div className="flex flex-col items-start flex-1">
+              <span className="font-medium text-sm">{field.display}</span>
+              {field.description && (
+                <span className="text-xs text-muted-foreground font-normal">
+                  {field.description}
+                </span>
+              )}
+            </div>
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-1 pt-1">
+          {field.fields.map((nestedField) => (
+            <FieldItem
+              key={nestedField.key}
+              field={nestedField}
+              expandedFields={expandedFields}
+              toggleFieldExpansion={toggleFieldExpansion}
+              onSimpleFieldClick={onSimpleFieldClick}
+              onNestedFieldClick={onNestedFieldClick}
+              depth={depth + 1}
+              parentPath={currentPath}
+            />
+          ))}
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  }
+
+  // Simple field
+  return (
+    <Button
+      key={field.key}
+      type="button"
+      variant="ghost"
+      size="sm"
+      onClick={() =>
+        depth > 0
+          ? onNestedFieldClick(currentPath)
+          : onSimpleFieldClick(currentPath)
+      }
+      className="w-full justify-start text-left h-auto py-2"
+      style={{ paddingLeft: `${depth * 1.5 + 1.5}rem` }}
+    >
+      <div className="flex flex-col items-start flex-1">
+        <span className="font-medium text-sm">{field.display}</span>
+        {field.description && (
+          <span className="text-xs text-muted-foreground font-normal">
+            {field.description}
+          </span>
+        )}
+      </div>
+    </Button>
+  );
+}
+
 function TemplateEditor({
   form,
   textareaRef,
@@ -712,15 +735,37 @@ function TemplateEditor({
 
 function PreviewContent({
   previewData,
+  format,
 }: {
-  previewData: TemplatePreviewRead | null;
+  previewData: Blob | null;
+  format: TemplateFormat | null;
 }) {
   const { t } = useTranslation();
 
-  // Callback ref - called when element mounts/unmounts
+  const [contentState, setContentState] = useState<{
+    html: string | null;
+    pdf: string | null;
+  }>({ html: null, pdf: null });
+
+  useEffect(() => {
+    if (!previewData || !format) return;
+
+    if (format === "html") {
+      previewData.text().then((text) => {
+        setContentState({ html: text, pdf: null });
+      });
+    } else if (format === "pdf") {
+      const url = URL.createObjectURL(previewData);
+      setContentState({ html: null, pdf: url });
+
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [previewData, format]);
+
+  // Callback ref for HTML preview with Shadow DOM
   const shadowHostCallback = useCallback(
     (node: HTMLDivElement | null) => {
-      if (!node || !previewData?.html) return;
+      if (!node || !contentState.html) return;
 
       // Create shadow root if it doesn't exist
       let shadowRoot = node.shadowRoot;
@@ -729,8 +774,8 @@ function PreviewContent({
       }
 
       // Sanitize the HTML (keeps styles but removes scripts and dangerous attributes)
-      const sanitizedHtml = DOMPurify.sanitize(previewData.html, {
-        WHOLE_DOCUMENT: true, // Important: Preserve full document structure
+      const sanitizedHtml = DOMPurify.sanitize(contentState.html, {
+        WHOLE_DOCUMENT: true,
         ALLOWED_TAGS: [
           "html",
           "head",
@@ -784,21 +829,29 @@ function PreviewContent({
         ALLOW_DATA_ATTR: false,
       });
 
-      // Set the sanitized HTML into shadow DOM
       shadowRoot.innerHTML = sanitizedHtml;
     },
-    [previewData?.html],
+    [contentState.html],
   );
 
   if (!previewData) return null;
 
   return (
-    <div>
-      <p>{t("preview_template")}</p>
-      <div
-        ref={shadowHostCallback}
-        className="border rounded-md p-4 bg-white overflow-auto min-h-[400px]"
-      />
+    <div className="h-full flex flex-col">
+      <p className="mb-2 font-medium">{t("preview_template")}</p>
+      {format === "html" && contentState.html && (
+        <div
+          ref={shadowHostCallback}
+          className="flex-1 border rounded-md p-4 bg-white overflow-auto min-h-[400px]"
+        />
+      )}
+      {format === "pdf" && contentState.pdf && (
+        <iframe
+          src={contentState.pdf}
+          className="flex-1 border rounded-md bg-white min-h-[400px] w-full"
+          title={t("preview_template")}
+        />
+      )}
     </div>
   );
 }

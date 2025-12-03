@@ -1,32 +1,22 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
-import {
-  ReportArchiveRead,
-  ReportDownloadRead,
-  ReportGenerateCreate,
-  ReportGenerateRead,
-  ReportRead,
-  ReportReadList,
-  ReportTypeRead,
-  ReportUpdate,
-} from "./report";
+import { ReportGenerateCreate, ReportRead, ReportReadList } from "./report";
 
 export default {
   createReport: {
-    path: "/api/v1/report/generate/",
+    path: "/api/v1/template_reports/generate/",
     method: HttpMethod.POST,
     TBody: Type<ReportGenerateCreate>(),
-    TRes: Type<ReportGenerateRead>(),
+    TRes: Type<{ status: string; detail?: string }>(),
   },
-  updateReport: {
-    path: "/api/v1/report/{report_id}/",
-    method: HttpMethod.PUT,
-    TBody: Type<ReportUpdate>(),
+  retrieveReport: {
+    path: "/api/v1/template_reports/{id}/",
+    method: HttpMethod.GET,
     TRes: Type<ReportRead>(),
   },
   listReports: {
-    path: "/api/v1/report/",
+    path: "/api/v1/template_reports/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ReportReadList>>(),
     defaultQueryParams: {
@@ -34,20 +24,10 @@ export default {
       upload_completed: "true",
     },
   },
-  downloadReport: {
-    path: "/api/v1/report/{report_id}/download/",
-    method: HttpMethod.GET,
-    TRes: Type<ReportDownloadRead>(),
-  },
   archiveReport: {
-    path: "/api/v1/report/{report_id}/archive/",
+    path: "/api/v1/template_reports/{id}/archive/",
     method: HttpMethod.POST,
     TBody: Type<{ archive_reason: string }>(),
-    TRes: Type<ReportArchiveRead>(),
-  },
-  getReportTypes: {
-    path: "/api/v1/report/get_report_types/",
-    method: HttpMethod.GET,
-    TRes: Type<ReportTypeRead>(),
+    TRes: Type<ReportReadList>(),
   },
 };

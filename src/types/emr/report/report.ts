@@ -1,13 +1,5 @@
-import { ContextConfig, TemplateBase } from "@/types/emr/template/template";
-import { UserReadMinimal } from "@/types/user/user";
-
-export interface ReportTypeRead {
-  [key: string]: {
-    display_name: string;
-    description: string;
-    associating_model: string;
-  };
-}
+import { TemplateBase } from "@/types/emr/template/template";
+import { UserBase, UserReadMinimal } from "@/types/user/user";
 
 export interface ReportBase {
   id: string;
@@ -18,8 +10,9 @@ export interface ReportReadList extends ReportBase {
   template: Partial<TemplateBase>;
   report_type: string;
   associating_id: string;
-  archived_by: UserReadMinimal;
+  archived_by: UserBase;
   archived_datetime: string;
+  archive_reason?: string;
   upload_completed: boolean;
   is_archived: boolean;
   created_date: string;
@@ -34,27 +27,12 @@ export interface ReportRead extends ReportReadList {
   internal_name: string;
 }
 
-export interface ReportUpdate extends Omit<ReportBase, "id"> {
-  name: string;
-}
-
 export interface ReportGenerateCreate {
   template_id: string;
-  report_type: string;
-  encounter_id?: string;
-  patient_id?: string;
   associating_id: string;
-  context_config: Record<string, ContextConfig> | null;
   output_format: string;
-  options: Record<string, string>;
-}
-
-export interface ReportGenerateRead
-  extends Omit<
-    ReportRead,
-    "template" | "upload_completed" | "is_archived" | "created_date" | "meta"
-  > {
-  template_id: string;
+  options: string;
+  force: boolean;
 }
 
 export interface ReportDownloadRead {

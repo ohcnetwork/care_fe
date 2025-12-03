@@ -20,9 +20,9 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
-import reportApi from "@/types/emr/report/reportApi";
 import templateApi from "@/types/emr/template/templateApi";
 
+import { TemplateTypes } from "@/types/emr/template/template";
 import TemplateCard from "./TemplateCard";
 
 interface TemplateListProps {
@@ -47,11 +47,6 @@ export default function TemplateList({ facilityId }: TemplateListProps) {
         offset: ((qParams.page || 1) - 1) * qParams.limit,
       },
     }),
-  });
-
-  const { data: reportTypes } = useQuery({
-    queryKey: ["reportTypes"],
-    queryFn: query(reportApi.getReportTypes),
   });
 
   return (
@@ -114,12 +109,11 @@ export default function TemplateList({ facilityId }: TemplateListProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("all_types")}</SelectItem>
-                {reportTypes &&
-                  Object.entries(reportTypes).map(([key, value]) => (
-                    <SelectItem key={key} value={key}>
-                      {value.display_name}
-                    </SelectItem>
-                  ))}
+                {TemplateTypes.map((templateType) => (
+                  <SelectItem key={templateType} value={templateType}>
+                    {t(templateType)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

@@ -5,7 +5,6 @@ import {
   TemplateBaseRead,
   TemplateCreate,
   TemplatePreviewCreate,
-  TemplatePreviewRead,
   TemplateRead,
   TemplateSchemaRead,
 } from "./template";
@@ -32,7 +31,7 @@ export default {
     path: "/api/v1/template/preview/",
     method: HttpMethod.POST,
     TBody: Type<TemplatePreviewCreate>(),
-    TRes: Type<TemplatePreviewRead>(),
+    TRes: Type<Blob>(),
   },
   listTemplates: {
     path: "/api/v1/template/",

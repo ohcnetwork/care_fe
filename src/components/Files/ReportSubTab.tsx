@@ -49,7 +49,6 @@ interface ReportTabProps {
 
 export function ReportSubTab({
   encounter,
-  patient,
   associatingId,
   permissions = [],
 }: ReportTabProps) {
@@ -62,7 +61,8 @@ export function ReportSubTab({
   const {
     reports,
     isLoading: reportsLoading,
-    downloadReport,
+    viewFile,
+    downloadFile,
     archiveReport,
     refetch,
     Dialogs,
@@ -94,16 +94,6 @@ export function ReportSubTab({
   const DetailButtons = ({ report }: { report: ReportReadList }) => {
     return (
       <div className="flex flex-row items-center justify-end gap-2">
-        <Button
-          variant="secondary"
-          onClick={() => downloadReport(report.id)}
-          size="sm"
-        >
-          <span className="flex flex-row items-center gap-1">
-            <CareIcon icon="l-arrow-circle-down" />
-            {t("download")}
-          </span>
-        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="sm">
@@ -111,6 +101,28 @@ export function ReportSubTab({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild className="text-primary-900">
+              <Button
+                size="sm"
+                onClick={() => viewFile(report)}
+                variant="ghost"
+                className="w-full flex flex-row justify-stretch items-center"
+              >
+                <CareIcon icon="l-eye" className="mr-1" />
+                <span>{t("view")}</span>
+              </Button>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="text-primary-900">
+              <Button
+                size="sm"
+                onClick={() => downloadFile(report)}
+                variant="ghost"
+                className="w-full flex flex-row justify-stretch items-center"
+              >
+                <CareIcon icon="l-arrow-circle-down" className="mr-1" />
+                <span>{t("download")}</span>
+              </Button>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild className="text-primary-900">
               <Button
                 size="sm"
@@ -427,8 +439,6 @@ export function ReportSubTab({
         {encounter && (
           <TemplateReportSheet
             facilityId={encounter.facility?.id || ""}
-            encounterId={encounter.id}
-            patientId={patient?.id}
             associatingId={associatingId}
             reportType="discharge_summary"
             permissions={permissions}

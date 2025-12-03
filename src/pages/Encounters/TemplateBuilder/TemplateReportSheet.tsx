@@ -41,8 +41,6 @@ interface TemplateReportSheetProps {
 
 export default function TemplateReportSheet({
   facilityId,
-  encounterId,
-  patientId,
   associatingId,
   reportType,
   trigger,
@@ -80,13 +78,10 @@ export default function TemplateReportSheet({
   const handleGenerateReport = (template: TemplateBaseRead) => {
     generateReport({
       template_id: template.id,
-      report_type: reportType,
-      encounter_id: encounterId,
-      patient_id: patientId,
       associating_id: associatingId,
-      context_config: null,
       output_format: template.default_format,
-      options: {},
+      options: JSON.stringify({}),
+      force: false,
     });
   };
 
