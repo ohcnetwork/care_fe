@@ -1,7 +1,6 @@
 import {
   ENCOUNTER_CLASS,
   ENCOUNTER_PRIORITY,
-  ENCOUNTER_STATUS,
   EncounterClass,
   EncounterPriority,
   EncounterStatus,
@@ -43,7 +42,7 @@ export const encounterStatusFilter = (
     key,
     "status",
     "command",
-    Array.from(ENCOUNTER_STATUS).map((value) => ({
+    Object.values(EncounterStatus).map((value) => ({
       value: value,
       label: t(value),
       color: ENCOUNTER_STATUS_FILTER_COLORS[value],

@@ -54,7 +54,7 @@ export default function LocationView({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const limit = 12;
+  const limit = 14;
 
   const { data: location, isLoading: isLocationLoading } = useQuery({
     queryKey: ["location", facilityId, id],

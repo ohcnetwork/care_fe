@@ -24,7 +24,7 @@ import {
   ENCOUNTER_DIET_PREFERENCE,
   ENCOUNTER_DISCHARGE_DISPOSITION,
   ENCOUNTER_PRIORITY,
-  ENCOUNTER_STATUS,
+  EncounterStatus,
   type EncounterAdmitSources,
   type EncounterClass,
   type EncounterDietPreference,
@@ -32,7 +32,6 @@ import {
   type EncounterEdit,
   type EncounterPriority,
   type EncounterRead,
-  type EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -115,7 +114,7 @@ export function EncounterQuestion({
   );
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
-    status: "unknown",
+    status: EncounterStatus.UNKNOWN,
     encounter_class: careConfig.defaultEncounterType,
     period: {
       start: new Date().toISOString(),
@@ -260,11 +259,13 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
-              {ENCOUNTER_STATUS.map((encounterStatus) => (
-                <SelectItem key={encounterStatus} value={encounterStatus}>
-                  {t(`encounter_status__${encounterStatus}`)}
-                </SelectItem>
-              ))}
+              {Object.values(EncounterStatus).map(
+                (encounterStatus: EncounterStatus) => (
+                  <SelectItem key={encounterStatus} value={encounterStatus}>
+                    {t(`encounter_status__${encounterStatus}`)}
+                  </SelectItem>
+                ),
+              )}
             </SelectContent>
           </Select>
         </div>

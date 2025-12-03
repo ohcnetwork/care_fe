@@ -36,10 +36,13 @@ import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
 import BackButton from "@/components/Common/BackButton";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import {
   REQUEST_ORDER_STATUS_COLORS,
   RequestOrderCategory,
@@ -76,6 +79,7 @@ const createRequestOrderFormSchema = (
       ? z.string().min(1, t("origin_required"))
       : z.string().optional(),
     destination: z.string().min(1, t("destination_required")),
+    tags: z.array(z.string()),
   });
 
 type FormValues = z.infer<ReturnType<typeof createRequestOrderFormSchema>>;
@@ -175,6 +179,7 @@ export default function RequestOrderForm({
       supplier: undefined,
       origin: undefined,
       destination: locationId,
+      tags: [],
     },
   });
 
@@ -190,9 +195,15 @@ export default function RequestOrderForm({
         supplier: existingData.supplier?.id || undefined,
         origin: existingData.origin?.id || undefined,
         destination: existingData.destination.id,
+        tags: existingData.tags.map((tag) => tag.id) ?? [],
       });
     }
   }, [isEditMode, existingData, form]);
+
+  const tagIds = form.watch("tags") || [];
+  const selectedTags = useTagConfigs({ ids: tagIds, facilityId })
+    .map(({ data }) => data)
+    .filter(Boolean) as TagConfig[];
 
   const { mutate: createRequestOrder, isPending: isCreating } = useMutation({
     mutationFn: mutate(requestOrderApi.createRequestOrder, {
@@ -396,6 +407,29 @@ export default function RequestOrderForm({
                       </FormItem>
                     )}
                   />
+
+                  {!isEditMode && (
+                    <FormField
+                      control={form.control}
+                      name="tags"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("order_tags")} </FormLabel>
+                          <FormControl>
+                            <TagSelectorPopover
+                              selected={selectedTags}
+                              onChange={(tags) => {
+                                field.onChange(tags.map((tag) => tag.id));
+                              }}
+                              resource={TagResource.REQUEST_ORDER}
+                              facilityId={facilityId}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
 
                   <FormField
                     control={form.control}
