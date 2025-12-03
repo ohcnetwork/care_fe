@@ -214,6 +214,87 @@ export async function selectFromValueSet(
   await scope.waitFor({ state: "hidden" }).catch(() => {});
 }
 
+interface SelectFromCommandOptions {
+  search?: string;
+  itemIndex?: number;
+}
+
+/**
+ * Generic helper for selecting from a Command component inside a Popover or Drawer.
+ * This pattern is used by UserSelector, HealthcareServiceSelector, and other similar components.
+ *
+ * Key behavior:
+ * - Single selection (auto-closes after select)
+ * - Uses CommandInput with data-slot="command-input" for search
+ * - Options are directly clickable CommandItems
+ * - Works with both Popover (desktop) and Drawer (mobile)
+ *
+ * @example
+ * await selectFromCommand(page, trigger, {
+ *   search: "Search Term",
+ *   itemIndex: 0
+ * });
+ */
+export async function selectFromCommand(
+  page: Page,
+  trigger: Locator,
+  { search, itemIndex = 0 }: SelectFromCommandOptions = {},
+) {
+  await trigger.waitFor({ state: "visible" });
+  await trigger.scrollIntoViewIfNeeded();
+
+  // Close any existing popovers before opening
+  await closeAnyOpenPopovers(page);
+
+  await trigger.click();
+
+  // Wait for the picker to open (could be dialog or popover)
+  const dialog = page.getByRole("dialog").last();
+  const hasDialog = await dialog.isVisible().catch(() => false);
+  const popper = page.locator("[data-radix-popper-content-wrapper]").last();
+  const scope = hasDialog ? dialog : popper;
+
+  await scope.waitFor({ state: "visible" });
+
+  // If search is provided, use the search input
+  if (search) {
+    // Try finding by data-slot first (standard CommandInput), fallback to placeholder
+    const input = scope.locator('[data-slot="command-input"]').first();
+    const isInputVisible = await input.isVisible().catch(() => false);
+
+    if (isInputVisible) {
+      await input.fill("");
+      await input.fill(search);
+      // Wait for search results to update
+      await page.waitForTimeout(500);
+    } else {
+      // Fallback for custom inputs
+      const placeholderInput = scope.getByPlaceholder(/search/i).first();
+      if (await placeholderInput.isVisible().catch(() => false)) {
+        await placeholderInput.fill("");
+        await placeholderInput.fill(search);
+        await page.waitForTimeout(500);
+      }
+    }
+  }
+
+  // Wait for options to load
+  const options = scope.getByRole("option");
+  await options.first().waitFor({ state: "visible" });
+
+  const count = await options.count();
+  if (count === 0) {
+    throw new Error("No options found in command selector");
+  }
+
+  // Click the option directly
+  const targetOption = options.nth(itemIndex);
+  await targetOption.click();
+
+  // Auto-closes on selection, so wait for it to close
+  await scope.waitFor({ state: "hidden" }).catch(() => {});
+}
+
 interface SelectFromCategoryPickerOptions {
   search?: string;
   navigateCategories?: string[];
