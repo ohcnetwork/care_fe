@@ -35,7 +35,9 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
 
     // Fill in department name (Department type is selected by default)
     const departmentName = faker.word.words(2);
-    await page.getByRole("textbox", { name: "Name" }).fill(departmentName);
+    await page
+      .getByRole("textbox", { name: "Name" })
+      .pressSequentially(departmentName);
 
     // Click Create Organization button
     await page.getByRole("button", { name: "Create Organization" }).click();
@@ -60,7 +62,9 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
 
     // Fill in team name
     const teamName = faker.word.words(2);
-    await page.getByRole("textbox", { name: "Name" }).fill(teamName);
+    await page
+      .getByRole("textbox", { name: "Name" })
+      .pressSequentially(teamName);
 
     // Select Team type
     await page.getByRole("combobox", { name: "Type" }).click();
