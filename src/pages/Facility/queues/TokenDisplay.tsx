@@ -1,5 +1,5 @@
 import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
+import PageTitle from "@/components/Common/PageHeadTitle";
 import { useScheduleResource } from "@/components/Schedule/useScheduleResource";
 import { cn } from "@/lib/utils";
 import {
@@ -15,6 +15,7 @@ import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useQueries, UseQueryResult } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -46,7 +47,7 @@ const combineResourceSubQueues = (
 export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
   const { t } = useTranslation();
 
-  const sp = useQueries({
+  const servicePoints = useQueries({
     queries: resources.map((resource) => ({
       queryKey: ["subQueues", facilityId, resource],
       queryFn: query(tokenSubQueueApi.list, {
@@ -67,11 +68,9 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
     combine: combineResourceSubQueues,
   });
 
-  if (sp.length === 0) {
+  if (servicePoints.length === 0) {
     return <Loading />;
   }
-
-  const servicePoints = [...sp].slice(0, 10);
 
   const itemCount = servicePoints.length;
 
@@ -105,15 +104,18 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
   };
 
   return (
-    <Page title={t("token_display")} hideTitleOnPage>
+    <>
+      <PageTitle title={t("token_display")} />
       <div
-        className={`grid gap-2 -mx-12 -my-12 bg-[#1FB6C9] h-screen p-3 [container-type:inline-size] ${getGridClass()}`}
+        className={cn(
+          "h-screen -mx-6 -mt-10 -mb-4 bg-[#1FB6C9] [container-type:inline-size] grid gap-4",
+          getGridClass(),
+        )}
       >
         {servicePoints.map((servicePoint, index) => (
           <div
             key={servicePoint.id}
-            className={cn(
-              "flex flex-col  h-full",
+            className={
               [
                 "col-span-1",
                 "col-span-2",
@@ -121,14 +123,14 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
                 "col-span-4",
                 "col-span-5",
                 "col-span-6",
-              ][getColSpan(index) - 1],
-            )}
+              ][getColSpan(index) - 1]
+            }
           >
             <ServicePointDisplay facilityId={facilityId} {...servicePoint} />
           </div>
         ))}
       </div>
-    </Page>
+    </>
   );
 };
 
@@ -143,15 +145,16 @@ const ServicePointDisplay = ({
   current_token,
   name,
 }: ServicePointDisplayProps) => {
-  const [hasCurrentTokenChanged, setHasCurrentTokenChanged] = useState(false);
+  const [hasRecentlyChanged, setHasRecentlyChanged] = useState(false);
   const tokenNumber = current_token ? renderTokenNumber(current_token) : "--";
 
   useEffect(() => {
-    if (current_token) {
-      setHasCurrentTokenChanged(true);
-
+    if (tokenNumber !== "--") {
       setTimeout(() => {
-        setHasCurrentTokenChanged(false);
+        setHasRecentlyChanged(true);
+      }, 1000);
+      setTimeout(() => {
+        setHasRecentlyChanged(false);
       }, 4000);
     }
   }, [tokenNumber]);
@@ -162,30 +165,41 @@ const ServicePointDisplay = ({
     facilityId,
   });
 
-  console.log(hasCurrentTokenChanged);
-
   return (
-    <>
-      <div className="w-full text-center p-4 bg-[#122235] text-[clamp(2rem,25cqw,4rem)]">
-        <span className="font-bold text-white uppercase whitespace-nowrap">
+    <div className="p-4 h-full bg-[#07131F] text-center">
+      <div className="p-6 bg-[#122235] rounded-t-2xl">
+        <p className="font-bold text-white uppercase whitespace-nowrap text-[clamp(2rem,25cqw,4rem)]">
           {name}
-        </span>
+        </p>
         {resource && (
-          <div className="text-4xl text-white">
+          <p className="text-[clamp(1rem,25cqw,2rem)] text-white">
             {formatScheduleResourceName(resource)}
-          </div>
+          </p>
         )}
       </div>
       <div
         className={cn(
-          "flex items-center justify-center font-bold h-full transition-colors duration-500",
-          hasCurrentTokenChanged
-            ? "bg-[#FFD83D] text-[#07131F]"
-            : "bg-[#07131F] text-[#FFD83D]",
+          "flex items-center justify-center font-black text-[clamp(2rem,25cqw,6rem)] h-[calc(100%-16rem)] transition-colors duration-500",
+          hasRecentlyChanged ? "bg-[#FFD83D] text-[#07131F]" : "text-[#FFD83D]",
         )}
       >
-        <span className="text-[clamp(2rem,25cqw,6rem)]">{tokenNumber}</span>
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.span
+            key={tokenNumber}
+            initial={{ y: -40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 40, opacity: 0 }}
+            transition={{
+              type: "tween",
+              duration: 1,
+              ease: "easeInOut",
+            }}
+            className="inline-block"
+          >
+            {tokenNumber}
+          </motion.span>
+        </AnimatePresence>
       </div>
-    </>
+    </div>
   );
 };
