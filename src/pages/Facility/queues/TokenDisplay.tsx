@@ -15,6 +15,7 @@ import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useQueries, UseQueryResult } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface TokenDisplayProps {
@@ -31,11 +32,6 @@ const combineResourceSubQueues = (
     resourceId: string;
   }>[],
 ) => {
-  // If any query is loading, return null
-  if (result.some((query) => query.isLoading)) {
-    return null;
-  }
-
   return result
     .filter((query) => query.data) // Voluntarily ignoring queries that are not successful to make it resilient to errors
     .flatMap(({ data }) =>
@@ -71,10 +67,11 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
     combine: combineResourceSubQueues,
   });
 
-  if (!sp) {
+  if (sp.length === 0) {
     return <Loading />;
   }
-  const servicePoints = [...sp, ...sp, ...sp, ...sp, ...sp, ...sp].slice(0, 10);
+
+  const servicePoints = [...sp].slice(0, 10);
 
   const itemCount = servicePoints.length;
 
@@ -110,13 +107,13 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
   return (
     <Page title={t("token_display")} hideTitleOnPage>
       <div
-        className={`grid gap-2 -mx-12 -my-12 bg-[#1FB6C9] h-screen p-3 ${getGridClass()}`}
+        className={`grid gap-2 -mx-12 -my-12 bg-[#1FB6C9] h-screen p-3 [container-type:inline-size] ${getGridClass()}`}
       >
         {servicePoints.map((servicePoint, index) => (
           <div
             key={servicePoint.id}
             className={cn(
-              "flex flex-col bg-[#07131F] h-full",
+              "flex flex-col  h-full",
               [
                 "col-span-1",
                 "col-span-2",
@@ -146,28 +143,48 @@ const ServicePointDisplay = ({
   current_token,
   name,
 }: ServicePointDisplayProps) => {
+  const [hasCurrentTokenChanged, setHasCurrentTokenChanged] = useState(false);
+  const tokenNumber = current_token ? renderTokenNumber(current_token) : "--";
+
+  useEffect(() => {
+    if (current_token) {
+      setHasCurrentTokenChanged(true);
+
+      setTimeout(() => {
+        setHasCurrentTokenChanged(false);
+      }, 4000);
+    }
+  }, [tokenNumber]);
+
   const resource = useScheduleResource({
     resourceType,
     resourceId,
     facilityId,
   });
 
+  console.log(hasCurrentTokenChanged);
+
   return (
     <>
-      <div className="bg-[#122235] w-full text-center p-4">
-        <span className="font-bold text-white text-6xl">{name}</span>
+      <div className="w-full text-center p-4 bg-[#122235] text-[clamp(2rem,25cqw,4rem)]">
+        <span className="font-bold text-white uppercase whitespace-nowrap">
+          {name}
+        </span>
         {resource && (
-          <div className="text-2xl text-white">
+          <div className="text-4xl text-white">
             {formatScheduleResourceName(resource)}
           </div>
         )}
       </div>
-      <div className="flex items-center justify-center text-7xl font-bold text-[#FFD83D] h-full">
-        {current_token ? (
-          <span>{renderTokenNumber(current_token)}</span>
-        ) : (
-          <span>--</span>
+      <div
+        className={cn(
+          "flex items-center justify-center font-bold h-full transition-colors duration-500",
+          hasCurrentTokenChanged
+            ? "bg-[#FFD83D] text-[#07131F]"
+            : "bg-[#07131F] text-[#FFD83D]",
         )}
+      >
+        <span className="text-[clamp(2rem,25cqw,6rem)]">{tokenNumber}</span>
       </div>
     </>
   );
