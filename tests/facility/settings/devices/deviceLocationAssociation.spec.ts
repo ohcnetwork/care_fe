@@ -38,134 +38,124 @@ test.describe("Device Location Association", () => {
   });
 
   test("should open location association sheet", async ({ page }) => {
-    // Click associate button for location - using a more robust selector
-    const associateButton = page
-      .locator('[class*="grid"]')
-      .filter({ hasText: "Location" })
+    // Click associate button for location - find by Location heading
+    await page
+      .getByRole("heading", { name: "Location" })
+      .locator("..")
       .getByRole("button", { name: "Associate" })
-      .first();
-
-    await associateButton.click();
+      .click();
 
     // Sheet should open
     await expect(page.getByText("Associate Location")).toBeVisible();
-    await expect(
-      page.getByText("Associate a location to track where this device is"),
-    ).toBeVisible();
+    await expect(page.getByText("No locations found")).toBeVisible();
   });
 
   test("should associate a location to device", async ({ page }) => {
-    // Click associate button for location
-    const associateButton = page
-      .locator('[class*="grid"]')
-      .filter({ hasText: "Location" })
+    // Click associate button for location - find by Location heading
+    await page
+      .getByRole("heading", { name: "Location" })
+      .locator("..")
       .getByRole("button", { name: "Associate" })
-      .first();
-
-    await associateButton.click();
+      .click();
 
     // Wait for the sheet to open
     await expect(
       page.getByRole("heading", { name: "Associate Location" }),
     ).toBeVisible();
 
+    // Click to open location selector
+    await page
+      .locator('[data-slot="popover-trigger"]')
+      .filter({ hasText: "Select location" })
+      .click();
+
     // Search for a location
-    const locationSearch = page.getByPlaceholder("Search location...");
-    await locationSearch.fill("ward");
-    await locationSearch.press("Enter");
+    await page.getByPlaceholder("Search locations...").fill("bed 5");
 
-    // Wait for search results and select first location
-    await page.waitForLoadState("networkidle");
+    // Click on first location result
+    const locationItem = page.locator('[data-slot="command-item"]').first();
+    await expect(locationItem).toBeVisible({ timeout: 5000 });
+    await locationItem.click();
 
-    // Click on first location result if available
-    const locationResults = page.locator('[role="button"]', {
-      hasText: /ward/i,
-    });
-    const count = await locationResults.count();
+    // Click associate button in the sheet
+    await page.getByRole("button", { name: "Associate" }).last().click();
 
-    if (count > 0) {
-      await locationResults.first().click();
+    // Should show success message
+    await expect(
+      page.getByText("Location associated successfully"),
+    ).toBeVisible();
 
-      // Click associate button in the sheet
-      await page.getByRole("button", { name: "Associate" }).last().click();
-
-      // Should show success message
-      await expect(
-        page.getByText("Location associated successfully"),
-      ).toBeVisible();
-
-      // Location should now be displayed
-      await expect(page.getByText("No location associated")).not.toBeVisible();
-    }
+    // Location should now be displayed
+    await expect(page.getByText("No location associated")).not.toBeVisible();
   });
 
   test("should display current location and allow disassociation", async ({
     page,
   }) => {
-    // First associate a location
-    const associateButton = page
-      .locator('[class*="grid"]')
-      .filter({ hasText: "Location" })
+    // First associate a location - find by Location heading
+    await page
+      .getByRole("heading", { name: "Location" })
+      .locator("..")
       .getByRole("button", { name: "Associate" })
-      .first();
-
-    await associateButton.click();
+      .click();
 
     await expect(
       page.getByRole("heading", { name: "Associate Location" }),
     ).toBeVisible();
 
-    const locationSearch = page.getByPlaceholder("Search location...");
-    await locationSearch.fill("ward");
-    await locationSearch.press("Enter");
-    await page.waitForLoadState("networkidle");
+    // Click to open location selector
+    await page
+      .locator('[data-slot="popover-trigger"]')
+      .filter({ hasText: "Select location" })
+      .click();
 
-    const locationResults = page.locator('[role="button"]', {
-      hasText: /ward/i,
-    });
-    const count = await locationResults.count();
+    // Search for a location
+    await page.getByPlaceholder("Search locations...").fill("bed 5");
 
-    if (count > 0) {
-      await locationResults.first().click();
-      await page.getByRole("button", { name: "Associate" }).last().click();
+    // Click on first location result
+    const locationItem = page.locator('[data-slot="command-item"]').first();
+    await expect(locationItem).toBeVisible({ timeout: 5000 });
+    await locationItem.click();
 
-      await expect(
-        page.getByText("Location associated successfully"),
-      ).toBeVisible();
+    await page.getByRole("button", { name: "Associate" }).last().click();
 
-      // Close the sheet by clicking outside or pressing Escape
-      await page.keyboard.press("Escape");
+    await expect(
+      page.getByText("Location associated successfully"),
+    ).toBeVisible();
 
-      // Open the sheet again
-      await page
-        .locator('[class*="grid"]')
-        .filter({ hasText: "Location" })
-        .getByRole("button", { name: "Change" })
-        .first()
-        .click();
+    // Close the sheet by clicking outside or pressing Escape
+    await page.keyboard.press("Escape");
 
-      // Should show current location
-      await expect(page.getByText("Current Location")).toBeVisible();
+    // Open the sheet again
+    await page
+      .getByRole("heading", { name: "Location" })
+      .locator("..")
+      .getByRole("button", { name: "Change" })
+      .click();
 
-      // Click disassociate
-      await page.getByRole("button", { name: "Disassociate" }).click();
+    // Should show current location
+    await expect(page.getByText("Current Location")).toBeVisible();
 
-      // Should show success message
-      await expect(
-        page.getByText("Location disassociated successfully"),
-      ).toBeVisible();
-    }
+    // Click disassociate
+    await page.getByRole("button", { name: "Disassociate" }).click();
+
+    // Should show success message
+    await expect(
+      page.getByText("Location disassociated successfully"),
+    ).toBeVisible();
+
+    // Verify location appears in location history
+    await expect(page.getByText("Location History")).toBeVisible();
+    await expect(page.getByText(/bed 5/i)).toBeVisible();
   });
 
   test("should display location history", async ({ page }) => {
-    // Click associate button for location
-    const associateButton = page
-      .locator('[class*="grid"]')
-      .filter({ hasText: "Location" })
+    // Click associate button for location - find by Location heading
+    await page
+      .getByRole("heading", { name: "Location" })
+      .locator("..")
       .getByRole("button", { name: "Associate" })
-      .first();
-
-    await associateButton.click();
+      .click();
 
     // Wait for the sheet to open
     await expect(

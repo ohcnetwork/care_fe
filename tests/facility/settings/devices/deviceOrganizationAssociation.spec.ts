@@ -38,125 +38,112 @@ test.describe("Device Organization Association", () => {
   });
 
   test("should open organization association sheet", async ({ page }) => {
-    // Click associate button for organization - using a more robust selector
-    const associateButton = page
-      .locator('[class*="md:col-span-2"]')
-      .filter({ hasText: "Managing Organization" })
+    // Click associate button for organization - find by Managing Organization heading
+    await page
+      .getByRole("heading", { name: "Managing Organization" })
+      .locator("..")
       .getByRole("button", { name: "Associate" })
-      .first();
-
-    await associateButton.click();
+      .click();
 
     // Sheet should open
     await expect(
-      page.getByRole("heading", { name: "Link Departments" }),
+      page.getByRole("heading", { name: "Manage Organization" }),
     ).toBeVisible();
   });
 
   test("should associate an organization to device", async ({ page }) => {
-    // Click associate button for organization
-    const associateButton = page
-      .locator('[class*="md:col-span-2"]')
-      .filter({ hasText: "Managing Organization" })
+    // Click associate button for organization - find by Managing Organization heading
+    await page
+      .getByRole("heading", { name: "Managing Organization" })
+      .locator("..")
       .getByRole("button", { name: "Associate" })
-      .first();
-
-    await associateButton.click();
+      .click();
 
     // Wait for the sheet to open
     await expect(
-      page.getByRole("heading", { name: "Link Departments" }),
+      page.getByRole("heading", { name: "Manage Organization" }),
     ).toBeVisible();
 
-    // Search for an organization/department
-    const orgSearch = page.getByPlaceholder("Search departments...");
-    await orgSearch.fill("cardiology");
-    await page.waitForLoadState("networkidle");
+    // Administration is pre-selected by default, click Add Organization
+    await page.getByRole("button", { name: "Add Organization" }).click();
 
-    // Click on first organization result if available
-    const orgResults = page.locator('[role="button"]', {
-      hasText: /cardiology/i,
-    });
-    const count = await orgResults.count();
+    // Should show success message
+    await expect(
+      page.getByText(/Organization added successfully/i),
+    ).toBeVisible();
 
-    if (count > 0) {
-      await orgResults.first().click();
-
-      // Click link button in the sheet
-      await page.getByRole("button", { name: "Link" }).last().click();
-
-      // Should show success message
-      await expect(page.getByText(/linked successfully/i)).toBeVisible();
-
-      // Organization should now be displayed
-      await expect(
-        page.getByText("No organization associated"),
-      ).not.toBeVisible();
-    }
+    // Organization should now be displayed
+    await expect(
+      page.getByText("No organization associated"),
+    ).not.toBeVisible();
   });
 
   test("should allow changing organization associated with device", async ({
     page,
   }) => {
-    // First associate an organization
-    const associateButton = page
-      .locator('[class*="md:col-span-2"]')
-      .filter({ hasText: "Managing Organization" })
+    // First associate an organization - find by Managing Organization heading
+    await page
+      .getByRole("heading", { name: "Managing Organization" })
+      .locator("..")
       .getByRole("button", { name: "Associate" })
-      .first();
-
-    await associateButton.click();
+      .click();
 
     await expect(
-      page.getByRole("heading", { name: "Link Departments" }),
+      page.getByRole("heading", { name: "Manage Organization" }),
     ).toBeVisible();
 
-    const orgSearch = page.getByPlaceholder("Search departments...");
-    await orgSearch.fill("cardiology");
-    await page.waitForLoadState("networkidle");
+    // Administration is pre-selected by default, click Add Organization
+    await page.getByRole("button", { name: "Add Organization" }).click();
 
-    const orgResults = page.locator('[role="button"]', {
-      hasText: /cardiology/i,
-    });
-    const count = await orgResults.count();
+    await expect(
+      page.getByText(/Organization added successfully/i),
+    ).toBeVisible();
 
-    if (count > 0) {
-      await orgResults.first().click();
-      await page.getByRole("button", { name: "Link" }).last().click();
+    // Close the sheet
+    await page.keyboard.press("Escape");
 
-      await expect(page.getByText(/linked successfully/i)).toBeVisible();
+    // Open the sheet again to change organization
+    await page
+      .getByRole("heading", { name: "Managing Organization" })
+      .locator("..")
+      .getByRole("button", { name: "Change" })
+      .click();
 
-      // Close the sheet
-      await page.keyboard.press("Escape");
+    // Should show current organization
+    await expect(page.getByText("Current Organization")).toBeVisible();
+    await expect(page.getByText("Administration").first()).toBeVisible();
 
-      // Open the sheet again to change organization
-      await page
-        .locator('[class*="md:col-span-2"]')
-        .filter({ hasText: "Managing Organization" })
-        .getByRole("button", { name: "Change" })
-        .first()
-        .click();
+    // Click "All Organizations" tab to see more options
+    await page.getByRole("tab", { name: "All Organizations" }).click();
 
-      // Should show current organization with unlink option
-      await expect(page.getByText("Current Linked Departments")).toBeVisible();
+    // Click the Select Department dropdown (using popover-trigger)
+    await page
+      .locator('[data-slot="popover-trigger"]')
+      .filter({ hasText: "Select Department" })
+      .click();
 
-      // Search for a different organization
-      const newOrgSearch = page.getByPlaceholder("Search departments...");
-      await newOrgSearch.fill("surgery");
-      await page.waitForLoadState("networkidle");
+    // Wait for the department list to load and select any item
+    const departmentItem = page.locator('[data-slot="command-item"]').first();
+    await expect(departmentItem).toBeVisible();
+    await departmentItem.click();
 
-      const newOrgResults = page.locator('[role="button"]', {
-        hasText: /surgery/i,
-      });
-      const newCount = await newOrgResults.count();
+    // Click Add Organization
+    await page.getByRole("button", { name: "Add Organization" }).click();
 
-      if (newCount > 0) {
-        await newOrgResults.first().click();
-        await page.getByRole("button", { name: "Link" }).last().click();
+    // Should show success message
+    await expect(
+      page.getByText(/Organization added successfully/i),
+    ).toBeVisible();
 
-        // Should show success message
-        await expect(page.getByText(/linked successfully/i)).toBeVisible();
-      }
-    }
+    // Verify the Managing Organization section shows the new organization, not Administration
+    const managingOrgSection = page
+      .getByRole("heading", { name: "Managing Organization" })
+      .locator("..");
+    await expect(
+      managingOrgSection.getByText("Administration"),
+    ).not.toBeVisible();
+    await expect(
+      managingOrgSection.getByRole("button", { name: "Change" }),
+    ).toBeVisible();
   });
 });
