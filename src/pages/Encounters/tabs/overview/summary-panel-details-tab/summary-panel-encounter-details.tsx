@@ -252,7 +252,7 @@ export const SummaryPanelEncounterDetails = () => {
                         .map((member) => (
                           <Avatar
                             key={member.member.id}
-                            name={formatName(member.member)}
+                            name={formatName(member.member, true)}
                             imageUrl={member.member.profile_picture_url}
                             className="size-10 rounded-full border border-white shadow-sm"
                           />

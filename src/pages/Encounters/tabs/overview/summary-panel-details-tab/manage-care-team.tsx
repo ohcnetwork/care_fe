@@ -52,7 +52,7 @@ export const ManageCareTeam = () => {
               >
                 <Avatar
                   key={member.member.id}
-                  name={formatName(member.member)}
+                  name={formatName(member.member, true)}
                   imageUrl={member.member.profile_picture_url}
                   className="size-9 rounded-full border border-white shadow-sm"
                 />{" "}

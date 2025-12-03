@@ -187,7 +187,7 @@ export function DiagnosticReportReview({
                 {fullReport?.created_by && (
                   <div className="flex items-center gap-2">
                     <Avatar
-                      name={formatName(fullReport.created_by)}
+                      name={formatName(fullReport.created_by, true)}
                       className="size-5"
                       imageUrl={fullReport.created_by.profile_picture_url}
                     />

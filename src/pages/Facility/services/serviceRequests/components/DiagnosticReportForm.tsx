@@ -851,7 +851,7 @@ export function DiagnosticReportForm({
                 {hasReport && fullReport?.created_by && (
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-5 w-full sm:w-auto">
                     <Avatar
-                      name={formatName(fullReport.created_by)}
+                      name={formatName(fullReport.created_by, true)}
                       className="size-5"
                       imageUrl={fullReport.created_by.profile_picture_url}
                     />
