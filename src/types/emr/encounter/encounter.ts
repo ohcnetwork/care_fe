@@ -223,8 +223,10 @@ export interface EncounterBase {
   discharge_summary_advice?: string | null;
 }
 
-export interface EncounterRead
-  extends Omit<EncounterBase, "patient" | "facility"> {
+export interface EncounterRead extends Omit<
+  EncounterBase,
+  "patient" | "facility"
+> {
   patient: PatientRead;
   facility: {
     id: string;
