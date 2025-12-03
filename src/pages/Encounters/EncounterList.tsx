@@ -163,8 +163,8 @@ export function EncounterList({
     .filter(Boolean) as TagConfig[];
 
   useEffect(() => {
-    // Set default date range if no dates are present
-    if (!created_date_after && !created_date_before) {
+    // Set default date range if no dates are present and no patient filter is active
+    if (!created_date_after && !created_date_before && !patient_filter) {
       const today = new Date();
       const defaultDays = careConfig.encounterDateFilter;
       if (defaultDays === 0) {
@@ -180,7 +180,7 @@ export function EncounterList({
         });
       }
     }
-  }, [created_date_after, created_date_before, updateQuery]);
+  }, [created_date_after, created_date_before, patient_filter, updateQuery]);
 
   const filters = [
     encounterStatusFilter("status"),
@@ -236,6 +236,17 @@ export function EncounterList({
         : undefined,
   });
 
+  const displaySelectedFilters =
+    patient_filter && !created_date_after && !created_date_before
+      ? {
+          ...selectedFilters,
+          created_date: {
+            ...selectedFilters.created_date,
+            selected: [],
+          },
+        }
+      : selectedFilters;
+
   return (
     <Page
       title={t("encounter_class_encounters", {
@@ -264,6 +275,8 @@ export function EncounterList({
                     updateQuery({
                       patient_filter: patientId,
                       patient_name: patientName,
+                      created_date_after: undefined,
+                      created_date_before: undefined,
                     })
                   }
                   placeholder={t("filter_by_identifier")}
@@ -272,7 +285,7 @@ export function EncounterList({
                   patientName={qParams.patient_name}
                 />
                 <MultiFilter
-                  selectedFilters={selectedFilters}
+                  selectedFilters={displaySelectedFilters}
                   onFilterChange={handleFilterChange}
                   onOperationChange={handleOperationChange}
                   onClearAll={handleClearAll}

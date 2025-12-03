@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { WalletMinimal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
@@ -16,9 +16,19 @@ import {
 } from "@/components/ui/sheet";
 
 import { ChargeItemDefinitionPicker } from "@/components/Common/ChargeItemDefinitionPicker";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { ScheduleTemplate } from "@/types/scheduling/schedule";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 interface ScheduleChargeItemDefinitionSelectorProps {
   facilityId: string;
@@ -37,41 +47,60 @@ export default function ScheduleChargeItemDefinitionSelector({
 }: ScheduleChargeItemDefinitionSelectorProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [reVisitDays, setReVisitDays] = useState(
-    scheduleTemplate.revisit_allowed_days,
-  );
 
-  const [selectedDefinitionState, setSelectedDefinitionState] = useState<{
-    charge_item_definition: ChargeItemDefinitionBase | undefined;
-    re_visit_charge_item_definition: ChargeItemDefinitionBase | undefined;
-  }>({
-    charge_item_definition: scheduleTemplate.charge_item_definition,
-    re_visit_charge_item_definition:
-      scheduleTemplate.revisit_charge_item_definition,
+  const scheduleChargeItemSchema = z.object({
+    charge_item_definition: z
+      .custom<ChargeItemDefinitionBase>()
+      .refine((val) => val?.slug, { message: t("field_required") }),
+    re_visit_allowed_days: z
+      .number({ required_error: t("field_required") })
+      .min(0, t("revisit_days_non_negative")),
+    re_visit_charge_item_definition: z
+      .custom<ChargeItemDefinitionBase>()
+      .nullable(),
   });
 
-  const handleSubmit = () => {
-    onChange({
-      charge_item_definition_slug:
-        selectedDefinitionState.charge_item_definition?.slug || "",
-      re_visit_allowed_days: reVisitDays,
-      re_visit_charge_item_definition_slug:
-        selectedDefinitionState.re_visit_charge_item_definition?.slug || null,
-    });
-    setIsOpen(false);
-  };
+  type FormValues = z.infer<typeof scheduleChargeItemSchema>;
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(scheduleChargeItemSchema),
+    defaultValues: {
+      charge_item_definition: scheduleTemplate.charge_item_definition,
+      re_visit_allowed_days: scheduleTemplate.revisit_allowed_days ?? undefined,
+      re_visit_charge_item_definition:
+        scheduleTemplate.revisit_charge_item_definition,
+    },
+  });
+
+  const reVisitDays = form.watch("re_visit_allowed_days");
+  const chargeItemDef = form.watch("charge_item_definition");
+
+  useEffect(() => {
+    if (!reVisitDays) {
+      form.setValue("re_visit_charge_item_definition", null);
+    }
+  }, [reVisitDays, form]);
 
   const handleSheetOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
-      // Reset to original values when closing
-      setReVisitDays(scheduleTemplate.revisit_allowed_days);
-      setSelectedDefinitionState({
+      form.reset({
         charge_item_definition: scheduleTemplate.charge_item_definition,
+        re_visit_allowed_days: scheduleTemplate.revisit_allowed_days,
         re_visit_charge_item_definition:
           scheduleTemplate.revisit_charge_item_definition,
       });
     }
+  };
+
+  const onSubmit = (data: FormValues) => {
+    onChange({
+      charge_item_definition_slug: data.charge_item_definition?.slug ?? "",
+      re_visit_allowed_days: data.re_visit_allowed_days,
+      re_visit_charge_item_definition_slug:
+        data.re_visit_charge_item_definition?.slug ?? null,
+    });
+    setIsOpen(false);
   };
 
   return (
@@ -93,103 +122,116 @@ export default function ScheduleChargeItemDefinitionSelector({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-6 flex flex-col gap-6">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-4">
-              <div>
-                <Label>{t("consulation charge")}</Label>
-                <div className="mt-2 flex gap-2 flex-col sm:flex-row">
-                  <ChargeItemDefinitionPicker
-                    facilityId={facilityId}
-                    value={selectedDefinitionState.charge_item_definition}
-                    onValueChange={(selectedDef) => {
-                      if (!selectedDef) {
-                        setSelectedDefinitionState({
-                          ...selectedDefinitionState,
-                          charge_item_definition: undefined,
-                        });
-                        return;
-                      }
-                      setSelectedDefinitionState({
-                        ...selectedDefinitionState,
-                        charge_item_definition:
-                          selectedDef as ChargeItemDefinitionBase,
-                      });
-                    }}
-                    placeholder={t("select_charge_item_definition")}
-                    className="grow-1"
-                    showCreateButton={true}
-                  />
-                </div>
-              </div>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="mt-6 flex flex-col gap-6"
+          >
+            <FormField
+              control={form.control}
+              name="charge_item_definition"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("consultation_charge")}</FormLabel>
+                  <FormControl>
+                    <div className="mt-2 flex gap-2 flex-col sm:flex-row">
+                      <ChargeItemDefinitionPicker
+                        facilityId={facilityId}
+                        value={field.value}
+                        onValueChange={(def) => {
+                          if (!def) {
+                            field.onChange(null);
+                            return;
+                          }
+                          const selected = Array.isArray(def) ? def[0] : def;
+                          field.onChange(selected);
+                        }}
+                        placeholder={t("select_charge_item_definition")}
+                        className="grow-1"
+                        showCreateButton
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="re_visit_allowed_days"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("re_visit_allowed_days")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={reVisitDays ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "") {
+                          field.onChange(undefined);
+                          return;
+                        }
+                        const parsed = Number(value);
+                        if (!isNaN(parsed)) {
+                          field.onChange(parsed);
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="re_visit_charge_item_definition"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className={!reVisitDays ? "text-gray-400" : ""}>
+                    {t("re_visit_consultation_charge")}
+                  </FormLabel>
+                  <FormControl>
+                    <div className="mt-2 flex gap-2 flex-col sm:flex-row">
+                      <ChargeItemDefinitionPicker
+                        facilityId={facilityId}
+                        value={field.value ?? undefined}
+                        onValueChange={(def) => {
+                          const selected = Array.isArray(def) ? def[0] : def;
+                          field.onChange(selected ?? null);
+                        }}
+                        placeholder={t("select_charge_item_definition")}
+                        className="grow-1"
+                        showCreateButton
+                        disabled={!reVisitDays}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <div>
-                <Label>{t("re_visit_allowed_days")}</Label>
-                <div className="mt-2">
-                  <Input
-                    type="number"
-                    min={0}
-                    value={reVisitDays}
-                    onChange={(e) =>
-                      setReVisitDays(parseInt(e.target.value) || 0)
-                    }
-                    placeholder={t("enter_re_visit_allowed_days")}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label>{t("re_visit_consultation_charge")}</Label>
-                <div className="mt-2 flex gap-2 flex-col sm:flex-row">
-                  <ChargeItemDefinitionPicker
-                    facilityId={facilityId}
-                    value={
-                      selectedDefinitionState.re_visit_charge_item_definition
-                    }
-                    onValueChange={(selectedDef) => {
-                      if (!selectedDef) {
-                        setSelectedDefinitionState({
-                          ...selectedDefinitionState,
-                          re_visit_charge_item_definition: undefined,
-                        });
-                        return;
-                      }
-                      setSelectedDefinitionState({
-                        ...selectedDefinitionState,
-                        re_visit_charge_item_definition:
-                          selectedDef as ChargeItemDefinitionBase,
-                      });
-                    }}
-                    placeholder={t("select_charge_item_definition")}
-                    className="flex-1"
-                    showCreateButton={true}
-                  />
-                </div>
-              </div>
+            <div className="flex justify-end gap-4 border-t pt-4 sticky bottom-0 bg-white">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="w-full sm:w-auto"
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                className="w-full sm:w-auto"
+                disabled={!chargeItemDef}
+              >
+                {t("save")}
+              </Button>
             </div>
-          </div>
-
-          <div className="flex justify-end gap-4 border-t pt-4">
-            <Button
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-              className="w-full sm:w-auto"
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={
-                !selectedDefinitionState.charge_item_definition ||
-                !selectedDefinitionState.re_visit_charge_item_definition ||
-                !reVisitDays
-              }
-              className="w-full sm:w-auto"
-            >
-              {t("save")}
-            </Button>
-          </div>
-        </div>
+          </form>
+        </Form>
       </SheetContent>
     </Sheet>
   );
