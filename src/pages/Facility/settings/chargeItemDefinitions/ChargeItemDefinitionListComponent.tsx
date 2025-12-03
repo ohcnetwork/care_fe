@@ -212,6 +212,7 @@ export function ChargeItemList({
         </div>
       </div>
 
+      {/* Results count */}
       {chargeItemsResponse && chargeItemsResponse.count > 0 && (
         <div className="mb-4 text-sm text-gray-600">
           {t("showing")} {chargeItems.length} {t("of")}{" "}
@@ -219,6 +220,7 @@ export function ChargeItemList({
         </div>
       )}
 
+      {/* Content */}
       {isLoadingChargeItems ? (
         <TableSkeleton count={5} />
       ) : chargeItems.length === 0 ? (
