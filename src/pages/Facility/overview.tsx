@@ -118,14 +118,20 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     <Page title="">
       <div className="container mx-auto space-y-8">
         {/* Welcome Header */}
-        <div className="relative rounded-lg overflow-hidden text-gray-900">
+        <div className="relative border-3 border-white overflow-hidden text-gray-900 rounded-xl bg-[linear-gradient(to_right,#F9FAFB_0%,#F0F0E6_60%)] sm:bg-[linear-gradient(to_right,#F9FAFB_0%, #F9FAFB_70%, #F0F0E6_100%)] lg:bg-[linear-gradient(to_right,#F5F8FF_0%,#F9FAFB_50%,#F0F0E6_100%)]">
           <div
-            className="absolute inset-0 bg-cover bg-center rounded-lg"
-            style={{ backgroundImage: "url('/images/home_banner.svg')" }}
+            className="absolute w-full h-full bg-right bg-no-repeat bg-contain rounded-lg mix-blend-darken -right-8 md:right-0"
+            style={{ backgroundImage: "url('/images/home-banner-icon.webp')" }}
             aria-hidden="true"
           />
-          <div className="relative z-10 p-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <div
+            className="absolute left-0 w-full h-full bg-left bg-no-repeat bg-contain mix-blend-darken"
+            style={{ backgroundImage: "url('/images/home-banner-sun.png')" }}
+            aria-hidden="true"
+          />
+
+          <div className="relative z-10 p-4 md:p-8">
+            <h1 className="mb-2 text-lg font-bold text-gray-900 md:text-2xl">
               {t("greet_user", {
                 time_of_day: getGreeting(),
                 user: [user.prefix, user.first_name].filter(Boolean).join(" "),
@@ -149,24 +155,24 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                   href={shortcut.href}
                   className="block h-full transition-all duration-200 hover:ring-2 ring-primary-400 rounded-xl ring-offset-2"
                 >
-                  <Card className="h-full border-0 shadow rounded-xl overflow-hidden">
-                    <CardContent className="p-1 flex flex-col h-full">
-                      <div className="p-6 bg-gray-100 rounded-xl space-y-3">
+                  <Card className="h-full overflow-hidden border-0 shadow rounded-xl">
+                    <CardContent className="flex flex-col h-full p-1">
+                      <div className="p-6 space-y-3 bg-gray-100 rounded-xl">
                         <div className="p-3 rounded-lg bg-primary/10 w-fit">
                           <shortcut.icon className="size-6 text-primary" />
                         </div>
-                        <CardTitle className="text-lg m-0">
+                        <CardTitle className="m-0 text-lg">
                           {shortcut.title}
                         </CardTitle>
                         <CardDescription className="text-gray-500">
                           {shortcut.description}
                         </CardDescription>
                       </div>
-                      <div className="p-4 flex items-center justify-between">
+                      <div className="flex items-center justify-between p-4">
                         <span className="text-sm font-medium text-gray-700">
                           {t("go_to")} {shortcut.title}
                         </span>
-                        <ArrowUpRight className="size-4 text-gray-400" />
+                        <ArrowUpRight className="text-gray-400 size-4" />
                       </div>
                     </CardContent>
                   </Card>
