@@ -45,9 +45,7 @@ test.describe("Patient Service Request Tab", () => {
 
     await expect(firstRow.getByText("Active")).toBeVisible();
 
-    await expect(
-      firstRow.getByText(serviceRequestData.priority, { exact: false }),
-    ).toBeVisible();
+    await expect(firstRow.getByText(serviceRequestData.priority)).toBeVisible();
   });
 
   test("should create a service request with all fields", async ({ page }) => {
@@ -86,9 +84,10 @@ test.describe("Patient Service Request Tab", () => {
     await firstRow.getByRole("button", { name: "See Details" }).click();
 
     await expect(
-      page.getByRole("heading", {
-        name: serviceRequestData.activityDefinition,
-      }),
+      page
+        .locator(".text-gray-700")
+        .filter({ hasText: serviceRequestData.activityDefinition })
+        .first(),
     ).toBeVisible();
 
     await expect(

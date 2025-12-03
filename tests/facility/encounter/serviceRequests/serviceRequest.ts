@@ -1,6 +1,5 @@
 import { faker } from "@faker-js/faker";
 import type { Page } from "@playwright/test";
-import { Priority } from "src/types/emr/serviceRequest/serviceRequest";
 import { BODY_SITES, KNOWN_USERS } from "tests/helper/commonConstants";
 import {
   expectToast,
@@ -10,14 +9,14 @@ import {
 } from "tests/helper/ui";
 
 export const STATUS_OPTIONS = [
-  "draft",
-  "active",
-  "on hold",
-  "entered in error",
-  "ended",
-  "completed",
-  "revoked",
-  "unknown",
+  "Draft",
+  "Active",
+  "On Hold",
+  "Entered in Error",
+  "Ended",
+  "Completed",
+  "Revoked",
+  "Unknown",
 ];
 
 export const ACTIVITY_DEFINITIONS = [
@@ -27,11 +26,11 @@ export const ACTIVITY_DEFINITIONS = [
   "Fasting Blood Glucose",
 ];
 
-export const PRIORITIES = Object.values(Priority);
+export const PRIORITIES = ["Routine", "Urgent", "ASAP", "Stat"];
 
 export interface ServiceRequestTestData {
   activityDefinition: string;
-  priority: Priority;
+  priority: string;
   navigateCategories: string[];
   status: string;
   bodySite?: string;
@@ -86,25 +85,19 @@ export async function createServiceRequest(
   await selectFromDefinitionCategoryPicker(page, activityDefinitionPicker, {
     navigateCategories: data.navigateCategories,
     search: data.activityDefinition,
-    itemIndex: 0,
   });
 
-  const prioritySelector = page
+  await page
     .locator('button[role="combobox"][data-slot="select-trigger"]')
     .filter({ hasText: /routine|urgent|asap|stat/i })
-    .first();
+    .first()
+    .click();
 
-  // Only change priority if it's different from the default
-  const currentValue = await prioritySelector.textContent();
-  if (!currentValue?.toLowerCase().includes(data.priority.toLowerCase())) {
-    await prioritySelector.click();
-
-    await page
-      .getByRole("option")
-      .filter({ hasText: new RegExp(data.priority, "i") })
-      .first()
-      .click();
-  }
+  await page
+    .getByRole("option")
+    .filter({ hasText: data.priority })
+    .first()
+    .click();
 
   if (allFields) {
     const bodySiteSelector = page
