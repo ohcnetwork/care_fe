@@ -18,7 +18,11 @@ test.describe("Token Category List - Permission Tests", () => {
     }) => {
       // Step 1: Navigate directly to token category page
       await page.goto(`/facility/${facilityId}/settings/token_category`);
-      await page.waitForLoadState("networkidle");
+
+      // Wait for page heading to be visible instead of networkidle
+      await expect(
+        page.getByRole("heading", { name: "Token Categories" }),
+      ).toBeVisible({ timeout: 10000 });
 
       // Verify we're on the token category list page
       await expect(page).toHaveURL(
@@ -87,13 +91,14 @@ test.describe("Token Category List - Permission Tests", () => {
     }) => {
       // Step 1: Navigate directly to token category page
       await page.goto(`/facility/${facilityId}/settings/token_category`);
-      await page.waitForLoadState("networkidle");
 
-      // Step 2: Verify access denied message is shown
+      // Wait for access denied message to be visible instead of networkidle
       const accessDeniedMessage = page.getByText(
         "Access Denied to Token Category",
       );
-      await expect(accessDeniedMessage).toBeVisible();
+      await expect(accessDeniedMessage).toBeVisible({ timeout: 10000 });
+
+      // Step 2: Verify access denied message is shown
 
       // Step 3: Verify table and data are NOT visible
       const table = page.locator("table");
