@@ -10,3 +10,17 @@ export const BODY_SITES = [
   "Structure of neuroretinal rim of left optic disc",
   "Structure of epithelium of right lens",
 ];
+
+export const KNOWN_USERS = [
+  "admin",
+  "care-doctor",
+  "care-staff",
+  "care-nurse",
+  "care-admin",
+  "care-volunteer",
+  "care-fac-admin",
+  "volunteer_2_0",
+  "doctor_2_0",
+  "nurse_2_0",
+  "staff_2_0",
+];

@@ -1,9 +1,10 @@
 import { faker } from "@faker-js/faker";
 import type { Page } from "@playwright/test";
 import { Priority } from "src/types/emr/serviceRequest/serviceRequest";
-import { BODY_SITES } from "tests/helper/commonConstants";
+import { BODY_SITES, KNOWN_USERS } from "tests/helper/commonConstants";
 import {
   expectToast,
+  selectFromCommand,
   selectFromDefinitionCategoryPicker,
   selectFromValueSet,
 } from "tests/helper/ui";
@@ -20,10 +21,10 @@ export const STATUS_OPTIONS = [
 ];
 
 export const ACTIVITY_DEFINITIONS = [
+  "Urinalysis",
   "Complete Blood Count (CBC) Panel",
   "Lipid Panel",
-  "Comprehensive Metabolic Panel",
-  "Thyroid Function Panel",
+  "Fasting Blood Glucose",
 ];
 
 export const PRIORITIES = Object.values(Priority);
@@ -36,6 +37,7 @@ export interface ServiceRequestTestData {
   bodySite?: string;
   patientInstruction?: string;
   notes?: string;
+  requestor?: string;
 }
 
 export function generateServiceRequestTestData(
@@ -54,6 +56,7 @@ export function generateServiceRequestTestData(
       bodySite: faker.helpers.arrayElement(BODY_SITES),
       patientInstruction: faker.lorem.sentence(),
       notes: faker.lorem.sentence(),
+      requestor: faker.helpers.arrayElement(KNOWN_USERS),
     };
   }
 
@@ -116,6 +119,16 @@ export async function createServiceRequest(
     await page
       .getByPlaceholder(/enter patient instruction/i)
       .fill(data.patientInstruction!);
+
+    const requestorSelector = page
+      .locator('button[data-slot="popover-trigger"][role="combobox"]')
+      .filter({ has: page.locator("p", { hasText: /admin/i }) })
+      .first();
+    await requestorSelector.waitFor({ state: "visible" });
+
+    await selectFromCommand(page, requestorSelector, {
+      search: data.requestor!,
+    });
 
     await page.getByPlaceholder(/add note/i).fill(data.notes!);
   }
