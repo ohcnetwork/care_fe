@@ -52,8 +52,7 @@ interface AddChargeItemsBillingSheetProps {
   disabled?: boolean;
 }
 
-interface ApplyChargeItemDefinitionRequestWithObject
-  extends ApplyChargeItemDefinitionRequest {
+interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
   charge_item_definition_object: ChargeItemDefinitionRead;
 }
 
