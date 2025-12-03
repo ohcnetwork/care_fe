@@ -11,7 +11,7 @@ export const BODY_SITES = [
   "Structure of epithelium of right lens",
 ];
 
-export const KNOWN_USERS = [
+export const KNOWN_USERNAMES = [
   "admin",
   "care-doctor",
   "care-staff",

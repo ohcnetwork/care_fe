@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { Status } from "src/types/emr/serviceRequest/serviceRequest";
 import { clickTabOrMenuItem } from "tests/helper/ui";
 import { getEncounterMetadata } from "tests/support/encounterId";
 import { createServiceRequest } from "./serviceRequest";
@@ -72,13 +71,9 @@ test.describe("Patient Service Request Tab", () => {
       firstRow.getByText(serviceRequestData.activityDefinition).first(),
     ).toBeVisible();
 
-    await expect(
-      firstRow.getByText(new RegExp(Status.active, "i")),
-    ).toBeVisible();
+    await expect(firstRow.getByText(serviceRequestData.status)).toBeVisible();
 
-    await expect(
-      firstRow.getByText(serviceRequestData.priority, { exact: false }),
-    ).toBeVisible();
+    await expect(firstRow.getByText(serviceRequestData.priority)).toBeVisible();
 
     // Verify details in the detail view
     await firstRow.getByRole("button", { name: "See Details" }).click();
@@ -90,14 +85,18 @@ test.describe("Patient Service Request Tab", () => {
         .first(),
     ).toBeVisible();
 
-    await expect(
-      page.getByText(serviceRequestData.bodySite!, { exact: false }),
-    ).toBeVisible();
+    await expect(page.getByText(serviceRequestData.bodySite!)).toBeVisible();
 
     await expect(
       page.getByText(serviceRequestData.patientInstruction!),
     ).toBeVisible();
 
     await expect(page.getByText(serviceRequestData.notes!)).toBeVisible();
+
+    await expect(
+      page
+        .locator(".font-semibold.text-gray-700")
+        .filter({ hasText: serviceRequestData.requestor! }),
+    ).toBeVisible();
   });
 });

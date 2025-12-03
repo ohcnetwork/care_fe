@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import type { Page } from "@playwright/test";
-import { BODY_SITES, KNOWN_USERS } from "tests/helper/commonConstants";
+import { BODY_SITES, KNOWN_USERNAMES } from "tests/helper/commonConstants";
 import {
   expectToast,
   selectFromCommand,
@@ -46,7 +46,7 @@ export function generateServiceRequestTestData(
     activityDefinition: faker.helpers.arrayElement(ACTIVITY_DEFINITIONS),
     priority: faker.helpers.arrayElement(PRIORITIES),
     navigateCategories: ["Lab Tests"],
-    status: "active",
+    status: "Active",
   };
 
   if (allFields) {
@@ -55,7 +55,7 @@ export function generateServiceRequestTestData(
       bodySite: faker.helpers.arrayElement(BODY_SITES),
       patientInstruction: faker.lorem.sentence(),
       notes: faker.lorem.sentence(),
-      requestor: faker.helpers.arrayElement(KNOWN_USERS),
+      requestor: faker.helpers.arrayElement(KNOWN_USERNAMES),
     };
   }
 
@@ -122,6 +122,14 @@ export async function createServiceRequest(
     await selectFromCommand(page, requestorSelector, {
       search: data.requestor!,
     });
+
+    // Capture the selected requestor's display name after selection
+    const selectedRequestorName = await page
+      .locator('button[data-slot="popover-trigger"][role="combobox"]')
+      .locator("p.font-medium.text-gray-900")
+      .first()
+      .textContent();
+    data.requestor = selectedRequestorName?.trim() || data.requestor!;
 
     await page.getByPlaceholder(/add note/i).fill(data.notes!);
   }
