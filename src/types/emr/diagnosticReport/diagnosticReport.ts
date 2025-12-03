@@ -28,13 +28,17 @@ export interface DiagnosticReportBase {
   conclusion?: string;
 }
 
-export interface DiagnosticReportCreate
-  extends Omit<DiagnosticReportBase, "id"> {
+export interface DiagnosticReportCreate extends Omit<
+  DiagnosticReportBase,
+  "id"
+> {
   service_request: string;
 }
 
-export interface DiagnosticReportUpdate
-  extends Omit<DiagnosticReportBase, "id"> {
+export interface DiagnosticReportUpdate extends Omit<
+  DiagnosticReportBase,
+  "id"
+> {
   id: string;
 }
 

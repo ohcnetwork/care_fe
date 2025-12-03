@@ -38,8 +38,10 @@ interface SearchOption {
   display: string;
 }
 
-interface SearchInputProps
-  extends Omit<React.ComponentProps<"input">, "onChange" | "value" | "ref"> {
+interface SearchInputProps extends Omit<
+  React.ComponentProps<"input">,
+  "onChange" | "value" | "ref"
+> {
   options: SearchOption[];
   onSearch: (key: string, value: string) => void;
   className?: string;

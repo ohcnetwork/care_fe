@@ -224,8 +224,10 @@ export interface MedicationRequestCreate extends MedicationRequest {
   create_prescription?: PrescriptionCreate;
 }
 
-export interface MedicationRequestRequest
-  extends Omit<MedicationRequest, "requester"> {
+export interface MedicationRequestRequest extends Omit<
+  MedicationRequest,
+  "requester"
+> {
   requester?: string;
 }
 
