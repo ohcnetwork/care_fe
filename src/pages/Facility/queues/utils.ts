@@ -50,12 +50,15 @@ export function useTokenListInfiniteQuery({
   });
 }
 
+// Compact URL-safe prefixes for resource types used in token display routes
+// p: Practitioner, l: Location, h: HealthcareService
 const resourceTypeToPrefix = {
   [SchedulableResourceType.Practitioner]: "p",
   [SchedulableResourceType.Location]: "l",
   [SchedulableResourceType.HealthcareService]: "h",
 } as const;
 
+// Reverse mapping from URL prefix to resource type
 const prefixToResourceType = {
   p: SchedulableResourceType.Practitioner,
   l: SchedulableResourceType.Location,
