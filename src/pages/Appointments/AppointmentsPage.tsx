@@ -3,7 +3,7 @@ import { CheckIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { addDays, differenceInDays } from "date-fns";
 import { TFunction } from "i18next";
-import { FilterIcon } from "lucide-react";
+import { FilterIcon, InfoIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -96,6 +96,12 @@ import {
   FilterDateRange,
   shortDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -395,6 +401,21 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 })
               }
             />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help hidden md:block">
+                    <InfoIcon className="size-4 text-gray-500" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t("auto_refresh_tooltip", {
+                    interval:
+                      careConfig.appointmentAndQueueRefreshInterval / 1000,
+                  })}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           {activeTab === "list" && (
             <Button

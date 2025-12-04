@@ -45,6 +45,7 @@ import { TokenStatus } from "@/types/tokens/token/token";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { ChevronLeft, Edit3, InfoIcon, SettingsIcon } from "lucide-react";
@@ -178,7 +179,12 @@ export function ManageQueuePage({
                         <InfoIcon className="size-4 text-gray-500" />
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>{t("auto_refresh_tooltip")}</TooltipContent>
+                    <TooltipContent>
+                      {t("auto_refresh_tooltip", {
+                        interval:
+                          careConfig.appointmentAndQueueRefreshInterval / 1000,
+                      })}
+                    </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
