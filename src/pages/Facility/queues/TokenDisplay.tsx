@@ -150,12 +150,12 @@ const ServicePointDisplay = ({
 
   useEffect(() => {
     if (tokenNumber !== "--") {
-      setTimeout(() => {
-        setHasRecentlyChanged(true);
-      }, 1000);
-      setTimeout(() => {
-        setHasRecentlyChanged(false);
-      }, 4000);
+      const timeout1 = setTimeout(() => setHasRecentlyChanged(true), 1000);
+      const timeout2 = setTimeout(() => setHasRecentlyChanged(false), 4000);
+      return () => {
+        clearTimeout(timeout1);
+        clearTimeout(timeout2);
+      };
     }
   }, [tokenNumber]);
 
