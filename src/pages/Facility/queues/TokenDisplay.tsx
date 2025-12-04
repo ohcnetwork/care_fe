@@ -34,7 +34,7 @@ const combineResourceSubQueues = (
   }>[],
 ) => {
   return result
-    .filter((query) => query.data) // Voluntarily ignoring queries that are not successful to make it resilient to errors
+    .filter((query) => query.data) // Intentionally ignoring queries that are not successful to make it resilient to errors
     .flatMap(({ data }) =>
       (data!.subQueues ?? []).map((subQueue) => ({
         ...subQueue,
