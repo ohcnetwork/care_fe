@@ -451,7 +451,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 tags={selectedTags.map((tag) => tag.id)}
                 tags_behavior={qParams.tags_behavior}
                 patient={qParams.patient}
-                autoRefresh={qParams.autoRefresh}
+                autoRefresh={JSON.parse(qParams.autoRefresh || "false")}
               />
             ))}
           </div>
@@ -474,7 +474,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           patient={qParams.patient}
           resourceType={resourceType}
           resourceIds={resourceId ? [resourceId] : practitionerIds}
-          autoRefresh={qParams.autoRefresh}
+          autoRefresh={JSON.parse(qParams.autoRefresh || "false")}
         />
       )}
     </Page>
@@ -492,7 +492,7 @@ function AppointmentColumn(props: {
   patient?: string;
   resourceType: SchedulableResourceType;
   resourceIds: string[];
-  autoRefresh: "true" | "false";
+  autoRefresh: boolean;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -551,7 +551,7 @@ function AppointmentColumn(props: {
     },
     enabled: !!props.resourceIds.length && props.canViewAppointments,
     refetchInterval:
-      props.autoRefresh === "true"
+      props.autoRefresh === true
         ? careConfig.appointmentAndQueueRefreshInterval
         : false,
   });
@@ -786,7 +786,7 @@ function AppointmentRow(props: {
   patient?: string;
   resourceType: SchedulableResourceType;
   resourceIds: string[];
-  autoRefresh: "true" | "false";
+  autoRefresh: boolean;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -824,7 +824,7 @@ function AppointmentRow(props: {
     }),
     enabled: !!props.resourceIds.length && props.canViewAppointments,
     refetchInterval:
-      props.autoRefresh === "true"
+      props.autoRefresh === true
         ? careConfig.appointmentAndQueueRefreshInterval
         : false,
   });
