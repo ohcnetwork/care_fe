@@ -177,42 +177,44 @@ export default function DiagnosticReportView({
         )}
 
         {/* Test Results */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>{t("test_results")}</CardTitle>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <MoreVertical className="size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <ObservationHistorySheet
-                    patientId={report.encounter.patient.id}
-                    diagnosticReportId={diagnosticReportId}
-                  >
-                    <DropdownMenuItem
-                      onSelect={(e) => e.preventDefault()}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
+        {report.observations && report.observations.length > 0 && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>{t("test_results")}</CardTitle>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <MoreVertical className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <ObservationHistorySheet
+                      patientId={report.encounter.patient.id}
+                      diagnosticReportId={diagnosticReportId}
                     >
-                      {t("view_observation_history")}
-                    </DropdownMenuItem>
-                  </ObservationHistorySheet>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <DiagnosticReportResultsTable
-              observations={report.observations.filter(
-                (obs) => obs.status !== ObservationStatus.ENTERED_IN_ERROR,
-              )}
-            />
-          </CardContent>
-        </Card>
+                      <DropdownMenuItem
+                        onSelect={(e) => e.preventDefault()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
+                        {t("view_observation_history")}
+                      </DropdownMenuItem>
+                    </ObservationHistorySheet>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <DiagnosticReportResultsTable
+                observations={report.observations.filter(
+                  (obs) => obs.status !== ObservationStatus.ENTERED_IN_ERROR,
+                )}
+              />
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
