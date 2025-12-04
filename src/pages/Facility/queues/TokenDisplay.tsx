@@ -44,6 +44,46 @@ const combineResourceSubQueues = (
     );
 };
 
+/**
+ * Returns the grid class for a given item count
+ * @param itemCount - The total number of items
+ * @returns The grid class (grid-cols-1, grid-cols-2, grid-cols-6)
+ */
+const getGridClass = (itemCount: number) => {
+  switch (itemCount) {
+    case 1:
+      return "grid-cols-1";
+    case 2:
+    case 3:
+    case 4:
+      return "grid-cols-2";
+    default:
+      return "grid-cols-6";
+  }
+};
+
+/**
+ * Returns the column span for a given index and item count
+ * @param index - The index of the item
+ * @param itemCount - The total number of items
+ * @returns The column span (1-6)
+ */
+const getColSpanClass = (index: number, itemCount: number) => {
+  // Two-column layout
+  if (itemCount === 3) return index === 2 ? "col-span-2" : "col-span-1"; // For 3 items, the last item should span 2 columns
+  if (itemCount <= 4) return "col-span-1"; // For all other cases in 4 col layout, column span is 1
+
+  // Three-column layout
+  // For more than 4 items, we first find the number of items in the last row
+  const lastRowCount = itemCount % 3;
+  // If the last row has 1 item, the last item should span 6 columns
+  if (lastRowCount === 1 && index === itemCount - 1) return "col-span-6";
+  // If the last row has 2 items, the last 2 items should span 3 columns
+  if (lastRowCount === 2 && index >= itemCount - 2) return "col-span-3";
+  // In all other cases, it should span 2 columns
+  return "col-span-2";
+};
+
 export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
   const { t } = useTranslation();
 
@@ -84,57 +124,19 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
 
   const itemCount = servicePoints.length;
 
-  const getGridClass = () => {
-    switch (itemCount) {
-      case 1:
-        return "grid-cols-1";
-      case 2:
-      case 3:
-      case 4:
-        return "grid-cols-2";
-      default:
-        return "grid-cols-6";
-    }
-  };
-
-  const getColSpan = (index: number) => {
-    // Two-column layout
-    if (itemCount === 3) return index === 2 ? 2 : 1; // For 3 items, the last item should span 2 columns
-    if (itemCount <= 4) return 1; // For all other cases in 4 col layout, column span is 1
-
-    // Three-column layout
-    // For more than 4 items, we first find the number of items in the last row
-    const lastRowCount = itemCount % 3;
-    // If the last row has 1 item, the last item should span 6 columns
-    if (lastRowCount === 1 && index === itemCount - 1) return 6;
-    // If the last row has 2 items, the last 2 items should span 3 columns
-    if (lastRowCount === 2 && index >= itemCount - 2) return 3;
-    // In all other cases, it should span 2 columns
-    return 2;
-  };
-
   return (
     <>
       <PageTitle title={t("token_display")} />
       <div
         className={cn(
           "h-screen -mx-6 -mt-10 -mb-4 bg-[#1FB6C9] [container-type:inline-size] grid gap-4",
-          getGridClass(),
+          getGridClass(itemCount),
         )}
       >
         {servicePoints.map((servicePoint, index) => (
           <div
             key={servicePoint.id}
-            className={
-              [
-                "col-span-1",
-                "col-span-2",
-                "col-span-3",
-                "col-span-4",
-                "col-span-5",
-                "col-span-6",
-              ][getColSpan(index) - 1]
-            }
+            className={getColSpanClass(index, itemCount)}
           >
             <ServicePointDisplay facilityId={facilityId} {...servicePoint} />
           </div>
