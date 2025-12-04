@@ -96,7 +96,7 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
     // For more than 4 items, we first find the number of items in the last row
     const lastRowCount = itemCount % 3;
     // If the last row has 1 item, the last item should span 6 columns
-    if (lastRowCount === 1 && index == itemCount - 1) return 6;
+    if (lastRowCount === 1 && index === itemCount - 1) return 6;
     // If the last row has 2 items, the last 2 items should span 3 columns
     if (lastRowCount === 2 && index >= itemCount - 2) return 3;
     // In all other cases, it should span 2 columns
