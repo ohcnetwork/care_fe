@@ -200,6 +200,14 @@ const careConfig = {
    * System identifier for patient phone number configuration
    */
   phoneNumberConfigSystem: "system.care.ohc.network/patient-phone-number",
+
+  /**
+   * Enable automatic invoice sheet after dispensing items
+   */
+  enableAutoInvoiceAfterDispense: boolean(
+    "REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE",
+    false,
+  ),
 } as const;
 
 export default careConfig;

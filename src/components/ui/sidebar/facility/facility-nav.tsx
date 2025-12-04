@@ -155,7 +155,7 @@ function generateFacilityLinks(
         },
         {
           name: t("billing"),
-          url: `${baseUrl}/settings/billing/discount_codes`,
+          url: `${baseUrl}/settings/billing`,
         },
         {
           name: t("charge_item_definitions"),

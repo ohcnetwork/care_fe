@@ -82,14 +82,13 @@ function OrganizationTreeNode({
               onToggleExpand(organization.id);
             }
           }}
-          data-cy="organization-tree-node-parent"
           className="flex items-center flex-1 text-sm gap-2 cursor-pointer"
         >
           <span className="truncate">{organization.name}</span>
         </div>
       </div>
       {isExpanded && children?.results && children.results.length > 0 && (
-        <div className="pl-2" data-cy="organization-tree-node-children">
+        <div className="pl-2">
           {children.results.map((child) => (
             <OrganizationTreeNode
               key={child.id}
@@ -130,6 +129,7 @@ export default function FacilityOrganizationNavbar({
         pathParams: { facilityId },
         queryParams: {
           parent: "",
+          limit: 100,
         },
       }),
       refetchOnWindowFocus: false,
@@ -139,7 +139,7 @@ export default function FacilityOrganizationNavbar({
   const topLevelOrganizations = allOrganizations?.results || [];
 
   return (
-    <div className="w-64 shadow-lg bg-white rounded-lg hidden md:block">
+    <div className="min-w-64 shadow-lg bg-white rounded-lg hidden md:block">
       <ScrollArea className="h-[calc(100vh-14rem)]">
         <div className="p-4">
           {isLoadingOrganizations ? (

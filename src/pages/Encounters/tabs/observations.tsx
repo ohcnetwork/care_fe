@@ -8,14 +8,15 @@ import { Card } from "@/components/ui/card";
 
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 
+import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { ObservationWithUser } from "@/types/emr/observation";
+import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
 import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
-import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { Observation } from "@/types/emr/observation";
-import patientApi from "@/types/emr/patient/patientApi";
+import { formatName } from "@/Utils/utils";
 
 interface GroupedObservations {
-  [key: string]: Observation[];
+  [key: string]: ObservationWithUser[];
 }
 
 function getDateKey(date: string) {
@@ -55,7 +56,7 @@ function formatDisplayTime(dateStr: string) {
 }
 
 function groupObservationsByDate(
-  observations: Observation[],
+  observations: ObservationWithUser[],
 ): GroupedObservations {
   return observations.reduce((groups: GroupedObservations, observation) => {
     const dateKey = getDateKey(observation.effective_datetime);
@@ -77,7 +78,7 @@ export const EncounterObservationsTab = () => {
   const { ref, inView } = useInView();
 
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
-    useInfiniteQuery<PaginatedResponse<Observation>, HTTPError>({
+    useInfiniteQuery<PaginatedResponse<ObservationWithUser>, HTTPError>({
       queryKey: ["infinite-observations", patientId, encounterId],
       queryFn: async ({ pageParam = 0 }) => {
         const response = await query(patientApi.listObservations, {
@@ -89,7 +90,7 @@ export const EncounterObservationsTab = () => {
             offset: String(pageParam),
           },
         })({ signal: new AbortController().signal });
-        return response as PaginatedResponse<Observation>;
+        return response as PaginatedResponse<ObservationWithUser>;
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
@@ -143,7 +144,7 @@ export const EncounterObservationsTab = () => {
                     new Date(b.effective_datetime).getTime() -
                     new Date(a.effective_datetime).getTime(),
                 )
-                .map((item: Observation) => (
+                .map((item: ObservationWithUser) => (
                   <div key={item.id} className="flex gap-4">
                     <div className="p-1 h-fit text-sm text-gray-700 bg-gray-100 rounded-md font-medium">
                       {formatDisplayTime(item.effective_datetime)}:
@@ -173,6 +174,14 @@ export const EncounterObservationsTab = () => {
                         <div className="font-medium text-sm text-gray-600">
                           {item.main_code.display || item.main_code.code}
                         </div>
+                        {item.data_entered_by && (
+                          <div className="text-gray-600 text-sm">
+                            {t("filed_by")}{" "}
+                            <span className="font-medium text-gray-800">
+                              {formatName(item.data_entered_by)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </Card>
                   </div>

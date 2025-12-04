@@ -34,6 +34,7 @@ import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
+  EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import {
   APPOINTMENT_STATUS_COLORS,
@@ -247,13 +248,13 @@ export default function AppointmentDetail(props: Props) {
                         appointment.token_slot.start_datetime,
                         "do MMMM",
                       ),
-                      time: format(
+                      slot_start_time: format(
                         appointment.token_slot.start_datetime,
                         "h:mm a",
                       ),
-                      duration: getReadableDuration(
-                        appointment.token_slot.start_datetime,
+                      slot_end_time: format(
                         appointment.token_slot.end_datetime,
+                        "h:mm a",
                       ),
                     }}
                   />
@@ -493,6 +494,7 @@ export default function AppointmentDetail(props: Props) {
                         facilityId={facilityId}
                         patientName={appointment.patient.name}
                         appointment={appointment.id}
+                        defaultStatus={EncounterStatus.IN_PROGRESS}
                         trigger={
                           <QuickAction
                             icon={<PlusSquare className="text-primary-500" />}

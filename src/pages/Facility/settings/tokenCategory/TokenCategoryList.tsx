@@ -268,9 +268,19 @@ function TokenCategoryActions({
   tokenCategory: TokenCategoryRead;
   facilityId: string;
 }) {
+  const { hasPermission } = usePermissions();
+  const { facility } = useCurrentFacility();
+  const { canWriteTokenCategory } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
   return (
     <ActionButtons
-      editPath={`/facility/${facilityId}/settings/token_category/${tokenCategory.id}/edit`}
+      editPath={
+        canWriteTokenCategory
+          ? `/facility/${facilityId}/settings/token_category/${tokenCategory.id}/edit`
+          : undefined
+      }
       viewPath={`/facility/${facilityId}/settings/token_category/${tokenCategory.id}`}
     />
   );

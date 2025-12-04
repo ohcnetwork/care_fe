@@ -1,5 +1,6 @@
 import { exportToSvg } from "@excalidraw/excalidraw";
 import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/element/src/types";
+import { BinaryFiles } from "@excalidraw/excalidraw/dist/types/excalidraw/types";
 import { useQuery } from "@tanstack/react-query";
 import { SearchIcon } from "lucide-react";
 import { navigate, usePathParams } from "raviger";
@@ -28,7 +29,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
-import metaArtifactApi from "@/types/metaAritifact/metaArtifactApi";
+import metaArtifactApi from "@/types/metaArtifact/metaArtifactApi";
 
 export interface DrawingsTabProps {
   type: "encounter" | "patient";
@@ -40,94 +41,97 @@ export interface DrawingsTabProps {
 
 interface ExcalidrawPreviewProps {
   elements: readonly ExcalidrawElement[];
+  files?: BinaryFiles;
 }
 
-const ExcalidrawPreview = memo(({ elements }: ExcalidrawPreviewProps) => {
-  const { t } = useTranslation();
-  const svgContainerRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [svgKey, setSvgKey] = useState(0);
+const ExcalidrawPreview = memo(
+  ({ elements, files }: ExcalidrawPreviewProps) => {
+    const { t } = useTranslation();
+    const svgContainerRef = useRef<HTMLDivElement>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [svgKey, setSvgKey] = useState(0);
 
-  useEffect(() => {
-    setIsLoading(true);
-    setSvgKey((prev) => prev + 1);
-  }, [elements]);
+    useEffect(() => {
+      setIsLoading(true);
+      setSvgKey((prev) => prev + 1);
+    }, [elements, files]);
 
-  useEffect(() => {
-    let isMounted = true;
+    useEffect(() => {
+      let isMounted = true;
 
-    if (!elements.length || !svgContainerRef.current) {
-      if (isMounted) setIsLoading(false);
-      return;
-    }
-
-    const generateSvg = async () => {
-      try {
-        if (svgContainerRef.current) {
-          svgContainerRef.current.innerHTML = "";
-        }
-
-        const svg = await exportToSvg({
-          elements,
-          appState: {
-            viewBackgroundColor: "#ffffff",
-            exportWithDarkMode: false,
-            theme: "light",
-          },
-          exportPadding: 10,
-          files: null,
-        });
-
-        if (isMounted && svgContainerRef.current) {
-          svg.setAttribute("width", "100%");
-          svg.setAttribute("height", "100%");
-          svg.style.maxHeight = "100%";
-          svg.style.maxWidth = "100%";
-          svg.style.display = "block";
-          svg.style.margin = "auto";
-
-          svgContainerRef.current.appendChild(svg);
-        }
-      } catch (_error) {
-        toast.error(t("error_generating_svg"));
-      } finally {
+      if (!elements.length || !svgContainerRef.current) {
         if (isMounted) setIsLoading(false);
+        return;
       }
-    };
 
-    const timeoutId = setTimeout(() => {
-      generateSvg();
-    }, 50);
+      const generateSvg = async () => {
+        try {
+          if (svgContainerRef.current) {
+            svgContainerRef.current.innerHTML = "";
+          }
 
-    return () => {
-      isMounted = false;
-      clearTimeout(timeoutId);
-    };
-  }, [elements, svgKey]);
+          const svg = await exportToSvg({
+            elements,
+            appState: {
+              viewBackgroundColor: "#ffffff",
+              exportWithDarkMode: false,
+              theme: "light",
+            },
+            exportPadding: 10,
+            files: files || null,
+          });
 
-  return (
-    <div className="h-60 md:h-40 w-full overflow-hidden rounded-md border border-gray-200 bg-white flex items-center justify-center">
-      {isLoading ? (
-        <div className="flex items-center justify-center h-full w-full">
-          <CareIcon
-            icon="l-spinner"
-            className="animate-spin text-2xl text-gray-400"
+          if (isMounted && svgContainerRef.current) {
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            svg.style.maxHeight = "100%";
+            svg.style.maxWidth = "100%";
+            svg.style.display = "block";
+            svg.style.margin = "auto";
+
+            svgContainerRef.current.appendChild(svg);
+          }
+        } catch (_error) {
+          toast.error(t("error_generating_svg"));
+        } finally {
+          if (isMounted) setIsLoading(false);
+        }
+      };
+
+      const timeoutId = setTimeout(() => {
+        generateSvg();
+      }, 50);
+
+      return () => {
+        isMounted = false;
+        clearTimeout(timeoutId);
+      };
+    }, [elements, files, svgKey]);
+
+    return (
+      <div className="h-60 md:h-40 w-full overflow-hidden rounded-md border border-gray-200 bg-white flex items-center justify-center">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full w-full">
+            <CareIcon
+              icon="l-spinner"
+              className="animate-spin text-2xl text-gray-400"
+            />
+          </div>
+        ) : elements.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-gray-400">
+            <CareIcon icon="l-image" className="text-2xl mb-1" />
+            <span className="text-xs">{t("empty_drawing")}</span>
+          </div>
+        ) : (
+          <div
+            ref={svgContainerRef}
+            className="h-full w-full flex items-center justify-center p-2"
           />
-        </div>
-      ) : elements.length === 0 ? (
-        <div className="flex flex-col items-center justify-center text-gray-400">
-          <CareIcon icon="l-image" className="text-2xl mb-1" />
-          <span className="text-xs">{t("empty_drawing")}</span>
-        </div>
-      ) : (
-        <div
-          ref={svgContainerRef}
-          className="h-full w-full flex items-center justify-center p-2"
-        />
-      )}
-    </div>
-  );
-});
+        )}
+      </div>
+    );
+  },
+);
 
 ExcalidrawPreview.displayName = "ExcalidrawPreview";
 
@@ -240,6 +244,7 @@ export const DrawingPage = ({
                     <div className="h-60 md:h-40 w-full bg-gray-50">
                       <ExcalidrawPreview
                         elements={drawing.object_value.elements}
+                        files={drawing.object_value.files}
                         key={drawing.modified_date}
                       />
                     </div>

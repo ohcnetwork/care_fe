@@ -52,7 +52,6 @@ interface AutocompleteProps {
   freeInput?: boolean;
   closeOnSelect?: boolean;
   showClearButton?: boolean;
-  "data-cy"?: string;
 
   ref?: React.RefCallback<HTMLButtonElement | null>;
 
@@ -76,7 +75,6 @@ export default function Autocomplete({
   freeInput = false,
   closeOnSelect = true,
   showClearButton = true,
-  "data-cy": dataCy,
   ref,
   shortcutId,
   ...props
@@ -218,7 +216,6 @@ export default function Autocomplete({
                 selectedOption && "rounded-r-none",
               )}
               disabled={disabled}
-              data-cy={dataCy}
               type="button"
             >
               <span className="overflow-hidden">
@@ -278,7 +275,6 @@ export default function Autocomplete({
               selectedOption && "rounded-r-none",
             )}
             disabled={disabled}
-            data-cy={dataCy}
             onClick={() => setOpen(!open)}
             ref={ref}
             data-shortcut-id={shortcutId}

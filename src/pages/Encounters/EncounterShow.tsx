@@ -39,6 +39,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import {
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
+  EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
@@ -76,7 +77,6 @@ export const EncounterShow = (props: Props) => {
 
   useSidebarAutoCollapse({ restore: false });
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [isEncounterRailOpen, setIsEncounterRailOpen] = useState(true);
   const getShortcutDisplay = useEncounterShortcutDisplays();
 
   const { t } = useTranslation();
@@ -103,6 +103,14 @@ export const EncounterShow = (props: Props) => {
   );
 
   const canAccess = canViewClinicalData || canViewEncounter;
+  const canShowAppointmentEncounterHeader =
+    primaryEncounter?.appointment?.id &&
+    canWritePrimaryEncounter &&
+    [
+      EncounterStatus.PLANNED,
+      EncounterStatus.IN_PROGRESS,
+      EncounterStatus.ON_HOLD,
+    ].includes(primaryEncounter.status);
 
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
@@ -198,10 +206,16 @@ export const EncounterShow = (props: Props) => {
       title={t("encounter")}
       className="block md:px-1 -mt-4"
       hideTitleOnPage
+      style={
+        {
+          "--encounter-header-offset": canShowAppointmentEncounterHeader
+            ? "3rem"
+            : "0rem",
+        } as React.CSSProperties
+      }
     >
-      {primaryEncounter &&
-        primaryEncounter.appointment?.id &&
-        canWritePrimaryEncounter && (
+      {primaryEncounter?.appointment?.id &&
+        canShowAppointmentEncounterHeader && (
           <div className="flex items-center justify-center -mt-2 mb-2">
             <AppointmentEncounterHeader
               appointment={primaryEncounter.appointment}
@@ -255,10 +269,7 @@ export const EncounterShow = (props: Props) => {
         <PatientDeceasedInfo patient={patient} />
       </div>
       <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
-        <EncounterHistorySelector
-          isRailOpen={isEncounterRailOpen}
-          setIssRailOpen={setIsEncounterRailOpen}
-        />
+        <EncounterHistorySelector />
         <div className="w-full">
           <div className="hidden lg:block">
             {isSelectedEncounterLoading ? (
@@ -318,7 +329,7 @@ export const EncounterShow = (props: Props) => {
           <NavTabs
             showMoreAfterIndex={showMoreAfterIndex}
             className="@container w-full"
-            tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-14rem)]"
+            tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-14rem-var(--encounter-header-offset))]"
             tabs={tabs}
             currentTab={props.tab}
             tabTriggerClassName="max-w-36"

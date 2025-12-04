@@ -1,5 +1,5 @@
 import { Menu } from "lucide-react";
-import { Link, useRoutes } from "raviger";
+import { ActiveLink, Redirect, useRoutes } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -24,71 +24,74 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { InformationalCodeSettings } from "./informational/InformationalCodeSettings";
 import { BillingSettings } from "./settings/BillingSettings";
 
-const routes = {
-  "/discount_components": () => <DiscountComponentSettings />,
-  "/discount_codes": () => <DiscountCodeSettings />,
-  "/tax_codes": () => <TaxCodeSettings />,
-  "/tax_components": () => <TaxComponentSettings />,
-  "/informational_codes": () => <InformationalCodeSettings />,
-  "/settings": () => <BillingSettings />,
-  "*": () => <ErrorPage />,
-};
-
-const sidebarNavItems = [
-  {
-    category: "Discount",
-    items: [
-      {
-        title: "Discount Codes",
-        href: "/discount_codes",
-      },
-      {
-        title: "Discount Components",
-        href: "/discount_components",
-      },
-    ],
-  },
-  {
-    category: "Tax",
-    items: [
-      {
-        title: "Tax Codes",
-        href: "/tax_codes",
-      },
-      {
-        title: "Tax Components",
-        href: "/tax_components",
-      },
-    ],
-  },
-  {
-    category: "Informational",
-    items: [
-      {
-        title: "Informational Codes",
-        href: "/informational_codes",
-      },
-    ],
-  },
-  {
-    category: "Configuration",
-    items: [
-      {
-        title: "Settings",
-        href: "/settings",
-      },
-    ],
-  },
-];
-
 export function BillingSettingsLayout() {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
 
+  const basePath = `/facility/${facilityId}/settings/billing`;
+
+  const routes = {
+    "/": () => <Redirect to={`${basePath}/discount_codes`} />,
+    "/discount_components": () => <DiscountComponentSettings />,
+    "/discount_codes": () => <DiscountCodeSettings />,
+    "/tax_codes": () => <TaxCodeSettings />,
+    "/tax_components": () => <TaxComponentSettings />,
+    "/informational_codes": () => <InformationalCodeSettings />,
+    "/settings": () => <BillingSettings />,
+    "*": () => <ErrorPage />,
+  };
+
   const route = useRoutes(routes, {
-    basePath: `/facility/${facilityId}/settings/billing`,
+    basePath,
     routeProps: { facilityId },
   });
+
+  const sidebarNavItems = [
+    {
+      category: t("discount"),
+      items: [
+        {
+          title: t("discount_codes"),
+          href: "/discount_codes",
+        },
+        {
+          title: t("discount_components"),
+          href: "/discount_components",
+        },
+      ],
+    },
+    {
+      category: t("tax"),
+      items: [
+        {
+          title: t("tax_codes"),
+          href: "/tax_codes",
+        },
+        {
+          title: t("tax_components"),
+          href: "/tax_components",
+        },
+      ],
+    },
+    {
+      category: t("informational"),
+      items: [
+        {
+          title: t("informational_codes"),
+          href: "/informational_codes",
+        },
+      ],
+    },
+    {
+      category: t("configuration"),
+      items: [
+        {
+          title: t("settings"),
+          href: "/settings",
+        },
+      ],
+    },
+  ];
 
   return (
     <div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
@@ -108,12 +111,14 @@ export function BillingSettingsLayout() {
                 </div>
                 {category.items.map((item) => (
                   <DropdownMenuItem key={item.href} asChild>
-                    <Link
+                    <ActiveLink
                       href={`/billing${item.href}`}
                       className="w-full cursor-pointer"
+                      activeClass="bg-gray-100 shadow-sm"
+                      exactActiveClass="bg-gray-100 shadow"
                     >
                       {item.title}
-                    </Link>
+                    </ActiveLink>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
@@ -134,16 +139,18 @@ export function BillingSettingsLayout() {
                 </h4>
                 <div className="space-y-1">
                   {category.items.map((item) => (
-                    <Link
+                    <ActiveLink
                       key={item.href}
                       href={`/billing${item.href}`}
                       className={cn(
                         buttonVariants({ variant: "ghost" }),
                         "w-full justify-start",
                       )}
+                      activeClass="bg-gray-100 shadow-sm text-black"
+                      exactActiveClass="bg-gray-100 shadow-sm text-black"
                     >
                       {item.title}
-                    </Link>
+                    </ActiveLink>
                   ))}
                 </div>
               </div>
