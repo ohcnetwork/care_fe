@@ -109,7 +109,7 @@ const careConfig = {
   },
 
   appointmentAndQueueRefreshInterval:
-    parseInt(env.REACT_AUTO_REFRESH_INTERVAL || "10") * 1000,
+    parseInt(env.REACT_AUTO_REFRESH_INTERVAL || "10", 10) * 1000,
 
   /**
    * Flag to make location field mandatory for payment reconciliation
