@@ -54,6 +54,11 @@ export function LocationCardWrapper({
   const showEndTimeField =
     status === "planned" || status === "completed" || isCompletingStay;
 
+  const isPlannedLocation =
+    status === "planned" ||
+    (status === "active" &&
+      new Date(locationHistory.start_datetime) > new Date());
+
   useEffect(() => {
     if (isEditing && editingState.timeConfig.status === "active") {
       setEditingState((prev) => ({
@@ -96,9 +101,7 @@ export function LocationCardWrapper({
       <div className="border border-gray-200 rounded-lg bg-gray-50 px-2 py-1">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-medium text-gray-600">
-            {status === "active"
-              ? t("current_location")
-              : t("planned_location")}
+            {isPlannedLocation ? t("planned_location") : t("current_location")}
           </h3>
         </div>
         <LocationCard locationHistory={locationHistory} status={status} />
