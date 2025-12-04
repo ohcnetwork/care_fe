@@ -551,9 +551,7 @@ function AppointmentColumn(props: {
     },
     enabled: !!props.resourceIds.length && props.canViewAppointments,
     refetchInterval:
-      props.autoRefresh === true
-        ? careConfig.appointmentAndQueueRefreshInterval
-        : false,
+      props.autoRefresh && careConfig.appointmentAndQueueRefreshInterval,
   });
 
   const appointments =
@@ -824,9 +822,7 @@ function AppointmentRow(props: {
     }),
     enabled: !!props.resourceIds.length && props.canViewAppointments,
     refetchInterval:
-      props.autoRefresh === true
-        ? careConfig.appointmentAndQueueRefreshInterval
-        : false,
+      props.autoRefresh && careConfig.appointmentAndQueueRefreshInterval,
   });
 
   const appointments = data?.results ?? [];
