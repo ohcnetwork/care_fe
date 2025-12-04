@@ -50,16 +50,9 @@ const combineResourceSubQueues = (
  * @returns The grid class (grid-cols-1, grid-cols-2, grid-cols-6)
  */
 const getGridClass = (itemCount: number) => {
-  switch (itemCount) {
-    case 1:
-      return "grid-cols-1";
-    case 2:
-    case 3:
-    case 4:
-      return "grid-cols-2";
-    default:
-      return "grid-cols-6";
-  }
+  if (itemCount === 1) return "grid-cols-1";
+  if (itemCount < 5) return "grid-cols-2";
+  return "grid-cols-6";
 };
 
 /**

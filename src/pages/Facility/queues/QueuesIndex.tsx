@@ -346,7 +346,6 @@ export default function QueuesIndex({
             </div>
           )}
 
-          {/* Create Queue Button */}
           <div className="ml-auto flex items-center gap-2">
             {effectiveResourceId && (
               <Button asChild variant="link">
