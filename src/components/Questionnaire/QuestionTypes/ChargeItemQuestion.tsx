@@ -127,7 +127,11 @@ function ChargeItemForm({
                 <PopoverTrigger>
                   <InfoIcon className="h-4 w-4 text-gray-700 cursor-pointer" />
                 </PopoverTrigger>
-                <PopoverContent side="right" className="p-0" align="start">
+                <PopoverContent
+                  side="right"
+                  className="p-0 w-auto max-w-[calc(100vw-2rem)]"
+                  align="start"
+                >
                   <ChargeItemPriceDisplay
                     priceComponents={
                       chargeItem.charge_item_definition_object.price_components
