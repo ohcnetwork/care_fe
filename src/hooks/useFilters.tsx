@@ -88,7 +88,7 @@ export default function useFilters({
 
     const defaults = Object.fromEntries(
       Object.entries(defaultQueryParams).filter(
-        ([key]) => qParams[key] == undefined,
+        ([key]) => qParams[key] === undefined,
       ),
     );
 
