@@ -108,6 +108,9 @@ const careConfig = {
     ),
   },
 
+  /**
+   * Auto refresh interval in milliseconds
+   */
   appointmentAndQueueRefreshInterval:
     parseInt(env.REACT_AUTO_REFRESH_INTERVAL || "10", 10) * 1000,
 
