@@ -52,15 +52,31 @@ jobs:
               return;
             }
 
-            const timeline = await github.rest.issues.listEventsForTimeline({
+            const timelineQuery = `
+              query($owner: String!, $repo: String!, $prNumber: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $prNumber) {
+                    timelineItems(last: 1, itemTypes: [REOPENED_EVENT]) {
+                      edges {
+                        node {
+                          ... on ReopenedEvent {
+                            createdAt
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const timelineResult = await github.graphql(timelineQuery, {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number
+              prNumber: context.payload.pull_request.number
             });
 
-            const lastReopenTime = timeline.data
-              .filter(event => event.event === 'reopened')
-              .pop()?.created_at;
+            const lastReopenTime = timelineResult.repository.pullRequest.timelineItems.edges[0]?.node?.createdAt;
 
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
