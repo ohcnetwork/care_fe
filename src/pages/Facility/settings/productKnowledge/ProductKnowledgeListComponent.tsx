@@ -212,7 +212,9 @@ export function ProductKnowledgeList({
 
   return (
     <div>
+      {/* Header with filters and view toggle */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        {/* Search */}
         <div className="relative w-full sm:w-auto">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
             <CareIcon icon="l-search" className="size-5" />
@@ -227,6 +229,7 @@ export function ProductKnowledgeList({
           />
         </div>
 
+        {/* Status Filter */}
         <div className="w-full sm:w-auto">
           <FilterSelect
             value={qParams.status || ""}
@@ -237,6 +240,7 @@ export function ProductKnowledgeList({
           />
         </div>
 
+        {/* Product Type Filter */}
         <div className="w-full sm:w-auto">
           <FilterSelect
             value={qParams.product_type || ""}
@@ -248,6 +252,7 @@ export function ProductKnowledgeList({
         </div>
       </div>
 
+      {/* Results count */}
       {productsResponse && productsResponse.count > 0 && (
         <div className="mb-4 text-sm text-gray-600">
           {t("showing")} {products.length} {t("of")} {productsResponse.count}{" "}
@@ -255,6 +260,7 @@ export function ProductKnowledgeList({
         </div>
       )}
 
+      {/* Content */}
       {isLoadingProducts ? (
         <TableSkeleton count={5} />
       ) : products.length === 0 ? (
@@ -267,6 +273,7 @@ export function ProductKnowledgeList({
         />
       ) : (
         <>
+          {/* Desktop Table View */}
           <div className="hidden lg:block">
             <div className="border rounded-lg overflow-hidden">
               <Table>
@@ -293,6 +300,7 @@ export function ProductKnowledgeList({
             </div>
           </div>
 
+          {/* Mobile Card View */}
           <div className="lg:hidden">
             <div className="grid gap-3">
               {products.map((product) => (

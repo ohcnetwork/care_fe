@@ -199,7 +199,9 @@ export function ActivityDefinitionList({
 
   return (
     <div>
+      {/* Header with filters and view toggle */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        {/* Search */}
         <div className="relative w-full sm:w-auto">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
             <CareIcon icon="l-search" className="size-5" />
@@ -214,6 +216,7 @@ export function ActivityDefinitionList({
           />
         </div>
 
+        {/* Status Filter */}
         <div className="w-full sm:w-auto">
           <FilterSelect
             value={qParams.status || ""}
@@ -224,6 +227,7 @@ export function ActivityDefinitionList({
           />
         </div>
 
+        {/* classification Filter */}
         <div className="w-full sm:w-auto">
           <FilterSelect
             value={qParams.classification || ""}
@@ -235,6 +239,7 @@ export function ActivityDefinitionList({
         </div>
       </div>
 
+      {/* Results count */}
       {activityDefinitionsResponse && activityDefinitionsResponse.count > 0 && (
         <div className="mb-4 text-sm text-gray-600">
           {t("showing")} {activityDefinitions.length} {t("of")}{" "}
@@ -242,6 +247,7 @@ export function ActivityDefinitionList({
         </div>
       )}
 
+      {/* Content */}
       {isLoadingActivityDefinitions ? (
         <TableSkeleton count={5} />
       ) : activityDefinitions.length === 0 ? (
@@ -254,6 +260,7 @@ export function ActivityDefinitionList({
         />
       ) : (
         <>
+          {/* Desktop Table View */}
           <div className="hidden lg:block">
             <div className="border rounded-lg overflow-hidden">
               <Table>
@@ -281,6 +288,7 @@ export function ActivityDefinitionList({
             </div>
           </div>
 
+          {/* Mobile Card View */}
           <div className="lg:hidden">
             <div className="grid gap-3">
               {activityDefinitions.map((definition) => (
