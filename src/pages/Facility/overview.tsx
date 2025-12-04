@@ -29,6 +29,7 @@ import {
 } from "@/Utils/dashboardLinks";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import { useCareApps } from "@/hooks/useCareApps";
 import facilityApi from "@/types/facility/facilityApi";
 import careConfig from "@careConfig";
 
@@ -47,6 +48,10 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       pathParams: { facilityId },
     }),
   });
+
+  const isAnalyticsEnabled = useCareApps().some(
+    (plugin) => plugin.plugin === "care_analytics_fe",
+  );
 
   const { canViewAppointments, canListEncounters } = getPermissions(
     hasPermission,
@@ -88,7 +93,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
       description: t("view_analytics"),
       icon: ChartLine,
       href: `/facility/${facilityId}/analytics`,
-      visible: true,
+      visible: isAnalyticsEnabled,
     },
   ];
 
