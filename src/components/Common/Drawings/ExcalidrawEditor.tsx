@@ -35,7 +35,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import metaArtifactApi from "@/types/metaAritifact/metaArtifactApi";
+import metaArtifactApi from "@/types/metaArtifact/metaArtifactApi";
 
 type Props = {
   associatingId: string;

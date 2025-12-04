@@ -29,7 +29,7 @@ import {
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
-import metaArtifactApi from "@/types/metaAritifact/metaArtifactApi";
+import metaArtifactApi from "@/types/metaArtifact/metaArtifactApi";
 
 export interface DrawingsTabProps {
   type: "encounter" | "patient";
