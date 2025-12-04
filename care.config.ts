@@ -40,6 +40,8 @@ const careConfig = {
     ohcn: env.REACT_OHCN_URL || "https://ohc.network?ref=care",
   },
 
+  appointmentAndQueueRefreshInterval: 10000,
+
   mainLogo: logo(env.REACT_MAIN_LOGO, {
     light: "/images/care_logo.svg",
     dark: "/images/care_logo.svg",

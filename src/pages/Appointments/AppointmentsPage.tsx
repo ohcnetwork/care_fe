@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSidebar } from "@/components/ui/sidebar";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -384,6 +385,17 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-sm font-medium">{t("auto_refresh")}</Label>
+            <Switch
+              checked={qParams.autoRefresh === "true"}
+              onCheckedChange={(checked) =>
+                updateQuery({
+                  autoRefresh: checked ? "true" : "false",
+                })
+              }
+            />
+          </div>
           {activeTab === "list" && (
             <Button
               variant="outline"
@@ -439,6 +451,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 tags={selectedTags.map((tag) => tag.id)}
                 tags_behavior={qParams.tags_behavior}
                 patient={qParams.patient}
+                autoRefresh={qParams.autoRefresh}
               />
             ))}
           </div>
@@ -461,6 +474,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           patient={qParams.patient}
           resourceType={resourceType}
           resourceIds={resourceId ? [resourceId] : practitionerIds}
+          autoRefresh={qParams.autoRefresh}
         />
       )}
     </Page>
@@ -478,6 +492,7 @@ function AppointmentColumn(props: {
   patient?: string;
   resourceType: SchedulableResourceType;
   resourceIds: string[];
+  autoRefresh: string;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -535,6 +550,10 @@ function AppointmentColumn(props: {
       return currentOffset < lastPage.count ? currentOffset : null;
     },
     enabled: !!props.resourceIds.length && props.canViewAppointments,
+    refetchInterval:
+      props.autoRefresh === "true"
+        ? careConfig.appointmentAndQueueRefreshInterval
+        : false,
   });
 
   const appointments =
@@ -767,6 +786,7 @@ function AppointmentRow(props: {
   patient?: string;
   resourceType: SchedulableResourceType;
   resourceIds: string[];
+  autoRefresh: string;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -803,6 +823,10 @@ function AppointmentRow(props: {
       },
     }),
     enabled: !!props.resourceIds.length && props.canViewAppointments,
+    refetchInterval:
+      props.autoRefresh === "true"
+        ? careConfig.appointmentAndQueueRefreshInterval
+        : false,
   });
 
   const appointments = data?.results ?? [];
