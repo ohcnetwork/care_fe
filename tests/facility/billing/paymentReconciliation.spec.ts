@@ -192,10 +192,8 @@ test.describe("Payment Reconciliation", () => {
     // Delete the created account
     const targetUrl = `/facility/${facilityId}/billing/account/${accountId}`;
     await page.goto(targetUrl);
-    await expect(
-      page.getByRole("button", { name: /settle & close/i }),
-    ).toBeVisible({ timeout: 10000 });
-    await page.keyboard.press("s");
+
+    await page.getByRole("button", { name: "Settle & Close S" }).click();
 
     await page.getByRole("button", { name: /close account/i }).click();
 
@@ -203,7 +201,7 @@ test.describe("Payment Reconciliation", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText(/account closed successfully/i),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
 
     await page.close();
     await context.close();
