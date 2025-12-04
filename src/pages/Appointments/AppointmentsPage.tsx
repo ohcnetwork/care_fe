@@ -152,17 +152,22 @@ interface Props {
 
 const getDefaultDateFilter = () => {
   const defaultDays = careConfig.appointments.defaultDateFilter;
+  const today = new Date();
 
   if (defaultDays === 0) {
     return {
-      date_from: dateQueryString(new Date()),
-      date_to: dateQueryString(new Date()),
+      date_from: dateQueryString(today),
+      date_to: dateQueryString(today),
     };
   }
 
+  // Past or future days based on configuration
+  const fromDate = defaultDays > 0 ? today : addDays(today, defaultDays);
+  const toDate = defaultDays > 0 ? addDays(today, defaultDays) : today;
+
   return {
-    date_from: dateQueryString(addDays(new Date(), defaultDays)),
-    date_to: dateQueryString(addDays(new Date(), defaultDays)),
+    date_from: dateQueryString(fromDate),
+    date_to: dateQueryString(toDate),
   };
 };
 
