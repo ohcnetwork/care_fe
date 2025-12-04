@@ -68,8 +68,18 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
     combine: combineResourceSubQueues,
   });
 
-  if (servicePoints.length === 0) {
+  const isLoading = resources.length > 0 && servicePoints.length === 0;
+
+  if (isLoading) {
     return <Loading />;
+  }
+
+  if (servicePoints.length === 0) {
+    return (
+      <div className="text-center text-white">
+        {t("no_service_points_found")}
+      </div>
+    );
   }
 
   const itemCount = servicePoints.length;
