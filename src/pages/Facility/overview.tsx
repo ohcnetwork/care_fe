@@ -15,7 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import Page from "@/components/Common/Page";
 
@@ -130,12 +130,21 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
             aria-hidden="true"
           />
 
-          <div className="relative z-10 p-4 md:p-8">
-            <h1 className="mb-2 text-lg font-bold text-gray-900 md:text-2xl">
-              {t("greet_user", {
-                time_of_day: getGreeting(),
-                user: [user.prefix, user.first_name].filter(Boolean).join(" "),
-              })}
+          <div className="relative z-10 p-4 md:p-8 max-w-[250px] sm:max-w-full">
+            <h1 className="mb-2 font-bold text-gray-900 text-2xl wrap-break-word">
+              <Trans
+                i18nKey="greet_user"
+                values={{
+                  time_of_day: getGreeting(),
+                  user: [user.prefix, user.first_name]
+                    .filter(Boolean)
+                    .join(" "),
+                }}
+                components={{
+                  1: <span className="text-gray-700 font-semibold" />,
+                  2: <span className="text-gray-900 font-bold" />,
+                }}
+              />
             </h1>
             <p>{t("welcome_back")}</p>
           </div>

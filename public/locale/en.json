@@ -2389,7 +2389,7 @@
   "graph": "Graph",
   "greater": "Greater Than",
   "greater_or_equals": "Greater Than or Equal",
-  "greet_user": "Good {{time_of_day}}, {{user}} 👋",
+  "greet_user": "<1>Good {{time_of_day}},</1> <2>{{user}}</2> 👋",
   "group": "Group",
   "group_by": "Group by",
   "group_layout_options": "Group layout options",
