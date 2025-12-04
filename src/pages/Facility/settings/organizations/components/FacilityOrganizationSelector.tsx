@@ -362,7 +362,7 @@ export default function FacilityOrganizationSelector(
   }, [currentSelection, currentOrganizations, selectedOrganizations]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
           <Label>

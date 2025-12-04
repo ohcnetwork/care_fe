@@ -161,7 +161,7 @@ export default function CreateEncounterForm({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto">
+      <SheetContent className="overflow-y-auto min-w-lg">
         <SheetHeader>
           <SheetTitle>{t("initiate_encounter")}</SheetTitle>
           <SheetDescription>
@@ -179,7 +179,27 @@ export default function CreateEncounterForm({
             onSubmit={form.handleSubmit(onSubmit)}
             className="mt-4 space-y-2"
           >
-            <div className="space-y-5">
+            <div className="space-y-6">
+              <FormField
+                control={form.control}
+                name="organizations"
+                render={({ field }) => (
+                  <FormItem>
+                    <FacilityOrganizationSelector
+                      facilityId={facilityId}
+                      value={field.value}
+                      onChange={(value) => {
+                        if (value === null) {
+                          form.setValue("organizations", []);
+                        } else {
+                          form.setValue("organizations", value);
+                        }
+                      }}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="start_date"
@@ -341,49 +361,29 @@ export default function CreateEncounterForm({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="organizations"
-                render={({ field }) => (
-                  <FormItem>
-                    <FacilityOrganizationSelector
-                      facilityId={facilityId}
-                      value={field.value}
-                      onChange={(value) => {
-                        if (value === null) {
-                          form.setValue("organizations", []);
-                        } else {
-                          form.setValue("organizations", value);
-                        }
-                      }}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="flex justify-end mt-6 space-x-2">
-              <Button
-                type="button"
-                onClick={() => {
-                  setIsOpen(false);
-                  form.reset();
-                }}
-                className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
-              >
-                {t("cancel")}
-                <ShortcutBadge actionId="cancel-action" />
-              </Button>
-              <Button
-                type="submit"
-                disabled={isPending || !form.watch("organizations").length}
-              >
-                {isPending ? t("creating") : t("create_encounter")}
-                <ShortcutBadge actionId="submit-action" className="bg-white" />
-              </Button>
             </div>
           </form>
         </Form>
+        <div className="flex justify-end sticky -bottom-5 gap-2 bg-white py-5">
+          <Button
+            type="button"
+            onClick={() => {
+              setIsOpen(false);
+              form.reset();
+            }}
+            className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100"
+          >
+            {t("cancel")}
+            <ShortcutBadge actionId="cancel-action" />
+          </Button>
+          <Button
+            type="submit"
+            disabled={isPending || !form.watch("organizations").length}
+          >
+            {isPending ? t("creating") : t("create_encounter")}
+            <ShortcutBadge actionId="submit-action" className="bg-white" />
+          </Button>
+        </div>
       </SheetContent>
     </Sheet>
   );
