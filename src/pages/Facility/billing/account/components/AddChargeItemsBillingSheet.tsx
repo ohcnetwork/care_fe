@@ -202,7 +202,7 @@ export default function AddChargeItemsBillingSheet({
                                   </PopoverTrigger>
                                   <PopoverContent
                                     side="right"
-                                    className="p-0"
+                                    className="p-0 w-auto max-w-[calc(100vw-2rem)]"
                                     align="start"
                                   >
                                     <ChargeItemPriceDisplay
@@ -261,7 +261,10 @@ export default function AddChargeItemsBillingSheet({
                                   <PopoverTrigger>
                                     <InfoIcon className="size-4 text-gray-700 cursor-pointer" />
                                   </PopoverTrigger>
-                                  <PopoverContent side="right" className="p-0">
+                                  <PopoverContent
+                                    side="right"
+                                    className="p-0 w-auto max-w-[calc(100vw-2rem)]"
+                                  >
                                     <ChargeItemPriceDisplay
                                       priceComponents={
                                         item.charge_item_definition_object
