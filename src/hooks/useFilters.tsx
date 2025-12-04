@@ -86,6 +86,12 @@ export default function useFilters({
 
     const qParamKeys = Object.keys(qParams);
 
+    const defaults = Object.fromEntries(
+      Object.entries(defaultQueryParams).filter(
+        ([key]) => qParams[key] == undefined,
+      ),
+    );
+
     // If we navigate to a path that has query params set on mount,
     // skip restoring the cache, instead update the cache with new filters.
     if (qParamKeys.length) {
@@ -95,22 +101,12 @@ export default function useFilters({
 
     const cache = FiltersCache.get();
     if (!cache) {
+      setQueryParams({ ...defaults });
       return;
     }
 
     // Restore cache
-    setQueryParams(cache);
-  }, []);
-
-  useEffect(() => {
-    const defaults = Object.fromEntries(
-      Object.entries(defaultQueryParams).filter(
-        ([key]) => qParams[key] === undefined,
-      ),
-    );
-    if (Object.keys(defaults).length > 0) {
-      updateQuery(defaults);
-    }
+    setQueryParams({ ...defaults, ...cache });
   }, []);
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {
