@@ -76,21 +76,24 @@ export default function useFilters({
   const removeFilter = (param: string) => removeFilters([param]);
 
   useEffect(() => {
+    const defaults = Object.fromEntries(
+      Object.entries(defaultQueryParams).filter(
+        ([key]) => qParams[key] === undefined,
+      ),
+    );
+
     if (disableCache) {
       // Clean-up any existing cache if present for this path.
       FiltersCache.invalidate();
+
+      // Set default query params if they are not present
+      setQueryParams({ ...defaults });
 
       // Skip cache restoration logic for this usage.
       return;
     }
 
     const qParamKeys = Object.keys(qParams);
-
-    const defaults = Object.fromEntries(
-      Object.entries(defaultQueryParams).filter(
-        ([key]) => qParams[key] === undefined,
-      ),
-    );
 
     // If we navigate to a path that has query params set on mount,
     // skip restoring the cache, instead update the cache with new filters.
