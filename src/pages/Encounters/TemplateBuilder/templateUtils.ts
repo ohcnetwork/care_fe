@@ -1,15 +1,8 @@
-/**
- * Utility functions for template building and smart insertion
- */
-
 interface InsertionResult {
   newTemplate: string;
   cursorPosition: number;
 }
 
-/**
- * Inserts content at cursor position or at the end of the template
- */
 export function insertAtCursor(
   template: string,
   content: string,
@@ -26,10 +19,6 @@ export function insertAtCursor(
   };
 }
 
-/**
- * Generates insertion content for a single object field
- * Example: patient.name -> {{ patient.name }}
- */
 export function generateSingleObjectInsertion(
   sectionKey: string,
   fieldKey: string,
@@ -37,93 +26,68 @@ export function generateSingleObjectInsertion(
   return `{{ ${sectionKey}.${fieldKey} }}`;
 }
 
-/**
- * Checks if a queryset loop already exists in the template
- * Returns the position where to insert the field, or null if loop doesn't exist
- * @param template - The template string
- * @param loopTarget - The full path to loop over (e.g., "encounter.care_team")
- */
-export function findQuerysetLoop(
-  template: string,
-  loopTarget: string,
-): { exists: boolean; insertPosition?: number; itemVar?: string } {
-  // Escape dots for regex
-  const escapedTarget = loopTarget.replace(/\./g, "\\.");
-  // Look for: {% for item in loopTarget %}
-  const loopStartRegex = new RegExp(
-    `{%\\s*for\\s+(\\w+)\\s+in\\s+${escapedTarget}\\s*%}`,
-    "i",
-  );
-  const loopEndRegex = /{%\s*endfor\s*%}/gi;
+function loopStartMarker(loopId: string): string {
+  return `<!-- loop:${loopId} -->`;
+}
 
-  const loopStartMatch = template.match(loopStartRegex);
+function loopEndMarker(loopId: string): string {
+  return `<!-- endloop:${loopId} -->`;
+}
 
-  if (!loopStartMatch) {
-    return { exists: false };
-  }
-
-  const itemVar = loopStartMatch[1]; // Capture the loop variable name
-  const loopStartPos = loopStartMatch.index! + loopStartMatch[0].length;
-
-  // Find the corresponding endfor
-  let endforPos = -1;
-  const restOfTemplate = template.slice(loopStartPos);
-
-  // Simple depth tracking to handle nested loops
-  const forMatches = Array.from(
-    restOfTemplate.matchAll(/{%\s*for\s+\w+\s+in\s+[\w.]+\s*%}/gi),
-  );
-  const endforMatches = Array.from(restOfTemplate.matchAll(loopEndRegex));
-
-  // Find the matching endfor for our loop
-  for (const endforMatch of endforMatches) {
-    const endforPosition = endforMatch.index!;
-    // Count how many 'for' statements are between loopStart and this endfor
-    const nestedFors = forMatches.filter(
-      (forMatch) => forMatch.index! < endforPosition,
-    ).length;
-
-    if (nestedFors === 0) {
-      endforPos = loopStartPos + endforPosition;
-      break;
-    }
-  }
-
-  if (endforPos === -1) {
-    return { exists: false };
-  }
-
-  // Insert position is just before the {% endfor %}
-  return { exists: true, insertPosition: endforPos, itemVar };
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
- * Represents a for loop in the template */
+ * Finds an existing loop by its marker comments.
+ * Returns insert position just before the {% endfor %} tag.
+ *
+ * @param template - The template string
+ * @param loopId - The loop identifier (e.g., "encounter.medications")
+ */
+export function findLoop(
+  template: string,
+  loopId: string,
+): { exists: boolean; insertPosition?: number } {
+  const endMarker = loopEndMarker(loopId);
+
+  // Match {% endfor %} followed by whitespace/newlines and the specific end marker
+  const pattern = new RegExp(
+    `({%\\s*endfor\\s*%})\\s*${escapeRegex(endMarker)}`,
+    "i",
+  );
+  const match = template.match(pattern);
+
+  if (match && match.index !== undefined) {
+    // Insert position is at the start of {% endfor %}
+    return { exists: true, insertPosition: match.index };
+  }
+
+  return { exists: false };
+}
+
+/**
+ * Represents a for loop in the template
+ */
 interface LoopInfo {
-  /** What to iterate over, e.g., "encounter.medications" or "medication.dosages" */
-  iterateOver: string;
+  /** Unique identifier for this loop (used in marker comments) / What to iterate over, e.g., "encounter.medications" */
+  id: string;
   /** Loop variable name, e.g., "medication" */
   as: string;
 }
 
 /**
  * Generates nested for loops for queryset fields.
+ * Uses marker comments to identify loops for easy insertion.
  *
  * @example
  * // Single queryset: medications -> drug_name
  * // Generates:
+ * // <!-- loop:encounter.medications -->
  * // {% for medication in encounter.medications %}
  * //     {{ medication.drug_name }}
  * // {% endfor %}
- *
- * @example
- * // Nested querysets: questionnaire_responses -> responses -> answer
- * // Generates:
- * // {% for questionnaire_response in encounter.questionnaire_responses %}
- * //     {% for response in questionnaire_response.responses %}
- * //         {{ response.answer }}
- * //     {% endfor %}
- * // {% endfor %}
+ * // <!-- endloop:encounter.medications -->
  */
 export function generateNestedQuerysetInsertion(
   template: string,
@@ -133,25 +97,20 @@ export function generateNestedQuerysetInsertion(
   cursorPosition: number,
 ): InsertionResult {
   const loops = buildLoopChain(contextKey, fieldKeys, querysetLevels);
-  console.log("loops", loops);
   const fieldReference = buildFieldReference(fieldKeys, querysetLevels);
-  console.log("fieldReference", fieldReference);
 
-  // Check if outermost loop already exists in template
-  const existingLoop = findQuerysetLoop(template, loops[0].iterateOver);
+  // Check if the innermost (immediate parent) loop exists
+  const innermostLoop = loops[loops.length - 1];
+  const existingLoop = findLoop(template, innermostLoop.id);
 
   if (existingLoop.exists && existingLoop.insertPosition !== undefined) {
-    // Add to existing loop
-    const content = buildContentForExistingLoop(
-      loops,
-      fieldReference,
-      existingLoop.itemVar,
-    );
+    // Loop exists - just add the field reference
+    const content = `\n{{ ${fieldReference} }}`;
     return insertAtCursor(template, content, existingLoop.insertPosition);
   }
 
-  // Create new nested loop structure
-  const content = buildNewLoopStructure(loops, fieldReference, fieldKeys);
+  // Loop doesn't exist - create all needed loops
+  const content = buildNewLoopStructure(loops, fieldReference);
   return insertAtCursor(template, content, cursorPosition);
 }
 
@@ -163,8 +122,8 @@ export function generateNestedQuerysetInsertion(
  *
  * Returns:
  * [
- *   { iterateOver: "encounter.questionnaire_responses", as: "questionnaire_response" },
- *   { iterateOver: "questionnaire_response.responses", as: "response" }
+ *   { id: "encounter.questionnaire_responses", as: "questionnaire_response" },
+ *   { id: "questionnaire_response.responses", as: "response" }
  * ]
  */
 function buildLoopChain(
@@ -178,7 +137,8 @@ function buildLoopChain(
     if (i === 0) {
       // First loop iterates over context.path
       const path = fieldKeys.slice(0, level.index + 1).join(".");
-      return { iterateOver: `${contextKey}.${path}`, as: itemVar };
+      const id = `${contextKey}.${path}`;
+      return { id, as: itemVar };
     }
 
     // Subsequent loops iterate over previous_item.path
@@ -187,8 +147,9 @@ function buildLoopChain(
     const pathSegment = fieldKeys
       .slice(prevLevel.index + 1, level.index + 1)
       .join(".");
+    const id = `${prevItemVar}.${pathSegment}`;
 
-    return { iterateOver: `${prevItemVar}.${pathSegment}`, as: itemVar };
+    return { id, as: itemVar };
   });
 }
 
@@ -209,82 +170,33 @@ function buildFieldReference(
 }
 
 /**
- * Builds content to insert into an existing loop
- */
-function buildContentForExistingLoop(
-  loops: LoopInfo[],
-  fieldReference: string,
-  existingItemVar?: string,
-): string {
-  const depth = loops.length;
-
-  if (depth === 1) {
-    // Single loop - just add the field
-    const itemVar = existingItemVar || loops[0].as;
-    const fieldParts = fieldReference.split(".");
-    const fieldPath = fieldParts.slice(1).join("."); // Remove the item var prefix
-    return `\n    <li>{{ ${itemVar}.${fieldPath} }}</li>`;
-  }
-
-  // Multiple loops - add inner loops
-  let content = "\n";
-  const baseIndent = "    ";
-
-  // Open inner loops (skip first since it already exists)
-  for (let i = 1; i < loops.length; i++) {
-    const loop = loops[i];
-    // Adjust iterateOver to use existing item var for first inner loop
-    const iterateOver =
-      i === 1
-        ? `${existingItemVar || loops[0].as}.${loop.iterateOver.split(".").slice(1).join(".")}`
-        : loop.iterateOver;
-    const indent = baseIndent.repeat(i);
-    content += `${indent}{% for ${loop.as} in ${iterateOver} %}\n`;
-  }
-
-  // Add field
-  const innerIndent = baseIndent.repeat(depth);
-  content += `${innerIndent}<li>{{ ${fieldReference} }}</li>\n`;
-
-  // Close inner loops
-  for (let i = loops.length - 1; i >= 1; i--) {
-    const indent = baseIndent.repeat(i);
-    content += `${indent}{% endfor %}\n`;
-  }
-
-  return content;
-}
-
-/**
- * Builds a complete new loop structure with HTML wrapper
+ * Builds a complete new loop structure with marker comments
  */
 function buildNewLoopStructure(
   loops: LoopInfo[],
   fieldReference: string,
-  fieldKeys: string[],
 ): string {
-  const sectionName = fieldKeys[fieldKeys.length - 1];
   const baseIndent = "    ";
+  let content = "\n";
 
-  let content = `\n<h3>${capitalizeFirst(sectionName)}</h3>\n<ul>\n`;
-
-  // Open all loops
+  // Open all loops with markers
   loops.forEach((loop, i) => {
-    const indent = baseIndent.repeat(i + 1);
-    content += `${indent}{% for ${loop.as} in ${loop.iterateOver} %}\n`;
+    const indent = baseIndent.repeat(i);
+    content += `${indent}${loopStartMarker(loop.id)}\n`;
+    content += `${indent}{% for ${loop.as} in ${loop.id} %}\n`;
   });
 
   // Add field
-  const innerIndent = baseIndent.repeat(loops.length + 1);
-  content += `${innerIndent}<li>{{ ${fieldReference} }}</li>\n`;
+  const innerIndent = baseIndent.repeat(loops.length);
+  content += `${innerIndent}{{ ${fieldReference} }}\n`;
 
-  // Close all loops
+  // Close all loops with markers (reverse order)
   for (let i = loops.length - 1; i >= 0; i--) {
-    const indent = baseIndent.repeat(i + 1);
+    const loop = loops[i];
+    const indent = baseIndent.repeat(i);
     content += `${indent}{% endfor %}\n`;
+    content += `${indent}${loopEndMarker(loop.id)}\n`;
   }
-
-  content += `</ul>\n`;
 
   return content;
 }
@@ -301,13 +213,6 @@ function getSingularForm(plural: string): string {
     return plural.slice(0, -1);
   }
   return plural;
-}
-
-/**
- * Capitalizes the first letter of a string
- */
-function capitalizeFirst(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 /**
@@ -367,59 +272,3 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
     </div>
 </body>
 </html>`;
-
-/**
- * Default context config based on the default template
- */
-export const DEFAULT_CONTEXT_CONFIG = {
-  patient: {},
-  encounter: {},
-  diagnoses: {},
-  symptoms: {},
-  allergies: {},
-  medications: {},
-};
-
-/**
- * Extracts variables used in the template
- * Returns a map of section -> fields[]
- */
-export function parseTemplateVariables(
-  template: string,
-): Record<string, string[]> {
-  const result: Record<string, string[]> = {};
-
-  // Match {{ section.field }} patterns
-  const variableRegex = /{{\s*(\w+)\.(\w+)\s*}}/g;
-  let match;
-
-  while ((match = variableRegex.exec(template)) !== null) {
-    const section = match[1];
-    const field = match[2];
-
-    if (!result[section]) {
-      result[section] = [];
-    }
-    if (!result[section].includes(field)) {
-      result[section].push(field);
-    }
-  }
-
-  return result;
-}
-
-/**
- * Checks if a section is used in the template (either as single object or queryset)
- */
-export function isSectionUsed(template: string, sectionKey: string): boolean {
-  // Check for single object usage: {{ sectionKey.field }}
-  const singleObjectRegex = new RegExp(`{{\\s*${sectionKey}\\.\\w+\\s*}}`, "i");
-
-  // Check for queryset usage: {% for item in sectionKey %}
-  const querysetRegex = new RegExp(
-    `{%\\s*for\\s+\\w+\\s+in\\s+${sectionKey}\\s*%}`,
-    "i",
-  );
-
-  return singleObjectRegex.test(template) || querysetRegex.test(template);
-}

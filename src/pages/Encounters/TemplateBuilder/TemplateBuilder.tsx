@@ -97,7 +97,7 @@ export default function TemplateBuilder({
   const [expandedFields, setExpandedFields] = useState<Set<string>>(new Set());
   const [previewState, setPreviewState] = useState<{
     isActive: boolean;
-    data: Blob | null;
+    data: Blob | string | null;
     format: TemplateFormat | null;
   }>({ isActive: false, data: null, format: null });
 
@@ -154,11 +154,11 @@ export default function TemplateBuilder({
 
   const { mutate: createTemplatePreview } = useMutation({
     mutationFn: mutate(templateApi.createTemplatePreview),
-    onSuccess: (data: Blob) => {
+    onSuccess: (data: Blob | string) => {
       const format = form.getValues("default_format");
       setPreviewState({
         isActive: true,
-        data: new Blob([data]),
+        data,
         format,
       });
       toast.success(t("template_preview_generated"));
@@ -261,37 +261,8 @@ export default function TemplateBuilder({
     });
   };
 
-  // Handle simple field insertion
-  const handleSimpleFieldClick = (fieldKey: string) => {
-    if (!selectedContext) return;
-
-    const template = form.getValues("template_data");
-    const cursorPosition = getCursorPosition();
-    const insertion = generateSingleObjectInsertion(
-      selectedContext.context_key,
-      fieldKey,
-    );
-
-    const { newTemplate, cursorPosition: newCursorPos } = insertAtCursor(
-      template,
-      insertion,
-      cursorPosition,
-    );
-
-    form.setValue("template_data", newTemplate);
-
-    // Set cursor position after React renders
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.selectionStart = newCursorPos;
-        textareaRef.current.selectionEnd = newCursorPos;
-        textareaRef.current.focus();
-      }
-    }, 0);
-  };
-
   // Handle nested field insertion (for fields within a queryset loop)
-  const handleNestedFieldClick = (fieldKey: string) => {
+  const handleFieldClick = (fieldKey: string) => {
     if (!selectedContext) return;
 
     const fieldKeys = fieldKey.split(".");
@@ -583,8 +554,7 @@ export default function TemplateBuilder({
                         field={field}
                         expandedFields={expandedFields}
                         toggleFieldExpansion={toggleFieldExpansion}
-                        onSimpleFieldClick={handleSimpleFieldClick}
-                        onNestedFieldClick={handleNestedFieldClick}
+                        onClick={handleFieldClick}
                       />
                     ))}
                   </div>
@@ -608,16 +578,14 @@ function FieldItem({
   field,
   expandedFields,
   toggleFieldExpansion,
-  onSimpleFieldClick,
-  onNestedFieldClick,
+  onClick,
   depth = 0,
   parentPath = "",
 }: {
   field: FieldSchema;
   expandedFields: Set<string>;
   toggleFieldExpansion: (fieldKey: string) => void;
-  onSimpleFieldClick: (fieldKey: string) => void;
-  onNestedFieldClick: (fieldKey: string) => void;
+  onClick: (fieldKey: string) => void;
   depth?: number;
   parentPath?: string;
 }) {
@@ -663,8 +631,7 @@ function FieldItem({
               field={nestedField}
               expandedFields={expandedFields}
               toggleFieldExpansion={toggleFieldExpansion}
-              onSimpleFieldClick={onSimpleFieldClick}
-              onNestedFieldClick={onNestedFieldClick}
+              onClick={onClick}
               depth={depth + 1}
               parentPath={currentPath}
             />
@@ -681,11 +648,7 @@ function FieldItem({
       type="button"
       variant="ghost"
       size="sm"
-      onClick={() =>
-        depth > 0
-          ? onNestedFieldClick(currentPath)
-          : onSimpleFieldClick(currentPath)
-      }
+      onClick={() => onClick(currentPath)}
       className="w-full justify-start text-left h-auto py-2"
       style={{ paddingLeft: `${depth * 1.5 + 1.5}rem` }}
     >
@@ -737,7 +700,7 @@ function PreviewContent({
   previewData,
   format,
 }: {
-  previewData: Blob | null;
+  previewData: Blob | string | null;
   format: TemplateFormat | null;
 }) {
   const { t } = useTranslation();
@@ -751,11 +714,9 @@ function PreviewContent({
     if (!previewData || !format) return;
 
     if (format === "html") {
-      previewData.text().then((text) => {
-        setContentState({ html: text, pdf: null });
-      });
+      setContentState({ html: previewData as string, pdf: null });
     } else if (format === "pdf") {
-      const url = URL.createObjectURL(previewData);
+      const url = URL.createObjectURL(previewData as Blob);
       setContentState({ html: null, pdf: url });
 
       return () => URL.revokeObjectURL(url);
