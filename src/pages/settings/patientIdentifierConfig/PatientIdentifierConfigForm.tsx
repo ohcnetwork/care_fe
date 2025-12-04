@@ -128,6 +128,10 @@ export default function PatientIdentifierConfigForm({
     ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patientIdentifierConfig"] });
+      queryClient.invalidateQueries({
+        queryKey: ["facility"],
+        exact: false,
+      });
       onSuccess?.();
     },
   });
@@ -142,6 +146,10 @@ export default function PatientIdentifierConfigForm({
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["patientIdentifierConfig"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["facility"],
+        exact: false,
       });
       onSuccess?.();
     },
