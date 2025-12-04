@@ -89,6 +89,7 @@ export default function TemplateBuilder({
   facilityId: string;
   slug?: string;
 }) {
+  const isEditing = !!slug;
   const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [selectedContext, setSelectedContext] = useState<ContextSchema | null>(
@@ -169,6 +170,7 @@ export default function TemplateBuilder({
   });
 
   useEffect(() => {
+    if (isEditing) return;
     const subscription = form.watch((value, { name }) => {
       if (name === "name") {
         form.setValue("slug_value", generateSlug(value.name || "", 25), {
@@ -178,7 +180,7 @@ export default function TemplateBuilder({
     });
 
     return () => subscription.unsubscribe();
-  }, [form]);
+  }, [form, isEditing]);
 
   useEffect(() => {
     if (template) {
@@ -242,10 +244,11 @@ export default function TemplateBuilder({
     const text = textareaRef.current?.value || "";
     const textContent = "<!-- Add your content here -->";
     let bodyStart = text.indexOf(textContent);
-    if (bodyStart !== -1) {
-      bodyStart += textContent.length;
-    }
-    return textareaRef.current?.selectionStart || bodyStart;
+    bodyStart += textContent.length + "\n".length;
+    const selectionStart = textareaRef.current?.selectionStart ?? text.length;
+    const cursorPosition =
+      selectionStart === text.length ? bodyStart : selectionStart;
+    return cursorPosition;
   };
 
   // Toggle nested field expansion
@@ -371,7 +374,7 @@ export default function TemplateBuilder({
 
         {/* Template metadata fields */}
         <Form {...form}>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-start">
             <FormField
               control={form.control}
               name="name"
@@ -399,7 +402,11 @@ export default function TemplateBuilder({
                     <span className="text-destructive ml-1">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder={t("enter_slug")} />
+                    <Input
+                      {...field}
+                      placeholder={t("enter_slug")}
+                      disabled={isEditing}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
