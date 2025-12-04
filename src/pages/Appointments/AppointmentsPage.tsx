@@ -492,7 +492,7 @@ function AppointmentColumn(props: {
   patient?: string;
   resourceType: SchedulableResourceType;
   resourceIds: string[];
-  autoRefresh: string;
+  autoRefresh: "true" | "false";
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -786,7 +786,7 @@ function AppointmentRow(props: {
   patient?: string;
   resourceType: SchedulableResourceType;
   resourceIds: string[];
-  autoRefresh: string;
+  autoRefresh: "true" | "false";
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
