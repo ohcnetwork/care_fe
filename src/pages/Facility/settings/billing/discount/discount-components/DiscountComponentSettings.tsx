@@ -96,20 +96,17 @@ export function DiscountComponentSettings() {
 
   return (
     <>
-      <Page
-        title={t("discount_monetary_components")}
-        options={
-          <div className="flex flex-col lg:flex-row items-center gap-2">
-            <Input
-              placeholder={t("search")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full lg:w-[300px]"
-            />
-            <CreateDiscountMonetaryComponentSheet />
-          </div>
-        }
-      >
+      <Page title={t("discount_monetary_components")}>
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-start lg:justify-between gap-2 mt-2 px-3 lg:px-0">
+          <Input
+            placeholder={t("search")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full lg:w-[300px]"
+          />
+          <CreateDiscountMonetaryComponentSheet />
+        </div>
+
         <div className="rounded-md border overflow-hidden mt-4">
           <Table>
             <TableHeader>

@@ -15,13 +15,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import {
   getResourceRequestCategoryEnum,
   RESOURCE_REQUEST_STATUS_COLORS,
 } from "@/types/resourceRequest/resourceRequest";
+import resourceRequestApi from "@/types/resourceRequest/resourceRequestApi";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { PatientProps } from ".";
@@ -33,7 +33,7 @@ export const ResourceRequests = (props: PatientProps) => {
 
   const { data: resourceRequests, isLoading: loading } = useQuery({
     queryKey: ["resourceRequests", patientId],
-    queryFn: query(routes.listResourceRequests, {
+    queryFn: query(resourceRequestApi.list, {
       queryParams: {
         related_patient: patientId,
       },
@@ -48,11 +48,7 @@ export const ResourceRequests = (props: PatientProps) => {
           {t("resource_requests")}
         </h2>
         {facilityId && (
-          <Button
-            variant="outline_primary"
-            asChild
-            data-cy="create-request-button"
-          >
+          <Button variant="outline_primary" asChild>
             <Link
               href={`/facility/${facilityId}/resource/new?related_patient=${patientData.id}`}
             >
@@ -67,7 +63,7 @@ export const ResourceRequests = (props: PatientProps) => {
         {loading ? (
           <TableSkeleton count={5} />
         ) : (
-          <Table data-cy="resource-requests-table">
+          <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>{t("resource_type")}</TableHead>
@@ -96,7 +92,7 @@ export const ResourceRequests = (props: PatientProps) => {
                           ]
                         }
                       >
-                        {t(`resource_status__${request.status}`)}
+                        {t(`resource_request_status__${request.status}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>

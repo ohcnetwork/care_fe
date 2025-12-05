@@ -85,13 +85,7 @@ interface ResourceDefinitionCategoryPickerProps<T> {
     pathParams?: Record<string, string>;
     queryParams?: Record<string, unknown>;
   };
-  // Optional translations
-  translations: {
-    searchPlaceholder: string;
-    selectPlaceholder: string;
-    noResultsFound: string;
-    noItemsFound: string;
-  };
+  translationBaseKey: string;
   // Optional mapper function to transform API response to BaseDefinition
   mapper?: (item: T) => BaseCategoryPickerDefinition;
   // Favorites functionality
@@ -119,6 +113,10 @@ interface ResourceDefinitionCategoryPickerProps<T> {
       };
     };
   };
+  ref?: React.Ref<HTMLButtonElement>;
+  hideClearButton?: boolean;
+  hideSelectedDisplay?: boolean;
+  alignContent?: "start" | "center" | "end";
 }
 
 export function ResourceDefinitionCategoryPicker<T>({
@@ -131,12 +129,17 @@ export function ResourceDefinitionCategoryPicker<T>({
   resourceType,
   searchParamName = "title",
   listDefinitions,
-  translations,
+  translationBaseKey,
   allowMultiple = false,
   mapper = (item: T) => item as BaseCategoryPickerDefinition,
   enableFavorites = false,
   favoritesConfig,
+  ref,
+  hideSelectedDisplay = false,
+  hideClearButton = false,
+  alignContent = "start",
 }: ResourceDefinitionCategoryPickerProps<T>) {
+  const shouldHideClearButton = allowMultiple || hideClearButton;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isMobile = useBreakpoints({ default: true, sm: false });
@@ -159,7 +162,6 @@ export function ResourceDefinitionCategoryPicker<T>({
         queryParams: {
           resource_type: resourceType,
           parent: currentParent || "",
-          ordering: "title",
         },
       }),
     },
@@ -321,7 +323,6 @@ export function ResourceDefinitionCategoryPicker<T>({
 
     if (allowMultiple) {
       const currentValues = Array.isArray(value) ? value : value ? [value] : [];
-
       const isSelected = currentValues.some(
         (v: T) => mapper!(v).slug === definition.slug,
       );
@@ -418,7 +419,7 @@ export function ResourceDefinitionCategoryPicker<T>({
     if (!selectedDefinition || allowMultiple) {
       return (
         <span className="text-gray-500 truncate">
-          {placeholder || t(translations.selectPlaceholder) || t("select_item")}
+          {placeholder || t(`select_${translationBaseKey}`) || t("select_item")}
         </span>
       );
     }
@@ -438,10 +439,10 @@ export function ResourceDefinitionCategoryPicker<T>({
   const renderSearchInput = () => (
     <div className="px-3 border-b">
       <CommandInput
-        placeholder={t(translations.searchPlaceholder)}
+        placeholder={t(`search_${translationBaseKey}`)}
         value={searchQuery}
         onValueChange={setSearchQuery}
-        className="h-9 border-0 focus:ring-0 text-base md:text-sm"
+        className="h-9 border-0 focus:ring-0 text-base sm:text-sm"
         autoFocus
       />
     </div>
@@ -524,9 +525,8 @@ export function ResourceDefinitionCategoryPicker<T>({
           <Search className="size-8 mx-auto mb-2 opacity-50" />
           <div className="text-sm">
             {currentParent
-              ? t(translations.noResultsFound) || t("no_results_found_for")
-              : t("no_categories_found_for")}{" "}
-            "{searchQuery}"
+              ? t("no_results_found_for", { term: searchQuery })
+              : t("no_categories_found_for", { term: searchQuery })}
           </div>
         </div>
       ) : (
@@ -534,7 +534,7 @@ export function ResourceDefinitionCategoryPicker<T>({
           <Folder className="size-8 mx-auto mb-2 opacity-50" />
           <div className="text-sm">
             {currentParent
-              ? t(translations.noItemsFound) || t("no_items_found")
+              ? t(`no_${translationBaseKey}_found`) || t("no_items_found")
               : t("no_categories_found")}
           </div>
         </div>
@@ -550,12 +550,7 @@ export function ResourceDefinitionCategoryPicker<T>({
           .filter(
             (category) =>
               !searchQuery ||
-              category.title
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-              category.description
-                ?.toLowerCase()
-                .includes(searchQuery.toLowerCase()),
+              category.title.toLowerCase().includes(searchQuery.toLowerCase()),
           )
           .map((category) => (
             <CommandItem
@@ -574,11 +569,6 @@ export function ResourceDefinitionCategoryPicker<T>({
                   <div className="font-medium text-sm truncate">
                     {category.title}
                   </div>
-                  {category.description && (
-                    <div className="text-xs text-gray-500 truncate mt-0.5">
-                      {category.description}
-                    </div>
-                  )}
                 </div>
               </div>
               <ChevronRight className="size-4 text-gray-500" />
@@ -636,11 +626,6 @@ export function ResourceDefinitionCategoryPicker<T>({
             <div className="font-medium text-sm break flex items-center justify-between gap-2">
               <span className="break-all">{definition.title}</span>
             </div>
-            {definition.description && (
-              <div className="text-xs text-gray-500 truncate mt-0.5">
-                {definition.description}
-              </div>
-            )}
             {searchQuery && definition.category && (
               <div className="text-xs text-gray-500 truncate mt-0.5">
                 {getDisplayPath(definition)}
@@ -793,14 +778,14 @@ export function ResourceDefinitionCategoryPicker<T>({
             setActiveTab("search");
           }}
         >
-          <div className="relative">
+          <div className="flex relative">
             <DrawerTrigger asChild>
               <Button
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
                 className={cn(
-                  "justify-between h-10 min-h-10 px-3 py-2 w-full shadow-xs border border-gray-300 font-medium",
+                  "justify-between px-3 py-2 w-full shadow-xs border border-gray-300 font-medium",
                   disabled && "opacity-50 cursor-not-allowed",
                   className,
                 )}
@@ -813,17 +798,15 @@ export function ResourceDefinitionCategoryPicker<T>({
                   className={cn(
                     "size-4 shrink-0 opacity-50 transition-transform duration-200",
                     open && "rotate-180",
-                    value && "hidden",
                   )}
                 />
               </Button>
             </DrawerTrigger>
-            {value && (
+            {value && !shouldHideClearButton && (
               <Button
-                variant="ghost"
-                size="sm"
+                variant="outline"
                 onClick={handleClearSelection}
-                className="text-gray-500/50 hover:text-gray-700 bg-white absolute px-2 right-1 top-1/2 -translate-y-1/2"
+                className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300"
               >
                 <X />
                 <span className="sr-only">{t("clear_selection")}</span>
@@ -833,7 +816,7 @@ export function ResourceDefinitionCategoryPicker<T>({
 
           <DrawerContent className="flex flex-col max-h-[85vh]">
             <DrawerTitle className="sr-only">
-              {t(translations.selectPlaceholder) || t("select_item")}
+              {t(`select_${translationBaseKey}`) || t("select_item")}
             </DrawerTitle>
             <div className="px-4 py-3 border-b flex-shrink-0">
               {!isMobile && (
@@ -910,38 +893,50 @@ export function ResourceDefinitionCategoryPicker<T>({
           }}
           modal
         >
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className={cn(
-                "justify-between h-10 min-h-10 px-3 py-2 w-full shadow-xs",
-                "hover:bg-gray-50 hover:text-gray-900",
-                "transition-all duration-200",
-                disabled && "opacity-50 cursor-not-allowed",
-                className,
-              )}
-              disabled={disabled}
-            >
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                {getDisplayValue()}
-              </div>
-              <ChevronDown
+          <div className="flex relative">
+            <PopoverTrigger asChild ref={ref}>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
                 className={cn(
-                  "size-4 shrink-0 opacity-50 transition-transform duration-200",
-                  open && "rotate-180",
+                  "justify-between px-3 py-2 w-full shadow-xs border-gray-300",
+                  "hover:bg-gray-50 hover:text-gray-900",
+                  "transition-all duration-200",
+                  disabled && "opacity-50 cursor-not-allowed",
+                  className,
                 )}
-              />
-            </Button>
-          </PopoverTrigger>
+                disabled={disabled}
+              >
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  {getDisplayValue()}
+                </div>
+                <ChevronDown
+                  className={cn(
+                    "size-4 shrink-0 opacity-50 transition-transform duration-200",
+                    open && "rotate-180",
+                  )}
+                />
+              </Button>
+            </PopoverTrigger>
+            {value && !shouldHideClearButton && (
+              <Button
+                variant="outline"
+                onClick={handleClearSelection}
+                className="rounded-l-none -ml-2 shadow-none text-gray-400 border-gray-300"
+              >
+                <X />
+                <span className="sr-only">{t("clear_selection")}</span>
+              </Button>
+            )}
+          </div>
 
           <PopoverContent
             className={cn(
               "p-0 shadow-lg border-0 -w-[var(--radix-popover-trigger-width)] sm:max-w-[80vw]",
               enableFavorites ? "md:max-w-[70vw]" : "min-w-[420px]",
             )}
-            align="start"
+            align={alignContent}
             sideOffset={4}
           >
             <div
@@ -1078,7 +1073,7 @@ export function ResourceDefinitionCategoryPicker<T>({
           </PopoverContent>
         </Popover>
       )}
-      {allowMultiple && (
+      {allowMultiple && !hideSelectedDisplay && (
         <div className="space-y-2">
           {Array.isArray(value) && value.length > 0 && (
             <div className="flex flex-col gap-2">

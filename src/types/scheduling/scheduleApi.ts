@@ -141,6 +141,9 @@ export default {
       path: "/api/v1/facility/{facilityId}/appointments/",
       method: HttpMethod.GET,
       TRes: Type<PaginatedResponse<AppointmentRead>>(),
+      defaultQueryParams: {
+        ordering: "token_slot__start_datetime",
+      },
     },
     retrieve: {
       path: "/api/v1/facility/{facilityId}/appointments/{id}/",

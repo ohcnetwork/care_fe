@@ -123,7 +123,10 @@ export function ComboboxQuantityInput({
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
-              className={cn("w-full text-sm", selectedUnit && "pr-16")}
+              className={cn(
+                "w-full text-base sm:text-sm",
+                selectedUnit && "pr-16",
+              )}
               disabled={disabled}
               autoFocus={autoFocus}
             />

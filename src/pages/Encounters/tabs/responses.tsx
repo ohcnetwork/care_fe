@@ -89,9 +89,7 @@ function LeftPanel({
       <div className="relative w-full pb-2">
         <QuestionnaireSearch
           placeholder={
-            questionnaireId
-              ? selectedQuestionnaireTitle
-              : t("select_questionnaire")
+            questionnaireId ? selectedQuestionnaireTitle : t("select_forms")
           }
           subjectType="encounter"
           onSelect={(q) => {
@@ -108,7 +106,7 @@ function LeftPanel({
                 <span className="text-left whitespace-normal break-words">
                   {questionnaireId
                     ? selectedQuestionnaireTitle
-                    : t("select_questionnaire")}
+                    : t("select_forms")}
                 </span>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0 ml-2">

@@ -1,7 +1,7 @@
 import careConfig from "@careConfig";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
-import { navigate } from "raviger";
+import { navigate, usePath } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 
 import Loading from "@/components/Common/Loading";
@@ -47,6 +47,7 @@ export default function AuthUserProvider({
   const [accessToken, setAccessToken] = useState(
     localStorage.getItem(LocalStorageKeys.accessToken),
   );
+  const path = usePath();
   const [patientToken, setPatientToken] = useState<TokenData | null>(
     JSON.parse(
       localStorage.getItem(LocalStorageKeys.patientTokenKey) || "null",
@@ -96,7 +97,14 @@ export default function AuthUserProvider({
       if (isMFAResponse(data)) {
         localStorage.setItem("mfa_temp_token", data.temp_token);
         const redirectURL = getRedirectURL();
-        navigate(redirectURL ? `/2fa?redirect=${redirectURL}` : "/2fa");
+        const directURL = path !== "/login" ? window.location.href : null;
+        navigate(
+          redirectURL
+            ? `/2fa?redirect=${redirectURL}`
+            : directURL
+              ? `/2fa?redirect=${directURL}`
+              : "/2fa",
+        );
         return;
       }
 
@@ -106,8 +114,7 @@ export default function AuthUserProvider({
         localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
 
         await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-
-        if (location.pathname === "/" || location.pathname === "/login") {
+        if (path === "/" || path === "/login") {
           navigate(getRedirectOr("/"));
         }
       }
@@ -124,7 +131,6 @@ export default function AuthUserProvider({
       localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
 
       await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-
       navigate(getRedirectOr("/"));
     },
   });

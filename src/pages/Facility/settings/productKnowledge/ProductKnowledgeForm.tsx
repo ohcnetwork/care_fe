@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusCircle, X } from "lucide-react";
-import { navigate } from "raviger";
+import { CheckIcon, PlusCircle, X } from "lucide-react";
+import { Link, navigate } from "raviger";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -36,7 +36,7 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { generateSlug } from "@/Utils/utils";
-import { Code } from "@/types/base/code/code";
+import { Code, CodeSchema } from "@/types/base/code/code";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import { DOSAGE_UNITS_CODES } from "@/types/emr/medicationRequest/medicationRequest";
 import {
@@ -50,55 +50,68 @@ import {
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
 
-// Define a Code schema to match the API type
-const codeSchema = z.object({
-  code: z.string().min(1, "Code is required"),
-  display: z.string().min(1, "Display name is required"),
-  system: z.string().min(1, "System is required"),
-});
-
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  slug_value: z.string().min(1, "Slug is required"),
-  product_type: z.nativeEnum(ProductKnowledgeType),
-  status: z.nativeEnum(ProductKnowledgeStatus),
-  alternate_identifier: z.string().trim().optional(),
-  category: z.string(),
-  code: codeSchema.nullable(),
-  base_unit: codeSchema.nullable(),
-  names: z
-    .array(
-      z.object({
-        name_type: z.nativeEnum(ProductNameTypes),
-        name: z.string().min(1, "Name is required"),
+const createFormSchema = (
+  t: (key: string, options?: Record<string, unknown>) => string,
+) => {
+  return z.object({
+    name: z.string().min(1, { message: t("name_is_required") }),
+    slug_value: z
+      .string()
+      .trim()
+      .min(5, {
+        message: t("character_count_validation", { min: 5, max: 25 }),
+      })
+      .max(25, {
+        message: t("character_count_validation", { min: 5, max: 25 }),
+      })
+      .regex(/^[a-z0-9_-]+$/, {
+        message: t("slug_format_message"),
       }),
-    )
-    .default([]),
-  storage_guidelines: z
-    .array(
-      z.object({
-        note: z.string().min(1, "Note is required"),
-        stability_duration: z
-          .object({
-            value: z.number().int().optional(),
-            unit: codeSchema,
-          })
-          .refine((data) => data.value !== undefined && data.value !== null),
-      }),
-    )
-    .default([]),
-  definitional: z
-    .object({
-      dosage_form: codeSchema.optional(),
-      intended_routes: z.array(codeSchema).default([]),
-    })
-    .nullable()
-    .optional()
-    .refine((data) => {
-      if (!data) return true; // definitional is optional
-      return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
+    product_type: z.nativeEnum(ProductKnowledgeType),
+    status: z.nativeEnum(ProductKnowledgeStatus),
+    alternate_identifier: z.string().trim().optional(),
+    category: z.string(),
+    code: CodeSchema.nullable(),
+    base_unit: CodeSchema.optional().refine((val) => val !== undefined, {
+      message: t("base_unit_is_required"),
     }),
-});
+    names: z
+      .array(
+        z.object({
+          name_type: z.nativeEnum(ProductNameTypes),
+          name: z.string().min(1, { message: t("name_is_required") }),
+        }),
+      )
+      .default([]),
+    storage_guidelines: z
+      .array(
+        z.object({
+          note: z.string().min(1, { message: t("field_required") }),
+          stability_duration: z
+            .object({
+              value: z.number().int().optional(),
+              unit: CodeSchema,
+            })
+            .refine((data) => data.value !== undefined && data.value !== null, {
+              message: t("field_required"),
+              path: ["value"],
+            }),
+        }),
+      )
+      .default([]),
+    definitional: z
+      .object({
+        dosage_form: CodeSchema.nullable().optional(),
+        intended_routes: z.array(CodeSchema),
+      })
+      .nullable()
+      .optional()
+      .refine((data) => {
+        if (!data) return true; // definitional is optional
+        return data.dosage_form && data.dosage_form.code; // if definitional exists, dosage_form is required
+      }),
+  });
+};
 
 export default function ProductKnowledgeForm({
   facilityId,
@@ -112,6 +125,7 @@ export default function ProductKnowledgeForm({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
+
   const isEditMode = Boolean(slug);
 
   const { data: existingData, isFetching } = useQuery({
@@ -168,6 +182,7 @@ function ProductKnowledgeFormContent({
   onSuccess?: () => void;
 }) {
   const { t } = useTranslation();
+
   const queryClient = useQueryClient();
   const isEditMode = Boolean(slug);
 
@@ -178,7 +193,8 @@ function ProductKnowledgeFormContent({
     system: "http://unitsofmeasure.org",
   };
 
-  // Handle form initialization with proper mapping of types
+  const formSchema = createFormSchema(t);
+
   const getDefaultValues = () => {
     if (isEditMode && existingData) {
       return {
@@ -189,7 +205,7 @@ function ProductKnowledgeFormContent({
         alternate_identifier: existingData.alternate_identifier || "",
         category: existingData.category?.slug,
         code: existingData.code?.code ? existingData.code : null,
-        base_unit: existingData.base_unit?.code ? existingData.base_unit : null,
+        base_unit: existingData.base_unit,
         names: existingData.names || [],
         storage_guidelines: existingData.storage_guidelines || [],
         definitional:
@@ -205,7 +221,7 @@ function ProductKnowledgeFormContent({
       names: [],
       storage_guidelines: [],
       code: null,
-      base_unit: null,
+      base_unit: undefined,
       definitional: null,
       status: ProductKnowledgeStatus.active,
       category: categorySlug,
@@ -215,20 +231,16 @@ function ProductKnowledgeFormContent({
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues(),
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
   React.useEffect(() => {
-    if (isEditMode) return;
-
-    const subscription = form.watch((value, { name }) => {
-      if (name === "name") {
-        form.setValue("slug_value", generateSlug(value.name || ""), {
-          shouldValidate: true,
-        });
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form, isEditMode]);
+    if (isEditMode && existingData) {
+      form.reset(getDefaultValues());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingData?.slug, isEditMode]);
 
   const namesArray = useFieldArray({
     control: form.control,
@@ -252,6 +264,9 @@ function ProductKnowledgeFormContent({
         queryClient.invalidateQueries({ queryKey: ["productKnowledge"] });
         toast.success(t("product_knowledge_created_successfully"));
         onSuccess();
+        navigate(
+          `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
+        );
       },
     },
   );
@@ -280,20 +295,14 @@ function ProductKnowledgeFormContent({
   );
 
   const isPending = isCreating || isUpdating;
+  const { isDirty } = form.formState;
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     // Convert null to undefined where needed to match API types
     const formattedData = {
       ...data,
       code: data.code || undefined,
-      definitional: data.definitional
-        ? {
-            ...data.definitional,
-            ingredients: [],
-            nutrients: [],
-            drug_characteristic: [],
-          }
-        : undefined,
+      definitional: data.definitional || null,
     };
 
     if (isEditMode && slug) {
@@ -356,7 +365,7 @@ function ProductKnowledgeFormContent({
                               if (!isEditMode) {
                                 form.setValue(
                                   "slug_value",
-                                  generateSlug(e.target.value || ""),
+                                  generateSlug(e.target.value || "", 25),
                                   {
                                     shouldValidate: true,
                                   },
@@ -383,7 +392,9 @@ function ProductKnowledgeFormContent({
                               const sanitizedValue = e.target.value
                                 .toLowerCase()
                                 .replace(/[^a-z0-9_-]/g, "");
-                              field.onChange(sanitizedValue);
+                              form.setValue("slug_value", sanitizedValue, {
+                                shouldValidate: true,
+                              });
                             }}
                           />
                         </FormControl>
@@ -404,8 +415,8 @@ function ProductKnowledgeFormContent({
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("product_type")}</FormLabel>
                         <Select
+                          value={field.value}
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger ref={field.ref}>
@@ -440,7 +451,9 @@ function ProductKnowledgeFormContent({
                               ResourceCategoryResourceType.product_knowledge
                             }
                             value={field.value}
-                            onValueChange={field.onChange}
+                            onValueChange={(category) =>
+                              field.onChange(category?.slug || "")
+                            }
                             placeholder={t("select_category")}
                             className="w-full"
                           />
@@ -452,51 +465,66 @@ function ProductKnowledgeFormContent({
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <FormLabel>{t("code")}</FormLabel>
-                    <div className="mt-2">
-                      <ValueSetSelect
-                        system="system-medication"
-                        value={form.watch("code")}
-                        placeholder={t("search_for_product_codes")}
-                        onSelect={(code) => {
-                          form.setValue("code", {
-                            code: code.code,
-                            display: code.display,
-                            system: code.system,
-                          });
-                        }}
-                        showCode={true}
-                      />
-                    </div>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>{t("code")}</FormLabel>
+                        <FormControl>
+                          <ValueSetSelect
+                            {...field}
+                            system="system-medication"
+                            placeholder={t("search_for_product_codes")}
+                            onSelect={(code) => {
+                              field.onChange({
+                                code: code.code,
+                                display: code.display,
+                                system: code.system,
+                              });
+                            }}
+                            showCode={true}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  <div>
-                    <FormLabel>{t("base_unit")}</FormLabel>
-                    <div className="mt-2">
-                      <Select
-                        value={form.watch("base_unit")?.code || ""}
-                        onValueChange={(value) => {
-                          const selectedUnit = DOSAGE_UNITS_CODES.find(
-                            (unit) => unit.code === value,
-                          );
-                          if (selectedUnit)
-                            form.setValue("base_unit", selectedUnit);
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("select_base_unit")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {DOSAGE_UNITS_CODES.map((unit) => (
-                            <SelectItem key={unit.code} value={unit.code}>
-                              {unit.display}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="base_unit"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel aria-required>{t("base_unit")}</FormLabel>
+                        <Select
+                          value={field.value?.code || ""}
+                          onValueChange={(value) => {
+                            const selectedUnit = DOSAGE_UNITS_CODES.find(
+                              (unit) => unit.code === value,
+                            );
+                            if (selectedUnit) field.onChange(selectedUnit);
+                          }}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={t("select_base_unit")}
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {DOSAGE_UNITS_CODES.map((unit) => (
+                              <SelectItem key={unit.code} value={unit.code}>
+                                {unit.display}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -507,8 +535,8 @@ function ProductKnowledgeFormContent({
                       <FormItem className="flex flex-col">
                         <FormLabel>{t("status")}</FormLabel>
                         <Select
+                          value={field.value}
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger ref={field.ref}>
@@ -592,8 +620,8 @@ function ProductKnowledgeFormContent({
                                 <FormItem className="flex flex-col">
                                   <FormLabel>{t("name_type")}</FormLabel>
                                   <Select
+                                    value={field.value}
                                     onValueChange={field.onChange}
-                                    defaultValue={field.value}
                                   >
                                     <FormControl>
                                       <SelectTrigger ref={field.ref}>
@@ -679,7 +707,7 @@ function ProductKnowledgeFormContent({
                       });
                     }}
                   >
-                    <PlusCircle className="mr-2 size-4" />
+                    <PlusCircle className="size-4" />
                     {t("add_guideline")}
                   </Button>
                 </div>
@@ -733,11 +761,7 @@ function ProductKnowledgeFormContent({
                                       }
                                     />
                                   </FormControl>
-                                  <FormMessage>
-                                    {form.formState.errors.storage_guidelines?.[
-                                      index
-                                    ]?.stability_duration && t("required")}
-                                  </FormMessage>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
@@ -752,21 +776,17 @@ function ProductKnowledgeFormContent({
                                   </FormLabel>
                                   <Select
                                     value={field.value.code}
-                                    defaultValue={field.value.code}
                                     onValueChange={(value) => {
                                       const selectedUnit =
                                         UCUM_TIME_UNITS_CODES.find(
                                           (unit) => unit.code === value,
                                         );
                                       if (selectedUnit)
-                                        form.setValue(
-                                          `storage_guidelines.${index}.stability_duration.unit`,
-                                          {
-                                            code: selectedUnit.code,
-                                            display: selectedUnit.display,
-                                            system: selectedUnit.system,
-                                          },
-                                        );
+                                        field.onChange({
+                                          code: selectedUnit.code,
+                                          display: selectedUnit.display,
+                                          system: selectedUnit.system,
+                                        });
                                     }}
                                   >
                                     <FormControl>
@@ -821,8 +841,8 @@ function ProductKnowledgeFormContent({
 
             {/* Product Definition Section */}
             <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div>
                     <h2 className="text-base font-medium text-gray-900">
                       {t("product_definition")}
@@ -836,9 +856,16 @@ function ProductKnowledgeFormContent({
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => form.setValue("definitional", null)}
+                      onClick={() =>
+                        form.setValue("definitional", null, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                          shouldTouch: true,
+                        })
+                      }
+                      className="w-full sm:w-auto flex items-center justify-center gap-1 "
                     >
-                      <X className="mr-2 size-4" />
+                      <X className="size-4 " />
                       {t("remove_definition")}
                     </Button>
                   ) : (
@@ -847,9 +874,17 @@ function ProductKnowledgeFormContent({
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        form.setValue("definitional", {
-                          intended_routes: [],
-                        })
+                        form.setValue(
+                          "definitional",
+                          {
+                            intended_routes: [],
+                          },
+                          {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                            shouldTouch: true,
+                          },
+                        )
                       }
                     >
                       <PlusCircle className="mr-2 size-4" />
@@ -864,7 +899,7 @@ function ProductKnowledgeFormContent({
                       <FormField
                         control={form.control}
                         name="definitional.dosage_form"
-                        render={() => (
+                        render={({ field }) => (
                           <FormItem className="flex flex-col">
                             <FormLabel aria-required>
                               {t("dosage_form")}
@@ -872,10 +907,10 @@ function ProductKnowledgeFormContent({
                             <FormControl>
                               <ValueSetSelect
                                 system="system-medication-form-codes"
-                                value={form.watch("definitional.dosage_form")}
+                                value={field.value}
                                 placeholder={t("dosage_form_placeholder")}
                                 onSelect={(code) => {
-                                  form.setValue("definitional.dosage_form", {
+                                  field.onChange({
                                     code: code.code,
                                     display: code.display,
                                     system: code.system,
@@ -987,19 +1022,29 @@ function ProductKnowledgeFormContent({
             </div>
 
             <div className="mt-6 flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/settings/product_knowledge/categories/${categorySlug}`,
-                  )
-                }
-              >
-                {t("cancel")}
+              <Button type="button" variant="outline" asChild>
+                <Link
+                  href={
+                    isEditMode
+                      ? `/product_knowledge/${slug}`
+                      : `/product_knowledge/categories/${categorySlug}`
+                  }
+                >
+                  {t("cancel")}
+                </Link>
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? t("saving") : t("save")}
+              <Button
+                type="submit"
+                disabled={isPending || (isEditMode && !isDirty)}
+              >
+                {isPending ? (
+                  t("saving")
+                ) : (
+                  <>
+                    <CheckIcon className="size-4" />
+                    {isEditMode ? t("update") : t("create")}
+                  </>
+                )}
               </Button>
             </div>
           </form>

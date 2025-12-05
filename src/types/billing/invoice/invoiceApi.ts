@@ -13,6 +13,9 @@ export default {
     path: "/api/v1/facility/{facilityId}/invoice/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<InvoiceBase>>(),
+    defaultQueryParams: {
+      ordering: "-created_date",
+    },
   },
   retrieveInvoice: {
     path: "/api/v1/facility/{facilityId}/invoice/{invoiceId}/",

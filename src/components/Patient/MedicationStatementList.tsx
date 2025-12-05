@@ -58,7 +58,6 @@ export function MedicationStatementList({
           pathParams: { patientId },
           queryParams: {
             limit: LIMIT,
-            ordering: "-created_date",
             offset: String(pageParam),
             status: status.join(","),
           },

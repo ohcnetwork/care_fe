@@ -34,10 +34,7 @@ export default function EditServiceHistorySheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent
-        className="w-full sm:max-w-2xl overflow-y-auto"
-        data-cy="edit-service-form"
-      >
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("service_record_edit")}</SheetTitle>
           <SheetDescription>{t("service_record_description")}</SheetDescription>

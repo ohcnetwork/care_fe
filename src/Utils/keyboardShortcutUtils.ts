@@ -47,6 +47,9 @@ export function formatKeyboardShortcut(key: string): string {
     // Single key (a -> A)
     if (key === "arrowDown") {
       return "↓";
+    }
+    if (key === "escape") {
+      return "ESC";
     } else if (key === "arrowLeft") {
       return "←";
     }

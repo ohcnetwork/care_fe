@@ -100,7 +100,6 @@ export const DischargeTab = ({
         ...(qParams.is_archived !== undefined && {
           is_archived: qParams.is_archived,
         }),
-        ordering: "-modified_date",
       },
     }),
   });
@@ -592,7 +591,6 @@ export const DischargeTab = ({
             value={qParams.name || ""}
             onChange={(e) => updateQuery({ name: e.target.value })}
             className="pl-10"
-            data-cy="search-input"
           />
         </div>
 

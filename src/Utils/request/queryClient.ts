@@ -19,16 +19,7 @@ declare module "@tanstack/react-query" {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: (failureCount, error) => {
-        // Only retry network errors or server errors (502, 503, 504) up to 3 times
-        if (
-          error.message === "Network Error" ||
-          (error instanceof HTTPError && [502, 503, 504].includes(error.status))
-        ) {
-          return failureCount < 3;
-        }
-        return false;
-      },
+      retry: false,
       refetchOnWindowFocus: false,
     },
   },

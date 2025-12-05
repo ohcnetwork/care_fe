@@ -11,6 +11,10 @@ export default {
     path: "/api/v1/product_knowledge/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ProductKnowledgeBase>>(),
+    defaultQueryParams: {
+      ordering: "-created_date",
+      include_instance: true,
+    },
   },
   retrieveProductKnowledge: {
     path: "/api/v1/product_knowledge/{slug}/",

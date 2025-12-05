@@ -50,6 +50,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -102,6 +103,7 @@ import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 
+import { generateSlug } from "@/Utils/utils";
 import { CodingEditor } from "./CodingEditor";
 import { QuestionActions } from "./QuestionActions";
 import { QuestionnaireForm } from "./QuestionnaireForm";
@@ -608,10 +610,23 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     field: keyof QuestionnaireDetail,
     value: QuestionnaireDetail[keyof QuestionnaireDetail],
   ) => {
-    form.setValue(field as "title" | "description" | "slug", value, {
+    let finalValue = value;
+    if (field === "slug" && typeof value === "string") {
+      finalValue = value.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+    }
+
+    form.setValue(field as "title" | "description" | "slug", finalValue, {
       shouldValidate: true,
       shouldDirty: true,
     });
+
+    if (field === "title") {
+      const next = generateSlug((value as string) || "", 25);
+      form.setValue("slug", next, {
+        shouldValidate: true,
+        shouldDirty: false,
+      });
+    }
   };
 
   const updateQuestions = (newQuestions: Question[]) => {
@@ -736,6 +751,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     if (id) {
       updateQuestionnaire({
         ...form.getValues(),
+        version: String(questionnaire.version), //TODO: remove when backend is fixed
         questions: rootQuestions,
       });
     } else {
@@ -904,16 +920,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             variant="outline"
             onClick={handleCancel}
             disabled={isCreating || isUpdating}
-            data-cy="cancel-questionnaire-form"
           >
             {t("cancel")}
           </Button>
           {id && (
-            <Button
-              variant="outline"
-              onClick={handleDownload}
-              data-cy="download-questionnaire-form"
-            >
+            <Button variant="outline" onClick={handleDownload}>
               <CareIcon icon="l-import" className="mr-1 size-4" />
               {t("download")}
             </Button>
@@ -942,7 +953,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             type="submit"
             onClick={handleSave}
             disabled={!isDirty || isCreating || isUpdating}
-            data-cy="save-questionnaire-form"
           >
             <CareIcon icon="l-save" className="mr-2 size-4" />
             {id ? t("save") : t("create")}
@@ -1106,7 +1116,12 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                           name="slug"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>{t("slug")}</FormLabel>
+                              <FormLabel>
+                                {t("slug")}{" "}
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {t("unique_url_for_questionnaire")}
+                                </p>
+                              </FormLabel>
                               <FormControl>
                                 <Input
                                   placeholder="unique-identifier-for-questionnaire"
@@ -1120,9 +1135,10 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                                 />
                               </FormControl>
                               <FormMessage />
-                              <p className="text-sm text-gray-500 mt-1">
-                                {t("unique_url_for_questionnaire")}
-                              </p>
+
+                              <FormDescription>
+                                {t("slug_format_message")}
+                              </FormDescription>
                             </FormItem>
                           )}
                         />
@@ -1334,7 +1350,6 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 patientId="preview"
                 subjectType={form.watch("subject_type")}
                 encounterId="preview"
-                facilityId="preview"
               />
             </CardContent>
           </Card>
@@ -2690,7 +2705,7 @@ function QuestionEditor({
                                 value={
                                   annotatedAnswerOptions.find(
                                     (o) => o.initial_selected,
-                                  )?.value || ""
+                                  )?.value
                                 }
                                 onValueChange={(selectedValue) => {
                                   const newOptions = annotatedAnswerOptions.map(
@@ -2710,7 +2725,7 @@ function QuestionEditor({
                                   >
                                     <div
                                       className={cn(
-                                        "grid grid-cols-12 items-center gap-3 rounded-md p-3 mb-2",
+                                        "grid grid-cols-12 items-center gap-3 rounded-md p-3",
                                         opt.initial_selected && "bg-gray-100",
                                       )}
                                     >
@@ -2719,6 +2734,10 @@ function QuestionEditor({
                                           value={opt.value}
                                           id={`default-choice-${question.id}-${idx}`}
                                           className="mt-1"
+                                          disabled={
+                                            !opt.value ||
+                                            opt.value.trim() === ""
+                                          }
                                         />
                                       </div>
                                       <OptionFields
@@ -2736,24 +2755,24 @@ function QuestionEditor({
                             )}
                           </div>
                         </div>
-
-                        <Button
-                          variant="outline"
-                          type="button"
-                          size="sm"
-                          onClick={() => {
-                            const newOption = { value: "" };
-                            const newOptions = annotatedAnswerOptions
-                              ? [...annotatedAnswerOptions, newOption]
-                              : [newOption];
-                            updateField("answer_option", newOptions);
-                          }}
-                        >
-                          <CareIcon icon="l-plus" className="size-4" />
-                          {t("add_option")}
-                        </Button>
                       </>
                     )}
+
+                    <Button
+                      variant="outline"
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        const newOption = { value: "" };
+                        const newOptions = annotatedAnswerOptions
+                          ? [...annotatedAnswerOptions, newOption]
+                          : [newOption];
+                        updateField("answer_option", newOptions);
+                      }}
+                    >
+                      <CareIcon icon="l-plus" className="size-4" />
+                      {t("add_option")}
+                    </Button>
                   </CardContent>
                 ) : (
                   <CardContent className="space-y-4">

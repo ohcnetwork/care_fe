@@ -85,7 +85,7 @@ export default function CreateScheduleTemplateSheet({
 
   const formSchema = z
     .object({
-      name: z.string().min(1, t("field_required")),
+      name: z.string().trim().min(1, t("field_required")),
       valid_from: z
         .date({ required_error: t("field_required") })
         .min(dayjs().startOf("day").toDate(), {
@@ -103,35 +103,50 @@ export default function CreateScheduleTemplateSheet({
               // Schema for appointment type
               z.object({
                 slot_type: z.literal("appointment"),
-                name: z.string().min(1, t("field_required")),
+                name: z.string().trim().min(1, t("field_required")),
                 reason: z.string().trim(),
-                start_time: z.string().min(1, t("field_required")) as z.ZodType<
-                  Time | undefined
-                >,
-                end_time: z.string().min(1, t("field_required")) as z.ZodType<
-                  Time | undefined
-                >,
+                start_time: z
+                  .string({ required_error: t("field_required") })
+                  .min(1, t("field_required")) as z.ZodType<Time | undefined>,
+                end_time: z
+                  .string({ required_error: t("field_required") })
+                  .min(1, t("field_required")) as z.ZodType<Time | undefined>,
                 slot_size_in_minutes: z
-                  .number()
-                  .min(1, t("number_min_error", { min: 0 })),
+                  .union([
+                    z.number().min(1, t("number_min_error", { min: 1 })),
+                    z.undefined(),
+                  ])
+                  .refine((val) => val !== undefined, {
+                    message: t("field_required"),
+                  }),
                 tokens_per_slot: z
-                  .number()
-                  .min(1, t("number_min_error", { min: 0 })),
+                  .union([
+                    z.number().min(1, t("number_min_error", { min: 1 })),
+                    z.undefined(),
+                  ])
+                  .refine((val) => val !== undefined, {
+                    message: t("field_required"),
+                  }),
                 is_auto_fill: z.boolean().optional(),
                 num_of_slots: z
-                  .number()
-                  .min(1, t("number_min_error", { min: 0 })),
+                  .union([
+                    z.number().min(1, t("number_min_error", { min: 1 })),
+                    z.undefined(),
+                  ])
+                  .refine((val) => val !== undefined, {
+                    message: t("field_required"),
+                  }),
               }),
               // Schema for open and closed types
               z.object({
                 slot_type: z.enum(["open", "closed"]),
-                name: z.string().min(1, t("field_required")),
+                name: z.string().trim().min(1, t("field_required")),
                 reason: z.string().trim(),
                 start_time: z
-                  .string()
+                  .string({ required_error: t("field_required") })
                   .min(1, t("field_required")) as unknown as z.ZodType<Time>,
                 end_time: z
-                  .string()
+                  .string({ required_error: t("field_required") })
                   .min(1, t("field_required")) as unknown as z.ZodType<Time>,
                 slot_size_in_minutes: z.literal(null),
                 tokens_per_slot: z.literal(null),
@@ -170,12 +185,12 @@ export default function CreateScheduleTemplateSheet({
       availabilities: [
         {
           name: "",
-          slot_type: "appointment",
+          slot_type: "appointment" as const,
           reason: "",
           start_time: undefined,
           end_time: undefined,
-          tokens_per_slot: null as unknown as undefined,
-          slot_size_in_minutes: null as unknown as undefined,
+          tokens_per_slot: undefined,
+          slot_size_in_minutes: undefined,
           is_auto_fill: false,
           num_of_slots: 1,
         },
@@ -577,8 +592,12 @@ export default function CreateScheduleTemplateSheet({
                                             {...field}
                                             className="shadow-none"
                                             onChange={(e) => {
+                                              const value =
+                                                e.target.valueAsNumber;
                                               field.onChange(
-                                                e.target.valueAsNumber,
+                                                isNaN(value)
+                                                  ? undefined
+                                                  : value,
                                               );
                                               updateSlotDuration(index);
                                             }}
@@ -608,12 +627,15 @@ export default function CreateScheduleTemplateSheet({
                                       type="number"
                                       inputMode="numeric"
                                       pattern="[0-9]*"
-                                      min={0}
+                                      min={1}
                                       placeholder="e.g. 10"
                                       {...field}
                                       value={field.value ?? ""}
                                       onChange={(e) => {
-                                        field.onChange(e.target.valueAsNumber);
+                                        const value = e.target.valueAsNumber;
+                                        field.onChange(
+                                          isNaN(value) ? undefined : value,
+                                        );
                                       }}
                                       disabled={form.watch(
                                         `availabilities.${index}.is_auto_fill`,
@@ -641,13 +663,16 @@ export default function CreateScheduleTemplateSheet({
                                       type="number"
                                       inputMode="numeric"
                                       pattern="[0-9]*"
-                                      min={0}
+                                      min={1}
                                       placeholder="e.g. 1"
                                       {...field}
                                       value={field.value ?? ""}
-                                      onChange={(e) =>
-                                        field.onChange(e.target.valueAsNumber)
-                                      }
+                                      onChange={(e) => {
+                                        const value = e.target.valueAsNumber;
+                                        field.onChange(
+                                          isNaN(value) ? undefined : value,
+                                        );
+                                      }}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -699,12 +724,12 @@ export default function CreateScheduleTemplateSheet({
                     ...availabilities,
                     {
                       name: "",
-                      slot_type: "appointment",
+                      slot_type: "appointment" as const,
                       reason: "",
                       start_time: undefined,
                       end_time: undefined,
-                      tokens_per_slot: null as unknown as number,
-                      slot_size_in_minutes: null as unknown as number,
+                      tokens_per_slot: undefined,
+                      slot_size_in_minutes: undefined,
                       is_auto_fill: false,
                       num_of_slots: 1,
                     },

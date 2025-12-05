@@ -12,6 +12,9 @@ export default {
     path: "/api/v1/observation_definition/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ObservationDefinitionReadSpec>>(),
+    defaultQueryParams: {
+      ordering: "-created_date",
+    },
   },
   retrieveObservationDefinition: {
     path: "/api/v1/observation_definition/{observationSlug}/",

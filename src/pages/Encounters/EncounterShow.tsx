@@ -1,26 +1,30 @@
-import { navigate } from "raviger";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
-
-import { NavTabs } from "@/components/ui/nav-tabs";
-
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
-import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
-
-import useAppHistory from "@/hooks/useAppHistory";
-import useBreakpoints from "@/hooks/useBreakpoints";
-import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
+import {
+  PatientDeceasedInfo,
+  PatientHeader,
+} from "@/components/Patient/PatientHeader";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   useEncounterShortcutDisplays,
   useEncounterShortcuts,
 } from "@/hooks/useEncounterShortcuts";
-import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
+import { format } from "date-fns";
+import { useEffect, useState } from "react";
 
 import { getPermissions } from "@/common/Permissions";
-
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
+import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { Badge } from "@/components/ui/badge";
+import { CommandShortcut } from "@/components/ui/command";
+import { NavTabs } from "@/components/ui/nav-tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { usePermissions } from "@/context/PermissionContext";
+import useAppHistory from "@/hooks/useAppHistory";
+import useBreakpoints from "@/hooks/useBreakpoints";
+import { useCareAppEncounterTabs } from "@/hooks/useCareApps";
+import { useSidebarAutoCollapse } from "@/hooks/useSidebarAutoCollapse";
+import { cn } from "@/lib/utils";
 import EncounterHistorySelector from "@/pages/Encounters/EncounterHistorySelector";
 import { EncounterConsentsTab } from "@/pages/Encounters/tabs/consents";
 import { EncounterDevicesTab } from "@/pages/Encounters/tabs/devices";
@@ -31,17 +35,17 @@ import { EncounterOverviewTab } from "@/pages/Encounters/tabs/overview";
 import { EncounterPlotsTab } from "@/pages/Encounters/tabs/plots";
 import { EncounterResponsesTab } from "@/pages/Encounters/tabs/responses";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { PLUGIN_Component } from "@/PluginEngine";
+import {
+  ENCOUNTER_STATUS_COLORS,
+  EncounterRead,
+  EncounterStatus,
+} from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
-
-import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
-import {
-  PatientDeceasedInfo,
-  PatientHeader,
-} from "@/components/Patient/PatientHeader";
-import { Button } from "@/components/ui/button";
-import { CommandShortcut } from "@/components/ui/command";
+import { navigate } from "raviger";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { AppointmentEncounterHeader } from "./AppointmentEncounterHeader";
 import { EncounterDiagnosticReportsTab } from "./tabs/diagnostic-reports";
 import { EncounterNotesTab } from "./tabs/notes";
@@ -61,6 +65,7 @@ export const EncounterShow = (props: Props) => {
     facilityId,
     primaryEncounter,
     selectedEncounter,
+    isSelectedEncounterLoading,
     primaryEncounterId,
     selectedEncounterId,
     isPrimaryEncounterLoading,
@@ -98,6 +103,14 @@ export const EncounterShow = (props: Props) => {
   );
 
   const canAccess = canViewClinicalData || canViewEncounter;
+  const canShowAppointmentEncounterHeader =
+    primaryEncounter?.appointment?.id &&
+    canWritePrimaryEncounter &&
+    [
+      EncounterStatus.PLANNED,
+      EncounterStatus.IN_PROGRESS,
+      EncounterStatus.ON_HOLD,
+    ].includes(primaryEncounter.status);
 
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
@@ -193,10 +206,16 @@ export const EncounterShow = (props: Props) => {
       title={t("encounter")}
       className="block md:px-1 -mt-4"
       hideTitleOnPage
+      style={
+        {
+          "--encounter-header-offset": canShowAppointmentEncounterHeader
+            ? "3rem"
+            : "0rem",
+        } as React.CSSProperties
+      }
     >
-      {primaryEncounter &&
-        primaryEncounter.appointment?.id &&
-        canWritePrimaryEncounter && (
+      {primaryEncounter?.appointment?.id &&
+        canShowAppointmentEncounterHeader && (
           <div className="flex items-center justify-center -mt-2 mb-2">
             <AppointmentEncounterHeader
               appointment={primaryEncounter.appointment}
@@ -212,25 +231,36 @@ export const EncounterShow = (props: Props) => {
           className="bg-white shadow-sm border-none rounded-sm"
           actions={
             <>
-              {canWriteSelectedEncounter && selectedEncounter && (
-                <div className="flex flex-col items-end justify-center gap-4">
-                  <EncounterCommandDialog
+              {selectedEncounter && (
+                <div className="flex max-md:flex-col items-end justify-center gap-4">
+                  <PLUGIN_Component
+                    __name="PatientInfoCardQuickActions"
                     encounter={selectedEncounter}
-                    open={actionsOpen}
-                    onOpenChange={setActionsOpen}
-                    trigger={
-                      <Button
-                        variant="primary_gradient"
-                        onClick={() => setActionsOpen(true)}
-                        className="text-base font-semibold rounded-md w-full"
-                      >
-                        {t("encounter_actions")}
-                        <CommandShortcut className="text-white hidden md:inline">
-                          {getShortcutDisplay("open-command-dialog")}
-                        </CommandShortcut>
-                      </Button>
-                    }
+                    className={cn(
+                      buttonVariants({ variant: "primary_gradient" }),
+                      "text-base font-semibold rounded-md w-full",
+                    )}
                   />
+
+                  {canWriteSelectedEncounter && (
+                    <EncounterCommandDialog
+                      encounter={selectedEncounter}
+                      open={actionsOpen}
+                      onOpenChange={setActionsOpen}
+                      trigger={
+                        <Button
+                          variant="primary_gradient"
+                          onClick={() => setActionsOpen(true)}
+                          className="text-base font-semibold rounded-md w-full"
+                        >
+                          {t("encounter_actions")}
+                          <CommandShortcut className="text-white hidden md:inline">
+                            {getShortcutDisplay("open-command-dialog")}
+                          </CommandShortcut>
+                        </Button>
+                      }
+                    />
+                  )}
                 </div>
               )}
             </>
@@ -240,22 +270,79 @@ export const EncounterShow = (props: Props) => {
       </div>
       <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
         <EncounterHistorySelector />
-        <NavTabs
-          showMoreAfterIndex={showMoreAfterIndex}
-          className="@container w-full"
-          tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-12rem)]"
-          tabs={tabs}
-          currentTab={props.tab}
-          tabTriggerClassName="max-w-36"
-          onTabChange={(tab) =>
-            navigate(tab, {
-              query:
-                primaryEncounterId !== selectedEncounterId
-                  ? { selectedEncounter: selectedEncounterId }
-                  : undefined,
-            })
-          }
-        />
+        <div className="w-full">
+          <div className="hidden lg:block">
+            {isSelectedEncounterLoading ? (
+              <Skeleton className="h-10 w-md" />
+            ) : (
+              selectedEncounter && (
+                <div className="flex gap-2 items-center">
+                  <h4 className="font-bold">
+                    {t(
+                      `encounter_class__${selectedEncounter?.encounter_class}`,
+                    )}
+                  </h4>
+                  <div className="text-sm text-gray-700 space-x-2">
+                    <span className="">{selectedEncounter?.facility.name}</span>
+
+                    <span>|</span>
+
+                    <span className="whitespace-nowrap">
+                      {selectedEncounter.period.start && (
+                        <span>
+                          {format(
+                            new Date(selectedEncounter.period.start!),
+                            "dd MMM",
+                          )}
+                        </span>
+                      )}
+                      {selectedEncounter.period.end &&
+                        selectedEncounter.period.start && <span>{" - "}</span>}
+                      {selectedEncounter.period.end ? (
+                        <span>
+                          {format(
+                            new Date(selectedEncounter.period.end),
+                            "dd MMM",
+                          )}
+                        </span>
+                      ) : (
+                        <span>
+                          {" - "}
+                          {t("ongoing")}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+
+                  <Badge
+                    variant={ENCOUNTER_STATUS_COLORS[selectedEncounter.status]}
+                    size="sm"
+                    className="whitespace-nowrap"
+                  >
+                    {t(`encounter_status__${selectedEncounter.status}`)}
+                  </Badge>
+                </div>
+              )
+            )}
+          </div>
+
+          <NavTabs
+            showMoreAfterIndex={showMoreAfterIndex}
+            className="@container w-full"
+            tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-14rem-var(--encounter-header-offset))]"
+            tabs={tabs}
+            currentTab={props.tab}
+            tabTriggerClassName="max-w-36"
+            onTabChange={(tab) =>
+              navigate(tab, {
+                query:
+                  primaryEncounterId !== selectedEncounterId
+                    ? { selectedEncounter: selectedEncounterId }
+                    : undefined,
+              })
+            }
+          />
+        </div>
       </div>
     </Page>
   );

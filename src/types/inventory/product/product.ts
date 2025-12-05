@@ -36,5 +36,5 @@ export interface ProductUpdate extends ProductBase {
 
 export interface ProductRead extends ProductBase {
   product_knowledge: ProductKnowledgeBase;
-  charge_item_definition: ChargeItemDefinitionBase;
+  charge_item_definition?: ChargeItemDefinitionBase;
 }

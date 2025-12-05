@@ -1,11 +1,13 @@
 import { Avatar } from "@/components/Common/Avatar";
 import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import { formatPatientAddress } from "@/components/Patient/utils";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PatientRead } from "@/types/emr/patient/patient";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { formatPatientAge } from "@/Utils/utils";
 import { Phone } from "lucide-react";
-import { Link } from "raviger";
+import { Link, usePath } from "raviger";
 import { useTranslation } from "react-i18next";
 
 export const PatientInfoHoverCard = ({
@@ -16,6 +18,11 @@ export const PatientInfoHoverCard = ({
   facilityId: string;
 }) => {
   const { t } = useTranslation();
+
+  const path = usePath();
+  const isPatientHomePage = path?.endsWith(
+    `/facility/${facilityId}/patients/verify`,
+  );
 
   return (
     <>
@@ -34,20 +41,23 @@ export const PatientInfoHoverCard = ({
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="outline" className="text-gray-950" asChild>
-          <Link
-            basePath="/"
-            href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
-              {
-                phone_number: patient.phone_number,
-                year_of_birth: patient.year_of_birth.toString(),
-                partial_id: patient.id.slice(0, 5),
-              },
-            ).toString()}`}
-          >
-            {t("patient_home")}
-          </Link>
-        </Button>
+        {!isPatientHomePage && facilityId && (
+          <Button variant="outline" className="text-gray-950" asChild>
+            <Link
+              basePath="/"
+              href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                {
+                  phone_number: patient.phone_number,
+                  year_of_birth: patient.year_of_birth.toString(),
+                  partial_id: patient.id.slice(0, 5),
+                },
+              ).toString()}`}
+            >
+              {t("patient_home")}
+            </Link>
+          </Button>
+        )}
+
         <Button variant="outline" className="text-gray-950" asChild>
           <Link
             basePath="/"
@@ -61,19 +71,21 @@ export const PatientInfoHoverCard = ({
           </Link>
         </Button>
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3 border-t border-gray-200 pt-4">
-          {patient.instance_identifiers?.map((identifier) => (
-            <div
-              key={identifier.config.id}
-              className="flex flex-col gap-0.5 text-sm"
-            >
-              <span className="font-medium text-gray-700">
-                {identifier.config.config.display}:{" "}
-              </span>
-              <span className="font-semibold">{identifier.value}</span>
-            </div>
-          ))}
+          {patient.instance_identifiers
+            ?.filter(({ config }) => !config.config.auto_maintained)
+            .map((identifier) => (
+              <div
+                key={identifier.config.id}
+                className="flex flex-col gap-0.5 text-sm"
+              >
+                <span className="font-medium text-gray-700">
+                  {identifier.config.config.display}:{" "}
+                </span>
+                <span className="font-semibold">{identifier.value}</span>
+              </div>
+            ))}
           {patient.phone_number && (
             <div className="flex flex-col gap-1 text-sm font-medium">
               <span className="text-gray-700">{t("contact")}</span>
@@ -118,6 +130,27 @@ export const PatientInfoHoverCard = ({
             </div>
           </div>
         </div>
+        {patient.instance_tags.length > 0 && (
+          <div className="flex items-start border-t border-gray-200 pt-2">
+            <div className="flex flex-col gap-1 text-sm font-medium w-full">
+              <span className="text-gray-700">{t("patient_tags")}:</span>
+              <div className="flex flex-wrap gap-2 text-sm whitespace-nowrap">
+                <>
+                  {patient.instance_tags.map((tag) => (
+                    <Badge
+                      key={tag.id}
+                      variant="secondary"
+                      className="capitalize"
+                      title={tag.description}
+                    >
+                      {getTagHierarchyDisplay(tag)}
+                    </Badge>
+                  ))}
+                </>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

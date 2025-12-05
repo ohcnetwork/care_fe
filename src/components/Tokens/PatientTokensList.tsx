@@ -100,7 +100,7 @@ export default function PatientTokensList({
             className="border-gray-300"
             dateFormat={
               selectedDate.toDateString() === new Date().toDateString()
-                ? `'Today (${selectedDate.toLocaleDateString("en-GB", {
+                ? `'Today (${selectedDate.toLocaleDateString("default", {
                     day: "2-digit",
                     month: "short",
                     year: "numeric",

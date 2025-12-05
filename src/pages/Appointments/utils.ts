@@ -12,8 +12,8 @@ import {
 import query from "@/Utils/request/query";
 import { dateQueryString, getMonthStartAndEnd } from "@/Utils/utils";
 import {
-  Appointment,
   AvailabilityHeatmapResponse,
+  PublicAppointment,
   SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -26,7 +26,12 @@ export const groupSlotsByAvailability = (slots: TokenSlot[]) => {
   }[] = [];
 
   for (const slot of slots) {
+    // skip past slots
     if (isPast(slot.end_datetime)) {
+      continue;
+    }
+    // skip fully allocated slots
+    if (slot.allocated === slot.availability.tokens_per_slot) {
       continue;
     }
     const availability = slot.availability;
@@ -85,6 +90,7 @@ export const useAvailabilityHeatmap = ({
       from_date: fromDate,
       to_date: toDate,
     },
+    silent: true,
   });
 
   if (careConfig.appointments.useAvailabilityStatsAPI === false) {
@@ -116,7 +122,7 @@ const getInfiniteAvailabilityHeatmap = ({
   return result;
 };
 
-export const formatAppointmentSlotTime = (appointment: Appointment) => {
+export const formatAppointmentSlotTime = (appointment: PublicAppointment) => {
   if (!appointment.token_slot?.start_datetime) {
     return "";
   }

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -75,14 +76,10 @@ function PatientIdentifierConfigCard({
               </p>
             )}
           </div>
-          {config.config.auto_maintained ? (
-            <Badge>{t("auto_maintained")}</Badge>
-          ) : (
-            <Button variant="outline" size="sm" onClick={() => onEdit(config)}>
-              <CareIcon icon="l-edit" className="size-4" />
-              {t("edit")}
-            </Button>
-          )}
+          <Button variant="outline" size="sm" onClick={() => onEdit(config)}>
+            <CareIcon icon="l-edit" className="size-4" />
+            {t("edit")}
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -98,6 +95,9 @@ export default function PatientIdentifierConfigList({
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: PatientIdentifierConfigStatus.active,
+    },
   });
 
   const [selectedConfig, setSelectedConfig] = React.useState<
@@ -115,7 +115,6 @@ export default function PatientIdentifierConfigList({
           offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
           display: qParams.display,
           status: qParams.status,
-          ordering: "-created_date",
         },
       },
     ),
@@ -191,6 +190,11 @@ export default function PatientIdentifierConfigList({
                       ? t("edit_patient_identifier_config")
                       : t("add_patient_identifier_config")}
                   </SheetTitle>
+                  <SheetDescription>
+                    {selectedConfig && "id" in selectedConfig
+                      ? t("manage_patient_identifier_config")
+                      : t("manage_instance_patient_identifier_config")}
+                  </SheetDescription>
                 </SheetHeader>
                 <div className="mt-6 pb-6">
                   <PatientIdentifierConfigForm
@@ -299,18 +303,14 @@ export default function PatientIdentifierConfigList({
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {config.config.auto_maintained ? (
-                            <Badge>{t("auto_maintained")}</Badge>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEdit(config)}
-                            >
-                              <CareIcon icon="l-edit" className="size-4" />
-                              {t("edit")}
-                            </Button>
-                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(config)}
+                          >
+                            <CareIcon icon="l-edit" className="size-4" />
+                            {t("edit")}
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}

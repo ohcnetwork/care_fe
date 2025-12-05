@@ -3,9 +3,18 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
+
+import mutate from "@/Utils/request/mutate";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   Sheet,
   SheetContent,
@@ -15,8 +24,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-
-import mutate from "@/Utils/request/mutate";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { DeviceSearch } from "@/pages/Facility/settings/devices/components/DeviceSelector";
 import { DeviceList } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
@@ -34,6 +42,7 @@ export default function AssociateDeviceSheet({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   const [selectedDevice, setSelectedDevice] = useState<DeviceList | null>(null);
   const [open, setOpen] = useState(false);
@@ -56,7 +65,46 @@ export default function AssociateDeviceSheet({
     associateDevice({ encounter: encounterId });
   };
 
-  return (
+  const deviceSearch = (
+    <DeviceSearch
+      facilityId={facilityId}
+      onSelect={setSelectedDevice}
+      value={selectedDevice}
+    />
+  );
+
+  const footerButton = (
+    <Button
+      onClick={handleSubmit}
+      disabled={!selectedDevice || isAssociatingDevice}
+    >
+      {isAssociatingDevice ? t("associating") : t("associate")}
+    </Button>
+  );
+
+  return isMobile ? (
+    <Drawer
+      open={open}
+      onOpenChange={(open) => {
+        setOpen(open);
+        setSelectedDevice(null);
+      }}
+    >
+      <DrawerTrigger asChild>{children}</DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle className="font-semibold text-xl">
+            {t("associate_device")}
+          </DrawerTitle>
+          <DrawerDescription>
+            {t("associate_device_description")}
+          </DrawerDescription>
+        </DrawerHeader>
+        <div className="px-4 py-6">{deviceSearch}</div>
+        <DrawerFooter>{footerButton}</DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  ) : (
     <Sheet
       open={open}
       onOpenChange={(open) => {
@@ -72,22 +120,8 @@ export default function AssociateDeviceSheet({
             {t("associate_device_description")}
           </SheetDescription>
         </SheetHeader>
-        <div className="py-6">
-          <DeviceSearch
-            facilityId={facilityId}
-            onSelect={setSelectedDevice}
-            value={selectedDevice}
-          />
-        </div>
-        <SheetFooter>
-          <Button
-            onClick={handleSubmit}
-            disabled={!selectedDevice || isAssociatingDevice}
-          >
-            <CareIcon icon="l-link-add" className="h-4" />
-            {isAssociatingDevice ? t("associating") : t("associate")}
-          </Button>
-        </SheetFooter>
+        <div className="py-6">{deviceSearch}</div>
+        <SheetFooter>{footerButton}</SheetFooter>
       </SheetContent>
     </Sheet>
   );

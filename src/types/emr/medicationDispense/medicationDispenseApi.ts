@@ -19,6 +19,9 @@ export default {
     path: "/api/v1/medication/dispense/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<MedicationDispenseRead>>(),
+    defaultQueryParams: {
+      ordering: "-created_date",
+    },
   },
   upsert: {
     path: "/api/v1/medication/dispense/upsert/",

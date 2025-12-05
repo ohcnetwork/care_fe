@@ -25,7 +25,7 @@ import { CardListWithHeaderSkeleton } from "@/components/Common/SkeletonLoading"
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { Code } from "@/types/base/code/code";
-import { getConditionOperationSummary } from "@/types/base/condition/condition";
+import { ConditionOperationSummary } from "@/types/base/condition/condition";
 import {
   getRangeSummary,
   getValuesetSummary,
@@ -76,7 +76,7 @@ function ObservationInterpretationDisplay({
           key={`condition-${conditionIndex}`}
           className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded"
         >
-          {getConditionOperationSummary(condition, t(condition.metric))}
+          <ConditionOperationSummary condition={condition} />
         </span>
       ));
 
@@ -217,6 +217,8 @@ export default function ObservationDefinitionView({
       ...definition,
       component: definition.component || [],
       status: "retired",
+      slug_value: definition.slug_config.slug_value,
+      facility: facilityId,
     });
   };
 

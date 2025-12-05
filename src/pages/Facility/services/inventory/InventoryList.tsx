@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { ArrowDownUp } from "lucide-react";
 import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,13 +10,6 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
@@ -31,20 +25,26 @@ import {
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { FilterSelect } from "@/components/ui/filter-select";
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
+import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
-import {
-  InventoryStatus,
-  InventoryStatusOptions,
-} from "@/types/inventory/product/inventory";
+import { InventoryStatusOptions } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { ProductKnowledgeSelect } from "./ProductKnowledgeSelect";
+
+const SORT_OPTIONS = {
+  low_to_high: "net_content",
+  high_to_low: "-net_content",
+} as const;
+
+type SortOptionKey = keyof typeof SORT_OPTIONS;
 
 interface InventoryListProps {
   facilityId: string;
   locationId: string;
 }
-
 export function InventoryList({ facilityId, locationId }: InventoryListProps) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
@@ -74,6 +74,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         product_knowledge: qParams.product_knowledge_id,
+        ordering: qParams.ordering,
       },
     }),
   });
@@ -82,43 +83,56 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
     <Page
       title={t("inventory")}
       options={
-        <div className="flex items-center gap-3">
-          {/* Product Knowledge Selector */}
-          <div className="w-64">
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-2">
+          <div className="w-full sm:w-auto">
             <ProductKnowledgeSelect
               value={selectedProductKnowledge}
-              onChange={(productKnowledge: ProductKnowledgeBase) => {
+              onChange={(
+                productKnowledge: ProductKnowledgeBase | undefined,
+              ) => {
                 setSelectedProductKnowledge(productKnowledge);
                 updateQuery({
                   product_knowledge_id: productKnowledge?.id || undefined,
                 });
               }}
               placeholder={t("search_product_knowledge")}
+              disableFavorites
             />
           </div>
 
-          {/* Status Filter */}
-          <Select
-            value={qParams.status ? qParams.status : "all"}
-            onValueChange={(value: InventoryStatus | "all") =>
-              updateQuery({ status: value === "all" ? undefined : value })
-            }
-          >
-            <SelectTrigger className="max-w-42">
-              <div className="flex items-center gap-2">
-                <CareIcon icon="l-filter" className="size-4" />
-                <SelectValue placeholder={t("status")} />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("all_statuses")}</SelectItem>
-              {InventoryStatusOptions.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {t(status)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="w-full sm:w-auto">
+            <FilterSelect
+              value={qParams.status || ""}
+              onValueChange={(value) => updateQuery({ status: value })}
+              options={Object.values(InventoryStatusOptions)}
+              label="status"
+              onClear={() => updateQuery({ status: undefined })}
+              className="w-full sm:w-auto h-9 border-gray-300"
+              placeholder="filter_by_status"
+            />
+          </div>
+          <div className="w-full sm:w-auto">
+            <FilterSelect
+              icon={<ArrowDownUp className="size-4" />}
+              value={
+                (Object.keys(SORT_OPTIONS) as Array<SortOptionKey>).find(
+                  (key) => SORT_OPTIONS[key] === qParams.ordering,
+                ) || ""
+              }
+              onValueChange={(value) =>
+                updateQuery({
+                  ordering: value
+                    ? SORT_OPTIONS[value as SortOptionKey]
+                    : undefined,
+                })
+              }
+              options={Object.keys(SORT_OPTIONS)}
+              label={t("net_content")}
+              onClear={() => updateQuery({ ordering: undefined })}
+              className="w-full sm:w-auto h-9 border-gray-300"
+              placeholder={t("sort_by_net_content")}
+            />
+          </div>
         </div>
       }
     >
@@ -142,6 +156,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                 <TableHead>{t("status")}</TableHead>
                 <TableHead>{t("expiration_date")}</TableHead>
                 <TableHead>{t("batch")}</TableHead>
+                <TableHead>{t("base_price")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -149,7 +164,7 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                 <TableRow key={inventory.id}>
                   <TableCell className="font-semibold">
                     <Link
-                      href={`/facility/${facilityId}/settings/product_knowledge/${inventory.product.product_knowledge.slug}`}
+                      href={`/facility/${facilityId}/settings/product/${inventory.product.id}`}
                       basePath="/"
                       className="flex items-center gap-2"
                     >
@@ -182,6 +197,19 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
                   </TableCell>
                   <TableCell>
                     {inventory.product.batch?.lot_number || "-"}
+                  </TableCell>
+                  <TableCell>
+                    {inventory.product.charge_item_definition && (
+                      <MonetaryDisplay
+                        amount={
+                          inventory.product.charge_item_definition.price_components.find(
+                            (c) =>
+                              c.monetary_component_type ===
+                              MonetaryComponentType.base,
+                          )?.amount
+                        }
+                      />
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

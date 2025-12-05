@@ -21,6 +21,7 @@ export interface FilterSelectProps {
   onClear: () => void;
   icon?: React.ReactNode;
   className?: string;
+  placeholder?: string;
 }
 
 export function FilterSelect({
@@ -31,12 +32,13 @@ export function FilterSelect({
   onClear,
   icon,
   className,
+  placeholder,
 }: FilterSelectProps) {
   const { t } = useTranslation();
   return (
     <div
       className={cn(
-        "flex items-center overflow-hidden rounded-lg border border-gray-400",
+        "flex items-center overflow-hidden rounded-md border border-gray-400",
         className,
       )}
     >
@@ -50,13 +52,13 @@ export function FilterSelect({
             {value ? (
               <>
                 <span className="text-gray-950">{t(label)}</span>
-                <span className="text-gray-600 underline lowercase">
-                  {t("is")}
-                </span>
+                <span className="text-gray-600 lowercase">{t("is")}</span>
                 <span className="text-gray-950 underline">{t(value)}</span>
               </>
             ) : (
-              <span className="text-gray-500">{t(label)}</span>
+              <span className="text-gray-500">
+                {placeholder ? t(placeholder) : t(label)}
+              </span>
             )}
           </div>
         </SelectTrigger>
@@ -73,7 +75,7 @@ export function FilterSelect({
           variant="ghost"
           size="sm"
           onClick={onClear}
-          className="h-8 border-l px-2 hover:bg-transparent w-9 mr-3 pr-px rounded-none text-gray-950 border-gray-400"
+          className="h-8 border-l hover:bg-transparent w-9 rounded-none text-gray-400 border-gray-400"
         >
           <X className="size-4" />
         </Button>

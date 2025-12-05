@@ -23,10 +23,10 @@ import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import CreateQuestionnaireTagSheet from "./CreateQuestionnaireTagSheet";
 import ManageQuestionnaireOrganizationsSheet, {
-  OrgSelectorPopover,
+  OrgSelector,
 } from "./ManageQuestionnaireOrganizationsSheet";
 import ManageQuestionnaireTagsSheet, {
-  QuestionnaireTagSelectorPopover,
+  QuestionnaireTagSelector,
 } from "./ManageQuestionnaireTagsSheet";
 
 interface Organization {
@@ -97,7 +97,6 @@ function StatusSelector({
           >
             <RadioGroupItem value={status} id={`status-${status}`} />
             <Label
-              data-cy={`questionnaire-status-${status}`}
               htmlFor={`status-${status}`}
               className="text-sm mx-1 font-normal text-gray-950"
             >
@@ -188,11 +187,7 @@ function OrganizationSelector({
         <ManageQuestionnaireOrganizationsSheet
           questionnaireId={id}
           trigger={
-            <Button
-              variant="outline"
-              className="w-full justify-start"
-              data-cy="manage-organisation-questionnaire"
-            >
+            <Button variant="outline" className="w-full justify-start">
               <Building className="mr-2 size-4" />
               {t("manage_organization_other")}
             </Button>
@@ -232,7 +227,7 @@ function OrganizationSelector({
       {selection.error && (
         <p className="text-sm text-red-500">{selection.error}</p>
       )}
-      <OrgSelectorPopover
+      <OrgSelector
         title={t("select_organizations")}
         selected={selection.selectedOrgs.map((org) => org.id)}
         onToggle={(value) => {
@@ -317,7 +312,7 @@ function TagSelector({
         )}
       </div>
 
-      <QuestionnaireTagSelectorPopover
+      <QuestionnaireTagSelector
         title={t("select_tags")}
         selected={selection.selectedTags}
         onToggle={selection.onToggle}

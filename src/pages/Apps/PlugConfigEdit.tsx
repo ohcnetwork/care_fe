@@ -12,9 +12,9 @@ import { Textarea } from "@/components/ui/textarea";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 import Loading from "@/components/Common/Loading";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import plugConfigApi from "@/types/plugConfig/plugConfigApi";
 
 interface Props {
   slug: string;
@@ -28,7 +28,7 @@ export function PlugConfigEdit({ slug }: Props) {
 
   const { data: existingConfig, isLoading } = useQuery({
     queryKey: ["plug-config", slug],
-    queryFn: query(routes.plugConfig.getPlugConfig, { pathParams: { slug } }),
+    queryFn: query(plugConfigApi.get, { pathParams: { slug } }),
     enabled: !isNew,
   });
 
@@ -48,16 +48,16 @@ export function PlugConfigEdit({ slug }: Props) {
 
   const { mutate: upsertConfig } = useMutation({
     mutationFn: isNew
-      ? mutate(routes.plugConfig.createPlugConfig)
-      : mutate(routes.plugConfig.updatePlugConfig, { pathParams: { slug } }),
-    onSuccess: () => navigate("/apps"),
+      ? mutate(plugConfigApi.create)
+      : mutate(plugConfigApi.update, { pathParams: { slug } }),
+    onSuccess: () => navigate("/admin/apps"),
   });
 
   const { mutate: deleteConfig } = useMutation({
-    mutationFn: mutate(routes.plugConfig.deletePlugConfig, {
+    mutationFn: mutate(plugConfigApi.delete, {
       pathParams: { slug },
     }),
-    onSuccess: () => navigate("/apps"),
+    onSuccess: () => navigate("/admin/apps"),
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,7 +68,7 @@ export function PlugConfigEdit({ slug }: Props) {
   };
 
   const handleDelete = () => {
-    deleteConfig();
+    deleteConfig(undefined);
   };
 
   if (isLoading) {
@@ -120,7 +120,7 @@ export function PlugConfigEdit({ slug }: Props) {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate("/apps/plug-configs")}
+            onClick={() => navigate("/admin/apps")}
           >
             {t("cancel")}
           </Button>

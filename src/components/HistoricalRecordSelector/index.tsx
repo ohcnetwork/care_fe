@@ -14,6 +14,7 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -50,6 +51,7 @@ interface HistoricalRecordSelectorProps<T extends BaseRecord> {
   onAddSelected: (selected: T[]) => void;
   buttonLabel?: string;
   title?: string;
+  disableAPI?: boolean;
 }
 
 interface DateGroupedRecords<T extends BaseRecord> {
@@ -142,6 +144,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   onAddSelected,
   buttonLabel,
   title,
+  disableAPI = false,
 }: HistoricalRecordSelectorProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeType, setActiveType] = useState<string>(
@@ -179,7 +182,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
         count: response.count,
       };
     },
-    enabled: isOpen,
+    enabled: isOpen && !disableAPI,
     staleTime: 0,
   });
 
@@ -336,11 +339,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          data-cy="view-history"
-          className="border-gray-400 flex ml-auto"
-        >
+        <Button variant="outline" className="border-gray-400 flex ml-auto">
           <Clock className="size-4" />
           <span className="font-semibold">
             {buttonLabel || t("view_history")}
@@ -353,6 +352,9 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
             <SheetTitle className="text-lg font-medium text-center">
               {title || t("history")}
             </SheetTitle>
+            <SheetDescription className="sr-only">
+              {title || t("history")}
+            </SheetDescription>
           </SheetHeader>
           {structuredTypes.length > 1 && (
             <Tabs
@@ -496,7 +498,6 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
               onClick={handleAddSelected}
               disabled={(state.selectedRecords[activeType] || []).length === 0}
               className="bg-emerald-600 hover:bg-emerald-700"
-              data-cy="add-selected-records"
             >
               {t("add_selected")}
             </Button>

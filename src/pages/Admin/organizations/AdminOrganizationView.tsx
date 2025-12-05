@@ -58,9 +58,6 @@ function OrganizationCard({
       });
       toast.success(t("organization_deleted_successfully"));
     },
-    onError: () => {
-      toast.error(t("something_went_wrong"));
-    },
   });
 
   const canDelete = parentId ? true : !org.has_children;
@@ -142,7 +139,7 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
   });
 
   const { data: children, isLoading } = useQuery({
-    queryKey: ["organization", "list", organizationType, id, qParams.search],
+    queryKey: ["organization", "list", organizationType, id, qParams],
     queryFn: query.debounced(organizationApi.list, {
       pathParams: { id: id },
       queryParams: {

@@ -6,7 +6,7 @@ on:
 
 jobs:
   label-type-changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     permissions:
       contents: read
       pull-requests: write

@@ -27,10 +27,13 @@ function Input({
             }
           },
         })}
-      onFocus={(e) => {
+      onClick={(e) => {
         if (type === "date") {
-          e.target.showPicker();
+          e.currentTarget.showPicker();
         }
+        props.onClick?.(e);
+      }}
+      onFocus={(e) => {
         props.onFocus?.(e);
       }}
       onWheel={(e) => {

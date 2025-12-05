@@ -52,31 +52,30 @@ export function LocationNav() {
         },
         {
           name: t("inventory"),
-          url: `${baseUrl}/inventory`,
+          url: `${baseUrl}/inventory/summary`,
           icon: <CareIcon icon="l-shop" />,
           children: [
             {
               name: t("items"),
-              url: `${baseUrl}/inventory`,
+              url: `${baseUrl}/inventory/summary`,
             },
             {
               header: t("internal_transfers"),
               name: t("to_receive"),
-              url: `${baseUrl}/internal_transfers/to_receive`,
+              url: `${baseUrl}/inventory/internal/receive/`,
             },
             {
               name: t("to_dispatch"),
-              url: `${baseUrl}/internal_transfers/to_dispatch`,
+              url: `${baseUrl}/inventory/internal/dispatch/`,
             },
             {
               header: t("external_supply"),
-              // headerIcon: <CareIcon icon="l-box" className="text-gray-400" />,
               name: t("purchase_orders"),
-              url: `${baseUrl}/external_supply/purchase_orders`,
+              url: `${baseUrl}/inventory/external/orders/outgoing`,
             },
             {
-              name: t("inward_entry"),
-              url: `${baseUrl}/external_supply/inward_entry`,
+              name: t("purchase_deliveries"),
+              url: `${baseUrl}/inventory/external/deliveries/incoming`,
             },
           ],
         },

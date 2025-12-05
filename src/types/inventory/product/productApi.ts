@@ -11,6 +11,9 @@ export default {
     path: "/api/v1/facility/{facilityId}/product/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ProductRead>>(),
+    defaultQueryParams: {
+      ordering: "-created_date",
+    },
   },
   retrieveProduct: {
     path: "/api/v1/facility/{facilityId}/product/{productId}/",

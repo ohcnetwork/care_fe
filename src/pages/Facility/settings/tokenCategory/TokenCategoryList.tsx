@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
-import { useEffect } from "react";
+import { Link, navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -25,11 +24,19 @@ import {
   TableSkeleton,
 } from "@/components/Common/SkeletonLoading";
 
+import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
+
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { getPermissions } from "@/common/Permissions";
 import { NavTabs } from "@/components/ui/nav-tabs";
-import { SchedulableResourceType } from "@/types/scheduling/schedule";
+import { usePermissions } from "@/context/PermissionContext";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import {
+  SCHEDULABLE_RESOURCE_TYPE_COLORS,
+  SchedulableResourceType,
+} from "@/types/scheduling/schedule";
 import { TokenCategoryRead } from "@/types/tokens/tokenCategory/tokenCategory";
 import tokenCategoryApi from "@/types/tokens/tokenCategory/tokenCategoryApi";
 
@@ -44,9 +51,9 @@ function TokenCategoryCard({
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="mb-4 flex flex-wrap flex-col md:flex-row items-start justify-between gap-2">
           <div>
-            <h3 className="font-medium text-gray-900">
+            <h3 className="font-medium text-gray-900 text-lg">
               {t("name")}: {tokenCategory.name}
             </h3>
             {tokenCategory.shorthand && (
@@ -55,18 +62,12 @@ function TokenCategoryCard({
               </p>
             )}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/settings/token_category/${tokenCategory.resource_type}/${tokenCategory.id}`,
-              )
-            }
-          >
-            <CareIcon icon="l-edit" className="size-4" />
-            {t("see_details")}
-          </Button>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <TokenCategoryActions
+              tokenCategory={tokenCategory}
+              facilityId={facilityId}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -124,26 +125,27 @@ export default function TokenCategoryList({
   );
 }
 
-const TokenCategoryListContent = ({
+function TokenCategoryListContent({
   facilityId,
   resourceType,
 }: {
   facilityId: string;
   resourceType: SchedulableResourceType;
-}) => {
+}) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: {
+      status: "active",
+    },
   });
-
-  // TODO: Remove this once we have a default status (robo's PR)
-  useEffect(() => {
-    if (!qParams.status) {
-      updateQuery({ status: "active" });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { facility } = useCurrentFacility();
+  const { hasPermission } = usePermissions();
+  const { canWriteTokenCategory } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["tokenCategories", facilityId, resourceType, qParams],
@@ -155,7 +157,7 @@ const TokenCategoryListContent = ({
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         resource_type: resourceType,
-        status: "active",
+        status: qParams.status,
         name: qParams.search,
       },
     }),
@@ -164,33 +166,38 @@ const TokenCategoryListContent = ({
   const tokenCategories = response?.results || [];
 
   return (
-    <div>
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-        <div className="w-full md:w-auto">
-          <div className="relative w-full md:w-auto">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <CareIcon icon="l-search" className="size-5" />
-            </span>
-            <Input
-              placeholder={t("search_token_categories")}
-              value={qParams.search || ""}
-              onChange={(e) =>
-                updateQuery({ search: e.target.value || undefined })
-              }
-              className="w-full md:w-[300px] pl-10"
-            />
+    <div className="container mx-auto">
+      <div className="mb-4">
+        <div className="mb-6 flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4"></div>
+
+        <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
+          <div className="w-full md:w-auto">
+            <div className="relative w-full md:w-auto">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <CareIcon icon="l-search" className="size-5" />
+              </span>
+              <Input
+                placeholder={t("search_token_categories")}
+                value={qParams.search || ""}
+                onChange={(e) =>
+                  updateQuery({ search: e.target.value || undefined })
+                }
+                className="w-full md:w-[300px] pl-10"
+              />
+            </div>
           </div>
+          {canWriteTokenCategory && (
+            <Button>
+              <Link
+                basePath="/"
+                href={`/facility/${facilityId}/settings/token_category/${resourceType}/new`}
+              >
+                <CareIcon icon="l-plus" className="mr-2" />
+                {t("add_token_category")}
+              </Link>
+            </Button>
+          )}
         </div>
-        <Button
-          onClick={() =>
-            navigate(
-              `/facility/${facilityId}/settings/token_category/${resourceType}/new`,
-            )
-          }
-        >
-          <CareIcon icon="l-plus" className="mr-2" />
-          {t("add_token_category")}
-        </Button>
       </div>
 
       {isLoading ? (
@@ -207,14 +214,14 @@ const TokenCategoryListContent = ({
           icon={
             <CareIcon icon="l-folder-open" className="text-primary size-6" />
           }
-          title={t("no_token_categories_found")}
-          description={t("no_token_categories_found_description")}
+          title={t("no_products_found")}
+          description={t("adjust_product_filters")}
         />
       ) : (
         <>
           {/* Mobile Card View */}
           <div className="grid gap-4 md:hidden">
-            {tokenCategories.map((tokenCategory) => (
+            {tokenCategories.map((tokenCategory: TokenCategoryRead) => (
               <TokenCategoryCard
                 key={tokenCategory.id}
                 tokenCategory={tokenCategory}
@@ -229,12 +236,13 @@ const TokenCategoryListContent = ({
                 <TableHeader className="bg-gray-100">
                   <TableRow>
                     <TableHead>{t("name")}</TableHead>
+                    <TableHead>{t("resource_type")}</TableHead>
                     <TableHead>{t("shorthand")}</TableHead>
                     <TableHead>{t("actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="bg-white">
-                  {tokenCategories.map((tokenCategory) => (
+                  {tokenCategories.map((tokenCategory: TokenCategoryRead) => (
                     <TableRow key={tokenCategory.id} className="divide-x">
                       <TableCell className="font-medium">
                         {tokenCategory.name}
@@ -242,20 +250,25 @@ const TokenCategoryListContent = ({
                           <Badge className="ml-2">{t("default")}</Badge>
                         )}
                       </TableCell>
-                      <TableCell>{tokenCategory.shorthand || "-"}</TableCell>
                       <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            navigate(
-                              `/facility/${facilityId}/settings/token_category/${tokenCategory.resource_type}/${tokenCategory.id}`,
-                            )
+                        <Badge
+                          variant={
+                            SCHEDULABLE_RESOURCE_TYPE_COLORS[
+                              tokenCategory.resource_type
+                            ]
                           }
                         >
-                          <CareIcon icon="l-edit" className="size-4" />
-                          {t("see_details")}
-                        </Button>
+                          {t(tokenCategory.resource_type)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{tokenCategory.shorthand || "-"}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <TokenCategoryActions
+                            tokenCategory={tokenCategory}
+                            facilityId={facilityId}
+                          />
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -273,4 +286,29 @@ const TokenCategoryListContent = ({
       )}
     </div>
   );
-};
+}
+
+function TokenCategoryActions({
+  tokenCategory,
+  facilityId,
+}: {
+  tokenCategory: TokenCategoryRead;
+  facilityId: string;
+}) {
+  const { hasPermission } = usePermissions();
+  const { facility } = useCurrentFacility();
+  const { canWriteTokenCategory } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
+  return (
+    <ActionButtons
+      editPath={
+        canWriteTokenCategory
+          ? `/facility/${facilityId}/settings/token_category/${tokenCategory.resource_type}/${tokenCategory.id}/edit`
+          : undefined
+      }
+      viewPath={`/facility/${facilityId}/settings/token_category/${tokenCategory.resource_type}/${tokenCategory.id}`}
+    />
+  );
+}

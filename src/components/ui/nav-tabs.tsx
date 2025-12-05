@@ -21,6 +21,7 @@ interface NavTabDefinition {
   label: string;
   component: React.ReactNode;
   shortcutId?: string;
+  labelSuffix?: React.ReactNode;
 }
 
 interface Props<TabKey extends string> {
@@ -31,6 +32,7 @@ interface Props<TabKey extends string> {
   tabTriggerClassName?: string;
   showMoreAfterIndex?: number;
   tabContentClassName?: string;
+  enableIndexShortcut?: boolean;
 }
 
 const getTabsToShowAndShowMore = <TabKey extends string>(
@@ -68,6 +70,7 @@ export const NavTabs = <TabKey extends string>({
   setPageTitle = true,
   tabTriggerClassName,
   showMoreAfterIndex,
+  enableIndexShortcut = false,
   ...props
 }: Props<TabKey> & React.ComponentProps<typeof Tabs>) => {
   const { t } = useTranslation();
@@ -82,7 +85,7 @@ export const NavTabs = <TabKey extends string>({
   return (
     <Tabs {...props} value={currentTab ?? allTabKeys[0]}>
       <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
-        {visibleTabs.map((option) => (
+        {visibleTabs.map((option, index) => (
           <TabsTrigger
             key={option}
             value={option}
@@ -93,8 +96,14 @@ export const NavTabs = <TabKey extends string>({
             onClick={() => onTabChange(option)}
           >
             {tabs[option].label}
+            {tabs[option].labelSuffix}
             {tabs[option].shortcutId && (
               <ShortcutBadge actionId={tabs[option].shortcutId}></ShortcutBadge>
+            )}
+            {enableIndexShortcut && (
+              <ShortcutBadge
+                actionId={`tab-index-${index + 1}`}
+              ></ShortcutBadge>
             )}
           </TabsTrigger>
         ))}

@@ -6,7 +6,7 @@ import { Time } from "@/Utils/types";
 import { formatName } from "@/Utils/utils";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { PatientRead } from "@/types/emr/patient/patient";
+import { PatientRead, PublicPatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
@@ -154,11 +154,6 @@ export enum AppointmentStatus {
   RESCHEDULED = "rescheduled",
 }
 
-export const PastAppointmentStatuses = [
-  AppointmentStatus.FULFILLED,
-  AppointmentStatus.NO_SHOW,
-];
-
 export const UpcomingAppointmentStatuses = [
   AppointmentStatus.PROPOSED,
   AppointmentStatus.PENDING,
@@ -167,6 +162,12 @@ export const UpcomingAppointmentStatuses = [
   AppointmentStatus.CHECKED_IN,
   AppointmentStatus.WAITLIST,
   AppointmentStatus.IN_CONSULTATION,
+];
+
+export const PastAppointmentStatuses = [
+  ...UpcomingAppointmentStatuses,
+  AppointmentStatus.FULFILLED,
+  AppointmentStatus.NO_SHOW,
 ];
 
 export const CancelledAppointmentStatuses = [
@@ -178,7 +179,8 @@ export const CancelledAppointmentStatuses = [
 
 export const AppointmentFinalStatuses = [
   ...CancelledAppointmentStatuses,
-  ...PastAppointmentStatuses,
+  AppointmentStatus.FULFILLED,
+  AppointmentStatus.NO_SHOW,
 ];
 
 export const APPOINTMENT_STATUS_COLORS = {
@@ -219,17 +221,24 @@ export type ScheduleResource =
   | LocationResource
   | HealthcareServiceResource;
 
-export type Appointment = {
+export type AppointmentBase = {
   id: string;
   token_slot: TokenSlot;
-  patient: PatientRead;
   booked_on: string;
   status: AppointmentStatus;
   note: string;
-  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
   token: TokenRead | null;
+  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
 } & ScheduleResource;
+
+export type Appointment = AppointmentBase & {
+  patient: PatientRead;
+};
+
+export type PublicAppointment = AppointmentBase & {
+  patient: PublicPatientRead;
+};
 
 export type AppointmentRead = Appointment & {
   tags: TagConfig[];

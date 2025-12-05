@@ -22,7 +22,6 @@
 
 ![Code scanning - action](https://github.com/ohcnetwork/care_fe/workflows/Code%20scanning%20-%20action/badge.svg)
 ![OSSAR](https://github.com/ohcnetwork/care_fe/workflows/OSSAR/badge.svg)
-[![Cypress Tests](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/wf7d2m/develop&style=flat&logo=cypress)](https://cloud.cypress.io/projects/wf7d2m/runs)
 ![Staging Release](https://github.com/ohcnetwork/care_fe/workflows/CARE%20Develop%20Registry/badge.svg)
 ![Production Release](https://github.com/ohcnetwork/care_fe/workflows/Production%20Release/badge.svg)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/200482ab117e4b5397ff3f5ae5719aa2)](https://www.codacy.com/gh/ohcnetwork/care_fe?utm_source=github.com&utm_medium=referral&utm_content=ohcnetwork/care_fe&utm_campaign=Badge_Grade)
@@ -93,46 +92,81 @@ For patient login via phone number:
 
 All strings must be encased in i18n translations. New translation strings must be specified in `src`->`Locale`->`en`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
 
+#### Remote i18n configuration (optional)
+
+CARE can load translation files from a remote URL and fall back to local files for any missing keys.
+
+- **Enable remote translations**: set `REACT_CUSTOM_REMOTE_I18N_URL` in your environment.
+- **Expected remote file path**: `${REACT_CUSTOM_REMOTE_I18N_URL}/{lang}.json` (for example: `https://cdn.example.com/i18n/en.json`).
+- **Local fallback path**: `/public/locale/{lang}.json` in this repository (served as `/locale/{lang}.json`).
+- **Merge behavior**: remote keys override local; any keys absent in remote are served from local.
+
+Example `.env.local`:
+
+```env
+# Load i18n from a CDN (per-language JSON files)
+REACT_CUSTOM_REMOTE_I18N_URL=https://cdn.example.com/i18n
+```
+
+Remote file example (`en.json`):
+
+```json
+{
+  "hello_care": "Hello Care Remote"
+}
+```
+
+Local file example (`public/locale/en.json`):
+
+```json
+{
+  "hello_care": "Hello Care Local",
+  "welcome_message": "Welcome to Care"
+}
+```
+
+With the above, the app serves:
+
+- `hello_care` -> "Hello Care Remote" (remote overrides local)
+- `welcome_message` -> "Welcome to Care" (falls back to local as remote is missing)
+
 ### Testing
 
 To ensure the quality of our pull requests, we use a variety of tools:
 
-- **Automated E2E Testing:** We use Cypress for end-to-end testing to automatically verify the functionality and performance of our code.
+- **Automated E2E Testing:** We use Playwright for end-to-end testing to automatically verify the functionality and performance of our code.
 - **Manual Real Device Testing:** We use BrowserStack to manually test our code on real devices, ensuring compatibility and functionality across different platforms and browsers.
 
-#### 🧪 Run cypress tests
+#### 🎭 Run Playwright tests
 
-To run cypress tests locally, you'll need to setup the backend to run locally and load dummy data required for cypress to the database. See [docs](https://github.com/ohcnetwork/care#self-hosting).
+To run Playwright tests locally, you'll need to setup the backend to run locally and load dummy data required for the tests. See [docs](https://github.com/ohcnetwork/care#self-hosting).
 
-Once backend is running locally, you'll have to ensure your local front-end is connected to local backend, by setting the `REACT_CARE_API_URL` env.
+Once backend is running locally, ensure your local front-end is connected to local backend by setting the `REACT_CARE_API_URL` environment variable:
 
 ```env
 #.env
 REACT_CARE_API_URL=http://127.0.0.1:9000
 ```
 
-Once done, start the development server by running
+First, install Playwright browsers:
 
 ```sh
-npm run dev
+npm run playwright:install
 ```
 
-Once development server is running, then run the cypress tests in either of the ways described below.
+Then run Playwright tests in one of the following modes:
 
 ```sh
-npm run cypress:run        # To run all tests in headless mode.
+npm run playwright:test           # Run all tests in headless mode
+npm run playwright:test:ui        # Run tests in interactive UI mode
+npm run playwright:test:headed    # Run tests in headed mode (visible browser)
+npm run playwright:show-report    # View the HTML test report
 ```
 
-```sh
-npm run cypress:run:gui    # To run all tests in headed mode.
-```
+- Test results and artifacts are saved in `test-results/`
+- HTML reports are saved in `playwright-report/`
 
-```sh
-npm run cypress:open       # To debug and run tests individually.
-```
-
-- Failed test screenshots are saved in `cypress/screenshots`
-- All test videos are saved in `cypress/videos`
+For more details, see [tests/README.md](tests/README.md).
 
 ## 📖 Documentations
 

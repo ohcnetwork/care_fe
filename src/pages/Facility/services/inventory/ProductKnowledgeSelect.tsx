@@ -21,11 +21,14 @@ const productKnowledgeMapper = (
 
 interface ProductKnowledgeSelectProps {
   value?: ProductKnowledgeBase;
-  onChange: (value: ProductKnowledgeBase) => void;
+  onChange: (value: ProductKnowledgeBase | undefined) => void;
   disabled?: boolean;
   className?: string;
   placeholder?: string;
-  enableFavorites?: boolean;
+  disableFavorites?: boolean;
+  ref?: React.Ref<HTMLButtonElement>;
+  hideClearButton?: boolean;
+  alignContent?: "start" | "center" | "end";
 }
 
 export function ProductKnowledgeSelect({
@@ -34,7 +37,10 @@ export function ProductKnowledgeSelect({
   disabled,
   className,
   placeholder,
-  enableFavorites = true,
+  disableFavorites = false,
+  ref,
+  hideClearButton = false,
+  alignContent = "start",
 }: ProductKnowledgeSelectProps) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
@@ -51,7 +57,7 @@ export function ProductKnowledgeSelect({
           | undefined,
       ) => {
         if (!selectedValue) {
-          onChange({} as ProductKnowledgeBase);
+          onChange(undefined);
           return;
         }
         onChange(
@@ -70,15 +76,10 @@ export function ProductKnowledgeSelect({
         },
       }}
       mapper={productKnowledgeMapper}
-      translations={{
-        searchPlaceholder: "search_product_knowledge",
-        selectPlaceholder: "select_product_knowledge",
-        noResultsFound: "no_product_knowledge_found_for",
-        noItemsFound: "no_product_knowledge_found",
-      }}
-      enableFavorites={enableFavorites}
+      translationBaseKey="product_knowledge"
+      enableFavorites={!disableFavorites}
       favoritesConfig={
-        enableFavorites
+        !disableFavorites
           ? {
               listFavorites: {
                 queryFn: productKnowledgeApi.listFavorites,
@@ -92,6 +93,9 @@ export function ProductKnowledgeSelect({
             }
           : undefined
       }
+      ref={ref}
+      hideClearButton={hideClearButton}
+      alignContent={alignContent}
     />
   );
 }

@@ -75,7 +75,6 @@ export const PrintChargeItems = (props: {
       pathParams: { facilityId },
       queryParams: {
         account: accountId,
-        ordering: "-created_date",
       },
       pageSize: 100,
     }),

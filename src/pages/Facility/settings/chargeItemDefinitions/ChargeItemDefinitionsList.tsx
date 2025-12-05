@@ -44,9 +44,6 @@ export function ChargeItemDefinitionsList({
         onCreateItem={onCreateItem}
         createItemLabel={t("add_definition")}
         createItemIcon="l-plus"
-        createItemTooltip={t(
-          "charge_items_can_only_be_added_to_leaf_categories",
-        )}
       >
         {categorySlug && (
           <ChargeItemList

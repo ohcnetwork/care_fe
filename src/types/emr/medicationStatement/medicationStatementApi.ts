@@ -7,6 +7,9 @@ const medicationStatementApi = {
     path: "/api/v1/patient/{patientId}/medication/statement/",
     method: "GET",
     TRes: Type<PaginatedResponse<MedicationStatementRead>>(),
+    defaultQueryParams: {
+      ordering: "-created_date",
+    },
   },
 } as const;
 

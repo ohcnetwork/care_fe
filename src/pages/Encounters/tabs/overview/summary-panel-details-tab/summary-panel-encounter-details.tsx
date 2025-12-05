@@ -1,21 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { Signal, SquarePen } from "lucide-react";
-import { useTranslation } from "react-i18next";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
-
+import query from "@/Utils/request/query";
+import { Avatar } from "@/components/Common/Avatar";
+import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-
-import query from "@/Utils/request/query";
-import { Avatar } from "@/components/Common/Avatar";
 import {
   EncounterClassBadge,
   StatusBadge,
 } from "@/pages/Encounters/EncounterProperties";
-import { OverviewSidebarSheet } from "@/pages/Encounters/tabs/overview/overview-sidebar-sheet";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import {
   AccountBillingStatus,
@@ -23,14 +16,21 @@ import {
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 import { ENCOUNTER_PRIORITY_COLORS } from "@/types/emr/encounter/encounter";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { Signal, SquarePen } from "lucide-react";
+import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 export const SummaryPanelEncounterDetails = () => {
   const { t } = useTranslation();
   const {
     selectedEncounter: encounter,
+    selectedEncounterId: encounterId,
     patientId,
     facilityId,
     patient,
+    canWriteSelectedEncounter,
   } = useEncounter();
   const { data: account } = useQuery({
     queryKey: ["accounts", patientId],
@@ -137,14 +137,7 @@ export const SummaryPanelEncounterDetails = () => {
                   {encounter.tags.length > 0 ? (
                     <>
                       {encounter.tags.map((tag) => (
-                        <Badge
-                          key={tag.id}
-                          variant="secondary"
-                          className="capitalize"
-                          title={tag.description}
-                        >
-                          {tag.display}
-                        </Badge>
+                        <TagBadge key={tag.id} tag={tag} />
                       ))}
                     </>
                   ) : (
@@ -164,17 +157,20 @@ export const SummaryPanelEncounterDetails = () => {
               )}
             </div>
           </div>
-          <OverviewSidebarSheet
-            trigger={
-              <Button
-                variant="outline"
-                className="hidden sm:flex flex-row w-full text-gray-950"
+          {canWriteSelectedEncounter && (
+            <Button
+              variant="outline"
+              className="hidden sm:flex flex-row w-full text-gray-950"
+              asChild
+            >
+              <Link
+                href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
               >
                 <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
-                <span className="font-semibold">{t("update_details")}</span>
-              </Button>
-            }
-          />
+                <span className="text-gray-950">{t("update_encounter")}</span>
+              </Link>
+            </Button>
+          )}
         </div>
         <Separator className="sm:hidden" />
         <div className="flex flex-col gap-4">
@@ -225,17 +221,19 @@ export const SummaryPanelEncounterDetails = () => {
 
           <div className="flex flex-row gap-2">
             <div className="text-sm text-gray-950 font-semibold flex flex-wrap gap-6">
-              {patient?.instance_identifiers?.map((identifier) => (
-                <div
-                  key={identifier.config.id}
-                  className="flex flex-col items-start"
-                >
-                  <span className="text-gray-600 md:w-auto">
-                    {identifier.config.config.display}:{" "}
-                  </span>
-                  <span className="font-semibold">{identifier.value}</span>
-                </div>
-              ))}
+              {patient?.instance_identifiers
+                ?.filter(({ config }) => !config.config.auto_maintained)
+                .map((identifier) => (
+                  <div
+                    key={identifier.config.id}
+                    className="flex flex-col items-start"
+                  >
+                    <span className="text-gray-600 md:w-auto">
+                      {identifier.config.config.display}:{" "}
+                    </span>
+                    <span className="font-semibold">{identifier.value}</span>
+                  </div>
+                ))}
             </div>
           </div>
 
@@ -273,14 +271,20 @@ export const SummaryPanelEncounterDetails = () => {
           )}
         </div>
       </div>
-      <OverviewSidebarSheet
-        trigger={
-          <Button variant="outline" className="sm:hidden w-full text-gray-950">
+      {canWriteSelectedEncounter && (
+        <Button
+          variant="outline"
+          className="sm:hidden w-full text-gray-950"
+          asChild
+        >
+          <Link
+            href={`/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/questionnaire/encounter`}
+          >
             <SquarePen className="size-3 text-gray-950" strokeWidth={1.5} />
-            <span className="font-semibold">{t("update_details")}</span>
-          </Button>
-        }
-      />
+            <span className="text-gray-950">{t("update_encounter")}</span>
+          </Link>
+        </Button>
+      )}
     </div>
   );
 };

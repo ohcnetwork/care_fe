@@ -97,6 +97,7 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
       title: `${form.getValues("title")} (Clone)`,
       organizations: selectedIds,
       tags: tags.map((tag) => tag.id),
+      version: "1.0", // TODO: remove once backend handles versioning
     };
 
     cloneQuestionnaire(clonedQuestionnaire);
@@ -193,7 +194,7 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
                   <CommandInput
                     placeholder={t("search_organizations")}
                     onValueChange={setSearchQuery}
-                    className="focus:ring-0 focus:outline-hidden border-none"
+                    className="focus:ring-0 focus:outline-hidden border-none text-base sm:text-sm"
                   />
                   <CommandList>
                     <CommandEmpty>{t("no_organizations_found")}</CommandEmpty>
@@ -206,7 +207,7 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
                         availableOrganizations?.results.map((org) => (
                           <CommandItem
                             key={org.id}
-                            value={org.id}
+                            value={org.name}
                             onSelect={() => handleToggleOrganization(org.id)}
                             className="flex items-center justify-between pr-2"
                           >

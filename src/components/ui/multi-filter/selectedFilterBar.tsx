@@ -32,7 +32,7 @@ function SubMenuFilter({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <div className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 underline cursor-pointer text-xs whitespace-nowrap">
+        <div className="flex items-center gap-2 px-2.5 h-9 border-x border-gray-200 underline cursor-pointer text-sm text-gray-600 whitespace-nowrap">
           {t(selectedOption.label)}
         </div>
       </DropdownMenuTrigger>
@@ -89,17 +89,19 @@ export function SelectedFilterBar({
     >
       <div
         className={cn(
-          "flex items-center bg-white rounded-md border border-gray-200 h-10 w-fit",
+          "flex items-center bg-white rounded-md border border-gray-200 w-fit",
           selectedBarClassName,
         )}
       >
         <DropdownMenuTrigger asChild>
           <div
-            className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 text-sm"
+            className="flex items-center gap-2 px-3 h-9 border-gray-200 text-sm"
             onClick={onClick}
           >
             {filter?.icon}
-            <span className="truncate">{t(filter.label)}</span>
+            <span className="truncate text-gray-950 font-medium cursor-pointer">
+              {t(filter.label)}
+            </span>
           </div>
         </DropdownMenuTrigger>
         <SubMenuFilter
@@ -109,14 +111,16 @@ export function SelectedFilterBar({
           }
           availableOptions={availableOperations ?? []}
         />
-        <div className="flex items-center gap-2 px-3 py-2 border-r border-gray-200 whitespace-nowrap">
-          {filter.renderSelected?.(selected, filter, onFilterChange)}
+        <div className="flex items-center gap-2 px-3 h-9 border-gray-200 whitespace-nowrap">
+          <span className="truncate text-gray-950 font-medium">
+            {filter.renderSelected?.(selected, filter, onFilterChange)}
+          </span>
         </div>
         {!filter?.disableClear && (
           <Button
             variant="ghost"
             onClick={clearFilter}
-            className="px-3 py-2 hover:bg-gray-50"
+            className="flex border-l rounded-l-none border-gray-200 hover:bg-gray-50"
           >
             <X className="h-5 w-5 text-gray-600" />
           </Button>

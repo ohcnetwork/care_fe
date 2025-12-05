@@ -28,6 +28,7 @@ function generateFacilityLinks(
     canWriteAppointment: boolean;
     canCreateEncounter: boolean;
     canViewEncounter: boolean;
+    canListTokenCategories: boolean;
   },
   pluginLinks: NavigationLink[],
 ) {
@@ -154,7 +155,7 @@ function generateFacilityLinks(
         },
         {
           name: t("billing"),
-          url: `${baseUrl}/settings/billing/discount_codes`,
+          url: `${baseUrl}/settings/billing`,
         },
         {
           name: t("charge_item_definitions"),
@@ -175,6 +176,7 @@ function generateFacilityLinks(
         {
           name: t("token_category"),
           url: `${baseUrl}/settings/token_category`,
+          visibility: permissions.canListTokenCategories,
         },
         // {
         //   name: t("patient_identifier_config"),
@@ -217,6 +219,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canWriteAppointment,
     canCreateEncounter,
     canViewEncounter,
+    canListTokenCategories,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
   const permissions = {
     canViewAppointments,
@@ -224,6 +227,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canWriteAppointment,
     canCreateEncounter,
     canViewEncounter,
+    canListTokenCategories,
   };
   return (
     <NavMain

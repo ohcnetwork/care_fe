@@ -5,21 +5,21 @@ import { toast } from "sonner";
 
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
+import {
+  ValueSetBase,
+  ValueSetCreate,
+  ValueSetRead,
+  ValueSetUpdate,
+} from "@/types/valueSet/valueSet";
+import valueSetApi from "@/types/valueSet/valueSetApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import {
-  CreateValuesetModel,
-  UpdateValuesetModel,
-  ValuesetBase,
-  ValuesetFormType,
-} from "@/types/valueset/valueset";
-import valuesetApi from "@/types/valueset/valuesetApi";
 
 import { ValueSetForm } from "./ValueSetForm";
 
 interface ValueSetEditorProps {
   slug?: string; // If provided, we're editing an existing valueset
-  onSuccess?: (data: ValuesetBase) => void;
+  onSuccess?: (data: ValueSetRead) => void;
 }
 
 export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
@@ -28,7 +28,7 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
   // Fetch existing valueset if we're editing
   const { data: existingValueset, isLoading } = useQuery({
     queryKey: ["valueset", slug],
-    queryFn: query(valuesetApi.get, {
+    queryFn: query(valueSetApi.get, {
       pathParams: { slug: slug! },
     }),
     enabled: !!slug,
@@ -36,8 +36,8 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: mutate(valuesetApi.create),
-    onSuccess: (data: ValuesetBase) => {
+    mutationFn: mutate(valueSetApi.create),
+    onSuccess: (data: ValueSetRead) => {
       toast.success(t("valueset_created"));
       queryClient.invalidateQueries({ queryKey: ["valuesets"] });
       onSuccess?.(data);
@@ -46,10 +46,10 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: mutate(valuesetApi.update, {
+    mutationFn: mutate(valueSetApi.update, {
       pathParams: { slug: slug! },
     }),
-    onSuccess: (data: ValuesetBase) => {
+    onSuccess: (data: ValueSetRead) => {
       toast.success(t("valueset_updated"));
       queryClient.removeQueries({ queryKey: ["valueset", slug] });
       onSuccess?.(data);
@@ -57,15 +57,15 @@ export function ValueSetEditor({ slug, onSuccess }: ValueSetEditorProps) {
     },
   });
 
-  const handleSubmit = (data: ValuesetFormType) => {
+  const handleSubmit = (data: ValueSetBase) => {
     if (slug && existingValueset) {
-      const updateData: UpdateValuesetModel = {
+      const updateData: ValueSetUpdate = {
         ...data,
         id: existingValueset.id,
       };
       updateMutation.mutate(updateData);
     } else {
-      const createData: CreateValuesetModel = data;
+      const createData: ValueSetCreate = data;
       createMutation.mutate(createData);
     }
   };

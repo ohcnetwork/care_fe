@@ -194,13 +194,13 @@ const config = [
     },
   },
 
-  // Cypress-specific rules
+  // Playwright-specific rules
   {
-    files: ["cypress/**/*.ts"],
+    files: ["tests/**/*.ts", "playwright.config.ts"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: "./cypress/tsconfig.json",
+        project: "./tests/tsconfig.json",
       },
     },
   },

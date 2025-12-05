@@ -52,13 +52,11 @@ interface AutocompleteProps {
   freeInput?: boolean;
   closeOnSelect?: boolean;
   showClearButton?: boolean;
-  "data-cy"?: string;
 
   ref?: React.RefCallback<HTMLButtonElement | null>;
 
   "aria-invalid"?: boolean;
   shortcutId?: string;
-  shortcutDisplay?: string;
 }
 
 export default function Autocomplete({
@@ -77,10 +75,8 @@ export default function Autocomplete({
   freeInput = false,
   closeOnSelect = true,
   showClearButton = true,
-  "data-cy": dataCy,
   ref,
   shortcutId,
-  shortcutDisplay,
   ...props
 }: AutocompleteProps) {
   const [open, setOpen] = React.useState(false);
@@ -151,7 +147,7 @@ export default function Autocomplete({
         placeholder={inputPlaceholder}
         disabled={disabled}
         onValueChange={handleInputChange}
-        className="outline-hidden border-none ring-0 shadow-none text-base"
+        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
         autoFocus={!isAppleDevice}
       />
       <CommandList className="overflow-y-auto">
@@ -198,7 +194,7 @@ export default function Autocomplete({
 
   if (isMobile) {
     return (
-      <div className="relative w-full">
+      <div className="flex relative w-full">
         <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>
             <Button
@@ -214,9 +210,12 @@ export default function Autocomplete({
               ref={ref}
               role="combobox"
               aria-expanded={open}
-              className={cn("w-full justify-between", className)}
+              className={cn(
+                "w-full justify-between",
+                className,
+                selectedOption && "rounded-r-none",
+              )}
               disabled={disabled}
-              data-cy={dataCy}
               type="button"
             >
               <span className="overflow-hidden">
@@ -243,13 +242,14 @@ export default function Autocomplete({
         </Drawer>
         {selectedOption && showClearButton ? (
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
-            className="absolute right-1 top-1/2 -translate-y-1/2 p-0 hover:bg-transparent opacity-50 z-10"
+            className="rounded-l-none border-l-0 text-gray-400 h-auto"
             onClick={handleClear}
             title={t("clear")}
+            hidden={disabled}
           >
-            <Cross2Icon className="size-3" />
+            <Cross2Icon />
             <span className="sr-only">{t("clear")}</span>
           </Button>
         ) : (
@@ -260,7 +260,7 @@ export default function Autocomplete({
   }
 
   return (
-    <div className="relative w-full">
+    <div className="flex relative w-full">
       <Popover open={open} onOpenChange={setOpen} modal={true}>
         <PopoverTrigger asChild className={popoverClassName}>
           <Button
@@ -269,9 +269,12 @@ export default function Autocomplete({
             role="combobox"
             aria-invalid={props["aria-invalid"]}
             aria-expanded={open}
-            className={cn("w-full justify-between", className)}
+            className={cn(
+              "w-full justify-between",
+              className,
+              selectedOption && "rounded-r-none",
+            )}
             disabled={disabled}
-            data-cy={dataCy}
             onClick={() => setOpen(!open)}
             ref={ref}
             data-shortcut-id={shortcutId}
@@ -295,23 +298,22 @@ export default function Autocomplete({
       </Popover>
       {selectedOption && showClearButton ? (
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
-          className="absolute right-1 top-1/2 -translate-y-1/2 p-0 hover:bg-transparent opacity-50 z-10"
+          className="rounded-l-none border-l-0 text-gray-400 h-auto"
           onClick={handleClear}
           title={t("clear")}
+          hidden={disabled}
         >
-          <Cross2Icon className="size-3" />
+          <Cross2Icon />
           <span className="sr-only">{t("clear")}</span>
         </Button>
       ) : (
         <>
-          {shortcutDisplay ? (
+          {shortcutId ? (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 ">
               <div className="flex items-center justify-center gap-1">
-                <div className="text-xs flex items-center justify-center size-5 rounded-md border border-gray-200">
-                  <ShortcutBadge actionId={shortcutId ?? ""} />
-                </div>
+                <ShortcutBadge actionId={shortcutId} />
                 <CaretSortIcon className="size-3 shrink-0 opacity-50" />
               </div>
             </div>

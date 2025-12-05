@@ -125,7 +125,8 @@ export function SubstitutionSheet({
     onOpenChange(false);
   };
 
-  const handleProductSelect = (product: ProductKnowledgeBase) => {
+  const handleProductSelect = (product: ProductKnowledgeBase | undefined) => {
+    if (!product) return;
     setSelectedSubstitute(product);
   };
 

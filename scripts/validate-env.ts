@@ -1,11 +1,26 @@
-import { z } from "zod";
 // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
-import { ENCOUNTER_CLASS } from "../src/types/emr/encounter/encounter";
+import {
+  ENCOUNTER_CLASS,
+  ENCOUNTER_DISCHARGE_DISPOSITION,
+  EncounterDischargeDisposition,
+} from "../src/types/emr/encounter/encounter";
+
+import { z } from "zod";
 
 const logoSchema = z.object({
   light: z.string().url(),
   dark: z.string().url(),
 });
+
+const customShortcutSchema = z.array(
+  z.object({
+    title: z.string(),
+    description: z.string(),
+    href: z.string(),
+    icon: z.string().optional(),
+    visible: z.boolean().optional(),
+  }),
+);
 
 const booleanAsStringSchema = z
   .string()
@@ -17,23 +32,27 @@ const numberAsString = z.string().refine((val) => !isNaN(parseInt(val)), {
   message: "Must be a valid number",
 });
 
-const logoSchemaString = z
-  .string()
-  .refine(
-    (val) => {
-      try {
-        JSON.parse(val);
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    {
-      message: "Logo must be a valid JSON string",
-    },
-  )
+const jsonAsStringSchema = z.string().refine(
+  (val) => {
+    try {
+      JSON.parse(val);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  {
+    message: "Not a valid JSON string",
+  },
+);
+
+const logoSchemaString = jsonAsStringSchema
   .transform((val) => JSON.parse(val))
   .pipe(logoSchema);
+
+const customShortcutsSchemaString = jsonAsStringSchema
+  .transform((val) => JSON.parse(val))
+  .pipe(customShortcutSchema);
 
 const envSchema = z
   .object({
@@ -62,7 +81,9 @@ const envSchema = z
     REACT_DISABLE_PATIENT_LOGIN: booleanAsStringSchema.optional(),
     REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION: booleanAsStringSchema.optional(),
     REACT_APPOINTMENTS_DEFAULT_DATE_FILTER: numberAsString.optional(),
+    REACT_PAYMENT_LOCATION_REQUIRED: booleanAsStringSchema.optional(),
     REACT_ENCOUNTER_DEFAULT_DATE_FILTER: numberAsString.optional(),
+    REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE: booleanAsStringSchema.optional(),
     REACT_OBSERVATION_PLOTS_CONFIG_URL: z.string().url().optional(),
     REACT_DEFAULT_COUNTRY: z.string().optional(),
     REACT_DEFAULT_COUNTRY_NAME: z.string().optional(),
@@ -88,7 +109,10 @@ const envSchema = z
     REACT_ALLOWED_LOCALES: z.string().optional(),
     REACT_PATIENT_REG_MIN_GEO_ORG_LEVELS_REQUIRED: numberAsString.optional(),
     REACT_DEFAULT_ENCOUNTER_TYPE: z.string().optional(),
+    REACT_DEFAULT_DISCHARGE_DISPOSITION: z.string().optional(),
     REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.string().uuid().optional(),
+    REACT_CUSTOM_REMOTE_I18N_URL: z.string().url().optional(),
+    REACT_CUSTOM_SHORTCUTS: customShortcutsSchemaString.optional(),
   })
   .superRefine(async (data, ctx) => {
     const allowedClasses =
@@ -102,6 +126,19 @@ const envSchema = z
         code: z.ZodIssueCode.custom,
         message: "Encounter class not in allowed encounter classes",
         path: ["REACT_DEFAULT_ENCOUNTER_TYPE"],
+      });
+    }
+
+    if (
+      data.REACT_DEFAULT_DISCHARGE_DISPOSITION &&
+      !ENCOUNTER_DISCHARGE_DISPOSITION.includes(
+        data.REACT_DEFAULT_DISCHARGE_DISPOSITION as EncounterDischargeDisposition,
+      )
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid discharge disposition",
+        path: ["REACT_DEFAULT_DISCHARGE_DISPOSITION"],
       });
     }
 

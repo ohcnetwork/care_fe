@@ -1,0 +1,95 @@
+name: Assign Labels
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - converted_to_draft
+      - ready_for_review
+      - assigned
+      - unassigned
+      - review_requested
+  pull_request_review:
+    types:
+      - submitted
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  assign-pr:
+    runs-on: ubuntu-24.04-arm
+    # Skip workflow for PRs created by bots
+    if: ${{ github.event.pull_request.user.type != 'Bot' }}
+
+    steps:
+      - name: Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+
+      - name: Assign PR Author
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api --method POST repos/$REPO/issues/$PR_NUMBER/assignees -f assignees[]="$AUTHOR" || echo "Warning: Could not assign $AUTHOR"
+
+      - name: Update PR Status and Labels
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          IS_DRAFT: ${{ github.event.pull_request.draft }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [[ "${{ github.event.action }}" == "opened" || "${{ github.event.action }}" == "ready_for_review" || "${{ github.event.action }}" == "converted_to_draft" ]]; then
+            if [[ "$IS_DRAFT" == "true" ]]; then
+              gh pr edit $PR_NUMBER --remove-label "needs testing" --repo $REPO 2>/dev/null || true
+              gh pr edit $PR_NUMBER --remove-label "needs review" --repo $REPO 2>/dev/null || true
+              gh pr edit $PR_NUMBER --add-label "work in progress" --repo $REPO
+            else
+              gh pr edit $PR_NUMBER --remove-label "work in progress" --repo $REPO 2>/dev/null || true
+              gh pr edit $PR_NUMBER --add-label "needs testing" --repo $REPO
+              gh pr edit $PR_NUMBER --add-label "needs review" --repo $REPO
+            fi
+          fi
+
+      - name: Handle Review Changes Requested
+        if: github.event_name == 'pull_request_review' && github.event.review.state == 'changes_requested'
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh pr edit $PR_NUMBER --remove-label "needs review" --repo $REPO 2>/dev/null || true
+          gh pr edit $PR_NUMBER --remove-label "needs testing" --repo $REPO 2>/dev/null || true
+          gh pr edit $PR_NUMBER --add-label "changes required" --repo $REPO
+
+      - name: Handle Review Re-Request
+        if: github.event.action == 'review_requested' && github.event.requested_reviewer.type != 'Bot'
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          CURRENT_LABELS=$(gh pr view $PR_NUMBER --repo $REPO --json labels --jq '.labels[].name')
+
+          HAS_TESTED=$(echo "$CURRENT_LABELS" | grep -x "Tested" || echo "")
+          HAS_NEEDS_TESTING=$(echo "$CURRENT_LABELS" | grep -x "needs testing" || echo "")
+          HAS_NEEDS_REVIEW=$(echo "$CURRENT_LABELS" | grep -x "needs review" || echo "")
+
+          gh pr edit $PR_NUMBER --remove-label "changes required" --repo $REPO 2>/dev/null || true
+
+          if [[ -z "$HAS_TESTED" && -z "$HAS_NEEDS_TESTING" ]]; then
+            gh pr edit $PR_NUMBER --add-label "needs testing" --repo $REPO
+          fi
+
+          if [[ -z "$HAS_NEEDS_REVIEW" ]]; then
+            gh pr edit $PR_NUMBER --add-label "needs review" --repo $REPO
+          fi

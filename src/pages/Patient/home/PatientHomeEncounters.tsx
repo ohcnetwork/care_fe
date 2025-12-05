@@ -3,6 +3,7 @@ import { CaptionsOff } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Pagination from "@/components/Common/Pagination";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { TimelineWrapper } from "@/components/Common/TimelineWrapper";
 import { TimelineEncounterCard } from "@/components/Facility/EncounterCard";
@@ -26,12 +27,15 @@ export default function PatientHomeEncounters({
 }: PatientHomeEncountersProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("active");
-
+  const [page, setPage] = useState(1);
+  const limit = 15;
   const { data: encounters, isLoading: encounterLoading } = useQuery({
-    queryKey: ["encounters", patientId, activeTab],
+    queryKey: ["encounters", patientId, activeTab, page, limit],
     queryFn: query(encounterApi.list, {
       queryParams: {
         patient: patientId,
+        limit: limit,
+        offset: (page - 1) * limit,
         status:
           activeTab === "active"
             ? "planned,in_progress,on_hold"
@@ -66,6 +70,14 @@ export default function PatientHomeEncounters({
               isFirst={index === 0}
             />
           ))}
+          <div className="flex items-center justify-center">
+            <Pagination
+              data={{ totalCount: encounters.count }}
+              onChange={(page) => setPage(page)}
+              defaultPerPage={limit}
+              cPage={page}
+            />
+          </div>
         </TimelineWrapper>
       );
     }

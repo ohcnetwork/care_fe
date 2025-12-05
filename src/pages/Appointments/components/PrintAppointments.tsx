@@ -74,7 +74,6 @@ export function PrintAppointments({
         tags: qParams.tags,
         resource_type: resourceType,
         resource_ids: qParams.practitioners ?? resourceId,
-        ordering: "token_slot__start_datetime",
         patient: qParams.patient,
       },
     }),

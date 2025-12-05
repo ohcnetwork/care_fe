@@ -74,8 +74,8 @@ export function TaxComponentSettings() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredComponents.map((component) => (
-                <TableRow key={`${component.code?.code || component.title}`}>
+              filteredComponents.map((component, idx) => (
+                <TableRow key={`${component.title}-${idx}`}>
                   <TableCell>{component.title}</TableCell>
                   <TableCell>
                     {component.code && (

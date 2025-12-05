@@ -67,7 +67,7 @@ export function LocationSearch({
       <CommandInput
         placeholder="Search locations..."
         value={search}
-        className="outline-hidden border-none ring-0 shadow-none"
+        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
         onValueChange={setSearch}
         autoFocus
       />
@@ -94,10 +94,7 @@ export function LocationSearch({
       <div className="w-full">
         <Drawer open={open} onOpenChange={setOpen} direction="bottom">
           <DrawerTrigger asChild>
-            <div
-              className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer"
-              data-cy="location-search-trigger"
-            >
+            <div className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer">
               {stringifyNestedObject(value || { name: "" }) ||
                 "Select location..."}
             </div>
@@ -118,11 +115,7 @@ export function LocationSearch({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        asChild
-        disabled={disabled}
-        data-cy="location-search-trigger"
-      >
+      <PopoverTrigger asChild disabled={disabled}>
         <div className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer">
           {stringifyNestedObject(value || { name: "" }) || "Select location..."}
         </div>

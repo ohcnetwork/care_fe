@@ -18,11 +18,11 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import routes from "@/Utils/request/api";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
-import { CommentModel } from "@/types/resourceRequest/resourceRequest";
+import { CommentRead } from "@/types/resourceRequest/resourceRequest";
+import { resourceRequestCommentApi } from "@/types/resourceRequest/resourceRequestApi";
 
 const CommentSection = ({ id }: { id: string }) => {
   const { t } = useTranslation();
@@ -33,18 +33,18 @@ const CommentSection = ({ id }: { id: string }) => {
 
   const { data: resourceComments, isLoading } = useQuery({
     queryKey: ["resourceComments", id, qParams],
-    queryFn: query(routes.getResourceComments, {
+    queryFn: query(resourceRequestCommentApi.list, {
       queryParams: {
         limit: RESULTS_PER_PAGE_LIMIT,
         offset: ((qParams.page ?? 1) - 1) * RESULTS_PER_PAGE_LIMIT,
       },
-      pathParams: { id },
+      pathParams: { resourceRequestId: id },
     }),
   });
 
   const { mutate: addComment } = useMutation({
-    mutationFn: mutate(routes.addResourceComments, {
-      pathParams: { id },
+    mutationFn: mutate(resourceRequestCommentApi.create, {
+      pathParams: { resourceRequestId: id },
     }),
     onSuccess: () => {
       toast.success(t("comment_added_successfully"));
@@ -134,11 +134,7 @@ const CommentSection = ({ id }: { id: string }) => {
 
 export default CommentSection;
 
-export const Comment = ({
-  comment,
-  created_by,
-  created_date,
-}: CommentModel) => (
+export const Comment = ({ comment, created_by, created_date }: CommentRead) => (
   <div
     className={cn(
       "mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-4 text-secondary-800",

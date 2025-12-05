@@ -202,20 +202,7 @@ function FinishedTokenOptions({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          "infinite-tokens",
-          facilityId,
-          queueId,
-          { status: TokenStatus.IN_PROGRESS },
-        ],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [
-          "infinite-tokens",
-          facilityId,
-          queueId,
-          { status: INACTIVE_TOKEN_STATUSES },
-        ],
+        queryKey: ["infinite-tokens", facilityId, queueId],
       });
       queryClient.invalidateQueries({
         queryKey: ["token-queue-summary", facilityId, queueId],

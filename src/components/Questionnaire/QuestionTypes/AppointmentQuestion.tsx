@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sheet";
 
 import { ScheduleResourceFormState } from "@/components/Schedule/ResourceSelector";
+import useAuthUser from "@/hooks/useAuthUser";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentFormSection } from "@/pages/Appointments/BookAppointment/AppointmentFormSection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
@@ -79,9 +80,10 @@ export function AppointmentQuestion({
   facilityId,
 }: AppointmentQuestionProps) {
   const { t } = useTranslation();
+  const currentUser = useAuthUser();
   const [selectedResource, setSelectedResource] =
     useState<ScheduleResourceFormState>({
-      resource: null,
+      resource: currentUser,
       resource_type: SchedulableResourceType.Practitioner,
     });
   const [open, setOpen] = useState(false);

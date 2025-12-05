@@ -1,10 +1,11 @@
-import { CountryCode } from "libphonenumber-js/types.cjs";
-
 import {
   ENCOUNTER_CLASS,
   EncounterClass,
+  EncounterDischargeDisposition,
 } from "@/types/emr/encounter/encounter";
+
 import { NonEmptyArray } from "@/Utils/types";
+import { CountryCode } from "libphonenumber-js/types.cjs";
 
 const env = import.meta.env;
 
@@ -59,6 +60,10 @@ const careConfig = {
       ? (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",")[0] as EncounterClass)
       : undefined),
 
+  defaultDischargeDisposition: env.REACT_DEFAULT_DISCHARGE_DISPOSITION as
+    | EncounterDischargeDisposition
+    | undefined,
+
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
     "https://www.openstreetmap.org/?mlat={lat}&mlon={long}&zoom=15",
@@ -102,6 +107,11 @@ const careConfig = {
       true,
     ),
   },
+
+  /**
+   * Flag to make location field mandatory for payment reconciliation
+   */
+  paymentLocationRequired: boolean("REACT_PAYMENT_LOCATION_REQUIRED", true),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
@@ -174,6 +184,30 @@ const careConfig = {
       false,
     ),
   },
+
+  i18nUrl: env.REACT_CUSTOM_REMOTE_I18N_URL,
+
+  /**
+   * Custom shortcuts configuration from environment variables
+   * Format: JSON string with array of shortcut objects
+   * Each shortcut can have: title, description, href, icon (optional)
+   * Placeholders like {facilityId}, {userId} will be replaced at runtime
+   */
+  customShortcuts: env.REACT_CUSTOM_SHORTCUTS
+    ? JSON.parse(env.REACT_CUSTOM_SHORTCUTS)
+    : [],
+  /**
+   * System identifier for patient phone number configuration
+   */
+  phoneNumberConfigSystem: "system.care.ohc.network/patient-phone-number",
+
+  /**
+   * Enable automatic invoice sheet after dispensing items
+   */
+  enableAutoInvoiceAfterDispense: boolean(
+    "REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE",
+    false,
+  ),
 } as const;
 
 export default careConfig;
