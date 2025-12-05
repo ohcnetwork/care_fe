@@ -168,8 +168,6 @@ function TokenCategoryListContent({
   return (
     <div className="container mx-auto">
       <div className="mb-4">
-        <div className="mb-6 flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4"></div>
-
         <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
           <div className="w-full md:w-auto">
             <div className="relative w-full md:w-auto">
