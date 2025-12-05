@@ -184,7 +184,11 @@ export default function DiagnosticReportView({
                 <CardTitle>{t("test_results")}</CardTitle>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      aria-label="Test Results Actions"
+                    >
                       <MoreVertical className="size-4" />
                     </Button>
                   </DropdownMenuTrigger>
