@@ -273,7 +273,6 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
                     <th>Criticality</th>
                     <th>Clinical Status</th>
                     <th>Last Occurrence</th>
-                    <th>Onset</th>
                     <th>Note</th>
                 </tr>
             </thead>
@@ -285,7 +284,6 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
                     <td><span style="color: #d9534f;">{{ allergy_intolerance.criticality }}</span></td>
                     <td>{{ allergy_intolerance.clinical_status }}</td>
                     <td>{{ allergy_intolerance.last_occurrence }}</td>
-                    <td>{{ allergy_intolerance.onset }}</td>
                     <td>{{ allergy_intolerance.note }}</td>
                 </tr>
                 {% endfor %}
