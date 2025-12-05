@@ -119,7 +119,7 @@ function ServiceRequestCard({
                       currentTags={request.tags}
                       onUpdate={() => {
                         queryClient.invalidateQueries({
-                          queryKey: ["serviceRequests", facilityId, locationId],
+                          queryKey: ["serviceRequests", facilityId],
                         });
                       }}
                       patientId={request.encounter.patient.id}
@@ -136,16 +136,16 @@ function ServiceRequestCard({
                     entityType="service_request"
                     entityId={request.id}
                     facilityId={facilityId}
-                    currentTags={[]}
+                    currentTags={request.tags}
                     onUpdate={() => {
                       queryClient.invalidateQueries({
-                        queryKey: ["serviceRequests", facilityId, locationId],
+                        queryKey: ["serviceRequests", facilityId],
                       });
                     }}
                     patientId={request.encounter.patient.id}
                     trigger={
                       <Button variant="outline" size="xs">
-                        <Hash className="size-3" /> {t("add_tags")}
+                        <Hash className="size-3" /> {t("tags")}
                       </Button>
                     }
                   />
@@ -244,7 +244,7 @@ export default function ServiceRequestList({
   });
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["serviceRequests", facilityId, locationId, qParams],
+    queryKey: ["serviceRequests", facilityId, { ...qParams, locationId }],
     queryFn: query.debounced(serviceRequestApi.listServiceRequest, {
       pathParams: { facilityId },
       queryParams: {
