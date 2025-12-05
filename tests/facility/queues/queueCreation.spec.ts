@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import type { Locator, Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -87,7 +87,7 @@ test.describe("Queue Creation & Editing", () => {
     await createQueue(page, queueName);
 
     await test.step("Open queue edit menu", async () => {
-      const row: Locator = page.getByRole("row", {
+      const row = page.getByRole("row", {
         name: new RegExp(`\\b${queueName}\\b`),
       });
       await row.locator("td").last().getByRole("button").click();
