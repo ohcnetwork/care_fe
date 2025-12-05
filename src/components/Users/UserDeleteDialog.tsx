@@ -17,6 +17,7 @@ import userApi from "@/types/user/userApi";
 interface ConfirmDialogProps {
   user: UserBase;
   trigger?: React.ReactNode;
+  isOwnAccount?: boolean;
 }
 
 const CONFIRMATION_TEXT = "Delete Account";
@@ -64,7 +65,9 @@ const UserDeleteDialog = (props: ConfirmDialogProps) => {
         </>
       }
       confirmationText={CONFIRMATION_TEXT}
-      actionButtonText={t("delete_my_account")}
+      actionButtonText={t(
+        props.isOwnAccount ? "delete_my_account" : "delete_account",
+      )}
       onConfirm={() => deleteUser()}
       isLoading={isPending}
       open={open}

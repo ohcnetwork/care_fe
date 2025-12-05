@@ -97,6 +97,7 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
       title: `${form.getValues("title")} (Clone)`,
       organizations: selectedIds,
       tags: tags.map((tag) => tag.id),
+      version: "1.0", // TODO: remove once backend handles versioning
     };
 
     cloneQuestionnaire(clonedQuestionnaire);

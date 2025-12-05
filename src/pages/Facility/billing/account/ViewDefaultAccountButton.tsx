@@ -4,12 +4,13 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
-import query from "@/Utils/request/query";
 import {
   AccountBillingStatus,
   AccountStatus,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import query from "@/Utils/request/query";
 
 export default function ViewDefaultAccountButton({
   facilityId,
@@ -50,7 +51,8 @@ export default function ViewDefaultAccountButton({
         disabled={disabled}
       >
         {t("view_account")}
-        <ExternalLinkIcon className="w-4 h-4" />
+        <ShortcutBadge actionId="view-account" />
+        <ExternalLinkIcon className="size-4" />
       </Button>
     )
   );

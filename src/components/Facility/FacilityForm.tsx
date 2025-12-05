@@ -57,12 +57,12 @@ export default function FacilityForm({
 
   const facilityFormSchema = z.object({
     facility_type: z.string().min(1, t("facility_type_required")),
-    name: z.string().min(1, t("name_is_required")),
+    name: z.string().trim().min(1, t("name_is_required")),
     description: z.string().trim().default(""),
     features: z.array(z.number()).default([]),
     pincode: validators().pincode,
     geo_organization: z.string().min(1, t("field_required")),
-    address: z.string().min(1, t("address_is_required")),
+    address: z.string().trim().min(1, t("address_is_required")),
     phone_number: validators().phoneNumber.required,
     latitude: validators()
       .coordinates.latitude.transform((val) => (val ? Number(val) : undefined))
@@ -253,11 +253,7 @@ export default function FacilityForm({
                 <FormItem>
                   <FormLabel aria-required>{t("facility_name")}</FormLabel>
                   <FormControl>
-                    <Input
-                      data-cy="facility-name"
-                      placeholder={t("enter_facility_name")}
-                      {...field}
-                    />
+                    <Input placeholder={t("enter_facility_name")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -271,11 +267,7 @@ export default function FacilityForm({
               <FormItem>
                 <FormLabel>{t("description")}</FormLabel>
                 <FormControl>
-                  <Textarea
-                    {...field}
-                    data-cy="facility-description"
-                    placeholder={t("markdown_supported")}
-                  />
+                  <Textarea {...field} placeholder={t("markdown_supported")} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -320,7 +312,6 @@ export default function FacilityForm({
                   <FormLabel aria-required>{t("phone_number")}</FormLabel>
                   <FormControl>
                     <PhoneInput
-                      data-cy="facility-phone"
                       placeholder={t("enter_phone_number")}
                       {...field}
                     />
@@ -338,7 +329,6 @@ export default function FacilityForm({
                   <FormLabel aria-required>{t("pincode")}</FormLabel>
                   <FormControl>
                     <Input
-                      data-cy="facility-pincode"
                       placeholder={t("enter_pincode")}
                       type="number"
                       inputMode="numeric"
@@ -391,11 +381,7 @@ export default function FacilityForm({
               <FormItem>
                 <FormLabel aria-required>{t("address")}</FormLabel>
                 <FormControl>
-                  <Textarea
-                    {...field}
-                    data-cy="facility-address"
-                    placeholder={t("enter_address")}
-                  />
+                  <Textarea {...field} placeholder={t("enter_address")} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -429,7 +415,6 @@ export default function FacilityForm({
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    data-cy="make-facility-public"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
@@ -453,7 +438,6 @@ export default function FacilityForm({
           disabled={
             facilityId ? isUpdatePending || !form.formState.isDirty : isPending
           }
-          data-cy={facilityId ? "update-facility" : "submit-facility"}
         >
           {facilityId ? (
             isUpdatePending ? (

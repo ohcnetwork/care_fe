@@ -435,6 +435,7 @@ export function MedicationStatementQuestion({
         ]}
         buttonLabel={t("medication_history")}
         onAddSelected={handleAddHistoricalMedications}
+        disableAPI={isPreview}
       />
 
       {medications.length > 0 && (

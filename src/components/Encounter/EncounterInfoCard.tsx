@@ -1,27 +1,24 @@
-import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
-
-import { cn } from "@/lib/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-
 import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
-import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import TagBadge from "@/components/Tags/TagBadge";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 export interface EncounterInfoCardProps {
   encounter: EncounterRead;
@@ -41,7 +38,6 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
 
   return (
     <Card
-      data-cy={`encounter-card-${encounter.id}`}
       data-status={encounter.status}
       key={props.encounter.id}
       className={cn(
@@ -63,10 +59,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           {encounter.patient.deceased_datetime && (
             <Badge variant="destructive">{t("deceased")}</Badge>
           )}
-          <Badge
-            data-cy="encounter-status-badge"
-            variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
-          >
+          <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
             {t(`encounter_status__${encounter.status}`)}
           </Badge>
         </div>
@@ -104,13 +97,13 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
         {encounterTags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {visibleTags.map((tag) => (
-              <Badge
+              <TagBadge
                 key={tag.id}
+                tag={tag}
+                hierarchyDisplay
                 variant="outline"
                 className="bg-gray-100 text-gray-700 border-gray-200 px-2 py-1 text-xs"
-              >
-                {getTagHierarchyDisplay(tag)}
-              </Badge>
+              />
             ))}
             {remainingCount > 0 && (
               <Badge className="bg-gray-100 text-gray-700 border-gray-200 px-2 py-1 text-xs">

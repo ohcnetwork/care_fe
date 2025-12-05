@@ -10,11 +10,11 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import { ValueSetEditor } from "@/components/ValueSet/ValueSetEditor";
 
+import { ValueSetRead, ValueSetStatus } from "@/types/valueSet/valueSet";
+import valueSetApi from "@/types/valueSet/valueSetApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
-import { ValuesetBase } from "@/types/valueset/valueset";
-import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface CreateValueSetProps {
   onValueSetChange?: (valueSet: string) => void;
@@ -26,7 +26,7 @@ export function SelectOrCreateValueset({
   value,
 }: CreateValueSetProps) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [currentValueSet, setCurrentValueSet] = useState<ValuesetBase>();
+  const [currentValueSet, setCurrentValueSet] = useState<ValueSetRead>();
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleValueSetChange = (val: string) => {
@@ -35,18 +35,18 @@ export function SelectOrCreateValueset({
 
   const { data: valuesets, isFetching: isFetchingValuesets } = useQuery({
     queryKey: ["valuesets", searchQuery],
-    queryFn: query.debounced(valuesetApi.list, {
+    queryFn: query.debounced(valueSetApi.list, {
       queryParams: {
         name: searchQuery,
-        status: "active",
+        status: ValueSetStatus.ACTIVE,
       },
     }),
-    select: (data: PaginatedResponse<ValuesetBase>) => data.results,
+    select: (data: PaginatedResponse<ValueSetRead>) => data.results,
   });
 
   const { data: slugObj, isLoading: isLoadingSlug } = useQuery({
     queryKey: ["valueset", value],
-    queryFn: query(valuesetApi.get, {
+    queryFn: query(valueSetApi.get, {
       pathParams: { slug: value! },
     }),
     enabled: !!value,

@@ -6,7 +6,7 @@ import { Time } from "@/Utils/types";
 import { formatName } from "@/Utils/utils";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { PatientRead } from "@/types/emr/patient/patient";
+import { PatientRead, PublicPatientRead } from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
@@ -221,17 +221,24 @@ export type ScheduleResource =
   | LocationResource
   | HealthcareServiceResource;
 
-export type Appointment = {
+export type AppointmentBase = {
   id: string;
   token_slot: TokenSlot;
-  patient: PatientRead;
   booked_on: string;
   status: AppointmentStatus;
   note: string;
-  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
   token: TokenRead | null;
+  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
 } & ScheduleResource;
+
+export type Appointment = AppointmentBase & {
+  patient: PatientRead;
+};
+
+export type PublicAppointment = AppointmentBase & {
+  patient: PublicPatientRead;
+};
 
 export type AppointmentRead = Appointment & {
   tags: TagConfig[];

@@ -46,10 +46,10 @@ test.describe("Tag Configuration Management", () => {
     await page.getByRole("button", { name: "Create tag config" }).click();
 
     // Verify the tag was created successfully
-    await expect(page.locator("tbody")).toContainText(uniqueTagName);
-    await expect(
-      page.getByRole("cell", { name: new RegExp(uniqueTagName) }),
-    ).toBeVisible();
+    await page
+      .getByRole("textbox", { name: "Search tag configs" })
+      .fill(uniqueTagName);
+    await expect(page.getByRole("cell", { name: uniqueTagName })).toBeVisible();
   });
 
   test("should display existing tag configurations", async ({ page }) => {
@@ -98,6 +98,9 @@ test.describe("Tag Configuration Management", () => {
     await page.getByRole("option", { name: "Administrator" }).click();
     await page.getByRole("button", { name: "Create tag config" }).click();
 
+    await page
+      .getByRole("textbox", { name: "Search tag configs" })
+      .fill(tagName);
     // View the tag details
     await page.getByRole("row", { name: tagName }).getByRole("button").click();
 
@@ -124,6 +127,9 @@ test.describe("Tag Configuration Management", () => {
     await page.getByRole("button", { name: "Create tag config" }).click();
 
     // Navigate to parent tag and create child
+    await page
+      .getByRole("textbox", { name: "Search tag configs" })
+      .fill(parentTagName);
     await page
       .getByRole("row", { name: parentTagName })
       .getByRole("button")
@@ -168,6 +174,9 @@ test.describe("Tag Configuration Management", () => {
 
     // Create child tag
     await page
+      .getByRole("textbox", { name: "Search tag configs" })
+      .fill(parentTagName);
+    await page
       .getByRole("row", { name: parentTagName })
       .getByRole("button")
       .click();
@@ -188,8 +197,10 @@ test.describe("Tag Configuration Management", () => {
     await expect(displayNameInput).toHaveValue(childTagName);
 
     // Update the child tag
-    await displayNameInput.clear();
-    await displayNameInput.fill(updatedChildTagName);
+    await page.getByRole("textbox", { name: "Display name *" }).click();
+    await page
+      .getByRole("textbox", { name: "Display name *" })
+      .fill(updatedChildTagName);
     await page.getByRole("button", { name: "Update tag config" }).click();
 
     // Verify the update was successful
@@ -224,6 +235,9 @@ test.describe("Tag Configuration Management", () => {
     await page.getByRole("button", { name: "Create tag config" }).click();
 
     // Create child tag
+    await page
+      .getByRole("textbox", { name: "Search tag configs" })
+      .fill(parentTagName);
     await page
       .getByRole("row", { name: parentTagName })
       .getByRole("button")

@@ -20,6 +20,8 @@ import { usePermissions } from "@/context/PermissionContext";
 import { FacilityListRead } from "@/types/facility/facility";
 import facilityApi from "@/types/facility/facilityApi";
 
+import useAuthUser from "@/hooks/useAuthUser";
+import { Settings } from "lucide-react";
 import AddFacilitySheet from "./components/AddFacilitySheet";
 import EntityBadge from "./components/EntityBadge";
 import OrganizationLayout from "./components/OrganizationLayout";
@@ -34,7 +36,13 @@ export default function OrganizationFacilities({
   navOrganizationId,
 }: Props) {
   const { t } = useTranslation();
+  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
+
+  const { isGeoAdmin } = getPermissions(
+    hasPermission,
+    authUser?.permissions || [],
+  );
 
   const { qParams, Pagination, advancedFilter, resultsPerPage, updateQuery } =
     useFilters({ limit: 15, disableCache: true });
@@ -96,14 +104,10 @@ export default function OrganizationFacilities({
                   })
                 }
                 className="w-full max-w-sm"
-                data-cy="search-facility"
               />
             </div>
 
-            <div
-              className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4"
-              data-cy="facility-cards"
-            >
+            <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4">
               {isFetching ? (
                 <CardGridSkeleton count={6} />
               ) : facilities?.results?.length === 0 ? (
@@ -146,9 +150,8 @@ export default function OrganizationFacilities({
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-end">
-                      <div>
+                      <div className="flex">
                         <Button
-                          data-cy="view-facility-button"
                           variant="link"
                           size="icon"
                           className="text-primary"
@@ -165,6 +168,22 @@ export default function OrganizationFacilities({
                             />
                           </Link>
                         </Button>
+                        {/* GeoAdmin Button to Manage Departments */}
+                        {isGeoAdmin && (
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="text-primary ml-4 p-2"
+                            asChild
+                          >
+                            <Link
+                              href={`/facility/${facility.id}/settings/departments`}
+                              className="text-sm w-full hover:underline"
+                            >
+                              <Settings className="size-4" />
+                            </Link>
+                          </Button>
+                        )}
                       </div>
                     </CardFooter>
                   </Card>
