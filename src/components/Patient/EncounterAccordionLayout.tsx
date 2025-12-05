@@ -53,7 +53,6 @@ export function EncounterAccordionLayout({
                   size="icon"
                   className="hover:bg-transparent text-gray-500 hover:text-gray-500"
                   aria-label={t("edit_encounter")}
-                  onClick={(e) => e.stopPropagation()}
                 >
                   <Link href={editLink}>
                     <SquarePen className="size-4" />
