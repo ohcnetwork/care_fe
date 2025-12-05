@@ -17,6 +17,14 @@ async function createQueue(page: Page, queueName: string) {
   await expect(page.getByText(queueName)).toBeVisible();
 }
 
+async function openQueueEditMenu(page: Page, queueName: string) {
+  const row = page.getByRole("row", {
+    name: new RegExp(`\\b${queueName}\\b`),
+  });
+  await row.locator("td").last().getByRole("button").click();
+  await page.getByRole("menuitem", { name: /edit queue name/i }).click();
+}
+
 test.describe("Queue Creation & Editing", () => {
   let facilityId: string;
 
@@ -37,11 +45,7 @@ test.describe("Queue Creation & Editing", () => {
     const updatedQueueName = faker.lorem.word();
     await createQueue(page, queueName);
     await test.step("Open queue edit menu", async () => {
-      const row = page.getByRole("row", {
-        name: new RegExp(`\\b${queueName}\\b`),
-      });
-      await row.locator("td").last().getByRole("button").click();
-      await page.getByRole("menuitem", { name: /edit queue name/i }).click();
+      await openQueueEditMenu(page, queueName);
     });
 
     await test.step("Update queue name", async () => {
@@ -68,11 +72,7 @@ test.describe("Queue Creation & Editing", () => {
     const queueName = faker.lorem.word();
     await createQueue(page, queueName);
     await test.step("Open queue edit menu", async () => {
-      const row = page.getByRole("row", {
-        name: new RegExp(`\\b${queueName}\\b`),
-      });
-      await row.locator("td").last().getByRole("button").click();
-      await page.getByRole("menuitem", { name: /edit queue name/i }).click();
+      await openQueueEditMenu(page, queueName);
     });
 
     await test.step("Verify update button is disabled", async () => {
@@ -87,11 +87,7 @@ test.describe("Queue Creation & Editing", () => {
     await createQueue(page, queueName);
 
     await test.step("Open queue edit menu", async () => {
-      const row = page.getByRole("row", {
-        name: new RegExp(`\\b${queueName}\\b`),
-      });
-      await row.locator("td").last().getByRole("button").click();
-      await page.getByRole("menuitem", { name: /edit queue name/i }).click();
+      await openQueueEditMenu(page, queueName);
     });
 
     await test.step("Clear queue name field and attempt update", async () => {
