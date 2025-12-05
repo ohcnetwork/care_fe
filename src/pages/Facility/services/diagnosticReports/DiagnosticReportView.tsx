@@ -187,7 +187,7 @@ export default function DiagnosticReportView({
                     <Button
                       variant="outline"
                       size="icon"
-                      aria-label="Test Results Actions"
+                      aria-label={t("test_results_actions")}
                     >
                       <MoreVertical className="size-4" />
                     </Button>
