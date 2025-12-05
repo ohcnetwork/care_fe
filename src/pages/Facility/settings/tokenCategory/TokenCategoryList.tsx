@@ -185,12 +185,12 @@ function TokenCategoryListContent({
             </div>
           </div>
           {canWriteTokenCategory && (
-            <Button>
+            <Button variant="primary" asChild>
               <Link
                 basePath="/"
                 href={`/facility/${facilityId}/settings/token_category/${resourceType}/new`}
               >
-                <CareIcon icon="l-plus" className="mr-2" />
+                <CareIcon icon="l-plus" />
                 {t("add_token_category")}
               </Link>
             </Button>
