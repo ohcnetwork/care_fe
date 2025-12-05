@@ -273,12 +273,7 @@ export default function QueuesIndex({
   // Handle resource selection - memoized to prevent unnecessary re-renders
   const handleResourceChange = useCallback(
     (users: UserReadMinimal[]) => {
-      if (users.length > 0) {
-        updateQuery({ resource_id: users[0].id });
-      } else {
-        // Clear the selection and reset to current user's ID
-        updateQuery({ resource_id: undefined });
-      }
+      updateQuery({ resource_id: users[0]?.id });
     },
     [updateQuery],
   );
