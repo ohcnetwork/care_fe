@@ -128,7 +128,6 @@ interface ServiceRequestFormProps {
   questionId?: string;
   index?: number;
   isPreview?: boolean;
-  activityDefinition?: ActivityDefinitionReadSpec;
   facilityId?: string;
 }
 
@@ -142,10 +141,16 @@ function ServiceRequestForm({
   questionId,
   index,
   isPreview = false,
-  activityDefinition,
   facilityId = "",
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
+  const { data: locations } = useQuery({
+    queryKey: ["locations", facilityId],
+    queryFn: query(locationApi.list, {
+      pathParams: { facility_id: facilityId },
+      queryParams: { limit: 100 },
+    }),
+  });
 
   const renderInfoSection = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-2 w-full">
@@ -199,19 +204,24 @@ function ServiceRequestForm({
         <span className="font-medium text-sm text-gray-700">
           {t("locations")}:
         </span>
-        {activityDefinition?.locations &&
-          activityDefinition?.locations.length > 0 &&
-          activityDefinition?.locations.map((location) => {
+        {serviceRequest.service_request.locations.length === 0 ? (
+          <span className="text-sm text-gray-500">{t("no_locations")}</span>
+        ) : (
+          serviceRequest.service_request.locations.map((loc) => {
+            const location = locations?.results.find(
+              (l: LocationList) => l.id === loc,
+            );
             return (
               <Badge
-                key={location.id}
+                key={location?.id}
                 variant="outline"
                 className="bg-gray-50 text-gray-700 border-gray-200"
               >
-                {location?.name || location.id}
+                {location?.name}
               </Badge>
             );
-          })}
+          })
+        )}
       </div>
     </div>
   );
@@ -488,10 +498,6 @@ export function ServiceRequestQuestion({
   });
 
   useEffect(() => {
-    console.log("selectedActivityDefinition", selectedActivityDefinition);
-  }, [selectedActivityDefinition]);
-
-  useEffect(() => {
     if (selectedActivityDefinition && selectedActivityDefinitionData) {
       const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec = {
         service_request: {
@@ -700,7 +706,6 @@ export function ServiceRequestQuestion({
       {previewServiceRequest && !isLoadingSelectedAD && (
         <ServiceRequestForm
           serviceRequest={previewServiceRequest}
-          activityDefinition={selectedActivityDefinitionData}
           onUpdate={handlePreviewServiceRequestUpdate}
           onRemove={() => {
             setPreviewServiceRequest(null);
