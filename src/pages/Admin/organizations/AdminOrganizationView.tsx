@@ -160,7 +160,7 @@ function OrganizationCard({
         </CardHeader>
 
         <Badge variant="indigo" className="w-fit">
-          {org.org_type}
+          {t(`SYSTEM__org_type__${org.org_type}`)}
         </Badge>
 
         <div className="flex gap-2 flex-wrap justify-end">
@@ -168,6 +168,11 @@ function OrganizationCard({
             organizationType={organizationType}
             parentId={parentId}
             org={org}
+            trigger={
+              <Button variant="white" size="sm" className="font-semibold">
+                {t("edit")}
+              </Button>
+            }
           />
 
           <Button
@@ -298,7 +303,7 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
                           </TableCell>
                           <TableCell>
                             <Badge variant="indigo" className="w-fit">
-                              {org.org_type}
+                              {t(`SYSTEM__org_type__${org.org_type}`)}
                             </Badge>
                           </TableCell>
                           <TableCell

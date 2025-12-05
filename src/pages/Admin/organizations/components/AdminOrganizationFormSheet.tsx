@@ -42,12 +42,14 @@ interface Props {
   organizationType: string;
   parentId?: string;
   org?: Organization;
+  trigger?: React.ReactNode;
 }
 
 export default function AdminOrganizationFormSheet({
   organizationType,
   parentId,
   org,
+  trigger,
 }: Props) {
   const { t } = useTranslation();
 
@@ -142,7 +144,9 @@ export default function AdminOrganizationFormSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        {isEditMode ? (
+        {trigger ? (
+          trigger
+        ) : isEditMode ? (
           <Button variant="ghost" size="icon" aria-label={t("edit")}>
             <PenLine className="size-4" />
           </Button>
