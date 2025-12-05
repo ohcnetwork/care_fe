@@ -9,8 +9,10 @@ export interface TokenQueue {
   is_primary: boolean;
 }
 
-export interface TokenQueueCreate
-  extends Omit<TokenQueue, "id" | "is_primary"> {
+export interface TokenQueueCreate extends Omit<
+  TokenQueue,
+  "id" | "is_primary"
+> {
   resource_type: SchedulableResourceType;
   resource_id: string;
 }

@@ -1,5 +1,6 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
 import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/element/src/types";
+import { BinaryFiles } from "@excalidraw/excalidraw/dist/types/excalidraw/types";
 import "@excalidraw/excalidraw/index.css";
 import {
   hashKey,
@@ -34,7 +35,7 @@ import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import metaArtifactApi from "@/types/metaAritifact/metaArtifactApi";
+import metaArtifactApi from "@/types/metaArtifact/metaArtifactApi";
 
 type Props = {
   associatingId: string;
@@ -52,6 +53,7 @@ export default function ExcalidrawEditor({
   const [elements, setElements] = useState<readonly ExcalidrawElement[] | null>(
     drawingId ? null : [],
   );
+  const [files, setFiles] = useState<BinaryFiles | null>(drawingId ? null : {});
   const [name, setName] = useState("");
   const [isDirty, setIsDirty] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
@@ -81,6 +83,7 @@ export default function ExcalidrawEditor({
     }
     setName(data.name);
     setElements(data.object_value.elements);
+    setFiles(data.object_value.files || {});
     setIsDirty(false);
   }, [data]);
 
@@ -101,6 +104,7 @@ export default function ExcalidrawEditor({
             object_value: {
               application: "excalidraw",
               elements: elements || [],
+              files: files || {},
             },
           },
         ],
@@ -124,7 +128,7 @@ export default function ExcalidrawEditor({
     setIsAlertOpen(false);
   };
 
-  if (elements === null || isFetching) {
+  if (elements === null || files === null || isFetching) {
     return <Loading />;
   }
 
@@ -202,10 +206,16 @@ export default function ExcalidrawEditor({
           initialData={{
             appState: { theme: "light" },
             elements: elements,
+            files: files,
           }}
-          onChange={debounce((newElements) => {
+          onChange={debounce((newElements, _appState, newFiles) => {
             setElements(newElements);
-            if (!isDirty && hashKey(newElements) !== hashKey(elements)) {
+            setFiles(newFiles);
+            if (
+              !isDirty &&
+              (hashKey(newElements) !== hashKey(elements) ||
+                JSON.stringify(newFiles) !== JSON.stringify(files))
+            ) {
               setIsDirty(true);
             }
           }, 100)}

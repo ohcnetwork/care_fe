@@ -51,15 +51,14 @@ export interface ChargeItemBase {
   paid_invoice?: InvoiceRead;
 }
 
-export interface ChargeItemCreate
-  extends Omit<
-    ChargeItemBase,
-    | "id"
-    | "service_resource_id"
-    | "service_resource"
-    | "paid_invoice"
-    | "total_price"
-  > {
+export interface ChargeItemCreate extends Omit<
+  ChargeItemBase,
+  | "id"
+  | "service_resource_id"
+  | "service_resource"
+  | "paid_invoice"
+  | "total_price"
+> {
   encounter?: string;
   patient?: string;
   account?: string;
@@ -80,11 +79,10 @@ export interface ApplyMultipleChargeItemDefinitionRequest {
   requests: ApplyChargeItemDefinitionRequest[];
 }
 
-export interface ChargeItemUpdate
-  extends Omit<
-    ChargeItemBase,
-    "service_resource_id" | "service_resource" | "paid_invoice" | "total_price"
-  > {
+export interface ChargeItemUpdate extends Omit<
+  ChargeItemBase,
+  "service_resource_id" | "service_resource" | "paid_invoice" | "total_price"
+> {
   account?: string;
 }
 
