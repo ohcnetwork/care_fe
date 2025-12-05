@@ -385,7 +385,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
               <div className="max-w-2xl mx-auto flex justify-end">
                 <Button
                   variant="primary_gradient"
-                  // TODO: disable button if basic info not fille
+                  disabled={!form.formState.isDirty || isPending}
                 >
                   <CheckIcon />
                   {patientId ? t("update") : t("register_patient")}
@@ -690,6 +690,7 @@ const PatientBasicsContent = ({
               </FormLabel>
               <FormControl>
                 <TagSelectorPopover
+                  facilityId={facilityId}
                   selected={selectedTags}
                   onChange={(tags) => {
                     field.onChange(tags.map((tag) => tag.id));
@@ -890,7 +891,6 @@ const AdditionalDetailsContent = ({
                   <FormControl>
                     <DateTimeInput
                       id="death-datetime"
-                      data-cy="death-datetime-input"
                       value={field.value ?? ""}
                       onDateChange={field.onChange}
                       max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}

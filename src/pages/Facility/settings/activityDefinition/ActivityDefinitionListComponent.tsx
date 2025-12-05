@@ -211,7 +211,7 @@ export function ActivityDefinitionList({
               <CareIcon icon="l-search" className="size-5" />
             </span>
             <Input
-              placeholder={t("search_activity_definitions")}
+              placeholder={t("search_activity_definition")}
               value={qParams.search || ""}
               onChange={(e) =>
                 updateQuery({ search: e.target.value || undefined })
@@ -283,7 +283,7 @@ export function ActivityDefinitionList({
           icon={
             <CareIcon icon="l-clipboard-alt" className="text-primary size-6" />
           }
-          title={t("no_activity_definitions_found")}
+          title={t("no_activity_definition_found")}
           description={t("no_activity_definitions_in_category")}
         />
       ) : (

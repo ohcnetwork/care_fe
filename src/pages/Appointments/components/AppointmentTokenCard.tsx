@@ -127,16 +127,9 @@ const TokenCard = ({
             </div>
           </div>
           <div className="flex flex-col gap-2 items-end">
-            <div className="flex items-end justify-between gap-4">
-              <div className="flex-shrink-0">
-                <div className="text-sm whitespace-nowrap text-center bg-gray-100 px-3 pb-2 pt-2 -mt-4 font-medium text-gray-700 rounded-md rounded-t-none border border-gray-200">
-                  <p>{t("general_op")}</p>
-                </div>
-              </div>
-            </div>
             {token && (
               <div className="items-end">
-                <Label className="text-gray-600 text-sm whitespace-nowrap justify-end mt-4">
+                <Label className="text-gray-600 text-sm whitespace-nowrap justify-end">
                   {t("token_no")}
                 </Label>
                 <p className="text-2xl font-bold justify-end flex">
@@ -144,10 +137,11 @@ const TokenCard = ({
                 </p>
               </div>
             )}
-            <div className="mt-4">
+            <div>
               <QRCodeSVG
                 size={isLargeScreen ? 96 : 60}
                 value={patient?.id || ""}
+                className="ml-2"
               />
             </div>
           </div>

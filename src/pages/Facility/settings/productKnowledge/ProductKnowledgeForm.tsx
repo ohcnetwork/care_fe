@@ -64,7 +64,7 @@ const createFormSchema = (
       .max(25, {
         message: t("character_count_validation", { min: 5, max: 25 }),
       })
-      .regex(/^[a-z0-9-]+$/, {
+      .regex(/^[a-z0-9_-]+$/, {
         message: t("slug_format_message"),
       }),
     product_type: z.nativeEnum(ProductKnowledgeType),
@@ -392,7 +392,9 @@ function ProductKnowledgeFormContent({
                               const sanitizedValue = e.target.value
                                 .toLowerCase()
                                 .replace(/[^a-z0-9_-]/g, "");
-                              field.onChange(sanitizedValue);
+                              form.setValue("slug_value", sanitizedValue, {
+                                shouldValidate: true,
+                              });
                             }}
                           />
                         </FormControl>

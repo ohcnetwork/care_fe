@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { InfoIcon, Trash2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -34,15 +34,15 @@ import { ChargeItemDefinitionPicker } from "@/components/Common/ChargeItemDefini
 import { useIsMobile } from "@/hooks/use-mobile";
 
 import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { ResourceCategorySubType } from "@/types/base/resourceCategory/resourceCategory";
 import {
   ApplyChargeItemDefinitionRequest,
   ChargeItemServiceResource,
 } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
-import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
-import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import {
+  ChargeItemDefinitionBase,
+  ChargeItemDefinitionRead,
+} from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 
 interface AddMultipleChargeItemsSheetProps {
   open: boolean;
@@ -56,8 +56,7 @@ interface AddMultipleChargeItemsSheetProps {
   disabled?: boolean;
 }
 
-interface ApplyChargeItemDefinitionRequestWithObject
-  extends ApplyChargeItemDefinitionRequest {
+interface ApplyChargeItemDefinitionRequestWithObject extends ApplyChargeItemDefinitionRequest {
   charge_item_definition_object: ChargeItemDefinitionRead;
 }
 
@@ -77,18 +76,9 @@ export default function AddMultipleChargeItemsSheet({
   const [selectedItems, setSelectedItems] = useState<
     ApplyChargeItemDefinitionRequestWithObject[]
   >([]);
-  const [selectedDefinitionSlug, setSelectedDefinitionSlug] = useState<
-    string | undefined
+  const [selectedDefinition, setSelectedDefinition] = useState<
+    ChargeItemDefinitionBase | undefined
   >(undefined);
-
-  // Fetch selected definition details when a definition is selected
-  const { data: selectedDefinition } = useQuery({
-    queryKey: ["chargeItemDefinition", facilityId, selectedDefinitionSlug],
-    queryFn: query(chargeItemDefinitionApi.retrieveChargeItemDefinition, {
-      pathParams: { facilityId, slug: selectedDefinitionSlug! },
-    }),
-    enabled: !!selectedDefinitionSlug,
-  });
 
   // Unified request data
   const { mutate: applyChargeItems, isPending } = useMutation({
@@ -104,10 +94,10 @@ export default function AddMultipleChargeItemsSheet({
   });
 
   useEffect(() => {
-    if (selectedDefinitionSlug && selectedDefinition) {
+    if (selectedDefinition) {
       // Check if this definition is already in the selected items
       const isAlreadySelected = selectedItems.some(
-        (item) => item.charge_item_definition === selectedDefinitionSlug,
+        (item) => item.charge_item_definition === selectedDefinition.slug,
       );
 
       if (!isAlreadySelected) {
@@ -126,10 +116,9 @@ export default function AddMultipleChargeItemsSheet({
       }
 
       // Clear the selection to allow selecting the same item again if needed
-      setSelectedDefinitionSlug(undefined);
+      setSelectedDefinition(undefined);
     }
   }, [
-    selectedDefinitionSlug,
     selectedDefinition,
     selectedItems,
     serviceResourceType,
@@ -176,14 +165,17 @@ export default function AddMultipleChargeItemsSheet({
           </label>
           <ChargeItemDefinitionPicker
             facilityId={facilityId}
-            resourceSubType={
-              ResourceCategorySubType.charge_item_definition_schedule_location
-            }
-            value={selectedDefinitionSlug}
-            onValueChange={setSelectedDefinitionSlug}
-            placeholder={t("select_charge_item_definition")}
-            disabled={disabled}
+            value={selectedDefinition}
+            onValueChange={(selectedDef) => {
+              if (!selectedDef) {
+                setSelectedDefinition(undefined);
+                return;
+              }
+              setSelectedDefinition(selectedDef as ChargeItemDefinitionBase);
+            }}
+            placeholder={t("select_charge_item_definitions")}
             className="w-full"
+            disabled={disabled}
           />
         </div>
 
@@ -248,7 +240,7 @@ export default function AddMultipleChargeItemsSheet({
                               </PopoverTrigger>
                               <PopoverContent
                                 side="right"
-                                className="p-0"
+                                className="p-0 w-auto max-w-[calc(100vw-2rem)]"
                                 align="start"
                               >
                                 <ChargeItemPriceDisplay
@@ -307,7 +299,10 @@ export default function AddMultipleChargeItemsSheet({
                               <PopoverTrigger>
                                 <InfoIcon className="size-4 text-gray-700 cursor-pointer" />
                               </PopoverTrigger>
-                              <PopoverContent side="right" className="p-0">
+                              <PopoverContent
+                                side="right"
+                                className="p-0 w-auto max-w-[calc(100vw-2rem)]"
+                              >
                                 <ChargeItemPriceDisplay
                                   priceComponents={
                                     item.charge_item_definition_object

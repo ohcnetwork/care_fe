@@ -76,8 +76,10 @@ export interface PaymentReconciliationBase {
   amount: string;
 }
 
-export interface PaymentReconciliationCreate
-  extends Omit<PaymentReconciliationBase, "id"> {
+export interface PaymentReconciliationCreate extends Omit<
+  PaymentReconciliationBase,
+  "id"
+> {
   target_invoice?: string;
   account: string;
   is_credit_note?: boolean;
