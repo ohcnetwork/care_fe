@@ -235,6 +235,7 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
+    <title>Discharge Summary</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 1200px; margin: 0 auto; }
         .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
@@ -245,79 +246,26 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
         table { width: 100%; border-collapse: collapse; margin: 10px 0; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; font-weight: bold; }
-        .subsection { margin: 15px 0 10px 20px; }
-        .subsection-title { font-size: 14px; font-weight: bold; color: #555; margin-bottom: 5px; }
-        .nested-item { margin: 8px 0; padding: 8px; background-color: #f9f9f9; border-left: 3px solid #2c5aa0; }
+        .care-team-member { margin: 8px 0; padding: 8px; background-color: #f9f9f9; border-left: 3px solid #2c5aa0; }
+        .prescription { margin: 15px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .medication { margin: 10px 0; padding: 10px; background-color: #f5f5f5; }
         .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid #333; font-size: 12px; color: #666; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Discharge Summary</h1>
-        <p>Status: {{ encounter.status }}</p>
+        {% if encounter.status %}
+        <p><strong>Encounter Status:</strong> {{ encounter.status }}</p>
+        {% endif %}
     </div>
 
     <!-- Add your content here -->
 
-    <!-- Symptoms -->
-    <div class="section">
-        <div class="section-title">SYMPTOMS</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Symptom</th>
-                    <th>Onset</th>
-                    <th>Clinical Status</th>
-                    <th>Verification</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- loop:encounter.symptoms -->
-                {% for symptom in encounter.symptoms %}
-                <tr>
-                    <td>{{ symptom.name }}</td>
-                    <td>{{ symptom.onset }}</td>
-                    <td>{{ symptom.clinical_status }}</td>
-                    <td>{{ symptom.verification_status }}</td>
-                </tr>
-                {% endfor %}
-                <!-- endloop:encounter.symptoms -->
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Diagnoses -->
-    <div class="section">
-        <div class="section-title">DIAGNOSES</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Diagnosis</th>
-                    <th>Onset</th>
-                    <th>Clinical Status</th>
-                    <th>Verification</th>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- loop:encounter.diagnoses -->
-                {% for diagnosis in encounter.diagnoses %}
-                <tr>
-                    <td><strong>{{ diagnosis.name }}</strong></td>
-                    <td>{{ diagnosis.onset }}</td>
-                    <td>{{ diagnosis.clinical_status }}</td>
-                    <td>{{ diagnosis.verification_status }}</td>
-                    <td>{{ diagnosis.note }}</td>
-                </tr>
-                {% endfor %}
-                <!-- endloop:encounter.diagnoses -->
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Allergy Intolerances -->
+    <!-- Allergies -->
     <div class="section">
         <div class="section-title">ALLERGIES &amp; INTOLERANCES</div>
+        {% if encounter.allergy_intolerances %}
         <table>
             <thead>
                 <tr>
@@ -325,7 +273,8 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
                     <th>Criticality</th>
                     <th>Clinical Status</th>
                     <th>Last Occurrence</th>
-                    <th>Notes</th>
+                    <th>Onset</th>
+                    <th>Note</th>
                 </tr>
             </thead>
             <tbody>
@@ -336,24 +285,203 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
                     <td><span style="color: #d9534f;">{{ allergy_intolerance.criticality }}</span></td>
                     <td>{{ allergy_intolerance.clinical_status }}</td>
                     <td>{{ allergy_intolerance.last_occurrence }}</td>
+                    <td>{{ allergy_intolerance.onset }}</td>
                     <td>{{ allergy_intolerance.note }}</td>
                 </tr>
                 {% endfor %}
                 <!-- endloop:encounter.allergy_intolerances -->
             </tbody>
         </table>
+        {% else %}
+        <p>No known allergies recorded.</p>
+        {% endif %}
+    </div>
+
+    <!-- Symptoms -->
+    <div class="section">
+        <div class="section-title">SYMPTOMS</div>
+        {% if encounter.symptoms %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Symptom</th>
+                    <th>Clinical Status</th>
+                    <th>Verification Status</th>
+                    <th>Onset</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- loop:encounter.symptoms -->
+                {% for symptom in encounter.symptoms %}
+                <tr>
+                    <td>{{ symptom.name }}</td>
+                    <td>{{ symptom.clinical_status }}</td>
+                    <td>{{ symptom.verification_status }}</td>
+                    <td>{{ symptom.onset }}</td>
+                    <td>{{ symptom.note }}</td>
+                </tr>
+                {% endfor %}
+                <!-- endloop:encounter.symptoms -->
+            </tbody>
+        </table>
+        {% else %}
+        <p>No symptoms recorded.</p>
+        {% endif %}
+    </div>
+
+    <!-- Diagnoses -->
+    <div class="section">
+        <div class="section-title">DIAGNOSES</div>
+        {% if encounter.diagnoses %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Diagnosis</th>
+                    <th>Clinical Status</th>
+                    <th>Verification Status</th>
+                    <th>Onset</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- loop:encounter.diagnoses -->
+                {% for diagnosis in encounter.diagnoses %}
+                <tr>
+                    <td><strong>{{ diagnosis.name }}</strong></td>
+                    <td>{{ diagnosis.clinical_status }}</td>
+                    <td>{{ diagnosis.verification_status }}</td>
+                    <td>{{ diagnosis.onset }}</td>
+                    <td>{{ diagnosis.note }}</td>
+                </tr>
+                {% endfor %}
+                <!-- endloop:encounter.diagnoses -->
+            </tbody>
+        </table>
+        {% else %}
+        <p>No diagnoses recorded.</p>
+        {% endif %}
+    </div>
+
+    <!-- Medication Prescriptions -->
+    <div class="section">
+        <div class="section-title">MEDICATION PRESCRIPTIONS</div>
+        {% if encounter.medication_prescriptions %}
+        <!-- loop:encounter.medication_prescriptions -->
+        {% for medication_prescription in encounter.medication_prescriptions %}
+        <div class="prescription">
+            <h4>Prescription {{ loop.index }}</h4>
+            <div class="info-row"><span class="label">Status:</span> {{ medication_prescription.status }}</div>
+            {% if medication_prescription.prescribed_by %}
+            <div class="info-row"><span class="label">Prescribed By:</span> {{ medication_prescription.prescribed_by.full_name }}</div>
+            {% endif %}
+            {% if medication_prescription.medications %}
+            <!-- loop:medication_prescription.medications -->
+            {% for medication in medication_prescription.medications %}
+            <div class="medication">
+                <div class="info-row"><span class="label">Medication:</span> <strong>{{ medication.name }}</strong></div>
+                <div class="info-row"><span class="label">Status:</span> {{ medication.status }}</div>
+                <div class="info-row"><span class="label">Intent:</span> {{ medication.intent }}</div>
+                <div class="info-row"><span class="label">Priority:</span> {{ medication.priority }}</div>
+                <div class="info-row"><span class="label">Authored On:</span> {{ medication.authored_on }}</div>
+                {% if medication.note %}
+                <div class="info-row"><span class="label">Note:</span> {{ medication.note }}</div>
+                {% endif %}
+                {% if medication.dosage_instructions %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dosage</th>
+                            <th>Frequency</th>
+                            <th>Duration</th>
+                            <th>Route</th>
+                            <th>Method</th>
+                            <th>Site</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- loop:medication.dosage_instructions -->
+                        {% for dosage_instruction in medication.dosage_instructions %}
+                        <tr>
+                            <td>{{ dosage_instruction.dosage }}</td>
+                            <td>{{ dosage_instruction.frequency }}</td>
+                            <td>{{ dosage_instruction.duration }}</td>
+                            <td>{{ dosage_instruction.route }}</td>
+                            <td>{{ dosage_instruction.method }}</td>
+                            <td>{{ dosage_instruction.site }}</td>
+                        </tr>
+                        {% endfor %}
+                        <!-- endloop:medication.dosage_instructions -->
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <!-- endloop:medication_prescription.medications -->
+            {% endif %}
+        </div>
+        {% endfor %}
+        <!-- endloop:encounter.medication_prescriptions -->
+        {% else %}
+        <p>No medications prescribed during this encounter.</p>
+        {% endif %}
+    </div>
+
+    <!-- Questionnaire Responses -->
+    <div class="section">
+        <div class="section-title">QUESTIONNAIRE RESPONSES</div>
+        {% if encounter.questionnaire_responses %}
+        <!-- loop:encounter.questionnaire_responses -->
+        {% for questionnaire_response in encounter.questionnaire_responses %}
+        <h4>{{ questionnaire_response.title }}</h4>
+        {% if questionnaire_response.description %}
+        <p>{{ questionnaire_response.description }}</p>
+        {% endif %}
+        {% if questionnaire_response.responses %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- loop:questionnaire_response.responses -->
+                {% for response in questionnaire_response.responses %}
+                <tr>
+                    <td>{{ response.question }}</td>
+                    <td>{{ response.answer }}</td>
+                </tr>
+                {% endfor %}
+                <!-- endloop:questionnaire_response.responses -->
+            </tbody>
+        </table>
+        {% else %}
+        <p>No responses recorded for this questionnaire.</p>
+        {% endif %}
+        <hr />
+        {% endfor %}
+        <!-- endloop:encounter.questionnaire_responses -->
+        {% else %}
+        <p>No questionnaires recorded for this encounter.</p>
+        {% endif %}
     </div>
 
     <!-- Care Team -->
     <div class="section">
         <div class="section-title">CARE TEAM</div>
+        {% if encounter.care_team %}
         <!-- loop:encounter.care_team -->
         {% for care_team in encounter.care_team %}
-        <div class="nested-item">
-            <strong>{{ care_team.user.full_name }}</strong> - {{ care_team.role }}
+        <div class="care-team-member">
+            <div class="info-row"><span class="label">Name:</span> {% if care_team.user %}{{ care_team.user.full_name }}{% else %}-{% endif %}</div>
+            <div class="info-row"><span class="label">Role:</span> {{ care_team.role }}</div>
         </div>
         {% endfor %}
         <!-- endloop:encounter.care_team -->
+        {% else %}
+        <p>No care team members recorded.</p>
+        {% endif %}
     </div>
 
     <!-- Footer -->
