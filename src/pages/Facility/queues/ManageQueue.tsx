@@ -1,3 +1,4 @@
+import { booleanFromString } from "@/common/utils";
 import { AnimatedCounter } from "@/components/Common/AnimatedCounter";
 import BackButton from "@/components/Common/BackButton";
 import Loading from "@/components/Common/Loading";
@@ -51,7 +52,7 @@ import { formatDate } from "date-fns";
 import { ChevronLeft, Edit3, InfoIcon, SettingsIcon } from "lucide-react";
 import { useNavigate, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
-import { booleanFromString, getTokenQueueStatusCount } from "./utils";
+import { getTokenQueueStatusCount } from "./utils";
 
 interface ManageQueuePageProps {
   facilityId: string;

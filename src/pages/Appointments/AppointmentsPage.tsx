@@ -84,6 +84,7 @@ import {
   formatPatientAge,
 } from "@/Utils/utils";
 
+import { booleanFromString } from "@/common/utils";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import {
   dateFilter,
@@ -103,7 +104,6 @@ import {
 } from "@/components/ui/tooltip";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
-import { booleanFromString } from "@/pages/Facility/queues/utils";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import careConfig from "@careConfig";
 import { PractitionerSelector } from "./components/PractitionerSelector";

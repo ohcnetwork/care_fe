@@ -1,4 +1,4 @@
-import { booleanFromString } from "@/pages/Facility/queues/utils";
+import { booleanFromString } from "@/common/utils";
 import {
   ENCOUNTER_CLASS,
   EncounterClass,

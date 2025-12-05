@@ -52,9 +52,3 @@ export function useTokenListInfiniteQuery({
         : false,
   });
 }
-
-export function booleanFromString(str: string, fallback = false) {
-  if (str === "true") return true;
-  if (str === "false") return false;
-  return fallback;
-}
