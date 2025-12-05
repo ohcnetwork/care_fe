@@ -25,7 +25,7 @@ async function createBasicValueSet(page: Page) {
   await page.getByRole("button", { name: "Save ValueSet" }).click();
 }
 
-test.describe("ValueSet Edit Page", () => {
+test.describe("ValueSet Edit", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/admin/valuesets");
     name = faker.company.name();
