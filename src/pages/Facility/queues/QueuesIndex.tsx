@@ -7,7 +7,7 @@ import {
   Plus,
   Settings,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,13 +21,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -59,6 +52,7 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import mutate from "@/Utils/request/mutate";
 import queryClient from "@/Utils/request/queryClient";
 import { dateQueryString } from "@/Utils/utils";
+import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { startOfDay } from "date-fns";
 import dayjs from "dayjs";
 import { Link } from "raviger";
@@ -232,12 +226,12 @@ export default function QueuesIndex({
 
   const { id: currentUserId } = useAuthUser();
 
-  // Set default resourceId for practitioners
+  // Set default resourceId for practitioners - keep as string for consistency
   const effectiveResourceId =
     qParams.resource_id ||
     resourceId ||
     (resourceType === SchedulableResourceType.Practitioner
-      ? currentUserId.toString()
+      ? currentUserId
       : undefined);
 
   // Fetch available users for practitioner resource type
@@ -251,6 +245,11 @@ export default function QueuesIndex({
 
   const availableUsers = availableUsersData?.users || [];
 
+  // Find the selected practitioner - compare IDs properly
+  const selectedPractitioner = availableUsers.find(
+    (user) => user.id === effectiveResourceId,
+  );
+
   // Set default date to today if no date is specified
   useEffect(() => {
     if (!qParams.date) {
@@ -259,23 +258,40 @@ export default function QueuesIndex({
     }
   }, [qParams.date, updateQuery]);
 
-  // Handle date filter
-  const handleDateChange = (date: Date | undefined) => {
-    if (date) {
-      updateQuery({ date: dateQueryString(date) });
-    } else {
-      updateQuery({ date: undefined });
-    }
-  };
+  // Handle date filter - memoized to prevent unnecessary re-renders
+  const handleDateChange = useCallback(
+    (date: Date | undefined) => {
+      if (date) {
+        updateQuery({ date: dateQueryString(date) });
+      } else {
+        updateQuery({ date: undefined });
+      }
+    },
+    [updateQuery],
+  );
 
-  // Handle resource selection
-  const handleResourceChange = (selectedResourceId: string) => {
-    updateQuery({ resource_id: selectedResourceId });
-  };
+  // Handle resource selection - memoized to prevent unnecessary re-renders
+  const handleResourceChange = useCallback(
+    (users: UserReadMinimal[]) => {
+      if (users.length > 0) {
+        updateQuery({ resource_id: users[0].id });
+      } else {
+        // Clear the selection and reset to current user's ID
+        updateQuery({ resource_id: undefined });
+      }
+    },
+    [updateQuery],
+  );
 
-  // Fetch queues
+  // Fetch queues - optimize query key to only include necessary params
   const { data: queuesResponse, isLoading: queuesLoading } = useQuery({
-    queryKey: ["tokenQueues", facilityId, effectiveResourceId, qParams],
+    queryKey: [
+      "tokenQueues",
+      facilityId,
+      effectiveResourceId,
+      qParams.date,
+      qParams.page,
+    ],
     queryFn: query(tokenQueueApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
@@ -326,21 +342,12 @@ export default function QueuesIndex({
               <label className="text-sm font-medium text-gray-700">
                 {t("selected_practitioner")}
               </label>
-              <Select
-                value={qParams.resource_id || effectiveResourceId}
-                onValueChange={handleResourceChange}
-              >
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder={t("select_practitioner")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableUsers.map((user: UserReadMinimal) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.first_name} {user.last_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <PractitionerSelector
+                facilityId={facilityId}
+                selected={selectedPractitioner ? [selectedPractitioner] : []}
+                onSelect={handleResourceChange}
+                multiple={false}
+              />
             </div>
           )}
 
