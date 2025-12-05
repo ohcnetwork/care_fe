@@ -35,7 +35,10 @@ test.describe("Edit Patient Prescription", () => {
       await page
         .getByRole("link", { name: /Add|Edit|Create Prescription/i })
         .click();
-      await page.waitForLoadState("networkidle");
+      // Wait for the "Add Medication" button to be visible instead of networkidle
+      await expect(
+        page.getByText(/Add Medication|Add another Medication/i),
+      ).toBeVisible({ timeout: 10000 });
     });
 
     await test.step("Add medication", async () => {
@@ -90,8 +93,10 @@ test.describe("Edit Patient Prescription", () => {
       await page
         .getByRole("link", { name: /Add|Edit|Create Prescription/i })
         .click();
-      await page.waitForLoadState("networkidle");
-      await expect(page.getByText(medicineName).first()).toBeVisible();
+      // Wait for medication to be visible instead of networkidle
+      await expect(page.getByText(medicineName).first()).toBeVisible({
+        timeout: 10000,
+      });
     });
 
     await test.step("Remove medication", async () => {

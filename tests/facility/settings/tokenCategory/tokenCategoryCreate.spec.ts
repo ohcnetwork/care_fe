@@ -28,7 +28,11 @@ test.describe("Token Category Create - Permission Tests", () => {
     test("Admin can view Add Token Category button", async ({ page }) => {
       // Navigate directly to token category page
       await page.goto(`/facility/${facilityId}/settings/token_category`);
-      await page.waitForLoadState("networkidle");
+
+      // Wait for page heading to be visible instead of networkidle
+      await expect(
+        page.getByRole("heading", { name: "Token Categories" }),
+      ).toBeVisible({ timeout: 10000 });
 
       // Verify we're on the token category list page
       await expect(page).toHaveURL(
@@ -45,7 +49,11 @@ test.describe("Token Category Create - Permission Tests", () => {
     test("Admin can create a token category", async ({ page }) => {
       // Navigate directly to creation page
       await page.goto(`/facility/${facilityId}/settings/token_category/new`);
-      await page.waitForLoadState("networkidle");
+
+      // Wait for the creation page heading to be visible instead of networkidle
+      await expect(
+        page.getByRole("heading", { name: "Create Token Category" }),
+      ).toBeVisible({ timeout: 10000 });
 
       // Verify we're on the creation page
       await expect(page).toHaveURL(
@@ -70,8 +78,9 @@ test.describe("Token Category Create - Permission Tests", () => {
       );
 
       // Verify the created token category appears in the list
-      await page.waitForLoadState("networkidle");
+      // Wait for table to be visible instead of networkidle
       const tableBody = page.locator("tbody");
+      await expect(tableBody).toBeVisible({ timeout: 10000 });
 
       // Search for the created token category
       await page
@@ -89,7 +98,11 @@ test.describe("Token Category Create - Permission Tests", () => {
     }) => {
       // Navigate directly to token category page
       await page.goto(`/facility/${facilityId}/settings/token_category`);
-      await page.waitForLoadState("networkidle");
+
+      // Wait for page heading to be visible instead of networkidle
+      await expect(
+        page.getByRole("heading", { name: "Token Categories" }),
+      ).toBeVisible({ timeout: 10000 });
 
       const nonExistentName = "NonExistentTokenCategory12345";
 
@@ -108,7 +121,11 @@ test.describe("Token Category Create - Permission Tests", () => {
     }) => {
       // Navigate directly to creation page
       await page.goto(`/facility/${facilityId}/settings/token_category/new`);
-      await page.waitForLoadState("networkidle");
+
+      // Wait for the creation page heading to be visible instead of networkidle
+      await expect(
+        page.getByRole("heading", { name: "Create Token Category" }),
+      ).toBeVisible({ timeout: 10000 });
 
       // Verify we're on the creation page
       await expect(page).toHaveURL(
@@ -158,7 +175,18 @@ test.describe("Token Category Create - Permission Tests", () => {
     test("Nurse cannot see Add Token Category button", async ({ page }) => {
       // Step 1: Navigate directly to token category page
       await page.goto(`/facility/${facilityId}/settings/token_category`);
-      await page.waitForLoadState("networkidle");
+
+      // Wait for page to load by checking for either access denied message or page heading
+      await Promise.race([
+        page
+          .getByText("Access Denied to Token Category")
+          .waitFor({ timeout: 5000 })
+          .catch(() => null),
+        page
+          .getByRole("heading", { name: "Token Categories" })
+          .waitFor({ timeout: 5000 })
+          .catch(() => null),
+      ]);
 
       // Step 2: Check if we have access to the page
       // If nurse has access to the page, verify Add Token Category button is NOT visible

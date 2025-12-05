@@ -34,6 +34,7 @@ import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
+  EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import {
   APPOINTMENT_STATUS_COLORS,
@@ -493,7 +494,7 @@ export default function AppointmentDetail(props: Props) {
                         facilityId={facilityId}
                         patientName={appointment.patient.name}
                         appointment={appointment.id}
-                        defaultStatus="in_progress"
+                        defaultStatus={EncounterStatus.IN_PROGRESS}
                         trigger={
                           <QuickAction
                             icon={<PlusSquare className="text-primary-500" />}

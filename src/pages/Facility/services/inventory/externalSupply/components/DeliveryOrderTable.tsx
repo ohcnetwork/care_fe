@@ -1,4 +1,4 @@
-import { Box, Eye } from "lucide-react";
+import { Box, Eye, Hash } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -16,11 +16,13 @@ import { EmptyState } from "@/components/ui/empty-state";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
   DeliveryOrderRetrieve,
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Props {
   deliveries: DeliveryOrderRetrieve[];
@@ -40,6 +42,7 @@ export default function DeliveryOrderTable({
   isRequester,
 }: Props) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   if (isLoading) {
     return <TableSkeleton count={5} />;
@@ -63,6 +66,7 @@ export default function DeliveryOrderTable({
           <TableHead>{internal ? t("origin") : t("supplier")}</TableHead>
           <TableHead>{t("deliver_to")}</TableHead>
           <TableHead>{t("status")}</TableHead>
+          <TableHead>{t("tags", { count: 2 })}</TableHead>
           <TableHead className="w-28">{t("actions")}</TableHead>
         </TableRow>
       </TableHeader>
@@ -78,6 +82,40 @@ export default function DeliveryOrderTable({
               <Badge variant={DELIVERY_ORDER_STATUS_COLORS[delivery.status]}>
                 {t(delivery.status)}
               </Badge>
+            </TableCell>
+            <TableCell className="sm:w-60 md:w-80">
+              <div className="flex flex-wrap gap-1">
+                <TagAssignmentSheet
+                  entityType="delivery_order"
+                  entityId={delivery.id}
+                  facilityId={facilityId}
+                  currentTags={delivery.tags ?? []}
+                  onUpdate={() => {
+                    queryClient.invalidateQueries({
+                      queryKey: [
+                        "deliveryOrders",
+                        locationId,
+                        internal,
+                        ...(isRequester ? [isRequester] : []),
+                      ],
+                    });
+                  }}
+                  trigger={
+                    delivery.tags && delivery.tags.length > 0 ? (
+                      <Button variant="outline" size="xs">
+                        <Hash className="size-3" /> {t("tags")}
+                      </Button>
+                    ) : (
+                      <Button variant="outline" size="xs">
+                        <Hash className="size-3" /> {t("add_tags")}
+                      </Button>
+                    )
+                  }
+                />
+                {delivery.tags.map((tag) => (
+                  <Badge key={tag.id}>{tag.display}</Badge>
+                ))}
+              </div>
             </TableCell>
             <TableCell>
               <Button
