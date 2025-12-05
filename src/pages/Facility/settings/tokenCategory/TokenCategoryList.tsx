@@ -212,8 +212,8 @@ function TokenCategoryListContent({
           icon={
             <CareIcon icon="l-folder-open" className="text-primary size-6" />
           }
-          title={t("no_products_found")}
-          description={t("adjust_product_filters")}
+          title={t("no_token_categories_found")}
+          description={t("no_token_categories_found_description")}
         />
       ) : (
         <>
