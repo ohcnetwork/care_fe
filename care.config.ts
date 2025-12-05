@@ -1,3 +1,4 @@
+import { booleanFromString } from "@/pages/Facility/queues/utils";
 import {
   ENCOUNTER_CLASS,
   EncounterClass,
@@ -15,9 +16,7 @@ interface ILogo {
 }
 
 const boolean = (key: string, fallback = false) => {
-  if (env[key] === "true") return true;
-  if (env[key] === "false") return false;
-  return fallback;
+  return booleanFromString(env[key], fallback);
 };
 
 const logo = (value?: string, fallback?: ILogo) => {
@@ -167,6 +166,11 @@ const careConfig = {
    * Disable patient login if set to "true"
    */
   disablePatientLogin: boolean("REACT_DISABLE_PATIENT_LOGIN", false),
+
+  /**
+   * Enable auto refresh if set to "true"
+   */
+  enableAutoRefresh: boolean("REACT_AUTO_REFRESH_BY_DEFAULT", false),
 
   patientRegistration: {
     /**

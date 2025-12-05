@@ -114,6 +114,7 @@ const envSchema = z
     REACT_CUSTOM_REMOTE_I18N_URL: z.string().url().optional(),
     REACT_CUSTOM_SHORTCUTS: customShortcutsSchemaString.optional(),
     REACT_AUTO_REFRESH_INTERVAL: numberAsString.optional(),
+    REACT_AUTO_REFRESH_BY_DEFAULT: booleanAsStringSchema.optional(),
   })
   .superRefine(async (data, ctx) => {
     const allowedClasses =

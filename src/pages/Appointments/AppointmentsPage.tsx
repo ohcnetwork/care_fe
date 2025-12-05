@@ -104,6 +104,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
+import { booleanFromString } from "@/pages/Facility/queues/utils";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { PractitionerSelector } from "./components/PractitionerSelector";
 
@@ -331,6 +332,11 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     return <Loading />;
   }
 
+  const shouldAutoRefresh = booleanFromString(
+    qParams.autoRefresh ?? "",
+    careConfig.enableAutoRefresh,
+  );
+
   return (
     <Page
       title={t("appointments")}
@@ -394,7 +400,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           <div className="flex items-center justify-between gap-2">
             <Label className="text-sm font-medium">{t("auto_refresh")}</Label>
             <Switch
-              checked={qParams.autoRefresh === "true"}
+              checked={shouldAutoRefresh}
               onCheckedChange={(checked) =>
                 updateQuery({
                   autoRefresh: checked ? "true" : "false",
@@ -472,7 +478,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 tags={selectedTags.map((tag) => tag.id)}
                 tags_behavior={qParams.tags_behavior}
                 patient={qParams.patient}
-                autoRefresh={JSON.parse(qParams.autoRefresh || "false")}
+                autoRefresh={shouldAutoRefresh}
               />
             ))}
           </div>
@@ -495,7 +501,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           patient={qParams.patient}
           resourceType={resourceType}
           resourceIds={resourceId ? [resourceId] : practitionerIds}
-          autoRefresh={JSON.parse(qParams.autoRefresh || "false")}
+          autoRefresh={shouldAutoRefresh}
         />
       )}
     </Page>
