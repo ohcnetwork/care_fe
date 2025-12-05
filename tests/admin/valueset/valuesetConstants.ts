@@ -29,10 +29,10 @@ export const VALID_UCUM_CODES = [
   "kg",
   "mg/dL",
   "cm",
-  "°C",
   "L/min",
   "%",
-  "beats/min",
+  "L",
+  "mL",
   "g/dL",
 ];
 
