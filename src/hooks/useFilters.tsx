@@ -107,13 +107,13 @@ export default function useFilters({
     const cache = FiltersCache.get();
     if (!cache) {
       if (Object.keys(defaults).length > 0) {
-        setQueryParams({ ...qParams, ...defaults });
+        setQueryParams({ ...defaults, ...qParams });
       }
       return;
     }
 
     // Restore cache
-    setQueryParams({ ...qParams, ...defaults, ...cache });
+    setQueryParams({ ...defaults, ...cache, ...qParams });
   }, []);
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {
