@@ -240,7 +240,7 @@ export function EncounterQuestion({
   if (isLoading) {
     return <div>{t("loading_encounter")}</div>;
   }
-
+  const isDischarged = encounter.status === "discharged";
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -249,18 +249,23 @@ export function EncounterQuestion({
           <Label>{t("encounter_status")}</Label>
           <Select
             value={encounter.status}
-            onValueChange={(value: EncounterStatus) =>
+            onValueChange={(value: EncounterStatus) => {
+              if (isDischarged) return;
               handleUpdateEncounter({
                 status: value,
-              })
-            }
-            disabled={disabled}
+              });
+            }}
+            disabled={disabled || isDischarged}
           >
             <SelectTrigger>
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
-              {ENCOUNTER_STATUS.map((encounterStatus) => (
+              {ENCOUNTER_STATUS.filter(
+                (status) =>
+                  isDischarged ||
+                  (status !== "discharged" && status !== "unknown"),
+              ).map((encounterStatus) => (
                 <SelectItem key={encounterStatus} value={encounterStatus}>
                   {t(`encounter_status__${encounterStatus}`)}
                 </SelectItem>
