@@ -87,8 +87,10 @@ export interface TemplateRead extends TemplateBaseRead {
   modified_date: string;
 }
 
-export interface TemplateCreate
-  extends Omit<TemplateBase, "id" | "created_date"> {
+export interface TemplateCreate extends Omit<
+  TemplateBase,
+  "id" | "created_date"
+> {
   slug_value: string;
   facility?: string;
   template_data: string;
