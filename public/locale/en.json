@@ -4196,6 +4196,7 @@
   "remove_symptom": "Remove Symptom",
   "remove_text": "Remove Text",
   "remove_user": "Remove User",
+  "remove_user_confirmation": "Are you sure you want to remove {{user}} from this organization?",
   "remove_user_organization": "Remove User from Organization",
   "remove_user_warn": "Are you sure you want to remove {{firstName}} {{lastName}} from this organization? This action cannot be undone.",
   "removing_with_dots": "Removing...",

@@ -1,10 +1,21 @@
-import { useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
+import { toast } from "sonner";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import SearchInput from "@/components/Common/SearchInput";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
@@ -14,12 +25,14 @@ import useFilters from "@/hooks/useFilters";
 
 import { getPermissions } from "@/common/Permissions";
 
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
 import organizationApi from "@/types/organization/organizationApi";
 
 import AddUserSheet from "./components/AddUserSheet";
 import EditUserRoleSheet from "./components/EditUserRoleSheet";
+import EditUserSheet from "./components/EditUserSheet";
 import EntityBadge from "./components/EntityBadge";
 import LinkUserSheet from "./components/LinkUserSheet";
 import OrganizationLayout from "./components/OrganizationLayout";
@@ -36,6 +49,12 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
   });
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
+  const queryClient = useQueryClient();
+  const [editingUser, setEditingUser] = useState<string | null>(null);
+  const [removingUserRole, setRemovingUserRole] = useState<{
+    id: string;
+    userName: string;
+  } | null>(null);
 
   const searchOptions = [
     {
@@ -54,18 +73,21 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     },
   ];
 
-  const handleSearch = useCallback((key: string, value: string) => {
-    const searchParams = {
-      name: key === "username" ? value : "",
-      phone_number:
-        key === "phone_number"
-          ? isValidPhoneNumber(value)
-            ? value
-            : undefined
-          : undefined,
-    };
-    updateQuery(searchParams);
-  }, []);
+  const handleSearch = useCallback(
+    (key: string, value: string) => {
+      const searchParams = {
+        name: key === "username" ? value : "",
+        phone_number:
+          key === "phone_number"
+            ? isValidPhoneNumber(value)
+              ? value
+              : undefined
+            : undefined,
+      };
+      updateQuery(searchParams);
+    },
+    [updateQuery],
+  );
 
   const handleFieldChange = () => {
     updateQuery({
@@ -76,6 +98,27 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
 
   const openAddUserSheet = qParams.sheet === "add";
   const openLinkUserSheet = qParams.sheet === "link";
+
+  const { mutate: removeUserRole } = useMutation({
+    mutationFn: (userRoleId: string) =>
+      mutate(organizationApi.removeUserRole, {
+        pathParams: { id: id, userRoleId },
+      })({}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["organizationUsers", id],
+      });
+      toast.success(t("user_removed_success"));
+      setRemovingUserRole(null);
+    },
+    onError: (error) => {
+      const errorData = error.cause as { errors: { msg: string[] } };
+      errorData.errors.msg.forEach((er) => {
+        toast.error(er);
+      });
+      setRemovingUserRole(null);
+    },
+  });
 
   const { data: users, isFetching: isFetchingUsers } = useQuery({
     queryKey: [
@@ -110,88 +153,156 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
           orgPermissions,
         );
         return (
-          <div className="space-y-6">
-            <div className="justify-between items-center flex flex-wrap">
-              <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
-                <EntityBadge
-                  title={t("users")}
-                  count={users?.count}
-                  isFetching={isFetchingUsers}
-                  translationParams={{ entity: "User" }}
+          <>
+            {editingUser && (
+              <EditUserSheet
+                existingUsername={editingUser}
+                open={!!editingUser}
+                setOpen={(open) => !open && setEditingUser(null)}
+              />
+            )}
+            <ConfirmActionDialog
+              open={!!removingUserRole}
+              onOpenChange={(open) => !open && setRemovingUserRole(null)}
+              title={t("remove_user")}
+              description={t("remove_user_confirmation", {
+                user: removingUserRole?.userName || "",
+              })}
+              onConfirm={() => {
+                if (removingUserRole) {
+                  removeUserRole(removingUserRole.id);
+                }
+              }}
+              confirmText={t("remove")}
+              variant="destructive"
+            />
+            <div className="space-y-6">
+              <div className="justify-between items-center flex flex-wrap">
+                <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
+                  <EntityBadge
+                    title={t("users")}
+                    count={users?.count}
+                    isFetching={isFetchingUsers}
+                    translationParams={{ entity: "User" }}
+                  />
+                </div>
+                <div className="gap-2 flex flex-wrap mt-2">
+                  {canCreateUser && (
+                    <AddUserSheet
+                      open={openAddUserSheet}
+                      setOpen={(open) => {
+                        updateQuery({ sheet: open ? "add" : "" });
+                      }}
+                      onUserCreated={(user) => {
+                        updateQuery({ sheet: "link", username: user.username });
+                      }}
+                      organizationId={id}
+                    />
+                  )}
+                  {canManageOrganizationUsers && (
+                    <LinkUserSheet
+                      organizationId={id}
+                      open={openLinkUserSheet}
+                      setOpen={(open) => {
+                        updateQuery({
+                          sheet: open ? "link" : "",
+                          username: "",
+                        });
+                      }}
+                      preSelectedUsername={qParams.username}
+                      onAddUserSheetOpen={() => updateQuery({ sheet: "add" })}
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <SearchInput
+                  options={searchOptions}
+                  onSearch={handleSearch}
+                  onFieldChange={handleFieldChange}
+                  className="w-full"
                 />
               </div>
-              <div className="gap-2 flex flex-wrap mt-2">
-                {canCreateUser && (
-                  <AddUserSheet
-                    open={openAddUserSheet}
-                    setOpen={(open) => {
-                      updateQuery({ sheet: open ? "add" : "" });
-                    }}
-                    onUserCreated={(user) => {
-                      updateQuery({ sheet: "link", username: user.username });
-                    }}
-                    organizationId={id}
-                  />
-                )}
-                {canManageOrganizationUsers && (
-                  <LinkUserSheet
-                    organizationId={id}
-                    open={openLinkUserSheet}
-                    setOpen={(open) => {
-                      updateQuery({ sheet: open ? "link" : "", username: "" });
-                    }}
-                    preSelectedUsername={qParams.username}
-                    onAddUserSheetOpen={() => updateQuery({ sheet: "add" })}
-                  />
-                )}
-              </div>
+              {isFetchingUsers ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                  <CardGridSkeleton count={6} />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {users?.results?.length === 0 ? (
+                    <Card className="col-span-full">
+                      <CardContent className="p-6 text-center text-gray-500">
+                        {t("no_users_found")}
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    users?.results?.map((userRole) => (
+                      <UserCard
+                        key={userRole.user.id}
+                        user={userRole.user}
+                        roleName={userRole.role.name}
+                        actions={
+                          canManageOrganizationUsers && (
+                            <div className="flex items-center gap-2">
+                              <EditUserRoleSheet
+                                organizationId={id}
+                                userRole={userRole}
+                                trigger={
+                                  <Button variant="outline" size="sm">
+                                    <span>{t("edit_role")}</span>
+                                  </Button>
+                                }
+                              />
+                            </div>
+                          )
+                        }
+                        userOptions={
+                          canManageOrganizationUsers && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="px-2"
+                                >
+                                  <CareIcon
+                                    icon="l-ellipsis-v"
+                                    className="h-4 w-4"
+                                  />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem
+                                  className="cursor-pointer flex items-center gap-2"
+                                  onClick={() =>
+                                    setEditingUser(userRole.user.username)
+                                  }
+                                >
+                                  {t("edit_profile")}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="cursor-pointer flex items-center gap-2 text-red-600"
+                                  onClick={() =>
+                                    setRemovingUserRole({
+                                      id: userRole.id,
+                                      userName: `${userRole.user.first_name} ${userRole.user.last_name}`,
+                                    })
+                                  }
+                                >
+                                  {t("remove_user")}
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )
+                        }
+                      />
+                    ))
+                  )}
+                </div>
+              )}
+              <Pagination totalCount={users?.count || 0} />
             </div>
-            <div className="flex gap-2">
-              <SearchInput
-                options={searchOptions}
-                onSearch={handleSearch}
-                onFieldChange={handleFieldChange}
-                className="w-full"
-              />
-            </div>
-            {isFetchingUsers ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                <CardGridSkeleton count={6} />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                {users?.results?.length === 0 ? (
-                  <Card className="col-span-full">
-                    <CardContent className="p-6 text-center text-gray-500">
-                      {t("no_users_found")}
-                    </CardContent>
-                  </Card>
-                ) : (
-                  users?.results?.map((userRole) => (
-                    <UserCard
-                      key={userRole.user.id}
-                      user={userRole.user}
-                      roleName={userRole.role.name}
-                      actions={
-                        canManageOrganizationUsers && (
-                          <EditUserRoleSheet
-                            organizationId={id}
-                            userRole={userRole}
-                            trigger={
-                              <Button variant="outline" size="sm">
-                                <span>{t("edit_role")}</span>
-                              </Button>
-                            }
-                          />
-                        )
-                      }
-                    />
-                  ))
-                )}
-              </div>
-            )}
-            <Pagination totalCount={users?.count || 0} />
-          </div>
+          </>
         );
       }}
     </OrganizationLayout>

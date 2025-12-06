@@ -22,6 +22,7 @@ interface UserCardProps {
   user: UserReadMinimal;
   roleName: string;
   actions?: React.ReactNode;
+  userOptions?: React.ReactNode;
   facility?: string;
 }
 
@@ -61,7 +62,7 @@ export const UserStatusIndicator = ({
   );
 };
 export function UserCard(props: UserCardProps) {
-  const { user, actions, roleName, facility } = props;
+  const { user, actions, roleName, facility, userOptions } = props;
 
   const { t } = useTranslation();
 
@@ -121,6 +122,7 @@ export function UserCard(props: UserCardProps) {
                 <CareIcon icon="l-arrow-up-right" className="text-lg mr-1" />
                 <span>{t("see_details")}</span>
               </Button>
+              {userOptions}
             </>
           ) : (
             <div className="bg-gray-200 rounded-md px-2 py-1 text-sm inline-block">
