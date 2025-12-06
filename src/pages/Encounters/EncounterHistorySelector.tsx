@@ -440,8 +440,8 @@ const EncounterSheetTrigger = () => {
             </span>
           </div>
           <div className="flex flex-col items-end gap-1">
-            {/* TOP ROW → Ongoing + Chevron */}
-            <div className="flex items-center gap-1">
+            {/* TOP ROW Ongoing Chevron */}
+            <div className="flex items-center gap-1 mt-[-6px]">
               <span className="text-sm text-gray-600 whitespace-nowrap">
                 {encounter.period.start && (
                   <span>
@@ -470,62 +470,17 @@ const EncounterSheetTrigger = () => {
               </div>
             </div>
 
-            {/* SECOND ROW → Badge */}
-            <Badge
-              variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
-              size="sm"
-              className="whitespace-nowrap mr-3"
-            >
-              {t(`encounter_status__${encounter.status}`)}
-            </Badge>
-          </div>
-
-          {/* <div className="flex gap-1 items-center justify-center">
-            <div className="flex flex-col gap-1 items-end ">
-              <span className="text-sm text-gray-600 whitespace-nowrap">
-                {encounter.period.start && (
-                  <span>
-                    {format(new Date(encounter.period.start!), "dd MMM")}
-                  </span>
-                )}
-                {encounter.period.end && encounter.period.start && (
-                  <span>{" - "}</span>
-                )}
-                {encounter.period.end ? (
-                  <span>
-                    {format(new Date(encounter.period.end), "dd MMM")}
-                  </span>
-                ) : (
-                  <span>
-                    {" - "}
-                    {t("ongoing")}
-                  </span>
-                )}
-                <div
-                  className={
-                    (buttonVariants({ variant: "ghost", size: "icon" }),
-                    "top:40")
-                  }
-                >
-                  <ChevronDown />
-                </div>
-              </span>
+            {/* SECOND ROW Badge */}
+            <div className="-mt-2.5">
               <Badge
                 variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
                 size="sm"
-                className=" whitespace-nowrap"
+                className="whitespace-nowrap mr-3"
               >
                 {t(`encounter_status__${encounter.status}`)}
               </Badge>
             </div>
-            <div
-              className={
-                (buttonVariants({ variant: "ghost", size: "icon" }), "top:40")
-              }
-            >
-              <ChevronDown />
-            </div>
-          </div> */}
+          </div>
         </div>
       </CardContent>
     </Card>
