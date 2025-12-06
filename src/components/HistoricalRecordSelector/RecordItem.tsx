@@ -71,11 +71,12 @@ export function RecordItem<T>({
             <TableCell
               key={field.key.toString()}
               className={cn(
-                "p-2 text-sm whitespace-pre-wrap border border-gray-200 bg-white min-w-[150px]",
-                "[&:nth-child(even)]:bg-gray-100",
-                "[&:nth-child(2)]:rounded-l-md",
-                "[&:nth-last-child(1)]:rounded-r-md",
-                isSelected && "[&:nth-last-child(1)]:bg-primary-100",
+                "p-2 text-sm whitespace-pre-wrap border border-gray-200 min-w-[150px]",
+                "nth-2:rounded-l-md",
+                "nth-last-1:rounded-r-md",
+                isSelected && field.key === "created_by"
+                  ? "bg-emerald-100!"
+                  : "bg-white even:bg-gray-100",
               )}
             >
               <div className="text-sm">{displayValue}</div>
@@ -85,7 +86,7 @@ export function RecordItem<T>({
 
         <TableCell
           className={
-            "p-2 w-12 text-sm border border-gray-200 bg-white [&:nth-child(even)]:bg-gray-100 [&:nth-last-child(1)]:rounded-r-md"
+            "p-2 w-12 text-sm border border-gray-200 bg-white even:bg-gray-100 nth-last-1:rounded-r-md"
           }
         >
           {hasAdditionalInfo && (
