@@ -43,7 +43,7 @@ export default function ServiceRequestTable({
   const handleViewDetails = (request: ServiceRequestReadSpec) => {
     const baseUrl = locationId
       ? `/facility/${facilityId}/locations/${locationId}/service_requests`
-      : `/facility/${facilityId}/services_requests`;
+      : `/facility/${facilityId}/service_requests`;
     navigate(`${baseUrl}/${request.id}`);
   };
 

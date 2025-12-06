@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { Check, LocateFixed, XIcon } from "lucide-react";
+import { Check, Loader2, LocateFixed, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -13,6 +13,11 @@ import { CaretSortIcon } from "@radix-ui/react-icons";
 
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import batchApi from "@/types/base/batch/batchApi";
+import {
+  ChargeItemBatchResponse,
+  ChargeItemRead,
+  extractChargeItemsFromBatchResponse,
+} from "@/types/billing/chargeItem/chargeItem";
 import {
   MedicationDispenseCategory,
   MedicationDispenseCreate,
@@ -79,6 +84,7 @@ interface Props {
   patientId: string;
   encounterId: string;
   selectedLocation: SelectedLocation;
+  onDispenseComplete?: (chargeItems: ChargeItemRead[]) => void;
 }
 
 interface FormItemType {
@@ -118,6 +124,7 @@ export default function DispenseDrawer({
   patientId: _patientId,
   encounterId,
   selectedLocation,
+  onDispenseComplete,
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -207,14 +214,45 @@ export default function DispenseDrawer({
     fetchMissingInventories();
   }, [productKnowledgeInventoriesMap, facilityId, currentLocation.id]);
 
+  // Auto-select single lot if only one inventory is available
+  useEffect(() => {
+    fields.forEach((field, index) => {
+      const inventories =
+        productKnowledgeInventoriesMap[field.productKnowledge?.id];
+      const currentLots = form.getValues(`items.${index}.lots`);
+
+      if (
+        inventories !== undefined &&
+        inventories?.length === 1 &&
+        !currentLots.some((lot) => lot.selectedInventoryId)
+      ) {
+        form.setValue(`items.${index}.lots`, [
+          {
+            selectedInventoryId: inventories[0].id,
+            quantity: 1,
+          },
+        ]);
+      }
+    });
+  }, [productKnowledgeInventoriesMap, fields, form]);
+
   const { mutate: dispense, isPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: () => {
+    onSuccess: (response) => {
       toast.success(t("items_dispensed_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["inventory", currentLocation.id],
       });
-      onOpenChange(false);
+
+      const chargeItems = extractChargeItemsFromBatchResponse(
+        response as ChargeItemBatchResponse,
+      );
+
+      if (chargeItems.length > 0 && onDispenseComplete) {
+        onDispenseComplete(chargeItems);
+      } else {
+        onOpenChange(false);
+      }
     },
   });
 
@@ -629,9 +667,23 @@ export default function DispenseDrawer({
                                 <TableCell className="font-medium text-gray-950 text-base">
                                   {productKnowledge.name}
                                 </TableCell>
-                                {!productKnowledgeInventoriesMap[
+                                {productKnowledgeInventoriesMap[
                                   productKnowledge.id
-                                ]?.length ? (
+                                ] === undefined ? (
+                                  <TableCell
+                                    colSpan={4}
+                                    className="text-center"
+                                  >
+                                    <div className="flex items-center justify-center py-3 gap-2">
+                                      <Loader2 className="size-4 animate-spin" />
+                                      <span className="text-sm text-gray-500">
+                                        {t("loading_stock")}
+                                      </span>
+                                    </div>
+                                  </TableCell>
+                                ) : !productKnowledgeInventoriesMap[
+                                    productKnowledge.id
+                                  ]?.length ? (
                                   <TableCell
                                     colSpan={4}
                                     className="text-center"

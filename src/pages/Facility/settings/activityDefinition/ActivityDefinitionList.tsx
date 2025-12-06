@@ -44,9 +44,6 @@ export default function ActivityDefinitionList({
         onCreateItem={onCreateItem}
         createItemLabel={t("add_activity_definition")}
         createItemIcon="l-plus"
-        createItemTooltip={t(
-          "activity_definitions_can_only_be_added_to_leaf_categories",
-        )}
       >
         {categorySlug && (
           <ActivityDefinitionListComponent

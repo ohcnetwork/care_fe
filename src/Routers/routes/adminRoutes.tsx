@@ -11,6 +11,8 @@ import RolesIndex from "@/pages/Admin/Roles/RolesIndex";
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
 import AdminOrganizationList from "@/pages/Admin/organizations/AdminOrganizationList";
+import { PlugConfigEdit } from "@/pages/Apps/PlugConfigEdit";
+import { PlugConfigList } from "@/pages/Apps/PlugConfigList";
 import PatientIdentifierConfigForm from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigForm";
 import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfig/PatientIdentifierConfigList";
 
@@ -35,6 +37,8 @@ const AdminRoutes: AppRoutes = {
   "/admin/tag_config/:id": ({ id }) => <TagConfigView tagId={id} />,
   "/admin/rbac/permissions": () => <PermissionsIndex />,
   "/admin/rbac/roles": () => <RolesIndex />,
+  "/admin/apps": () => <PlugConfigList />,
+  "/admin/apps/:slug": ({ slug }) => <PlugConfigEdit slug={slug} />,
   ...["govt", "product_supplier", "role"].reduce((acc: AppRoutes, type) => {
     acc[`/admin/organizations/${type}/:id`] = ({ id }) => (
       <AdminOrganizationList organizationType={type} organizationId={id} />

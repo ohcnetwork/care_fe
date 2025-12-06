@@ -75,7 +75,7 @@ export function ClinicalHistoryPage({
       component: <MedicationHistory patientId={patientId} />,
     },
     responses: {
-      label: t("questionnaire_responses"),
+      label: t("responses"),
       component: <ResponsesHistory patientId={patientId} />,
     },
   } as const;

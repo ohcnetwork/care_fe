@@ -36,7 +36,16 @@ export function useFieldError(
     );
   };
 
-  return { hasError };
+  const getError = (fieldKey: string) => {
+    return errors?.find(
+      (error) =>
+        error.question_id === questionId &&
+        error.field_key === fieldKey &&
+        (index === undefined || error.index === index),
+    );
+  };
+
+  return { hasError, getError };
 }
 
 export function createValidationError(

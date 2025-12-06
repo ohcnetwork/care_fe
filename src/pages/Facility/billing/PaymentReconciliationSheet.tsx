@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
+import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -9,6 +10,8 @@ import { toast } from "sonner";
 import * as z from "zod";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import careConfig from "@careConfig";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +46,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipComponent } from "@/components/ui/tooltip";
 
+import { locationAtomFamily } from "@/atoms/location-atom";
+import { LocationPicker } from "@/components/Location/LocationPicker";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
@@ -102,6 +107,9 @@ const formSchema = z
     note: z.string().optional(),
     account: z.string(),
     is_credit_note: z.boolean().optional(),
+    location: careConfig.paymentLocationRequired
+      ? z.string().min(1)
+      : z.string().optional(),
   })
   .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
     message: t("tender_amount_cannot_be_less_than_payment_amount"),
@@ -121,6 +129,9 @@ export function PaymentReconciliationSheet({
   const queryClient = useQueryClient();
   const [tenderAmount, setTenderAmount] = useState<string>("0");
   const [returnedAmount, setReturnedAmount] = useState<string>("0");
+  const [selectedLocationObject, setSelectedLocationObject] = useAtom(
+    locationAtomFamily(facilityId),
+  );
   useShortcutSubContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -143,6 +154,7 @@ export function PaymentReconciliationSheet({
       note: "",
       account: accountId,
       is_credit_note: isCreditNote,
+      location: selectedLocationObject?.id,
     },
   });
 
@@ -224,6 +236,7 @@ export function PaymentReconciliationSheet({
       tendered_amount: Number(data.tendered_amount).toFixed(2),
       returned_amount: Number(data.returned_amount).toFixed(2),
       is_credit_note: isCreditNote,
+      location: data.location,
     };
     submitPayment(submissionData);
   });
@@ -306,6 +319,32 @@ export function PaymentReconciliationSheet({
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel
+                      aria-required={careConfig.paymentLocationRequired}
+                    >
+                      {t("location")}
+                    </FormLabel>
+                    <FormControl>
+                      <LocationPicker
+                        facilityId={facilityId}
+                        value={selectedLocationObject}
+                        onValueChange={(location) => {
+                          setSelectedLocationObject(location);
+                          field.onChange(location?.id);
+                        }}
+                        placeholder={t("select_location")}
+                        className="w-full border-gray-300"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

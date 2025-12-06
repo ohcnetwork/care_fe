@@ -10,8 +10,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -53,13 +52,19 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
+import { cn } from "@/lib/utils";
 import { Code } from "@/types/base/code/code";
 import {
   DIAGNOSIS_CLINICAL_STATUS,
+  DIAGNOSIS_CLINICAL_STATUS_COLORS,
+  DIAGNOSIS_SEVERITY,
+  DIAGNOSIS_SEVERITY_COLORS,
   DIAGNOSIS_VERIFICATION_STATUS,
+  DIAGNOSIS_VERIFICATION_STATUS_COLORS,
   Diagnosis,
   DiagnosisClinicalStatus,
   DiagnosisRequest,
+  DiagnosisSeverity,
   Onset,
 } from "@/types/emr/diagnosis/diagnosis";
 import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
@@ -84,10 +89,41 @@ const DIAGNOSIS_INITIAL_VALUE: Omit<DiagnosisRequest, "encounter"> = {
   code: { code: "", display: "", system: "" },
   clinical_status: "active",
   verification_status: "confirmed",
+  severity: "moderate",
   category: "encounter_diagnosis",
   onset: { onset_datetime: dateQueryString(new Date()) },
   dirty: true,
 };
+
+function DiagnosisSeveritySelect({
+  severity,
+  onValueChange,
+  disabled,
+}: {
+  severity: DiagnosisSeverity | null;
+  onValueChange: (value: DiagnosisSeverity) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Select
+      value={severity ?? undefined}
+      onValueChange={(value) => onValueChange(value as DiagnosisSeverity)}
+      disabled={disabled}
+    >
+      <SelectTrigger className="h-8 md:h-9">
+        <SelectValue placeholder={t("choose_severity")} />
+      </SelectTrigger>
+      <SelectContent>
+        {DIAGNOSIS_SEVERITY.map((severity) => (
+          <SelectItem key={severity} value={severity}>
+            {t(severity)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
 
 function ClinicalStatusSelect({
   status,
@@ -237,6 +273,14 @@ function DiagnosisDetailsForm({
         />
       </div>
       <div className="space-y-2">
+        <Label className="text-sm">{t("severity")}</Label>
+        <DiagnosisSeveritySelect
+          severity={diagnosis.severity ?? null}
+          onValueChange={(value) => onUpdate({ severity: value })}
+          disabled={disabled}
+        />
+      </div>
+      <div className="space-y-2">
         <Label className="text-sm">{t("notes")}</Label>
         <DiagnosisNotesInput
           note={diagnosis.note}
@@ -254,6 +298,7 @@ function convertToDiagnosisRequest(diagnosis: Diagnosis): DiagnosisRequest {
     code: diagnosis.code,
     clinical_status: diagnosis.clinical_status,
     verification_status: diagnosis.verification_status,
+    severity: diagnosis.severity,
     onset: diagnosis.onset
       ? {
           ...diagnosis.onset,
@@ -479,6 +524,7 @@ export function DiagnosisQuestion({
       ...sortedDiagnoses,
       ...nonDuplicateDiagnoses.map(({ id: _id, ...diagnosis }) => ({
         ...diagnosis,
+        severity: diagnosis.severity ?? "moderate",
         dirty: true,
       })),
     ];
@@ -489,9 +535,14 @@ export function DiagnosisQuestion({
   };
 
   return (
-    <div className="space-y-4">
+    <div
+      className={cn(
+        "space-y-4",
+        sortedDiagnoses.length > 0 ? "md:max-w-fit" : "max-w-4xl",
+      )}
+    >
       <HistoricalRecordSelector<DiagnosisRequest>
-        title={t("diagnosis_history")}
+        title={t("past_diagnoses")}
         structuredTypes={[
           {
             type: t("diagnoses"),
@@ -505,25 +556,67 @@ export function DiagnosisQuestion({
               {
                 key: "clinical_status",
                 label: t("status"),
-                render: (status: string) => t(status),
+                render: (status: string) => (
+                  <Badge
+                    variant={
+                      DIAGNOSIS_CLINICAL_STATUS_COLORS[
+                        status as keyof typeof DIAGNOSIS_CLINICAL_STATUS_COLORS
+                      ]
+                    }
+                  >
+                    {t(status)}
+                  </Badge>
+                ),
+              },
+              {
+                key: "verification_status",
+                label: t("verification"),
+                render: (verification_status: string) => (
+                  <Badge
+                    variant={
+                      DIAGNOSIS_VERIFICATION_STATUS_COLORS[
+                        verification_status as keyof typeof DIAGNOSIS_VERIFICATION_STATUS_COLORS
+                      ]
+                    }
+                  >
+                    {t(verification_status)}
+                  </Badge>
+                ),
+              },
+              {
+                key: "severity",
+                label: t("severity"),
+                render: (severity: DiagnosisSeverity | null) => (
+                  <Badge
+                    variant={
+                      DIAGNOSIS_SEVERITY_COLORS[
+                        severity as keyof typeof DIAGNOSIS_SEVERITY_COLORS
+                      ]
+                    }
+                  >
+                    {severity ? t(severity) : "-"}
+                  </Badge>
+                ),
+              },
+              {
+                key: "created_by",
+                label: t("recorded_by"),
+                render: (created_by) => formatName(created_by),
               },
               {
                 key: "onset",
                 label: t("onset_date"),
                 render: (onset: Onset) =>
                   onset?.onset_datetime
-                    ? format(new Date(onset.onset_datetime), "dd-MM-yyyy")
+                    ? format(new Date(onset.onset_datetime), "dd MMM yyyy")
                     : "",
               },
+            ],
+            expandableFields: [
               {
                 key: "note",
                 label: t("notes"),
-                render: (note: string | undefined) => note || "-",
-              },
-              {
-                key: "created_by",
-                label: t("recorded_by"),
-                render: (created_by) => formatName(created_by),
+                render: (note) => note,
               },
             ],
             queryKey: ["diagnoses_and_chronic_conditions", patientId],
@@ -543,6 +636,7 @@ export function DiagnosisQuestion({
         ]}
         buttonLabel={t("diagnosis_history")}
         onAddSelected={handleAddHistoricalDiagnoses}
+        disableAPI={isPreview}
       />
 
       {sortedDiagnoses.length > 0 && (
@@ -558,6 +652,9 @@ export function DiagnosisQuestion({
                   </TableHead>
                   <TableHead className="w-[15%] text-center">
                     {t("status")}
+                  </TableHead>
+                  <TableHead className="w-[15%] text-center">
+                    {t("severity")}
                   </TableHead>
                   <TableHead className="w-[15%] text-center">
                     {t("verification")}
@@ -698,6 +795,13 @@ const DiagnosisTableRow = ({
                 clinical_status: value as DiagnosisRequest["clinical_status"],
               })
             }
+            disabled={disabled}
+          />
+        </TableCell>
+        <TableCell className="py-1">
+          <DiagnosisSeveritySelect
+            severity={diagnosis.severity}
+            onValueChange={(value) => onUpdate?.({ severity: value })}
             disabled={disabled}
           />
         </TableCell>
@@ -847,18 +951,28 @@ const DiagnosisItem: React.FC<DiagnosisItemProps> = ({
                   </div>
                 </div>
                 {!isOpen && (
-                  <div className="text-sm text-gray-500">
-                    {t("diagnosed_on")}{" "}
-                    {diagnosis.onset?.onset_datetime
-                      ? format(
-                          new Date(diagnosis.onset.onset_datetime),
-                          "MMMM d, yyyy",
-                        )
-                      : ""}
-                    {" · "}
-                    {t(diagnosis.clinical_status)}
-                    {" · "}
-                    {t(diagnosis.verification_status)}
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
+                    <span>
+                      {t("diagnosed_on")}{" "}
+                      {diagnosis.onset?.onset_datetime
+                        ? format(
+                            new Date(diagnosis.onset.onset_datetime),
+                            "MMMM d, yyyy",
+                          )
+                        : ""}
+                    </span>
+                    <span className="text-gray-300">|</span>
+                    <span>{t(diagnosis.clinical_status)}</span>
+                    <span className="text-gray-300">|</span>
+                    <span>{t(diagnosis.verification_status)}</span>
+                    {diagnosis.severity && (
+                      <>
+                        <span className="text-gray-300">|</span>
+                        <Badge variant="outline" className="py-0 font-medium">
+                          {t(diagnosis.severity)}
+                        </Badge>
+                      </>
+                    )}
                   </div>
                 )}
               </div>

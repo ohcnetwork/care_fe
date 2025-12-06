@@ -12,13 +12,13 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { ValueSetBase } from "@/types/valueSet/valueSet";
+import valueSetApi from "@/types/valueSet/valueSetApi";
 import query from "@/Utils/request/query";
 import { mergeAutocompleteOptions } from "@/Utils/utils";
-import { ValuesetFormType } from "@/types/valueset/valueset";
-import valuesetApi from "@/types/valueset/valuesetApi";
 
 interface ValueSetPreviewProps {
-  valueset: ValuesetFormType;
+  valueset: ValueSetBase;
   trigger: React.ReactNode;
 }
 
@@ -29,8 +29,8 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   const [selected, setSelected] = useState("");
 
   const { data: searchQuery, isFetching } = useQuery({
-    queryKey: ["valueset", "preview_search", search, valueset.compose],
-    queryFn: query.debounced(valuesetApi.preview_search, {
+    queryKey: ["valueset", "previewSearch", search, valueset.compose],
+    queryFn: query.debounced(valueSetApi.previewSearch, {
       queryParams: { search, count: 20 },
       body: {
         ...valueset,

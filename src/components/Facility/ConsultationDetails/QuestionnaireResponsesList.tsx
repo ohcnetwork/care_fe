@@ -438,7 +438,6 @@ function ResponseCardContent({ item }: { item: QuestionnaireResponse }) {
           <span className="text-gray-600">{t("filed_by")}</span>{" "}
           <span className="font-medium text-gray-700">
             {formatName(item.created_by)}
-            {item.created_by?.user_type && ` (${item.created_by.user_type})`}
           </span>
         </div>
         <div>
@@ -569,7 +568,7 @@ export default function QuestionnaireResponsesList({
             )}
           >
             <div className="text-lg font-medium text-gray-500">
-              {t("no_questionnaire_responses")}
+              {t("no_responses_found")}
             </div>
           </Card>
         ) : (

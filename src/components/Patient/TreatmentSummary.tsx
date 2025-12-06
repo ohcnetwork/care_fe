@@ -1,33 +1,31 @@
+import { formatDosage, formatSig } from "@/components/Medicine/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
+
+import PrintPreview from "@/CAREUI/misc/PrintPreview";
+import { getPermissions } from "@/common/Permissions";
+import Loading from "@/components/Common/Loading";
+import PrintTable from "@/components/Common/PrintTable";
+import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
+import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
+import { usePermissions } from "@/context/PermissionContext";
+import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
+import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
+import { completedEncounterStatus } from "@/types/emr/encounter/encounter";
+import encounterApi from "@/types/emr/encounter/encounterApi";
+import { displayMedicationName } from "@/types/emr/medicationRequest/medicationRequest";
+import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
+import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
+import patientApi from "@/types/emr/patient/patientApi";
+import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
+import symptomApi from "@/types/emr/symptom/symptomApi";
+import query from "@/Utils/request/query";
 import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
-
-import PrintPreview from "@/CAREUI/misc/PrintPreview";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-import Loading from "@/components/Common/Loading";
-import PrintTable from "@/components/Common/PrintTable";
-import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
-import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { formatDosage, formatSig } from "@/components/Medicine/utils";
-
-import { getPermissions } from "@/common/Permissions";
-
-import query from "@/Utils/request/query";
-import { formatDateTime, formatName, formatPatientAge } from "@/Utils/utils";
-import { usePermissions } from "@/context/PermissionContext";
-import allergyIntoleranceApi from "@/types/emr/allergyIntolerance/allergyIntoleranceApi";
-import diagnosisApi from "@/types/emr/diagnosis/diagnosisApi";
-import { completedEncounterStatus } from "@/types/emr/encounter/encounter";
-import encounterApi from "@/types/emr/encounter/encounterApi";
-import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
-import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
-import patientApi from "@/types/emr/patient/patientApi";
-import symptomApi from "@/types/emr/symptom/symptomApi";
 
 interface TreatmentSummaryProps {
   facilityId?: string;
@@ -152,6 +150,20 @@ export default function TreatmentSummary({
       enabled: !!patientId,
     });
 
+  const { data: serviceRequests, isLoading: serviceRequestsLoading } = useQuery(
+    {
+      queryKey: ["service_requests", patientId, encounterId],
+      queryFn: query.paginated(serviceRequestApi.listServiceRequest, {
+        pathParams: { facilityId: facilityId || "" },
+        queryParams: {
+          encounter: encounterId,
+        },
+        pageSize: 100,
+      }),
+      enabled: !!encounterId && !!facilityId,
+    },
+  );
+
   if (encounterLoading) {
     return <Loading />;
   }
@@ -170,7 +182,8 @@ export default function TreatmentSummary({
     diagnosesLoading ||
     symptomsLoading ||
     medicationsLoading ||
-    medicationStatementLoading;
+    medicationStatementLoading ||
+    serviceRequestsLoading;
 
   if (isLoading) {
     return (
@@ -466,6 +479,7 @@ export default function TreatmentSummary({
                     headers={[
                       { key: "diagnosis" },
                       { key: "status" },
+                      { key: "severity" },
                       { key: "verification" },
                       { key: "onset" },
                       { key: "notes" },
@@ -474,6 +488,9 @@ export default function TreatmentSummary({
                     rows={diagnoses?.results.map((diagnosis) => ({
                       diagnosis: diagnosis.code.display,
                       status: t(diagnosis.clinical_status),
+                      severity: diagnosis.severity
+                        ? t(diagnosis.severity)
+                        : "-",
                       verification: t(diagnosis.verification_status),
                       onset: diagnosis.onset?.onset_datetime
                         ? new Date(
@@ -515,7 +532,7 @@ export default function TreatmentSummary({
                       const remarks = formatSig(instruction);
                       const notes = medication.note;
                       return {
-                        medicine: medication.medication?.display,
+                        medicine: displayMedicationName(medication),
                         status: t(`medication_status__${medication.status}`),
                         dosage: dosage,
                         frequency: instruction?.as_needed_boolean
@@ -574,6 +591,26 @@ export default function TreatmentSummary({
                       reason: medication.reason,
                       notes: medication.note,
                       logged_by: formatName(medication.created_by),
+                    }))}
+                  />
+                </SectionLayout>
+              )}
+
+              {/* Service Requests */}
+              {serviceRequests?.count != 0 && (
+                <SectionLayout title={t("service_requests")}>
+                  <PrintTable
+                    headers={[
+                      { key: "title" },
+                      { key: "service_type" },
+                      { key: "status" },
+                      { key: "priority" },
+                    ]}
+                    rows={serviceRequests?.results.map((request) => ({
+                      title: request.title,
+                      service_type: t(request.category),
+                      status: t(request.status),
+                      priority: t(request.priority),
                     }))}
                   />
                 </SectionLayout>

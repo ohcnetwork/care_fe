@@ -33,7 +33,7 @@ import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrgani
 import { PublicPatientRead } from "@/types/emr/patient/patient";
 import publicPatientApi from "@/types/emr/patient/publicPatientApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
-import { Appointment } from "@/types/scheduling/schedule";
+import { PublicAppointment } from "@/types/scheduling/schedule";
 
 type PatientRegistrationProps = {
   facilityId: string;
@@ -109,7 +109,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
           Authorization: `Bearer ${tokenData.token}`,
         },
       }),
-      onSuccess: (data: Appointment) => {
+      onSuccess: (data: PublicAppointment) => {
         toast.success(t("appointment_created_success"));
         queryClient.invalidateQueries({
           queryKey: [

@@ -128,12 +128,20 @@ function SubQueueCard({
   });
 
   const handleUpdateSubQueue = () => {
+    const trimmedName = subQueueName.trim();
+    if (trimmedName.length === 0) {
+      toast.error("Service point name is required");
+      return;
+    }
     updateSubQueue({
-      name: subQueueName,
+      name: trimmedName,
       status: subQueueStatus,
     });
     setEditSubQueue(false);
   };
+
+  const hasChanges =
+    subQueueName.trim() !== subQueue.name || subQueueStatus !== subQueue.status;
 
   return (
     <Card
@@ -202,7 +210,11 @@ function SubQueueCard({
               <Button variant="ghost" onClick={() => setEditSubQueue(false)}>
                 {t("cancel")}
               </Button>
-              <Button variant="primary" onClick={handleUpdateSubQueue}>
+              <Button
+                variant="primary"
+                onClick={handleUpdateSubQueue}
+                disabled={!hasChanges || subQueueName.trim().length === 0}
+              >
                 <Check />
                 {t("save_changes")}
               </Button>

@@ -95,7 +95,7 @@ const ScheduleTemplateItem = ({
   });
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
-  const { canSetChargeItemDefinition } = getPermissions(
+  const { canSetChargeItemDefinition, canWriteSchedule } = getPermissions(
     hasPermission,
     facilityData?.permissions ?? [],
   );
@@ -138,7 +138,7 @@ const ScheduleTemplateItem = ({
         </div>
 
         <div className="flex gap-2">
-          {canSetChargeItemDefinition && (
+          {canSetChargeItemDefinition && canWriteSchedule && (
             <ScheduleChargeItemDefinitionSelector
               facilityId={facilityId}
               scheduleTemplate={template}
@@ -152,21 +152,23 @@ const ScheduleTemplateItem = ({
               }
             />
           )}
-          <EditScheduleTemplateSheet
-            template={template}
-            facilityId={facilityId}
-            resourceId={resourceId}
-            resourceType={resourceType}
-            open={qParams.edit === template.id}
-            onOpenChange={(open) =>
-              setQParams({ ...qParams, edit: open ? template.id : null })
-            }
-            trigger={
-              <Button variant="ghost" size="icon">
-                <Edit3Icon className="size-4" />
-              </Button>
-            }
-          />
+          {canWriteSchedule && (
+            <EditScheduleTemplateSheet
+              template={template}
+              facilityId={facilityId}
+              resourceId={resourceId}
+              resourceType={resourceType}
+              open={qParams.edit === template.id}
+              onOpenChange={(open) =>
+                setQParams({ ...qParams, edit: open ? template.id : null })
+              }
+              trigger={
+                <Button variant="ghost" size="icon">
+                  <Edit3Icon className="size-4" />
+                </Button>
+              }
+            />
+          )}
         </div>
       </div>
       <div className="flex flex-col gap-2 px-4 py-2">

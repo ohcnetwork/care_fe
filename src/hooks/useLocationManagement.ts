@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import routes from "@/Utils/request/api";
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
+import batchApi from "@/types/base/batch/batchApi";
 import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 
 interface UseLocationManagementProps {
   facilityId: string;
@@ -43,8 +43,8 @@ export function useLocationManagement({
       parentId,
       { page, limit: itemsPerPage + 2, searchQuery },
     ],
-    /* The weird offset calculation is to include overlapping items between pages. 
-    Offset is calculated using (page - 1) * itemsPerPage - 1 to include overlapping items between pages. 
+    /* The weird offset calculation is to include overlapping items between pages.
+    Offset is calculated using (page - 1) * itemsPerPage - 1 to include overlapping items between pages.
     This enables smooth reordering across pages by showing one item from the previous and one from the next page.*/
     queryFn: query.debounced(locationApi.list, {
       pathParams: { facility_id: facilityId },
@@ -88,7 +88,7 @@ export function useLocationManagement({
         }),
       );
 
-      return mutate(routes.batchRequest, { silent: true })({
+      return mutate(batchApi.batchRequest, { silent: true })({
         requests: batchRequests,
       });
     },

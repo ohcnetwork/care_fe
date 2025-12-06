@@ -18,7 +18,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 
 import { Avatar } from "@/components/Common/Avatar";
@@ -35,7 +34,6 @@ import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { UserReadMinimal } from "@/types/user/user";
 
 type CareTeamSheetProps = {
-  trigger: React.ReactNode;
   encounter: EncounterRead;
   canWrite: boolean;
   open?: boolean;
@@ -57,7 +55,6 @@ export function EmptyState() {
 }
 
 export function CareTeamSheet({
-  trigger,
   encounter,
   canWrite,
   ...props
@@ -208,7 +205,6 @@ export function CareTeamSheet({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-3xl pr-0">
         <SheetHeader className="space-y-1 mr-2">
           <SheetTitle className="text-xl font-semibold">

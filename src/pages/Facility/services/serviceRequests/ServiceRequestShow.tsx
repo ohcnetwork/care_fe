@@ -372,7 +372,6 @@ export default function ServiceRequestShow({
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        data-cy="invoice-actions-button"
                         className="border-gray-400 px-2"
                       >
                         <CareIcon icon="l-ellipsis-v" />
@@ -396,27 +395,24 @@ export default function ServiceRequestShow({
                           </Button>
                         </DropdownMenuItem>
                       )}
-                      {request.status === Status.on_hold ||
-                        (request.status === Status.revoked && (
-                          <DropdownMenuItem
-                            asChild
-                            className="text-primary-900"
+                      {(request.status === Status.on_hold ||
+                        request.status === Status.revoked) && (
+                        <DropdownMenuItem asChild className="text-primary-900">
+                          <Button
+                            variant="ghost"
+                            onClick={() =>
+                              updateServiceRequest({
+                                status: Status.active,
+                              })
+                            }
+                            className="w-full flex flex-row justify-stretch items-center"
+                            disabled={isUpdatingServiceRequest}
                           >
-                            <Button
-                              variant="ghost"
-                              onClick={() =>
-                                updateServiceRequest({
-                                  status: Status.active,
-                                })
-                              }
-                              className="w-full flex flex-row justify-stretch items-center"
-                              disabled={isUpdatingServiceRequest}
-                            >
-                              <CareIcon icon="l-play" className="mr-1" />
-                              {t("mark_as_active")}
-                            </Button>
-                          </DropdownMenuItem>
-                        ))}
+                            <CareIcon icon="l-play" className="mr-1" />
+                            {t("mark_as_active")}
+                          </Button>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem asChild className="text-primary-900">
                         <Button
                           variant="ghost"
@@ -476,8 +472,7 @@ export default function ServiceRequestShow({
               resourceId={serviceRequestId}
               encounterId={request.encounter.id}
               serviceResourceType={ChargeItemServiceResource.service_request}
-              sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/services_requests/${serviceRequestId}`}
-              locationId={locationId}
+              sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/service_requests/${serviceRequestId}`}
               patientId={request.encounter.patient.id}
               viewOnly={disableEdit}
             />
