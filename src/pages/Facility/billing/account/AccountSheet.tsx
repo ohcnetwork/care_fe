@@ -32,7 +32,6 @@ import { Textarea } from "@/components/ui/textarea";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
-  ACCOUNT_BILLING_STATUS_COLORS,
   ACCOUNT_STATUS_COLORS,
   AccountBillingStatus,
   type AccountRead,
@@ -81,9 +80,6 @@ export function AccountSheet({
     },
   });
 
-  const accountBillingStatus = methods.watch("billing_status");
-  const accountStatus = methods.watch("status");
-
   // Reset form when initialValues changes
   React.useEffect(() => {
     methods.reset(
@@ -106,17 +102,6 @@ export function AccountSheet({
     },
   });
 
-  const isAccountBillingStatusClosed = (
-    billingStatus: AccountBillingStatus,
-  ) => {
-    return (
-      billingStatus === AccountBillingStatus.closed_baddebt ||
-      billingStatus === AccountBillingStatus.closed_voided ||
-      billingStatus === AccountBillingStatus.closed_completed ||
-      billingStatus === AccountBillingStatus.closed_combined
-    );
-  };
-
   const updateMutation = useMutation<AccountRead, unknown, AccountFormValues>({
     mutationFn: (data) =>
       query(accountApi.updateAccount, {
@@ -125,17 +110,10 @@ export function AccountSheet({
           id: data.id!,
           name: data.name,
           description: data.description,
-          status:
-            isAccountBillingStatusClosed(data.billing_status) &&
-            data.status === AccountStatus.active
-              ? AccountStatus.inactive
-              : data.status,
+          status: data.status,
           billing_status: data.billing_status,
-          service_period: {
-            start: data.service_period?.start || new Date().toISOString(),
-            end: isAccountBillingStatusClosed(data.billing_status)
-              ? new Date().toISOString()
-              : data.service_period?.end || undefined,
+          service_period: data.service_period || {
+            start: new Date().toISOString(),
           },
           patient: data.patient?.id || patientId!,
         },
@@ -250,13 +228,15 @@ export function AccountSheet({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {Object.keys(ACCOUNT_BILLING_STATUS_COLORS).map(
-                            (key) => (
-                              <SelectItem key={key} value={key}>
-                                {t(key)}
-                              </SelectItem>
-                            ),
-                          )}
+                          {[
+                            AccountBillingStatus.open,
+                            AccountBillingStatus.carecomplete_notbilled,
+                            AccountBillingStatus.billing,
+                          ].map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {t(status)}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -264,12 +244,6 @@ export function AccountSheet({
                   </FormItem>
                 )}
               />
-              {isAccountBillingStatusClosed(accountBillingStatus) &&
-                accountStatus === AccountStatus.active && (
-                  <p className="text-red-500 bg-red-50 text-xs -mt-2 p-2">
-                    {t("billing_status_inactive_warning")}
-                  </p>
-                )}
 
               <SheetFooter>
                 <Button

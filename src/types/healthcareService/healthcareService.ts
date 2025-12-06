@@ -22,8 +22,10 @@ export interface BaseHealthcareServiceSpec {
   internal_type?: InternalType;
 }
 
-export interface HealthcareServiceCreateSpec
-  extends Omit<BaseHealthcareServiceSpec, "id"> {
+export interface HealthcareServiceCreateSpec extends Omit<
+  BaseHealthcareServiceSpec,
+  "id"
+> {
   facility: string;
   locations: string[];
   managing_organization?: string;

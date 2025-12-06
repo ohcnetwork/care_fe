@@ -1052,6 +1052,7 @@ export default function MedicationBillForm({ patientId }: Props) {
     const medsWithZeroQuantity = selectedItems.filter((item) => {
       return item.lots.every(
         (lot) =>
+          !lot.quantity ||
           lot.quantity === 0 ||
           !lot.selectedInventoryId ||
           !lot.selectedInventoryId.length,
@@ -1874,7 +1875,9 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                                 selectedInventory.status ===
                                                                   "active" &&
                                                                 new Date(
-                                                                  selectedInventory.product.expiration_date,
+                                                                  selectedInventory
+                                                                    .product
+                                                                    .expiration_date,
                                                                 ) >= new Date()
                                                                   ? "primary"
                                                                   : "destructive"
@@ -2012,7 +2015,8 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                               inv.status ===
                                                                 "active" &&
                                                               new Date(
-                                                                inv.product.expiration_date,
+                                                                inv.product
+                                                                  .expiration_date,
                                                               ) >= new Date()
                                                                 ? "primary"
                                                                 : "destructive"
@@ -2091,7 +2095,7 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                           formField.onChange(
                                                             parseInt(
                                                               e.target.value,
-                                                            ) || 0,
+                                                            ),
                                                           );
                                                         }}
                                                         className="border-gray-300 border rounded-none w-24"

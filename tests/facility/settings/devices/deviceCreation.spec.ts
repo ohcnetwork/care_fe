@@ -182,10 +182,11 @@ test.describe("Facility Devices Management", () => {
     // Navigate to Add Device form
     await page.getByRole("link", { name: "Add Device" }).click();
 
-    await page.waitForLoadState("networkidle");
+    // Wait for form to be ready by checking Save button visibility
+    const saveButton = page.getByRole("button", { name: "Save" });
+    await expect(saveButton).toBeVisible({ timeout: 10000 });
 
     // Verify Save button is disabled initially
-    const saveButton = page.getByRole("button", { name: "Save" });
     await expect(saveButton).toBeDisabled();
 
     // Fill User Friendly Name to enable the Save button
