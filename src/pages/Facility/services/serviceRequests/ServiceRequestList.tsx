@@ -145,7 +145,7 @@ function ServiceRequestCard({
                     patientId={request.encounter.patient.id}
                     trigger={
                       <Button variant="outline" size="xs">
-                        <Hash className="size-3" /> {t("tags")}
+                        <Hash className="size-3" /> {t("add_tags")}
                       </Button>
                     }
                   />
