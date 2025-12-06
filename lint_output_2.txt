@@ -1,0 +1,4 @@
+
+> care_fe@3.0.5 lint
+> eslint ./src
+

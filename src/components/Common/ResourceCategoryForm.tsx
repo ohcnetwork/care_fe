@@ -109,7 +109,7 @@ export function ResourceCategoryForm({
   }, [categoryData, form]);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen && !isEditing) {
       form.reset({
         title: "",
         slug_value: "",
@@ -117,7 +117,7 @@ export function ResourceCategoryForm({
         resource_sub_type: ResourceCategorySubType.other,
       });
     }
-  }, [isOpen, form]);
+  }, [isOpen, isEditing, form]);
 
   // Auto-generate slug from name when creating new category
   useEffect(() => {

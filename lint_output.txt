@@ -1,0 +1,395 @@
+
+> care_fe@3.0.5 lint
+> eslint ./src
+
+
+C:\VSC\care_fe\src\PluginRegistry.ts
+  13:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  34:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  38:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\Utils\Notifications.ts
+  22:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  50:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\Utils\request\api.tsx
+  70:16  warning  `routes` is deprecated. use object specific api instead  @typescript-eslint/no-deprecated
+
+C:\VSC\care_fe\src\Utils\request\errorHandler.ts
+  43:19  warning  `BadRequest` is deprecated. TODO: add a better error handler  @typescript-eslint/no-deprecated
+  88:27  warning  Unexpected any. Specify a different type                      @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\Utils\useVoiceRecorder.ts
+  75:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\components\Auth\Authenticate.tsx
+  90:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\components\Auth\Login.tsx
+   90:19  warning  Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+   97:18  warning  Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+  122:6   warning  React Hook useEffect has a missing dependency: 'resendOtpCountdown'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  137:22  warning  Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+  169:22  warning  Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+  199:28  warning  Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+  286:35  warning  Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\components\Auth\ResetPassword.tsx
+  24:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  29:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  88:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\components\Billing\CompactConditionEditor.tsx
+  392:6   warning  React Hook useEffect has missing dependencies: 'defaultCondition' and 'form'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  553:71  warning  Unexpected any. Specify a different type                                                                                          @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\components\Common\SearchInput.tsx
+  217:6  warning  React Hook useEffect has a missing dependency: 'selectedOption'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Consent\ConsentFormSheet.tsx
+  248:6  warning  React Hook useEffect has missing dependencies: 'form' and 'isEdit'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  257:6  warning  React Hook useEffect has a missing dependency: 'fileUpload'. Either include it or remove the dependency array           react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Facility\FacilityForm.tsx
+  216:6  warning  React Hook useEffect has a missing dependency: 'form'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Files\AudioCaptureDialog.tsx
+  116:6  warning  React Hook useEffect has a missing dependency: 'handleStartRecording'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Files\CameraCaptureDialog.tsx
+   88:6  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array                             react-hooks/exhaustive-deps
+  117:6  warning  React Hook useEffect has missing dependencies: 'startStream' and 'stopStream'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Files\DischargeSummarySubTab.tsx
+  143:6  warning  React Hook useEffect has a missing dependency: 'fileUpload'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Files\DrawingSubTab.tsx
+  109:8  warning  React Hook useEffect has a missing dependency: 't'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Files\FileSubTab.tsx
+  154:6  warning  React Hook useEffect has a missing dependency: 'fileUpload'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\HistoricalRecordSelector\RecordItem.tsx
+  12:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  38:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\components\HistoricalRecordSelector\index.tsx
+   35:18  warning  Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   42:73  warning  Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+   43:22  warning  Unexpected any. Specify a different type                                                                                                  @typescript-eslint/no-explicit-any
+  249:6   warning  React Hook useEffect has a missing dependency: 'state.dateGroupedRecords'. Either include it or remove the dependency array               react-hooks/exhaustive-deps
+  252:5   warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Location\LocationCardWrapper.tsx
+  67:6  warning  React Hook useEffect has a missing dependency: 'setEditingState'. Either include it or remove the dependency array. If 'setEditingState' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Location\LocationPicker.tsx
+  117:6  warning  React Hook useEffect has a missing dependency: 'value.parent'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Medicine\MedicationAdministration\MedicineAdminSheet.tsx
+  257:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\components\Notes\NoteManager.tsx
+  444:6  warning  React Hook useEffect has a missing dependency: 'threads'. Either include it or remove the dependency array. You can also do a functional update 'setThreads(t => ...)' if you only need 'threads' in the 'setThreads' call  react-hooks/exhaustive-deps
+  493:6  warning  React Hook useMemo has a missing dependency: 'commentAdded'. Either include it or remove the dependency array                                                                                                               react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Questionnaire\CodingEditor.tsx
+  39:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\components\Questionnaire\QuestionTypes\AllergyQuestion.tsx
+  596:6  warning  React Hook useEffect has missing dependencies: 'questionnaireResponse.question_id' and 'updateQuestionnaireResponseCB'. Either include them or remove the dependency array. If 'updateQuestionnaireResponseCB' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Questionnaire\QuestionTypes\DiagnosisQuestion.tsx
+  401:6  warning  React Hook useEffect has missing dependencies: 'questionnaireResponse.question_id' and 'updateQuestionnaireResponseCB'. Either include them or remove the dependency array. If 'updateQuestionnaireResponseCB' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Questionnaire\QuestionTypes\EncounterQuestion.tsx
+  159:6  warning  React Hook useEffect has missing dependencies: 'encounter.period' and 'handleUpdateEncounter'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  181:6  warning  React Hook useEffect has a missing dependency: 'handleUpdateEncounter'. Either include it or remove the dependency array                           react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Questionnaire\QuestionTypes\FileQuestion.tsx
+  160:6  warning  React Hook useEffect has missing dependencies: 'encounterId', 'questionnaireResponse.note', 'questionnaireResponse.question_id', 'updateQuestionnaireResponseCB', and 'values'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Questionnaire\QuestionTypes\MedicationRequestQuestion.tsx
+  247:6  warning  React Hook useEffect has missing dependencies: 'currentUser', 'questionnaireResponse.question_id', and 'updateQuestionnaireResponseCB'. Either include them or remove the dependency array. If 'updateQuestionnaireResponseCB' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Questionnaire\QuestionTypes\MedicationStatementQuestion.tsx
+  187:6  warning  React Hook useEffect has missing dependencies: 'questionnaireResponse.question_id' and 'updateQuestionnaireResponseCB'. Either include them or remove the dependency array. If 'updateQuestionnaireResponseCB' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Questionnaire\QuestionTypes\QuestionGroup.tsx
+  133:6  warning  React Hook useEffect has missing dependencies: 'clearDependentQuestionResponse' and 'question'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Questionnaire\QuestionTypes\ServiceRequestQuestion.tsx
+  67:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\components\Questionnaire\QuestionTypes\SymptomQuestion.tsx
+  689:6  warning  React Hook useEffect has missing dependencies: 'questionnaireResponse.question_id' and 'updateQuestionnaireResponseCB'. Either include them or remove the dependency array. If 'updateQuestionnaireResponseCB' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\Questionnaire\QuestionnaireEditor.tsx
+   219:37  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+   475:24  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  1743:35  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  1816:35  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+  1844:6   warning  React Hook useEffect has a missing dependency: 'updateField'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  3192:39  warning  Unexpected any. Specify a different type                                                                        @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\components\Questionnaire\QuestionnaireForm.tsx
+   64:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  595:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\components\Scan\SpecimenIDScanDialog.tsx
+  30:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\components\Users\BackupCodesDialog.tsx
+  56:30  warning  `write` is deprecated. [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/write)  @typescript-eslint/no-deprecated
+
+C:\VSC\care_fe\src\components\Users\TwoFactorAuth.tsx
+  159:6  warning  React Hook useEffect has missing dependencies: 'closeBackupCodes', 'closeDisableDialog', 'closePasswordDialog', 'closeRegenerateConfirm', and 'closeSetupDialog'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\ValueSet\CodingField.tsx
+  24:9  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\components\ui\calendar.tsx
+  327:6  warning  React Hook React.useCallback has missing dependencies: 'displayYears.from', 'displayYears.to', 'navView', 'onPrevClick', and 'setDisplayYears'. Either include them or remove the dependency array. If 'onPrevClick' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+  347:6  warning  React Hook React.useCallback has missing dependencies: 'displayYears.from', 'displayYears.to', 'navView', 'onNextClick', and 'setDisplayYears'. Either include them or remove the dependency array. If 'onNextClick' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\components\ui\context-menu.tsx
+   23:9  warning  `ElementRef` is deprecated. Use `ComponentRef<T>` instead
+
+Retrieves the type of the 'ref' prop for a given component type or tag name  @typescript-eslint/no-deprecated
+   44:9  warning  `ElementRef` is deprecated. Use `ComponentRef<T>` instead
+
+Retrieves the type of the 'ref' prop for a given component type or tag name  @typescript-eslint/no-deprecated
+   59:9  warning  `ElementRef` is deprecated. Use `ComponentRef<T>` instead
+
+Retrieves the type of the 'ref' prop for a given component type or tag name  @typescript-eslint/no-deprecated
+   76:9  warning  `ElementRef` is deprecated. Use `ComponentRef<T>` instead
+
+Retrieves the type of the 'ref' prop for a given component type or tag name  @typescript-eslint/no-deprecated
+   94:9  warning  `ElementRef` is deprecated. Use `ComponentRef<T>` instead
+
+Retrieves the type of the 'ref' prop for a given component type or tag name  @typescript-eslint/no-deprecated
+  118:9  warning  `ElementRef` is deprecated. Use `ComponentRef<T>` instead
+
+Retrieves the type of the 'ref' prop for a given component type or tag name  @typescript-eslint/no-deprecated
+  140:9  warning  `ElementRef` is deprecated. Use `ComponentRef<T>` instead
+
+Retrieves the type of the 'ref' prop for a given component type or tag name  @typescript-eslint/no-deprecated
+  158:9  warning  `ElementRef` is deprecated. Use `ComponentRef<T>` instead
+
+Retrieves the type of the 'ref' prop for a given component type or tag name  @typescript-eslint/no-deprecated
+
+C:\VSC\care_fe\src\components\ui\multi-filter\utils\useMultiFilterState.tsx
+  120:6  warning  React Hook useEffect has a missing dependency: 'getInitialValues'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\globals.d.ts
+  7:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\hooks\useAppUpdates.tsx
+  76:6  warning  React Hook useEffect has missing dependencies: 'onDismissUpdateToast', 'silentlyAutoUpdate', 't', and 'updateApp'. Either include them or remove the dependency array. If 'onDismissUpdateToast' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+  85:6  warning  React Hook useEffect has a missing dependency: 't'. Either include it or remove the dependency array                                                                                                                                                                                                   react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\hooks\useEncounterShortcuts.ts
+  223:10  warning  `useShortcutDisplays` is deprecated. Use `useShortcutDisplay` from `@/context/ShortcutContext` instead.
+This hook is now integrated with the ShortcutContext and automatically uses the current context hierarchy  @typescript-eslint/no-deprecated
+
+C:\VSC\care_fe\src\hooks\useFileManager.tsx
+  108:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  153:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  292:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  394:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  444:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\hooks\useFileUpload.tsx
+  126:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  234:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\hooks\useFilters.tsx
+  113:6  warning  React Hook useEffect has missing dependencies: 'defaultQueryParams', 'disableCache', 'qParams', 'setQueryParams', and 'updateCache'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\hooks\useLocationManagement.ts
+  70:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  71:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\hooks\useLocationState.tsx
+  66:5  warning  React Hook useCallback has a missing dependency: 'pathType'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Admin\organizations\components\AdminOrganizationFormSheet.tsx
+  89:6  warning  React Hook useEffect has a missing dependency: 'form'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Encounters\ConsentDetail.tsx
+  100:6  warning  React Hook useEffect has a missing dependency: 'fileUpload'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Encounters\ReportBuilder\ReportBuilder.tsx
+  195:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\pages\Encounters\tabs\responses.tsx
+  70:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\pages\Facility\FacilitiesPage.tsx
+  40:6  warning  React Hook useEffect has a missing dependency: 'updateQuery'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Facility\FacilityDetailsPage.tsx
+  44:16  warning  `routes` is deprecated. use object specific api instead  @typescript-eslint/no-deprecated
+  45:20  warning  `routes` is deprecated. use object specific api instead  @typescript-eslint/no-deprecated
+
+C:\VSC\care_fe\src\pages\Facility\billing\account\CreateInvoice.tsx
+  313:9  warning  The 'chargeItems' logical expression could make the dependencies of useEffect Hook (at line 336) change on every render. To fix this, wrap the initialization of 'chargeItems' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Facility\billing\account\components\EditChargeItemSheet.tsx
+  121:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\pages\Facility\billing\invoice\PrintInvoice.tsx
+   76:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   79:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   84:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   87:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   96:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  104:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  106:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\pages\Facility\billing\paymentReconciliation\PaymentsData.tsx
+  86:6  warning  React Hook useEffect has a missing dependency: 'updateQuery'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Facility\services\diagnosticReports\DiagnosticReportPrint.tsx
+   94:16  warning  Unexpected any. Specify a different type                                                                       @typescript-eslint/no-explicit-any
+  125:6   warning  React Hook useEffect has a missing dependency: 'getFileUrl'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Facility\services\inventory\ToDispatch.tsx
+  133:6  warning  React Hook useEffect has missing dependencies: 'EFFECTIVE_STATUSES' and 'updateQuery'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  222:6  warning  React Hook useEffect has missing dependencies: 'EFFECTIVE_STATUSES' and 'updateQuery'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Facility\services\inventory\ToReceive.tsx
+  157:6  warning  React Hook useEffect has missing dependencies: 'EFFECTIVE_STATUSES' and 'updateQuery'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  246:6  warning  React Hook useEffect has missing dependencies: 'EFFECTIVE_STATUSES' and 'updateQuery'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Facility\services\inventory\externalSupply\deliveryOrder\DeliveryOrderShow.tsx
+  76:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\pages\Facility\services\pharmacy\MedicationBillForm.tsx
+  1378:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\pages\Facility\services\serviceRequests\ServiceRequestList.tsx
+  212:5  warning  React Hook useMemo has a missing dependency: 't'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Facility\services\serviceRequests\components\DiagnosticReportForm.tsx
+  189:22  warning  Unexpected any. Specify a different type                                                                       @typescript-eslint/no-explicit-any
+  233:22  warning  Unexpected any. Specify a different type                                                                       @typescript-eslint/no-explicit-any
+  261:34  warning  Unexpected any. Specify a different type                                                                       @typescript-eslint/no-explicit-any
+  290:6   warning  React Hook useEffect has a missing dependency: 'fileUpload'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Facility\services\serviceRequests\components\DiagnosticReportReview.tsx
+  120:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\pages\Facility\services\serviceRequests\components\MultiQRCodePrintSheet.tsx
+  65:6  warning  React Hook useEffect has a missing dependency: 'selectedSpecimens.size'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Facility\services\serviceRequests\components\SpecimenForm.tsx
+  123:71  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  149:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\pages\Facility\services\serviceRequests\components\SpecimenWorkflowCard.tsx
+   88:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  147:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  173:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\pages\Facility\settings\chargeItemDefinitions\ChargeItemDefinitionForm.tsx
+   147:10  error    'resetCounter' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+   147:24  error    'setResetCounter' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  1286:26  error    'arg0' is defined but never used. Allowed unused args must match /^_/u                      @typescript-eslint/no-unused-vars
+  1286:36  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+  1286:44  warning  Unexpected any. Specify a different type                                                    @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\pages\Facility\settings\devices\components\DeviceForm.tsx
+  188:6  warning  React Hook useEffect has a missing dependency: 'pluginDevices'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Facility\settings\locations\LocationForm.tsx
+  164:6  warning  React Hook useEffect has missing dependencies: 'form', 'replaceBedFields', and 'resetToDefaultNames'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  165:5  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                  react-hooks/exhaustive-deps
+  166:5  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                  react-hooks/exhaustive-deps
+  167:5  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                  react-hooks/exhaustive-deps
+  168:5  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                  react-hooks/exhaustive-deps
+  169:5  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Facility\settings\locations\LocationView.tsx
+  120:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\pages\Facility\settings\observationDefinition\ObservationInterpretation.tsx
+   191:29  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   191:51  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   250:27  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   250:49  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   274:27  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   274:49  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   303:29  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   303:47  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   325:59  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   397:12  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   409:36  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   409:50  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   468:37  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   580:13  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   707:23  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   728:43  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   767:54  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   808:51  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   841:25  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   849:49  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   868:32  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   880:49  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   899:32  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   921:43  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   952:49  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+   982:49  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  1029:51  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  1088:6   warning  React Hook useEffect has a missing dependency: 'setConditions'. Either include it or remove the dependency array. If 'setConditions' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+  1205:63  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  1242:66  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  1342:43  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  1370:41  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  1504:65  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+  1527:65  warning  Unexpected any. Specify a different type                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\pages\Facility\settings\organizations\components\FacilityOrganizationFormSheet.tsx
+  107:6  warning  React Hook useEffect has a missing dependency: 'form'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Facility\settings\specimen-definitions\SpecimenDefinitionForm.tsx
+  91:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\pages\Organization\OrganizationPatients.tsx
+  67:6  warning  React Hook useCallback has a missing dependency: 'updateQuery'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Organization\OrganizationUsers.tsx
+  68:6  warning  React Hook useCallback has a missing dependency: 'updateQuery'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Organization\components\GovtOrganizationSelector.tsx
+  121:6  warning  React Hook useEffect has missing dependencies: 'onChange', 'required', and 'requiredDepth'. Either include them or remove the dependency array. If 'onChange' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\pages\Organization\components\OrganizationFilter.tsx
+  87:6  warning  React Hook useEffect has a missing dependency: 'orgDetail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\VSC\care_fe\src\supportedBrowsers.ts
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+C:\VSC\care_fe\src\types\base\batch\batch.ts
+  11:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\types\base\condition\condition.ts
+  227:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\types\location\association.ts
+  12:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  23:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\types\plugConfig.ts
+  4:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\VSC\care_fe\src\types\questionnaire\validation.ts
+  66:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 194 problems (3 errors, 191 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

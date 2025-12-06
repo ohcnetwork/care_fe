@@ -707,6 +707,11 @@ export function ChargeItemDefinitionForm({
     reValidateMode: "onChange",
   });
 
+  const resetFormCompletely = () => {
+    form.reset(getDefaultValues());
+    form.clearErrors();
+  };
+
   // Reset form when initialData changes (for update mode)
   useEffect(() => {
     if (isUpdate && initialData) {
@@ -746,6 +751,9 @@ export function ChargeItemDefinitionForm({
         }),
     onSuccess: (chargeItemDefinition: ChargeItemDefinitionRead) => {
       queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
+      resetFormCompletely();
+      form.reset(getDefaultValues());
+      form.clearErrors();
       onSuccess?.(chargeItemDefinition);
       toast.success(
         isUpdate
@@ -1240,7 +1248,12 @@ export function ChargeItemDefinitionForm({
             variant="outline"
             size={minimal ? "sm" : "default"}
             disabled={isPending}
-            onClick={onCancel}
+            onClick={() => {
+              resetFormCompletely();
+              form.reset(getDefaultValues());
+              form.clearErrors();
+              onCancel();
+            }}
           >
             {t("cancel")}
           </Button>

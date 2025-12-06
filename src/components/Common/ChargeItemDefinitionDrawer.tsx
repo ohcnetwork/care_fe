@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,13 @@ export function ChargeItemDefinitionDrawer({
   onSuccess,
 }: ChargeItemDefinitionDrawerProps) {
   const { t } = useTranslation();
+  const [formKey, setFormKey] = useState(0);
+
+  useEffect(() => {
+    if (open) {
+      setFormKey((prev) => prev + 1);
+    }
+  }, [open]);
 
   function handleCancel() {
     onOpenChange(false);
@@ -73,6 +81,7 @@ export function ChargeItemDefinitionDrawer({
           <div className="max-w-4xl mx-auto w-full px-4 py-4">
             <div className="bg-gray-100 rounded-lg p-4">
               <ChargeItemDefinitionForm
+                key={formKey}
                 facilityId={facilityId}
                 categorySlug={initialData ? undefined : categorySlug}
                 initialData={initialData}
