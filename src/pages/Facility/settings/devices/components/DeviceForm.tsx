@@ -460,6 +460,7 @@ export default function DeviceForm({ facilityId, device, onSuccess }: Props) {
                         if (isPhone(value) !== isPhone(field.value)) {
                           form.setValue(`contact.${index}.value`, "");
                         }
+                        form.clearErrors(`contact.${index}.value`);
 
                         field.onChange(value);
                       }}
