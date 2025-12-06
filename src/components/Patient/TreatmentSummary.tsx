@@ -42,7 +42,7 @@ const SectionLayout = ({
   children: React.ReactNode;
 }) => {
   return (
-    <Card className="rounded-sm shadow-none border-none">
+    <Card className="rounded-sm shadow-none border-none break-inside-avoid">
       <CardHeader className="flex justify-between flex-row px-0 py-2 ">
         <CardTitle>{title}</CardTitle>
       </CardHeader>
@@ -618,7 +618,7 @@ export default function TreatmentSummary({
             </div>
 
             {/* Questionnaire Responses Section */}
-            <div>
+            <div className="break-inside-avoid">
               <QuestionnaireResponsesList
                 encounterId={encounterId}
                 patientId={encounter.patient.id}
