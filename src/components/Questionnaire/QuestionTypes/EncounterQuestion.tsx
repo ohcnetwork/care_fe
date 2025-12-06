@@ -24,7 +24,7 @@ import {
   ENCOUNTER_DIET_PREFERENCE,
   ENCOUNTER_DISCHARGE_DISPOSITION,
   ENCOUNTER_PRIORITY,
-  ENCOUNTER_STATUS,
+  EncounterStatus,
   type EncounterAdmitSources,
   type EncounterClass,
   type EncounterDietPreference,
@@ -32,7 +32,6 @@ import {
   type EncounterEdit,
   type EncounterPriority,
   type EncounterRead,
-  type EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -115,7 +114,7 @@ export function EncounterQuestion({
   );
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
-    status: "unknown",
+    status: EncounterStatus.UNKNOWN,
     encounter_class: careConfig.defaultEncounterType,
     period: {
       start: new Date().toISOString(),
@@ -240,7 +239,7 @@ export function EncounterQuestion({
   if (isLoading) {
     return <div>{t("loading_encounter")}</div>;
   }
-  const isDischarged = encounter.status === "discharged";
+  const isDischarged = encounter.status === EncounterStatus.DISCHARGED;
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -261,15 +260,18 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
-              {ENCOUNTER_STATUS.filter(
-                (status) =>
-                  isDischarged ||
-                  (status !== "discharged" && status !== "unknown"),
-              ).map((encounterStatus) => (
-                <SelectItem key={encounterStatus} value={encounterStatus}>
-                  {t(`encounter_status__${encounterStatus}`)}
-                </SelectItem>
-              ))}
+              {Object.values(EncounterStatus)
+                .filter(
+                  (status) =>
+                    isDischarged ||
+                    (status !== EncounterStatus.DISCHARGED &&
+                      status !== EncounterStatus.UNKNOWN),
+                )
+                .map((encounterStatus: EncounterStatus) => (
+                  <SelectItem key={encounterStatus} value={encounterStatus}>
+                    {t(`encounter_status__${encounterStatus}`)}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
