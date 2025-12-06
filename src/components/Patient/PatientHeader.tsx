@@ -27,7 +27,7 @@ export function PatientHeader({
   return (
     <Card
       className={cn(
-        "p-2 rounded-none shadow-none border-none md:p-4 flex flex-col md:flex-row md:justify-between bg-transparent gap-6",
+        "p-2 rounded-none shadow-none border-none md:p-4 flex flex-col md:flex-row md:justify-between bg-transparent",
         className,
       )}
     >
