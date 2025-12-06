@@ -144,12 +144,13 @@ function ServiceRequestForm({
   facilityId = "",
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
-  const { data: locations } = useQuery({
+  const { data: locations, isLoading: isLocationsLoading } = useQuery({
     queryKey: ["locations", facilityId],
-    queryFn: query(locationApi.list, {
+    queryFn: query.paginated(locationApi.list, {
       pathParams: { facility_id: facilityId },
-      queryParams: { limit: 100 },
+      pageSize: 100,
     }),
+    enabled: !!facilityId,
   });
 
   const renderInfoSection = () => (
@@ -204,7 +205,9 @@ function ServiceRequestForm({
         <span className="font-medium text-sm text-gray-700">
           {t("locations")}:
         </span>
-        {serviceRequest.service_request.locations.length === 0 ? (
+        {isLocationsLoading ? (
+          <span className="text-sm text-gray-500">{t("loading")}</span>
+        ) : serviceRequest.service_request.locations.length === 0 ? (
           <span className="text-sm text-gray-500">{t("no_locations")}</span>
         ) : (
           serviceRequest.service_request.locations.map((loc) => {
