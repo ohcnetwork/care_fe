@@ -228,7 +228,7 @@ export const EncounterShow = (props: Props) => {
         <PatientHeader
           patient={patient}
           facilityId={facilityId}
-          className="bg-white shadow-sm border-none rounded-sm"
+          className="bg-white shadow-sm border-none rounded-sm "
           actions={
             <>
               {selectedEncounter && (
@@ -241,31 +241,33 @@ export const EncounterShow = (props: Props) => {
                       "text-base font-semibold rounded-md w-full",
                     )}
                   />
-
-                  {canWriteSelectedEncounter && (
-                    <EncounterCommandDialog
-                      encounter={selectedEncounter}
-                      open={actionsOpen}
-                      onOpenChange={setActionsOpen}
-                      trigger={
-                        <Button
-                          variant="primary_gradient"
-                          onClick={() => setActionsOpen(true)}
-                          className="text-base font-semibold rounded-md w-full"
-                        >
-                          {t("encounter_actions")}
-                          <CommandShortcut className="text-white hidden md:inline">
-                            {getShortcutDisplay("open-command-dialog")}
-                          </CommandShortcut>
-                        </Button>
-                      }
-                    />
-                  )}
+                  <div className="mt-[-85px]">
+                    {canWriteSelectedEncounter && (
+                      <EncounterCommandDialog
+                        encounter={selectedEncounter}
+                        open={actionsOpen}
+                        onOpenChange={setActionsOpen}
+                        trigger={
+                          <Button
+                            variant="primary_gradient"
+                            onClick={() => setActionsOpen(true)}
+                            className="text-base font-semibold rounded-md w-full"
+                          >
+                            {t("encounter_actions")}
+                            <CommandShortcut className="text-white hidden md:inline">
+                              {getShortcutDisplay("open-command-dialog")}
+                            </CommandShortcut>
+                          </Button>
+                        }
+                      />
+                    )}
+                  </div>
                 </div>
               )}
             </>
           }
         />
+
         <PatientDeceasedInfo patient={patient} />
       </div>
       <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
