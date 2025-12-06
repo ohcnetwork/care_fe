@@ -613,6 +613,7 @@
   "allergies": "Allergies",
   "allergies_empty_message": "No allergies recorded",
   "allergy": "Allergy",
+  "allergy_already_exist_warning": "Allergy already exists!",
   "allergy_history": "Allergy History",
   "allow_camera_access": "Please allow camera permissions in your browser",
   "allow_transfer": "Allow Transfer",

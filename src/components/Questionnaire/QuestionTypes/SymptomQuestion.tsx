@@ -634,7 +634,8 @@ function checkForDuplicateSymptom(
   const isDuplicate = existingSymptoms.some(
     (symptom) =>
       symptom.code.code === codeValue &&
-      symptom.verification_status !== "entered_in_error",
+      symptom.verification_status !== "entered_in_error" &&
+      symptom.clinical_status !== "resolved",
   );
   if (isDuplicate) {
     toast.warning(t("symptom_already_exist_warning"));
