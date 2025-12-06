@@ -55,6 +55,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     id: string;
     userName: string;
   } | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
   const searchOptions = [
     {
@@ -112,10 +113,15 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
       setRemovingUserRole(null);
     },
     onError: (error) => {
-      const errorData = error.cause as { errors: { msg: string[] } };
-      errorData.errors.msg.forEach((er) => {
-        toast.error(er);
-      });
+      const errorData = error.cause as
+        | { errors?: { msg?: string[] } }
+        | undefined;
+      const messages = errorData?.errors?.msg;
+      if (messages?.length) {
+        messages.forEach((er) => toast.error(er));
+      } else {
+        toast.error(t("error_removing_user"));
+      }
       setRemovingUserRole(null);
     },
   });
@@ -258,12 +264,20 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                         }
                         userOptions={
                           canManageOrganizationUsers && (
-                            <DropdownMenu>
+                            <DropdownMenu
+                              open={openDropdownId === userRole.id}
+                              onOpenChange={(open) =>
+                                setOpenDropdownId(open ? userRole.id : null)
+                              }
+                            >
                               <DropdownMenuTrigger asChild>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   className="px-2"
+                                  onMouseEnter={() =>
+                                    setOpenDropdownId(userRole.id)
+                                  }
                                 >
                                   <CareIcon
                                     icon="l-ellipsis-v"
@@ -271,7 +285,11 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                                   />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuContent
+                                align="end"
+                                className="w-48"
+                                onMouseLeave={() => setOpenDropdownId(null)}
+                              >
                                 <DropdownMenuItem
                                   className="cursor-pointer flex items-center gap-2"
                                   onClick={() =>
