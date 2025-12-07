@@ -1,98 +1,1283 @@
-import { X } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CheckIcon, Loader2 } from "lucide-react";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  mapPriceComponent,
+  MonetaryAmountInput,
+  MonetaryDisplay,
+} from "@/components/ui/monetary-display";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
-import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
-import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import { CompactConditionEditor } from "@/components/Billing/CompactConditionEditor";
+import Loading from "@/components/Common/Loading";
+import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
 
-interface ChargeItemDefinitionDrawerProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  facilityId: string;
-  categorySlug?: string;
-  initialData?: ChargeItemDefinitionRead;
-  onSuccess?: (chargeItemDefinition: ChargeItemDefinitionRead) => void;
+import { cn } from "@/lib/utils";
+import { CodeSchema } from "@/types/base/code/code";
+import {
+  ConditionForm,
+  conditionSchema,
+  Metrics,
+} from "@/types/base/condition/condition";
+import {
+  MonetaryComponent,
+  MonetaryComponentRead,
+  MonetaryComponentType,
+} from "@/types/base/monetaryComponent/monetaryComponent";
+import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
+import {
+  MRP_CODE,
+  PURCHASE_PRICE_CODE,
+} from "@/types/billing/chargeItem/chargeItem";
+import {
+  ChargeItemDefinitionCreate,
+  ChargeItemDefinitionRead,
+  ChargeItemDefinitionStatus,
+} from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
+import facilityApi from "@/types/facility/facilityApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { Check, ChevronDown, Component, Search, Trash2 } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import RadioInput from "@/components/ui/RadioInput";
+import { generateSlug } from "@/Utils/utils";
+import { toast } from "sonner";
+
+interface MonetaryComponentSelectorProps {
+  title: string;
+  components: MonetaryComponentRead[];
+  selectedComponents: MonetaryComponent[];
+  onComponentToggle: (
+    component: MonetaryComponent,
+    selected: boolean,
+    type: MonetaryComponentType,
+  ) => void;
+  onConditionsChange: (
+    component: MonetaryComponent,
+    conditions: ConditionForm[],
+  ) => void;
+  type: MonetaryComponentType;
+  availableMetrics: Metrics[];
+  className?: string;
 }
 
-export function ChargeItemDefinitionDrawer({
-  open,
-  onOpenChange,
-  facilityId,
-  categorySlug,
-  initialData,
-  onSuccess,
-}: ChargeItemDefinitionDrawerProps) {
-  const { t } = useTranslation();
-  const [formkey, setFormkey] = useState(0);
+// Schema factory for a single price component
+const createPriceComponentSchema = (
+  t: (key: string, options?: Record<string, unknown>) => string,
+) =>
+  z.object({
+    monetary_component_type: z.nativeEnum(MonetaryComponentType),
+    code: CodeSchema.optional(),
+    factor: z.number().gt(0).max(100).optional(),
+    amount: z
+      .string()
+      .refine((val) => !val || Number(val) > 0, {
+        message: t("must_be_greater_than_value", { value: 0 }),
+      })
+      .optional(),
+    conditions: z.array(conditionSchema),
+  });
 
-  useEffect(() => {
-    if (open) {
-      setFormkey((prev) => prev + 1);
-    }
-  }, [open]);
+interface ChargeItemDefinitionFormProps {
+  facilityId: string;
+  initialData?: ChargeItemDefinitionRead;
+  categorySlug?: string;
+  minimal?: boolean;
+  isUpdate?: boolean;
+  onSuccess?: (chargeItemDefinition: ChargeItemDefinitionRead) => void;
+  onCancel?: () => void;
+}
 
-  function handleCancel() {
-    onOpenChange(false);
-  }
-
-  function handleCreateSuccess(chargeItemDefinition: ChargeItemDefinitionRead) {
-    onSuccess?.(chargeItemDefinition);
-    onOpenChange(false);
-  }
-
+const monetaryComponentIsEqual = <T extends MonetaryComponent>(a: T, b: T) => {
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh] flex flex-col px-8">
-        <DrawerHeader className="relative flex-shrink-0">
-          <div className="max-w-4xl mx-auto w-full relative">
-            <DrawerClose asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-4 top-4 h-6 w-6 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </DrawerClose>
-            <DrawerTitle className="text-left">
-              {initialData
-                ? t("copy_charge_item_definition")
-                : t("create_charge_item_definition")}
-            </DrawerTitle>
-            <DrawerDescription className="text-left">
-              {initialData
-                ? t("copy_charge_item_definition_description")
-                : t("create_charge_item_definition_description")}
-            </DrawerDescription>
-          </div>
-        </DrawerHeader>
+    a.monetary_component_type === b.monetary_component_type &&
+    a.code?.code === b.code?.code &&
+    a.code?.system === b.code?.system &&
+    a.code?.display === b.code?.display
+  );
+};
 
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto w-full px-4 py-4">
-            <div className="bg-gray-100 rounded-lg p-4">
-              <ChargeItemDefinitionForm
-                key={formkey}
-                facilityId={facilityId}
-                categorySlug={initialData ? undefined : categorySlug}
-                initialData={initialData}
-                minimal={true}
-                onSuccess={handleCreateSuccess}
-                onCancel={handleCancel}
+// Component for monetary component selection with autocomplete
+export function MonetaryComponentSelector({
+  title,
+  components,
+  selectedComponents,
+  onComponentToggle,
+  onConditionsChange,
+  type,
+  availableMetrics,
+  className = "",
+}: MonetaryComponentSelectorProps) {
+  const { t } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [tempSelectedComponents, setTempSelectedComponents] = useState<
+    MonetaryComponent[]
+  >([]);
+
+  // Initialize temp selections when dropdown opens
+  useEffect(() => {
+    if (isOpen) {
+      setTempSelectedComponents(selectedComponents);
+    }
+  }, [isOpen, selectedComponents]);
+
+  const getComponentValue = (component: MonetaryComponent) => {
+    return component.factor ?? component.amount ?? 0;
+  };
+
+  const isSameAmountOrFactor = (
+    component: MonetaryComponent,
+    otherComponent: MonetaryComponent,
+  ) => {
+    return (
+      (component.factor != null &&
+        component.factor === otherComponent.factor) ||
+      (component.amount != null && component.amount === otherComponent.amount)
+    );
+  };
+
+  const isComponentSelected = (
+    component: MonetaryComponentRead,
+    selectedComponents: MonetaryComponent[],
+  ) =>
+    selectedComponents.some(
+      (c) =>
+        monetaryComponentIsEqual(c, component) &&
+        isSameAmountOrFactor(c, component),
+    );
+
+  // Group components by code
+  const groupedComponents = components.reduce<
+    Record<string, MonetaryComponentRead[]>
+  >((acc, component) => {
+    const key = component.code?.code;
+    if (key) {
+      (acc[key] ||= []).push(component);
+    }
+    return acc;
+  }, {});
+
+  const groupComponents: Record<string, MonetaryComponentRead[]> = {};
+  const nonGroupComponents: MonetaryComponentRead[] = [];
+
+  Object.entries(groupedComponents).forEach(([key, comps]) => {
+    if (comps.length > 1) {
+      groupComponents[key] = comps;
+    } else {
+      nonGroupComponents.push(comps[0]);
+    }
+  });
+
+  const filteredGroupComponents = Object.entries(groupComponents).reduce<
+    Record<string, MonetaryComponentRead[]>
+  >((acc, [key, comps]) => {
+    const filteredComps = comps.filter(
+      (component) =>
+        component.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        component.code?.code?.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+
+    if (filteredComps.length > 0) {
+      acc[key] = filteredComps;
+    }
+
+    return acc;
+  }, {});
+
+  const filteredNonGroupComponents = nonGroupComponents.filter(
+    (component) =>
+      component.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      component.code?.code?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const handleTempToggle = (
+    component: MonetaryComponentRead,
+    checked: boolean,
+  ) => {
+    if (checked) {
+      const newComponent: MonetaryComponent = {
+        ...component,
+        monetary_component_type: type,
+        factor: component.factor != null ? component.factor : undefined,
+        amount:
+          component.factor != null ? undefined : String(component.amount || 0),
+        conditions: [],
+      };
+      setTempSelectedComponents((prev) => [...prev, newComponent]);
+    } else {
+      setTempSelectedComponents((prev) =>
+        prev.filter((c) => !monetaryComponentIsEqual(c, component)),
+      );
+    }
+  };
+
+  const handleDone = () => {
+    // Remove all current selections first
+    selectedComponents.forEach((component) => {
+      onComponentToggle(component, false, type);
+    });
+
+    // Add all temp selections
+    tempSelectedComponents.forEach((component) => {
+      onComponentToggle(component, true, type);
+    });
+
+    setIsOpen(false);
+    setSearchQuery("");
+  };
+
+  const handleCancel = () => {
+    setIsOpen(false);
+    setSearchQuery("");
+    setTempSelectedComponents([]);
+  };
+
+  const handleRadioButtonChange = (groupKey: string, selected: string) => {
+    // If selected is empty, it means the user deselected the radio button
+    if (!selected) {
+      // Remove any component from this group
+      setTempSelectedComponents((prev) =>
+        prev.filter((c) => c.code?.code !== groupKey),
+      );
+      return;
+    }
+
+    const group = groupComponents[groupKey];
+    if (!group) return;
+
+    // Find the component with the matching value
+    const selectedComponent = group.find(
+      (component) => getComponentValue(component).toString() === selected,
+    );
+
+    if (!selectedComponent) return;
+
+    // Remove any existing selection from this group and add the new one
+    setTempSelectedComponents((prev) => {
+      // Remove any component from the same group (by code)
+      const filtered = prev.filter((c) => c.code?.code !== groupKey);
+      return [...filtered, selectedComponent];
+    });
+  };
+
+  const renderGroupCheckList = (
+    groupComponents: Record<string, MonetaryComponentRead[]>,
+  ) => {
+    if (Object.keys(groupComponents).length === 0) {
+      return <></>;
+    }
+    return (
+      <div className="flex flex-col gap-2">
+        {Object.entries(groupComponents).map(([key, components]) => {
+          const selectedInGroup = components.find((component) =>
+            isComponentSelected(component, tempSelectedComponents),
+          );
+          const selectedValue = selectedInGroup
+            ? `${getComponentValue(selectedInGroup)}`
+            : "";
+
+          const radioOptions = components.map((component) => ({
+            label: `${getComponentValue(component)} ${component.factor != null ? "%" : "₹"}`,
+            value: `${getComponentValue(component)}`,
+          }));
+
+          return (
+            <div key={`${key}`} className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 p-2">
+                <Component
+                  className="size-4 text-black/80"
+                  strokeWidth={1.25}
+                />
+                <div className="text-sm font-semibold text-gray-900 uppercase">
+                  {key}
+                </div>
+              </div>
+              <RadioInput
+                value={selectedValue}
+                onValueChange={(value: string) =>
+                  handleRadioButtonChange(key, value)
+                }
+                options={radioOptions}
+                className="flex flex-row gap-1 justify-end mr-2"
               />
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderCheckList = (
+    listComponents: MonetaryComponentRead[],
+    isGroup = false,
+  ) => {
+    if (listComponents.length === 0) {
+      return <></>;
+    }
+    return listComponents.map((component, idx) => {
+      const isSelected = isComponentSelected(component, tempSelectedComponents);
+      return (
+        <div
+          key={`${component.title}-${component.code?.code || idx}`}
+          className={cn(
+            "flex items-center space-x-3 p-2 hover:bg-gray-50 rounded",
+          )}
+        >
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={(checked) =>
+              handleTempToggle(component, checked as boolean)
+            }
+            className={cn(isGroup && "aria-hidden")}
+          />
+          <div className="flex flex-row justify-between items-center flex-1 min-w-0">
+            <div className="text-sm font-medium text-gray-900">
+              {component.code?.display}
+            </div>
+            <div className="flex flex-row items-center gap-2 h-10">
+              {getComponentValue(component)}
+              <span className="text-gray-500">
+                {component.factor != null ? "%" : "₹"}
+              </span>
             </div>
           </div>
         </div>
-      </DrawerContent>
-    </Drawer>
+      );
+    });
+  };
+
+  return (
+    <div className={cn("space-y-1", className)}>
+      {/* Selected Components Section - Only for Discounts */}
+      {type === MonetaryComponentType.discount &&
+        selectedComponents.length > 0 && (
+          <div className="space-y-1 mb-2">
+            <p className="text-sm font-medium text-gray-700">
+              {t("selected")} {title.toLowerCase()}
+            </p>
+
+            {selectedComponents.map((component, idx) => {
+              const componentRead = components.find((c) =>
+                monetaryComponentIsEqual(c, component),
+              );
+
+              return (
+                <div
+                  key={`selected-${componentRead?.title}-${componentRead?.code?.code || idx}`}
+                  className="p-3 rounded-lg bg-white border border-gray-200 transition-colors"
+                >
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <div>
+                      <div className="font-medium text-md">
+                        {idx + 1}. {componentRead?.code?.display} -{" "}
+                        {getComponentValue(component)}
+                        {component.factor != null ? "%" : "₹"}
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onComponentToggle(component, false, type)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+
+                  {/* Condition editor for discount components */}
+                  <CompactConditionEditor
+                    conditions={
+                      component.conditions?.map((condition) => ({
+                        ...condition,
+                        _conditionType: `${condition.metric}_${condition.operation}`,
+                      })) || []
+                    }
+                    availableMetrics={availableMetrics}
+                    onChange={(conditions) =>
+                      onConditionsChange(
+                        { ...component, monetary_component_type: type },
+                        conditions,
+                      )
+                    }
+                    className="mt-3"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-gray-900">{title}</p>
+        </div>
+      </div>
+
+      {/* Trigger Area */}
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <div className="bg-white border rounded-md p-3 cursor-pointer hover:border-gray-400 transition-colors min-h-[44px] flex items-center justify-between">
+            <div className="flex items-center gap-2 flex-wrap">
+              {selectedComponents.length === 0 ? (
+                <span className="text-gray-500 text-sm">
+                  {t(
+                    type === MonetaryComponentType.tax
+                      ? "add_tax"
+                      : "add_discount",
+                  )}
+                </span>
+              ) : type === MonetaryComponentType.tax ? (
+                // For taxes, show badges in trigger
+                <>
+                  {selectedComponents.slice(0, 3).map((component, idx) => {
+                    const value = getComponentValue(component);
+                    const suffix = component.factor != null ? "%" : "₹";
+                    const display = component.code?.display;
+                    return (
+                      <Badge
+                        key={`${component.code?.code}-${idx}`}
+                        variant="secondary"
+                        className="text-xs p-1 rounded-sm"
+                      >
+                        {display} @ {value}
+                        {suffix}
+                      </Badge>
+                    );
+                  })}
+                  {selectedComponents.length > 3 && (
+                    <Badge variant="secondary" className="text-xs">
+                      +{selectedComponents.length - 3} {t("more")}
+                    </Badge>
+                  )}
+                </>
+              ) : (
+                // For discounts, just show count
+                <span className="text-gray-700 text-sm">
+                  {selectedComponents.length} {t("selected")}
+                </span>
+              )}
+            </div>
+            <ChevronDown className="size-4 text-gray-400" />
+          </div>
+        </PopoverTrigger>
+
+        <PopoverContent className="w-68 p-0" align="start">
+          <div className="p-3 border-b">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t(
+                  type === MonetaryComponentType.tax
+                    ? "search_for_tax_code"
+                    : "search_for_discount_code",
+                )}
+                className="pl-10"
+              />
+            </div>
+          </div>
+
+          <div className="max-h-[30vh] overflow-y-auto p-2">
+            {renderGroupCheckList(filteredGroupComponents)}
+            {renderCheckList(filteredNonGroupComponents)}
+          </div>
+
+          <div className="p-3 border-t flex gap-2">
+            <Button
+              onClick={handleCancel}
+              variant="outline"
+              size="sm"
+              className="flex-1"
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              onClick={handleDone}
+              size="sm"
+              className="flex-1 bg-green-600 hover:bg-green-700"
+            >
+              <Check className="size-4 mr-1" />
+              {t("done")}
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
+export function ChargeItemDefinitionForm({
+  facilityId,
+  initialData,
+  minimal = false,
+  isUpdate = false,
+  categorySlug,
+  onSuccess = () => {
+    if (categorySlug) {
+      navigate(
+        `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}`,
+      );
+    } else {
+      navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
+    }
+  },
+  onCancel = () => {
+    if (categorySlug) {
+      navigate(
+        `/facility/${facilityId}/settings/charge_item_definitions/categories/${categorySlug}`,
+      );
+    } else {
+      navigate(`/facility/${facilityId}/settings/charge_item_definitions`);
+    }
+  },
+}: ChargeItemDefinitionFormProps) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  // Fetch facility data for available components
+  const { data: facilityData, isLoading } = useQuery({
+    queryKey: ["facility", facilityId],
+    queryFn: query(facilityApi.get, {
+      pathParams: { facilityId },
+    }),
+  });
+
+  // Fetch available metrics for conditions
+  const { data: availableMetrics = [] } = useQuery({
+    queryKey: ["metrics"],
+    queryFn: query(chargeItemDefinitionApi.listMetrics),
+  });
+
+  const priceComponentSchema = createPriceComponentSchema(t);
+  const createFormSchema = (
+    t: (key: string, options?: Record<string, unknown>) => string,
+  ) =>
+    z.object({
+      title: z.string().min(1, { message: t("title_is_required") }),
+      slug_value: z
+        .string()
+        .trim()
+        .min(5, {
+          message: t("character_count_validation", { min: 5, max: 25 }),
+        })
+        .max(25, {
+          message: t("character_count_validation", { min: 5, max: 25 }),
+        })
+        .regex(/^[a-z0-9_-]+$/, {
+          message: t("slug_format_message"),
+        }),
+      category: z.string().min(1, { message: t("field_required") }),
+      _categoryName: z.string().optional(),
+      status: z.nativeEnum(ChargeItemDefinitionStatus),
+      description: z.string().optional(),
+      purpose: z.string().optional(),
+      derived_from_uri: z
+        .string()
+        .optional()
+        .refine(
+          (val) => {
+            return !val || /^https?:\/\/.+/.test(val);
+          },
+          { message: t("invalid_url") },
+        ),
+      base_price: z
+        .string()
+        .min(1, { message: t("base_price_is_required") })
+        .refine((val) => Number(val) > 0, {
+          message: t("must_be_greater_than_value", { value: 0 }),
+        }),
+      mrp: z
+        .string()
+        .optional()
+        .refine((val) => !val || Number(val) > 0, {
+          message: t("must_be_greater_than_value", { value: 0 }),
+        }),
+      purchase_price: z
+        .string()
+        .optional()
+        .refine((val) => !val || Number(val) > 0, {
+          message: t("must_be_greater_than_value", { value: 0 }),
+        }),
+      price_components: z.array(priceComponentSchema),
+    });
+
+  const formSchema = createFormSchema(t);
+
+  // Helper function to get default values
+  const getDefaultValues = () => {
+    const mrpComponent = initialData?.price_components.find(
+      (c) =>
+        c.code?.code === MRP_CODE &&
+        c.monetary_component_type === MonetaryComponentType.informational,
+    );
+    const purchasePriceComponent = initialData?.price_components.find(
+      (c) =>
+        c.code?.code === PURCHASE_PRICE_CODE &&
+        c.monetary_component_type === MonetaryComponentType.informational,
+    );
+
+    return {
+      // Basic information fields
+      title: initialData?.title || "",
+      slug_value: initialData?.slug_config.slug_value || "",
+      category: isUpdate
+        ? initialData?.category.slug || ""
+        : initialData?.category.slug || categorySlug || "",
+      _categoryName: isUpdate
+        ? initialData?.category.title || ""
+        : initialData?.category.title || "",
+      status: initialData?.status || ChargeItemDefinitionStatus.active,
+
+      // Additional details
+      description: initialData?.description || "",
+      purpose: initialData?.purpose || "",
+      derived_from_uri: initialData?.derived_from_uri || undefined,
+
+      // Base price
+      base_price:
+        initialData?.price_components
+          .find((c) => c.monetary_component_type === MonetaryComponentType.base)
+          ?.amount?.toString() || "",
+
+      // MRP and Purchase Price
+      mrp: mrpComponent?.amount?.toString() || "",
+      purchase_price: purchasePriceComponent?.amount?.toString() || "",
+
+      // Price components (excluding base price, MRP, and Purchase Price components)
+      price_components:
+        initialData?.price_components
+          .filter(
+            (c) =>
+              c.monetary_component_type !== MonetaryComponentType.base &&
+              c.code?.code !== MRP_CODE &&
+              c.code?.code !== PURCHASE_PRICE_CODE,
+          )
+          .map((component) => ({
+            ...mapPriceComponent(component),
+            conditions:
+              component.conditions?.map((condition) => ({
+                ...condition,
+                _conditionType: `${condition.metric}_${condition.operation}`,
+              })) || [],
+          })) || [],
+    };
+  };
+
+  // Initialize form (with basic information fields)
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: getDefaultValues(),
+    mode: "onChange",
+    reValidateMode: "onChange",
+  });
+
+  const resetFormCompletely = () => {
+    form.reset(getDefaultValues());
+    form.clearErrors();
+  };
+
+  // Reset form when initialData changes (for update mode)
+  useEffect(() => {
+    if (isUpdate && initialData) {
+      form.reset(getDefaultValues());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData?.slug, isUpdate]);
+
+  useEffect(() => {
+    if (isUpdate) return;
+
+    const subscription = form.watch((value, { name }) => {
+      if (name === "title") {
+        form.setValue("slug_value", generateSlug(value.title || "", 25), {
+          shouldValidate: true,
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, isUpdate]);
+
+  // Get current form values
+  const priceComponents = form.watch("price_components");
+  const basePrice = form.watch("base_price") || "0";
+
+  const { isDirty } = form.formState;
+
+  // Handle form submission
+  const { mutate: upsert, isPending } = useMutation({
+    mutationFn: isUpdate
+      ? mutate(chargeItemDefinitionApi.updateChargeItemDefinition, {
+          pathParams: { facilityId, slug: initialData!.slug },
+        })
+      : mutate(chargeItemDefinitionApi.createChargeItemDefinition, {
+          pathParams: { facilityId },
+        }),
+    onSuccess: (chargeItemDefinition: ChargeItemDefinitionRead) => {
+      queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
+      resetFormCompletely();
+      form.reset(getDefaultValues());
+      form.clearErrors();
+      onSuccess?.(chargeItemDefinition);
+      toast.success(
+        isUpdate
+          ? t("charge_item_definition_updated_successfully")
+          : t("charge_item_definition_created_successfully"),
+      );
+    },
+    onError: (error) => {
+      console.error("Mutation failed:", error);
+    },
+  });
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    // Build price components array
+    const priceComponents: MonetaryComponent[] = [
+      // Base price component (always first)
+      {
+        monetary_component_type: MonetaryComponentType.base,
+        amount: values.base_price,
+        conditions: [],
+      },
+    ];
+
+    // Add MRP if provided
+    if (values.mrp && values.mrp !== "") {
+      priceComponents.push({
+        monetary_component_type: MonetaryComponentType.informational,
+        amount: values.mrp,
+        code: mrpCode,
+        conditions: [],
+      });
+    }
+
+    // Add Purchase Price if provided
+    if (values.purchase_price && values.purchase_price !== "") {
+      priceComponents.push({
+        monetary_component_type: MonetaryComponentType.informational,
+        amount: values.purchase_price,
+        code: purchasePriceCode,
+        conditions: [],
+      });
+    }
+
+    // Add other components (taxes, discounts, etc.)
+    priceComponents.push(
+      ...values.price_components.map((component) => ({
+        ...component,
+        conditions: component.conditions,
+      })),
+    );
+
+    // For minimal mode, ensure status is active
+    const submissionData = {
+      ...values,
+      // Override status if in minimal mode
+      status: minimal ? ChargeItemDefinitionStatus.active : values.status,
+      price_components: priceComponents,
+    };
+
+    // Remove mrp and purchase_price from submission (they're in price_components now)
+    const {
+      mrp: _mrp,
+      purchase_price: _purchase_price,
+      ...finalData
+    } = submissionData;
+
+    upsert(finalData as ChargeItemDefinitionCreate);
+  };
+
+  if (isLoading || !facilityData) {
+    return <Loading />;
+  }
+
+  // Get all available components
+  const availableDiscounts = [
+    ...facilityData.discount_monetary_components,
+    ...facilityData.instance_discount_monetary_components,
+  ].map((component) => ({
+    ...component,
+    amount:
+      component?.amount != null ? String(component.amount) : component.amount,
+  }));
+  const availableTaxes = [...facilityData.instance_tax_monetary_components];
+
+  const mrpCode = facilityData.instance_informational_codes.find(
+    (c) => c.code === MRP_CODE,
+  ) || {
+    code: MRP_CODE,
+    system: "care",
+    display: t("mrp"),
+  };
+
+  const purchasePriceCode = facilityData.instance_informational_codes.find(
+    (c) => c.code === PURCHASE_PRICE_CODE,
+  ) || {
+    code: PURCHASE_PRICE_CODE,
+    system: "care",
+    display: t("purchase_price"),
+  };
+
+  // Get currently selected components by type
+  const getSelectedComponents = (type: MonetaryComponentType) =>
+    priceComponents.filter((c) => c.monetary_component_type === type);
+
+  // Handle component selection
+  const handleComponentToggle = (
+    component: MonetaryComponent,
+    selected: boolean,
+    type: MonetaryComponentType = MonetaryComponentType.tax,
+  ) => {
+    const currentComponents = form.getValues("price_components");
+    let newComponents: z.infer<typeof priceComponentSchema>[];
+
+    if (selected) {
+      newComponents = [
+        ...currentComponents,
+        {
+          ...component,
+          monetary_component_type: type,
+          factor: component.factor != null ? component.factor : undefined,
+          amount:
+            component.factor != null ? undefined : String(component.amount),
+          conditions:
+            component.conditions?.map((condition) => ({
+              ...condition,
+              _conditionType: `${condition.metric}_${condition.operation}`,
+            })) || [],
+        },
+      ];
+    } else {
+      newComponents = currentComponents.filter(
+        (c) => !monetaryComponentIsEqual(c, component),
+      );
+    }
+
+    form.setValue("price_components", newComponents, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    form.trigger("price_components");
+  };
+
+  // Handle component conditions change
+  const handleComponentConditionsChange = (
+    component: MonetaryComponent,
+    conditions: ConditionForm[],
+  ) => {
+    const currentComponents = form.getValues("price_components");
+    const componentIndex = currentComponents.findIndex((c) =>
+      monetaryComponentIsEqual(c, component),
+    );
+
+    if (componentIndex === -1) return;
+
+    const newComponents = [...currentComponents];
+    newComponents[componentIndex] = {
+      ...newComponents[componentIndex],
+      conditions: conditions?.map((condition) => ({
+        ...condition,
+        _conditionType: `${condition.metric}_${condition.operation}`,
+      })),
+    };
+
+    form.setValue("price_components", newComponents, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit(onSubmit)(e);
+        }}
+        className="space-y-6"
+      >
+        {/* Basic Information */}
+        <div
+          className={cn(
+            "grid grid-cols-1 md:grid-cols-3 gap-2 mb-4 sm:mb-2 items-start",
+            !minimal && "md:grid-cols-2 mb-2",
+          )}
+        >
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {t("title")} <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder={t("title")} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="slug_value"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {t("slug")} <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder={t("slug_input_placeholder")}
+                    onChange={(e) => {
+                      const sanitizedValue = e.target.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9_-]/g, "");
+                      form.setValue("slug_value", sanitizedValue, {
+                        shouldValidate: true,
+                      });
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  {t("category")} <span className="text-red-500">*</span>
+                </FormLabel>
+                <FormControl>
+                  <ResourceCategoryPicker
+                    facilityId={facilityId}
+                    resourceType={
+                      ResourceCategoryResourceType.charge_item_definition
+                    }
+                    value={field.value}
+                    onValueChange={(category) => {
+                      field.onChange(category?.slug || "");
+                      form.setValue("_categoryName", category?.title || "");
+                    }}
+                    placeholder={t("select_category")}
+                    className="w-full"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {!minimal && (
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("status")}</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("select_status")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Object.values(ChargeItemDefinitionStatus).map(
+                        (status) => (
+                          <SelectItem key={status} value={status}>
+                            {t(status)}
+                          </SelectItem>
+                        ),
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
+
+        {/* Additional Details */}
+        {!minimal && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("additional_details")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("description")}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) => field.onChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="purpose"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("purpose")}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) => field.onChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="derived_from_uri"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("derived_from_uri")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) =>
+                          field.onChange(e.target.value || undefined)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Pricing Components */}
+        <Card className="bg-gray-50">
+          <CardHeader className={minimal ? "pb-3" : ""}>
+            <CardTitle className={minimal ? "text-lg" : ""}>
+              {t("pricing_components")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className={minimal ? "space-y-4 pt-0" : "space-y-6"}>
+            {/* Base Price */}
+            <div className={"flex md:flex-row flex-col gap-4"}>
+              <div className="w-full">
+                <FormItem className="flex flex-col">
+                  <div className="flex flex-col w-full gap-2">
+                    <FormField
+                      control={form.control}
+                      name="base_price"
+                      render={({ field }) => (
+                        <FormItem className="w-full">
+                          <FormLabel className="font-medium text-gray-900 text-base">
+                            {t("base_price")}
+                          </FormLabel>
+                          <FormControl>
+                            <MonetaryAmountInput
+                              {...field}
+                              value={field.value ?? 0}
+                              onChange={(e) =>
+                                field.onChange(String(e.target.value))
+                              }
+                              placeholder="0.00"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </FormItem>
+              </div>
+              {/* MRP */}
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="mrp"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel className="font-medium text-gray-900 text-base">
+                        {t("mrp")}
+                      </FormLabel>
+                      <FormControl>
+                        <MonetaryAmountInput
+                          {...field}
+                          value={field.value ?? 0}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          placeholder="0.00"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {/* Purchase Price */}
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="purchase_price"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel className="font-medium text-gray-900 text-base">
+                        {t("purchase_price")}
+                      </FormLabel>
+                      <FormControl>
+                        <MonetaryAmountInput
+                          {...field}
+                          value={field.value ?? 0}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          placeholder="0.00"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <MonetaryComponentSelector
+              title={t("taxes")}
+              components={availableTaxes}
+              selectedComponents={getSelectedComponents(
+                MonetaryComponentType.tax,
+              )}
+              onComponentToggle={handleComponentToggle}
+              onConditionsChange={handleComponentConditionsChange}
+              type={MonetaryComponentType.tax}
+              availableMetrics={availableMetrics}
+              className={minimal ? "w-full" : ""}
+            />
+
+            <MonetaryComponentSelector
+              title={t("discounts")}
+              components={availableDiscounts}
+              selectedComponents={getSelectedComponents(
+                MonetaryComponentType.discount,
+              )}
+              onComponentToggle={handleComponentToggle}
+              onConditionsChange={handleComponentConditionsChange}
+              type={MonetaryComponentType.discount}
+              availableMetrics={availableMetrics}
+              className={minimal ? "w-full" : ""}
+            />
+
+            {/* Price Summary */}
+            {!minimal && (
+              <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100">
+                <h4 className="font-medium text-green-900 mb-3">
+                  {t("price_summary")}
+                </h4>
+                <div className="space-y-2 divide-y divide-green-200">
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-600">{t("base_price")}</span>
+                    <MonetaryDisplay
+                      className="font-medium text-gray-900"
+                      amount={basePrice}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Form Actions */}
+        <div
+          className={`flex justify-end ${minimal ? "space-x-1" : "space-x-2"}`}
+        >
+          <Button
+            type="button"
+            variant="outline"
+            size={minimal ? "sm" : "default"}
+            disabled={isPending}
+            onClick={() => {
+              resetFormCompletely();
+              form.reset(getDefaultValues());
+              form.clearErrors();
+              onCancel();
+            }}
+          >
+            {t("cancel")}
+          </Button>
+          <Button
+            type="submit"
+            size={minimal ? "sm" : "default"}
+            disabled={isPending || (isUpdate && !isDirty)}
+          >
+            {isPending ? (
+              <>
+                <Loader2
+                  className={`${minimal ? "mr-1" : "mr-2"} size-4 animate-spin`}
+                />
+                {t("saving")}
+              </>
+            ) : (
+              <>
+                <CheckIcon className={`${minimal ? "mr-1" : "mr-2"} size-4`} />
+                {isUpdate ? t("update") : t("create")}
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
