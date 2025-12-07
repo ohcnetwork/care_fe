@@ -124,7 +124,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
 
   useEffect(() => {
     if (transformRef.current && show) {
-      transformRef.current.resetTransform();
+      transformRef.current.centerView(1.2);
     }
   }, [index, show]);
 
@@ -276,11 +276,11 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                 </Button>
               )}
 
-              <div className="flex h-[50vh] md:h-[70vh] w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200">
+              <div className="flex h-[50vh] md:h-[70vh] xl:h-[75vh] w-full items-center justify-center overflow-hidden rounded-lg border border-secondary-200">
                 {file_state.isImage ? (
                   <TransformWrapper
                     ref={transformRef}
-                    initialScale={1}
+                    initialScale={1.2}
                     minScale={0.25}
                     maxScale={2}
                     centerOnInit
@@ -366,7 +366,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                     sandbox=""
                     title={t("source_file")}
                     src={fileUrl}
-                    className="h-[50vh] md:h-[70vh] w-full"
+                    className="h-[50vh] md:h-[70vh] xl:h-[75vh] w-full"
                   />
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center">
@@ -404,7 +404,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                       icon: "l-refresh",
                       action: () => {
                         setRotation(0);
-                        transformRef.current?.resetTransform();
+                        transformRef.current?.centerView(1.2);
                       },
                       disabled: false,
                     },
@@ -461,7 +461,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                     {
                       label: `${page}/${numPages}`,
                       icon: null,
-                      action: () => {},
+                      action: () => void 0,
                       disabled: false,
                     },
                     {
@@ -492,7 +492,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
             </div>
           </>
         ) : (
-          <div className="flex h-[50vh] md:h-[70vh] items-center justify-center">
+          <div className="flex h-[50vh] md:h-[70vh] xl:h-[75vh] items-center justify-center">
             <CircularProgress />
           </div>
         )}
