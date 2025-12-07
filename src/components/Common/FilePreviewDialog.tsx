@@ -71,6 +71,7 @@ const previewExtensions = [
   ".gif",
   ".webp",
 ];
+const DEFAULT_IMAGE_SCALE = 1.2;
 
 function getRotationClass(rotation: number) {
   const normalizedRotation = rotation % 360;
@@ -124,7 +125,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
 
   useEffect(() => {
     if (transformRef.current && show) {
-      transformRef.current.centerView(1.2);
+      transformRef.current.centerView(DEFAULT_IMAGE_SCALE);
     }
   }, [index, show]);
 
@@ -280,7 +281,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                 {file_state.isImage ? (
                   <TransformWrapper
                     ref={transformRef}
-                    initialScale={1.2}
+                    initialScale={DEFAULT_IMAGE_SCALE}
                     minScale={0.25}
                     maxScale={2}
                     centerOnInit
@@ -404,7 +405,7 @@ export default function FilePreviewDialog(props: FilePreviewProps) {
                       icon: "l-refresh",
                       action: () => {
                         setRotation(0);
-                        transformRef.current?.centerView(1.2);
+                        transformRef.current?.centerView(DEFAULT_IMAGE_SCALE);
                       },
                       disabled: false,
                     },
