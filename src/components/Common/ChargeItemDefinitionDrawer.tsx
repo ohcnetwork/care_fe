@@ -49,6 +49,7 @@ export function ChargeItemDefinitionDrawer({
           <div className="max-w-4xl mx-auto w-full relative">
             <DrawerClose asChild>
               <Button
+                aria-label={t("close")}
                 variant="ghost"
                 size="sm"
                 className="absolute right-4 top-4 h-6 w-6 p-0"
