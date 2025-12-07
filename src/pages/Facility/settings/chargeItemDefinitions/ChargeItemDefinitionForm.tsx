@@ -752,8 +752,6 @@ export function ChargeItemDefinitionForm({
     onSuccess: (chargeItemDefinition: ChargeItemDefinitionRead) => {
       queryClient.invalidateQueries({ queryKey: ["chargeItemDefinitions"] });
       resetFormCompletely();
-      form.reset(getDefaultValues());
-      form.clearErrors();
       onSuccess?.(chargeItemDefinition);
       toast.success(
         isUpdate
@@ -1250,8 +1248,6 @@ export function ChargeItemDefinitionForm({
             disabled={isPending}
             onClick={() => {
               resetFormCompletely();
-              form.reset(getDefaultValues());
-              form.clearErrors();
               onCancel();
             }}
           >
