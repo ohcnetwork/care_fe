@@ -88,7 +88,7 @@ export default function useFilters({
 
       // Set default query params if they are not present, preserving existing params
       if (Object.keys(defaults).length > 0) {
-        setQueryParams({ ...qParams, ...defaults });
+        setQueryParams({ ...defaults, ...qParams });
       }
 
       // Skip cache restoration logic for this usage.
