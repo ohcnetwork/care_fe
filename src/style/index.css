@@ -147,6 +147,7 @@
 @layer utilities {
   html {
     @apply size-full scroll-smooth;
+    overflow-y: scroll;
   }
 
   body {
