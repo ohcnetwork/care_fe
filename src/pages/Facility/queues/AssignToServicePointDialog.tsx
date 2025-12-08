@@ -90,35 +90,32 @@ export function AssignToServicePointDialog({
           onValueChange={setSelectedSubQueueId}
         >
           {assignedServicePoints.map((subQueue) => (
-            <div
+            <label
               key={subQueue.id}
+              htmlFor={subQueue.id}
               className={cn(
-                "flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors",
-                subQueue.id === token.sub_queue?.id && "hidden",
+                "flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer",
+                selectedSubQueueId === subQueue.id &&
+                  subQueue.id === token.sub_queue?.id &&
+                  "hidden",
               )}
             >
               <RadioGroupItem value={subQueue.id} id={subQueue.id} />
-              <label
-                htmlFor={subQueue.id}
-                className="flex-1 text-sm font-medium cursor-pointer"
-              >
+              <span className="flex-1 text-sm font-medium">
                 {subQueue.name}
-              </label>
-              <span className="text-sm">
+              </span>
+              <span className="text-sm text-gray-600">
                 {preferredServicePointCategories?.[subQueue.id]?.name ??
                   t("all")}
               </span>
-            </div>
+            </label>
           ))}
           {assignedServicePoints.length === 0 && (
-            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
               <RadioGroupItem value="none" id="none" disabled />
-              <label
-                htmlFor="none"
-                className="flex-1 text-sm font-medium cursor-pointer"
-              >
+              <span className="flex-1 text-sm font-medium text-gray-500">
                 {t("no_service_points_available")}
-              </label>
+              </span>
             </div>
           )}
         </RadioGroup>
