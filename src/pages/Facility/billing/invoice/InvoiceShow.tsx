@@ -343,6 +343,14 @@ export function InvoiceShow({
           </BackButton>
         </div>
         <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
+          <Button variant="outline" asChild>
+            <Link
+              href={`/facility/${facilityId}/billing/account/${invoice.account.id}`}
+            >
+              {t("view_account")}
+              <ShortcutBadge actionId="view-account" />
+            </Link>
+          </Button>
           {invoice?.status === InvoiceStatus.draft && (
             <Button
               variant="outline_primary"
