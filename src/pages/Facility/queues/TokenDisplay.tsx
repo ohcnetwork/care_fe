@@ -1,5 +1,6 @@
 import Loading from "@/components/Common/Loading";
 import PageTitle from "@/components/Common/PageHeadTitle";
+import RotatingText from "@/components/Common/RotatingText";
 import { useScheduleResource } from "@/components/Schedule/useScheduleResource";
 import { cn } from "@/lib/utils";
 import {
@@ -7,6 +8,7 @@ import {
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
 import { renderTokenNumber } from "@/types/tokens/token/token";
+import { TokenQueueRead } from "@/types/tokens/tokenQueue/tokenQueue";
 import {
   TokenSubQueueRead,
   TokenSubQueueStatus,
@@ -15,8 +17,7 @@ import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useQueries, UseQueryResult } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 
 interface TokenDisplayProps {
@@ -27,21 +28,52 @@ interface TokenDisplayProps {
 const REFRESH_INTERVAL = 10000; // 10 seconds
 
 const combineResourceSubQueues = (
-  result: UseQueryResult<{
-    subQueues: TokenSubQueueRead[];
+  result: UseQueryResult<
+    | {
+        subQueues: TokenSubQueueRead[];
+        resourceType: SchedulableResourceType;
+        resourceId: string;
+        type: "subqueues";
+      }
+    | {
+        queues: TokenQueueRead[];
+        resourceType: SchedulableResourceType;
+        resourceId: string;
+        type: "queues";
+      }
+  >[],
+) => {
+  if (result.some((query) => query.status === "pending")) {
+    return null;
+  }
+  const servicePoints: (TokenSubQueueRead & {
     resourceType: SchedulableResourceType;
     resourceId: string;
-  }>[],
-) => {
-  return result
-    .filter((query) => query.data) // Intentionally ignoring queries that are not successful to make it resilient to errors
-    .flatMap(({ data }) =>
-      (data!.subQueues ?? []).map((subQueue) => ({
-        ...subQueue,
-        resourceType: data!.resourceType,
-        resourceId: data!.resourceId,
-      })),
-    );
+    queue: TokenQueueRead | undefined;
+  })[] = [];
+
+  for (const { data } of result) {
+    if (data?.type === "subqueues") {
+      servicePoints.push(
+        ...data.subQueues.map((subQueue) => {
+          let queue: TokenQueueRead | undefined;
+          for (const { data: queueData } of result) {
+            if (queueData?.type === "queues") {
+              queue = queueData.queues.find(
+                (queue) => queue.id === subQueue.id,
+              );
+            }
+          }
+          return {
+            ...subQueue,
+            resourceType: data.resourceType,
+            resourceId: data.resourceId,
+            queue: queue,
+          };
+        }),
+      );
+    }
+  }
 };
 
 /**
@@ -81,23 +113,42 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
   const { t } = useTranslation();
 
   const servicePoints = useQueries({
-    queries: resources.map((resource) => ({
-      queryKey: ["subQueues", facilityId, resource],
-      queryFn: query(tokenSubQueueApi.list, {
-        pathParams: { facility_id: facilityId },
-        queryParams: {
-          resource_type: resource.resourceType,
-          resource_id: resource.resourceId,
-          status: TokenSubQueueStatus.ACTIVE,
-        },
-        silent: true,
-      }),
-      refetchInterval: REFRESH_INTERVAL,
-      select: (data: PaginatedResponse<TokenSubQueueRead>) => ({
-        ...resource,
-        subQueues: data.results,
-      }),
-    })),
+    queries: [
+      ...resources.map((resource) => ({
+        queryKey: ["queues", facilityId, resource],
+        queryFn: query(tokenSubQueueApi.list, {
+          pathParams: { facility_id: facilityId },
+          queryParams: {
+            resource_type: resource.resourceType,
+            resource_id: resource.resourceId,
+            date: dayjs().format("YYYY-MM-DD"),
+          },
+          silent: true,
+        }),
+        refetchInterval: REFRESH_INTERVAL,
+        select: (data: PaginatedResponse<TokenSubQueueRead>) => ({
+          ...resource,
+          type: "queues",
+          subQueues: data.results,
+        }),
+      })),
+      ...resources.map((resource) => ({
+        queryKey: ["subQueues", facilityId],
+        queryFn: query(tokenSubQueueApi.list, {
+          pathParams: { facility_id: facilityId },
+          queryParams: {
+            resource_type: resource.resourceType,
+            resource_id: resource.resourceId,
+            status: TokenSubQueueStatus.ACTIVE,
+          },
+        }),
+        select: (data: PaginatedResponse<TokenSubQueueRead>) => ({
+          ...resource,
+          type: "subQueues",
+          subQueues: data.results,
+        }),
+      })),
+    ],
     combine: combineResourceSubQueues,
   });
 
@@ -150,19 +201,7 @@ const ServicePointDisplay = ({
   current_token,
   name,
 }: ServicePointDisplayProps) => {
-  const [hasRecentlyChanged, setHasRecentlyChanged] = useState(false);
   const tokenNumber = current_token ? renderTokenNumber(current_token) : "--";
-
-  useEffect(() => {
-    if (tokenNumber !== "--") {
-      const timeout1 = setTimeout(() => setHasRecentlyChanged(true), 1000);
-      const timeout2 = setTimeout(() => setHasRecentlyChanged(false), 4000);
-      return () => {
-        clearTimeout(timeout1);
-        clearTimeout(timeout2);
-      };
-    }
-  }, [tokenNumber]);
 
   const resource = useScheduleResource({
     resourceType,
@@ -184,26 +223,21 @@ const ServicePointDisplay = ({
       </div>
       <div
         className={cn(
-          "flex items-center justify-center font-black text-[clamp(2rem,25cqw,6rem)] h-[calc(100%-16rem)] transition-colors duration-500",
-          hasRecentlyChanged ? "bg-[#FFD83D] text-[#07131F]" : "text-[#FFD83D]",
+          "flex items-center justify-center font-black text-[clamp(2rem,25cqw,6rem)] h-[calc(100%-16rem)] bg-[#07131F]",
         )}
       >
-        <AnimatePresence mode="popLayout" initial={false}>
-          <motion.span
-            key={tokenNumber}
-            initial={{ y: -40, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 40, opacity: 0 }}
-            transition={{
-              type: "tween",
-              duration: 1,
-              ease: "easeInOut",
-            }}
-            className="inline-block"
-          >
-            {tokenNumber}
-          </motion.span>
-        </AnimatePresence>
+        <RotatingText
+          texts={[tokenNumber]}
+          mainClassName="px-2 sm:px-2 md:px-3 text-[#FFD83D] overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
+          staggerFrom={"last"}
+          initial={{ y: "100%" }}
+          animate={{ y: 0 }}
+          exit={{ y: "-120%" }}
+          staggerDuration={0.025}
+          splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
+          transition={{ type: "spring", damping: 30, stiffness: 400 }}
+          rotationInterval={2000}
+        />
       </div>
     </div>
   );
