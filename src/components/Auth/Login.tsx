@@ -167,7 +167,6 @@ const Login = (props: LoginProps) => {
       }
     },
     onError: (error: any) => {
-      console.log(error);
       let errorMessage = "invalid_otp";
       if (
         error.cause &&
