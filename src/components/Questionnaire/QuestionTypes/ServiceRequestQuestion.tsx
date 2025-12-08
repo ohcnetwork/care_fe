@@ -198,22 +198,15 @@ function ServiceRequestForm({
         <span className="font-medium text-sm text-gray-700">
           {t("locations")}:
         </span>
-        {(() => {
-          const locations = serviceRequest.activity_definition_data?.locations;
-          return (
-            locations &&
-            locations.length > 0 &&
-            locations.map((location) => (
-              <Badge
-                key={location.id}
-                variant="outline"
-                className="bg-gray-50 text-gray-700 border-gray-200"
-              >
-                {location.name}
-              </Badge>
-            ))
-          );
-        })()}
+        {serviceRequest.activity_definition_data?.locations?.map((location) => (
+          <Badge
+            key={location.id}
+            variant="outline"
+            className="bg-gray-50 text-gray-700 border-gray-200"
+          >
+            {location.name}
+          </Badge>
+        ))}
       </div>
     </div>
   );
