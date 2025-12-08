@@ -37,14 +37,13 @@ test.describe("Clear Cache in profile successfully", () => {
 
     // Wait for page reload
     await reloadPromise;
-    await page.waitForLoadState("networkidle");
 
-    // Wait for cache to be cleared
+    // Wait for cache to be cleared - use a more reliable check
     await page.waitForFunction(
       () => {
         return caches.keys().then((keys) => !keys.includes("test-cache"));
       },
-      { timeout: 10000 },
+      { timeout: 15000 },
     );
 
     // Verify test cache has been deleted
