@@ -57,6 +57,7 @@ interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
   > & {
     requester: UserReadMinimal;
   };
+  activity_definition_data?: ActivityDefinitionReadSpec;
 }
 
 interface ServiceRequestQuestionProps {
@@ -128,7 +129,6 @@ interface ServiceRequestFormProps {
   questionId?: string;
   index?: number;
   isPreview?: boolean;
-  activityDefinition?: ActivityDefinitionReadSpec;
   facilityId?: string;
 }
 
@@ -142,7 +142,6 @@ function ServiceRequestForm({
   questionId,
   index,
   isPreview = false,
-  activityDefinition,
   facilityId = "",
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
@@ -199,19 +198,22 @@ function ServiceRequestForm({
         <span className="font-medium text-sm text-gray-700">
           {t("locations")}:
         </span>
-        {activityDefinition?.locations &&
-          activityDefinition?.locations.length > 0 &&
-          activityDefinition?.locations.map((location) => {
-            return (
+        {(() => {
+          const locations = serviceRequest.activity_definition_data?.locations;
+          return (
+            locations &&
+            locations.length > 0 &&
+            locations.map((location) => (
               <Badge
                 key={location.id}
                 variant="outline"
                 className="bg-gray-50 text-gray-700 border-gray-200"
               >
-                {location?.name || location.id}
+                {location.name}
               </Badge>
-            );
-          })}
+            ))
+          );
+        })()}
       </div>
     </div>
   );
@@ -488,10 +490,6 @@ export function ServiceRequestQuestion({
   });
 
   useEffect(() => {
-    console.log("selectedActivityDefinition", selectedActivityDefinition);
-  }, [selectedActivityDefinition]);
-
-  useEffect(() => {
     if (selectedActivityDefinition && selectedActivityDefinitionData) {
       const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec = {
         service_request: {
@@ -514,6 +512,7 @@ export function ServiceRequestQuestion({
         },
         activity_definition: selectedActivityDefinition,
         encounter: encounterId,
+        activity_definition_data: selectedActivityDefinitionData,
       };
 
       setPreviewServiceRequest(newServiceRequest);
@@ -700,7 +699,6 @@ export function ServiceRequestQuestion({
       {previewServiceRequest && !isLoadingSelectedAD && (
         <ServiceRequestForm
           serviceRequest={previewServiceRequest}
-          activityDefinition={selectedActivityDefinitionData}
           onUpdate={handlePreviewServiceRequestUpdate}
           onRemove={() => {
             setPreviewServiceRequest(null);
