@@ -441,15 +441,7 @@ export function ValueSetForm({
                       .toLowerCase()
                       .replace(/[^a-z0-9_-]/g, "");
                     field.onChange(sanitizedValue);
-
-                    if (
-                      sanitizedValue.length >= 5 &&
-                      sanitizedValue.length <= 25
-                    ) {
-                      form.clearErrors("slug");
-                    } else {
-                      form.trigger("slug");
-                    }
+                    form.trigger("slug");
                   }}
                 />
               </FormControl>
