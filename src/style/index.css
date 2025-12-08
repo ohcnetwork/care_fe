@@ -146,10 +146,8 @@
 
 @layer utilities {
   html {
-    @apply size-full scroll-smooth;
-    overflow-y: scroll;
+    @apply size-full scroll-smooth overflow-y-scroll;
   }
-
   body {
     font-family: "Figtree", sans-serif;
     color: #453c52;
