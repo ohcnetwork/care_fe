@@ -93,7 +93,7 @@ export default function InvoicesData({
   return (
     <>
       <div className="flex flex-col md:flex-row justify-between gap-2 pb-4">
-        <div className="w-full md:w-auto md:flex gap-2 space-y-2">
+        <div className="w-full md:w-auto md:flex gap-2 space-y-2 md:space-y-0">
           {showIdentifierFilter && (
             <PatientIdentifierFilter
               onSelect={(patientId) => updateQuery({ patient: patientId })}
