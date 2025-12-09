@@ -52,9 +52,3 @@ applyTo: "src/components/**/*.{ts,tsx}"
 - Keyboard navigation: Essential for clinical workflows and emergency situations
 - Screen reader support: Proper heading hierarchy for medical records
 - Color contrast: Meet WCAG AA standards for clinical environments
-
-## Testing Integration
-- Cypress attributes: Use `data-cy="patient-info-card"` following feature-action pattern
-- Page Object Model: Reference cypress/pageObject/ structure for component testing
-- Medical workflow testing: Test critical paths (patient admission, medication orders)
-- Error scenarios: Test network failures, invalid patient data, authorization errors

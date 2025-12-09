@@ -18,7 +18,6 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
@@ -90,7 +89,7 @@ interface DiagnosticReportFormProps {
 interface ComponentValue {
   value: string;
   unit: string;
-  isNormal: boolean;
+  interpretation: string;
 }
 
 // Interface for observation values
@@ -98,7 +97,7 @@ interface ObservationValue {
   id: string;
   value: string;
   unit: string;
-  isNormal: boolean;
+  interpretation: string;
   status: ObservationStatus;
   components: Record<string, ComponentValue>;
 }
@@ -308,7 +307,7 @@ export function DiagnosticReportForm({
                   components[comp.code.code] = {
                     value: comp.value.value || "",
                     unit: comp.value.unit?.code || "",
-                    isNormal: comp.interpretation === "normal",
+                    interpretation: comp.interpretation || "",
                   };
                 }
               });
@@ -318,7 +317,7 @@ export function DiagnosticReportForm({
               id: obs.id,
               value: obs.value.value || "",
               unit: obs.value.unit?.code || "",
-              isNormal: obs.interpretation === "normal",
+              interpretation: obs.interpretation || "",
               status: obs.status,
               components,
             };
@@ -351,7 +350,7 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          isNormal: true,
+          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -375,7 +374,7 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          isNormal: true,
+          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -383,34 +382,6 @@ export function DiagnosticReportForm({
       observationsList[index] = {
         ...observationsList[index],
         unit,
-      };
-      return {
-        ...prev,
-        [definitionId]: observationsList,
-      };
-    });
-  }
-
-  function handleNormalChange(
-    definitionId: string,
-    index: number,
-    isNormal: boolean,
-  ) {
-    setObservations((prev) => {
-      const observationsList = [...(prev[definitionId] || [])];
-      if (!observationsList[index]) {
-        observationsList[index] = {
-          id: "",
-          value: "",
-          unit: "",
-          isNormal: true,
-          status: ObservationStatus.AMENDED,
-          components: {},
-        };
-      }
-      observationsList[index] = {
-        ...observationsList[index],
-        isNormal,
       };
       return {
         ...prev,
@@ -433,7 +404,7 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          isNormal: true,
+          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -442,7 +413,7 @@ export function DiagnosticReportForm({
       const components = { ...observation.components };
 
       components[componentCode] = {
-        ...(components[componentCode] || { isNormal: true }),
+        ...components[componentCode],
         value,
         unit,
       };
@@ -472,7 +443,7 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          isNormal: true,
+          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -481,46 +452,8 @@ export function DiagnosticReportForm({
       const components = { ...observation.components };
 
       components[componentCode] = {
-        ...(components[componentCode] || { value: "", isNormal: true }),
+        ...(components[componentCode] || { value: "", interpretation: "" }),
         unit,
-      };
-
-      observationsList[index] = {
-        ...observation,
-        components,
-      };
-
-      return {
-        ...prev,
-        [definitionId]: observationsList,
-      };
-    });
-  }
-
-  function handleComponentNormalChange(
-    definitionId: string,
-    index: number,
-    componentCode: string,
-    isNormal: boolean,
-  ) {
-    setObservations((prev) => {
-      const observationsList = [...(prev[definitionId] || [])];
-      if (!observationsList[index]) {
-        observationsList[index] = {
-          id: "",
-          value: "",
-          unit: "",
-          isNormal: true,
-          status: ObservationStatus.AMENDED,
-          components: {},
-        };
-      }
-      const observation = observationsList[index];
-      const components = { ...observation.components };
-
-      components[componentCode] = {
-        ...(components[componentCode] || { value: "", unit: "" }),
-        isNormal,
       };
 
       observationsList[index] = {
@@ -591,13 +524,21 @@ export function DiagnosticReportForm({
         );
 
       // If there's a conclusion, we must have results first
-      if (conclusion.trim() && !hasObservationValue) {
+      if (
+        conclusion.trim() &&
+        !hasObservationValue &&
+        observationDefinitions.length > 0
+      ) {
         toast.error(t("cannot_add_conclusion_without_results"));
         return;
       }
 
-      // Results are mandatory, unless an observation is being deleted
-      if (!hasObservationValue && !hasDeletions) {
+      // Results are mandatory if observation definitions exist, unless an observation is being deleted
+      if (
+        !hasObservationValue &&
+        !hasDeletions &&
+        observationDefinitions.length > 0
+      ) {
         toast.error(t("please_fill_all_results"));
         return;
       }
@@ -679,9 +620,6 @@ export function DiagnosticReportForm({
                       components.push({
                         code: componentDef.code,
                         value: componentValue,
-                        interpretation: componentData.isNormal
-                          ? "normal"
-                          : "abnormal",
                       });
                     }
                   },
@@ -703,7 +641,7 @@ export function DiagnosticReportForm({
                   effective_datetime: new Date().toISOString(),
                   value,
                   encounter: null,
-                  interpretation: obsData.isNormal ? "normal" : "abnormal",
+                  interpretation: obsData.interpretation || "",
                   component: components.length > 0 ? components : undefined,
                 },
               };
@@ -764,7 +702,7 @@ export function DiagnosticReportForm({
                   id: "",
                   value: "",
                   unit: "",
-                  isNormal: true,
+                  interpretation: "",
                   status: ObservationStatus.AMENDED,
                   components: {},
                 },
@@ -793,7 +731,7 @@ export function DiagnosticReportForm({
           ] || {
             value: "",
             unit: component.permitted_unit?.code,
-            isNormal: true,
+            interpretation: "",
           };
 
           return (
@@ -868,28 +806,6 @@ export function DiagnosticReportForm({
                     disabled={isErrored || disableEdit}
                   />
                 </div>
-
-                <div className="flex items-center space-x-2 sm:pt-6">
-                  <Checkbox
-                    id={`abnormal-checkbox-${definition.id}-${component.code.code}-${index}`}
-                    checked={!componentData.isNormal}
-                    onCheckedChange={(checked) =>
-                      handleComponentNormalChange(
-                        definition.id,
-                        index,
-                        component.code.code,
-                        !checked, // isNormal is the opposite of checked (isAbnormal)
-                      )
-                    }
-                    disabled={isErrored || disableEdit}
-                  />
-                  <Label
-                    htmlFor={`abnormal-checkbox-${definition.id}-${component.code.code}-${index}`}
-                    className="text-sm font-normal text-gray-950 cursor-pointer"
-                  >
-                    {t("abnormal")}
-                  </Label>
-                </div>
               </div>
             </div>
           );
@@ -931,7 +847,7 @@ export function DiagnosticReportForm({
               <div className="flex items-center gap-2">
                 <CardTitle>
                   <p className="flex items-center gap-1.5">
-                    <NotepadText className="size-[24px] text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
+                    <NotepadText className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
                     <span className="text-base/9 text-gray-950 font-medium">
                       {t("test_results_entry")}
                     </span>
@@ -998,7 +914,7 @@ export function DiagnosticReportForm({
                         id: "",
                         value: "",
                         unit: "",
-                        isNormal: true,
+                        interpretation: "",
                         status: ObservationStatus.AMENDED,
                         components: {},
                       },
@@ -1129,27 +1045,6 @@ export function DiagnosticReportForm({
                                           disabled={isErrored || disableEdit}
                                         />
                                       </div>
-
-                                      <div className="flex items-center space-x-2 sm:pt-6">
-                                        <Checkbox
-                                          id={`abnormal-checkbox-${definition.id}-${index}`}
-                                          checked={!observationData.isNormal}
-                                          onCheckedChange={(checked) =>
-                                            handleNormalChange(
-                                              definition.id,
-                                              index,
-                                              !checked, // isNormal is the opposite of checked (isAbnormal)
-                                            )
-                                          }
-                                          disabled={isErrored || disableEdit}
-                                        />
-                                        <Label
-                                          htmlFor={`abnormal-checkbox-${definition.id}-${index}`}
-                                          className="text-sm font-medium text-gray-700 cursor-pointer"
-                                        >
-                                          {t("abnormal")}
-                                        </Label>
-                                      </div>
                                     </div>
                                   )}
 
@@ -1180,7 +1075,7 @@ export function DiagnosticReportForm({
                                         id: "",
                                         value: "",
                                         unit: "",
-                                        isNormal: true,
+                                        interpretation: "",
                                         status: ObservationStatus.AMENDED,
                                         components: {},
                                       },
@@ -1322,7 +1217,7 @@ export function DiagnosticReportForm({
                       : t("no_test_results_recorded")}
                   </p>
                 </div>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-center">
                   {activityDefinition?.diagnostic_report_codes &&
                     activityDefinition.diagnostic_report_codes.length > 0 && (
                       <div className="flex-1 min-w-0">

@@ -343,6 +343,14 @@ export function InvoiceShow({
           </BackButton>
         </div>
         <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
+          <Button variant="outline" asChild>
+            <Link
+              href={`/facility/${facilityId}/billing/account/${invoice.account.id}`}
+            >
+              {t("view_account")}
+              <ShortcutBadge actionId="view-account" />
+            </Link>
+          </Button>
           {invoice?.status === InvoiceStatus.draft && (
             <Button
               variant="outline_primary"
@@ -444,11 +452,7 @@ export function InvoiceShow({
               {canEdit && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      data-cy="invoice-actions-button"
-                      className="border-gray-400 px-2"
-                    >
+                    <Button variant="outline" className="border-gray-400 px-2">
                       <CareIcon icon="l-ellipsis-v" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -461,7 +465,6 @@ export function InvoiceShow({
                         }
                         disabled={isCancelPending}
                         className="w-full flex flex-row justify-stretch items-center"
-                        data-cy="invoice-cancel-button"
                       >
                         <CareIcon icon="l-times-circle" className="mr-1" />
                         <span>{t("mark_as_cancelled")}</span>
@@ -475,7 +478,6 @@ export function InvoiceShow({
                         }
                         disabled={isCancelPending}
                         className="w-full flex flex-row justify-stretch items-center"
-                        data-cy="invoice-mark-error-button"
                       >
                         <CareIcon
                           icon="l-exclamation-circle"
@@ -966,7 +968,8 @@ export function InvoiceShow({
                 </div>
               ) : (
                 payments.results.map((payment, index) => (
-                  <div
+                  <Link
+                    href={`/facility/${facilityId}/billing/payments/${payment.id}/print`}
                     key={payment.id}
                     className="relative flex items-start py-8 px-3  group"
                   >
@@ -1017,7 +1020,7 @@ export function InvoiceShow({
                         </Badge>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>

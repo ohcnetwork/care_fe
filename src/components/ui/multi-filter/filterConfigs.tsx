@@ -1,7 +1,6 @@
 import {
   ENCOUNTER_CLASS,
   ENCOUNTER_PRIORITY,
-  ENCOUNTER_STATUS,
   EncounterClass,
   EncounterPriority,
   EncounterStatus,
@@ -24,6 +23,12 @@ import {
 } from "./utils/Utils";
 
 import {
+  ACCOUNT_BILLING_STATUS_COLORS,
+  ACCOUNT_STATUS_COLORS,
+  AccountBillingStatus,
+  AccountStatus,
+} from "@/types/billing/account/Account";
+import {
   ENCOUNTER_CLASS_FILTER_COLORS,
   ENCOUNTER_PRIORITY_FILTER_COLORS,
   ENCOUNTER_STATUS_FILTER_COLORS,
@@ -37,7 +42,7 @@ export const encounterStatusFilter = (
     key,
     "status",
     "command",
-    Array.from(ENCOUNTER_STATUS).map((value) => ({
+    Object.values(EncounterStatus).map((value) => ({
       value: value,
       label: t(value),
       color: ENCOUNTER_STATUS_FILTER_COLORS[value],
@@ -71,7 +76,7 @@ export const encounterClassFilter = (
 ) =>
   createFilterConfig(
     key,
-    t("class"),
+    t("encounter_class"),
     "command",
     Array.from(ENCOUNTER_CLASS).map((value) => ({
       value: value,
@@ -190,5 +195,80 @@ export const tagFilter = (
       mode,
       icon: <Tag className="w-4 h-4" />,
       operationKey: "tags_behavior",
+    },
+  );
+
+export const accountBillingStatusFilter = (
+  key: string = "billing_status",
+  mode: FilterMode = "single",
+  customOperations?: Operation[],
+) =>
+  createFilterConfig(
+    key,
+    t("billing_status"),
+    "command",
+    Object.values(AccountBillingStatus).map((value) => ({
+      value: value,
+      label: t(value),
+      color: ACCOUNT_BILLING_STATUS_COLORS[value],
+    })),
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedStatus = selected as string[];
+        if (typeof selectedStatus[0] === "string") {
+          const option = selectedStatus[0];
+          const variant =
+            ACCOUNT_BILLING_STATUS_COLORS[option as AccountBillingStatus];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedStatus.length}
+              variant={variant}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
+      icon: <CircleDashed className="w-4 h-4" />,
+      showColorIndicators: false,
+    },
+  );
+
+export const accountStatusFilter = (
+  key: string = "status",
+  mode: FilterMode = "single",
+  customOperations?: Operation[],
+) =>
+  createFilterConfig(
+    key,
+    t("account_status"),
+    "command",
+    Object.values(AccountStatus).map((value) => ({
+      value: value,
+      label: t(value),
+      color: ACCOUNT_STATUS_COLORS[value],
+    })),
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedStatus = selected as string[];
+        if (typeof selectedStatus[0] === "string") {
+          const option = selectedStatus[0];
+          const variant = ACCOUNT_STATUS_COLORS[option as AccountStatus];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedStatus.length}
+              variant={variant}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
+      icon: <CircleDashed className="w-4 h-4" />,
+      showColorIndicators: false,
     },
   );
