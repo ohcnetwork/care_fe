@@ -169,7 +169,7 @@ test.describe("Create an Encounter", () => {
   });
 
   test("view treatment summary print layout", async ({ page }) => {
-    // 1. Navigate to Treatment Summary Page
+    // Navigate to Treatment Summary Page
     
     // Navigate to the first patient's profile
     await page.getByRole("link", { name: "Patient Home" }).first().click();
