@@ -22,6 +22,7 @@ export interface FilterSelectProps {
   icon?: React.ReactNode;
   className?: string;
   placeholder?: string;
+  conjunctionText?: string;
 }
 
 export function FilterSelect({
@@ -33,6 +34,7 @@ export function FilterSelect({
   icon,
   className,
   placeholder,
+  conjunctionText,
 }: FilterSelectProps) {
   const { t } = useTranslation();
   return (
@@ -51,13 +53,15 @@ export function FilterSelect({
             {icon || <CareIcon icon="l-filter" className="size-4" />}
             {value ? (
               <>
-                <span className="text-gray-950">{t(label)}</span>
-                <span className="text-gray-600 lowercase">{t("is")}</span>
+                <span className="text-gray-950">{label}</span>
+                <span className="text-gray-600 lowercase">
+                  {conjunctionText || t("is")}
+                </span>
                 <span className="text-gray-950 underline">{t(value)}</span>
               </>
             ) : (
               <span className="text-gray-500">
-                {placeholder ? t(placeholder) : t(label)}
+                {placeholder ? placeholder : label}
               </span>
             )}
           </div>
