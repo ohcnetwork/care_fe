@@ -169,32 +169,40 @@ test.describe("Create an Encounter", () => {
   });
 
   test("view treatment summary print layout", async ({ page }) => {
-    // Navigate to Treatment Summary Page
-    
-    // Navigate to the first patient's profile
+    await page.evaluate(() => {
+      window.print = () => {};
+    });
+
     await page.getByRole("link", { name: "Patient Home" }).first().click();
+    await page.waitForLoadState("networkidle");
+
     await page.getByRole("link", { name: "View Profile" }).first().click();
-    
-    // Navigate to the patient's encounter list
+    await page.waitForLoadState("networkidle");
+
     await page.getByRole("link", { name: "View Encounters" }).first().click();
-    
-    // Navigate to the main Treatment Summary page
+    await page.waitForLoadState("networkidle");
+
     await page.getByRole("link", { name: "Treatment Summary" }).click();
-    
-    // 2. Verify Key Structural Components
-    
-    // Check for the main page header
-    await expect(page.getByRole("heading", { name: "Treatment Summary" })).toBeVisible();
-    
-    // Check for key SectionLayout components
-    await expect(page.getByRole("heading", { name: "Allergies" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Medications" })).toBeVisible();
-    
-    // Check for the Questionnaire section (the one that was splitting)
+    await page.waitForLoadState("networkidle");
+
+    // START STRUCTURAL VERIFICATION
+    await expect(
+      page.getByRole("heading", { name: "Treatment Summary" }),
+    ).toBeVisible();
+
+    // Verify key sections modified for print stability
+    await expect(
+      page.getByRole("heading", { name: "Allergies" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Medications" }),
+    ).toBeVisible();
+
+    // Verify Questionnaire section presence
     await expect(page.getByText("Questionnaire Group Creation")).toBeVisible();
-    
-    // 3. Trigger Print (Functional check)
+
+    // Trigger Print (Functional check)
     await expect(page.getByRole("button", { name: "Print" })).toBeVisible();
     await page.getByRole("button", { name: "Print" }).click();
-});
+  });
 });
