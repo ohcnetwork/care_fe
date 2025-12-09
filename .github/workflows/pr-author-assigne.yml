@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
 
     steps:
-      - name: Get the detaile about the PR author
+      - name: Get the details about the PR author
         env:
           GH_TOKEN: ${{ github.token }}
         id: prinfo
@@ -43,6 +43,7 @@ jobs:
               pr_association: .data.repository.pullRequest.authorAssociation,
               pr_author: .data.repository.pullRequest.author.login,
               state: .data.repository.pullRequest.state
+              issue_state: .data.repository.pullRequest.closingIssuesReferences.nodes[0].state // null
             }')
 
           echo "OUTPUT: $response"
@@ -52,6 +53,7 @@ jobs:
           echo "pr_author=$(echo "$response" | jq -r '.pr_author')" >> $GITHUB_OUTPUT
           echo "pr_association=$(echo "$response" | jq -r '.pr_association')" >> $GITHUB_OUTPUT
           echo "state=$(echo "$response" | jq -r '.state')" >> $GITHUB_OUTPUT
+          echo "issue_state=$(echo "$response" | jq -r '.issue_state')" >> $GITHUB_OUTPUT
 
       - name: Use the extracted data
         run: |
@@ -60,6 +62,7 @@ jobs:
           echo "PR Author: ${{ steps.prinfo.outputs.pr_author }}"
           echo "PR Association: ${{ steps.prinfo.outputs.pr_association }}"
           echo "PR State: ${{ steps.prinfo.outputs.state }}"
+          echo "Issue State": ${{ steps.prinfo.outputs.issue_state }}"
 
       - name: Close PR if no linked issue
         if: steps.prinfo.outputs.issue_number == 'null' || steps.prinfo.outputs.issue_state == 'CLOSED'
@@ -108,4 +111,3 @@ jobs:
             fi
 
             echo "PR author is assigned to the issue, all good."
-
