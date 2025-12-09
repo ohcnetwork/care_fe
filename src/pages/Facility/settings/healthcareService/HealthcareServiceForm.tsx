@@ -340,7 +340,7 @@ function HealthcareServiceFormContent({
                 <FormField
                   control={form.control}
                   name="locations"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormControl>
                         <RequirementsSelector
@@ -368,6 +368,9 @@ function HealthcareServiceFormContent({
                               value={field.value}
                               onChange={field.onChange}
                             />
+                          }
+                          triggerBtnClassName={
+                            fieldState.error ? "border-red-500" : undefined
                           }
                         />
                       </FormControl>

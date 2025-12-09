@@ -8,11 +8,11 @@ test.use({ storageState: "tests/.auth/user.json" });
 const allergyOptions = [
   "Fezolinetant",
   "Anifrolumab",
-  "Live attenuated virus antigen",
+  "Live attenuated Junin virus antigen",
   "Isomaltose",
   "Cetrimonium bromide",
   "Benzenesulfonic acid",
-  "Inclisiran",
+  "Inclisiran sodium",
   "Purified water",
   "Olipudase alfa",
 ];
