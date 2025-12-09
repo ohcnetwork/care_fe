@@ -362,3 +362,109 @@ export function getCardByTitle(page: Page, title: string | RegExp) {
     has: page.locator('[data-slot="card-title"]', { hasText: title }),
   });
 }
+
+export async function clearFilter(page: Page) {
+  const clearButton = page
+    .getByRole("button")
+    .filter({ has: page.locator("svg.lucide-x") })
+    .first();
+  await clearButton.click();
+}
+
+/**
+ * Helper to select a value from a FilterSelect component
+ * FilterSelect uses a Select component with a combobox trigger that shows the label
+ *
+ * @param page - Playwright page object
+ * @param label - The label text of the FilterSelect (e.g., "status", "category")
+ * @param value - The value to select (will be matched case-insensitively)
+ *
+ * @example
+ * await selectFromFilterSelect(page, "status", "active");
+ * await selectFromFilterSelect(page, "category", "laboratory");
+ */
+export async function selectFromFilterSelect(
+  page: Page,
+  label: string | RegExp,
+  value: string,
+) {
+  // Find the FilterSelect combobox by its label text
+  const filterSelect = page
+    .getByRole("combobox")
+    .filter({ hasText: label })
+    .first();
+  await filterSelect.waitFor({ state: "visible" });
+  await filterSelect.scrollIntoViewIfNeeded();
+  await filterSelect.click();
+
+  // Select the option by value (case-insensitive match)
+  const option = page.getByRole("option", {
+    name: new RegExp(value, "i"),
+  });
+  await option.waitFor({ state: "visible" });
+  await option.click();
+}
+
+/**
+ * Apply a filter to a table view with navigation and filter selection
+ * @param page - Playwright page object
+ * @param url - Full URL to navigate to
+ * @param filterLabel - Filter label regex (e.g., /status/i, /category/i)
+ * @param filterValue - Value to filter by
+ *
+ * @example
+ * await applyTableFilter(page, "/facility/123/settings/definitions", /status/i, "Active");
+ */
+export async function applyTableFilter(
+  page: Page,
+  url: string,
+  filterLabel: RegExp,
+  filterValue: string,
+) {
+  await page.goto(url);
+  await clearFilter(page);
+  await page.locator('[data-slot="table-body"]').waitFor({ state: "visible" });
+
+  await selectFromFilterSelect(page, filterLabel, filterValue);
+  await page.waitForLoadState("networkidle");
+
+  const tableBody = page.locator('[data-slot="table-body"]');
+  await tableBody.waitFor({ state: "visible" });
+
+  const tableBodyRows = tableBody.locator('[data-slot="table-row"]');
+  await tableBodyRows.first().waitFor({ state: "visible" });
+}
+
+/**
+ * Verify all badges in table match expected text and optionally verify specific row exists
+ * @param page - Playwright page object
+ * @param badgeText - Expected badge text to verify
+ * @param specificRowText - Optional text to find specific row
+ *
+ * @example
+ * await verifyTableBadges(page, "Active", "My Activity");
+ * await verifyTableBadges(page, "Laboratory"); // Without specific row check
+ */
+export async function verifyTableBadges(
+  page: Page,
+  badgeText: string,
+  specificRowText?: string,
+) {
+  const tableBody = page.locator('[data-slot="table-body"]');
+  const tableBodyRows = tableBody.locator('[data-slot="table-row"]');
+  const rowCount = await tableBodyRows.count();
+
+  if (rowCount > 0) {
+    const badges = tableBody
+      .locator('[data-slot="badge"]')
+      .filter({ hasText: badgeText });
+    await expect(badges).toHaveCount(rowCount);
+  }
+
+  if (specificRowText) {
+    const specificRow = page.locator('[data-slot="table-row"]', {
+      hasText: specificRowText,
+    });
+    await expect(specificRow).toBeVisible();
+  }
+}
