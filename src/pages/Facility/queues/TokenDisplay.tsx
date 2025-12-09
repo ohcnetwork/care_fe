@@ -9,6 +9,7 @@ import {
 } from "@/types/scheduling/schedule";
 import { renderTokenNumber } from "@/types/tokens/token/token";
 import { TokenQueueRead } from "@/types/tokens/tokenQueue/tokenQueue";
+import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import {
   TokenSubQueueRead,
   TokenSubQueueStatus,
@@ -33,7 +34,7 @@ const combineResourceSubQueues = (
         subQueues: TokenSubQueueRead[];
         resourceType: SchedulableResourceType;
         resourceId: string;
-        type: "subqueues";
+        type: "service_points";
       }
     | {
         queues: TokenQueueRead[];
@@ -43,9 +44,11 @@ const combineResourceSubQueues = (
       }
   >[],
 ) => {
+  // If any query is pending, return null
   if (result.some((query) => query.status === "pending")) {
     return null;
   }
+
   const servicePoints: (TokenSubQueueRead & {
     resourceType: SchedulableResourceType;
     resourceId: string;
@@ -53,15 +56,17 @@ const combineResourceSubQueues = (
   })[] = [];
 
   for (const { data } of result) {
-    if (data?.type === "subqueues") {
+    if (data?.type === "service_points") {
       servicePoints.push(
         ...data.subQueues.map((subQueue) => {
           let queue: TokenQueueRead | undefined;
           for (const { data: queueData } of result) {
-            if (queueData?.type === "queues") {
-              queue = queueData.queues.find(
-                (queue) => queue.id === subQueue.id,
-              );
+            if (
+              queueData?.type === "queues" &&
+              queueData.resourceType === data.resourceType &&
+              queueData.resourceId === data.resourceId
+            ) {
+              queue = queueData.queues.find((q) => q.is_primary);
             }
           }
           return {
@@ -74,6 +79,8 @@ const combineResourceSubQueues = (
       );
     }
   }
+
+  return servicePoints;
 };
 
 /**
@@ -113,10 +120,28 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
   const { t } = useTranslation();
 
   const servicePoints = useQueries({
-    queries: [
-      ...resources.map((resource) => ({
-        queryKey: ["queues", facilityId, resource],
+    queries: resources.flatMap((resource) => [
+      {
+        queryKey: ["subQueues", facilityId, resource],
         queryFn: query(tokenSubQueueApi.list, {
+          pathParams: { facility_id: facilityId },
+          queryParams: {
+            resource_type: resource.resourceType,
+            resource_id: resource.resourceId,
+            status: TokenSubQueueStatus.ACTIVE,
+          },
+          silent: true,
+        }),
+        refetchInterval: REFRESH_INTERVAL,
+        select: (data: PaginatedResponse<TokenSubQueueRead>) => ({
+          ...resource,
+          subQueues: data.results,
+          type: "service_points" as const,
+        }),
+      },
+      {
+        queryKey: ["queues", facilityId, resource],
+        queryFn: query(tokenQueueApi.list, {
           pathParams: { facility_id: facilityId },
           queryParams: {
             resource_type: resource.resourceType,
@@ -126,35 +151,17 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
           silent: true,
         }),
         refetchInterval: REFRESH_INTERVAL,
-        select: (data: PaginatedResponse<TokenSubQueueRead>) => ({
+        select: (data: PaginatedResponse<TokenQueueRead>) => ({
           ...resource,
-          type: "queues",
-          subQueues: data.results,
+          queues: data.results,
+          type: "queues" as const,
         }),
-      })),
-      ...resources.map((resource) => ({
-        queryKey: ["subQueues", facilityId],
-        queryFn: query(tokenSubQueueApi.list, {
-          pathParams: { facility_id: facilityId },
-          queryParams: {
-            resource_type: resource.resourceType,
-            resource_id: resource.resourceId,
-            status: TokenSubQueueStatus.ACTIVE,
-          },
-        }),
-        select: (data: PaginatedResponse<TokenSubQueueRead>) => ({
-          ...resource,
-          type: "subQueues",
-          subQueues: data.results,
-        }),
-      })),
-    ],
+      },
+    ]),
     combine: combineResourceSubQueues,
   });
 
-  const isLoading = resources.length > 0 && servicePoints.length === 0;
-
-  if (isLoading) {
+  if (servicePoints === null) {
     return <Loading />;
   }
 
