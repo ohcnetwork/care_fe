@@ -499,6 +499,39 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
         {% endif %}
     </div>
 
+    <!-- Service Requests -->
+    <div class="section">
+        <div class="section-title">SERVICE REQUESTS</div>
+        {% if encounter.service_requests %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Intent</th>
+                    <th>Requester</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- loop:encounter.service_requests -->
+                {% for service_request in encounter.service_requests %}
+                <tr>
+                    <td><strong>{{ service_request.title }}</strong></td>
+                    <td>{{ service_request.category }}</td>
+                    <td>{{ service_request.status }}</td>
+                    <td>{{ service_request.intent }}</td>
+                    <td>{% if service_request.requester %}{{ service_request.requester.full_name }}{% else %}-{% endif %}</td>
+                </tr>
+                {% endfor %}
+                <!-- endloop:encounter.service_requests -->
+            </tbody>
+        </table>
+        {% else %}
+        <p>No service requests recorded.</p>
+        {% endif %}
+    </div>
+
     <!-- Care Team -->
     <div class="section">
         <div class="section-title">CARE TEAM</div>

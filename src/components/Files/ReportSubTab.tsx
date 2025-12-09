@@ -258,14 +258,6 @@ export function ReportSubTab({
                         )}
                       </div>
                     </div>
-                    <div>
-                      <div className="text-gray-500">{t("uploaded_by")}</div>
-                      <div className="font-medium">
-                        {report.uploaded_by
-                          ? formatName(report.uploaded_by)
-                          : "-"}
-                      </div>
-                    </div>
                   </div>
 
                   <div className="pt-2 flex justify-end">
@@ -300,9 +292,6 @@ export function ReportSubTab({
             </TableHead>
             <TableHead className="w-[20%] rounded-y bg-white">
               {t("date")}
-            </TableHead>
-            <TableHead className="w-[20%] rounded-y bg-white">
-              {t("uploaded_by")}
             </TableHead>
             <TableHead className="w-[20%] text-right rounded-r bg-white"></TableHead>
           </TableRow>
@@ -364,16 +353,6 @@ export function ReportSubTab({
                           {dayjs(report.created_date).format("DD MMM YYYY")}
                         </span>
                       </TooltipComponent>
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        "rounded-y-md group-hover:bg-transparent",
-                        report.is_archived ? "bg-white/50" : "bg-white",
-                      )}
-                    >
-                      {report.uploaded_by
-                        ? formatName(report.uploaded_by)
-                        : "-"}
                     </TableCell>
                     <TableCell
                       className={cn(
