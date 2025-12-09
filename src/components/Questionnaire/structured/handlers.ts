@@ -71,12 +71,14 @@ export const structuredHandlers: {
           body: {
             datapoints: medications.map((medication) => ({
               ...medication,
-              create_prescription: medication.id
-                ? undefined
+              ...(medication.id
+                ? {}
                 : {
-                    status: PrescriptionStatus.active,
-                    alternate_identifier: prescriptionIdentifier,
-                  },
+                    create_prescription: {
+                      status: PrescriptionStatus.active,
+                      alternate_identifier: prescriptionIdentifier,
+                    },
+                  }),
               note: sanitizeNote(medication.note),
               encounter: encounterId,
               patient: patientId,
