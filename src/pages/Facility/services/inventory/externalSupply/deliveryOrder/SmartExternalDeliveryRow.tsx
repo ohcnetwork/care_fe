@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Check, ChevronDown, Component, Plus, Search } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { UseFormReturn, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -8,7 +8,6 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
@@ -29,11 +28,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import RadioInput from "@/components/ui/RadioInput";
 import { TableCell, TableRow } from "@/components/ui/table";
 
 import { cn } from "@/lib/utils";
 
+import { MonetaryComponentSelector } from "@/components/Billing/MonetaryComponentSelector";
 import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
 import {
   CURRENCY_SYMBOL,
@@ -46,11 +45,16 @@ import {
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { Code } from "@/types/base/code/code";
 import {
+  calculateItemTotal,
   MonetaryComponent,
   MonetaryComponentRead,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
+import {
+  getComponentsFromChargeItem,
+  MRP_CODE,
+} from "@/types/billing/chargeItem/chargeItem";
 import facilityApi from "@/types/facility/facilityApi";
 import { ProductRead } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
@@ -76,355 +80,23 @@ function getItemFieldPath<K extends keyof SupplyDeliveryItemValues>(
   return `items.${index}.${field}` as ItemFieldPath<K>;
 }
 
-// Helper to compare monetary components
-const monetaryComponentIsEqual = <T extends MonetaryComponent>(a: T, b: T) => {
-  return (
-    a.monetary_component_type === b.monetary_component_type &&
-    a.code?.code === b.code?.code &&
-    a.code?.system === b.code?.system
-  );
-};
-
-// Inline Tax/Discount Selector matching the ChargeItemDefinitionForm style
-function InlineMonetarySelector({
-  type,
-  components,
-  selectedComponents,
-  onSelectionChange,
-  disabled,
-}: {
-  type: MonetaryComponentType;
-  components: MonetaryComponentRead[];
-  selectedComponents: MonetaryComponent[];
-  onSelectionChange: (components: MonetaryComponent[]) => void;
-  disabled?: boolean;
-}) {
-  const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [tempSelected, setTempSelected] = useState<MonetaryComponent[]>([]);
-
-  // Initialize temp selections when dropdown opens
-  useEffect(() => {
-    if (isOpen) {
-      setTempSelected(selectedComponents);
-    }
-  }, [isOpen, selectedComponents]);
-
-  const getComponentValue = (component: MonetaryComponent) => {
-    return component.factor ?? component.amount ?? 0;
-  };
-
-  const isSameAmountOrFactor = (
-    component: MonetaryComponent,
-    otherComponent: MonetaryComponent,
-  ) => {
-    return (
-      (component.factor != null &&
-        component.factor === otherComponent.factor) ||
-      (component.amount != null && component.amount === otherComponent.amount)
-    );
-  };
-
-  const isComponentSelected = (
-    component: MonetaryComponentRead,
-    selected: MonetaryComponent[],
-  ) =>
-    selected.some(
-      (c) =>
-        monetaryComponentIsEqual(c, component) &&
-        isSameAmountOrFactor(c, component),
-    );
-
-  // Group components by code (CGST, SGST, IGST, etc.)
-  const groupedComponents = useMemo(() => {
-    return components.reduce<Record<string, MonetaryComponentRead[]>>(
-      (acc, component) => {
-        const key = component.code?.code;
-        if (key) {
-          (acc[key] ||= []).push(component);
-        }
-        return acc;
-      },
-      {},
-    );
-  }, [components]);
-
-  const { groupComponents, nonGroupComponents } = useMemo(() => {
-    const groups: Record<string, MonetaryComponentRead[]> = {};
-    const nonGroups: MonetaryComponentRead[] = [];
-
-    Object.entries(groupedComponents).forEach(([key, comps]) => {
-      if (comps.length > 1) {
-        groups[key] = comps;
-      } else {
-        nonGroups.push(comps[0]);
-      }
-    });
-
-    return { groupComponents: groups, nonGroupComponents: nonGroups };
-  }, [groupedComponents]);
-
-  const filteredGroupComponents = useMemo(() => {
-    return Object.entries(groupComponents).reduce<
-      Record<string, MonetaryComponentRead[]>
-    >((acc, [key, comps]) => {
-      const filtered = comps.filter(
-        (c) =>
-          c.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.code?.code?.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-      if (filtered.length > 0) {
-        acc[key] = filtered;
-      }
-      return acc;
-    }, {});
-  }, [groupComponents, searchQuery]);
-
-  const filteredNonGroupComponents = useMemo(() => {
-    return nonGroupComponents.filter(
-      (c) =>
-        c.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.code?.code?.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [nonGroupComponents, searchQuery]);
-
-  const handleRadioChange = (groupKey: string, selected: string) => {
-    if (!selected) {
-      setTempSelected((prev) => prev.filter((c) => c.code?.code !== groupKey));
-      return;
-    }
-
-    const group = groupComponents[groupKey];
-    if (!group) return;
-
-    const selectedComponent = group.find(
-      (c) => getComponentValue(c).toString() === selected,
-    );
-
-    if (!selectedComponent) return;
-
-    setTempSelected((prev) => {
-      const filtered = prev.filter((c) => c.code?.code !== groupKey);
-      return [
-        ...filtered,
-        {
-          ...selectedComponent,
-          monetary_component_type: type,
-          factor:
-            selectedComponent.factor != null
-              ? selectedComponent.factor
-              : undefined,
-          amount:
-            selectedComponent.factor != null
-              ? undefined
-              : String(selectedComponent.amount || 0),
-          conditions: [],
-        },
-      ];
-    });
-  };
-
-  const handleCheckboxToggle = (
-    component: MonetaryComponentRead,
-    checked: boolean,
-  ) => {
-    if (checked) {
-      setTempSelected((prev) => [
-        ...prev,
-        {
-          ...component,
-          monetary_component_type: type,
-          factor: component.factor != null ? component.factor : undefined,
-          amount:
-            component.factor != null
-              ? undefined
-              : String(component.amount || 0),
-          conditions: [],
-        },
-      ]);
-    } else {
-      setTempSelected((prev) =>
-        prev.filter((c) => !monetaryComponentIsEqual(c, component)),
-      );
-    }
-  };
-
-  const handleDone = () => {
-    onSelectionChange(tempSelected);
-    setIsOpen(false);
-    setSearchQuery("");
-  };
-
-  const handleCancel = () => {
-    setIsOpen(false);
-    setSearchQuery("");
-    setTempSelected([]);
-  };
-
-  return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={disabled}
-          className="w-full min-w-[100px] justify-between text-xs h-9"
-        >
-          {selectedComponents.length === 0 ? (
-            <span className="text-muted-foreground">
-              {type === MonetaryComponentType.tax
-                ? t("add_tax")
-                : t("add_discount")}
-            </span>
-          ) : (
-            <div className="flex items-center gap-1 overflow-hidden">
-              {selectedComponents.slice(0, 2).map((c, idx) => (
-                <Badge
-                  key={idx}
-                  variant="secondary"
-                  className="text-[10px] px-1 rounded-sm"
-                >
-                  {c.code?.display} @ {getComponentValue(c)}
-                  {c.factor != null ? "%" : "₹"}
-                </Badge>
-              ))}
-              {selectedComponents.length > 2 && (
-                <Badge variant="secondary" className="text-[10px] px-1">
-                  +{selectedComponents.length - 2}
-                </Badge>
-              )}
-            </div>
-          )}
-          <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-
-      <PopoverContent className="w-[320px] p-0" align="start">
-        {/* Search */}
-        <div className="p-3 border-b">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t(
-                type === MonetaryComponentType.tax
-                  ? "search_for_tax_code"
-                  : "search_for_discount_code",
-              )}
-              className="pl-10"
-            />
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="max-h-[30vh] overflow-y-auto p-2">
-          {/* Grouped Components with Radio Buttons */}
-          {Object.entries(filteredGroupComponents).map(([key, comps]) => {
-            const selectedInGroup = comps.find((c) =>
-              isComponentSelected(c, tempSelected),
-            );
-            const selectedValue = selectedInGroup
-              ? `${getComponentValue(selectedInGroup)}`
-              : "";
-
-            const radioOptions = comps.map((c) => ({
-              label: `${getComponentValue(c)} ${c.factor != null ? "%" : "₹"}`,
-              value: `${getComponentValue(c)}`,
-            }));
-
-            return (
-              <div key={key} className="flex flex-col gap-2 mb-3">
-                <div className="flex items-center gap-2 p-2">
-                  <Component
-                    className="size-4 text-black/80"
-                    strokeWidth={1.25}
-                  />
-                  <div className="text-sm font-semibold text-gray-900 uppercase">
-                    {key}
-                  </div>
-                </div>
-                <RadioInput
-                  value={selectedValue}
-                  onValueChange={(value: string) =>
-                    handleRadioChange(key, value)
-                  }
-                  options={radioOptions}
-                  className="flex flex-row gap-1 justify-end mr-2"
-                />
-              </div>
-            );
-          })}
-
-          {/* Non-grouped Components with Checkboxes */}
-          {filteredNonGroupComponents.map((component, idx) => {
-            const isSelected = isComponentSelected(component, tempSelected);
-            return (
-              <div
-                key={`${component.title}-${component.code?.code || idx}`}
-                className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded"
-              >
-                <input
-                  type="checkbox"
-                  checked={isSelected}
-                  onChange={(e) =>
-                    handleCheckboxToggle(component, e.target.checked)
-                  }
-                  className="h-4 w-4 rounded border-gray-300"
-                />
-                <div className="flex flex-row justify-between items-center flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900">
-                    {component.code?.display}
-                  </div>
-                  <div className="flex flex-row items-center gap-2">
-                    {getComponentValue(component)}
-                    <span className="text-gray-500">
-                      {component.factor != null ? "%" : "₹"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-
-          {Object.keys(filteredGroupComponents).length === 0 &&
-            filteredNonGroupComponents.length === 0 && (
-              <p className="text-sm text-center text-muted-foreground py-4">
-                {t(
-                  type === MonetaryComponentType.tax
-                    ? "no_taxes_configured"
-                    : "no_discounts_configured",
-                )}
-              </p>
-            )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-3 border-t flex gap-2">
-          <Button
-            type="button"
-            onClick={handleCancel}
-            variant="outline"
-            size="sm"
-            className="flex-1"
-          >
-            {t("cancel")}
-          </Button>
-          <Button
-            type="button"
-            onClick={handleDone}
-            size="sm"
-            className="flex-1 bg-green-600 hover:bg-green-700"
-          >
-            <Check className="size-4 mr-1" />
-            {t("done")}
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
+/**
+ * Reset all item-specific form fields when product knowledge changes
+ */
+function resetItemFormFields(
+  form: UseFormReturn<SupplyDeliveryFormValues>,
+  index: number,
+) {
+  form.setValue(getItemFieldPath(index, "supplied_item"), undefined);
+  form.setValue(getItemFieldPath(index, "batch_number"), "");
+  form.setValue(getItemFieldPath(index, "expiry_date"), "");
+  form.setValue(getItemFieldPath(index, "charge_item_definition"), undefined);
+  form.setValue(getItemFieldPath(index, "unit_price"), 0);
+  form.setValue(getItemFieldPath(index, "informational_components"), []);
+  form.setValue(getItemFieldPath(index, "tax_components"), []);
+  form.setValue(getItemFieldPath(index, "discount_components"), []);
+  form.setValue(getItemFieldPath(index, "charge_item_category"), undefined);
+  form.setValue(getItemFieldPath(index, "is_manually_edited"), false);
 }
 
 export function SmartExternalDeliveryRow({
@@ -512,7 +184,87 @@ export function SmartExternalDeliveryRow({
     enabled: !!productKnowledge?.slug,
   });
 
-  const products = productsResponse?.results || [];
+  const products = useMemo(
+    () => productsResponse?.results || [],
+    [productsResponse?.results],
+  );
+
+  const fillFormFromProduct = useCallback(
+    (product: ProductRead) => {
+      form.setValue(`items.${index}.supplied_item`, product);
+
+      if (product.batch?.lot_number) {
+        form.setValue(`items.${index}.batch_number`, product.batch.lot_number);
+      }
+      if (product.expiration_date) {
+        form.setValue(
+          `items.${index}.expiry_date`,
+          format(new Date(product.expiration_date), "yyyy-MM-dd"),
+        );
+      }
+
+      const chargeItemDef = product.charge_item_definition;
+      if (chargeItemDef) {
+        form.setValue(`items.${index}.charge_item_definition`, chargeItemDef);
+
+        // Set the charge item category so it persists when editing
+        if (chargeItemDef.category?.slug) {
+          form.setValue(
+            getItemFieldPath(index, "charge_item_category"),
+            chargeItemDef.category.slug,
+          );
+        }
+
+        // Extract pricing components using shared utility
+        const baseComponents = getComponentsFromChargeItem(
+          chargeItemDef,
+          MonetaryComponentType.base,
+        );
+        if (baseComponents[0]?.amount) {
+          form.setValue(
+            `items.${index}.unit_price`,
+            parseFloat(baseComponents[0].amount),
+          );
+        }
+
+        const informational = getComponentsFromChargeItem(
+          chargeItemDef,
+          MonetaryComponentType.informational,
+        );
+        if (informational.length) {
+          form.setValue(
+            getItemFieldPath(index, "informational_components"),
+            informational,
+          );
+        }
+
+        const taxes = getComponentsFromChargeItem(
+          chargeItemDef,
+          MonetaryComponentType.tax,
+        );
+        if (taxes.length) {
+          form.setValue(getItemFieldPath(index, "tax_components"), taxes);
+        }
+
+        const discounts = getComponentsFromChargeItem(
+          chargeItemDef,
+          MonetaryComponentType.discount,
+        );
+        if (discounts.length) {
+          form.setValue(
+            getItemFieldPath(index, "discount_components"),
+            discounts,
+          );
+        }
+      } else {
+        form.setValue(`items.${index}.unit_price`, 0);
+      }
+
+      form.setValue(`items.${index}.is_manually_edited`, false);
+      setIsCreatingNew(false);
+    },
+    [form, index],
+  );
 
   // Determine if category selection is needed for charge item definition
   // Show picker when: product knowledge selected AND (creating new item OR no existing products)
@@ -536,85 +288,7 @@ export function SmartExternalDeliveryRow({
       const lastProduct = products[0];
       fillFormFromProduct(lastProduct);
     }
-  }, [products, suppliedItem, index]);
-
-  const fillFormFromProduct = useCallback(
-    (product: ProductRead) => {
-      form.setValue(`items.${index}.supplied_item`, product);
-      if (product.batch?.lot_number) {
-        form.setValue(`items.${index}.batch_number`, product.batch.lot_number);
-      }
-      if (product.expiration_date) {
-        form.setValue(
-          `items.${index}.expiry_date`,
-          format(new Date(product.expiration_date), "yyyy-MM-dd"),
-        );
-      }
-      if (product.charge_item_definition) {
-        form.setValue(
-          `items.${index}.charge_item_definition`,
-          product.charge_item_definition,
-        );
-
-        // Set the charge item category so it persists when editing
-        if (product.charge_item_definition.category?.slug) {
-          form.setValue(
-            getItemFieldPath(index, "charge_item_category"),
-            product.charge_item_definition.category.slug,
-          );
-        }
-
-        // Extract pricing components
-        const basePrice = product.charge_item_definition.price_components?.find(
-          (c) => c.monetary_component_type === MonetaryComponentType.base,
-        );
-        if (basePrice?.amount) {
-          form.setValue(
-            `items.${index}.unit_price`,
-            parseFloat(basePrice.amount),
-          );
-        }
-
-        // Extract informational components (MRP, Purchase Price, etc.)
-        const informational =
-          product.charge_item_definition.price_components?.filter(
-            (c) =>
-              c.monetary_component_type === MonetaryComponentType.informational,
-          );
-        if (informational?.length) {
-          form.setValue(
-            getItemFieldPath(index, "informational_components"),
-            informational,
-          );
-        }
-
-        // Extract taxes
-        const taxes = product.charge_item_definition.price_components?.filter(
-          (c) => c.monetary_component_type === MonetaryComponentType.tax,
-        );
-        if (taxes?.length) {
-          form.setValue(getItemFieldPath(index, "tax_components"), taxes);
-        }
-
-        // Extract discounts
-        const discounts =
-          product.charge_item_definition.price_components?.filter(
-            (c) => c.monetary_component_type === MonetaryComponentType.discount,
-          );
-        if (discounts?.length) {
-          form.setValue(
-            getItemFieldPath(index, "discount_components"),
-            discounts,
-          );
-        }
-      } else {
-        form.setValue(`items.${index}.unit_price`, 0);
-      }
-      form.setValue(`items.${index}.is_manually_edited`, false);
-      setIsCreatingNew(false);
-    },
-    [form, index],
-  );
+  }, [products, suppliedItem, index, form, fillFormFromProduct]);
 
   const handleProductSelect = (product: ProductRead) => {
     fillFormFromProduct(product);
@@ -627,34 +301,14 @@ export function SmartExternalDeliveryRow({
     setIsCreatingNew(true);
   };
 
-  // Calculate computed total
+  // Calculate computed total using shared utility
   const computedTotal = useMemo(() => {
-    const basePrice = unitPrice || 0;
-    let total = basePrice * (quantity || 1);
-
-    // Apply taxes
-    if (taxComponents?.length) {
-      taxComponents.forEach((tax) => {
-        if (tax.factor) {
-          total += basePrice * (quantity || 1) * (tax.factor / 100);
-        } else if (tax.amount) {
-          total += parseFloat(tax.amount);
-        }
-      });
-    }
-
-    // Apply discounts
-    if (discountComponents?.length) {
-      discountComponents.forEach((discount) => {
-        if (discount.factor) {
-          total -= basePrice * (quantity || 1) * (discount.factor / 100);
-        } else if (discount.amount) {
-          total -= parseFloat(discount.amount);
-        }
-      });
-    }
-
-    return total;
+    return calculateItemTotal(
+      unitPrice || 0,
+      quantity || 1,
+      taxComponents,
+      discountComponents,
+    );
   }, [unitPrice, quantity, taxComponents, discountComponents]);
 
   // Available components from facility
@@ -679,9 +333,6 @@ export function SmartExternalDeliveryRow({
       })) as MonetaryComponentRead[],
     [facilityData],
   );
-
-  // MRP code constant
-  const MRP_CODE = "mrp";
 
   // Get MRP value from informational components
   const mrpValue = useMemo(() => {
@@ -727,40 +378,8 @@ export function SmartExternalDeliveryRow({
                   value={field.value}
                   onChange={(value) => {
                     field.onChange(value);
-                    // Clear the auto-open flag once user interacts
                     onProductSelectOpened?.();
-                    // Clear everything when PK changes
-                    form.setValue(
-                      getItemFieldPath(index, "supplied_item"),
-                      undefined,
-                    );
-                    form.setValue(getItemFieldPath(index, "batch_number"), "");
-                    form.setValue(getItemFieldPath(index, "expiry_date"), "");
-                    form.setValue(
-                      getItemFieldPath(index, "charge_item_definition"),
-                      undefined,
-                    );
-                    form.setValue(getItemFieldPath(index, "unit_price"), 0);
-                    form.setValue(
-                      getItemFieldPath(index, "informational_components"),
-                      [],
-                    );
-                    form.setValue(
-                      getItemFieldPath(index, "tax_components"),
-                      [],
-                    );
-                    form.setValue(
-                      getItemFieldPath(index, "discount_components"),
-                      [],
-                    );
-                    form.setValue(
-                      getItemFieldPath(index, "charge_item_category"),
-                      undefined,
-                    );
-                    form.setValue(
-                      getItemFieldPath(index, "is_manually_edited"),
-                      false,
-                    );
+                    resetItemFormFields(form, index);
                     setIsCreatingNew(false);
                   }}
                   placeholder={t("select_product")}
@@ -1061,7 +680,7 @@ export function SmartExternalDeliveryRow({
 
       {/* Taxes */}
       <TableCell className="align-top p-2">
-        <InlineMonetarySelector
+        <MonetaryComponentSelector
           type={MonetaryComponentType.tax}
           components={availableTaxes}
           selectedComponents={taxComponents || []}
@@ -1073,12 +692,13 @@ export function SmartExternalDeliveryRow({
             markAsEdited();
           }}
           disabled={!productKnowledge}
+          displayMode="inline"
         />
       </TableCell>
 
       {/* Discounts */}
       <TableCell className="align-top p-2">
-        <InlineMonetarySelector
+        <MonetaryComponentSelector
           type={MonetaryComponentType.discount}
           components={availableDiscounts}
           selectedComponents={discountComponents || []}
@@ -1090,6 +710,7 @@ export function SmartExternalDeliveryRow({
             markAsEdited();
           }}
           disabled={!productKnowledge}
+          displayMode="inline"
         />
       </TableCell>
 
