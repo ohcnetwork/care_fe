@@ -107,7 +107,17 @@ export function generateNestedQuerysetInsertion(
     const existingLoop = findLoop(template, loops[i].id);
     if (existingLoop.exists && existingLoop.insertPosition !== undefined) {
       existingLoopIndex = i;
-      insertPosition = existingLoop.insertPosition;
+      // Only update insertPosition if cursor is not already inside this loop
+      if (
+        !checkIfCursorIsInsideLoop(
+          loops[i].id,
+          template,
+          existingLoop,
+          cursorPosition,
+        )
+      ) {
+        insertPosition = existingLoop.insertPosition;
+      }
     } else {
       break;
     }
@@ -124,6 +134,38 @@ export function generateNestedQuerysetInsertion(
       : `\n${baseIndent}{{ ${fieldReference} }}`;
 
   return insertAtCursor(template, content, insertPosition);
+}
+
+function checkIfCursorIsInsideLoop(
+  loopId: string,
+  template: string,
+  loopInfo: { exists: boolean; insertPosition?: number },
+  cursorPosition: number,
+): boolean {
+  const startMarker = loopStartMarker(loopId);
+  const startMarkerIndex = template.indexOf(startMarker);
+  if (
+    startMarkerIndex === -1 ||
+    !loopInfo.exists ||
+    loopInfo.insertPosition === undefined
+  )
+    return false;
+
+  // Find the {% for %} tag after the start marker
+  const afterStartMarker = template.substring(startMarkerIndex);
+  const forTagPattern = /{%\s*for\s+[^%]+%}/;
+  const forTagMatch = afterStartMarker.match(forTagPattern);
+  if (!forTagMatch || forTagMatch.index === undefined) return false;
+
+  // Loop content starts after the {% for ... %} tag
+  const loopContentStart =
+    startMarkerIndex + forTagMatch.index + forTagMatch[0].length;
+
+  // loopInfo.insertPosition already points to the start of {% endfor %}
+  const loopContentEnd = loopInfo.insertPosition;
+
+  // Check if cursor is between the {% for %} and {% endfor %} tags
+  return cursorPosition >= loopContentStart && cursorPosition <= loopContentEnd;
 }
 
 /**
@@ -431,32 +473,24 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
         {% if encounter.questionnaire_responses %}
         <!-- loop:encounter.questionnaire_responses -->
         {% for questionnaire_response in encounter.questionnaire_responses %}
-        <h4>{{ questionnaire_response.title }}</h4>
-        {% if questionnaire_response.description %}
-        <p>{{ questionnaire_response.description }}</p>
-        {% endif %}
-        {% if questionnaire_response.responses %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Question</th>
-                    <th>Answer</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- loop:questionnaire_response.responses -->
-                {% for response in questionnaire_response.responses %}
-                <tr>
-                    <td>{{ response.question }}</td>
-                    <td>{{ response.answer }}</td>
-                </tr>
-                {% endfor %}
-                <!-- endloop:questionnaire_response.responses -->
-            </tbody>
-        </table>
-        {% else %}
-        <p>No responses recorded for this questionnaire.</p>
-        {% endif %}
+        <div style="margin-bottom: 20px;">
+            <h4>{{ questionnaire_response.title }}</h4>
+            {% if questionnaire_response.description %}
+            <p style="color: #666; font-style: italic;">{{ questionnaire_response.description }}</p>
+            {% endif %}
+            {% if questionnaire_response.responses %}
+            <!-- loop:questionnaire_response.responses -->
+            {% for response in questionnaire_response.responses %}
+            <div style="margin: 15px 0; padding: 10px; background-color: #f9f9f9; border-left: 3px solid #2c5aa0;">
+                <div style="font-weight: bold; margin-bottom: 5px;">Q: {{ response.question.get('text', response.question) }}</div>
+                <div style="margin-left: 15px;">A: {{ response.answer.get('values', [response.answer]) | map(attribute='value') | join(', ') }}</div>
+            </div>
+            {% endfor %}
+            <!-- endloop:questionnaire_response.responses -->
+            {% else %}
+            <p>No responses recorded for this questionnaire.</p>
+            {% endif %}
+        </div>
         <hr />
         {% endfor %}
         <!-- endloop:encounter.questionnaire_responses -->
