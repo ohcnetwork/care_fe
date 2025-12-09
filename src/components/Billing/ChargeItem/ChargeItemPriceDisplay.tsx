@@ -92,7 +92,7 @@ export default function ChargeItemPriceDisplay({
       <p className="font-medium text-sm mb-2">
         {t("component_wise_breakdown")}
       </p>
-      <div className="space-y-1 text-xs">
+      <div className="flex flex-col gap-1 text-xs">
         <div className="flex justify-between">
           <span>{t("base_amount")}</span>
           <MonetaryDisplay amount={String(baseAmount)} />
@@ -103,7 +103,9 @@ export default function ChargeItemPriceDisplay({
             key={`surcharge-${index}`}
             className="flex justify-between text-gray-500"
           >
-            <span>{component.code?.display || t("surcharge")}</span>
+            <span className="max-w-[10rem]">
+              {component.code?.display || t("surcharge")}
+            </span>
             {renderComponentValue(component, "+")}
           </div>
         ))}
@@ -113,7 +115,9 @@ export default function ChargeItemPriceDisplay({
             key={`discount-${index}`}
             className="flex justify-between text-gray-500"
           >
-            <span>{component.code?.display || t("discount")}</span>
+            <span className="max-w-[10rem]">
+              {component.code?.display || t("discount")}
+            </span>
             {renderComponentValue(component, "-")}
           </div>
         ))}
@@ -123,7 +127,9 @@ export default function ChargeItemPriceDisplay({
             key={`tax-${index}`}
             className="flex justify-between text-gray-500"
           >
-            <span>{component.code?.display || t("tax")}</span>
+            <span className="max-w-[10rem]">
+              {component.code?.display || t("tax")}
+            </span>
             {renderComponentValue(component, "+")}
           </div>
         ))}
