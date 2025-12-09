@@ -92,9 +92,6 @@ export default function ValueSetSearchContent({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState(0);
-  const [itemToRemove, setItemToRemove] = useState<CodeConceptMinimal | null>(
-    null,
-  );
   const [showBulkClearConfirm, setShowBulkClearConfirm] = useState(false);
 
   const searchQuery = useQuery({
@@ -132,10 +129,9 @@ export default function ValueSetSearchContent({
       queryClient.invalidateQueries({
         queryKey: ["valueset", system, "favourites"],
       });
-      setItemToRemove(null);
     },
     onError: () => {
-      setItemToRemove(null);
+      // no-op: we don't show individual confirmation anymore
     },
   });
 
@@ -267,7 +263,8 @@ export default function ValueSetSearchContent({
                         (favourite) => favourite.code === option.code,
                       );
                       if (isFavorited) {
-                        setItemToRemove(option);
+                        // remove favourite directly without showing confirmation
+                        removeFavouriteMutation.mutate(option);
                       } else {
                         addFavouriteMutation.mutate(option);
                       }
@@ -335,7 +332,8 @@ export default function ValueSetSearchContent({
                         (favourite) => favourite.code === option.code,
                       );
                       if (isFavorited) {
-                        setItemToRemove(option);
+                        // remove favourite directly without showing confirmation
+                        removeFavouriteMutation.mutate(option);
                       } else {
                         addFavouriteMutation.mutate(option);
                       }
@@ -353,32 +351,9 @@ export default function ValueSetSearchContent({
         </CommandList>
       )}
 
-      {/* Individual Item Removal Confirmation */}
-      <ConfirmActionDialog
-        open={!!itemToRemove && !showBulkClearConfirm}
-        onOpenChange={(open) => {
-          if (!open) {
-            setItemToRemove(null);
-          }
-        }}
-        title={t("are_you_sure")}
-        description={t("are_you_sure_want_to_clear_favourite", {
-          name: itemToRemove?.display,
-        })}
-        confirmText={t("confirm")}
-        cancelText={t("cancel")}
-        variant="destructive"
-        disabled={removeFavouriteMutation.isPending}
-        onConfirm={() => {
-          if (itemToRemove) {
-            removeFavouriteMutation.mutate(itemToRemove);
-          }
-        }}
-      />
-
       {/* Bulk Clear Confirmation */}
       <ConfirmActionDialog
-        open={showBulkClearConfirm && !itemToRemove}
+        open={showBulkClearConfirm}
         onOpenChange={(open) => {
           if (!open) {
             setShowBulkClearConfirm(false);
