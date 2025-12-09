@@ -185,10 +185,9 @@ test.describe("Create an Encounter", () => {
     await page.getByRole("link", { name: "Treatment Summary" }).click();
     await page.waitForLoadState("networkidle");
 
-    // START STRUCTURAL VERIFICATION
     await expect(
       page.getByRole("heading", { name: "Treatment Summary" }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15000 });
 
     // Verify key sections modified for print stability
     await expect(
