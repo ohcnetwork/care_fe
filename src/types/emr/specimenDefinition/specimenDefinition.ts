@@ -97,8 +97,10 @@ export interface SpecimenDefinition {
   slug_config: SlugConfig;
 }
 
-export interface SpecimenDefinitionCreate
-  extends Omit<SpecimenDefinition, "id" | "facility" | "slug_config" | "slug"> {
+export interface SpecimenDefinitionCreate extends Omit<
+  SpecimenDefinition,
+  "id" | "facility" | "slug_config" | "slug"
+> {
   slug_value: string;
   type_tested?: TypeTestedSpec;
 }
