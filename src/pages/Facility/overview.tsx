@@ -28,6 +28,7 @@ import {
   processCustomDashboardLinks,
 } from "@/Utils/dashboardLinks";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import { useCareApps } from "@/hooks/useCareApps";
 import facilityApi from "@/types/facility/facilityApi";
@@ -141,9 +142,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
                 i18nKey="greet_user"
                 values={{
                   time_of_day: getGreeting(),
-                  user: [user.prefix, user.first_name]
-                    .filter(Boolean)
-                    .join(" "),
+                  user: formatName(user),
                 }}
                 components={{
                   1: <span className="text-gray-700 font-semibold" />,
