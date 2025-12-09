@@ -7,7 +7,7 @@ import {
   Plus,
   Settings,
 } from "lucide-react";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -258,25 +258,19 @@ export default function QueuesIndex({
     }
   }, [qParams.date, updateQuery]);
 
-  // Handle date filter - memoized to prevent unnecessary re-renders
-  const handleDateChange = useCallback(
-    (date: Date | undefined) => {
-      if (date) {
-        updateQuery({ date: dateQueryString(date) });
-      } else {
-        updateQuery({ date: undefined });
-      }
-    },
-    [updateQuery],
-  );
+  // Handle date filter
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      updateQuery({ date: dateQueryString(date) });
+    } else {
+      updateQuery({ date: undefined });
+    }
+  };
 
-  // Handle resource selection - memoized to prevent unnecessary re-renders
-  const handleResourceChange = useCallback(
-    (users: UserReadMinimal[]) => {
-      updateQuery({ resource_id: users[0]?.id });
-    },
-    [updateQuery],
-  );
+  // Handle resource selection
+  const handleResourceChange = (users: UserReadMinimal[]) => {
+    updateQuery({ resource_id: users[0]?.id });
+  };
 
   // Fetch queues - optimize query key to only include necessary params
   const { data: queuesResponse, isLoading: queuesLoading } = useQuery({
