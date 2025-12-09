@@ -191,10 +191,7 @@ export const FacilityHome = ({ facilityId }: Props) => {
                         align="center"
                         sideOffset={4}
                       >
-                        <h2
-                          className="text-xs sm:text-sm md:text-base lg:text-base text-white/70 inline-block"
-                          data-cy="facility-type-card"
-                        >
+                        <h2 className="text-xs sm:text-sm md:text-base lg:text-base text-white/70 inline-block">
                           {facilityData?.facility_type}
                         </h2>
                       </TooltipComponent>
