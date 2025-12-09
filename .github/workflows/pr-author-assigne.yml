@@ -42,7 +42,7 @@ jobs:
               issue_number: .data.repository.pullRequest.closingIssuesReferences.nodes[0].number // null,
               pr_association: .data.repository.pullRequest.authorAssociation,
               pr_author: .data.repository.pullRequest.author.login,
-              state: .data.repository.pullRequest.state
+              state: .data.repository.pullRequest.state,
               issue_state: .data.repository.pullRequest.closingIssuesReferences.nodes[0].state // null
             }')
 
@@ -62,7 +62,7 @@ jobs:
           echo "PR Author: ${{ steps.prinfo.outputs.pr_author }}"
           echo "PR Association: ${{ steps.prinfo.outputs.pr_association }}"
           echo "PR State: ${{ steps.prinfo.outputs.state }}"
-          echo "Issue State": ${{ steps.prinfo.outputs.issue_state }}"
+          echo "Issue State: ${{ steps.prinfo.outputs.issue_state }}"
 
       - name: Close PR if no linked issue
         if: steps.prinfo.outputs.issue_number == 'null' || steps.prinfo.outputs.issue_state == 'CLOSED'
