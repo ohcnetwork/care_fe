@@ -1,3 +1,5 @@
+import { type UserConfig, defineConfig, loadEnv } from "vite";
+
 import federation from "@originjs/vite-plugin-federation";
 import reactScan from "@react-scan/vite-plugin-react-scan";
 import tailwindcss from "@tailwindcss/vite";
@@ -6,12 +8,11 @@ import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import { marked } from "marked";
 import path from "path";
-import { defineConfig, loadEnv, type UserConfig } from "vite";
 import checker from "vite-plugin-checker";
 import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
-
 import { careConsoleArt } from "./plugins/careConsoleArt";
+import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
 import validateEnv from "./scripts/validate-env";
 
@@ -51,6 +52,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
     },
     plugins: [
       careConsoleArt(),
+      fixSonnerPackageJson(),
       tailwindcss(),
       federation({
         name: "core",
@@ -62,6 +64,8 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "react-dom",
           "react-i18next",
           "@tanstack/react-query",
+          "raviger",
+          "sonner",
         ],
       }),
       viteStaticCopy({
@@ -167,15 +171,6 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           "**/playwright-report/**",
           "**/test-results/**",
         ],
-      },
-      headers: {
-        "Strict-Transport-Security":
-          "max-age=31536000; includeSubDomains; preload",
-        "X-XSS-Protection": "1; mode=block",
-        "X-Frame-Options": "SAMEORIGIN",
-        "X-Content-Type-Options": "nosniff",
-        "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Permissions-Policy": "geolocation=(self), microphone=(self)",
       },
     },
     preview: {

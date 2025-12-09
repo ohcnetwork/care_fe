@@ -153,10 +153,11 @@ export function DiagnosticReportReview({
     );
   }
 
-  // Don't show the report review if there are no observations and no files
+  // Don't show the report review if there are no observations and no files and no conclusion
   if (
     (!fullReport?.observations || fullReport.observations.length === 0) &&
-    (!files?.results || files.results.length === 0)
+    (!files?.results || files.results.length === 0) &&
+    !fullReport?.conclusion
   ) {
     return null;
   }
@@ -175,7 +176,7 @@ export function DiagnosticReportReview({
               <div className="flex items-center gap-2">
                 <CardTitle>
                   <p className="flex items-center gap-1.5">
-                    <FileCheck2 className="size-[24px] text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
+                    <FileCheck2 className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
                     <span className="text-base/9 text-gray-950 font-medium">
                       {t("result_review")}
                     </span>

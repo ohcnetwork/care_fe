@@ -26,6 +26,7 @@ import query from "@/Utils/request/query";
 import { cn } from "@/lib/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { formatPatientAge } from "@/Utils/utils";
+import { QRCodeSVG } from "qrcode.react";
 
 type PrintInvoiceProps = {
   facilityId: string;
@@ -112,24 +113,34 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
       <div className="max-w-5xl mx-auto">
         {/* Header with Facility Name and Logo */}
         <div className="flex justify-between items-start mb-4 pb-2 border-b border-gray-200">
+          <div className="flex items-start gap-4">
+            <div className="text-left">
+              <h1 className="text-3xl font-semibold">{facility.name}</h1>
+              {facility.address && (
+                <div className="text-gray-500 whitespace-pre-wrap break-words text-sm">
+                  {facility.address}
+                  {facility.phone_number && (
+                    <p className="text-gray-500 text-sm">
+                      {facility.phone_number}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+            <QRCodeSVG
+              value={JSON.stringify({
+                inv: invoiceId,
+              })}
+              size={50}
+              level="M"
+              marginSize={0}
+            />
+          </div>
           <img
             src={careConfig.mainLogo?.dark}
-            alt="Care Logo"
-            className="h-10 w-auto object-contain mb-2 sm:mb-0 order-2"
+            alt="Logo"
+            className="h-10 w-auto object-contain mb-2 sm:mb-0 text-end"
           />
-          <div className="text-left">
-            <h1 className="text-3xl font-semibold">{facility.name}</h1>
-            {facility.address && (
-              <div className="text-gray-500 whitespace-pre-wrap break-words text-sm">
-                {facility.address}
-                {facility.phone_number && (
-                  <p className="text-gray-500 text-sm">
-                    {facility.phone_number}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Invoice Information */}
