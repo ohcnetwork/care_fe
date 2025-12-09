@@ -136,7 +136,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
             aria-hidden="true"
           />
 
-          <div className="relative z-10 p-4 md:p-8 max-w-[250px] sm:max-w-full">
+          <div className="relative z-10 p-4 md:p-8 max-w-[250px] md:max-w-[280px] lg:max-w-lg">
             <h1 className="mb-2 font-bold text-gray-900 text-2xl wrap-break-word">
               <Trans
                 i18nKey="greet_user"
