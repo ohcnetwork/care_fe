@@ -320,10 +320,10 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
             </thead>
             <tbody>
                 <!-- loop:encounter.allergy_intolerances -->
-                {% for allergy_intolerance in encounter.allergy_intolerances %}
+                {% for allergy_intolerance in encounter.allergy_intolerances.filter(exclude_verification_status="entered_in_error") %}
                 <tr>
                     <td><strong>{{ allergy_intolerance.name }}</strong></td>
-                    <td><span style="color: #d9534f;">{{ allergy_intolerance.criticality }}</span></td>
+                    <td>{{ allergy_intolerance.criticality }}</td>
                     <td>{{ allergy_intolerance.clinical_status }}</td>
                     <td>{{ allergy_intolerance.last_occurrence }}</td>
                     <td>{{ allergy_intolerance.note }}</td>
@@ -353,7 +353,7 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
             </thead>
             <tbody>
                 <!-- loop:encounter.symptoms -->
-                {% for symptom in encounter.symptoms %}
+                {% for symptom in encounter.symptoms.filter(exclude_verification_status="entered_in_error") %}
                 <tr>
                     <td>{{ symptom.name }}</td>
                     <td>{{ symptom.clinical_status }}</td>
@@ -386,7 +386,7 @@ export const DEFAULT_TEMPLATE = `<!DOCTYPE html>
             </thead>
             <tbody>
                 <!-- loop:encounter.diagnoses -->
-                {% for diagnosis in encounter.diagnoses %}
+                {% for diagnosis in encounter.diagnoses.filter(exclude_verification_status="entered_in_error") %}
                 <tr>
                     <td><strong>{{ diagnosis.name }}</strong></td>
                     <td>{{ diagnosis.clinical_status }}</td>
