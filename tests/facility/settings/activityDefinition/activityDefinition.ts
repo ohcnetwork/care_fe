@@ -79,14 +79,19 @@ export const CHARGE_ITEM_DEFINITIONS = [
   "Fasting Blood Glucose Test",
 ];
 
-export const STATUS_OPTIONS = ["Active", "Draft", "Retired", "Unknown"];
+export const STATUS_OPTIONS = [
+  "Active",
+  "Draft",
+  "Retired",
+  "Unknown",
+] as const;
 
 export const CLASSIFICATION_OPTIONS = [
   "Laboratory",
   "Imaging",
   "Surgical Procedure",
   "Counselling",
-];
+] as const;
 
 interface ActivityDefinitionData {
   title: string;
@@ -143,14 +148,19 @@ export function generateActivityDefinitionData(
  * Helper function to create an Activity Definition via UI
  * @param page - Playwright page object
  * @param facilityId - Facility ID where the AD will be created
+ * @param allFields - Whether to create the AD with all fields
+ * @param overrides - Overrides for the AD data (status and classification)
  * @returns Object containing the created AD data
  */
 export async function createActivityDefinition(
   page: Page,
   facilityId: string,
   allFields: boolean = false,
+  overrides: Partial<
+    Pick<ActivityDefinitionData, "status" | "classification">
+  > = {},
 ): Promise<ActivityDefinitionData> {
-  const data = generateActivityDefinitionData(allFields);
+  const data = { ...generateActivityDefinitionData(allFields), ...overrides };
 
   await page.goto(
     `/facility/${facilityId}/settings/activity_definitions/categories/f-${facilityId}-${RESOURCE_CATEGORY_SLUG}/new`,

@@ -4,7 +4,7 @@ import {
   MetaArtifactCreateRequest,
   MetaArtifactResponse,
   MetaArtifactUpdateRequest,
-} from "@/types/metaAritifact/metaArtifact";
+} from "@/types/metaArtifact/metaArtifact";
 
 export default {
   /**
