@@ -48,42 +48,71 @@ jobs:
               return pattern.test(prBody);
             });
 
-            const prState = context.payload.pull_request.state;
-
-            if (checked.length > 0 && prState === 'open') {
+            if (checked.length > 0) {
               return;
             }
 
-            if (checked.length === 0 && prState === 'open') {
-              const commentBody = [
-                'This PR has been automatically closed because the merge checklist was not completed.',
-                '',
-                'To fix this:',
-                'Mark the checklist items in your PR body by changing `- [ ]` to `- [x]` (make sure to only check relevant items).',
-                '',
-                'Once updated, the PR will reopen automatically.'
-              ].join('\n');
+            const timelineQuery = `
+              query($owner: String!, $repo: String!, $prNumber: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $prNumber) {
+                    timelineItems(last: 1, itemTypes: [REOPENED_EVENT]) {
+                      edges {
+                        node {
+                          ... on ReopenedEvent {
+                            createdAt
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
 
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body: commentBody
-              });
+            const timelineResult = await github.graphql(timelineQuery, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              prNumber: context.payload.pull_request.number
+            });
 
-              await github.rest.pulls.update({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.payload.pull_request.number,
-                state: 'closed'
-              });
+            const lastReopenTime = timelineResult.repository.pullRequest.timelineItems.edges[0]?.node?.createdAt;
 
-              core.setFailed('Checklist incomplete. PR closed.');
-            } else if (checked.length > 0 && prState === 'closed') {
-              await github.rest.pulls.update({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.payload.pull_request.number,
-                state: 'open'
-              });
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number
+            });
+
+            const existingComment = comments.data.find(comment => {
+              if (comment.user.type !== 'Bot' || !comment.body.includes('⚠️ Merge Checklist Incomplete')) {
+                return false;
+              }
+              return !lastReopenTime || new Date(comment.created_at) > new Date(lastReopenTime);
+            });
+
+            if (existingComment) {
+              return;
             }
+
+            const commentBody = [
+              '## ⚠️ Merge Checklist Incomplete',
+              '',
+              'Thank you for your contribution! To help us review your PR efficiently, please complete the merge checklist in your PR description.',
+              '',
+              '**Your PR will be reviewed once you have marked the appropriate checklist items.**',
+              '',
+              'To update the checklist:',
+              '- Change `- [ ]` to `- [x]` for completed items',
+              '- Only check items that are relevant to your PR',
+              '- Leave items unchecked if they don\'t apply',
+              '',
+              'The checklist helps ensure code quality, testing coverage, and documentation are properly addressed.'
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: commentBody
+            });
