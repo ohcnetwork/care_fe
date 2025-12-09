@@ -118,6 +118,7 @@ test.describe("Symptom Questionnaire", () => {
   });
 
   test("verify duplicate symptom cannot be added", async ({ page }) => {
+    await page.waitForLoadState("networkidle");
     await page
       .getByRole("combobox")
       .filter({ hasText: /Add (another )?Symptom/i })

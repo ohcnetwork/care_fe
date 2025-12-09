@@ -133,6 +133,7 @@ test.describe("Diagnosis", () => {
   });
 
   test("verify duplicate diagnosis cannot be added", async ({ page }) => {
+    await page.waitForLoadState("networkidle");
     await page
       .getByRole("combobox")
       .filter({ hasText: /Add (another )?Diagnosis/i })
@@ -167,7 +168,7 @@ test.describe("Diagnosis", () => {
       page
         .getByRole("region", { name: "Notifications alt+T" })
         .getByRole("listitem")
-        .filter({ hasText: "Diagnosis already exists" }),
+        .filter({ hasText: "Diagnosis already exists!" }),
     ).toBeVisible();
   });
 
@@ -192,6 +193,7 @@ test.describe("Diagnosis", () => {
     await expect(diagnosisRow.getByText("Verification")).toBeVisible();
     await expect(diagnosisRow.getByText("Onset")).toBeVisible();
 
+    await diagnosisRow.scrollIntoViewIfNeeded();
     await expect(diagnosisRow.getByText(diagnosisName)).toBeVisible();
   });
 });
