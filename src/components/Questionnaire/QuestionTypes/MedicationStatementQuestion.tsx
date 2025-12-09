@@ -1,3 +1,4 @@
+import { Avatar } from "@/components/Common/Avatar";
 import { MinusCircledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -38,11 +39,9 @@ import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
-import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import {
-  MEDICATION_REQUEST_TIMING_OPTIONS,
   MedicationRequestCreate,
   MedicationRequestRead,
   displayMedicationName,
@@ -68,6 +67,7 @@ import {
   validateFields,
 } from "@/types/questionnaire/validation";
 
+import { PaginatedResponse } from "@/Utils/request/types";
 import { FieldError } from "./FieldError";
 
 interface MedicationStatementQuestionProps {
@@ -326,7 +326,7 @@ export function MedicationStatementQuestion({
             type: t("past_prescriptions"),
             displayFields: [
               {
-                key: "requested_product,code",
+                key: "",
                 label: t("medicine"),
                 render: (med) => displayMedicationName(med),
               },
@@ -335,29 +335,40 @@ export function MedicationStatementQuestion({
                 label: t("dosage"),
                 render: (instructions) => {
                   const dosage = formatDosage(instructions[0]) || "";
-
                   const frequency =
-                    getFrequencyDisplay(instructions[0]?.timing)?.meaning || "";
-
-                  const duration = instructions?.[0]?.timing?.repeat
-                    ?.bounds_duration
-                    ? `${instructions[0].timing.repeat.bounds_duration.value} ${instructions[0].timing.repeat.bounds_duration.unit}`
-                    : "";
-
-                  return `${dosage}\n${frequency}\n${duration}`;
+                    getFrequencyDisplay(instructions[0]?.timing)?.meaning ||
+                    "-";
+                  return `${dosage}\n${frequency}`;
                 },
               },
               {
                 key: "dosage_instruction",
-                label: t("frequency"),
+                label: t("duration"),
                 render: (instructions) => {
-                  const timing = instructions?.[0]?.timing;
-                  const option = reverseFrequencyOption(timing);
-                  return option
-                    ? MEDICATION_REQUEST_TIMING_OPTIONS[option].display
-                    : "";
+                  const duration =
+                    instructions?.[0]?.timing?.repeat?.bounds_duration;
+                  if (!duration?.value) return "-";
+                  return `${duration.value} ${duration.unit}`;
                 },
               },
+              {
+                key: "created_by",
+                label: t("prescribed_by"),
+                render: (created_by) => (
+                  <div className="flex items-center gap-2">
+                    <Avatar
+                      imageUrl={created_by?.profile_picture_url}
+                      name={formatName(created_by, true)}
+                      className="size-6 rounded-full"
+                    />
+                    <span className="text-sm truncate">
+                      {formatName(created_by)}
+                    </span>
+                  </div>
+                ),
+              },
+            ],
+            expandableFields: [
               {
                 key: "dosage_instruction",
                 label: t("instructions"),
@@ -367,12 +378,7 @@ export function MedicationStatementQuestion({
               {
                 key: "note",
                 label: t("notes"),
-                render: (note) => note || "-",
-              },
-              {
-                key: "created_by",
-                label: t("prescribed_by"),
-                render: (created_by) => formatName(created_by),
+                render: (note) => note,
               },
             ],
             queryKey: ["medication_requests", patientId],
@@ -399,23 +405,36 @@ export function MedicationStatementQuestion({
               },
               {
                 key: "dosage_text",
-                label: t("dosage"),
+                label: t("dosage_instruction"),
                 render: (dosage) => dosage,
               },
               {
                 key: "status",
                 label: t("status"),
-                render: (status) => t(status),
-              },
-              {
-                key: "note",
-                label: t("notes"),
-                render: (note) => note || "-",
+                render: (status: string) => t(`medication_status__${status}`),
               },
               {
                 key: "created_by",
                 label: t("prescribed_by"),
-                render: (created_by) => formatName(created_by),
+                render: (created_by) => (
+                  <div className="flex items-center gap-2">
+                    <Avatar
+                      imageUrl={created_by?.profile_picture_url}
+                      name={formatName(created_by, true)}
+                      className="size-6 rounded-full"
+                    />
+                    <span className="text-sm truncate">
+                      {formatName(created_by)}
+                    </span>
+                  </div>
+                ),
+              },
+            ],
+            expandableFields: [
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note) => note,
               },
             ],
             queryKey: ["medication_statements", patientId],
@@ -933,14 +952,4 @@ const MedicationStatementGridRow: React.FC<MedicationStatementGridRowProps> = ({
       )}
     </div>
   );
-};
-
-// Helper function to find the frequency option from timing
-const reverseFrequencyOption = (
-  timing?: MedicationRequestCreate["dosage_instruction"][0]["timing"],
-) => {
-  if (!timing?.code?.code) return undefined;
-  return Object.entries(MEDICATION_REQUEST_TIMING_OPTIONS).find(
-    ([_, option]) => option.timing.code?.code === timing.code?.code,
-  )?.[0];
 };
