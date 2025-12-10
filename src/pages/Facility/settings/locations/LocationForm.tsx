@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
+
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import {
@@ -263,7 +265,11 @@ export default function LocationForm({
   ];
 
   if (locationId && isLoading) {
-    return <div className="p-4">{t("loading")}</div>;
+    return (
+      <div className="p-4">
+        <FormSkeleton rows={6} />
+      </div>
+    );
   }
 
   const showBedOptions = form.watch("form") === "bd" && !isEditMode;
