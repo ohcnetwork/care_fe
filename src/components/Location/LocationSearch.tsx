@@ -63,7 +63,7 @@ export function LocationSearch({
     enabled: facilityId !== "preview",
   });
   const commandContent = (
-    <Command className="pt-1">
+    <Command className="pt-1" shouldFilter={false}>
       <CommandInput
         placeholder="Search locations..."
         value={search}
@@ -76,7 +76,7 @@ export function LocationSearch({
         {locations?.results.map((location) => (
           <CommandItem
             key={location.id}
-            value={location.name}
+            value={location.id}
             onSelect={() => {
               onSelect(location);
               setOpen(false);
