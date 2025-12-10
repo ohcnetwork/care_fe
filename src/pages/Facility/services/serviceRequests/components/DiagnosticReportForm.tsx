@@ -524,13 +524,21 @@ export function DiagnosticReportForm({
         );
 
       // If there's a conclusion, we must have results first
-      if (conclusion.trim() && !hasObservationValue) {
+      if (
+        conclusion.trim() &&
+        !hasObservationValue &&
+        observationDefinitions.length > 0
+      ) {
         toast.error(t("cannot_add_conclusion_without_results"));
         return;
       }
 
-      // Results are mandatory, unless an observation is being deleted
-      if (!hasObservationValue && !hasDeletions) {
+      // Results are mandatory if observation definitions exist, unless an observation is being deleted
+      if (
+        !hasObservationValue &&
+        !hasDeletions &&
+        observationDefinitions.length > 0
+      ) {
         toast.error(t("please_fill_all_results"));
         return;
       }
@@ -839,7 +847,7 @@ export function DiagnosticReportForm({
               <div className="flex items-center gap-2">
                 <CardTitle>
                   <p className="flex items-center gap-1.5">
-                    <NotepadText className="size-[24px] text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
+                    <NotepadText className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
                     <span className="text-base/9 text-gray-950 font-medium">
                       {t("test_results_entry")}
                     </span>
@@ -1209,7 +1217,7 @@ export function DiagnosticReportForm({
                       : t("no_test_results_recorded")}
                   </p>
                 </div>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-center">
                   {activityDefinition?.diagnostic_report_codes &&
                     activityDefinition.diagnostic_report_codes.length > 0 && (
                       <div className="flex-1 min-w-0">
