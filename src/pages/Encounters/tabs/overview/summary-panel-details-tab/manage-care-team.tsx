@@ -10,6 +10,8 @@ import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
+import { formatName } from "@/Utils/utils";
+
 import { EmptyState } from "./empty-state";
 
 export const ManageCareTeam = () => {
@@ -50,14 +52,14 @@ export const ManageCareTeam = () => {
               >
                 <Avatar
                   key={member.member.id}
-                  name={member.member.first_name}
+                  name={formatName(member.member, true)}
                   imageUrl={member.member.profile_picture_url}
                   className="size-9 rounded-full border border-white shadow-sm"
                 />{" "}
                 <div className="flex items-center justify-between w-full">
                   <div className="flex flex-col">
                     <span className="font-medium text-black text-sm">
-                      {member.member.first_name}
+                      {formatName(member.member)}
                     </span>
                     <span className="text-xs text-gray-500">
                       {member.role.display}
