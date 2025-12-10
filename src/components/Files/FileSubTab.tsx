@@ -613,8 +613,8 @@ export const FilesPage = ({
       <FilterBadges
         isArchived={qParams.is_archived}
         onClearFilter={() => updateQuery({ is_archived: undefined })}
-        activeLabel="active_files"
-        archivedLabel="archived_files"
+        activeLabel={t("active_files")}
+        archivedLabel={t("archived_files")}
       />
       <RenderTable />
       <RenderCard />

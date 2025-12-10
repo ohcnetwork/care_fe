@@ -381,8 +381,8 @@ export function ReportSubTab({ encounter, associatingId }: ReportTabProps) {
         onClearFilter={() =>
           updateQuery({ is_archived: undefined, include_archived: false })
         }
-        activeLabel="active_reports"
-        archivedLabel="archived_reports"
+        activeLabel={t("active_reports")}
+        archivedLabel={t("archived_reports")}
       />
 
       {/* Report List */}
