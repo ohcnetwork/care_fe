@@ -35,6 +35,7 @@ import useReportManager from "@/hooks/useReportManager";
 import queryClient from "@/Utils/request/queryClient";
 import { formatName } from "@/Utils/utils";
 import TemplateReportSheet from "@/pages/Encounters/TemplateBuilder/TemplateReportSheet";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { ReportRead, ReportReadList } from "@/types/emr/report/report";
@@ -44,15 +45,11 @@ interface ReportTabProps {
   encounter?: EncounterRead;
   patient?: PatientRead;
   associatingId: string;
-  permissions?: string[];
 }
 
-export function ReportSubTab({
-  encounter,
-  associatingId,
-  permissions = [],
-}: ReportTabProps) {
+export function ReportSubTab({ encounter, associatingId }: ReportTabProps) {
   const { t } = useTranslation();
+  const { facility } = useCurrentFacility();
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 15,
     disableCache: true,
@@ -417,7 +414,7 @@ export function ReportSubTab({
           <TemplateReportSheet
             facilityId={encounter.facility?.id || ""}
             associatingId={associatingId}
-            permissions={permissions}
+            permissions={facility?.permissions ?? []}
             trigger={
               <Button variant="outline_primary">
                 <CareIcon icon="l-plus" className="mr-1" />

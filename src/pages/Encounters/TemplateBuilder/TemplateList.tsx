@@ -22,6 +22,9 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import templateApi from "@/types/emr/template/templateApi";
 
+import { getPermissions } from "@/common/Permissions";
+import { usePermissions } from "@/context/PermissionContext";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { TemplateTypes } from "@/types/emr/template/template";
 import TemplateCard from "./TemplateCard";
 
@@ -31,6 +34,13 @@ interface TemplateListProps {
 
 export default function TemplateList({ facilityId }: TemplateListProps) {
   const { t } = useTranslation();
+  const { facility } = useCurrentFacility();
+  const { hasPermission } = usePermissions();
+
+  const { canListTemplate, canWriteTemplate } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
   const { qParams, updateQuery, Pagination } = useFilters({
     limit: 12,
   });
@@ -47,18 +57,21 @@ export default function TemplateList({ facilityId }: TemplateListProps) {
         offset: ((qParams.page || 1) - 1) * qParams.limit,
       },
     }),
+    enabled: canListTemplate,
   });
 
   return (
     <Page
       title={t("templates")}
       options={
-        <Button variant="primary" asChild>
-          <Link href={`/facility/${facilityId}/template/builder`}>
-            <CareIcon icon="l-plus" className="mr-1" />
-            <span>{t("create_template")}</span>
-          </Link>
-        </Button>
+        canWriteTemplate && (
+          <Button variant="primary" asChild>
+            <Link href={`/facility/${facilityId}/template/builder`}>
+              <CareIcon icon="l-plus" className="mr-1" />
+              <span>{t("create_template")}</span>
+            </Link>
+          </Button>
+        )
       }
     >
       <div className="space-y-4">
@@ -160,19 +173,21 @@ export default function TemplateList({ facilityId }: TemplateListProps) {
                   template={template}
                   buttons={
                     <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        asChild
-                      >
-                        <Link
-                          href={`/facility/${facilityId}/template/builder/${template.slug}`}
+                      {canWriteTemplate && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          asChild
                         >
-                          <CareIcon icon="l-pen" className="mr-1" />
-                          <span>{t("edit")}</span>
-                        </Link>
-                      </Button>
+                          <Link
+                            href={`/facility/${facilityId}/template/builder/${template.slug}`}
+                          >
+                            <CareIcon icon="l-pen" className="mr-1" />
+                            <span>{t("edit")}</span>
+                          </Link>
+                        </Button>
+                      )}
                     </>
                   }
                 />

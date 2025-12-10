@@ -48,7 +48,8 @@ export default function TemplateReportSheet({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { hasPermission } = usePermissions();
-  const { canListTemplate } = getPermissions(hasPermission, permissions);
+  const { canListTemplate, canWriteTemplate, canGenerateReportFromTemplate } =
+    getPermissions(hasPermission, permissions);
 
   const { data: templatesData, isLoading: isTemplatesLoading } = useQuery({
     queryKey: ["templates", facilityId],
@@ -90,16 +91,18 @@ export default function TemplateReportSheet({
         <SheetHeader>
           <SheetTitle className="flex flex-col sm:flex-row justify-between mt-4">
             <span>{t("available_templates")}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full sm:w-auto"
-              onClick={() =>
-                navigate(`/facility/${facilityId}/template/builder/`)
-              }
-            >
-              {t("create_template")}
-            </Button>
+            {canWriteTemplate && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+                onClick={() =>
+                  navigate(`/facility/${facilityId}/template/builder/`)
+                }
+              >
+                {t("create_template")}
+              </Button>
+            )}
           </SheetTitle>
         </SheetHeader>
         <div className="space-y-4 mt-3">
@@ -134,32 +137,36 @@ export default function TemplateReportSheet({
                     template={template}
                     buttons={
                       <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={() =>
-                            navigate(
-                              `/facility/${facilityId}/template/builder/${template.slug}`,
-                            )
-                          }
-                          disabled={isGenerating}
-                        >
-                          {t("edit")}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={() => handleGenerateReport(template)}
-                          disabled={
-                            isGenerating || template.status !== "active"
-                          }
-                        >
-                          {isGenerating
-                            ? t("generating")
-                            : t("generate_report")}
-                        </Button>
+                        {canWriteTemplate && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            onClick={() =>
+                              navigate(
+                                `/facility/${facilityId}/template/builder/${template.slug}`,
+                              )
+                            }
+                            disabled={isGenerating}
+                          >
+                            {t("edit")}
+                          </Button>
+                        )}
+                        {canGenerateReportFromTemplate && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => handleGenerateReport(template)}
+                            disabled={
+                              isGenerating || template.status !== "active"
+                            }
+                          >
+                            {isGenerating
+                              ? t("generating")
+                              : t("generate_report")}
+                          </Button>
+                        )}
                       </>
                     }
                   />
