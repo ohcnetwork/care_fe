@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { clickTabOrMenuItem } from "tests/helper/ui";
-import { getEncounterMetadata } from "tests/support/encounterId";
+import { getEncounterId } from "tests/support/encounterId";
+import { getFacilityId } from "tests/support/facilityId";
+import { getPatientId } from "tests/support/patientId";
 import { createServiceRequest } from "./serviceRequest";
 
 test.use({ storageState: "tests/.auth/user.json" });
@@ -10,10 +12,9 @@ let patientId: string;
 let encounterId: string;
 
 test.beforeAll(async () => {
-  const metadata = getEncounterMetadata();
-  facilityId = metadata.facilityId;
-  patientId = metadata.patientId;
-  encounterId = metadata.encounterId;
+  encounterId = getEncounterId();
+  facilityId = getFacilityId();
+  patientId = getPatientId();
 });
 
 test.describe("Patient Service Request Tab", () => {
