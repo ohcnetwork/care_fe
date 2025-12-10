@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import query from "@/Utils/request/query";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import { LocationList, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -44,6 +45,7 @@ function BaseLocationTreeNode({
 }: BaseLocationTreeNodeProps) {
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = selectedLocations.some((loc) => loc.id === location.id);
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   // Fetch children when expanded
   const { data: children, isLoading } = useQuery({
@@ -82,9 +84,10 @@ function BaseLocationTreeNode({
     <div className="space-y-1">
       <div
         className={cn(
-          "group flex items-center py-1 px-2 rounded-md hover:bg-gray-50 transition-colors my-1",
+          "group flex items-center py-1 rounded-md hover:bg-gray-50 transition-colors my-1",
           isSelected && "bg-primary-100/50 border border-primary-200",
           shouldShowExpand && "cursor-pointer hover:bg-gray-100",
+          isMobile ? "mr-3" : "mr-5",
           className,
         )}
         style={{ paddingLeft: getPaddingLeft(level) }}
@@ -273,7 +276,6 @@ function SearchResultTreeNode({
       addLocationsToMap={addLocationsToMap}
       renderLocationInfo={renderLocationInfo}
       getPaddingLeft={getPaddingLeft}
-      className="px-3"
     />
   );
 }
@@ -474,7 +476,7 @@ export default function LocationMultiSelect({
 
       if (searchResults.length > 0) {
         return (
-          <div className="space-y-1">
+          <div className="overflow-y-auto max-h-[55dvh] md:max-h-[50dvh] lg:max-h-[40dvh]">
             {searchResults.map((result) => (
               <SearchResultTreeNode
                 key={result.location.id}

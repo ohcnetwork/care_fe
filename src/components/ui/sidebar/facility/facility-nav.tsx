@@ -108,7 +108,7 @@ function generateFacilityLinks(
       children: [
         {
           name: t("accounts"),
-          url: `${baseUrl}/billing/accounts`,
+          url: `${baseUrl}/billing/account`,
         },
         {
           name: t("invoices"),
