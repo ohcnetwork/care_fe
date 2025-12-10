@@ -349,7 +349,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
           </span>
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-3xl p-0 overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-3xl lg:max-w-[50vw] p-0 overflow-y-auto">
         <div className="flex flex-col gap-2 p-2">
           <SheetHeader className="px-2 py-0">
             <SheetTitle className="text-lg font-medium">
@@ -414,7 +414,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                         <Skeleton className="h-8 w-full" />
                       </div>
                     ) : records.length ? (
-                      <Table className="w-full lg:max-w-3xl min-w-fit border-separate border-spacing-y-2">
+                      <Table className="w-full min-w-fit border-separate border-spacing-y-2">
                         <TableHeader>
                           <TableRow className="border-0">
                             <TableHead className="border-0 bg-transparent p-2 w-12">
@@ -434,7 +434,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                               <TableHead
                                 key={String(field.label)}
                                 className={
-                                  "border border-gray-200 bg-gray-50 nth-2:rounded-l-md nth-last-1:rounded-r-md min-w-[150px]"
+                                  "border border-gray-200 bg-gray-50 nth-2:rounded-l-md nth-last-1:rounded-r-md"
                                 }
                               >
                                 {field.label}
@@ -444,7 +444,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
                               activeTypeConfig.expandableFields.length > 0 && (
                                 <TableHead
                                   className={
-                                    "border border-gray-200 bg-gray-50 nth-last-1:rounded-r-md w-12"
+                                    "border border-gray-200 bg-gray-50 nth-last-1:rounded-r-md"
                                   }
                                 ></TableHead>
                               )}

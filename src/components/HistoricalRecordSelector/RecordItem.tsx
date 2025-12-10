@@ -75,7 +75,7 @@ export function RecordItem<T>({
             <TableCell
               key={field.key.toString()}
               className={cn(
-                "p-2 text-sm whitespace-pre-wrap border border-gray-200 min-w-[150px]",
+                "p-2 text-sm whitespace-pre-wrap border border-gray-200",
                 "nth-2:rounded-l-md",
                 "nth-last-1:rounded-r-md",
                 isHighlightedUser
@@ -90,7 +90,7 @@ export function RecordItem<T>({
 
         <TableCell
           className={
-            "p-2 w-12 text-sm border border-gray-200 bg-white even:bg-gray-100 nth-last-1:rounded-r-md"
+            "p-2 text-sm border border-gray-200 bg-white even:bg-gray-100 nth-last-1:rounded-r-md"
           }
         >
           {hasAdditionalInfo && (
