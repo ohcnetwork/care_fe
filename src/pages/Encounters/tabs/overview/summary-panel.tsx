@@ -49,7 +49,7 @@ export const SummaryPanel = () => {
         </TabsContent>
 
         <TabsContent value="reports">
-          <SummaryPanelReportsTab />
+          <SummaryPanelReportsTab activeTab={activeTab} />
         </TabsContent>
       </Tabs>
     </div>

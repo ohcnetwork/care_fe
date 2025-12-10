@@ -6,6 +6,8 @@ import ResourceCreate from "@/components/Resource/ResourceForm";
 import BedAvailabilityDashboard from "@/pages/Facility/BedAvailabilityDashboard";
 
 import { AppRoutes } from "@/Routers/AppRouter";
+import TemplateBuilder from "@/pages/Encounters/TemplateBuilder/TemplateBuilder";
+import TemplatePage from "@/pages/Encounters/TemplateBuilder/TemplatePage";
 import AccountList from "@/pages/Facility/billing/account/AccountList";
 import AccountShow from "@/pages/Facility/billing/account/AccountShow";
 import CreateInvoicePage from "@/pages/Facility/billing/account/CreateInvoice";
@@ -167,6 +169,15 @@ const FacilityRoutes: AppRoutes = {
       facilityId={facilityId}
       paymentReconciliationId={paymentReconciliationId}
     />
+  ),
+  "/facility/:facilityId/template": ({ facilityId }) => (
+    <TemplatePage facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/template/builder": ({ facilityId }) => (
+    <TemplateBuilder facilityId={facilityId} />
+  ),
+  "/facility/:facilityId/template/builder/:slug": ({ facilityId, slug }) => (
+    <TemplateBuilder facilityId={facilityId} slug={slug} />
   ),
 };
 

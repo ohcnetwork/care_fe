@@ -29,6 +29,7 @@ function generateFacilityLinks(
     canCreateEncounter: boolean;
     canViewEncounter: boolean;
     canListTokenCategories: boolean;
+    canListTemplate: boolean;
   },
   pluginLinks: NavigationLink[],
 ) {
@@ -186,10 +187,11 @@ function generateFacilityLinks(
           name: t("tag_config"),
           url: `${baseUrl}/settings/tag_config`,
         },
-        // {
-        //   name: t("report_builder"),
-        //   url: `${baseUrl}/settings/report_builder/`,
-        // },
+        {
+          name: t("templates"),
+          url: `${baseUrl}/template`,
+          visibility: permissions.canListTemplate,
+        },
       ],
     },
   ];
@@ -220,6 +222,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canCreateEncounter,
     canViewEncounter,
     canListTokenCategories,
+    canListTemplate,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
   const permissions = {
     canViewAppointments,
@@ -228,6 +231,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canCreateEncounter,
     canViewEncounter,
     canListTokenCategories,
+    canListTemplate,
   };
   return (
     <NavMain
