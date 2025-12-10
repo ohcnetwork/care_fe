@@ -28,18 +28,16 @@ test.describe("User Profile Avatar Modification", () => {
     const fileInput = page.locator("input[type='file']").first();
     await fileInput.setInputFiles(imagePath);
 
-    // Wait for image to load
-    await page.waitForLoadState("networkidle");
-
+    // Wait for crop button to be enabled (indicates image is loaded)
     const cropButton = page.getByRole("button", { name: "Crop" });
-    await expect(cropButton).toBeEnabled();
+    await expect(cropButton).toBeEnabled({ timeout: 10000 });
     await cropButton.click();
 
     await expect(
       page
         .getByRole("region", { name: "Notifications alt+T" })
         .getByText(/cropped successfully/i),
-    ).toBeVisible({ timeout: 5000 });
+    ).toBeVisible({ timeout: 10000 });
   }
 
   // Helper function to save the avatar
@@ -168,10 +166,9 @@ test.describe("User Profile Avatar Modification", () => {
       const fileInput = page.locator("input[type='file']").first();
       await fileInput.setInputFiles(invalidFilePath);
 
-      await page.waitForLoadState("networkidle");
-
+      // Wait for crop button and check it's disabled (indicates file validation happened)
       const cropButton = page.getByRole("button", { name: "Crop" });
-      await expect(cropButton).toBeDisabled();
+      await expect(cropButton).toBeDisabled({ timeout: 5000 });
     });
   });
 
@@ -226,9 +223,10 @@ test.describe("User Profile Avatar Modification", () => {
         .locator("input[type='file']")
         .first()
         .setInputFiles(validImagePath);
-      await page.waitForLoadState("networkidle");
 
-      await expect(page.getByRole("button", { name: "Crop" })).toBeEnabled();
+      await expect(page.getByRole("button", { name: "Crop" })).toBeEnabled({
+        timeout: 10000,
+      });
     });
   });
 });

@@ -39,6 +39,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import {
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
+  inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
@@ -102,6 +103,13 @@ export const EncounterShow = (props: Props) => {
   );
 
   const canAccess = canViewClinicalData || canViewEncounter;
+  const hasToken = primaryEncounter?.appointment?.token;
+  const isEncounterActive =
+    primaryEncounter?.appointment?.id &&
+    !inactiveEncounterStatus.includes(primaryEncounter?.status ?? "");
+
+  // Header is shown either when token is present or encounter is active and has an appointment
+  const canViewAppointmentEncounterHeader = hasToken || isEncounterActive;
 
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
@@ -199,24 +207,21 @@ export const EncounterShow = (props: Props) => {
       hideTitleOnPage
       style={
         {
-          "--encounter-header-offset":
-            primaryEncounter?.appointment?.id && canWritePrimaryEncounter
-              ? "3.5rem"
-              : "0.5rem",
+          "--encounter-header-offset": canViewAppointmentEncounterHeader
+            ? "3rem"
+            : "0rem",
         } as React.CSSProperties
       }
     >
-      {primaryEncounter &&
-        primaryEncounter.appointment?.id &&
-        canWritePrimaryEncounter &&
-        primaryEncounter.status !== "discharged" && (
-          <div className="flex items-center justify-center -mt-2 mb-2">
-            <AppointmentEncounterHeader
-              appointment={primaryEncounter.appointment}
-              encounter={primaryEncounter}
-            />
-          </div>
-        )}
+      {primaryEncounter.appointment && canViewAppointmentEncounterHeader && (
+        <div className="flex items-center justify-center -mt-2 mb-2">
+          <AppointmentEncounterHeader
+            canWritePrimaryEncounter={canWritePrimaryEncounter}
+            appointment={primaryEncounter.appointment}
+            encounter={primaryEncounter}
+          />
+        </div>
+      )}
 
       <div className="flex flex-col gap-2">
         <PatientHeader

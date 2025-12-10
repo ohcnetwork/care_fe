@@ -213,7 +213,7 @@ export default function UserForm({
 
   const { isLoading: isUsernameChecking, isError: isUsernameTaken } = useQuery({
     queryKey: ["checkUsername", usernameInput],
-    queryFn: query(userApi.checkUsername, {
+    queryFn: query.debounced(userApi.checkUsername, {
       pathParams: { username: usernameInput },
       silent: true,
     }),
