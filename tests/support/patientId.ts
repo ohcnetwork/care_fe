@@ -32,7 +32,7 @@ export function getPatientId(): string {
   const raw = fs.readFileSync(META_PATH, "utf8");
   try {
     const { id } = JSON.parse(raw);
-    if (!id) throw new Error("Missing id in patientMeta.json");
+    if (!id) throw new Error(`Missing id in patient meta file: ${META_PATH}`);
     cachedId = id;
     return id;
   } catch (err) {
