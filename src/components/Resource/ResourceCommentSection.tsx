@@ -144,7 +144,7 @@ export const Comment = ({ comment, created_by, created_date }: CommentRead) => (
       <TooltipComponent content={formatName(created_by)}>
         <div className="flex">
           <Avatar
-            name={`${created_by.first_name} ${created_by.last_name}`}
+            name={formatName(created_by, true)}
             imageUrl={created_by?.profile_picture_url}
             className="size-8 rounded-full object-cover"
           />

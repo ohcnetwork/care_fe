@@ -52,6 +52,7 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
+import { Avatar } from "@/components/Common/Avatar";
 import { cn } from "@/lib/utils";
 import { Code } from "@/types/base/code/code";
 import {
@@ -601,7 +602,18 @@ export function DiagnosisQuestion({
               {
                 key: "created_by",
                 label: t("recorded_by"),
-                render: (created_by) => formatName(created_by),
+                render: (created_by) => (
+                  <div className="flex items-center gap-2">
+                    <Avatar
+                      imageUrl={created_by?.profile_picture_url}
+                      name={formatName(created_by, true)}
+                      className="size-6 rounded-full"
+                    />
+                    <span className="text-sm truncate">
+                      {formatName(created_by)}
+                    </span>
+                  </div>
+                ),
               },
               {
                 key: "onset",
