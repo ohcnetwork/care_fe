@@ -4,8 +4,6 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 
 import TagConfigList from "@/pages/Admin/TagConfig/TagConfigList";
 import TagConfigView from "@/pages/Admin/TagConfig/TagConfigView";
-import ReportBuilderList from "@/pages/Encounters/ReportBuilder";
-import ReportBuilder from "@/pages/Encounters/ReportBuilder/ReportBuilder";
 import { BillingSettingsLayout } from "@/pages/Facility/settings/billing/layout";
 import CreateDevice from "@/pages/Facility/settings/devices/CreateDevice";
 import DeviceDetail from "@/pages/Facility/settings/devices/DeviceShow";
@@ -238,18 +236,6 @@ const getRoutes = (facilityId: string) => ({
     <TokenCategoryForm facilityId={facilityId} tokenCategoryId={id} />
   ),
 
-  "/reportbuilder": () => <ReportBuilderList facilityId={facilityId} />,
-  "/reportbuilder/new": () => <ReportBuilder facilityId={facilityId} />,
-  "/reportbuilder/:reportTemplateId": ({
-    reportTemplateId,
-  }: {
-    reportTemplateId: string;
-  }) => (
-    <ReportBuilder
-      facilityId={facilityId}
-      reportTemplateId={reportTemplateId}
-    />
-  ),
   "/patient_identifier_config": () => (
     <PatientIdentifierConfigList facilityId={facilityId} />
   ),
