@@ -19,8 +19,10 @@ function getTagColorStyles(tag: TagConfig) {
   };
 }
 
-interface TagBadgeProps
-  extends Omit<React.ComponentProps<typeof Badge>, "children"> {
+interface TagBadgeProps extends Omit<
+  React.ComponentProps<typeof Badge>,
+  "children"
+> {
   tag: TagConfig;
   className?: string;
   hierarchyDisplay?: boolean;

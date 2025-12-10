@@ -1,10 +1,12 @@
 import { ExcalidrawElement } from "@excalidraw/excalidraw/dist/types/element/src/types";
+import { BinaryFiles } from "@excalidraw/excalidraw/dist/types/excalidraw/types";
 
 import { UserReadMinimal } from "@/types/user/user";
 
 type DrawingValue = {
   application: "excalidraw";
   elements: readonly ExcalidrawElement[];
+  files?: BinaryFiles;
 };
 
 type ObjectTypeValues = {

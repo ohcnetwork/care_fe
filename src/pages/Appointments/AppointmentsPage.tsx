@@ -1,4 +1,3 @@
-import careConfig from "@careConfig";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { addDays, differenceInDays } from "date-fns";
@@ -98,6 +97,7 @@ import {
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import careConfig from "@careConfig";
 import { PractitionerSelector } from "./components/PractitionerSelector";
 
 type AppointmentStatusGroup = {
@@ -150,16 +150,44 @@ interface Props {
   resourceId?: string;
 }
 
+const getDefaultDateFilter = () => {
+  const defaultDays = careConfig.appointments.defaultDateFilter;
+  const today = new Date();
+
+  if (defaultDays === 0) {
+    return {
+      date_from: dateQueryString(today),
+      date_to: dateQueryString(today),
+    };
+  }
+
+  // Past or future days based on configuration
+  const fromDate = defaultDays > 0 ? today : addDays(today, defaultDays);
+  const toDate = defaultDays > 0 ? addDays(today, defaultDays) : today;
+
+  return {
+    date_from: dateQueryString(fromDate),
+    date_to: dateQueryString(toDate),
+  };
+};
+
 export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
+
+  const practitionerFilterEnabled =
+    resourceType === SchedulableResourceType.Practitioner && !resourceId;
+
   const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
     limit: 15,
+    defaultQueryParams: {
+      ...(practitionerFilterEnabled ? { practitioners: authUser.id } : {}),
+      ...getDefaultDateFilter(),
+    },
+    cacheBlacklist: ["date_from", "date_to"],
   });
 
   useShortcutSubContext();
-  const practitionerFilterEnabled =
-    resourceType === SchedulableResourceType.Practitioner && !resourceId;
 
   const [activeTab, setActiveTab] = useView("appointments", "board");
   const { open: isSidebarOpen } = useSidebar();
@@ -191,40 +219,6 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   const practitioners = schedulableUserResources?.filter((r) =>
     practitionerIds.includes(r.id),
   );
-
-  useEffect(() => {
-    // Set default date range if no dates are present
-    if (!qParams.date_from && !qParams.date_to) {
-      const today = new Date();
-      const defaultDays = careConfig.appointments.defaultDateFilter;
-
-      if (defaultDays === 0) {
-        // Today only
-        qParams.date_from = dateQueryString(today);
-        qParams.date_to = dateQueryString(today);
-      } else {
-        // Past or future days based on configuration
-        const fromDate = defaultDays > 0 ? today : addDays(today, defaultDays);
-        const toDate = defaultDays > 0 ? addDays(today, defaultDays) : today;
-        qParams.date_from = dateQueryString(fromDate);
-        qParams.date_to = dateQueryString(toDate);
-      }
-    }
-
-    // Only update if there are changes
-    if (Object.keys(qParams).length > 0) {
-      updateQuery({ ...qParams });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [qParams.date_from, qParams.date_to]);
-
-  useEffect(() => {
-    if (!qParams.practitioners && practitionerFilterEnabled) {
-      updateQuery({
-        practitioners: authUser.id,
-      });
-    }
-  }, []);
 
   // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
