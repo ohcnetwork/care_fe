@@ -77,7 +77,12 @@ export const PERMISSION_CREATE_USER = "can_create_user";
 export const PERMISSION_LIST_USER = "can_list_user";
 
 // Template Permissions
-export const PERMISSION_LIST_TEMPLATE = "can_list_template";
+export const PERMISSION_LIST_TEMPLATE = "can_read_template";
+export const PERMISSION_WRITE_TEMPLATE = "can_write_template";
+export const PERMISSION_PREVIEW_TEMPLATE = "can_preview_template";
+export const PERMISSION_VIEW_TEMPLATE_SCHEMA = "can_view_template_schema";
+export const PERMISSION_GENERATE_REPORT_FROM_TEMPLATE =
+  "can_generate_report_from_template";
 export const PERMISSION_MANAGE_TEMPLATE = "can_manage_template";
 export const PERMISSION_CREATE_CHARGE_ITEM_DEFINITION =
   "can_create_charge_item_definition";
@@ -94,6 +99,10 @@ export const PERMISSION_LIST_TOKENS = "can_list_token";
 export const PERMISSION_WRITE_HEALTHCARE_SERVICE =
   "can_write_healthcare_service";
 export const PERMISSION_READ_HEALTHCARE_SERVICE = "can_read_healthcare_service";
+
+// Resource Category Permissions
+export const PERMISSION_WRITE_RESOURCE_CATEGORY = "can_write_resource_category";
+export const PERMISSION_READ_RESOURCE_CATEGORY = "can_read_resource_category";
 
 export interface Permissions {
   // Patient Permissions
@@ -207,6 +216,15 @@ export interface Permissions {
   // Template Permissions
   /** Permission slug: "can_list_template" */
   canListTemplate: boolean;
+  /** Permission slug: "can_write_template" */
+  canWriteTemplate: boolean;
+  /** Permission slug: "can_preview_template" */
+  canPreviewTemplate: boolean;
+  /** Permission slug: "can_view_template_schema" */
+  canViewTemplateSchema: boolean;
+  /** Permission slug: "can_generate_report_from_template" */
+  canGenerateReportFromTemplate: boolean;
+  // @deprecated Use canWriteTemplate instead
   /** Permission slug: "can_manage_template" */
   canManageTemplate: boolean;
   /** Permission slug: "can_create_charge_item_definition" */
@@ -226,6 +244,11 @@ export interface Permissions {
   canWriteHealthcareService: boolean;
   /** Permission slug: "can_read_healthcare_service" */
   canReadHealthcareService: boolean;
+
+  /** Permission slug: "can_write_resource_category" */
+  canWriteResourceCategory: boolean;
+  /** Permission slug: "can_read_resource_category" */
+  canReadResourceCategory: boolean;
 }
 
 export type HasPermissionFn = (
@@ -386,6 +409,17 @@ export function getPermissions(
 
     // Template
     canListTemplate: hasPermission(PERMISSION_LIST_TEMPLATE, permissions),
+    canWriteTemplate: hasPermission(PERMISSION_WRITE_TEMPLATE, permissions),
+    canPreviewTemplate: hasPermission(PERMISSION_PREVIEW_TEMPLATE, permissions),
+    canViewTemplateSchema: hasPermission(
+      PERMISSION_VIEW_TEMPLATE_SCHEMA,
+      permissions,
+    ),
+    canGenerateReportFromTemplate: hasPermission(
+      PERMISSION_GENERATE_REPORT_FROM_TEMPLATE,
+      permissions,
+    ),
+    // @deprecated Use canWriteTemplate instead
     canManageTemplate: hasPermission(PERMISSION_MANAGE_TEMPLATE, permissions),
     canSetChargeItemDefinition: hasPermission(
       PERMISSION_SET_CHARGE_ITEM_DEFINITION,
@@ -411,6 +445,16 @@ export function getPermissions(
     ),
     canReadHealthcareService: hasPermission(
       PERMISSION_READ_HEALTHCARE_SERVICE,
+      permissions,
+    ),
+
+    // Resource Category
+    canWriteResourceCategory: hasPermission(
+      PERMISSION_WRITE_RESOURCE_CATEGORY,
+      permissions,
+    ),
+    canReadResourceCategory: hasPermission(
+      PERMISSION_READ_RESOURCE_CATEGORY,
       permissions,
     ),
   };

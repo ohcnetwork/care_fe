@@ -395,27 +395,24 @@ export default function ServiceRequestShow({
                           </Button>
                         </DropdownMenuItem>
                       )}
-                      {request.status === Status.on_hold ||
-                        (request.status === Status.revoked && (
-                          <DropdownMenuItem
-                            asChild
-                            className="text-primary-900"
+                      {(request.status === Status.on_hold ||
+                        request.status === Status.revoked) && (
+                        <DropdownMenuItem asChild className="text-primary-900">
+                          <Button
+                            variant="ghost"
+                            onClick={() =>
+                              updateServiceRequest({
+                                status: Status.active,
+                              })
+                            }
+                            className="w-full flex flex-row justify-stretch items-center"
+                            disabled={isUpdatingServiceRequest}
                           >
-                            <Button
-                              variant="ghost"
-                              onClick={() =>
-                                updateServiceRequest({
-                                  status: Status.active,
-                                })
-                              }
-                              className="w-full flex flex-row justify-stretch items-center"
-                              disabled={isUpdatingServiceRequest}
-                            >
-                              <CareIcon icon="l-play" className="mr-1" />
-                              {t("mark_as_active")}
-                            </Button>
-                          </DropdownMenuItem>
-                        ))}
+                            <CareIcon icon="l-play" className="mr-1" />
+                            {t("mark_as_active")}
+                          </Button>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem asChild className="text-primary-900">
                         <Button
                           variant="ghost"
@@ -601,8 +598,8 @@ export default function ServiceRequestShow({
             </Card>
           )}
 
-          {observationRequirements.length > 0 && (
-            <div className="space-y-3 pt-5">
+          <div className="space-y-3 pt-5">
+            {observationRequirements.length > 0 && (
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">{t("test_results")}</h2>
                 <DropdownMenu>
@@ -630,22 +627,22 @@ export default function ServiceRequestShow({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              {(!diagnosticReports.length ||
-                diagnosticReports[0]?.status !==
-                  DiagnosticReportStatus.final) && (
-                <DiagnosticReportForm
-                  patientId={request.encounter.patient.id}
-                  facilityId={facilityId}
-                  serviceRequestId={serviceRequestId}
-                  observationDefinitions={observationRequirements}
-                  diagnosticReports={diagnosticReports}
-                  activityDefinition={activityDefinition}
-                  specimens={request.specimens || []}
-                  disableEdit={disableEdit}
-                />
-              )}
-            </div>
-          )}
+            )}
+            {(!diagnosticReports.length ||
+              diagnosticReports[0]?.status !==
+                DiagnosticReportStatus.final) && (
+              <DiagnosticReportForm
+                patientId={request.encounter.patient.id}
+                facilityId={facilityId}
+                serviceRequestId={serviceRequestId}
+                observationDefinitions={observationRequirements}
+                diagnosticReports={diagnosticReports}
+                activityDefinition={activityDefinition}
+                specimens={request.specimens || []}
+                disableEdit={disableEdit}
+              />
+            )}
+          </div>
 
           {diagnosticReports.length > 0 && (
             <DiagnosticReportReview

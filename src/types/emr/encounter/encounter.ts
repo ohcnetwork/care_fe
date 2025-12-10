@@ -108,17 +108,17 @@ export const ENCOUNTER_PRIORITY_COLORS = {
   React.ComponentProps<typeof Badge>["variant"]
 >;
 
-export const ENCOUNTER_STATUS = [
-  "planned",
-  "in_progress",
-  "on_hold",
-  "discharged",
-  "completed",
-  "cancelled",
-  "discontinued",
-  "entered_in_error",
-  "unknown",
-] as const;
+export enum EncounterStatus {
+  PLANNED = "planned",
+  IN_PROGRESS = "in_progress",
+  ON_HOLD = "on_hold",
+  DISCHARGED = "discharged",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
+  DISCONTINUED = "discontinued",
+  ENTERED_IN_ERROR = "entered_in_error",
+  UNKNOWN = "unknown",
+}
 
 export const ENCOUNTER_STATUS_COLORS = {
   planned: "blue",
@@ -177,8 +177,6 @@ export type EncounterDischargeDisposition =
 
 export type EncounterPriority = (typeof ENCOUNTER_PRIORITY)[number];
 
-export type EncounterStatus = (typeof ENCOUNTER_STATUS)[number];
-
 export type Period = {
   start?: string;
   end?: string;
@@ -225,8 +223,10 @@ export interface EncounterBase {
   discharge_summary_advice?: string | null;
 }
 
-export interface EncounterRead
-  extends Omit<EncounterBase, "patient" | "facility"> {
+export interface EncounterRead extends Omit<
+  EncounterBase,
+  "patient" | "facility"
+> {
   patient: PatientRead;
   facility: {
     id: string;

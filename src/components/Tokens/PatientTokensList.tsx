@@ -159,7 +159,7 @@ export default function PatientTokensList({
                     </div>
                     <Badge
                       variant={TOKEN_STATUS_COLORS[token.status]}
-                      className="px-1.5 rounded-sm ml-2"
+                      className="px-1.5 rounded-sm ml-2 whitespace-nowrap flex-shrink-0"
                     >
                       {t(token.status.toLowerCase())}
                     </Badge>

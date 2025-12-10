@@ -25,8 +25,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import useBreakpoints from "@/hooks/useBreakpoints";
 
-interface MultiSelectProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface MultiSelectProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   options: {
     label: string;
     value: string;

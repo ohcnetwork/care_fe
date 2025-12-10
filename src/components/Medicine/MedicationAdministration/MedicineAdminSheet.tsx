@@ -71,12 +71,13 @@ const MedicineListItem = ({
             )}
           </div>
         </div>
-        <Checkbox
-          checked={isSelected}
-          onCheckedChange={onSelect}
-          className="mt-1 mr-6 border-gray-800 size-5"
-          aria-label="Select for administration"
-        />
+        <div className="mt-1 mr-6">
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={onSelect}
+            aria-label={t("select_for_administration")}
+          />
+        </div>
       </div>
 
       <div

@@ -69,8 +69,10 @@ export interface BaseServiceRequestSpec {
   patient_instruction: string | null;
 }
 
-export interface ServiceRequestCreateSpec
-  extends Omit<BaseServiceRequestSpec, "id" | "requester"> {
+export interface ServiceRequestCreateSpec extends Omit<
+  BaseServiceRequestSpec,
+  "id" | "requester"
+> {
   encounter: string;
   locations: string[];
   requester: string;

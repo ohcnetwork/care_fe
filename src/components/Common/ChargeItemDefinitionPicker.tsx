@@ -139,6 +139,7 @@ export function ChargeItemDefinitionPicker({
           onValueChange={(selectedDef) => {
             if (!selectedDef) {
               setSelectedDefinitions([]);
+              onValueChange(undefined);
               return;
             }
             if (allowMultiple) {
@@ -177,6 +178,7 @@ export function ChargeItemDefinitionPicker({
               size="sm"
               onClick={() => setCreateDrawerOpen(true)}
               className="h-9 px-2 w-full"
+              disabled={disabled}
             >
               <Plus className="h-3 w-3 mr-1" />
               {t("create_charge_item_definition")}
@@ -189,6 +191,7 @@ export function ChargeItemDefinitionPicker({
               size="sm"
               onClick={() => setCopySelectionOpen(true)}
               className="h-9 px-2 w-full"
+              disabled={disabled}
             >
               <Copy className="h-3 w-3 mr-1" />
               {t("copy_charge_item_definition")}
