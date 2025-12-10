@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -28,12 +27,12 @@ import {
 import { TooltipComponent } from "@/components/ui/tooltip";
 
 import Loading from "@/components/Common/Loading";
+import { FilterBadges, FilterButton } from "@/components/Files/FileFilters";
 
 import useFilters from "@/hooks/useFilters";
 import useReportManager from "@/hooks/useReportManager";
 
 import queryClient from "@/Utils/request/queryClient";
-import { formatName } from "@/Utils/utils";
 import TemplateReportSheet from "@/pages/Encounters/TemplateBuilder/TemplateReportSheet";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
@@ -88,127 +87,69 @@ export function ReportSubTab({ encounter, associatingId }: ReportTabProps) {
 
   const DetailButtons = ({ report }: { report: ReportReadList }) => {
     return (
-      <div className="flex flex-row items-center justify-end gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="secondary" size="sm">
-              <CareIcon icon="l-ellipsis-h" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild className="text-primary-900">
-              <Button
-                size="sm"
-                onClick={() => viewFile(report)}
-                variant="ghost"
-                className="w-full flex flex-row justify-stretch items-center"
-              >
-                <CareIcon icon="l-eye" className="mr-1" />
-                <span>{t("view")}</span>
+      <div className="flex flex-row gap-2 justify-end">
+        <Button
+          onClick={() => viewFile(report)}
+          variant="secondary"
+          className="w-auto flex flex-row justify-stretch items-center"
+        >
+          <CareIcon icon="l-eye" className="mr-1" />
+          <span>{t("view")}</span>
+        </Button>
+        <div className="flex flex-row items-center justify-end gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary">
+                <CareIcon icon="l-ellipsis-h" />
               </Button>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="text-primary-900">
-              <Button
-                size="sm"
-                onClick={() => downloadFile(report)}
-                variant="ghost"
-                className="w-full flex flex-row justify-stretch items-center"
-              >
-                <CareIcon icon="l-arrow-circle-down" className="mr-1" />
-                <span>{t("download")}</span>
-              </Button>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="text-primary-900">
-              <Button
-                size="sm"
-                onClick={() => archiveReport(report as unknown as ReportRead)}
-                variant="ghost"
-                className="w-full flex flex-row justify-stretch items-center"
-              >
-                <CareIcon icon="l-archive-alt" className="mr-1" />
-                <span>{t("archive")}</span>
-              </Button>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild className="text-primary-900">
+                <Button
+                  size="sm"
+                  onClick={() => downloadFile(report)}
+                  variant="ghost"
+                  className="w-full flex flex-row justify-stretch items-center"
+                >
+                  <CareIcon icon="l-arrow-circle-down" className="mr-1" />
+                  <span>{t("download")}</span>
+                </Button>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="text-primary-900">
+                <Button
+                  size="sm"
+                  onClick={() => archiveReport(report as unknown as ReportRead)}
+                  variant="ghost"
+                  className="w-full flex flex-row justify-stretch items-center"
+                >
+                  <CareIcon icon="l-archive-alt" className="mr-1" />
+                  <span>{t("archive")}</span>
+                </Button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     );
   };
 
   const getArchivedMessage = (report: ReportReadList) => {
     return (
-      <div className="flex flex-col items-end gap-1">
-        <Badge variant="destructive" className="text-xs">
+      <div className="flex flex-row gap-2 justify-end">
+        <span className="text-gray-200/90 self-center uppercase font-bold">
           {t("archived")}
-        </Badge>
-        {report.archived_by && (
-          <span className="text-xs text-gray-500">
-            {t("by")} {formatName(report.archived_by)}
-          </span>
-        )}
-        {report.archived_datetime && (
-          <span className="text-xs text-gray-500">
-            {dayjs(report.archived_datetime).format("DD MMM YYYY, hh:mm A")}
-          </span>
-        )}
-      </div>
-    );
-  };
-
-  const FilterButton = () => {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="secondary" className="text-sm text-secondary-800">
-            <span className="flex flex-row items-center gap-1">
-              <CareIcon icon="l-filter" />
-              <span>{t("filter")}</span>
-            </span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="start"
-          className="w-[calc(100vw-2.5rem)] sm:w-[calc(100%-2rem)]"
+        </span>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            viewFile(report);
+          }}
         >
-          <DropdownMenuItem
-            className="text-primary-900"
-            onClick={() => {
-              updateQuery({ is_archived: "false", include_archived: false });
-            }}
-          >
-            <span>{t("active_reports")}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-primary-900"
-            onClick={() => {
-              updateQuery({ is_archived: "true", include_archived: true });
-            }}
-          >
-            <span>{t("archived_reports")}</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  };
-
-  const FilterBadges = () => {
-    if (typeof qParams.is_archived === "undefined") return null;
-    return (
-      <div className="flex flex-row gap-2 mt-2 mx-2">
-        <Badge
-          variant="outline"
-          className="cursor-pointer"
-          onClick={() =>
-            updateQuery({ is_archived: undefined, include_archived: false })
-          }
-        >
-          {t(
-            qParams.is_archived === "false"
-              ? "active_reports"
-              : "archived_reports",
-          )}
-          <CareIcon icon="l-times-circle" className="ml-1" />
-        </Badge>
+          <span className="flex flex-row items-center gap-1">
+            <CareIcon icon="l-archive-alt" />
+            {t("view")}
+          </span>
+        </Button>
       </div>
     );
   };
@@ -226,7 +167,7 @@ export function ReportSubTab({ encounter, associatingId }: ReportTabProps) {
               >
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-3 flex-1">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
                       <span className="p-2 rounded-full bg-gray-100 shrink-0">
                         <CareIcon
                           icon={getReportTypeIcon(report.report_type)}
@@ -234,7 +175,7 @@ export function ReportSubTab({ encounter, associatingId }: ReportTabProps) {
                         />
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">
+                        <p className="font-medium text-gray-900 truncate w-full">
                           {report.name}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
@@ -358,7 +299,9 @@ export function ReportSubTab({ encounter, associatingId }: ReportTabProps) {
                       {report.is_archived ? (
                         getArchivedMessage(report)
                       ) : (
-                        <DetailButtons report={report} />
+                        <div className="flex flex-row gap-2 justify-end">
+                          <DetailButtons report={report} />
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>
@@ -395,7 +338,12 @@ export function ReportSubTab({ encounter, associatingId }: ReportTabProps) {
               className="pl-10"
             />
           </div>
-          <FilterButton />
+          <FilterButton
+            onFilterChange={(filter) => updateQuery(filter)}
+            activeLabel={t("active_reports")}
+            archivedLabel={t("archived_reports")}
+            includeArchivedParam
+          />
           <Button
             variant="outline_primary"
             className="min-w-24 sm:min-w-28"
@@ -428,7 +376,14 @@ export function ReportSubTab({ encounter, associatingId }: ReportTabProps) {
         )}
       </div>
 
-      <FilterBadges />
+      <FilterBadges
+        isArchived={qParams.is_archived}
+        onClearFilter={() =>
+          updateQuery({ is_archived: undefined, include_archived: false })
+        }
+        activeLabel="active_reports"
+        archivedLabel="archived_reports"
+      />
 
       {/* Report List */}
       <RenderCards />

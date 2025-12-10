@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -110,24 +111,17 @@ export default function TemplateReportSheet({
             <CardGridSkeleton count={5} />
           ) : !templatesData?.results ||
             templatesData?.results?.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-10 border border-dashed border-gray-300 rounded-lg bg-gray-50 my-4">
-              <div className="text-center max-w-md">
-                <div className="flex flex-row items-center justify-center gap-2">
-                  <div className="bg-gray-50 p-2 rounded-full size-10 flex items-center justify-center border border-gray-200 shadow-sm">
-                    <CareIcon
-                      icon="l-file-medical"
-                      className="text-green-500 text-2xl"
-                    />
-                  </div>
-                  <h4 className="text-xl font-normal text-gray-800">
-                    {t("no_templates_found")}
-                  </h4>
-                </div>
-                <p className="text-gray-600 text-sm mt-4">
-                  {t("template_description")}
-                </p>
-              </div>
-            </div>
+            <EmptyState
+              icon={
+                <CareIcon
+                  icon="l-file-medical"
+                  className="text-green-500 text-2xl"
+                />
+              }
+              title={t("no_templates_found")}
+              description={t("template_description")}
+              className="my-4 bg-gray-50"
+            />
           ) : (
             <ScrollArea className="h-[calc(100vh-10rem)]">
               <div className="space-y-2 mt-3">

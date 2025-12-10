@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -136,34 +137,33 @@ export default function TemplateList({ facilityId }: TemplateListProps) {
         {isTemplatesLoading ? (
           <CardGridSkeleton count={12} />
         ) : !templatesData?.results || templatesData.results.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-10 border border-dashed border-gray-300 rounded-lg bg-gray-50 my-4">
-            <div className="text-center max-w-md">
-              <div className="flex flex-row items-center justify-center gap-2">
-                <div className="bg-gray-50 p-2 rounded-full size-10 flex items-center justify-center border border-gray-200 shadow-sm">
-                  <CareIcon
-                    icon="l-file-medical-alt"
-                    className="text-blue-500 text-2xl"
-                  />
-                </div>
-                <h4 className="text-xl font-normal text-gray-800">
-                  {t("no_templates_found")}
-                </h4>
-              </div>
-              <p className="text-gray-600 text-sm mt-4">
-                {qParams.name || qParams.status || qParams.template_type
-                  ? t("no_templates_match_search")
-                  : t("template_list_description")}
-              </p>
-              {!qParams.name && !qParams.status && !qParams.template_type && (
-                <Button variant="outline_primary" className="mt-4" asChild>
+          <EmptyState
+            icon={
+              <CareIcon
+                icon="l-file-medical-alt"
+                className="text-blue-500 text-2xl"
+              />
+            }
+            title={t("no_templates_found")}
+            description={
+              qParams.name || qParams.status || qParams.template_type
+                ? t("no_templates_match_search")
+                : t("template_list_description")
+            }
+            action={
+              !qParams.name &&
+              !qParams.status &&
+              !qParams.template_type && (
+                <Button variant="outline_primary" asChild>
                   <Link href={`/facility/${facilityId}/template/builder`}>
                     <CareIcon icon="l-plus" className="mr-1" />
                     <span>{t("create_first_template")}</span>
                   </Link>
                 </Button>
-              )}
-            </div>
-          </div>
+              )
+            }
+            className="my-4 bg-gray-50"
+          />
         ) : (
           <>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 py-2">
