@@ -7,7 +7,7 @@ import {
   Plus,
   Settings,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -269,23 +269,14 @@ export default function QueuesIndex({
   };
 
   // Handle resource selection
-  const handleResourceChange = useCallback(
-    (users: UserReadMinimal[]) => {
-      const resourceId = users.length > 0 ? users[0].id : undefined;
-      updateQuery({ resource_id: resourceId });
-    },
-    [updateQuery],
-  );
+  const handleResourceChange = (users: UserReadMinimal[]) => {
+    const resourceId = users.length > 0 ? users[0].id : undefined;
+    updateQuery({ resource_id: resourceId });
+  };
 
   // Fetch queues - optimize query key to only include necessary params
   const { data: queuesResponse, isLoading: queuesLoading } = useQuery({
-    queryKey: [
-      "tokenQueues",
-      facilityId,
-      effectiveResourceId,
-      qParams.date,
-      qParams.page,
-    ],
+    queryKey: ["tokenQueues", facilityId, effectiveResourceId, qParams],
     queryFn: query(tokenQueueApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {
