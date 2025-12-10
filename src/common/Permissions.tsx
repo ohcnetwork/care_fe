@@ -77,7 +77,12 @@ export const PERMISSION_CREATE_USER = "can_create_user";
 export const PERMISSION_LIST_USER = "can_list_user";
 
 // Template Permissions
-export const PERMISSION_LIST_TEMPLATE = "can_list_template";
+export const PERMISSION_LIST_TEMPLATE = "can_read_template";
+export const PERMISSION_WRITE_TEMPLATE = "can_write_template";
+export const PERMISSION_PREVIEW_TEMPLATE = "can_preview_template";
+export const PERMISSION_VIEW_TEMPLATE_SCHEMA = "can_view_template_schema";
+export const PERMISSION_GENERATE_REPORT_FROM_TEMPLATE =
+  "can_generate_report_from_template";
 export const PERMISSION_MANAGE_TEMPLATE = "can_manage_template";
 export const PERMISSION_CREATE_CHARGE_ITEM_DEFINITION =
   "can_create_charge_item_definition";
@@ -211,6 +216,15 @@ export interface Permissions {
   // Template Permissions
   /** Permission slug: "can_list_template" */
   canListTemplate: boolean;
+  /** Permission slug: "can_write_template" */
+  canWriteTemplate: boolean;
+  /** Permission slug: "can_preview_template" */
+  canPreviewTemplate: boolean;
+  /** Permission slug: "can_view_template_schema" */
+  canViewTemplateSchema: boolean;
+  /** Permission slug: "can_generate_report_from_template" */
+  canGenerateReportFromTemplate: boolean;
+  // @deprecated Use canWriteTemplate instead
   /** Permission slug: "can_manage_template" */
   canManageTemplate: boolean;
   /** Permission slug: "can_create_charge_item_definition" */
@@ -395,6 +409,17 @@ export function getPermissions(
 
     // Template
     canListTemplate: hasPermission(PERMISSION_LIST_TEMPLATE, permissions),
+    canWriteTemplate: hasPermission(PERMISSION_WRITE_TEMPLATE, permissions),
+    canPreviewTemplate: hasPermission(PERMISSION_PREVIEW_TEMPLATE, permissions),
+    canViewTemplateSchema: hasPermission(
+      PERMISSION_VIEW_TEMPLATE_SCHEMA,
+      permissions,
+    ),
+    canGenerateReportFromTemplate: hasPermission(
+      PERMISSION_GENERATE_REPORT_FROM_TEMPLATE,
+      permissions,
+    ),
+    // @deprecated Use canWriteTemplate instead
     canManageTemplate: hasPermission(PERMISSION_MANAGE_TEMPLATE, permissions),
     canSetChargeItemDefinition: hasPermission(
       PERMISSION_SET_CHARGE_ITEM_DEFINITION,

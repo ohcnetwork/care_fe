@@ -42,8 +42,8 @@ export function GenericQRScanDialog({
 
   // Default values
   const dialogTitle = title || t("scan_qr");
-  const labelText = inputLabel || t("id");
-  const placeholderText = inputPlaceholder || t("enter_specimen_id");
+  const labelText = inputLabel;
+  const placeholderText = inputPlaceholder;
   const scanMessage = scanningMessage || t("align_qr_code_in_frame");
 
   useEffect(() => {
@@ -169,7 +169,7 @@ export function GenericQRScanDialog({
               <div className="space-y-4">
                 <div>
                   <label className="text-sm sm:text-base font-medium text-gray-700">
-                    {labelText}:
+                    {labelText}
                   </label>
                   <Input
                     placeholder={placeholderText}
