@@ -203,7 +203,7 @@ function OrganizationCard({
 export default function AdminOrganizationView({ id, organizationType }: Props) {
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
-    limit: 12,
+    limit: 14,
     disableCache: true,
   });
 
@@ -222,7 +222,7 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
   });
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-4 mx-auto w-full max-w-7xl px-2 md:px-4">
       <div className="flex flex-col flex-wrap sm:flex-row sm:items-center sm:justify-between w-full gap-4">
         <div className="relative w-full sm:w-80 max-w-full">
           <CareIcon
@@ -239,100 +239,108 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
           />
         </div>
 
-        <div className="w-full sm:w-auto">
+        <div className="w-full sm:w-auto flex justify-center sm:justify-start">
           <FacilityOrganizationFormSheet
             organizationType={organizationType}
             parentId={id}
+            trigger={
+              <Button className="w-full">
+                <CareIcon icon="l-plus" className="mr-2 size-4" />
+                {t("add_department_team")}
+              </Button>
+            }
           />
         </div>
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1  gap-3">
           <CardListSkeleton count={4} />
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="md:pb-4">
           {children?.results?.length ? (
             <>
               <div className="hidden sm:block rounded-lg border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t("name")}</TableHead>
-                      <TableHead>{t("type")}</TableHead>
-                      <TableHead className="text-right">
-                        {t("actions")}
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {children.results.map((org) => {
-                      const canDelete = id ? true : !org.has_children;
-                      return (
-                        <TableRow
-                          key={org.id}
-                          onClick={() =>
-                            navigate(
-                              `/admin/organizations/${organizationType}/${org.id}`,
-                            )
-                          }
-                          className="hover:cursor-pointer group"
-                        >
-                          <TableCell>
-                            <div className="font-medium flex items-center gap-2 py-2">
-                              <Building className="size-4" />
-                              <span className="group-hover:underline group-hover:text-primary">
-                                {org.name}
-                              </span>
-                              {org.has_children && (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <span className="cursor-help">
-                                        <FolderOpen className="size-3 text-gray-400" />
-                                      </span>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      {t("has_child_organizations")}
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="indigo" className="w-fit">
-                              {t(`SYSTEM__org_type__${org.org_type}`)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell
-                            className="text-right"
-                            onClick={(e) => e.stopPropagation()}
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t("name")}</TableHead>
+                        <TableHead>{t("type")}</TableHead>
+                        <TableHead className="text-right">
+                          {t("actions")}
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {children.results.map((org) => {
+                        const canDelete = id ? true : !org.has_children;
+                        return (
+                          <TableRow
+                            key={org.id}
+                            onClick={() =>
+                              navigate(
+                                `/admin/organizations/${organizationType}/${org.id}`,
+                              )
+                            }
+                            className="hover:cursor-pointer group"
                           >
-                            <div className="flex items-center justify-end gap-1">
-                              <FacilityOrganizationFormSheet
-                                organizationType={organizationType}
-                                parentId={id}
-                                org={org}
-                              />
-
-                              {canDelete ? (
-                                <DeleteOrgDialog
-                                  org={org}
+                            <TableCell>
+                              <div className="font-medium flex items-center gap-2 py-2">
+                                <Building className="size-4" />
+                                <span className="group-hover:underline group-hover:text-primary">
+                                  {org.name}
+                                </span>
+                                {org.has_children && (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="cursor-help">
+                                          <FolderOpen className="size-3 text-gray-400" />
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        {t("has_child_organizations")}
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="indigo" className="w-fit">
+                                {t(`SYSTEM__org_type__${org.org_type}`)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell
+                              className="text-right"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="flex items-center justify-end gap-1">
+                                <FacilityOrganizationFormSheet
                                   organizationType={organizationType}
                                   parentId={id}
+                                  org={org}
                                 />
-                              ) : (
-                                <div className="size-10" />
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+
+                                {canDelete ? (
+                                  <DeleteOrgDialog
+                                    org={org}
+                                    organizationType={organizationType}
+                                    parentId={id}
+                                  />
+                                ) : (
+                                  <div className="size-10" />
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
               <div className="block sm:hidden space-y-4">
                 {children.results.map((org) => (

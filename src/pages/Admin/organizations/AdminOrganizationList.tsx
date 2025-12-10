@@ -10,11 +10,6 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
 
 import Page from "@/components/Common/Page";
 
@@ -105,19 +100,12 @@ export default function AdminOrganizationList({
     <>
       <Page title={t(organizationType)} hideTitleOnPage className="p-0">
         <div className="container mx-auto">
-          <div className="flex flex-col sm:flex-row items-start justify-between mb-2 sm:mb-4">
-            <h3>{t(organizationType)}</h3>
-          </div>
-          <ResizablePanelGroup
-            direction="horizontal"
-            className="min-h-[calc(100vh-14rem)] rounded-lg"
-          >
-            <ResizablePanel
-              defaultSize={20}
-              minSize={15}
-              maxSize={30}
-              className="hidden md:flex"
-            >
+          <div className="bg-gray-50 -mx-4 md:-mx-0 px-4 md:px-10">
+            <div className="flex flex-col sm:flex-row items-start justify-between mb-2 sm:mb-4">
+              <h3>{t(organizationType)}</h3>
+            </div>
+
+            <div className="flex">
               <AdminOrganizationNavbar
                 organizationType={organizationType}
                 selectedOrganizationId={organizationId || null}
@@ -125,81 +113,81 @@ export default function AdminOrganizationList({
                 onToggleExpand={handleToggleExpand}
                 onOrganizationSelect={handleOrganizationSelect}
               />
-            </ResizablePanel>
 
-            <ResizableHandle
-              withHandle
-              className="hidden md:flex items-center justify-center"
-            />
-
-            <ResizablePanel
-              defaultSize={80}
-              minSize={65}
-              className="md:pl-4 flex"
-            >
-              <div className="flex-1 rounded-lg md:shadow-lg overflow-auto md:bg-white flex flex-col p-4 md:p-6">
+              <div className="flex-1 space-y-2 sm:space-y-3 rounded-lg md:shadow-lg overflow-hidden ml-0 md:ml-4 md:bg-white md:min-h-[calc(100vh-14rem)] transition-all duration-150 ease-in-out">
                 {organizationId && org && (
-                  <>
-                    <div className="flex items-center w-full flex-shrink-0 mb-4">
-                      <Breadcrumb>
-                        <BreadcrumbList>
-                          <BreadcrumbItem>
-                            <BreadcrumbLink
-                              asChild
-                              className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
-                              onClick={() =>
-                                navigate(
-                                  `/admin/organizations/${organizationType}`,
-                                )
-                              }
-                            >
-                              <button type="button">
-                                {t("organizations")}
-                              </button>
-                            </BreadcrumbLink>
-                          </BreadcrumbItem>
-                          <BreadcrumbSeparator />
-                          {orgParents.reverse().map((parent) => (
-                            <React.Fragment key={parent.id}>
-                              <BreadcrumbItem>
-                                <BreadcrumbLink
-                                  asChild
-                                  className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
-                                  onClick={() => handleParentClick(parent.id)}
-                                >
-                                  <button type="button">{parent.name}</button>
-                                </BreadcrumbLink>
-                              </BreadcrumbItem>
-                              <BreadcrumbSeparator />
-                            </React.Fragment>
-                          ))}
-                          <BreadcrumbItem key={org?.id}>
-                            <span className="font-semibold text-gray-900">
-                              {org?.name}
-                            </span>
-                          </BreadcrumbItem>
-                        </BreadcrumbList>
-                      </Breadcrumb>
-                    </div>
-                    <div className="flex items-center mb-2">
-                      <h2 className="text-xl font-semibold">{org.name}</h2>
-                    </div>
-                    {org.description && (
-                      <p className="text-sm text-gray-500 break-all whitespace-normal mb-4">
-                        {org.description}
-                      </p>
-                    )}
-                  </>
+                  <div className="flex items-center mx-auto w-full max-w-7xl px-2 md:px-4">
+                    <Breadcrumb className="pt-0">
+                      <BreadcrumbList>
+                        <BreadcrumbItem>
+                          <BreadcrumbLink
+                            asChild
+                            className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
+                            onClick={() =>
+                              navigate(
+                                `/admin/organizations/${organizationType}`,
+                              )
+                            }
+                          >
+                            <button type="button">{t("organizations")}</button>
+                          </BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        {orgParents.reverse().map((parent) => (
+                          <React.Fragment key={parent.id}>
+                            <BreadcrumbItem>
+                              <BreadcrumbLink
+                                asChild
+                                className="text-sm text-gray-900 cursor-pointer hover:underline hover:underline-offset-2"
+                                onClick={() => handleParentClick(parent.id)}
+                              >
+                                <button type="button">{parent.name}</button>
+                              </BreadcrumbLink>
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
+                          </React.Fragment>
+                        ))}
+                        <BreadcrumbItem key={org?.id}>
+                          <span className="font-semibold text-gray-900">
+                            {org?.name}
+                          </span>
+                        </BreadcrumbItem>
+                      </BreadcrumbList>
+                    </Breadcrumb>
+                  </div>
                 )}
-                <div className="flex-1 flex flex-col">
-                  <AdminOrganizationView
-                    id={organizationId}
-                    organizationType={organizationType}
-                  />
-                </div>
+
+                <Page
+                  hideTitleOnPage
+                  title={org?.name || ""}
+                  className="mx-auto w-full max-w-7xl px-2 md:px-4"
+                >
+                  {organizationId && org && (
+                    <>
+                      <div className="flex items-center">
+                        <h2 className="text-xl font-semibold">{org.name}</h2>
+                      </div>
+
+                      {org.description && (
+                        <div className="mt-2">
+                          <p className="text-sm text-gray-500 break-all whitespace-normal">
+                            {org.description}
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  <div className="mt-2 md:pb-2">
+                    <AdminOrganizationView
+                      id={organizationId}
+                      organizationType={organizationType}
+                    />
+                  </div>
+                </Page>
               </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
+            </div>
+          </div>
         </div>
       </Page>
     </>

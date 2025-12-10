@@ -140,8 +140,8 @@ export default function AdminOrganizationNavbar({
   const topLevelOrganizations = allOrganizations?.results || [];
 
   return (
-    <div className="h-full w-full bg-white rounded-lg shadow-lg flex flex-col overflow-hidden">
-      <ScrollArea className="flex-1">
+    <div className="min-w-64 shadow-lg bg-white rounded-lg hidden md:block transition-all duration-150 ease-in-out">
+      <ScrollArea className="h-[calc(100vh-14rem)]">
         <div className="p-4">
           {isLoadingOrganizations ? (
             <div className="p-4">
