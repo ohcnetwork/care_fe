@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building, FolderOpen, Trash } from "lucide-react";
+import { Building, FolderOpen, PenLine, Trash } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -317,6 +317,15 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
                                     organizationType={organizationType}
                                     parentId={id}
                                     org={org}
+                                    trigger={
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        aria-label={t("edit")}
+                                      >
+                                        <PenLine className="size-4" />
+                                      </Button>
+                                    }
                                   />
 
                                   {canDelete ? (
