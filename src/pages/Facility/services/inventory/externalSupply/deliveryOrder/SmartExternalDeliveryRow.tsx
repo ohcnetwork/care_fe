@@ -177,7 +177,7 @@ export function SmartExternalDeliveryRow({
       queryParams: {
         product_knowledge: productKnowledge?.slug,
         ordering: "-created_date",
-        limit: 50,
+        limit: 100,
         status: "active",
       },
     }),
@@ -541,28 +541,6 @@ export function SmartExternalDeliveryRow({
         />
       </TableCell>
 
-      {/* Quantity */}
-      <TableCell className="align-top p-2">
-        <FormField
-          control={form.control}
-          name={`items.${index}.supplied_item_quantity`}
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  type="number"
-                  min={1}
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value))}
-                  className="w-full min-w-[70px]"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </TableCell>
-
       {/* Category - Charge Item Definition Category */}
       <TableCell className="align-top p-2 text-center">
         {needsCategorySelection ? (
@@ -677,6 +655,28 @@ export function SmartExternalDeliveryRow({
           </TableCell>
         );
       })}
+
+      {/* Quantity */}
+      <TableCell className="align-top p-2">
+        <FormField
+          control={form.control}
+          name={`items.${index}.supplied_item_quantity`}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={1}
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  className="w-full min-w-[70px]"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </TableCell>
 
       {/* Taxes */}
       <TableCell className="align-top p-2">

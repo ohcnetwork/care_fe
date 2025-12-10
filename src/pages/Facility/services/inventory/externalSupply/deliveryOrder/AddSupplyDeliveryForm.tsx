@@ -538,9 +538,6 @@ export function AddSupplyDeliveryForm({
                               <TableHead className="min-w-[130px] text-xs font-semibold">
                                 {t("expiry")}
                               </TableHead>
-                              <TableHead className="min-w-[70px] text-xs font-semibold">
-                                {t("qty")}
-                              </TableHead>
                               <TableHead className="min-w-[140px] text-xs font-semibold text-center">
                                 {t("category")}
                               </TableHead>
@@ -555,6 +552,9 @@ export function AddSupplyDeliveryForm({
                                   {code.display}
                                 </TableHead>
                               ))}
+                              <TableHead className="min-w-[70px] text-xs font-semibold">
+                                {t("qty")}
+                              </TableHead>
                               <TableHead className="min-w-[120px] text-xs font-semibold">
                                 {t("tax")}
                               </TableHead>

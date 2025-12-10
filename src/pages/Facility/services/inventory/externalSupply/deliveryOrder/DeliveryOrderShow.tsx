@@ -74,10 +74,11 @@ function calculateTotalPrice(
   deliveries: SupplyDeliveryRead[],
   internal: boolean,
 ): number {
-  return deliveries.reduce(
-    (sum, delivery) => sum + calculateTotal(delivery, internal),
-    0,
-  );
+  return deliveries
+    .filter(
+      (delivery) => delivery.status !== SupplyDeliveryStatus.entered_in_error,
+    )
+    .reduce((sum, delivery) => sum + calculateTotal(delivery, internal), 0);
 }
 
 interface Props {
