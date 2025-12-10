@@ -57,7 +57,8 @@ export function LocationCardWrapper({
   const isPlannedLocation =
     status === "planned" ||
     (status === "active" &&
-      new Date(locationHistory.start_datetime) > new Date());
+      new Date(locationHistory.start_datetime).getTime() >
+        new Date().getTime() + 5 * 60 * 1000);
 
   useEffect(() => {
     if (isEditing && editingState.timeConfig.status === "active") {
