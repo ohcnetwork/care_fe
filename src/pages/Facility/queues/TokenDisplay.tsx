@@ -7,7 +7,12 @@ import {
   formatScheduleResourceName,
   SchedulableResourceType,
 } from "@/types/scheduling/schedule";
-import { renderTokenNumber } from "@/types/tokens/token/token";
+import {
+  renderTokenNumber,
+  TokenRead,
+  TokenStatus,
+} from "@/types/tokens/token/token";
+import tokenApi from "@/types/tokens/token/tokenApi";
 import { TokenQueueRead } from "@/types/tokens/tokenQueue/tokenQueue";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import {
@@ -17,7 +22,7 @@ import {
 import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { useQueries, UseQueryResult } from "@tanstack/react-query";
+import { useQueries, useQuery, UseQueryResult } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 
@@ -184,14 +189,16 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
           getGridClass(itemCount),
         )}
       >
-        {servicePoints.map((servicePoint, index) => (
-          <div
-            key={servicePoint.id}
-            className={getColSpanClass(index, itemCount)}
-          >
-            <ServicePointDisplay facilityId={facilityId} {...servicePoint} />
-          </div>
-        ))}
+        {servicePoints
+          .filter((servicePoint) => servicePoint.queue)
+          .map((servicePoint, index) => (
+            <div
+              key={servicePoint.id}
+              className={getColSpanClass(index, itemCount)}
+            >
+              <ServicePointDisplay facilityId={facilityId} {...servicePoint} />
+            </div>
+          ))}
       </div>
     </>
   );
@@ -205,16 +212,31 @@ const ServicePointDisplay = ({
   facilityId,
   resourceType,
   resourceId,
-  current_token,
+  queue,
   name,
+  id,
 }: ServicePointDisplayProps) => {
-  const tokenNumber = current_token ? renderTokenNumber(current_token) : "--";
+  const { data: token } = useQuery({
+    queryKey: ["tokens", facilityId, id, queue?.id ?? ""],
+    queryFn: query(tokenApi.list, {
+      pathParams: { facility_id: facilityId, queue_id: queue?.id ?? "" },
+      queryParams: {
+        sub_queue: id,
+        status: TokenStatus.IN_PROGRESS,
+        limit: 1,
+      },
+    }),
+    refetchInterval: REFRESH_INTERVAL,
+    select: (data: PaginatedResponse<TokenRead>) => data.results[0],
+  });
 
   const resource = useScheduleResource({
     resourceType,
     resourceId,
     facilityId,
   });
+
+  console.log(token, "token");
 
   return (
     <div className="p-4 h-full bg-[#07131F] text-center">
@@ -234,16 +256,23 @@ const ServicePointDisplay = ({
         )}
       >
         <RotatingText
-          texts={[tokenNumber]}
-          mainClassName="px-2 sm:px-2 md:px-3 text-[#FFD83D] overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
-          staggerFrom={"last"}
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "-120%" }}
-          staggerDuration={0.025}
-          splitLevelClassName="overflow-hidden pb-0.5 sm:pb-1 md:pb-1"
-          transition={{ type: "spring", damping: 30, stiffness: 400 }}
-          rotationInterval={2000}
+          texts={token ? [renderTokenNumber(token)] : ["--"]}
+          mainClassName="px-2 sm:px-2 md:px-3 text-[#FFD83D] overflow-hidden py-1 md:py-2 justify-center rounded-lg"
+          initial={{ y: "250%", scale: 0.3, opacity: 0, rotate: -15 }}
+          animate={{ y: 0, scale: 1, opacity: 1, rotate: 0 }}
+          exit={{ y: "-250%", scale: 0.3, opacity: 0, rotate: 15 }}
+          transition={{
+            type: "spring",
+            damping: 8,
+            stiffness: 120,
+            mass: 0.5,
+          }}
+          staggerDuration={0.02}
+          staggerFrom="center"
+          rotationInterval={1000}
+          splitLevelClassName="overflow-hidden"
+          animatePresenceMode="wait"
+          animatePresenceInitial={false}
         />
       </div>
     </div>

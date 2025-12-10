@@ -214,7 +214,7 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>(
           initial={animatePresenceInitial}
         >
           <motion.span
-            key={currentTextIndex}
+            key={`${currentTextIndex}-${texts[currentTextIndex]}`}
             className={cn(
               splitBy === "lines" ? "text-rotate-lines" : "text-rotate",
             )}
