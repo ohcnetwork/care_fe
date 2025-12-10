@@ -7,7 +7,7 @@ import {
   Plus,
   Settings,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -246,8 +246,9 @@ export default function QueuesIndex({
   const availableUsers = availableUsersData?.users || [];
 
   // Find the selected practitioner - compare IDs properly
-  const selectedPractitioner = availableUsers.find(
-    (user) => user.id === effectiveResourceId,
+  const selectedPractitioner = useMemo(
+    () => availableUsers.find((user) => user.id === effectiveResourceId),
+    [availableUsers, effectiveResourceId],
   );
 
   // Set default date to today if no date is specified
@@ -268,9 +269,13 @@ export default function QueuesIndex({
   };
 
   // Handle resource selection
-  const handleResourceChange = (users: UserReadMinimal[]) => {
-    updateQuery({ resource_id: users[0]?.id });
-  };
+  const handleResourceChange = useCallback(
+    (users: UserReadMinimal[]) => {
+      const resourceId = users.length > 0 ? users[0].id : undefined;
+      updateQuery({ resource_id: resourceId });
+    },
+    [updateQuery],
+  );
 
   // Fetch queues - optimize query key to only include necessary params
   const { data: queuesResponse, isLoading: queuesLoading } = useQuery({
