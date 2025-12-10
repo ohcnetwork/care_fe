@@ -1,25 +1,23 @@
-import { useQuery } from "@tanstack/react-query";
-import { format, isWithinInterval } from "date-fns";
-import { ClipboardCheck } from "lucide-react";
-import { useTranslation } from "react-i18next";
-
-import { cn } from "@/lib/utils";
-
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-
-import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
-import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import {
   Appointment,
   GetSlotsForDayResponse,
   SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
+import { format, isWithinInterval } from "date-fns";
+import { useCallback, useEffect, useMemo } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import scheduleApi from "@/types/scheduling/scheduleApi";
-import { useEffect, useMemo } from "react";
+import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
+import { useQuery } from "@tanstack/react-query";
+import { ClipboardCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface AppointmentSlotPickerProps {
   facilityId: string;
@@ -66,17 +64,20 @@ export function AppointmentSlotPicker({
   });
 
   // Update slot details when a slot is selected
-  const handleSlotSelect = (slotId: string | undefined) => {
-    onSlotSelect(slotId);
-    if (slotId && onSlotDetailsChange) {
-      const allSlots = slotsQuery.data || [];
-      const selectedSlot = allSlots.find((slot) => slot.id === slotId);
+  const handleSlotSelect = useCallback(
+    (slotId: string | undefined) => {
+      onSlotSelect(slotId);
+      if (slotId && onSlotDetailsChange) {
+        const allSlots = slotsQuery.data || [];
+        const selectedSlot = allSlots.find((slot) => slot.id === slotId);
 
-      if (selectedSlot) {
-        onSlotDetailsChange(selectedSlot);
+        if (selectedSlot) {
+          onSlotDetailsChange(selectedSlot);
+        }
       }
-    }
-  };
+    },
+    [onSlotSelect, onSlotDetailsChange, slotsQuery.data],
+  );
 
   const { slotGroups, availableSlots } = useMemo(() => {
     const slotGroups = groupSlotsByAvailability(slotsQuery.data || []);
@@ -86,8 +87,8 @@ export function AppointmentSlotPicker({
 
   // Pre-select the first slot for current date if there are any slots available
   useEffect(() => {
-    onSlotSelect(availableSlots?.[0]?.id);
-  }, [availableSlots, onSlotSelect]);
+    handleSlotSelect(availableSlots?.[0]?.id);
+  }, [availableSlots, handleSlotSelect]);
 
   return (
     <div
