@@ -349,7 +349,7 @@ export function HistoricalRecordSelector<T extends BaseRecord>({
           </span>
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-3xl lg:max-w-[50vw] p-0 overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-3xl lg:max-w-4xl p-0 overflow-y-auto">
         <div className="flex flex-col gap-2 p-2">
           <SheetHeader className="px-2 py-0">
             <SheetTitle className="text-lg font-medium">
