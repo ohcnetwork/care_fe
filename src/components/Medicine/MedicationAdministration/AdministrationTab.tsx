@@ -178,7 +178,7 @@ const TimeSlotHeader: React.FC<TimeSlotHeaderProps> = ({
             <div className="text-sm font-medium">
               {format(slot.date, "dd MMM").toUpperCase()}
             </div>
-            <div className="text-sm text-[#6b7280]">
+            <div className="text-sm text-gray-500">
               {format(slot.date, "EEE")}
             </div>
           </div>
@@ -197,7 +197,7 @@ const TimeSlotHeader: React.FC<TimeSlotHeaderProps> = ({
             <div className="text-sm font-medium">
               {format(slot.date, "dd MMM").toUpperCase()}
             </div>
-            <div className="text-sm text-[#6b7280]">
+            <div className="text-sm text-gray-500">
               {format(slot.date, "EEE")}
             </div>
           </div>
@@ -251,7 +251,7 @@ const MedicationRow: React.FC<MedicationRowProps> = ({
               ?.meaning
           }
         </div>
-        <div className="text-xs text-[#6b7280] mt-1 truncate">
+        <div className="text-xs text-gray-500 mt-1 truncate">
           {t("added_on")}:{" "}
           {format(
             new Date(medication.authored_on || medication.created_date),
@@ -717,7 +717,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                 <div className="flex items-center justify-between p-4 bg-gray-50 border-t border-gray-50">
                   <div className="flex items-center gap-2 whitespace-break-spaces">
                     {lastModifiedDate && (
-                      <div className="text-xs text-[#6b7280]">
+                      <div className="text-xs text-gray-500">
                         {t("last_modified")}{" "}
                         {formatDistanceToNow(lastModifiedDate)} {t("ago")}
                       </div>
@@ -762,15 +762,15 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
               </div>
 
               {/* Main content with borders */}
-              <div className="col-span-full grid grid-cols-subgrid divide-x divide-[#e5e7eb] border-l border-r border-gray-200">
+              <div className="col-span-full grid grid-cols-subgrid divide-x divide-gray-200 border-l border-r border-gray-200">
                 {/* Headers */}
-                <div className="p-4 font-medium text-sm border-t border-gray-200 bg-[#F3F4F6] text-secondary-700">
+                <div className="p-4 font-medium text-sm border-t border-gray-200 bg-gray-100 text-secondary-700">
                   {t("medicine")}:
                 </div>
                 {visibleSlots.map((slot, i) => (
                   <div
                     key={`${format(slot.date, "yyyy-MM-dd")}-${slot.start}`}
-                    className="p-4 font-semibold text-xs text-center border-t border-gray-200 relative bg-[#F3F4F6] text-secondary-700"
+                    className="p-4 font-semibold text-xs text-center border-t border-gray-200 relative bg-gray-100 text-secondary-700"
                   >
                     {i === endSlotIndex &&
                       slot.date.getTime() === currentDate.getTime() && (
@@ -781,7 +781,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
                     {slot.label}
                   </div>
                 ))}
-                <div className="border-t border-gray-200 bg-[#F3F4F6]" />
+                <div className="border-t border-gray-200 bg-gray-100" />
 
                 {/* Medication rows */}
                 {filteredMedications?.map((medication) => (
@@ -802,7 +802,7 @@ export const AdministrationTab: React.FC<AdministrationTabProps> = ({
 
             {stoppedMedications?.results?.length > 0 && !searchQuery.trim() && (
               <div
-                className="p-4 border-t border-[#e5e7eb] flex items-center gap-2 cursor-pointer hover:bg-gray-50"
+                className="p-4 border-t border-gray-200 flex items-center gap-2 cursor-pointer hover:bg-gray-50"
                 onClick={() => setShowStopped(!showStopped)}
               >
                 <CareIcon

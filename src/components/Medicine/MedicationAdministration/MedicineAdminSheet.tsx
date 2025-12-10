@@ -248,7 +248,7 @@ export function MedicineAdminSheet({
               </Button>
               <Button
                 type="submit"
-                className="bg-[#006D4C] hover:bg-[#006D4C]/90"
+                className="bg-primary-700 hover:bg-primary-700/90"
                 disabled={
                   selectedMedicines.size === 0 || isPending || !isAllFormsValid
                 }
