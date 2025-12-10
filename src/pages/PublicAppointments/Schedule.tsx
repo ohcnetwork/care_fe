@@ -243,7 +243,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 <div className="flex flex-col gap-4 py-4 justify-between h-full">
                   <Avatar
                     imageUrl={userData.profile_picture_url}
-                    name={`${userData.first_name} ${userData.last_name}`}
+                    name={formatName(userData, true)}
                     className="size-96 self-center rounded-sm"
                   />
 
