@@ -1,12 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { BanIcon, TriangleAlertIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  BanIcon,
+  ExternalLink,
+  Eye,
+  PrinterIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 import { Link } from "raviger";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -157,7 +162,7 @@ export function PaymentReconciliationShow({
             <Link
               href={`/facility/${facilityId}/billing/payments/${paymentReconciliationId}/print`}
             >
-              <CareIcon icon="l-print" className="mr-2 size-4" />
+              <PrinterIcon className="size-4" />
               {t("print_receipt")}
               <ShortcutBadge actionId="print-button" />
             </Link>
@@ -380,7 +385,7 @@ export function PaymentReconciliationShow({
                     <Link
                       href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
                     >
-                      <CareIcon icon="l-eye" className="mr-2 size-4" />
+                      <Eye className="size-4" />
                       {t("view_invoice")}
                     </Link>
                   </Button>
@@ -388,7 +393,7 @@ export function PaymentReconciliationShow({
                     <Link
                       href={`/facility/${facilityId}/billing/invoice/${payment.target_invoice.id}/print`}
                     >
-                      <CareIcon icon="l-print" className="mr-2 size-4" />
+                      <PrinterIcon className="size-4" />
                       {t("print_invoice")}
                     </Link>
                   </Button>
@@ -441,7 +446,7 @@ export function PaymentReconciliationShow({
                     href={`/facility/${facilityId}/billing/payments/${paymentReconciliationId}/print`}
                     className="flex items-center w-full relative"
                   >
-                    <CareIcon icon="l-print" className="mr-2 size-4" />
+                    <PrinterIcon className="size-4" />
                     {t("print_receipt")}
                   </Link>
                 </Button>
@@ -451,7 +456,7 @@ export function PaymentReconciliationShow({
                       href={`/facility/${facilityId}/billing/invoices/${payment.target_invoice.id}`}
                       className="flex items-center w-full relative"
                     >
-                      <CareIcon icon="l-eye" className="mr-2 size-4" />
+                      <Eye className="size-4" />
                       {t("view_invoice")}
                       <ShortcutBadge actionId="view-invoice" />
                     </Link>
@@ -468,7 +473,7 @@ export function PaymentReconciliationShow({
                             variant="outline"
                             disabled={isPending}
                           >
-                            <CareIcon icon="l-ban" className="mr-2 size-4" />
+                            <BanIcon className="size-4" />
                             {t("mark_as_cancelled")}
                             <ShortcutBadge actionId="mark-payment-cancelled" />
                           </Button>
@@ -498,10 +503,7 @@ export function PaymentReconciliationShow({
                             variant="outline"
                             disabled={isPending}
                           >
-                            <CareIcon
-                              icon="l-exclamation-triangle"
-                              className="mr-2 size-4"
-                            />
+                            <TriangleAlertIcon className="size-4" />
                             {t("mark_as_entered_in_error")}
                             <ShortcutBadge actionId="mark-payment-error" />
                           </Button>
@@ -536,8 +538,17 @@ export function PaymentReconciliationShow({
                   }
                   data-shortcut-id="go-back"
                 >
-                  <CareIcon icon="l-arrow-left" className="mr-2 size-4" />
+                  <ArrowLeft className="size-4" />
                   {t("back_to_payments")}
+                </Button>
+                <Button variant="outline" className="w-full" asChild>
+                  <Link
+                    href={`/facility/${facilityId}/billing/account/${payment.account?.id}`}
+                  >
+                    <ExternalLink className="size-4" />
+                    {t("view_account")}
+                    <ShortcutBadge actionId="view-account" />
+                  </Link>
                 </Button>
               </div>
             </CardContent>

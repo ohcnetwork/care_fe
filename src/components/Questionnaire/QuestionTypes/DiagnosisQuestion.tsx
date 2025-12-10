@@ -10,8 +10,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,11 +52,15 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
+import { cn } from "@/lib/utils";
 import { Code } from "@/types/base/code/code";
 import {
   DIAGNOSIS_CLINICAL_STATUS,
+  DIAGNOSIS_CLINICAL_STATUS_COLORS,
   DIAGNOSIS_SEVERITY,
+  DIAGNOSIS_SEVERITY_COLORS,
   DIAGNOSIS_VERIFICATION_STATUS,
+  DIAGNOSIS_VERIFICATION_STATUS_COLORS,
   Diagnosis,
   DiagnosisClinicalStatus,
   DiagnosisRequest,
@@ -540,7 +542,7 @@ export function DiagnosisQuestion({
       )}
     >
       <HistoricalRecordSelector<DiagnosisRequest>
-        title={t("diagnosis_history")}
+        title={t("past_diagnoses")}
         structuredTypes={[
           {
             type: t("diagnoses"),
@@ -554,31 +556,67 @@ export function DiagnosisQuestion({
               {
                 key: "clinical_status",
                 label: t("status"),
-                render: (status: string) => t(status),
+                render: (status: string) => (
+                  <Badge
+                    variant={
+                      DIAGNOSIS_CLINICAL_STATUS_COLORS[
+                        status as keyof typeof DIAGNOSIS_CLINICAL_STATUS_COLORS
+                      ]
+                    }
+                  >
+                    {t(status)}
+                  </Badge>
+                ),
+              },
+              {
+                key: "verification_status",
+                label: t("verification"),
+                render: (verification_status: string) => (
+                  <Badge
+                    variant={
+                      DIAGNOSIS_VERIFICATION_STATUS_COLORS[
+                        verification_status as keyof typeof DIAGNOSIS_VERIFICATION_STATUS_COLORS
+                      ]
+                    }
+                  >
+                    {t(verification_status)}
+                  </Badge>
+                ),
+              },
+              {
+                key: "severity",
+                label: t("severity"),
+                render: (severity: DiagnosisSeverity | null) => (
+                  <Badge
+                    variant={
+                      DIAGNOSIS_SEVERITY_COLORS[
+                        severity as keyof typeof DIAGNOSIS_SEVERITY_COLORS
+                      ]
+                    }
+                  >
+                    {severity ? t(severity) : "-"}
+                  </Badge>
+                ),
+              },
+              {
+                key: "created_by",
+                label: t("recorded_by"),
+                render: (created_by) => formatName(created_by),
               },
               {
                 key: "onset",
                 label: t("onset_date"),
                 render: (onset: Onset) =>
                   onset?.onset_datetime
-                    ? format(new Date(onset.onset_datetime), "dd-MM-yyyy")
+                    ? format(new Date(onset.onset_datetime), "dd MMM yyyy")
                     : "",
               },
-              {
-                key: "severity",
-                label: t("severity"),
-                render: (severity: DiagnosisSeverity | null) =>
-                  severity ? t(severity) : "-",
-              },
+            ],
+            expandableFields: [
               {
                 key: "note",
                 label: t("notes"),
-                render: (note: string | undefined) => note || "-",
-              },
-              {
-                key: "created_by",
-                label: t("recorded_by"),
-                render: (created_by) => formatName(created_by),
+                render: (note) => note,
               },
             ],
             queryKey: ["diagnoses_and_chronic_conditions", patientId],
