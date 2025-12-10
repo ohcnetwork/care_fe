@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { TableCell, TableRow } from "@/components/ui/table";
+import useAuthUser from "@/hooks/useAuthUser";
 import { BadgeInfo } from "lucide-react";
 
 export interface DisplayField<T> {
@@ -37,6 +38,7 @@ export function RecordItem<T>({
 
   const recordId = (record as any).id as string;
   const isExpanded = expandedRecordId === recordId;
+  const user = useAuthUser();
 
   const expandableFieldsWithValues = expandableFields
     ?.map((field) => {
@@ -66,6 +68,8 @@ export function RecordItem<T>({
               ? field.render(record)
               : field.render(value)
             : value?.toString() || "-";
+          const isHighlightedUser =
+            field.key === "created_by" && (value as any)?.id === user?.id;
 
           return (
             <TableCell
@@ -74,7 +78,7 @@ export function RecordItem<T>({
                 "p-2 text-sm whitespace-pre-wrap border border-gray-200 min-w-[150px]",
                 "nth-2:rounded-l-md",
                 "nth-last-1:rounded-r-md",
-                isSelected && field.key === "created_by"
+                isHighlightedUser
                   ? "bg-emerald-100!"
                   : "bg-white even:bg-gray-100",
               )}
