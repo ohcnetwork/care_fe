@@ -85,8 +85,6 @@ export function ReportSubTab({
   const getReportTypeIcon = (reportType: string): IconName => {
     const iconMap: Record<string, IconName> = {
       discharge_summary: "l-file-medical-alt",
-      lab_report: "l-flask",
-      prescription: "l-prescription-bottle",
     };
     return iconMap[reportType] || "l-file-alt";
   };
@@ -419,7 +417,6 @@ export function ReportSubTab({
           <TemplateReportSheet
             facilityId={encounter.facility?.id || ""}
             associatingId={associatingId}
-            reportType="discharge_summary"
             permissions={permissions}
             trigger={
               <Button variant="outline_primary">

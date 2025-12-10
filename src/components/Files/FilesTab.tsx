@@ -3,7 +3,6 @@ import { useQueryParams } from "raviger";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { DischargeTab } from "@/components/Files/DischargeSummarySubTab";
 import { DrawingPage } from "@/components/Files/DrawingSubTab";
 import { FilesPage } from "@/components/Files/FileSubTab";
 
@@ -26,15 +25,10 @@ interface FilesTabsProps {
 }
 
 type QueryParams = {
-  file: "all" | "discharge_summary" | "reports" | "drawings";
+  file: "all" | "reports" | "drawings";
 };
 
-const allowedTabs = [
-  "all",
-  "discharge_summary",
-  "reports",
-  "drawings",
-] as const;
+const allowedTabs = ["all", "reports", "drawings"] as const;
 type TabType = (typeof allowedTabs)[number];
 
 export const FilesTab = ({
@@ -89,14 +83,6 @@ export const FilesTab = ({
           >
             {t("files")}
           </TabsTrigger>
-          {type === "encounter" && encounter && (
-            <TabsTrigger
-              value="discharge_summary"
-              className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
-            >
-              {t("discharge_summary")}
-            </TabsTrigger>
-          )}
           <TabsTrigger
             value="reports"
             className="data-[state=active]:bg-white rounded-md px-4 font-semibold"
@@ -120,17 +106,6 @@ export const FilesTab = ({
             canEdit={canEdit}
           />
         </TabsContent>
-
-        {type === "encounter" && encounter && (
-          <TabsContent value="discharge_summary">
-            <DischargeTab
-              type={type}
-              encounter={encounter}
-              canEdit={canEdit}
-              // facilityId={facilityId || ""}
-            />
-          </TabsContent>
-        )}
 
         <TabsContent value="reports">
           <ReportSubTab

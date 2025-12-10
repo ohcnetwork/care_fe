@@ -33,7 +33,6 @@ interface TemplateReportSheetProps {
   encounterId?: string;
   patientId?: string;
   associatingId: string;
-  reportType: string;
   trigger: React.ReactNode;
   onSuccess?: () => void;
   permissions: string[];
@@ -42,7 +41,6 @@ interface TemplateReportSheetProps {
 export default function TemplateReportSheet({
   facilityId,
   associatingId,
-  reportType,
   trigger,
   permissions,
   onSuccess,
@@ -53,7 +51,7 @@ export default function TemplateReportSheet({
   const { canListTemplate } = getPermissions(hasPermission, permissions);
 
   const { data: templatesData, isLoading: isTemplatesLoading } = useQuery({
-    queryKey: ["templates", facilityId, reportType],
+    queryKey: ["templates", facilityId],
     queryFn: query(templateApi.listTemplates, {
       queryParams: {
         facility: facilityId,
