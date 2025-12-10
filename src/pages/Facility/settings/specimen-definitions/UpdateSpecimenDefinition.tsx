@@ -45,7 +45,7 @@ export function UpdateSpecimenDefinition({
     });
 
   if (isFetching) {
-    return <div>Loading...</div>;
+    return <div>{t("loading")}</div>;
   }
 
   if (!specimenDefinition) {

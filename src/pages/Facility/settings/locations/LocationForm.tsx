@@ -263,7 +263,7 @@ export default function LocationForm({
   ];
 
   if (locationId && isLoading) {
-    return <div className="p-4">Loading...</div>;
+    return <div className="p-4">{t("loading")}</div>;
   }
 
   const showBedOptions = form.watch("form") === "bd" && !isEditMode;
