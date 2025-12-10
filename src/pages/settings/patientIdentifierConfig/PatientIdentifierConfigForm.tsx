@@ -455,11 +455,14 @@ export default function PatientIdentifierConfigForm({
                     value={form.watch("config.default_value") ? "auto" : "user"}
                     onValueChange={(v) => {
                       if (v === "user") {
-                        form.setValue("config.default_value", "");
+                        form.setValue("config.default_value", "", {
+                          shouldDirty: true,
+                        });
                       } else if (v === "auto") {
                         form.setValue(
                           "config.default_value",
                           "f'{patient_count}'",
+                          { shouldDirty: true },
                         );
                       }
                     }}
