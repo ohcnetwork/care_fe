@@ -106,8 +106,6 @@ export function useEncounterShortcuts() {
         ),
       "treatment-summary": () =>
         navigate(buildEncounterUrl("/treatment_summary")),
-      "discharge-summary": () =>
-        navigate(buildEncounterUrl("/files?file=discharge_summary")),
       "encounter-overview": () => navigate(buildEncounterUrl("/updates")),
       "add-questionnaire": () => {
         document.dispatchEvent(new CustomEvent("open-forms-dialog"));
