@@ -85,21 +85,19 @@ export interface ProductKnowledgeBase {
   slug_config: SlugConfig;
 }
 
-export interface ProductKnowledgeCreate
-  extends Omit<
-    ProductKnowledgeBase,
-    "id" | "category" | "slug_config" | "slug"
-  > {
+export interface ProductKnowledgeCreate extends Omit<
+  ProductKnowledgeBase,
+  "id" | "category" | "slug_config" | "slug"
+> {
   slug_value: string;
   facility: string;
   category: string;
 }
 
-export interface ProductKnowledgeUpdate
-  extends Omit<
-    ProductKnowledgeBase,
-    "id" | "category" | "slug_config" | "slug"
-  > {
+export interface ProductKnowledgeUpdate extends Omit<
+  ProductKnowledgeBase,
+  "id" | "category" | "slug_config" | "slug"
+> {
   slug_value: string;
   facility: string;
   category: string;

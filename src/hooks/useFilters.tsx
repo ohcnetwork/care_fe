@@ -76,9 +76,20 @@ export default function useFilters({
   const removeFilter = (param: string) => removeFilters([param]);
 
   useEffect(() => {
+    const defaults = Object.fromEntries(
+      Object.entries(defaultQueryParams).filter(
+        ([key]) => qParams[key] === undefined,
+      ),
+    );
+
     if (disableCache) {
       // Clean-up any existing cache if present for this path.
       FiltersCache.invalidate();
+
+      // Set default query params if they are not present, preserving existing params
+      if (Object.keys(defaults).length > 0) {
+        setQueryParams({ ...defaults, ...qParams });
+      }
 
       // Skip cache restoration logic for this usage.
       return;
@@ -95,22 +106,14 @@ export default function useFilters({
 
     const cache = FiltersCache.get();
     if (!cache) {
+      if (Object.keys(defaults).length > 0) {
+        setQueryParams({ ...defaults, ...qParams });
+      }
       return;
     }
 
     // Restore cache
-    setQueryParams(cache);
-  }, []);
-
-  useEffect(() => {
-    const defaults = Object.fromEntries(
-      Object.entries(defaultQueryParams).filter(
-        ([key]) => qParams[key] === undefined,
-      ),
-    );
-    if (Object.keys(defaults).length > 0) {
-      updateQuery(defaults);
-    }
+    setQueryParams({ ...defaults, ...cache, ...qParams });
   }, []);
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {

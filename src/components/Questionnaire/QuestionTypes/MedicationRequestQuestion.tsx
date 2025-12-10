@@ -38,7 +38,6 @@ import UserSelector from "@/components/Common/UserSelector";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { formatDosage } from "@/components/Medicine/utils";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValueSetSelect";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
@@ -49,6 +48,8 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import { Avatar } from "@/components/Common/Avatar";
+import { formatDosage } from "@/components/Medicine/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import {
@@ -474,18 +475,40 @@ export function MedicationRequestQuestion({
                 label: t("dosage"),
                 render: (instructions) => {
                   const dosage = formatDosage(instructions[0]) || "";
-
                   const frequency =
-                    getFrequencyDisplay(instructions[0]?.timing)?.meaning || "";
-
-                  const duration = instructions?.[0]?.timing?.repeat
-                    ?.bounds_duration
-                    ? `${instructions[0].timing.repeat.bounds_duration.value} ${instructions[0].timing.repeat.bounds_duration.unit}`
-                    : "";
-
-                  return `${dosage}\n${frequency}\n${duration}`;
+                    getFrequencyDisplay(instructions[0]?.timing)?.meaning ||
+                    "-";
+                  return `${dosage}\n${frequency}`;
                 },
               },
+              {
+                key: "dosage_instruction",
+                label: t("duration"),
+                render: (instructions) => {
+                  const duration =
+                    instructions?.[0]?.timing?.repeat?.bounds_duration;
+                  if (!duration?.value) return "-";
+                  return `${duration.value} ${duration.unit}`;
+                },
+              },
+              {
+                key: "created_by",
+                label: t("prescribed_by"),
+                render: (created_by) => (
+                  <div className="flex items-center gap-2">
+                    <Avatar
+                      imageUrl={created_by?.profile_picture_url}
+                      name={formatName(created_by, true)}
+                      className="size-6 rounded-full"
+                    />
+                    <span className="text-sm truncate">
+                      {formatName(created_by)}
+                    </span>
+                  </div>
+                ),
+              },
+            ],
+            expandableFields: [
               {
                 key: "dosage_instruction",
                 label: t("instructions"),
@@ -496,11 +519,6 @@ export function MedicationRequestQuestion({
                 key: "note",
                 label: t("notes"),
                 render: (note) => note,
-              },
-              {
-                key: "created_by",
-                label: t("prescribed_by"),
-                render: (created_by) => formatName(created_by),
               },
             ],
             queryKey: ["medication_requests", patientId],
@@ -527,23 +545,36 @@ export function MedicationRequestQuestion({
               },
               {
                 key: "dosage_text",
-                label: t("dosage"),
+                label: t("dosage_instruction"),
                 render: (dosage) => dosage,
               },
               {
                 key: "status",
                 label: t("status"),
-                render: (status) => t(status),
-              },
-              {
-                key: "note",
-                label: t("notes"),
-                render: (note) => note || "-",
+                render: (status: string) => t(`medication_status__${status}`),
               },
               {
                 key: "created_by",
                 label: t("prescribed_by"),
-                render: (created_by) => formatName(created_by),
+                render: (created_by) => (
+                  <div className="flex items-center gap-2">
+                    <Avatar
+                      imageUrl={created_by?.profile_picture_url}
+                      name={formatName(created_by, true)}
+                      className="size-6 rounded-full"
+                    />
+                    <span className="text-sm truncate">
+                      {formatName(created_by)}
+                    </span>
+                  </div>
+                ),
+              },
+            ],
+            expandableFields: [
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note) => note,
               },
             ],
             queryKey: ["medication_statements", patientId],
