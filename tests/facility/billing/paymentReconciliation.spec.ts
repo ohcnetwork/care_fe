@@ -1,67 +1,14 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { getAccountId } from "tests/support/accountId";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-let facilityId: string;
-let patientId: string;
-let accountId: string;
-
-test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext({
-    storageState: "tests/.auth/user.json",
-  });
-  const page = await context.newPage();
-
-  facilityId = getFacilityId();
-
-  await page.goto(`/facility/${facilityId}/encounters/patients/all`);
-  await page.getByRole("button", { name: "View Encounter" }).first().click();
-
-  await page.waitForURL(
-    /\/facility\/([^/]+)\/patient\/([^/]+)\/encounter\/([^/]+)/,
-    {
-      timeout: 10000,
-    },
-  );
-
-  const urlMatch = page
-    .url()
-    .match(/\/facility\/([^/]+)\/patient\/([^/]+)\/encounter\/([^/]+)/);
-
-  if (!urlMatch || !urlMatch[2]) {
-    throw new Error(`Failed to extract patient ID from URL: ${page.url()}`);
-  }
-
-  patientId = urlMatch[2];
-
-  await page.goto(`/facility/${facilityId}/patient/${patientId}`);
-  await page.getByRole("tab", { name: "Accounts" }).click();
-  await page.getByRole("button", { name: "Create Account" }).click();
-
-  // Generate random account name using faker
-  const accountName = faker.finance.accountName();
-
-  await page.getByRole("textbox", { name: "Name *" }).fill(accountName);
-  await page.getByRole("button", { name: "Create" }).click();
-
-  await page.getByRole("button", { name: "Go to account" }).click();
-
-  // Wait for account creation and extract accountId from URL
-  await page.waitForURL(/\/account\/[a-f0-9-]+/);
-  const accountMatch = page.url().match(/\/account\/([a-f0-9-]+)/);
-
-  if (!accountMatch || !accountMatch[1]) {
-    throw new Error(`Failed to extract account ID from URL: ${page.url()}`);
-  }
-  accountId = accountMatch[1];
-
-  await context.close();
-});
-
 test.describe("Payment Reconciliation", () => {
   test.beforeEach(async ({ page }) => {
+    const facilityId = getFacilityId();
+    const accountId = getAccountId();
     const targetUrl = `/facility/${facilityId}/billing/account/${accountId}`;
     await page.goto(targetUrl);
   });
