@@ -229,7 +229,7 @@ export function BedChargeItemsTable({
   const locationHistory = encounter?.location_history || [];
 
   const { data: chargeItems, isLoading } = useQuery({
-    queryKey: ["bedChargeItems", qParams, accountId],
+    queryKey: ["chargeItems", accountId],
     queryFn: query(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
@@ -298,7 +298,7 @@ export function BedChargeItemsTable({
             status: false,
           });
           queryClient.invalidateQueries({
-            queryKey: ["bedChargeItems", qParams, accountId],
+            queryKey: ["chargeItems", accountId],
           });
         }}
       />

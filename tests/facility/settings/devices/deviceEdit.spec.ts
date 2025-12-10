@@ -13,23 +13,22 @@ test.describe("Facility Device Edit", () => {
   });
 
   test("Edit first device in list and verify changes", async ({ page }) => {
-    // Wait for the device list to load
-    await page.waitForLoadState("networkidle");
-
-    // Get the first device link from the list
+    // Wait for device list to load by checking for at least one device card
     const firstDeviceLink = page
       .getByRole("link")
       .filter({ has: page.locator('[data-slot="card"]') })
       .first();
 
     // Verify at least one device exists
-    await expect(firstDeviceLink).toBeVisible();
+    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
 
     // Click on the first device to view details
     await firstDeviceLink.click();
 
-    // Wait for device details page to load
-    await page.waitForLoadState("networkidle");
+    // Wait for device details page to load by checking for Edit button
+    await expect(page.getByRole("button", { name: "Edit" })).toBeVisible({
+      timeout: 10000,
+    });
 
     // Click Edit button
     await page.getByRole("button", { name: "Edit" }).click();
@@ -141,20 +140,21 @@ test.describe("Facility Device Edit", () => {
   });
 
   test("Edit device with partial fields and verify", async ({ page }) => {
-    // Wait for the device list to load
-    await page.waitForLoadState("networkidle");
-
-    // Get the first device link from the list
+    // Wait for device list to load by checking for at least one device card
     const firstDeviceLink = page
       .getByRole("link")
       .filter({ has: page.locator('[data-slot="card"]') })
       .first();
 
-    await expect(firstDeviceLink).toBeVisible();
+    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
 
     // Click on the first device to view details
     await firstDeviceLink.click();
-    await page.waitForLoadState("networkidle");
+
+    // Wait for device details page to load by checking for Edit button
+    await expect(page.getByRole("button", { name: "Edit" })).toBeVisible({
+      timeout: 10000,
+    });
 
     // Click Edit button
     await page.getByRole("button", { name: "Edit" }).click();
@@ -185,20 +185,21 @@ test.describe("Facility Device Edit", () => {
   });
 
   test("Cancel editing and verify no changes are saved", async ({ page }) => {
-    // Wait for the device list to load
-    await page.waitForLoadState("networkidle");
-
-    // Get the first device link from the list
+    // Wait for device list to load by checking for at least one device card
     const firstDeviceLink = page
       .getByRole("link")
       .filter({ has: page.locator('[data-slot="card"]') })
       .first();
 
-    await expect(firstDeviceLink).toBeVisible();
+    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
 
     // Click on the first device to view details
     await firstDeviceLink.click();
-    await page.waitForLoadState("networkidle");
+
+    // Wait for device details page to load by checking for Edit button
+    await expect(page.getByRole("button", { name: "Edit" })).toBeVisible({
+      timeout: 10000,
+    });
 
     // Get original registered name value
     const originalDeviceName = await page

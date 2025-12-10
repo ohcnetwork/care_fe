@@ -1875,7 +1875,9 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                                 selectedInventory.status ===
                                                                   "active" &&
                                                                 new Date(
-                                                                  selectedInventory.product.expiration_date,
+                                                                  selectedInventory
+                                                                    .product
+                                                                    .expiration_date,
                                                                 ) >= new Date()
                                                                   ? "primary"
                                                                   : "destructive"
@@ -2013,7 +2015,8 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                               inv.status ===
                                                                 "active" &&
                                                               new Date(
-                                                                inv.product.expiration_date,
+                                                                inv.product
+                                                                  .expiration_date,
                                                               ) >= new Date()
                                                                 ? "primary"
                                                                 : "destructive"
