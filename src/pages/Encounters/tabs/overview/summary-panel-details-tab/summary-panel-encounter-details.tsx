@@ -1,5 +1,6 @@
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { Avatar } from "@/components/Common/Avatar";
 import TagBadge from "@/components/Tags/TagBadge";
 import { Badge } from "@/components/ui/badge";
@@ -251,7 +252,7 @@ export const SummaryPanelEncounterDetails = () => {
                         .map((member) => (
                           <Avatar
                             key={member.member.id}
-                            name={member.member.first_name}
+                            name={formatName(member.member, true)}
                             imageUrl={member.member.profile_picture_url}
                             className="size-10 rounded-full border border-white shadow-sm"
                           />
