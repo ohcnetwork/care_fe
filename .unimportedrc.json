@@ -7,6 +7,7 @@
     "src/Locale/update_locale.js",
     "src/PluginRegistry.ts",
     "src/components/ui/definition-list.tsx",
+    "src/components/ui/resizable.tsx",
     "src/pages/Admin/organizations/components/AdminOrganizationSelector.tsx",
     "src/pages/Encounters/ReportBuilder/ReportBuilderSheet.tsx",
     "src/pluginTypes.ts",
@@ -19,15 +20,10 @@
     "@vitejs/plugin-react",
     "browserslist-useragent-regexp",
     "cross-env",
-    "normalize-wheel"
+    "normalize-wheel",
+    "react-resizable-panels"
   ],
   "ignoreUnresolved": [
-    [
-      "__federation__",
-      [
-        "src/PluginEngine.tsx"
-      ]
-    ],
     [
       "./pluginMap",
       [
@@ -38,6 +34,12 @@
       "@/supportedBrowsers",
       [
         "src/components/ErrorPages/BrowserWarning.tsx"
+      ]
+    ],
+    [
+      "__federation__",
+      [
+        "src/PluginEngine.tsx"
       ]
     ],
     [
