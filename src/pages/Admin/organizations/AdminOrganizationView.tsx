@@ -126,39 +126,39 @@ function OrganizationCard({
 
   return (
     <Card key={org.id}>
-      <CardContent className="p-4 space-y-4">
-        <CardHeader className="p-0">
-          <div className="flex justify-between">
-            <div className="flex items-center gap-2">
-              <Building className="size-4" />
-              <span className="text-lg font-semibold hover:underline hover:decoration-green-600 hover:text-green-600">
-                {org.name}
-              </span>
-              {org.has_children && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="cursor-help">
-                        <FolderOpen className="size-3 text-gray-400" />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {t("has_child_organizations")}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-            </div>
-            {canDelete && (
-              <DeleteOrgDialog
-                org={org}
-                organizationType={organizationType}
-                parentId={parentId}
-              />
+      <CardHeader className="p-4">
+        <div className="flex justify-between">
+          <div className="flex items-center gap-2">
+            <Building className="size-4" />
+            <span className="text-lg font-semibold hover:underline hover:decoration-green-600 hover:text-green-600">
+              {org.name}
+            </span>
+            {org.has_children && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">
+                      <FolderOpen className="size-3 text-gray-400" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t("has_child_organizations")}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
-        </CardHeader>
+          {canDelete && (
+            <DeleteOrgDialog
+              org={org}
+              organizationType={organizationType}
+              parentId={parentId}
+            />
+          )}
+        </div>
+      </CardHeader>
 
+      <CardContent className="px-4 pb-4 space-y-4">
         <Badge variant="indigo" className="w-fit">
           {t(`SYSTEM__org_type__${org.org_type}`)}
         </Badge>
