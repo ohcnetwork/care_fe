@@ -207,4 +207,31 @@ test.describe("Facility Devices Management", () => {
       .getByText("This field is required");
     await expect(registeredNameError).toBeVisible();
   });
+
+  test("Clear validation error when switching contact point type", async ({
+    page,
+  }) => {
+    // Navigate to Add Device form
+    await page.getByRole("link", { name: "Add Device" }).click();
+
+    // Add a contact point
+    await page.getByRole("button", { name: "Add Contact Point" }).click();
+
+    // Select Email type
+    await page.getByRole("combobox", { name: "Select contact system" }).click();
+    await page.getByRole("option", { name: "Email" }).click();
+
+    // Enter invalid email
+    await page.getByPlaceholder("name@example.com").fill("invalid-email");
+
+    // Verify validation error appears
+    await expect(page.getByText("Invalid email")).toBeVisible();
+
+    // Switch to URL type
+    await page.getByRole("combobox", { name: "Select contact system" }).click();
+    await page.getByRole("option", { name: "URL" }).click();
+
+    // Verify validation error is gone
+    await expect(page.getByText("Invalid email")).not.toBeVisible();
+  });
 });
