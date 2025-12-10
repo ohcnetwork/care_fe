@@ -7,7 +7,7 @@ import BedAvailabilityDashboard from "@/pages/Facility/BedAvailabilityDashboard"
 
 import { AppRoutes } from "@/Routers/AppRouter";
 import TemplateBuilder from "@/pages/Encounters/TemplateBuilder/TemplateBuilder";
-import TemplateList from "@/pages/Encounters/TemplateBuilder/TemplateList";
+import TemplatePage from "@/pages/Encounters/TemplateBuilder/TemplatePage";
 import AccountList from "@/pages/Facility/billing/account/AccountList";
 import AccountShow from "@/pages/Facility/billing/account/AccountShow";
 import CreateInvoicePage from "@/pages/Facility/billing/account/CreateInvoice";
@@ -171,7 +171,7 @@ const FacilityRoutes: AppRoutes = {
     />
   ),
   "/facility/:facilityId/template": ({ facilityId }) => (
-    <TemplateList facilityId={facilityId} />
+    <TemplatePage facilityId={facilityId} />
   ),
   "/facility/:facilityId/template/builder": ({ facilityId }) => (
     <TemplateBuilder facilityId={facilityId} />
