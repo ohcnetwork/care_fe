@@ -167,7 +167,6 @@ export default function PatientIdentifierConfigForm({
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("Form submitted with values:", values);
     const newValues = {
       ...values,
       config: {
