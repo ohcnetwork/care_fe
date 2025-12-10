@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Stethoscope } from "lucide-react";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -111,6 +111,8 @@ export default function CreateEncounterForm({
     },
   });
 
+  const status = form.watch("status");
+
   const tagIds = form.watch("tags");
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
   const selectedTags = tagQueries
@@ -147,6 +149,17 @@ export default function CreateEncounterForm({
 
     createEncounter(encounterRequest);
   }
+
+  const startDate = form.watch("start_date");
+
+  useEffect(() => {
+    if (
+      status !== EncounterStatus.PLANNED &&
+      new Date(startDate) > new Date()
+    ) {
+      form.setValue("start_date", new Date().toISOString());
+    }
+  }, [status, startDate, form]);
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -199,6 +212,14 @@ export default function CreateEncounterForm({
                             field.onChange(updatedDate.toISOString());
                           }}
                           className="h-9"
+                          disabled={(date) => {
+                            if (status !== EncounterStatus.PLANNED) {
+                              const today = new Date();
+                              today.setHours(23, 59, 59, 999);
+                              return date > today;
+                            }
+                            return false;
+                          }}
                         />
                         <Input
                           type="time"
