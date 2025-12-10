@@ -174,17 +174,25 @@ test.describe("Create an Encounter", () => {
     });
 
     await page.getByRole("link", { name: "Patient Home" }).first().click();
+    // Wait for the patient list to render before interacting with patient-specific links
     await page.waitForLoadState("networkidle");
 
-    await page.getByRole("link", { name: "View Profile" }).first().click();
+    // Assuming the 'View Profile' link is directly accessible in the patient list view:
+    await page
+      .getByRole("link", { name: "View Profile" })
+      .first()
+      .click({ timeout: 15000 });
     await page.waitForLoadState("networkidle");
 
+    // This locator is often unreliable; adding a wait and strong locator is key.
     await page.getByRole("link", { name: "View Encounters" }).first().click();
     await page.waitForLoadState("networkidle");
 
+    // Navigate to the main Treatment Summary page
     await page.getByRole("link", { name: "Treatment Summary" }).click();
     await page.waitForLoadState("networkidle");
 
+    // Check for the main page header
     await expect(
       page.getByRole("heading", { name: "Treatment Summary" }),
     ).toBeVisible({ timeout: 15000 });
@@ -199,8 +207,6 @@ test.describe("Create an Encounter", () => {
 
     // Verify Questionnaire section presence
     await expect(page.getByText("Questionnaire Group Creation")).toBeVisible();
-
-    // Trigger Print (Functional check)
     await expect(page.getByRole("button", { name: "Print" })).toBeVisible();
     await page.getByRole("button", { name: "Print" }).click();
   });
