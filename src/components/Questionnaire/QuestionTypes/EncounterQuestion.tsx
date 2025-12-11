@@ -246,13 +246,12 @@ export function EncounterQuestion({
         {/* Basic Details */}
         <div className="space-y-2">
           <Label>{t("encounter_status")}</Label>
-          <div
+          <output
             data-testid="encounter-status"
-            role="status"
             aria-label={t("current_encounter_status")}
           >
             {t(`encounter_status__${encounter.status}`)}
-          </div>
+          </output>
           <Select
             value={encounter.status}
             onValueChange={(value: EncounterStatus) => {
