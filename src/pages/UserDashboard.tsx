@@ -68,7 +68,7 @@ export default function UserDashboard() {
       <div className="flex flex-col sm:flex-row gap-4 items-center rounded-lg w-full justify-between">
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <Avatar
-            name={formatName(user)}
+            name={formatName(user, true)}
             imageUrl={user.profile_picture_url}
             className="h-14 w-14 md:h-16 md:w-16"
           />

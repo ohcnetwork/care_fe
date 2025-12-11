@@ -8,11 +8,9 @@ import {
 } from "@/hooks/useKeyboardShortcuts";
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
-import {
-  formatKeyboardShortcut,
-  useShortcutDisplays,
-} from "@/Utils/keyboardShortcutUtils";
+import { formatKeyboardShortcut } from "@/Utils/keyboardShortcutUtils";
 import shortcutsConfig from "@/config/keyboardShortcuts.json";
+import { useShortcutDisplay } from "@/context/ShortcutContext";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 interface ShortcutsConfig {
@@ -106,8 +104,6 @@ export function useEncounterShortcuts() {
         ),
       "treatment-summary": () =>
         navigate(buildEncounterUrl("/treatment_summary")),
-      "discharge-summary": () =>
-        navigate(buildEncounterUrl("/files?file=discharge_summary")),
       "encounter-overview": () => navigate(buildEncounterUrl("/updates")),
       "add-questionnaire": () => {
         document.dispatchEvent(new CustomEvent("open-forms-dialog"));
@@ -196,10 +192,16 @@ function formatKeyDisplay(key: string): string {
 
 // Hook to get shortcut display strings for actions
 export function useEncounterShortcutDisplays() {
+  const getShortcutDisplay = useShortcutDisplay();
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
-  const dynamicResolver = useCallback(
+  return useCallback(
     (actionId: string): string | undefined => {
+      // Try to get from context first
+      const display = getShortcutDisplay(actionId);
+      if (display) return display;
+
+      // Handle dynamic questionnaire shortcuts
       if (actionId.startsWith("questionnaire-")) {
         const slug = actionId.replace("questionnaire-", "");
         const index = (questionnaireOptions?.results || []).findIndex(
@@ -217,8 +219,6 @@ export function useEncounterShortcutDisplays() {
       }
       return undefined;
     },
-    [questionnaireOptions],
+    [getShortcutDisplay, questionnaireOptions],
   );
-
-  return useShortcutDisplays(["encounter"], dynamicResolver);
 }
