@@ -11,6 +11,7 @@ import { DateTimeInput } from "@/components/Common/DateTimeInput";
 import { LocationHistory } from "@/types/emr/encounter/encounter";
 import { LocationAssociationStatus } from "@/types/location/association";
 
+import { cn } from "@/lib/utils";
 import { LocationCard } from "./LocationCard";
 
 interface EditingState {
@@ -33,6 +34,9 @@ interface LocationCardWrapperProps {
   isPending: boolean;
   showBackButton?: boolean;
   title?: string;
+  keepBedActive?: boolean;
+  onKeepBedActiveChange?: (value: boolean) => void;
+  areLinkedLocations?: boolean;
 }
 
 export function LocationCardWrapper({
@@ -46,6 +50,9 @@ export function LocationCardWrapper({
   isPending,
   showBackButton,
   title,
+  keepBedActive,
+  onKeepBedActiveChange,
+  areLinkedLocations = false,
 }: LocationCardWrapperProps) {
   const { t } = useTranslation();
   const isEditing = editingState.locationId === locationHistory.id;
@@ -93,93 +100,110 @@ export function LocationCardWrapper({
         </div>
       )}
 
-      <div className="border border-gray-200 rounded-lg bg-gray-50 px-2 py-1">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-medium text-gray-600">
-            {status === "active"
-              ? t("current_location")
+      <div className="flex flex-col gap-1">
+        <h3 className="text-base font-semibold">
+          {status === "active"
+            ? t("patient_current_location")
+            : status === "reserved"
+              ? t("linked_locations")
               : t("planned_location")}
-          </h3>
-        </div>
-        <LocationCard locationHistory={locationHistory} status={status} />
+        </h3>
 
-        {isEditing ? (
-          <div className="mt-4 pt-2 space-y-2">
-            {isCompletingStay ? (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>{t("end_time")}</Label>
-                  <DateTimeInput
-                    value={
-                      editingState.timeConfig.end?.toISOString() ??
-                      new Date().toISOString()
-                    }
-                    onDateChange={(newISO) =>
-                      setEditingState((prev) => ({
-                        ...prev,
-                        timeConfig: {
-                          ...prev.timeConfig,
-                          end: newISO ? new Date(newISO) : undefined,
-                        },
-                      }))
-                    }
-                  />
+        <div
+          className={cn(
+            "flex gap-2 border border-gray-200 rounded-lg bg-gray-50 px-2 py-1",
+            areLinkedLocations
+              ? "flex-row items-start"
+              : "flex-col justify-between",
+          )}
+        >
+          <LocationCard
+            locationHistory={locationHistory}
+            status={status}
+            keepBedActive={keepBedActive}
+            onKeepBedActiveChange={onKeepBedActiveChange}
+          />
+
+          {isEditing ? (
+            <div className="mt-4 pt-2 space-y-2">
+              {isCompletingStay ? (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>{t("end_time")}</Label>
+                    <DateTimeInput
+                      value={
+                        editingState.timeConfig.end?.toISOString() ??
+                        new Date().toISOString()
+                      }
+                      onDateChange={(newISO) =>
+                        setEditingState((prev) => ({
+                          ...prev,
+                          timeConfig: {
+                            ...prev.timeConfig,
+                            end: newISO ? new Date(newISO) : undefined,
+                          },
+                        }))
+                      }
+                    />
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-2">
-                  <Label>{t("start_time")}</Label>
-                  <DateTimeInput
-                    value={editingState.timeConfig.start?.toISOString()}
-                    onDateChange={(newISO) =>
-                      setEditingState((prev) => ({
-                        ...prev,
-                        timeConfig: {
-                          ...prev.timeConfig,
-                          start: new Date(newISO),
-                        },
-                      }))
-                    }
-                  />
-                </div>
-                {showEndTimeField &&
-                  editingState.timeConfig.status !== "active" && (
-                    <div className="space-y-2">
-                      <Label>{t("end_time")}</Label>
-                      <DateTimeInput
-                        value={editingState.timeConfig.end?.toISOString()}
-                        onDateChange={(newISO) =>
-                          setEditingState((prev) => ({
-                            ...prev,
-                            timeConfig: {
-                              ...prev.timeConfig,
-                              end: newISO ? new Date(newISO) : undefined,
-                            },
-                          }))
-                        }
-                      />
-                    </div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <Label>{t("start_time")}</Label>
+                    <DateTimeInput
+                      value={editingState.timeConfig.start?.toISOString()}
+                      onDateChange={(newISO) =>
+                        setEditingState((prev) => ({
+                          ...prev,
+                          timeConfig: {
+                            ...prev.timeConfig,
+                            start: new Date(newISO),
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                  {showEndTimeField &&
+                    editingState.timeConfig.status !== "active" && (
+                      <div className="space-y-2">
+                        <Label>{t("end_time")}</Label>
+                        <DateTimeInput
+                          value={editingState.timeConfig.end?.toISOString()}
+                          onDateChange={(newISO) =>
+                            setEditingState((prev) => ({
+                              ...prev,
+                              timeConfig: {
+                                ...prev.timeConfig,
+                                end: newISO ? new Date(newISO) : undefined,
+                              },
+                            }))
+                          }
+                        />
+                      </div>
+                    )}
+                </>
+              )}
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={handleCancelEdit}>
+                  {t("cancel")}
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleConfirm}
+                  disabled={isPending}
+                >
+                  {isPending && (
+                    <Loader2 className="mr-2 size-4 animate-spin" />
                   )}
-              </>
-            )}
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={handleCancelEdit}>
-                {t("cancel")}
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleConfirm}
-                disabled={isPending}
-              >
-                {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-                {isCompletingStay ? t("complete") : t("save")}
-              </Button>
+                  {isCompletingStay ? t("complete") : t("save")}
+                </Button>
+              </div>
             </div>
-          </div>
-        ) : (
-          children && <div className="mt-2">{children}</div>
-        )}
+          ) : (
+            children && <div>{children}</div>
+          )}
+        </div>
       </div>
     </div>
   );

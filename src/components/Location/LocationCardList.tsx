@@ -26,7 +26,7 @@ export function LocationCardList({
 
   return (
     <div className={cn("grid grid-cols-1 lg:grid-cols-3 gap-4", className)}>
-      {locations.map((location) => (
+      {locations?.map((location) => (
         <Card
           key={location.id}
           className="cursor-pointer hover:bg-gray-50 transition-colors"

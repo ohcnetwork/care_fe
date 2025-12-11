@@ -1450,6 +1450,8 @@
   "current_address": "Current Address and Route to Home",
   "current_balance": "Current Balance",
   "current_encounter": "Current Encounter",
+  "patient_current_location": "Patient's Current Location",
+  "linked_locations": "Linked Locations",
   "current_location": "Current Location",
   "current_location_description": "The current location of this device",
   "current_order": "Current Order",

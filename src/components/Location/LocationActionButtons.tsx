@@ -44,25 +44,20 @@ export function LocationActionButtons({
 
   const buttons: ActionButton[] = [];
 
-  buttons.push({
-    label: status === "planned" ? t("cancel_plan") : t("mark_as_error"),
-    onClick: onCancel,
-    variant: "destructive",
-    className: "",
-  });
-
-  buttons.push({
-    label: t("move_to_another_bed"),
-    onClick: onMove,
-    variant: "outline",
-    className: "border-gray-400 shadow-sm",
-  });
+  if (status !== "reserved") {
+    buttons.push({
+      label: t("move_to_another_bed"),
+      onClick: onMove,
+      variant: "outline",
+      className: "border-gray-400 shadow-sm",
+    });
+  }
 
   if (status === "active" && onComplete) {
     buttons.push({
       label: t("complete_bed_stay"),
       onClick: () => onComplete(location),
-      variant: "outline",
+      variant: "primary",
       className: "border-gray-400 shadow-sm",
     });
   }
@@ -78,18 +73,16 @@ export function LocationActionButtons({
 
   return (
     <div className="flex flex-wrap gap-2 items-center">
-      <div className="flex flex-wrap gap-2 flex-1">
-        {buttons.map((button, index) => (
-          <Button
-            key={index}
-            variant={button.variant}
-            onClick={button.onClick}
-            className={cn("sm:w-auto w-full", button.className)}
-          >
-            {button.label}
-          </Button>
-        ))}
-      </div>
+      {buttons.map((button, index) => (
+        <Button
+          key={index}
+          variant={button.variant}
+          onClick={button.onClick}
+          className={cn("sm:w-auto w-full", button.className)}
+        >
+          {button.label}
+        </Button>
+      ))}
       {onUpdateTime && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -98,6 +91,9 @@ export function LocationActionButtons({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onCancel()}>
+              {status === "planned" ? t("cancel_plan") : t("mark_as_error")}
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onUpdateTime(location)}>
               {t("update_time")}
             </DropdownMenuItem>

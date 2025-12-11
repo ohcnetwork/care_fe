@@ -33,6 +33,7 @@ interface LocationNavigationProps {
   onLoadMore: () => void;
   onGoBack: () => void;
   onClearSelection: () => void;
+  linkedLocations: LocationList[];
 }
 
 export function LocationNavigation({
@@ -55,6 +56,7 @@ export function LocationNavigation({
   onLoadMore,
   onGoBack,
   onClearSelection,
+  linkedLocations,
 }: LocationNavigationProps) {
   const { t } = useTranslation();
 
@@ -74,6 +76,11 @@ export function LocationNavigation({
           />
         </div>
       </form>
+
+      <LocationCardList
+        locations={linkedLocations}
+        onLocationClick={onLocationClick}
+      />
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
