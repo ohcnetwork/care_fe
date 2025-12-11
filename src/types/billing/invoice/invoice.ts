@@ -35,16 +35,20 @@ export interface InvoiceCreate extends Omit<InvoiceBase, "id" | "number"> {
   charge_items: string[];
 }
 
-export interface InvoiceRead extends InvoiceBase {
+export interface InvoiceList extends InvoiceBase {
   account: AccountRead;
-  charge_items: ChargeItemRead[];
-  total_price_components: MonetaryComponent[];
   total_net: number;
   total_gross: number;
-  payment_reconciliations?: PaymentReconciliationRead[];
+  title: string;
   created_date: string;
-  created_by: UserReadMinimal;
   modified_date: string;
+}
+
+export interface InvoiceRead extends InvoiceList {
+  charge_items: ChargeItemRead[];
+  total_price_components: MonetaryComponent[];
+  payment_reconciliations?: PaymentReconciliationRead[];
+  created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
 }
 
