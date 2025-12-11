@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -22,7 +22,6 @@ export interface FilterSelectProps {
   icon?: React.ReactNode;
   className?: string;
   placeholder?: string;
-  conjunctionText?: string;
 }
 
 export function FilterSelect({
@@ -34,7 +33,6 @@ export function FilterSelect({
   icon,
   className,
   placeholder,
-  conjunctionText,
 }: FilterSelectProps) {
   const { t } = useTranslation();
   return (
@@ -53,9 +51,14 @@ export function FilterSelect({
             {icon || <CareIcon icon="l-filter" className="size-4" />}
             {value ? (
               <>
-                <span className="text-gray-950">{label}</span>
-                <span className="text-gray-600 lowercase">
-                  {conjunctionText || t("is")}
+                <span className="text-gray-950">
+                  <Trans
+                    i18nKey="filter_label_is"
+                    components={{
+                      style: <span className="text-gray-600 ml-1" />,
+                    }}
+                    values={{ label }}
+                  />
                 </span>
                 <span className="text-gray-950 underline">{t(value)}</span>
               </>
