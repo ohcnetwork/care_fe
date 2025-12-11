@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -249,6 +250,7 @@ export function EncounterQuestion({
           <output
             data-testid="encounter-status"
             aria-label={t("current_encounter_status")}
+            className="block w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm"
           >
             {t(`encounter_status__${encounter.status}`)}
           </output>
@@ -360,13 +362,13 @@ export function EncounterQuestion({
               onConfirm={handleUpdateEncounter}
               disabled={disabled}
               trigger={
-                <button
+                <Button
                   type="button"
                   data-testid="mark-as-discharged"
                   disabled={disabled}
                 >
                   {t("mark_for_discharge")}
-                </button>
+                </Button>
               }
             />
           </div>
