@@ -2,8 +2,11 @@ import { faker } from "@faker-js/faker";
 import { expect, Page, test } from "@playwright/test";
 import { expectedSlug } from "tests/helper/utils";
 import {
+  LOINC_CODE_NAME,
+  SNOMED_CODE_NAME,
   STATUS_OPTIONS,
   SYSTEM_OPTIONS,
+  UCUM_CODE_NAME,
   VALID_LOINC_CODES,
   VALID_SNOMED_CODES,
   VALID_UCUM_CODES,
@@ -17,6 +20,7 @@ let status: string;
 let description: string;
 let code: string;
 let system: string;
+let codeName: string;
 
 async function createBasicValueSet(page: Page) {
   await page.getByRole("link", { name: "Create ValueSet" }).click();
@@ -36,12 +40,15 @@ test.describe("ValueSet Edit", () => {
     switch (system) {
       case "SNOMED":
         code = faker.helpers.arrayElement(VALID_SNOMED_CODES);
+        codeName = SNOMED_CODE_NAME[code];
         break;
       case "LOINC":
         code = faker.helpers.arrayElement(VALID_LOINC_CODES);
+        codeName = LOINC_CODE_NAME[code];
         break;
       case "UCUM":
         code = faker.helpers.arrayElement(VALID_UCUM_CODES);
+        codeName = UCUM_CODE_NAME[code];
         break;
     }
     await createBasicValueSet(page);
@@ -66,13 +73,17 @@ test.describe("ValueSet Edit", () => {
     await page.getByRole("option", { name: system }).click();
     await page.getByRole("button", { name: "Add Concept" }).click();
     await page.getByRole("textbox", { name: "Code" }).fill(code);
-    await page.getByRole("button").filter({ hasText: /^$/ }).nth(4).click();
+    await page.getByLabel("Verify code").click();
 
     await expect(
       page
         .getByRole("listitem")
         .filter({ hasText: "Code verified successfully" }),
     ).toBeVisible();
+
+    await expect(page.getByRole("textbox", { name: "Unverified" })).toHaveValue(
+      codeName,
+    );
 
     await page.getByRole("button", { name: "Save ValueSet" }).click();
 
