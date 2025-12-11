@@ -57,6 +57,7 @@ interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
   > & {
     requester: UserReadMinimal;
   };
+  locationData?: LocationList[];
 }
 
 interface ServiceRequestQuestionProps {
@@ -195,24 +196,27 @@ function ServiceRequestForm({
           </Badge>
         </div>
       )}
-      <div className="flex items-center gap-2 flex-wrap col-span-1 sm:col-span-2 xl:col-span-4">
-        <span className="font-medium text-sm text-gray-700">
-          {t("locations")}:
-        </span>
-        {activityDefinition?.locations &&
-          activityDefinition?.locations.length > 0 &&
-          activityDefinition?.locations.map((location) => {
-            return (
-              <Badge
-                key={location.id}
-                variant="outline"
-                className="bg-gray-50 text-gray-700 border-gray-200"
-              >
-                {location?.name || location.id}
-              </Badge>
-            );
-          })}
-      </div>
+      {(serviceRequest.locationData || activityDefinition?.locations) &&
+        (serviceRequest.locationData || activityDefinition?.locations)!.length >
+          0 && (
+          <div className="flex items-center gap-2 flex-wrap col-span-1 sm:col-span-2 xl:col-span-4">
+            <span className="font-medium text-sm text-gray-700">
+              {t("locations")}:
+            </span>
+            {(serviceRequest.locationData ||
+              activityDefinition?.locations)!.map((location) => {
+              return (
+                <Badge
+                  key={location.id}
+                  variant="outline"
+                  className="bg-gray-50 text-gray-700 border-gray-200"
+                >
+                  {location?.name || location.id}
+                </Badge>
+              );
+            })}
+          </div>
+        )}
     </div>
   );
 
@@ -514,6 +518,7 @@ export function ServiceRequestQuestion({
         },
         activity_definition: selectedActivityDefinition,
         encounter: encounterId,
+        locationData: selectedActivityDefinitionData.locations || [],
       };
 
       setPreviewServiceRequest(newServiceRequest);
