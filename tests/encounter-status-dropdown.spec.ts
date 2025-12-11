@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+// TODO: Enable once API mocking is implemented
+// Required setup:
+// - Mock encounterApi.get to return encounters with different statuses
+// - Provide valid test facility, patient, and encounter IDs
+// - Add beforeEach setup for test data
 test.describe.skip("Encounter Status Dropdown Logic", () => {
   const FACILITY_ID = "test-facility-id";
   const PATIENT_ID = "test-patient-id";

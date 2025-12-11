@@ -246,7 +246,10 @@ export function EncounterQuestion({
         {/* Basic Details */}
         <div className="space-y-2">
           <Label>{t("encounter_status")}</Label>
-          <div data-testid="encounter-status">
+          <div
+            data-testid="encounter-status"
+            aria-label={t("current_encounter_status")}
+          >
             {t(`encounter_status__${encounter.status}`)}
           </div>
           <Select
@@ -258,7 +261,6 @@ export function EncounterQuestion({
               });
             }}
             disabled={disabled || isDischarged}
-            data-testid="status-dropdown"
           >
             <SelectTrigger data-testid="encounter-status-select">
               <SelectValue placeholder={t("select_status")} />
