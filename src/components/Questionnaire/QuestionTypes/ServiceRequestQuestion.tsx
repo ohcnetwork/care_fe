@@ -479,6 +479,9 @@ export function ServiceRequestQuestion({
     (questionnaireResponse.values?.[0]
       ?.value as unknown as ServiceRequestApplyActivityDefinitionSpec[]) || [],
   );
+  const [activityDefinitions, setActivityDefinitions] = useState<
+    Record<string, ActivityDefinitionReadSpec>
+  >({});
   const { data: locations } = useQuery({
     queryKey: ["locations", facilityId],
     queryFn: query(locationApi.list, {
@@ -540,9 +543,13 @@ export function ServiceRequestQuestion({
   ]);
 
   const handleAddServiceRequest = () => {
-    if (!previewServiceRequest) return;
+    if (!previewServiceRequest || !selectedActivityDefinitionData) return;
 
     setServiceRequests([...serviceRequests, previewServiceRequest]);
+    setActivityDefinitions({
+      ...activityDefinitions,
+      [selectedActivityDefinitionData.slug]: selectedActivityDefinitionData,
+    });
     updateQuestionnaireResponseCB(
       [
         {
@@ -680,6 +687,9 @@ export function ServiceRequestQuestion({
         <ServiceRequestForm
           key={`${serviceRequest.service_request.code.code}-${index}`}
           serviceRequest={serviceRequest}
+          activityDefinition={
+            activityDefinitions[serviceRequest.activity_definition]
+          }
           onUpdate={(updates) => handleUpdateServiceRequest(index, updates)}
           onRemove={() => handleRemoveServiceRequest(index)}
           onAdd={handleAddServiceRequest}
