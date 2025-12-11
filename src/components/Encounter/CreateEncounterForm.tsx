@@ -40,8 +40,11 @@ import {
 
 import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 
+import { getPermissions } from "@/common/Permissions";
+import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import FacilityOrganizationSelector from "@/pages/Facility/settings/organizations/components/FacilityOrganizationSelector";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ENCOUNTER_CLASS_ICONS,
   ENCOUNTER_PRIORITY,
@@ -83,6 +86,13 @@ export default function CreateEncounterForm({
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   useShortcutSubContext();
+  const facility = useCurrentFacility();
+
+  const { hasPermission } = usePermissions();
+  const { canViewEncounter } = getPermissions(
+    hasPermission,
+    facility?.facility?.permissions ?? [],
+  );
 
   const encounterFormSchema = z.object({
     status: z.enum([
@@ -125,6 +135,9 @@ export default function CreateEncounterForm({
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.();
+      if (!canViewEncounter) {
+        return;
+      }
       if (!disableRedirectOnSuccess) {
         navigate(
           `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
