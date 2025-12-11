@@ -29,10 +29,13 @@ import PaginationComponent from "@/components/Common/Pagination";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import query from "@/Utils/request/query";
+import { useShortcuts } from "@/context/ShortcutContext";
+
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import query from "@/Utils/request/query";
 
 export function LocationSwitcher() {
   const { t } = useTranslation();
@@ -123,6 +126,7 @@ export function LocationSelectorDialog({
   onLocationSelect?: (location: LocationList) => void;
 }) {
   const { t } = useTranslation();
+  const shortcuts = useShortcuts();
   const [locationLevel, setLocationLevel] = useState<LocationList[]>([]);
   const [searchValue, setSearchValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -130,6 +134,16 @@ export function LocationSelectorDialog({
   const path = usePath();
   const subPath =
     path?.match(/\/facility\/[^/]+\/locations\/[^/]+\/(.*)/)?.[1] || "";
+
+  // this for enabling keyboard shortcuts even when inside input fields
+  useEffect(() => {
+    if (open) {
+      shortcuts.setIgnoreInputFields(true);
+    }
+    return () => {
+      shortcuts.setIgnoreInputFields(false);
+    };
+  }, [open, shortcuts]);
 
   const currentParentId = locationLevel.length
     ? locationLevel[locationLevel.length - 1].id
@@ -317,11 +331,7 @@ export function LocationSelectorDialog({
                   )
                 }
               >
-                <span>{t("done")}</span>
-                <span className="flex text-xs items-center gap-1 p-1 shadow rounded-md bg-green-900">
-                  {t("shift_key")} +
-                  <CareIcon icon="l-corner-down-left" className="size-3" />
-                </span>
+                <ShortcutBadge actionId="submit-action" />
               </Button>
             </div>
           </div>
@@ -336,6 +346,7 @@ export function LocationSelectorDialog({
                 setCurrentPage(1);
               }}
               value={searchValue}
+              autoFocus
             />
             <CommandList
               className="max-h-[calc(100vh-30rem)]"

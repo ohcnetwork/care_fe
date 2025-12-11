@@ -66,7 +66,18 @@ export default function PatientIdentifierConfigForm({
         system: z.string().trim().min(1, t("field_required")),
         required: z.boolean(),
         unique: z.boolean(),
-        regex: z.string(),
+        regex: z.string().refine(
+          (val) => {
+            if (!val) return true;
+            try {
+              new RegExp(val);
+              return true;
+            } catch {
+              return false;
+            }
+          },
+          { message: t("invalid_regex") },
+        ),
         display: z.string().trim().min(1, t("field_required")),
         default_value: z.string().trim().optional().nullable(),
         retrieve_config: z.object({
@@ -279,33 +290,19 @@ export default function PatientIdentifierConfigForm({
                     <FormField
                       control={form.control}
                       name="config.regex"
-                      render={({ field }) => {
-                        let regexError = "";
-                        try {
-                          if (field.value) new RegExp(field.value);
-                        } catch {
-                          regexError = t("invalid_regex");
-                        }
-                        return (
-                          <FormItem>
-                            <FormLabel>{t("regex")}</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                placeholder={t("eg_regex_pattern")}
-                              />
-                            </FormControl>
-                            <FormDescription>{t("regex_help")}</FormDescription>
-                            {(regexError ||
-                              form.formState.errors.config?.regex) && (
-                              <div className="text-xs text-red-500 mt-1">
-                                {regexError ||
-                                  form.formState.errors.config?.regex?.message}
-                              </div>
-                            )}
-                          </FormItem>
-                        );
-                      }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("regex")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder={t("eg_regex_pattern")}
+                            />
+                          </FormControl>
+                          <FormDescription>{t("regex_help")}</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
                 </div>
@@ -458,11 +455,14 @@ export default function PatientIdentifierConfigForm({
                     value={form.watch("config.default_value") ? "auto" : "user"}
                     onValueChange={(v) => {
                       if (v === "user") {
-                        form.setValue("config.default_value", "");
+                        form.setValue("config.default_value", "", {
+                          shouldDirty: true,
+                        });
                       } else if (v === "auto") {
                         form.setValue(
                           "config.default_value",
                           "f'{patient_count}'",
+                          { shouldDirty: true },
                         );
                       }
                     }}
