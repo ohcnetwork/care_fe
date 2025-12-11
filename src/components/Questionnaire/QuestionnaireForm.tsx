@@ -584,13 +584,13 @@ export function QuestionnaireForm({
         if (q.required && isQuestionEnabled(q, form.responses)) {
           // Handle appointment validation
           const response = form.responses.find((r) => r.question_id === q.id);
-          const hasValue = response?.values?.some(
-            (v) =>
-              v.value !== undefined &&
-              v.value !== null &&
-              v.value !== "" &&
-              (Array.isArray(v.value) ? v.value.length > 0 : true),
-          );
+
+          const hasValue = response?.values?.some((v) => {
+            if (v.value === undefined || v.value === null || v.value === "") {
+              return false;
+            }
+            return Array.isArray(v.value) ? v.value.length > 0 : true;
+          });
 
           const hasProperty = (arr: any[] | undefined, prop: string) =>
             Array.isArray(arr) && arr.some((item) => item?.[prop] != null);
