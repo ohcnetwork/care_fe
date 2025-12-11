@@ -442,6 +442,7 @@ export function ValueSetForm({
                       .replace(/[^a-z0-9_-]/g, "");
                     form.setValue("slug", sanitizedValue, {
                       shouldValidate: true,
+                      shouldDirty: true,
                     });
                   }}
                 />
