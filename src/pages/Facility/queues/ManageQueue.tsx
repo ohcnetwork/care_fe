@@ -164,9 +164,14 @@ export function ManageQueuePage({
               <Switch
                 checked={autoRefresh === "true"}
                 onCheckedChange={(checked) =>
-                  setQueryParams({
-                    autoRefresh: checked ? "true" : "false",
-                  })
+                  setQueryParams(
+                    {
+                      autoRefresh: checked ? "true" : "false",
+                    },
+                    {
+                      replace: true,
+                    },
+                  )
                 }
               />
               <div className="flex items-center gap-1">
@@ -198,9 +203,14 @@ export function ManageQueuePage({
                     <Switch
                       checked={autoRefresh === "true"}
                       onCheckedChange={(checked) =>
-                        setQueryParams({
-                          autoRefresh: checked ? "true" : "false",
-                        })
+                        setQueryParams(
+                          {
+                            autoRefresh: checked ? "true" : "false",
+                          },
+                          {
+                            replace: true,
+                          },
+                        )
                       }
                     />
                   </div>
