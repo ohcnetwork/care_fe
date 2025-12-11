@@ -1,4 +1,4 @@
-import { BadgeInfo, ExternalLink, File, X } from "lucide-react";
+import { ExternalLink, File, X } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -11,12 +11,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 import { Avatar } from "@/components/Common/Avatar";
 import RelativeDateTooltip from "@/components/Common/RelativeDateTooltip";
-import ClinicalInformationRow from "@/components/Patient/Common/ClinicalInformationRow";
+import ClinicalInformationRow, {
+  BadgeButtonDropdownTrigger,
+} from "@/components/Patient/Common/ClinicalInformationRow";
 
 import { formatName } from "@/Utils/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
@@ -52,14 +53,7 @@ const DiagnosisCard = ({
             {t(diagnosis.clinical_status)}
           </Badge>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="link"
-                className="text-gray-500 hover:text-gray-700 p-1"
-              >
-                <BadgeInfo size={16} />
-              </Button>
-            </DropdownMenuTrigger>
+            <BadgeButtonDropdownTrigger note={diagnosis.note} />
             <DropdownMenuContent className="mx-1 w-28 text-xs p-1" align="end">
               {diagnosis.note && (
                 <DropdownMenuItem
