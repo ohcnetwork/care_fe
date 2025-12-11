@@ -27,6 +27,11 @@ export default {
     TRes: Type<EncounterRead>(),
     TBody: Type<EncounterEdit>(),
   },
+  restart: {
+    path: "/api/v1/encounter/{id}/restart/",
+    method: HttpMethod.POST,
+    TRes: Type<EncounterRead>(),
+  },
 
   // Organization Management
   addOrganization: {

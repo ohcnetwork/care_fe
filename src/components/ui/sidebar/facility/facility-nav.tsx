@@ -27,7 +27,7 @@ function generateFacilityLinks(
     canListEncounters: boolean;
     canWriteAppointment: boolean;
     canCreateEncounter: boolean;
-    canViewEncounter: boolean;
+    canReadEncounter: boolean;
     canListTokenCategories: boolean;
     canListTemplate: boolean;
   },
@@ -220,7 +220,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canListEncounters,
     canWriteAppointment,
     canCreateEncounter,
-    canViewEncounter,
+    canReadEncounter,
     canListTokenCategories,
     canListTemplate,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
@@ -229,7 +229,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
     canListEncounters,
     canWriteAppointment,
     canCreateEncounter,
-    canViewEncounter,
+    canReadEncounter,
     canListTokenCategories,
     canListTemplate,
   };
