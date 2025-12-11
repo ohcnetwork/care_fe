@@ -355,7 +355,11 @@ export function EncounterQuestion({
               onConfirm={handleUpdateEncounter}
               disabled={disabled}
               trigger={
-                <button data-testid="mark-as-discharged" disabled={disabled}>
+                <button
+                  type="button"
+                  data-testid="mark-as-discharged"
+                  disabled={disabled}
+                >
                   {t("mark_for_discharge")}
                 </button>
               }
