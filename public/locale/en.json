@@ -4856,6 +4856,7 @@
   "service_records_none": "No service history available",
   "service_records_none_description": "No service history for this device",
   "service_request": "Service Request",
+  "service_request_cancelled": "Service request cancelled",
   "service_request_completed": "Service request marked as completed",
   "service_request_completion_confirmation": "Are you sure you want to mark this service request as complete? This action cannot be undone.",
   "service_request_detail_page_description_prefix": "{{count}} deliveries have been received",
