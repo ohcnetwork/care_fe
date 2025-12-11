@@ -8,9 +8,11 @@ import {
 } from "@/hooks/useKeyboardShortcuts";
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 
-import { formatKeyboardShortcut } from "@/Utils/keyboardShortcutUtils";
+import {
+  formatKeyboardShortcut,
+  useShortcutDisplays,
+} from "@/Utils/keyboardShortcutUtils";
 import shortcutsConfig from "@/config/keyboardShortcuts.json";
-import { useShortcutDisplay } from "@/context/ShortcutContext";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 
 interface ShortcutsConfig {
@@ -192,16 +194,10 @@ function formatKeyDisplay(key: string): string {
 
 // Hook to get shortcut display strings for actions
 export function useEncounterShortcutDisplays() {
-  const getShortcutDisplay = useShortcutDisplay();
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
 
-  return useCallback(
+  const dynamicResolver = useCallback(
     (actionId: string): string | undefined => {
-      // Try to get from context first
-      const display = getShortcutDisplay(actionId);
-      if (display) return display;
-
-      // Handle dynamic questionnaire shortcuts
       if (actionId.startsWith("questionnaire-")) {
         const slug = actionId.replace("questionnaire-", "");
         const index = (questionnaireOptions?.results || []).findIndex(
@@ -219,6 +215,8 @@ export function useEncounterShortcutDisplays() {
       }
       return undefined;
     },
-    [getShortcutDisplay, questionnaireOptions],
+    [questionnaireOptions],
   );
+
+  return useShortcutDisplays(["encounter"], dynamicResolver);
 }
