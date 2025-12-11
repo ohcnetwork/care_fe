@@ -274,7 +274,7 @@ export default function QueuesIndex({
     updateQuery({ resource_id: resourceId });
   };
 
-  // Fetch queues - optimize query key to only include necessary params
+  // Fetch queues with all query parameters
   const { data: queuesResponse, isLoading: queuesLoading } = useQuery({
     queryKey: ["tokenQueues", facilityId, effectiveResourceId, qParams],
     queryFn: query(tokenQueueApi.list, {
