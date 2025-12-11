@@ -446,7 +446,7 @@ export const request = async <TResponse = unknown>(
   return response.json();
 };
 
-const CARE_API_WORKERS = parseInt(process.env.CARE_API_WORKERS ?? "2");
+const CARE_API_WORKERS = parseInt(process.env.CARE_API_WORKERS ?? "4");
 
 /**
  * Batch a request to the CARE API

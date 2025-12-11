@@ -25,6 +25,7 @@ const requiredHeaderKeys = [
   "batchNumber",
   "expiryDate",
   "quantity",
+  "productType",
   "purchasePrice",
   "sellingPrice",
   "taxRate",
@@ -84,23 +85,27 @@ async function buildProductKnowledges(
             name: datapoint.item,
             hsnCode: datapoint.hsnCode,
             baseUnit: BASE_UNIT.count,
+            productType: datapoint.productType,
           },
         ];
       }),
     ),
   ).map(
-    ([item, { name, hsnCode, baseUnit }]) =>
+    ([item, { name, hsnCode, baseUnit, productType }]) =>
       ({
         name,
         slug_value: item,
         alternate_identifier: hsnCode,
         facility: FACILITY_ID!,
-        product_type: ProductKnowledgeType.medication,
+        product_type: productType as unknown as ProductKnowledgeType,
         status: ProductKnowledgeStatus.active,
         names: [],
         storage_guidelines: [],
         base_unit: baseUnit,
-        category: `f-${FACILITY_ID}-pk-medicines`,
+        category:
+          productType === ProductKnowledgeType.medication
+            ? `f-${FACILITY_ID}-pk-medicines`
+            : `f-${FACILITY_ID}-pk-consumables`,
       }) satisfies ProductKnowledgeCreate,
   );
 
@@ -167,6 +172,7 @@ async function main() {
         row.sellingPrice,
         row.quantity,
         row.taxRate,
+        row.productType,
       ].every((v) => v !== ""),
     );
     logger(`Found ${datapoints.length} product knowledges to be created`);

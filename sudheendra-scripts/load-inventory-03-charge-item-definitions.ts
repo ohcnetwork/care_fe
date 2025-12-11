@@ -4,6 +4,7 @@ import {
   ChargeItemDefinitionCreate,
   ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import { ProductKnowledgeType } from "@/types/inventory/productKnowledge/productKnowledge";
 import dotenv from "dotenv";
 import {
   batchRequest,
@@ -21,6 +22,7 @@ const logger = getLogger();
 
 const requiredHeaderKeys = [
   "item",
+  "productType",
   "hsnCode",
   "batchNumber",
   "expiryDate",
@@ -131,7 +133,10 @@ async function buildChargeItemDefinitions(
               },
               ...getTaxComponents(datapoint),
             ],
-            category: `f-${FACILITY_ID}-cid-medications`,
+            category:
+              datapoint.productType === ProductKnowledgeType.medication
+                ? `f-${FACILITY_ID}-cid-medications`
+                : `f-${FACILITY_ID}-cid-consumables`,
           } satisfies ChargeItemDefinitionCreate,
         ];
       }),
@@ -201,6 +206,7 @@ async function main() {
         row.sellingPrice,
         row.quantity,
         row.taxRate,
+        row.productType,
       ].every((v) => v !== ""),
     );
     logger(`Found ${datapoints.length} charge item definitions to be created`);
