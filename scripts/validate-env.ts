@@ -81,6 +81,8 @@ const envSchema = z
     REACT_DISABLE_PATIENT_LOGIN: booleanAsStringSchema.optional(),
     REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION: booleanAsStringSchema.optional(),
     REACT_APPOINTMENTS_DEFAULT_DATE_FILTER: numberAsString.optional(),
+    REACT_TOKEN_DISPLAY_TOKEN_REFRESH_INTERVAL: numberAsString.optional(),
+    REACT_TOKEN_DISPLAY_CONFIG_REFRESH_INTERVAL: numberAsString.optional(),
     REACT_PAYMENT_LOCATION_REQUIRED: booleanAsStringSchema.optional(),
     REACT_ENCOUNTER_DEFAULT_DATE_FILTER: numberAsString.optional(),
     REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE: booleanAsStringSchema.optional(),

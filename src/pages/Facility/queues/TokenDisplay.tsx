@@ -22,6 +22,7 @@ import {
 import tokenSubQueueApi from "@/types/tokens/tokenSubQueue/tokenSubQueueApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import careConfig from "@careConfig";
 import { useQueries, useQuery, UseQueryResult } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
@@ -31,7 +32,7 @@ interface TokenDisplayProps {
   resources: { resourceType: SchedulableResourceType; resourceId: string }[];
 }
 
-const REFRESH_INTERVAL = 10000; // 10 seconds
+const { tokenRefreshInterval, configRefreshInterval } = careConfig.tokenDisplay;
 
 const combineResourceSubQueues = (
   result: UseQueryResult<
@@ -137,7 +138,7 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
           },
           silent: true,
         }),
-        refetchInterval: REFRESH_INTERVAL,
+        refetchInterval: configRefreshInterval,
         select: (data: PaginatedResponse<TokenSubQueueRead>) => ({
           ...resource,
           subQueues: data.results,
@@ -155,7 +156,7 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
           },
           silent: true,
         }),
-        refetchInterval: REFRESH_INTERVAL,
+        refetchInterval: configRefreshInterval,
         select: (data: PaginatedResponse<TokenQueueRead>) => ({
           ...resource,
           queues: data.results,
@@ -210,23 +211,23 @@ type ServicePointDisplayProps = NonNullable<
 
 const ServicePointDisplay = ({
   facilityId,
+  queue,
   resourceType,
   resourceId,
-  queue,
-  name,
-  id,
+  ...subQueue
 }: ServicePointDisplayProps) => {
   const { data: token } = useQuery({
-    queryKey: ["tokens", facilityId, id, queue?.id ?? ""],
+    queryKey: ["tokenDisplayToken", facilityId, queue?.id, subQueue.id],
     queryFn: query(tokenApi.list, {
       pathParams: { facility_id: facilityId, queue_id: queue?.id ?? "" },
       queryParams: {
-        sub_queue: id,
+        sub_queue: subQueue.id,
         status: TokenStatus.IN_PROGRESS,
         limit: 1,
       },
     }),
-    refetchInterval: REFRESH_INTERVAL,
+    refetchInterval: tokenRefreshInterval,
+    enabled: !!queue,
     select: (data: PaginatedResponse<TokenRead>) => data.results[0],
   });
 
@@ -236,13 +237,11 @@ const ServicePointDisplay = ({
     facilityId,
   });
 
-  console.log(token, "token");
-
   return (
     <div className="p-4 h-full bg-[#07131F] text-center">
       <div className="p-6 bg-[#122235] rounded-t-2xl">
         <p className="font-bold text-white uppercase whitespace-nowrap text-[clamp(2rem,25cqw,4rem)]">
-          {name}
+          {subQueue.name}
         </p>
         {resource && (
           <p className="text-[clamp(1rem,25cqw,2rem)] text-white">
