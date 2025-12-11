@@ -42,13 +42,6 @@ export default {
     TBody: Type<{ organization: string }>(),
   },
 
-  // Discharge Summary
-  generateDischargeSummary: {
-    path: "/api/v1/encounter/{encounterId}/generate_discharge_summary/",
-    method: HttpMethod.POST,
-    TRes: Type<{ detail: string }>(),
-  },
-
   // Tag-related endpoints
   setTags: {
     path: "/api/v1/encounter/{external_id}/set_tags/",
