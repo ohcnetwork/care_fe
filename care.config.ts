@@ -113,7 +113,8 @@ const careConfig = {
    * Flag to make location field mandatory for payment reconciliation
    */
   paymentLocationRequired: booleanFromString(
-    env.REACT_PAYMENT_LOCATION_REQUIRED || "true",
+    env.REACT_PAYMENT_LOCATION_REQUIRED,
+    true,
   ),
 
   careApps: env.REACT_ENABLED_APPS
@@ -164,14 +165,16 @@ const careConfig = {
    * Disable patient login if set to "true"
    */
   disablePatientLogin: booleanFromString(
-    env.REACT_DISABLE_PATIENT_LOGIN || "false",
+    env.REACT_DISABLE_PATIENT_LOGIN,
+    false,
   ),
 
   /**
    * Enable auto refresh if set to "true"
    */
   enableAutoRefresh: booleanFromString(
-    env.REACT_AUTO_REFRESH_BY_DEFAULT || "false",
+    env.REACT_AUTO_REFRESH_BY_DEFAULT,
+    false,
   ),
 
   patientRegistration: {
@@ -192,7 +195,8 @@ const careConfig = {
     defaultGeoOrganization: env.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG,
 
     minimalPatientRegistration: booleanFromString(
-      env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION || "false",
+      env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION,
+      false,
     ),
   },
 
@@ -216,7 +220,8 @@ const careConfig = {
    * Enable automatic invoice sheet after dispensing items
    */
   enableAutoInvoiceAfterDispense: booleanFromString(
-    env.REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE || "false",
+    env.REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE,
+    false,
   ),
 } as const;
 
