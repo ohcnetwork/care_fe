@@ -4432,6 +4432,7 @@
   "scan": "Scan",
   "scan_asset_qr": "Scan Asset QR!",
   "scan_existing": "Scan Existing",
+  "scan_invoice_qr": "Scan Invoice QR",
   "scan_patient_qr": "Scan Patient QR Code",
   "scan_qr": "Scan the QR code",
   "scan_with_camera": "Scan with Camera",
