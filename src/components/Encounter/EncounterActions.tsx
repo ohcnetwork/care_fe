@@ -24,10 +24,7 @@ export interface EncounterActionsProps {
   facilityId: string;
 }
 
-export function EncounterActions({
-  encounter,
-  facilityId,
-}: EncounterActionsProps) {
+export function EncounterActions({ encounter }: EncounterActionsProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -42,7 +39,7 @@ export function EncounterActions({
       queryClient.invalidateQueries({ queryKey: ["encounters"] });
       queryClient.invalidateQueries({ queryKey: ["encounter", encounter.id] });
       navigate(
-        `/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`,
+        `/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`,
       );
     },
     onError: () => {

@@ -80,10 +80,7 @@ export function TimelineEncounterCard({
             <div className="font-semibold text-base">
               {t(`encounter_class__${encounter.encounter_class}`)}
             </div>
-            <EncounterActions
-              encounter={encounter}
-              facilityId={facilityId ?? encounter.facility.id}
-            />
+            <EncounterActions encounter={encounter} />
           </div>
           <div className="mb-3 flex items-center gap-2">
             <Badge

@@ -66,7 +66,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
             {t(`encounter_status__${encounter.status}`)}
           </Badge>
-          <EncounterActions encounter={encounter} facilityId={facilityId} />
+          <EncounterActions encounter={encounter} />
         </div>
       </CardHeader>
       <CardContent className="px-4 py-2 pt-2 bg-white space-y-1">
