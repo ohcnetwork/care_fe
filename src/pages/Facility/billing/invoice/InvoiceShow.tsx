@@ -83,6 +83,7 @@ import dayjs from "@/Utils/dayjs";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
@@ -1191,6 +1192,29 @@ export function InvoiceShow({
           queryClient.invalidateQueries({ queryKey: ["invoice", invoiceId] });
         }}
       />
+
+      <div className="p-2">
+        <div className="space-y-2">
+          <div>
+            <p className="text-sm text-gray-500">{t("last_modified_by")}</p>
+            <p className="text-sm font-semibold">
+              {formatName(invoice.updated_by)}
+            </p>
+            <p className="text-xs text-gray-500">
+              {formatDateTime(invoice.modified_date)}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">{t("created_by")}</p>
+            <p className="text-sm font-semibold">
+              {formatName(invoice.created_by)}
+            </p>
+            <p className="text-xs text-gray-500">
+              {formatDateTime(invoice.created_date)}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {sourceUrl && (
         <Alert className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-2xl w-full mx-auto shadow-lg rounded-lg p-0 bg-white border border-gray-200">
