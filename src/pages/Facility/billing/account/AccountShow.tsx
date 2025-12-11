@@ -213,7 +213,7 @@ export function AccountShow({
           <h2 className="text-2xl font-bold">{t("account_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("account_may_not_exist")}</p>
           <Button asChild className="mt-4">
-            <Link href={`/facility/${facilityId}/billing/accounts`}>
+            <Link href={`/facility/${facilityId}/billing/account`}>
               {t("back_to_accounts")}
             </Link>
           </Button>
