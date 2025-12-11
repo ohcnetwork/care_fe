@@ -35,13 +35,13 @@ export function TimelineEncounterCard({
 }: TimelineEncounterCardProps) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-  const { canViewEncounter, canViewPatients } = getPermissions(
+  const { canReadEncounter, canViewPatients } = getPermissions(
     hasPermission,
     permissions,
   );
   const [isHovered, setIsHovered] = useState(false);
 
-  const canAccess = canViewEncounter || canViewPatients;
+  const canAccess = canReadEncounter || canViewPatients;
 
   const StatusIcon = ENCOUNTER_STATUS_ICONS[encounter.status];
 

@@ -70,22 +70,17 @@ export default function InvoicesData({
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["invoices", qParams, accountId],
-    queryFn: query.debounced(
-      invoiceApi.retrieveInvoice.method === "GET"
-        ? invoiceApi.listInvoice
-        : invoiceApi.listInvoice,
-      {
-        pathParams: { facilityId },
-        queryParams: {
-          account: accountId,
-          limit: resultsPerPage,
-          offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-          number: qParams.search,
-          status: qParams.status,
-          patient: qParams.patient,
-        },
+    queryFn: query.debounced(invoiceApi.listInvoice, {
+      pathParams: { facilityId },
+      queryParams: {
+        account: accountId,
+        limit: resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        number: qParams.search,
+        status: qParams.status,
+        patient: qParams.patient,
       },
-    ),
+    }),
   });
 
   const invoices = (response?.results as InvoiceRead[]) || [];
@@ -96,8 +91,11 @@ export default function InvoicesData({
         <div className="w-full md:w-auto md:flex gap-2 space-y-2 md:space-y-0">
           {showIdentifierFilter && (
             <PatientIdentifierFilter
-              onSelect={(patientId) => updateQuery({ patient: patientId })}
+              onSelect={(patientId, patientName) =>
+                updateQuery({ patient: patientId, patient_name: patientName })
+              }
               patientId={qParams.patient}
+              patientName={qParams.patient_name}
               placeholder={t("filter_by_patient")}
               className="h-9 rounded-md"
             />
@@ -145,6 +143,7 @@ export default function InvoicesData({
             <TableHeader>
               <TableRow>
                 <TableHead>{t("invoice_number")}</TableHead>
+                <TableHead>{t("account")}</TableHead>
                 <TableHead>{t("status")}</TableHead>
                 <TableHead>{t("total")}</TableHead>
                 <TableHead>{t("actions")}</TableHead>
@@ -155,6 +154,25 @@ export default function InvoicesData({
                 <TableRow key={invoice.id}>
                   <TableCell>
                     <div>{invoice.number}</div>
+                  </TableCell>
+
+                  <TableCell>
+                    <Button variant="link" asChild>
+                      <Link
+                        href={`/facility/${facilityId}/billing/account/${invoice.account?.id}`}
+                        className="hover:text-primary "
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <div className="text-base flex items-center gap-1 underline underline-offset-2">
+                          {invoice.account?.name}
+                          <CareIcon
+                            icon="l-external-link-alt"
+                            className="size-3"
+                          />
+                        </div>
+                      </Link>
+                    </Button>
                   </TableCell>
 
                   <TableCell>
