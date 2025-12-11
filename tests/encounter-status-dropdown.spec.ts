@@ -23,12 +23,13 @@ test.describe.skip("Encounter Status Dropdown Logic", () => {
         `/facility/${FACILITY_ID}/patient/${PATIENT_ID}/encounter/${ACTIVE_ENCOUNTER_ID}/updates`,
       );
       await page.click('[data-testid="status-dropdown"]');
+      // Use case-insensitive contains matching for translated text
       const options = await page.$$eval(
         '[data-testid="status-option"]',
         (opts) => opts.map((o) => o.textContent?.trim().toLowerCase()),
       );
-      expect(options).not.toContain("discharged");
-      expect(options).not.toContain("unknown");
+      expect(options.some((o) => o?.includes("discharged"))).toBe(false);
+      expect(options.some((o) => o?.includes("unknown"))).toBe(false);
     });
   });
 
@@ -51,7 +52,8 @@ test.describe.skip("Encounter Status Dropdown Logic", () => {
       const statusText = await page.textContent(
         '[data-testid="encounter-status"]',
       );
-      expect(statusText).toBe("discharged");
+      // Use case-insensitive matching for translated text
+      expect(statusText?.toLowerCase()).toContain("discharged");
     });
   });
 });

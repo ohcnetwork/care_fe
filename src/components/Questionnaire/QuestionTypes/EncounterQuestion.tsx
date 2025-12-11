@@ -246,7 +246,9 @@ export function EncounterQuestion({
         {/* Basic Details */}
         <div className="space-y-2">
           <Label>{t("encounter_status")}</Label>
-          <div data-testid="encounter-status">{encounter.status}</div>
+          <div data-testid="encounter-status">
+            {t(`encounter_status__${encounter.status}`)}
+          </div>
           <Select
             value={encounter.status}
             onValueChange={(value: EncounterStatus) => {
