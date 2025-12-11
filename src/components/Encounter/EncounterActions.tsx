@@ -21,7 +21,6 @@ import mutate from "@/Utils/request/mutate";
 
 export interface EncounterActionsProps {
   encounter: EncounterRead;
-  facilityId: string;
 }
 
 export function EncounterActions({ encounter }: EncounterActionsProps) {
