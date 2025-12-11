@@ -248,6 +248,7 @@ export function EncounterQuestion({
           <Label>{t("encounter_status")}</Label>
           <div
             data-testid="encounter-status"
+            role="status"
             aria-label={t("current_encounter_status")}
           >
             {t(`encounter_status__${encounter.status}`)}
