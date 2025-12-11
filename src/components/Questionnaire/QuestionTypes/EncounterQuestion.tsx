@@ -276,6 +276,7 @@ export function EncounterQuestion({
                     key={encounterStatus}
                     value={encounterStatus}
                     data-testid="status-option"
+                    data-value={encounterStatus}
                   >
                     {t(`encounter_status__${encounterStatus}`)}
                   </SelectItem>
