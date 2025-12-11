@@ -235,7 +235,7 @@ export const EncounterShow = (props: Props) => {
         <PatientHeader
           patient={patient}
           facilityId={facilityId}
-          className="bg-white shadow-sm border-none rounded-sm "
+          className="bg-white shadow-sm border-none rounded-sm"
           actions={
             <>
               {selectedEncounter && (
@@ -248,7 +248,7 @@ export const EncounterShow = (props: Props) => {
                       "text-base font-semibold rounded-md w-full",
                     )}
                   />
-                  <div className="mt-[-85px]">
+                  <>
                     {canWriteSelectedEncounter && (
                       <EncounterCommandDialog
                         encounter={selectedEncounter}
@@ -268,7 +268,7 @@ export const EncounterShow = (props: Props) => {
                         }
                       />
                     )}
-                  </div>
+                  </>
                 </div>
               )}
             </>

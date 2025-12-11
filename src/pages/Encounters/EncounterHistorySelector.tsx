@@ -439,9 +439,9 @@ const EncounterSheetTrigger = () => {
               {encounter.facility.name}
             </span>
           </div>
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex flex-col items-start">
             {/* TOP ROW Ongoing Chevron */}
-            <div className="flex items-center gap-1 mt-[-6px]">
+            <div className="flex items-center gap-1 -mt-2">
               <span className="text-sm text-gray-600 whitespace-nowrap">
                 {encounter.period.start && (
                   <span>
@@ -465,13 +465,14 @@ const EncounterSheetTrigger = () => {
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "icon" }),
                 )}
+                aria-hidden="true"
               >
                 <ChevronDown />
               </div>
             </div>
 
             {/* SECOND ROW Badge */}
-            <div className="-mt-2.5">
+            <div className="">
               <Badge
                 variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
                 size="sm"
