@@ -279,7 +279,7 @@ export function ManageQueuePage({
           onTabChange={(tab) => {
             navigate(tab, {
               query: {
-                autoRefresh: shouldAutoRefresh ? "true" : "false",
+                autoRefresh: shouldAutoRefresh.toString(),
               },
             });
           }}

@@ -15,10 +15,6 @@ interface ILogo {
   dark: string;
 }
 
-const boolean = (key: string, fallback = false) => {
-  return booleanFromString(env[key], fallback);
-};
-
 const logo = (value?: string, fallback?: ILogo) => {
   if (!value) {
     return fallback;
@@ -101,8 +97,8 @@ const careConfig = {
       : 0,
 
     // Kill switch in-case the heatmap API doesn't scale as expected
-    useAvailabilityStatsAPI: boolean(
-      "REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API",
+    useAvailabilityStatsAPI: booleanFromString(
+      env.REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API,
       true,
     ),
   },
@@ -116,7 +112,9 @@ const careConfig = {
   /**
    * Flag to make location field mandatory for payment reconciliation
    */
-  paymentLocationRequired: boolean("REACT_PAYMENT_LOCATION_REQUIRED", true),
+  paymentLocationRequired: booleanFromString(
+    env.REACT_PAYMENT_LOCATION_REQUIRED || "true",
+  ),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
@@ -165,12 +163,16 @@ const careConfig = {
   /**
    * Disable patient login if set to "true"
    */
-  disablePatientLogin: boolean("REACT_DISABLE_PATIENT_LOGIN", false),
+  disablePatientLogin: booleanFromString(
+    env.REACT_DISABLE_PATIENT_LOGIN || "false",
+  ),
 
   /**
    * Enable auto refresh if set to "true"
    */
-  enableAutoRefresh: boolean("REACT_AUTO_REFRESH_BY_DEFAULT", false),
+  enableAutoRefresh: booleanFromString(
+    env.REACT_AUTO_REFRESH_BY_DEFAULT || "false",
+  ),
 
   patientRegistration: {
     /**
@@ -189,9 +191,8 @@ const careConfig = {
 
     defaultGeoOrganization: env.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG,
 
-    minimalPatientRegistration: boolean(
-      "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
-      false,
+    minimalPatientRegistration: booleanFromString(
+      env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION || "false",
     ),
   },
 
@@ -214,9 +215,8 @@ const careConfig = {
   /**
    * Enable automatic invoice sheet after dispensing items
    */
-  enableAutoInvoiceAfterDispense: boolean(
-    "REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE",
-    false,
+  enableAutoInvoiceAfterDispense: booleanFromString(
+    env.REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE || "false",
   ),
 } as const;
 
