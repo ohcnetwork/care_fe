@@ -191,7 +191,10 @@ export function PaymentReconciliationSheet({
       form.setValue("returned_amount", "0");
       setReturnedAmount("0");
     }
-  }, [tenderAmount, amount, isCashPayment, form]);
+    if (selectedLocationObject?.id) {
+      form.setValue("location", selectedLocationObject.id);
+    }
+  }, [tenderAmount, amount, isCashPayment, form, selectedLocationObject]);
 
   const { mutate: submitPayment, isPending } = useMutation({
     mutationFn: mutate(paymentReconciliationApi.createPaymentReconciliation, {
@@ -240,6 +243,12 @@ export function PaymentReconciliationSheet({
     };
     submitPayment(submissionData);
   });
+
+  useEffect(() => {
+    if (open) {
+      form.reset();
+    }
+  }, [open]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

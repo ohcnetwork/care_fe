@@ -1,4 +1,5 @@
 import { test } from "@playwright/test";
+import { format, subDays } from "date-fns";
 import fs from "fs";
 import { getFacilityId } from "tests/support/facilityId";
 
@@ -8,56 +9,50 @@ test("navigate to an encounter and save patient and encounter id", async ({
   page,
 }) => {
   const facilityId = getFacilityId();
-
+  const createdDateAfter = format(subDays(new Date(), 90), "yyyy-MM-dd");
+  const createdDateBefore = format(new Date(), "yyyy-MM-dd");
   // Navigate to encounters overview page with a wide date range to show all encounters
   await page.goto(
-    `/facility/${facilityId}/encounters/patients/all?created_date_after=2000-01-01&created_date_before=2099-12-31`,
+    `/facility/${facilityId}/encounters/patients/all?created_date_after=${createdDateAfter}&created_date_before=${createdDateBefore}`,
   );
 
   try {
     // Wait for encounter link to be visible
-    const encounterLink = page.locator('a[href*="/encounter/"]').first();
-    await encounterLink.waitFor({ state: "visible", timeout: 10000 });
+    await page.getByRole("link", { name: "View Encounter" }).first().click();
 
-    if (await encounterLink.isVisible()) {
-      const href = await encounterLink.getAttribute("href");
+    // Wait for navigation to the encounter page
+    await page.waitForURL(
+      /\/facility\/[^/]+\/patient\/[^/]+\/encounter\/[^/]+/,
+    );
 
-      if (!href) {
-        throw new Error("Could not get encounter link href");
-      }
+    // Extract patient ID and encounter ID from the URL
+    const url = page.url();
+    const patientIdMatch = url.match(/\/patient\/([^/]+)/);
+    const encounterIdMatch = url.match(/\/encounter\/([^/]+)/);
 
-      // Extract patient ID and encounter ID from the URL
-      // URL format: /facility/{facilityId}/patient/{patientId}/encounter/{encounterId}/...
-      const patientMatch = href.match(/\/patient\/([^/]+)/);
-      const encounterMatch = href.match(/\/encounter\/([^/]+)/);
-
-      if (!patientMatch || !encounterMatch) {
-        throw new Error(`Could not extract IDs from URL: ${href}`);
-      }
-
-      const patientId = patientMatch[1];
-      const encounterId = encounterMatch[1];
-
-      // Ensure the directory exists
-      fs.mkdirSync("tests/.auth", { recursive: true });
-
-      // Save patient ID
-      fs.writeFileSync(
-        "tests/.auth/patientMeta.json",
-        JSON.stringify({ id: patientId }, null, 2),
-      );
-
-      // Save encounter ID
-      fs.writeFileSync(
-        "tests/.auth/encounterMeta.json",
-        JSON.stringify({ id: encounterId }, null, 2),
-      );
-
-      console.log(`✅ Patient ID saved: ${patientId}`);
-      console.log(`✅ Encounter ID saved: ${encounterId}`);
-    } else {
-      throw new Error("No encounters found. Please create an encounter first.");
+    const patientId = patientIdMatch?.[1];
+    const encounterId = encounterIdMatch?.[1];
+    if (!patientId || !encounterId) {
+      throw new Error(`Failed to extract IDs from URL: ${url}`);
     }
+
+    // Ensure the directory exists
+    fs.mkdirSync("tests/.auth", { recursive: true });
+
+    // Save patient ID
+    fs.writeFileSync(
+      "tests/.auth/patientMeta.json",
+      JSON.stringify({ id: patientId }, null, 2),
+    );
+
+    // Save encounter ID
+    fs.writeFileSync(
+      "tests/.auth/encounterMeta.json",
+      JSON.stringify({ id: encounterId }, null, 2),
+    );
+
+    console.log(`✅ Patient ID saved: ${patientId}`);
+    console.log(`✅ Encounter ID saved: ${encounterId}`);
   } catch (error) {
     console.error("❌ Failed to set up patient and encounter:", error);
     throw error;

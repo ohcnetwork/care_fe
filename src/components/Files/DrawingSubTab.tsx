@@ -164,13 +164,13 @@ export const DrawingPage = ({
     hasPermission,
     patient?.permissions ?? patientData?.permissions ?? [],
   );
-  const { canViewEncounter, canWriteEncounter } = getPermissions(
+  const { canReadEncounter, canWriteEncounter } = getPermissions(
     hasPermission,
     encounter?.permissions ?? [],
   );
   const canAccess =
     type === "encounter"
-      ? canViewClinicalData || canViewEncounter
+      ? canViewClinicalData || canReadEncounter
       : canViewClinicalData;
 
   const canWriteCurrentEncounter =
