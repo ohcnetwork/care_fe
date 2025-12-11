@@ -246,6 +246,7 @@ export function EncounterQuestion({
         {/* Basic Details */}
         <div className="space-y-2">
           <Label>{t("encounter_status")}</Label>
+          <div data-testid="encounter-status">{encounter.status}</div>
           <Select
             value={encounter.status}
             onValueChange={(value: EncounterStatus) => {
@@ -255,8 +256,9 @@ export function EncounterQuestion({
               });
             }}
             disabled={disabled || isDischarged}
+            data-testid="status-dropdown"
           >
-            <SelectTrigger>
+            <SelectTrigger data-testid="encounter-status-select">
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
@@ -268,7 +270,11 @@ export function EncounterQuestion({
                       status !== EncounterStatus.UNKNOWN),
                 )
                 .map((encounterStatus: EncounterStatus) => (
-                  <SelectItem key={encounterStatus} value={encounterStatus}>
+                  <SelectItem
+                    key={encounterStatus}
+                    value={encounterStatus}
+                    data-testid="status-option"
+                  >
                     {t(`encounter_status__${encounterStatus}`)}
                   </SelectItem>
                 ))}
@@ -348,6 +354,11 @@ export function EncounterQuestion({
               encounter={encounter}
               onConfirm={handleUpdateEncounter}
               disabled={disabled}
+              trigger={
+                <button data-testid="mark-as-discharged" disabled={disabled}>
+                  {t("mark_for_discharge")}
+                </button>
+              }
             />
           </div>
         </div>
