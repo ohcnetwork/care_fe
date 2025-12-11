@@ -86,12 +86,12 @@ export default function CreateEncounterForm({
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   useShortcutSubContext();
-  const facility = useCurrentFacility();
+  const { facility } = useCurrentFacility();
 
   const { hasPermission } = usePermissions();
   const { canViewEncounter } = getPermissions(
     hasPermission,
-    facility?.facility?.permissions ?? [],
+    facility?.permissions ?? [],
   );
 
   const encounterFormSchema = z.object({
@@ -138,7 +138,7 @@ export default function CreateEncounterForm({
       if (!canViewEncounter) {
         return;
       }
-      if (!disableRedirectOnSuccess) {
+      if (!disableRedirectOnSuccess && canViewEncounter) {
         navigate(
           `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
         );
