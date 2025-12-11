@@ -89,7 +89,7 @@ export default function CreateEncounterForm({
   const { facility } = useCurrentFacility();
 
   const { hasPermission } = usePermissions();
-  const { canViewEncounter } = getPermissions(
+  const { canReadEncounter } = getPermissions(
     hasPermission,
     facility?.permissions ?? [],
   );
@@ -135,10 +135,10 @@ export default function CreateEncounterForm({
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["encounters", patientId] });
       onSuccess?.();
-      if (!canViewEncounter) {
+      if (!canReadEncounter) {
         return;
       }
-      if (!disableRedirectOnSuccess && canViewEncounter) {
+      if (!disableRedirectOnSuccess && canReadEncounter) {
         navigate(
           `/facility/${facilityId}/patient/${patientId}/encounter/${data.id}/updates`,
         );
