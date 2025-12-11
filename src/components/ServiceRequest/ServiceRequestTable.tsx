@@ -92,7 +92,7 @@ export default function ServiceRequestTable({
                   }
                 >
                   {t(`encounter_class__${request.encounter.encounter_class}`)}
-                </Badge>{" "}
+                </Badge>
               </TableCell>
               <TableCell>
                 <Badge variant={SERVICE_REQUEST_STATUS_COLORS[request.status]}>
