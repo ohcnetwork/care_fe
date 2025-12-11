@@ -18,6 +18,7 @@ import {
 
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
+import { ENCOUNTER_CLASSES_COLORS } from "@/types/emr/encounter/encounter";
 import {
   SERVICE_REQUEST_PRIORITY_COLORS,
   SERVICE_REQUEST_STATUS_COLORS,
@@ -54,6 +55,7 @@ export default function ServiceRequestTable({
           <TableRow className="divide-gray-200">
             {showPatientInfo && <TableHead>{t("patient_name")}</TableHead>}
             <TableHead>{t("service_type")}</TableHead>
+            <TableHead>{t("encounter_class")}</TableHead>
             <TableHead>{t("status")}</TableHead>
             <TableHead>{t("priority")}</TableHead>
             <TableHead>{t("tags", { count: 2 })}</TableHead>
@@ -82,6 +84,15 @@ export default function ServiceRequestTable({
                     </div>
                   )}
                 </div>
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant={
+                    ENCOUNTER_CLASSES_COLORS[request.encounter.encounter_class]
+                  }
+                >
+                  {t(`encounter_class__${request.encounter.encounter_class}`)}
+                </Badge>{" "}
               </TableCell>
               <TableCell>
                 <Badge variant={SERVICE_REQUEST_STATUS_COLORS[request.status]}>

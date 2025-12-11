@@ -23,7 +23,10 @@ import useFilters from "@/hooks/useFilters";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
-import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
+import {
+  encounterClassFilter,
+  tagFilter,
+} from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { createFilterConfig } from "@/components/ui/multi-filter/utils/Utils";
@@ -208,6 +211,7 @@ export default function ServiceRequestList({
           color: SERVICE_REQUEST_PRIORITY_COLORS[p],
         })),
       ),
+      encounterClassFilter(),
     ],
     [],
   );
@@ -257,6 +261,7 @@ export default function ServiceRequestList({
         tags: qParams.tags,
         patient: qParams.patient,
         tags_behavior: qParams.tags_behavior,
+        encounter_class: qParams.encounter_class,
       },
     }),
   });
