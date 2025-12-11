@@ -86,8 +86,10 @@ export default function useFilters({
       // Clean-up any existing cache if present for this path.
       FiltersCache.invalidate();
 
-      // Set default query params if they are not present
-      setQueryParams({ ...defaults });
+      // Set default query params if they are not present, preserving existing params
+      if (Object.keys(defaults).length > 0) {
+        setQueryParams({ ...defaults, ...qParams });
+      }
 
       // Skip cache restoration logic for this usage.
       return;
@@ -104,12 +106,14 @@ export default function useFilters({
 
     const cache = FiltersCache.get();
     if (!cache) {
-      setQueryParams({ ...defaults });
+      if (Object.keys(defaults).length > 0) {
+        setQueryParams({ ...defaults, ...qParams });
+      }
       return;
     }
 
     // Restore cache
-    setQueryParams({ ...defaults, ...cache });
+    setQueryParams({ ...defaults, ...cache, ...qParams });
   }, []);
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {
