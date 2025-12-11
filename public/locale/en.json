@@ -2335,6 +2335,7 @@
   "filter_by_tags": "Filter by Tags",
   "filter_by_type": "Filter by Type",
   "filter_deliveries": "Filter deliveries",
+  "filter_label_is": "{{label}} <style>is</style>",
   "filter_options": "Filter Options",
   "filter_selected_count_one": "{{count}} filter selected",
   "filter_selected_count_other": "{{count}} filters selected",
