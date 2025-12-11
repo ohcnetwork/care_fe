@@ -56,7 +56,7 @@ function DepartmentCard({
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <Link
-            href={`/facility/${facilityId}/settings/departments/${department.id}`}
+            href={`/facility/${facilityId}/settings/departments/${department.id}/departments`}
             className="flex-1 min-w-0"
           >
             <h3 className="font-semibold text-gray-900 truncate hover:text-primary-600">
