@@ -50,14 +50,14 @@ export default defineConfig({
       dependencies: ["setup-auth"],
     },
     {
-      name: "setup-encounter",
-      testMatch: /.*\/encounter\.setup\.ts/,
+      name: "setup-patient",
+      testMatch: /.*\/patient\.setup\.ts/,
       dependencies: ["setup-facility"],
     },
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      dependencies: ["setup-encounter"],
+      dependencies: ["setup-patient"],
     },
     // {
     //   name: "firefox",

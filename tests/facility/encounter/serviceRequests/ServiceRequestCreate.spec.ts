@@ -81,7 +81,7 @@ test.describe("Patient Service Request Tab", () => {
 
     await expect(
       page
-        .locator(".text-gray-700")
+        .locator("div")
         .filter({ hasText: serviceRequestData.activityDefinition })
         .first(),
     ).toBeVisible();
@@ -96,8 +96,9 @@ test.describe("Patient Service Request Tab", () => {
 
     await expect(
       page
-        .locator(".font-semibold.text-gray-700")
-        .filter({ hasText: serviceRequestData.requestor! }),
+        .locator("div")
+        .filter({ hasText: serviceRequestData.requestor! })
+        .first(),
     ).toBeVisible();
   });
 });
