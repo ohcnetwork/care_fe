@@ -1,9 +1,21 @@
+import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { EncounterActions } from "@/components/Encounter/EncounterActions";
+import TagBadge from "@/components/Tags/TagBadge";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+
+import { cn } from "@/lib/utils";
+
 import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
@@ -11,14 +23,6 @@ import {
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
-
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import TagBadge from "@/components/Tags/TagBadge";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
 
 export interface EncounterInfoCardProps {
   encounter: EncounterRead;
@@ -62,6 +66,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           <Badge variant={ENCOUNTER_STATUS_COLORS[encounter.status]}>
             {t(`encounter_status__${encounter.status}`)}
           </Badge>
+          <EncounterActions encounter={encounter} />
         </div>
       </CardHeader>
       <CardContent className="px-4 py-2 pt-2 bg-white space-y-1">

@@ -79,6 +79,14 @@ export default function EditUserRoleSheet({
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganizationUsers", facilityId, organizationId],
       });
+      queryClient.invalidateQueries({
+        queryKey: [
+          "facilityOrganizations",
+          "byUser",
+          facilityId,
+          userRole.user.id,
+        ],
+      });
       toast.success(t("user_removed_success"));
       setOpen(false);
     },

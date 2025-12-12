@@ -32,7 +32,7 @@ export function InvoiceList({
         toast.error(t("invalid_qr_code"));
       }
     } catch {
-      toast.error(t("invalid_qr_code"));
+      return;
     }
   };
 
@@ -58,14 +58,19 @@ export function InvoiceList({
             </div>
             <Button
               variant="outline"
-              aria-label={t("scan_qr")}
+              aria-label={t("scan_invoice_qr")}
               onClick={() => setScanDialogOpen(true)}
+              className="hidden sm:flex"
             >
               <QrCode className="size-4" />
-              <span className="hidden md:block"> {t("scan_qr")}</span>
+              <span> {t("scan_invoice_qr")}</span>
             </Button>
           </div>
-          <InvoicesData facilityId={facilityId} accountId={accountId} />
+          <InvoicesData
+            facilityId={facilityId}
+            accountId={accountId}
+            showIdentifierFilter
+          />
         </div>
       </div>
 
