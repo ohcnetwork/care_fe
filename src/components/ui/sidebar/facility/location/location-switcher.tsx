@@ -29,7 +29,7 @@ import PaginationComponent from "@/components/Common/Pagination";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import { useShortcuts } from "@/context/ShortcutContext";
+import { useShortcuts, useShortcutSubContext } from "@/context/ShortcutContext";
 
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
 import { LocationList } from "@/types/location/location";
@@ -135,7 +135,8 @@ export function LocationSelectorDialog({
   const subPath =
     path?.match(/\/facility\/[^/]+\/locations\/[^/]+\/(.*)/)?.[1] || "";
 
-  // this for enabling keyboard shortcuts even when inside input fields
+  useShortcutSubContext("patient:search:-global");
+
   useEffect(() => {
     if (open) {
       shortcuts.setIgnoreInputFields(true);
