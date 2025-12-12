@@ -44,6 +44,7 @@ import useFileUpload from "@/hooks/useFileUpload";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
@@ -858,17 +859,12 @@ export function DiagnosticReportForm({
                 {hasReport && fullReport?.created_by && (
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-5 w-full sm:w-auto">
                     <Avatar
-                      name={
-                        fullReport.created_by.first_name ||
-                        fullReport.created_by.username ||
-                        ""
-                      }
+                      name={formatName(fullReport.created_by, true)}
                       className="size-5"
                       imageUrl={fullReport.created_by.profile_picture_url}
                     />
                     <span className="text-sm/9 text-gray-700 font-medium">
-                      {fullReport.created_by.first_name || ""}{" "}
-                      {fullReport.created_by.last_name || ""}
+                      {formatName(fullReport.created_by)}
                     </span>
                   </div>
                 )}
