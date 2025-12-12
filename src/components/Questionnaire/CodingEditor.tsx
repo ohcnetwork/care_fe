@@ -206,7 +206,7 @@ export function CodingEditor({
               disabled={isPending}
               onClick={() => {
                 if (!code.system || !code.code) {
-                  toast.error(t("select_system_first"));
+                  toast.error(t("please_select_system_and_code"));
                   return;
                 }
 
