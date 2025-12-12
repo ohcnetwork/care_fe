@@ -79,7 +79,7 @@ export function getTabs(
 ): Tabs {
   const {
     canViewAppointments,
-    canViewEncounter,
+    canReadEncounter,
     canViewClinicalData,
     canViewPatientQuestionnaireResponses,
     canListEncounters,
@@ -93,7 +93,7 @@ export function getTabs(
       case "encounters":
         return { ...tab, visible: canListEncounters || canViewPatients };
       case "files":
-        return { ...tab, visible: canViewEncounter || canViewClinicalData };
+        return { ...tab, visible: canReadEncounter || canViewClinicalData };
       case "clinical_history":
         return { ...tab, visible: canViewClinicalData };
       case "updates":
