@@ -260,7 +260,8 @@ export function InvoiceShow({
     return t("appointment_invoice_alert");
   })();
 
-  const isInvoiceRecordPaymentPluginsPresent = useCareApps().some(
+  const { apps } = useCareApps();
+  const isInvoiceRecordPaymentPluginsPresent = apps.some(
     (plugin) => plugin.components?.InvoiceRecordPaymentOptions,
   );
 

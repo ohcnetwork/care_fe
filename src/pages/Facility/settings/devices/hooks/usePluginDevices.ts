@@ -3,21 +3,29 @@ import { useCareApps } from "@/hooks/useCareApps";
 import { PluginDeviceManifest } from "@/pluginTypes";
 
 export const usePluginDevices = () => {
-  const careApps = useCareApps();
+  const { apps } = useCareApps();
 
-  return careApps.reduce<PluginDeviceManifest[]>((acc, app) => {
+  return apps.reduce<PluginDeviceManifest[]>((acc, app) => {
     return [...acc, ...(app.devices || [])];
   }, []);
 };
 
 export const usePluginDevice = (type: string) => {
-  const devices = usePluginDevices();
+  const { apps, isLoading } = useCareApps();
+
+  const devices = apps.reduce<PluginDeviceManifest[]>((acc, app) => {
+    return [...acc, ...(app.devices || [])];
+  }, []);
 
   const device = devices.find((device) => device.type === type);
 
-  if (!device) {
-    throw new Error(`Device type ${type} not found`);
+  if (device) {
+    return { isLoading: false, device } as const;
   }
 
-  return device;
+  if (isLoading) {
+    return { isLoading: true, device: null } as const;
+  }
+
+  throw new Error(`Device type ${type} not found`);
 };

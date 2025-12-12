@@ -208,8 +208,8 @@ function generateFacilityLinks(
 export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
-  const careApps = useCareApps();
-  const pluginNavItems = careApps
+  const { apps } = useCareApps();
+  const pluginNavItems = apps
     .filter((c) => !!c.navItems)
     .flatMap((c) => c.navItems) as NavigationLink[];
 

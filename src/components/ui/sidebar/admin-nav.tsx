@@ -81,8 +81,8 @@ function generateAdminLinks(
 export function AdminNav() {
   const { t } = useTranslation();
 
-  const careApps = useCareApps();
-  const pluginNavItems = careApps
+  const { apps } = useCareApps();
+  const pluginNavItems = apps
     .filter((c) => !!c.adminNavItems)
     .flatMap((c) => c.adminNavItems) as NavigationLink[];
 

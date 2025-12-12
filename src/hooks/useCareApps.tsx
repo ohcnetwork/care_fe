@@ -6,7 +6,10 @@ import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { PluginManifest } from "@/pluginTypes";
 import { t } from "i18next";
 
-export const CareAppsContext = createContext<PluginManifest[]>([]);
+export const CareAppsContext = createContext<{
+  isLoading: boolean;
+  apps: PluginManifest[];
+} | null>(null);
 
 export const useCareApps = () => {
   const ctx = useContext(CareAppsContext);
@@ -68,9 +71,9 @@ const withSuspense = (
 };
 
 export const useCareAppEncounterTabs = () => {
-  const careApps = useCareApps();
+  const { apps } = useCareApps();
 
-  return careApps.reduce<Record<string, React.FC<PluginEncounterTabProps>>>(
+  return apps.reduce<Record<string, React.FC<PluginEncounterTabProps>>>(
     (acc, app) => {
       const appTabs = Object.entries(app.encounterTabs ?? {}).reduce(
         (acc, [key, Component]) => {
@@ -87,8 +90,8 @@ export const useCareAppEncounterTabs = () => {
 
 // If required; Reduce plugin.routes to a single pluginRoutes object of type Record<string, () => React.ReactNode>
 export function usePluginRoutes() {
-  const careApps = useCareApps();
-  const routes = careApps.reduce((acc, plugin) => {
+  const { apps } = useCareApps();
+  const routes = apps.reduce((acc, plugin) => {
     return { ...acc, ...(plugin.routes ?? {}) };
   }, {});
   if (!routes) {
