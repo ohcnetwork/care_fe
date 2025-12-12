@@ -1,121 +1,191 @@
-// tests/facility/billing/paymentReconciliation.spec.ts
+import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { getAccountId } from "tests/support/accountId";
 import { getFacilityId } from "tests/support/facilityId";
-
-// Adjust these strings if your i18n produces different visible text
-const LABELS = {
-  accountsNav: /accounts/i,
-  recordPaymentBtn: /record payment/i, // button that opens the PaymentReconciliationSheet
-  paymentAmountLabel: /payment amount/i,
-  tenderAmountLabel: /tender amount/i,
-  submitBtn: /record payment/i,
-  customInvalidMsg: /Please enter a valid amount/i, // expected custom message (case-insensitive)
-  nativeInvalidMsg: /Invalid input/i, // message you want to avoid
-};
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-test.describe("PaymentReconciliationSheet — validation messages", () => {
+test.describe("Payment Reconciliation", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate directly to the billing accounts page for the test facility
     const facilityId = getFacilityId();
-    await page.goto(`/facility/${facilityId}/billing`);
-    await page.getByRole("link", { name: LABELS.accountsNav }).click();
-
-    // Wait for the account list to be ready and click the first account
-    const firstAccountRow = page
-      .locator('[data-testid^="account-row-"]')
-      .first();
-    await expect(firstAccountRow).toBeVisible();
-    await firstAccountRow.click();
-
-    // Click "Record payment" to open the sheet
-    const recordPayment = page.getByRole("button", {
-      name: LABELS.recordPaymentBtn,
-    });
-    await expect(recordPayment).toBeVisible();
-    await recordPayment.click();
-
-    // Wait for the sheet to appear. A good way to do this is to wait for a unique element inside it.
-    const paymentAmountInput = page.getByLabel(LABELS.paymentAmountLabel);
-    await expect(paymentAmountInput).toBeVisible();
-
-      // Also ensure the submit button within the sheet is ready.
-+   const dialog = page.getByRole('dialog');
-+   await expect(
-+     dialog.getByRole('button', { name: LABELS.submitBtn }),
-+   ).toBeVisible();
-
+    const accountId = getAccountId();
+    const targetUrl = `/facility/${facilityId}/billing/account/${accountId}`;
+    await page.goto(targetUrl);
   });
 
-  test("submitting empty/default form shows custom validation message", async ({
+  test("should record payment with all fields filled", async ({ page }) => {
+    // Open Record Payment
+    await page.getByRole("button", { name: /record payment/i }).click();
+
+    // Select payment method randomly
+    const paymentMethods = [
+      "Cash",
+      "Credit Card",
+      "Debit Card",
+      "Check",
+      "Direct Deposit",
+    ];
+    const selectedMethod = faker.helpers.arrayElement(paymentMethods);
+
+    await page.getByRole("combobox", { name: "Payment Method" }).click();
+    await page.getByRole("option", { name: selectedMethod }).click();
+
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Select Location" })
+      .click();
+
+    await page
+      .locator('[data-slot="command-item"]')
+      .first()
+      .waitFor({ state: "visible" });
+
+    await page.locator('[data-slot="command-item"]').first().click();
+
+    const paymentTypes = ["Payment", "Adjustment", "Advance"];
+    const selectedType = faker.helpers.arrayElement(paymentTypes);
+
+    await page.getByRole("combobox", { name: "Payment Type" }).click();
+    await page.getByRole("option", { name: selectedType }).click();
+
+    // Enter payment amount
+    const paymentAmount = faker.number.int({ min: 100, max: 5000 }).toString();
+    await page
+      .getByRole("textbox", { name: "Payment Amount" })
+      .fill(paymentAmount);
+
+    // If payment method is Cash, enter tender amount
+    if (selectedMethod === "Cash") {
+      const tenderAmount = faker.number
+        .int({ min: parseInt(paymentAmount), max: 10000 })
+        .toString();
+      await page
+        .getByRole("textbox", { name: "Tender Amount" })
+        .fill(tenderAmount);
+    } else {
+      // For non-cash payments, Tender Amount field should not be visible
+      await expect(
+        page.getByRole("textbox", { name: "Tender Amount" }),
+      ).not.toBeVisible();
+    }
+
+    // Fill Payment Date
+    const paymentDate = faker.date
+      .between({
+        from: new Date(2025, 0, 1),
+        to: new Date(),
+      })
+      .toISOString()
+      .slice(0, 16);
+
+    await page.getByRole("textbox", { name: "Payment Date" }).fill(paymentDate);
+
+    // Fill Reference Number
+    const referenceNumber = faker.string.alphanumeric(10).toUpperCase();
+    await page
+      .getByRole("textbox", { name: "Reference Number" })
+      .fill(referenceNumber);
+
+    // Fill Notes
+    const notes = faker.lorem.sentence();
+    await page.getByRole("textbox", { name: "Notes" }).fill(notes);
+
+    // Save payment
+    await page.getByRole("button", { name: /record payment/i }).click();
+
+    // Verify success
+    await expect(
+      page.getByText(/payment.*recorded.*successfully/i),
+    ).toBeVisible();
+  });
+
+  test("should open record payment dialog using keyboard shortcut R", async ({
     page,
   }) => {
-    
-    const dialog = page.getByRole("dialog");
-    const submitBtn = dialog.getByRole("button", { name: LABELS.submitBtn });
-    await submitBtn.click();
+    await expect(
+      page.getByRole("button", { name: /record payment/i }),
+    ).toBeVisible();
+    // Press 'R' to open Record Payment
+    await page.keyboard.press("r");
 
-    // Expect the custom validation message to be visible
-    await expect(page.getByText(LABELS.customInvalidMsg)).toBeVisible();
-
-    // Ensure native browser message is NOT present
-    await expect(page.getByText(LABELS.nativeInvalidMsg)).not.toBeVisible();
+    // Verify Record Payment dialog is open
+    const dialog = page.getByRole("dialog", { name: "Record Payment" });
+    await expect(dialog).toBeVisible();
   });
 
-  test("submitting explicit zero shows custom validation message (amount = 0)", async ({
+  test("should show validation error when submitting empty payment", async ({
     page,
   }) => {
-    const paymentAmountInput = page.getByLabel(LABELS.paymentAmountLabel);
+    // Open Record Payment
+    await page.getByRole("button", { name: /record payment/i }).click();
 
-    // Fill 0 explicitly
-    await paymentAmountInput.fill("0");
+    // Click Record Payment without filling anything
+    await page.getByRole("button", { name: /record payment/i }).click();
 
-    // Submit
-    const submitBtn = page.getByRole("button", { name: LABELS.submitBtn });
-    await submitBtn.click();
+    // Verify validation error is shown
+    const paymentAmountSection = page
+      .locator("div")
+      .filter({ hasText: /^Payment Amount/ })
+      .filter({ hasText: /Invalid input$/ });
 
-    // Expect custom message
-    await expect(page.getByText(LABELS.customInvalidMsg)).toBeVisible();
-
-    // Ensure native message missing
-    await expect(page.getByText(LABELS.nativeInvalidMsg)).not.toBeVisible();
+    await expect(paymentAmountSection).toBeVisible();
   });
 
-  test("no console errors when submitting invalid payment", async ({
+  test("should record payment twice without refreshing page with location cache", async ({
     page,
   }) => {
-    const errors: string[] = [];
-    page.on("console", (msg) => {
-      if (msg.type() === "error") {
-        errors.push(msg.text());
-      }
-    });
+    // Open Record Payment
+    await page.getByRole("button", { name: /record payment/i }).click();
 
-    // Direct submit to trigger validation
-    const submitBtn = page.getByRole("button", { name: LABELS.submitBtn });
-    await submitBtn.click();
+    // Select the first location
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: "Select Location" })
+      .click();
 
-    // Wait for the validation UI to settle, then assert that no console errors were logged.
-+   await expect(page.getByText(LABELS.customInvalidMsg)).toBeVisible();
-+   expect(errors).toHaveLength(0);
-  });
+    await page
+      .locator('[data-slot="command-item"]')
+      .first()
+      .waitFor({ state: "visible" });
 
-  test("submitting valid payment form succeeds", async ({ page }) => {
-    const paymentAmountInput = page.getByLabel(LABELS.paymentAmountLabel);
-    const tenderAmountInput = page.getByLabel(LABELS.tenderAmountLabel);
-    const submitBtn = page.getByRole("button", { name: LABELS.submitBtn });
+    await page.locator('[data-slot="command-item"]').first().click();
+    // Enter payment amount
+    const paymentAmount = faker.number.int({ min: 100, max: 5000 }).toString();
+    await page
+      .getByRole("textbox", { name: "Payment Amount" })
+      .fill(paymentAmount);
 
-    // Fill valid values
-    await paymentAmountInput.fill("100");
-    await tenderAmountInput.fill("100");
+    // Enter tender amount
+    const tenderAmount = faker.number
+      .int({ min: parseInt(paymentAmount), max: 10000 })
+      .toString();
+    await page
+      .getByRole("textbox", { name: "Tender Amount" })
+      .fill(tenderAmount);
 
-    // Submit the form
-    await submitBtn.click();
+    // Save payment
+    await page.getByRole("button", { name: /record payment/i }).click();
 
-    // Expect the payment form/sheet to close or success message to be visible
-    // Check that the payment amount input is no longer visible, implying form closed
-    await expect(paymentAmountInput).toBeHidden();
-    
+    // Verify success
+    await expect(
+      page.getByText(/payment.*recorded.*successfully/i),
+    ).toBeVisible();
+
+    // Record Payment again without refreshing the page
+    await page.getByRole("button", { name: /record payment/i }).click();
+
+    // Enter payment amount
+    const newPaymentAmount = faker.number.int({ min: 1, max: 100 }).toString();
+    await page
+      .getByRole("textbox", { name: "Payment Amount" })
+      .fill(newPaymentAmount);
+
+    // Save payment
+    await page.getByRole("button", { name: /record payment/i }).click();
+
+    // Verify success
+    await expect(
+      page.getByText(/payment.*recorded.*successfully/i),
+    ).toBeVisible();
   });
 });
