@@ -105,10 +105,10 @@ export function InventoryList({ facilityId, locationId }: InventoryListProps) {
               value={qParams.status || ""}
               onValueChange={(value) => updateQuery({ status: value })}
               options={Object.values(InventoryStatusOptions)}
-              label="status"
+              label={t("status")}
               onClear={() => updateQuery({ status: undefined })}
               className="w-full sm:w-auto h-9 border-gray-300"
-              placeholder="filter_by_status"
+              placeholder={t("filter_by_status")}
             />
           </div>
           <div className="w-full sm:w-auto">

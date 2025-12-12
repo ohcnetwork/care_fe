@@ -15,6 +15,7 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import { ObservationWithUser } from "@/types/emr/observation";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -120,7 +121,7 @@ export const ObservationHistoryTable = ({
         <TableBody>
           {data?.pages.map((page, _pageIndex) =>
             page.results.map((observation) => {
-              const name = `${observation.data_entered_by.first_name} ${observation.data_entered_by.last_name}`;
+              const name = formatName(observation.data_entered_by);
 
               return (
                 <TableRow key={observation.id}>
