@@ -188,8 +188,10 @@ export const FacilityHome = ({ facilityId }: Props) => {
                       <TooltipComponent
                         content={facilityData?.facility_type}
                         side="right"
+                        align="center"
+                        sideOffset={4}
                       >
-                        <h2 className="text-xs sm:text-sm md:text-base lg:text-base text-white/70">
+                        <h2 className="text-xs sm:text-sm md:text-base lg:text-base text-white/70 inline-block">
                           {facilityData?.facility_type}
                         </h2>
                       </TooltipComponent>

@@ -43,7 +43,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { mergeAutocompleteOptions, valuesOf } from "@/Utils/utils";
+import { formatName, mergeAutocompleteOptions, valuesOf } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
@@ -211,14 +211,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   };
 
   const fillMyDetails = () => {
-    form.setValue(
-      "referring_facility_contact_name",
-      `${authUser.first_name} ${authUser.last_name}`.trim(),
-      {
-        shouldDirty: true,
-        shouldValidate: true,
-      },
-    );
+    form.setValue("referring_facility_contact_name", formatName(authUser), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
     if (authUser.phone_number) {
       form.setValue(
         "referring_facility_contact_number",
