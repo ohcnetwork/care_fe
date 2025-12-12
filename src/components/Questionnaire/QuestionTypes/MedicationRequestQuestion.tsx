@@ -212,8 +212,6 @@ export function MedicationRequestQuestion({
     `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
   );
 
-  console.log("alternateIdentifier", alternateIdentifier);
-
   const { data: patientMedications } = useQuery({
     queryKey: ["medication_requests", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
