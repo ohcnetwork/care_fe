@@ -10,6 +10,7 @@ import { Markdown } from "@/components/ui/markdown";
 
 import { Avatar } from "@/components/Common/Avatar";
 import { LoginHeader } from "@/components/Common/LoginHeader";
+import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
 
 import useAppHistory from "@/hooks/useAppHistory";
@@ -58,9 +59,31 @@ export function FacilityDetailsPage({ id }: Props) {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin">
-          <CareIcon icon="l-spinner" className="size-8" />
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center pb-4">
+          <Button
+            variant="outline"
+            className="border border-secondary-400"
+            onClick={() => goBack("/facilities")}
+          >
+            <CareIcon icon="l-arrow-left" className="size-4 mr-1" />
+            <span className="text-sm underline">{t("back")}</span>
+          </Button>
+          <LoginHeader />
+        </div>
+        <Card className="overflow-hidden bg-white border border-gray-200">
+          <div className="flex flex-col sm:flex-row m-6">
+            <div className="size-64 shrink-0 overflow-hidden rounded-lg bg-gray-200 animate-pulse" />
+            <div className="px-4 space-y-2 flex-1">
+              <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
+              <div className="h-6 w-64 bg-gray-200 rounded animate-pulse" />
+            </div>
+          </div>
+        </Card>
+        <div className="mt-6">
+          <div className="grid grid-cols-1 gap-4 @xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 lg:grid-cols-2">
+            <CardGridSkeleton count={6} />
+          </div>
         </div>
       </div>
     );
