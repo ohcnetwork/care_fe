@@ -106,32 +106,16 @@ export function MultiSelect({
           </Badge>
         )}
         {open ? (
-          <ChevronUp
-            id="dropdown-toggle"
-            className="h-4 mx-2 cursor-pointer text-black"
-          />
+          <ChevronUp className="h-4 mx-2 cursor-pointer text-black" />
         ) : (
-          <ChevronDown
-            id="dropdown-toggle"
-            className="h-4 mx-2 cursor-pointer text-black"
-          />
+          <ChevronDown className="h-4 mx-2 cursor-pointer text-black" />
         )}
       </div>
     </Button>
   );
 
   const listContent = (
-    <div
-      className="flex flex-col h-full overflow-hidden"
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          e.stopPropagation();
-          onValueChange(selectedValues);
-          setOpen(false);
-        }
-      }}
-    >
+    <div className="flex flex-col h-full overflow-hidden">
       <Command className="flex-1 overflow-hidden min-h-0">
         <div className="border border-gray-200 rounded-md m-1 mb-2">
           <CommandInput
@@ -234,16 +218,12 @@ export function MultiSelect({
         <Button
           variant="primary_gradient"
           size="md"
-          className="flex items-center gap-1 p-3"
           onClick={() => {
             onValueChange(selectedValues);
             setOpen(false);
           }}
         >
           {t("done")}
-          <span className="flex items-center justify-center size-5 rounded-sm border border-white/25 bg-white/15 font-medium">
-            <CareIcon icon="l-enter" className="size-3" />
-          </span>
         </Button>
       </div>
     </div>
