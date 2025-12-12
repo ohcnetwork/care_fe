@@ -234,8 +234,7 @@ export interface EncounterListRead extends EncounterBase {
 }
 
 export interface EncounterRead
-  extends Omit<EncounterListRead, "patient">,
-    Permissions {
+  extends Omit<EncounterListRead, "patient">, Permissions {
   appointment: AppointmentRead | null;
   patient: PatientRead;
   organizations: FacilityOrganizationRead[];
@@ -246,11 +245,10 @@ export interface EncounterRead
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
 }
-export interface EncounterCreate
-  extends Omit<
-    EncounterBase,
-    "discharge_summary_advice" | "external_identifier"
-  > {
+export interface EncounterCreate extends Omit<
+  EncounterBase,
+  "discharge_summary_advice" | "external_identifier"
+> {
   patient: string;
   facility: string;
   organizations: string[];
