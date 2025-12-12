@@ -89,6 +89,8 @@ export default function FacilityOrganizationSelector(
       if (selectedOrganizations.length > 0) {
         setSelectedOrganizations(selectedOrganizations);
       }
+    } else {
+      setSelectedOrganizations([]);
     }
   }, [value, currentOrganizations]);
 
