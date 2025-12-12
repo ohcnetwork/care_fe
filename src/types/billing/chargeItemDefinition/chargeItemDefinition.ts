@@ -32,11 +32,10 @@ export interface ChargeItemDefinitionRead extends ChargeItemDefinitionBase {
   category: ResourceCategoryRead;
 }
 
-export interface ChargeItemDefinitionCreate
-  extends Omit<
-    ChargeItemDefinitionBase,
-    "id" | "category" | "slug_config" | "slug"
-  > {
+export interface ChargeItemDefinitionCreate extends Omit<
+  ChargeItemDefinitionBase,
+  "id" | "category" | "slug_config" | "slug"
+> {
   slug_value: string;
   category: string;
   version?: number;

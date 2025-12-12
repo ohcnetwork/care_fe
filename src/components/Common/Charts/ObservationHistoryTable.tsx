@@ -114,7 +114,7 @@ export const ObservationHistoryTable = ({
         </TableHeader>
         <TableBody>
           {data?.pages.map((page, _pageIndex) =>
-            page.results.map((observation: ObservationListRead) => {
+            page.results.map((observation) => {
               const name = formatName(observation.data_entered_by);
 
               return (

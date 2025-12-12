@@ -49,30 +49,32 @@ export interface BaseObservationDefinitionSpec {
   slug_config: SlugConfig;
 }
 
-export interface ObservationDefinitionComponentCreateSpec
-  extends Omit<ObservationDefinitionComponentSpec, "qualified_ranges"> {
+export interface ObservationDefinitionComponentCreateSpec extends Omit<
+  ObservationDefinitionComponentSpec,
+  "qualified_ranges"
+> {
   qualified_ranges?: QualifiedRange[];
 }
 
-export interface ObservationDefinitionCreateSpec
-  extends Omit<
-    BaseObservationDefinitionSpec,
-    "id" | "slug_config" | "slug" | "qualified_ranges" | "component"
-  > {
+export interface ObservationDefinitionCreateSpec extends Omit<
+  BaseObservationDefinitionSpec,
+  "id" | "slug_config" | "slug" | "qualified_ranges" | "component"
+> {
   slug_value: string;
   facility: string;
   qualified_ranges?: QualifiedRange[];
   component: ObservationDefinitionComponentCreateSpec[];
 }
 
-export interface ObservationDefinitionUpdateSpec
-  extends Omit<BaseObservationDefinitionSpec, "slug_config" | "slug"> {
+export interface ObservationDefinitionUpdateSpec extends Omit<
+  BaseObservationDefinitionSpec,
+  "slug_config" | "slug"
+> {
   slug_value: string;
   facility: string;
 }
 
-export interface ObservationDefinitionReadSpec
-  extends BaseObservationDefinitionSpec {
+export interface ObservationDefinitionReadSpec extends BaseObservationDefinitionSpec {
   version?: number;
 }
 
