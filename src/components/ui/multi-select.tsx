@@ -69,19 +69,17 @@ export function MultiSelect({
   const { t } = useTranslation();
 
   const handleToggleOption = (option: string) => {
-    const newSelectedValues = selectedValues.includes(option)
-      ? selectedValues.filter((value) => value !== option)
-      : [...selectedValues, option];
-    setSelectedValues(newSelectedValues);
+    setSelectedValues((prevSelectedValues) =>
+      prevSelectedValues.includes(option)
+        ? prevSelectedValues.filter((v) => v !== option)
+        : [...prevSelectedValues, option],
+    );
   };
-
   const handleSelectAll = () => {
-    if (selectedValues.length === options.length) {
-      setSelectedValues([]);
-    } else {
-      const allValues = options.map((option) => option.value);
-      setSelectedValues(allValues);
-    }
+    setSelectedValues((prevSelectedValues) => {
+      if (prevSelectedValues.length === options.length) return [];
+      return options.map((o) => o.value);
+    });
   };
 
   const triggerButton = (
