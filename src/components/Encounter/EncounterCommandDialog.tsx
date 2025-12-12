@@ -321,7 +321,7 @@ export function EncounterCommandDialog({
     [handleAction, onOpenChange, addRecentAction],
   );
 
-  const { apps } = useCareApps();
+  const careApps = useCareApps();
 
   return (
     <>
@@ -364,7 +364,10 @@ export function EncounterCommandDialog({
               <CommandSeparator />
             </div>
           ))}
-          {apps.some((plugin) => plugin.components?.EncounterActions) && (
+          {careApps.some(
+            (plugin) =>
+              !plugin.isLoading && plugin.components?.EncounterActions,
+          ) && (
             <CommandGroup heading={t("plugin_actions")} className="px-0">
               <PLUGIN_Component
                 __name="EncounterActions"

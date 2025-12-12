@@ -81,10 +81,10 @@ function generateAdminLinks(
 export function AdminNav() {
   const { t } = useTranslation();
 
-  const { apps } = useCareApps();
-  const pluginNavItems = apps
-    .filter((c) => !!c.adminNavItems)
-    .flatMap((c) => c.adminNavItems) as NavigationLink[];
+  const careApps = useCareApps();
+  const pluginNavItems = careApps.flatMap((c) =>
+    !c.isLoading && !!c.adminNavItems ? c.adminNavItems : [],
+  ) as NavigationLink[];
 
   return <NavMain links={generateAdminLinks(t, pluginNavItems)} />;
 }

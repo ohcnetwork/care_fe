@@ -63,16 +63,16 @@ export default function PluginEngine({
       queryKey: ["plugin-manifest", config.slug],
       queryFn: () => getPluginManifest(config),
     })),
-    combine: (result) => {
-      const apps = result
-        .map((r) => r.data)
-        .filter((m): m is PluginManifest => m != null);
+    combine: (queries) =>
+      queries.map(({ data, isLoading }, i) => {
+        const config = (enabledPlugins?.configs ?? [])[i];
 
-      return {
-        isLoading: result.some((r) => r.isLoading),
-        apps,
-      };
-    },
+        if (isLoading) {
+          return { ...config, isLoading: true as const };
+        }
+
+        return { ...config, isLoading: false as const, ...data! };
+      }),
   });
 
   return (
@@ -100,11 +100,15 @@ export function PLUGIN_Component<K extends keyof SupportedPluginComponents>({
   __name,
   ...props
 }: { __name: K } & PluginProps<K>) {
-  const { apps } = useCareApps();
+  const careApps = useCareApps();
 
   return (
     <>
-      {apps.map((plugin) => {
+      {careApps.map((plugin) => {
+        if (plugin.isLoading) {
+          return null;
+        }
+
         const Component = plugin.components?.[
           __name
         ] as React.ComponentType<unknown>;
