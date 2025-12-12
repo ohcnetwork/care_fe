@@ -36,7 +36,6 @@ import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 
-import { formatName } from "@/Utils/utils";
 import observationApi from "@/types/emr/observation/observationApi";
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
 interface CodeGroup {
