@@ -45,6 +45,7 @@ export default function FacilityOrganizationSelector(
 ) {
   const { t } = useTranslation();
   const {
+    value,
     onChange,
     facilityId,
     currentOrganizations,
@@ -79,6 +80,17 @@ export default function FacilityOrganizationSelector(
       },
     ),
   });
+
+  useEffect(() => {
+    if (value) {
+      const selectedOrganizations = value
+        .map((id) => currentOrganizations?.find((org) => org.id === id))
+        .filter((org) => org !== undefined);
+      if (selectedOrganizations.length > 0) {
+        setSelectedOrganizations(selectedOrganizations);
+      }
+    }
+  }, [value, currentOrganizations]);
 
   const organizationQueries = useQueries({
     queries: navigationLevels.map((level) => ({
