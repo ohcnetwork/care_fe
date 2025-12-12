@@ -166,7 +166,6 @@ export default function CreateTokenForm({
 
   const handleOpenChange = (open: boolean) => {
     if (open) {
-      // Reset BEFORE opening for clean slate
       form.reset();
       setSelectedResource({
         resource: null,
