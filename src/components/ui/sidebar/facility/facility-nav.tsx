@@ -210,7 +210,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const { hasPermission } = usePermissions();
   const careApps = useCareApps();
   const pluginNavItems = careApps.flatMap((c) =>
-    !c.isLoading && !!c.navItems ? c.navItems : [],
+    !c.isLoading && c.navItems ? c.navItems : [],
   ) as NavigationLink[];
 
   const { facility } = useCurrentFacility();
