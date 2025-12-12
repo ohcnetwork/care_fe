@@ -43,7 +43,7 @@ export const PatientInfoCard = ({
           {children}
 
           <PLUGIN_Component
-            __name="PatientHeaderActions"
+            __name="PrintIDCardButton"
             patient={patient}
             facilityId={facilityId}
             variant="link"

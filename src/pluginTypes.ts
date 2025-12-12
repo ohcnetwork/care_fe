@@ -69,7 +69,7 @@ export type PatientSearchActionsComponentType = React.FC<{
   className?: string;
 }>;
 
-export type PatientHeaderActionsComponentType = React.FC<{
+export type PrintIDCardComponentType = React.FC<{
   facilityId: string;
   patient: PatientRead;
   className?: string;
@@ -89,7 +89,7 @@ export type SupportedPluginComponents = {
   PatientDetailsTabDemographyGeneralInfo: PatientDetailsTabDemographyGeneralInfoComponentType;
   InvoiceRecordPaymentOptions: InvoiceRecordPaymentOptionsComponentType;
   PatientSearchActions: PatientSearchActionsComponentType;
-  PatientHeaderActions: PatientHeaderActionsComponentType;
+  PrintIDCardButton: PrintIDCardComponentType;
 };
 
 // Create a type for lazy-loaded components
