@@ -70,7 +70,7 @@ export default function GenericFilter({
       {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
       <div className="p-3 max-h-[30vh] overflow-y-auto">
         <Input
-          placeholder="Search options..."
+          placeholder={t("search_options")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="h-8 text-sm mb-3"
