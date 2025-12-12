@@ -16,7 +16,7 @@ export function getEncounterId(): string {
     console.warn("⚠️ Encounter meta missing — running encounter setup...");
     try {
       execSync(
-        "npx playwright test --project=setup tests/setup/encounter.setup.ts",
+        "npx playwright test --project=setup tests/setup/patient.setup.ts",
         {
           stdio: "inherit",
           cwd: process.cwd(),
@@ -32,7 +32,7 @@ export function getEncounterId(): string {
   const raw = fs.readFileSync(META_PATH, "utf8");
   try {
     const { id } = JSON.parse(raw);
-    if (!id) throw new Error("Missing id in encounterMeta.json");
+    if (!id) throw new Error(`Missing id in encounter meta file: ${META_PATH}`);
     cachedId = id;
     return id;
   } catch (err) {
