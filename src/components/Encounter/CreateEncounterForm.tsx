@@ -84,23 +84,37 @@ export default function CreateEncounterForm({
   const { t } = useTranslation();
   useShortcutSubContext();
 
-  const encounterFormSchema = z.object({
-    status: z.enum([
-      EncounterStatus.PLANNED,
-      EncounterStatus.IN_PROGRESS,
-      EncounterStatus.ON_HOLD,
-    ] as const),
-    encounter_class: z.enum(careConfig.encounterClasses),
-    priority: z.enum(ENCOUNTER_PRIORITY),
-    organizations: z.array(z.string()).min(1, {
-      message: t("at_least_one_department_is_required"),
-    }),
-    start_date: z.string(),
-    tags: z.array(z.string()),
-  });
+  const encounterFormSchema = z
+    .object({
+      status: z.enum([
+        EncounterStatus.PLANNED,
+        EncounterStatus.IN_PROGRESS,
+        EncounterStatus.ON_HOLD,
+      ] as const),
+      encounter_class: z.enum(careConfig.encounterClasses),
+      priority: z.enum(ENCOUNTER_PRIORITY),
+      organizations: z.array(z.string()).min(1, {
+        message: t("at_least_one_department_is_required"),
+      }),
+      start_date: z.string(),
+      tags: z.array(z.string()),
+    })
+    .refine(
+      (data) => {
+        if (data.status !== EncounterStatus.PLANNED) {
+          return new Date(data.start_date) <= new Date();
+        }
+        return true;
+      },
+      {
+        message: t("future_date_not_allowed_for_non_planned_status"),
+        path: ["start_date"],
+      },
+    );
 
   const form = useForm({
     resolver: zodResolver(encounterFormSchema),
+    mode: "onChange",
     defaultValues: {
       status: defaultStatus,
       encounter_class: careConfig.defaultEncounterType,
@@ -112,6 +126,10 @@ export default function CreateEncounterForm({
   });
 
   const status = form.watch("status");
+
+  useEffect(() => {
+    form.trigger("start_date");
+  }, [status, form]);
 
   const tagIds = form.watch("tags");
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
@@ -149,17 +167,6 @@ export default function CreateEncounterForm({
 
     createEncounter(encounterRequest);
   }
-
-  const startDate = form.watch("start_date");
-
-  useEffect(() => {
-    if (
-      status !== EncounterStatus.PLANNED &&
-      new Date(startDate) > new Date()
-    ) {
-      form.setValue("start_date", new Date().toISOString());
-    }
-  }, [status, startDate, form]);
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
