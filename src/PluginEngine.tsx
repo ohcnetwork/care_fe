@@ -14,10 +14,10 @@ import { CareAppsContext, useCareApps } from "@/hooks/useCareApps";
 import query from "@/Utils/request/query";
 
 import { PluginManifest, SupportedPluginComponents } from "@/pluginTypes";
+import { PlugConfig } from "@/types/plugConfig";
 import plugConfigApi from "@/types/plugConfig/plugConfigApi";
 import { t } from "i18next";
 import { z } from "zod";
-import { PlugConfig } from "@/types/plugConfig";
 
 const getPluginManifest = async (config: PlugConfig) => {
   if (
