@@ -93,6 +93,8 @@ export default function AppRouter() {
 
   useRedirect("/user", "/users");
 
+  useRedirect("/login", "/");
+
   // Merge in Plugin Routes
   routes = {
     ...pluginRoutes,
