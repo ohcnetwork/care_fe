@@ -58,7 +58,7 @@ import { UserReadMinimal } from "@/types/user/user";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import mutate from "@/Utils/request/mutate";
 import queryClient from "@/Utils/request/queryClient";
-import { dateQueryString } from "@/Utils/utils";
+import { dateQueryString, formatName } from "@/Utils/utils";
 import { startOfDay } from "date-fns";
 import dayjs from "dayjs";
 import { Link } from "raviger";
@@ -336,7 +336,7 @@ export default function QueuesIndex({
                 <SelectContent>
                   {availableUsers.map((user: UserReadMinimal) => (
                     <SelectItem key={user.id} value={user.id}>
-                      {user.first_name} {user.last_name}
+                      {formatName(user)}
                     </SelectItem>
                   ))}
                 </SelectContent>

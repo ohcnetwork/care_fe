@@ -22,6 +22,7 @@ interface NavTabDefinition {
   component: React.ReactNode;
   shortcutId?: string;
   labelSuffix?: React.ReactNode;
+  visible?: boolean;
 }
 
 interface Props<TabKey extends string> {
@@ -75,7 +76,7 @@ export const NavTabs = <TabKey extends string>({
 }: Props<TabKey> & React.ComponentProps<typeof Tabs>) => {
   const { t } = useTranslation();
 
-  const allTabKeys = keysOf(tabs);
+  const allTabKeys = keysOf(tabs).filter((key) => tabs[key].visible !== false);
   const { visibleTabs, showMoreTabs } = getTabsToShowAndShowMore(
     allTabKeys,
     currentTab,
@@ -136,12 +137,16 @@ export const NavTabs = <TabKey extends string>({
           </DropdownMenu>
         )}
       </TabsList>
-      {entriesOf(tabs).map(([key, tab]) => (
-        <TabsContent key={key} value={key} className={tabContentClassName}>
-          {setPageTitle && <PageTitle title={tab.label} />}
-          {tab.component}
-        </TabsContent>
-      ))}
+
+      {entriesOf(tabs).map(
+        ([key, tab]) =>
+          tab.visible !== false && (
+            <TabsContent key={key} value={key} className={tabContentClassName}>
+              {setPageTitle && <PageTitle title={tab.label} />}
+              {tab.component}
+            </TabsContent>
+          ),
+      )}
     </Tabs>
   );
 };

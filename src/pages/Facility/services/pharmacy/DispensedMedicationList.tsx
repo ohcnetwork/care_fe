@@ -251,7 +251,6 @@ function MedicationTable({
                         href={`/facility/${facilityId}/billing/invoices/${medication.charge_item.paid_invoice?.id}`}
                         basePath={`/`}
                         className="hover:text-primary underline underline-offset-2"
-                        target="_blank"
                       >
                         {t("view_invoice")}
                         <CareIcon

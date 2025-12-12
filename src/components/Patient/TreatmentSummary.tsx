@@ -84,12 +84,12 @@ export default function TreatmentSummary({
     hasPermission,
     patient?.permissions ?? [],
   );
-  const { canViewEncounter } = getPermissions(
+  const { canReadEncounter } = getPermissions(
     hasPermission,
     encounter?.permissions ?? [],
   );
 
-  const canAccess = canViewEncounter || canViewClinicalData;
+  const canAccess = canReadEncounter || canViewClinicalData;
 
   const { data: allergies, isLoading: allergiesLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],

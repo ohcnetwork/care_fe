@@ -33,6 +33,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar } from "@/components/Common/Avatar";
 
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import patientApi from "@/types/emr/patient/patientApi";
 
@@ -216,7 +217,7 @@ export const ObservationVisualizer = ({
         if (!isNaN(value) && timestamp in processedData && code.display) {
           const details: ObservationDetails = {
             value,
-            enteredBy: `${observation.data_entered_by.first_name} ${observation.data_entered_by.last_name}`,
+            enteredBy: formatName(observation.data_entered_by),
             enteredAt: formatChartDate(observation.effective_datetime).display,
             note: observation.note || undefined,
             status: observation.status,

@@ -32,6 +32,11 @@ export default {
     TRes: Type<EncounterRead>(),
     TBody: Type<EncounterEdit>(),
   },
+  restart: {
+    path: "/api/v1/encounter/{id}/restart/",
+    method: HttpMethod.POST,
+    TRes: Type<EncounterRead>(),
+  },
 
   // Organization Management
   addOrganization: {
@@ -45,13 +50,6 @@ export default {
     method: HttpMethod.DELETE,
     TRes: Type<EncounterRead>(),
     TBody: Type<{ organization: string }>(),
-  },
-
-  // Discharge Summary
-  generateDischargeSummary: {
-    path: "/api/v1/encounter/{encounterId}/generate_discharge_summary/",
-    method: HttpMethod.POST,
-    TRes: Type<{ detail: string }>(),
   },
 
   // Tag-related endpoints

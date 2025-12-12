@@ -1,14 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import {
-  ArrowLeft,
-  ChevronDownIcon,
-  Eye,
-  Info,
-  MoreVertical,
-  Shuffle,
-} from "lucide-react";
+import { ArrowLeft, Eye, Info, MoreVertical, Shuffle } from "lucide-react";
 import { navigate, useQueryParams } from "raviger";
 import React, { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -70,6 +63,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
+import StockLotSelector from "@/pages/Facility/services/inventory/StockLotSelector";
 
 import ComboboxQuantityInput from "@/components/Common/ComboboxQuantityInput";
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
@@ -1793,261 +1787,51 @@ export default function MedicationBillForm({ patientId }: Props) {
                                       effectiveProductKnowledge.id
                                     ]?.length ? (
                                       <div className="space-y-2">
-                                        <Popover>
-                                          <PopoverTrigger asChild>
-                                            <Button
-                                              variant="outline"
-                                              className="w-auto min-w-40 justify-between h-auto min-h-[40px] p-1 border-gray-300 border"
-                                              type="button"
-                                            >
-                                              <div className="flex flex-col items-start gap-1 w-full p-1">
-                                                {(() => {
-                                                  const selectedLots = form
-                                                    .watch(
-                                                      `items.${index}.lots`,
-                                                    )
-                                                    .filter(
-                                                      (lot) =>
-                                                        lot.selectedInventoryId,
-                                                    );
-
-                                                  if (
-                                                    selectedLots.length === 0
-                                                  ) {
-                                                    return (
-                                                      <span className="text-gray-500">
-                                                        {t("select_stock")}
-                                                      </span>
-                                                    );
-                                                  }
-
-                                                  return selectedLots.map(
-                                                    (lot) => {
-                                                      const selectedInventory =
-                                                        productKnowledgeInventoriesMap[
-                                                          effectiveProductKnowledge
-                                                            .id
-                                                        ]?.find(
-                                                          (inv) =>
-                                                            inv.id ===
-                                                            lot.selectedInventoryId,
-                                                        );
-
-                                                      return (
-                                                        <div
-                                                          key={
-                                                            lot.selectedInventoryId
-                                                          }
-                                                          className="flex items-center gap-2 w-full bg-gray-50 px-2 py-1 border-gray-200 border-1 text-gray-950"
-                                                        >
-                                                          <span className="font-medium text-sm">
-                                                            {"Lot #" +
-                                                              selectedInventory
-                                                                ?.product.batch
-                                                                ?.lot_number}
-                                                          </span>
-                                                          <Badge
-                                                            variant={
-                                                              selectedInventory?.status ===
-                                                                "active" &&
-                                                              selectedInventory?.net_content >
-                                                                0
-                                                                ? "primary"
-                                                                : "destructive"
-                                                            }
-                                                          >
-                                                            {
-                                                              selectedInventory?.net_content
-                                                            }{" "}
-                                                            {
-                                                              selectedInventory
-                                                                ?.product
-                                                                .product_knowledge
-                                                                .base_unit
-                                                                .display
-                                                            }
-                                                          </Badge>
-                                                          {selectedInventory
-                                                            ?.product
-                                                            .expiration_date && (
-                                                            <Badge
-                                                              variant={
-                                                                selectedInventory.status ===
-                                                                  "active" &&
-                                                                new Date(
-                                                                  selectedInventory.product.expiration_date,
-                                                                ) >= new Date()
-                                                                  ? "primary"
-                                                                  : "destructive"
-                                                              }
-                                                            >
-                                                              {t("expiry")}:{" "}
-                                                              {selectedInventory
-                                                                .product
-                                                                .expiration_date
-                                                                ? formatDate(
-                                                                    selectedInventory
-                                                                      .product
-                                                                      .expiration_date,
-                                                                    "dd/MM/yyyy",
-                                                                  )
-                                                                : "-"}
-                                                            </Badge>
-                                                          )}
-                                                          {selectedInventory
-                                                            ?.location.id !==
-                                                            locationId && (
-                                                            <Badge variant="secondary">
-                                                              {
-                                                                selectedInventory
-                                                                  ?.location
-                                                                  .name
-                                                              }
-                                                            </Badge>
-                                                          )}
-                                                        </div>
-                                                      );
-                                                    },
+                                        <StockLotSelector
+                                          selectedLots={form.watch(
+                                            `items.${index}.lots`,
+                                          )}
+                                          onLotSelectionChange={(lots) => {
+                                            const existingLotIds = form
+                                              .getValues(`items.${index}.lots`)
+                                              .map(
+                                                (lot) =>
+                                                  lot.selectedInventoryId,
+                                              );
+                                            const newLots = lots.map((lot) => {
+                                              if (
+                                                !existingLotIds.includes(
+                                                  lot.selectedInventoryId,
+                                                )
+                                              ) {
+                                                const medication =
+                                                  form.getValues(
+                                                    `items.${index}.medication`,
                                                   );
-                                                })()}
-                                              </div>
-                                              <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0" />
-                                            </Button>
-                                          </PopoverTrigger>
-                                          <PopoverContent className="w-auto p-0">
-                                            <div className="max-h-60 overflow-auto">
-                                              {productKnowledgeInventoriesMap[
-                                                effectiveProductKnowledge.id
-                                              ]?.length ? (
-                                                productKnowledgeInventoriesMap[
-                                                  effectiveProductKnowledge.id
-                                                ]?.map((inv) => {
-                                                  const currentLots =
-                                                    form.watch(
-                                                      `items.${index}.lots`,
-                                                    );
-                                                  const isSelected =
-                                                    currentLots.some(
-                                                      (lot) =>
-                                                        lot.selectedInventoryId ===
-                                                        inv.id,
-                                                    );
-
-                                                  return (
-                                                    <div
-                                                      key={inv.id}
-                                                      className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent"
-                                                      onClick={() => {
-                                                        const lots =
-                                                          form.getValues(
-                                                            `items.${index}.lots`,
-                                                          );
-
-                                                        if (isSelected) {
-                                                          form.setValue(
-                                                            `items.${index}.lots`,
-                                                            lots.filter(
-                                                              (lot) =>
-                                                                lot.selectedInventoryId !==
-                                                                inv.id,
-                                                            ),
-                                                          );
-                                                        } else {
-                                                          const medication =
-                                                            form.getValues(
-                                                              `items.${index}.medication`,
-                                                            );
-                                                          const initialQuantity =
-                                                            medication
-                                                              ? computeInitialQuantity(
-                                                                  medication,
-                                                                )
-                                                              : 0;
-
-                                                          form.setValue(
-                                                            `items.${index}.lots`,
-                                                            [
-                                                              ...lots,
-                                                              {
-                                                                selectedInventoryId:
-                                                                  inv.id,
-                                                                quantity:
-                                                                  initialQuantity,
-                                                              },
-                                                            ],
-                                                          );
-                                                        }
-                                                      }}
-                                                    >
-                                                      <Checkbox
-                                                        checked={isSelected}
-                                                        className="mr-2"
-                                                      />
-                                                      <div className="flex-1 flex items-center justify-between gap-1">
-                                                        <span>
-                                                          {"Lot #" +
-                                                            inv.product.batch
-                                                              ?.lot_number}
-                                                        </span>
-                                                        <Badge
-                                                          variant={
-                                                            inv.status ===
-                                                              "active" &&
-                                                            inv.net_content > 0
-                                                              ? "primary"
-                                                              : "destructive"
-                                                          }
-                                                          className="ml-2"
-                                                        >
-                                                          {inv.net_content}{" "}
-                                                          {
-                                                            inv.product
-                                                              ?.product_knowledge
-                                                              .base_unit.display
-                                                          }
-                                                        </Badge>
-                                                        {inv.product
-                                                          ?.expiration_date && (
-                                                          <Badge
-                                                            variant={
-                                                              inv.status ===
-                                                                "active" &&
-                                                              new Date(
-                                                                inv.product.expiration_date,
-                                                              ) >= new Date()
-                                                                ? "primary"
-                                                                : "destructive"
-                                                            }
-                                                          >
-                                                            {t("expiry")}:{" "}
-                                                            {inv.product
-                                                              .expiration_date
-                                                              ? formatDate(
-                                                                  inv.product
-                                                                    .expiration_date,
-                                                                  "dd/MM/yyyy",
-                                                                )
-                                                              : "-"}
-                                                          </Badge>
-                                                        )}
-                                                        {inv?.location.id !==
-                                                          locationId && (
-                                                          <Badge variant="secondary">
-                                                            {inv?.location.name}
-                                                          </Badge>
-                                                        )}
-                                                      </div>
-                                                    </div>
-                                                  );
-                                                })
-                                              ) : (
-                                                <div className="p-4 text-center text-gray-500">
-                                                  {t("no_lots_found")}
-                                                </div>
-                                              )}
-                                            </div>
-                                          </PopoverContent>
-                                        </Popover>
+                                                return {
+                                                  ...lot,
+                                                  quantity: medication
+                                                    ? computeInitialQuantity(
+                                                        medication,
+                                                      )
+                                                    : lot.quantity,
+                                                };
+                                              }
+                                              return lot;
+                                            });
+                                            form.setValue(
+                                              `items.${index}.lots`,
+                                              newLots,
+                                            );
+                                          }}
+                                          availableInventories={
+                                            productKnowledgeInventoriesMap[
+                                              effectiveProductKnowledge.id
+                                            ]
+                                          }
+                                          multiSelect
+                                          showexpiry={false}
+                                        />
                                       </div>
                                     ) : (
                                       <Badge variant="destructive">
