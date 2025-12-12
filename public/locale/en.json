@@ -2350,6 +2350,7 @@
   "full_history": "Full History",
   "full_name": "Full Name",
   "full_screen": "Full Screen",
+  "future_date_not_allowed_for_non_planned_status": "Future dates are only allowed for planned encounters",
   "gender": "Gender",
   "gender_is_required": "Gender is required",
   "general": "General",
