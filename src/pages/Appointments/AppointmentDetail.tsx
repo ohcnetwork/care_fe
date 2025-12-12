@@ -526,7 +526,6 @@ export default function AppointmentDetail(props: Props) {
                         />
                       }
                       onSuccess={() => {
-                        console.log("invalidating appointment", appointment.id);
                         queryClient.invalidateQueries({
                           queryKey: ["appointment", appointment.id],
                         });

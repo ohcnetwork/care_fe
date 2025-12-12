@@ -84,7 +84,6 @@ function TimelineNode({ event }: { event: TimelineEvent }) {
 
 function WorkflowContent({ events }: { events: TimelineEvent[] }) {
   const { t } = useTranslation();
-  console.log(events);
   return (
     <>
       <div className="flex items-center gap-2 p-4 border-b">
