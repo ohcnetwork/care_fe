@@ -1,3 +1,4 @@
+import { ButtonVariant } from "@/components/ui/button";
 import { NavigationLink } from "@/components/ui/sidebar/nav-main";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
@@ -68,6 +69,13 @@ export type PatientSearchActionsComponentType = React.FC<{
   className?: string;
 }>;
 
+export type PatientHeaderActionsComponentType = React.FC<{
+  facilityId: string;
+  patient: PatientRead;
+  className?: string;
+  variant?: ButtonVariant;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
@@ -81,6 +89,7 @@ export type SupportedPluginComponents = {
   PatientDetailsTabDemographyGeneralInfo: PatientDetailsTabDemographyGeneralInfoComponentType;
   InvoiceRecordPaymentOptions: InvoiceRecordPaymentOptionsComponentType;
   PatientSearchActions: PatientSearchActionsComponentType;
+  PatientHeaderActions: PatientHeaderActionsComponentType;
 };
 
 // Create a type for lazy-loaded components

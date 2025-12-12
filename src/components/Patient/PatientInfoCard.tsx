@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
+import { PLUGIN_Component } from "@/PluginEngine";
 import { PatientRead } from "@/types/emr/patient/patient";
 import {
   getTagHierarchyDisplay,
@@ -40,6 +41,13 @@ export const PatientInfoCard = ({
             <PatientHoverCard patient={patient} facilityId={facilityId} />
           </div>
           {children}
+
+          <PLUGIN_Component
+            __name="PatientHeaderActions"
+            patient={patient}
+            facilityId={facilityId}
+            variant="link"
+          />
         </CardHeader>
       </Card>
       <Card className="bg-white shadow-sm mx-3 rounded-md rounded-t-none rounded-b-md">
