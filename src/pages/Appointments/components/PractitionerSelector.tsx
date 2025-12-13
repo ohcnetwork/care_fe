@@ -52,7 +52,6 @@ import {
 import scheduleApi from "@/types/scheduling/scheduleApi";
 import { UserReadMinimal } from "@/types/user/user";
 import query from "@/Utils/request/query";
-import { NonEmptyArray } from "@/Utils/types";
 import { formatName } from "@/Utils/utils";
 
 const getColorForTag = (uuid: string) => {
@@ -599,10 +598,8 @@ export const PractitionerSelector = ({
                             variant="outline"
                             size="xs"
                             onClick={() => {
-                              if (organizationUsers?.users) {
-                                handleSelectAll(
-                                  organizationUsers.users as NonEmptyArray<UserReadMinimal>,
-                                );
+                              if (filteredPractitioners.length > 0) {
+                                handleSelectAll(filteredPractitioners);
                               }
                             }}
                           >
