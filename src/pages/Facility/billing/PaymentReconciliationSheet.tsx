@@ -9,6 +9,14 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import {
+  Banknote,
+  CreditCard,
+  Landmark,
+  ScanQrCode,
+  Signature,
+} from "lucide-react";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import careConfig from "@careConfig";
@@ -29,13 +37,6 @@ import {
   MonetaryDisplay,
 } from "@/components/ui/monetary-display";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -44,10 +45,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { TooltipComponent } from "@/components/ui/tooltip";
 
 import { locationAtomFamily } from "@/atoms/location-atom";
 import { LocationPicker } from "@/components/Location/LocationPicker";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
@@ -62,6 +63,7 @@ import {
 import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import { Label } from "@radix-ui/react-label";
 
 interface PaymentReconciliationSheetProps {
   open: boolean;
@@ -254,8 +256,8 @@ export function PaymentReconciliationSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full max-w-md sm:max-w-lg overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{t("record_payment")}</SheetTitle>
-          <SheetDescription>
+          <SheetTitle className="m-0">{t("record_payment")}</SheetTitle>
+          <SheetDescription className="text-gray-700">
             {invoice
               ? t("recording_payment_for_invoice", {
                   id: invoice.number,
@@ -266,7 +268,7 @@ export function PaymentReconciliationSheet({
 
         <Form {...form}>
           <form onSubmit={handleSubmit} className="space-y-6 py-4">
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="text-lg font-medium">
@@ -283,63 +285,156 @@ export function PaymentReconciliationSheet({
                 )}
               </div>
 
+              {invoice && (
+                <div className="rounded-lg bg-linear-to-b from-gray-100 to-gray-50 border border-gray-200 p-3 space-y-3">
+                  <div className="flex text-sm justify-center text-gray-700">
+                    {t("invoice_total")}:
+                    <p className="font-bold ml-1">
+                      <MonetaryDisplay amount={String(invoice.total_gross)} />
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-3 text-center">
+                    <p className="text-sm text-gray-600 mb-1">
+                      {t("balance_due")}
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      <MonetaryDisplay amount={String(invoice.total_gross)} />
+                    </p>
+                  </div>
+                  <div
+                    className="h-4 w-full bg-repeat-x -mt-4"
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='10.4' height='12' viewBox='2 3 10.4 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg filter='url(%23filter0_dd_31940_236060)'%3E%3Cpath d='M7.19629 12L12.3924 3H2.00014L7.19629 12Z' fill='white'/%3E%3C/g%3E%3Cdefs%3E%3Cfilter id='filter0_dd_31940_236060' x='-0.803711' y='-1' width='16' height='16' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'%3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'/%3E%3CfeColorMatrix in='SourceAlpha' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0' result='hardAlpha'/%3E%3CfeOffset dy='1'/%3E%3CfeGaussianBlur stdDeviation='1'/%3E%3CfeComposite in2='hardAlpha' operator='out'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0'/%3E%3CfeBlend mode='normal' in2='BackgroundImageFix' result='effect1_dropShadow_31940_236060'/%3E%3CfeColorMatrix in='SourceAlpha' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0' result='hardAlpha'/%3E%3CfeOffset dy='1'/%3E%3CfeGaussianBlur stdDeviation='0.5'/%3E%3CfeComposite in2='hardAlpha' operator='out'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3CfeBlend mode='normal' in2='effect1_dropShadow_31940_236060' result='effect2_dropShadow_31940_236060'/%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='effect2_dropShadow_31940_236060' result='shape'/%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E")`,
+                      backgroundSize: "10.4px 12px",
+                      backgroundPosition: "center",
+                    }}
+                  />
+                </div>
+              )}
+
               <FormField
                 control={form.control}
                 name="method"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("payment_method")}</FormLabel>
-                    <Select
+                    <FormLabel className="text-gray-950">
+                      {t("payment_method")}
+                    </FormLabel>
+                    <RadioGroup
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
+                      className="grid grid-cols-3 gap-3"
                     >
-                      <FormControl>
-                        <SelectTrigger ref={field.ref}>
-                          <SelectValue
-                            placeholder={t("select_payment_method")}
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem
-                          value={PaymentReconciliationPaymentMethod.cash}
-                        >
-                          {t("cash")}
-                        </SelectItem>
-                        <SelectItem
-                          value={PaymentReconciliationPaymentMethod.ccca}
-                        >
-                          {t("credit_card")}
-                        </SelectItem>
-                        <SelectItem
-                          value={PaymentReconciliationPaymentMethod.debc}
-                        >
-                          {t("debit_card")}
-                        </SelectItem>
-                        <SelectItem
-                          value={PaymentReconciliationPaymentMethod.chck}
-                        >
-                          {t("check")}
-                        </SelectItem>
-                        <SelectItem
-                          value={PaymentReconciliationPaymentMethod.ddpo}
-                        >
-                          {t("direct_deposit")}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                      {[
+                        {
+                          value: "upi" as PaymentReconciliationPaymentMethod,
+                          icon: ScanQrCode,
+                          label: t("upi"),
+                        },
+                        {
+                          value: PaymentReconciliationPaymentMethod.cash,
+                          icon: Banknote,
+                          label: t("cash"),
+                        },
+                        {
+                          value: PaymentReconciliationPaymentMethod.ddpo,
+                          icon: Landmark,
+                          label: t("bank_transfer"),
+                        },
+                        {
+                          value: PaymentReconciliationPaymentMethod.ccca,
+                          icon: CreditCard,
+                          label: t("credit_card"),
+                        },
+                        {
+                          value: PaymentReconciliationPaymentMethod.debc,
+                          icon: CreditCard,
+                          label: t("debit_card"),
+                        },
+                        {
+                          value: PaymentReconciliationPaymentMethod.chck,
+                          icon: Signature,
+                          label: t("cheque"),
+                        },
+                      ].map((method) => {
+                        const Icon = method.icon;
+                        return (
+                          <Label
+                            key={method.value}
+                            className="relative flex cursor-pointer flex-col items-center rounded-md border border-gray-400 shadow-ms p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-green-50"
+                          >
+                            <RadioGroupItem
+                              value={method.value}
+                              className="absolute left-2 top-2"
+                              aria-label={`payment-method-${method.value}`}
+                            />
+                            <div className="grid grow justify-items-center gap-1">
+                              <Icon className="size-5 text-gray-600" />
+                              <span className="text-sm font-medium text-center text-gray-950">
+                                {method.label}
+                              </span>
+                            </div>
+                          </Label>
+                        );
+                      })}
+                    </RadioGroup>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
+                name="reconciliation_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-950">
+                      {t("payment_type")}
+                    </FormLabel>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      className="flex flex-wrap"
+                    >
+                      {[
+                        {
+                          value: PaymentReconciliationType.payment,
+                          label: t("payment"),
+                        },
+                        {
+                          value: PaymentReconciliationType.adjustment,
+                          label: t("adjustment"),
+                        },
+                        {
+                          value: PaymentReconciliationType.advance,
+                          label: t("advance"),
+                        },
+                      ].map((type) => (
+                        <Label
+                          key={type.value}
+                          className="flex cursor-pointer gap-2 items-center justify-center rounded-md border border-gray-400 shadow-ms p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-primary-100/50"
+                        >
+                          <RadioGroupItem
+                            value={type.value}
+                            aria-label={`payment-type-${type.value}`}
+                          />
+                          <span className="text-sm font-medium text-gray-950">
+                            {type.label}
+                          </span>
+                        </Label>
+                      ))}
+                    </RadioGroup>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel
-                      aria-required={careConfig.paymentLocationRequired}
-                    >
+                    <FormLabel className="text-gray-950">
                       {t("location")}
                     </FormLabel>
                     <FormControl>
@@ -361,46 +456,12 @@ export function PaymentReconciliationSheet({
 
               <FormField
                 control={form.control}
-                name="reconciliation_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("payment_type")}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger ref={field.ref}>
-                          <SelectValue
-                            placeholder={t("select_reconciliation_type")}
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={PaymentReconciliationType.payment}>
-                          {t("payment")}
-                        </SelectItem>
-                        <SelectItem
-                          value={PaymentReconciliationType.adjustment}
-                        >
-                          {t("adjustment")}
-                        </SelectItem>
-                        <SelectItem value={PaymentReconciliationType.advance}>
-                          {t("advance")}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="amount"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("payment_amount")}</FormLabel>
+                  <FormItem className="gap-1.5">
+                    <FormLabel className="text-gray-950">
+                      {t("amount_paid")}
+                    </FormLabel>
                     <FormControl>
                       <MonetaryAmountInput
                         {...field}
@@ -413,28 +474,23 @@ export function PaymentReconciliationSheet({
                         }}
                       />
                     </FormControl>
+                    <FormDescription className="text-gray-700 italic -mt-1.5">
+                      {t("amount_to_be_recorded")}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
               {isCashPayment && !isCreditNote && (
-                <>
+                <div>
                   <FormField
                     control={form.control}
                     name="tendered_amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>
-                          {t("tender_amount")}
-                          <TooltipComponent
-                            content={t("tender_amount_tooltip")}
-                          >
-                            <CareIcon
-                              icon="l-info-circle"
-                              className="ml-1 size-4 text-gray-500"
-                            />
-                          </TooltipComponent>
+                        <FormLabel className="text-gray-950">
+                          {t("amount_received")}
                         </FormLabel>
                         <FormControl>
                           <MonetaryAmountInput
@@ -446,7 +502,7 @@ export function PaymentReconciliationSheet({
                             }}
                           />
                         </FormControl>
-                        <FormDescription>
+                        <FormDescription className="text-gray-700 italic -mt-1.5">
                           {t("amount_given_by_customer")}
                         </FormDescription>
                         <FormMessage />
@@ -455,19 +511,19 @@ export function PaymentReconciliationSheet({
                   />
 
                   {Number(returnedAmount) > 0 && (
-                    <div className="rounded-md bg-green-50 border border-green-200 p-3">
+                    <div className="rounded-md bg-yellow-50 border border-yellow-500 p-2 mt-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-green-800">
-                          {t("change_to_return")}
+                        <span className="text-sm text-yellow-950">
+                          {t("change_to_return")}:
+                          <MonetaryDisplay
+                            className="font-semibold text-yellow-950 ml-1"
+                            amount={returnedAmount}
+                          />
                         </span>
-                        <MonetaryDisplay
-                          className="font-semibold text-green-800"
-                          amount={returnedAmount}
-                        />
                       </div>
                     </div>
                   )}
-                </>
+                </div>
               )}
 
               <FormField
@@ -475,7 +531,9 @@ export function PaymentReconciliationSheet({
                 name="payment_datetime"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("payment_date")}</FormLabel>
+                    <FormLabel className="text-gray-950">
+                      {t("payment_date")}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="datetime-local"
@@ -493,11 +551,13 @@ export function PaymentReconciliationSheet({
                 name="reference_number"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("reference_number")}</FormLabel>
+                    <FormLabel className="text-gray-950">
+                      {t("reference_number")}
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} value={field.value || ""} />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-gray-700 italic -mt-1.5">
                       {!isCashPayment && t("reference_number_description")}
                     </FormDescription>
                     <FormMessage />
@@ -510,7 +570,12 @@ export function PaymentReconciliationSheet({
                 name="note"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("notes")}</FormLabel>
+                    <FormLabel className="text-gray-950">
+                      {t("notes")}
+                      <span className="text-gray-600 italic">
+                        ({t("optional")})
+                      </span>
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
