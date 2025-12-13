@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
-import { formatDateTime } from "@/Utils/utils";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import patientApi from "@/types/emr/patient/patientApi";
 import { QuestionnaireResponse as Response } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
@@ -68,8 +68,7 @@ export default function QuestionnaireResponseView({
               <div className="flex items-center gap-2">
                 <CareIcon icon="l-user" className="size-4" />
                 <span>
-                  {formResponse.created_by?.first_name}{" "}
-                  {formResponse.created_by?.last_name}
+                  {formatName(formResponse.created_by)}
                   {` (${formResponse.created_by?.user_type})`}
                 </span>
               </div>

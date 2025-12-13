@@ -18,7 +18,6 @@ import {
   CheckCircle2,
   Component,
   Edit,
-  FileText,
   HistoryIcon,
   MapPin,
   NotebookPen,
@@ -203,23 +202,6 @@ export function EncounterCommandDialog({
             label: t("dispense"),
             shortcut: getShortcutDisplay("dispense"),
             icon: <Pill />,
-          },
-        ],
-      },
-      {
-        group: t("available_reports"),
-        items: [
-          {
-            id: "treatment-summary",
-            label: t("treatment_summary"),
-            shortcut: getShortcutDisplay("treatment-summary"),
-            icon: <FileText />,
-          },
-          {
-            id: "discharge-summary",
-            label: t("discharge_summary"),
-            shortcut: getShortcutDisplay("discharge-summary"),
-            icon: <FileText />,
           },
         ],
       },
