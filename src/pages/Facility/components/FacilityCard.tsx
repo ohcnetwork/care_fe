@@ -35,11 +35,9 @@ export function FacilityCard({ facility, className }: Props) {
               <h3 className="truncate text-xl font-semibold">
                 {facility.name}
               </h3>
-              {facility.facility_type && (
-                <p className="text-sm text-gray-600 mt-1">
-                  {facility.facility_type}
-                </p>
-              )}
+              <p className="text-sm text-gray-600 mt-1">
+                {facility.facility_type}
+              </p>
               <p className="text-sm text-gray-500 truncate">
                 {[facility.address].filter(Boolean).join(", ")}
                 {facility.latitude && facility.longitude && (
