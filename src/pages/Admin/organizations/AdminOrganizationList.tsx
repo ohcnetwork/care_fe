@@ -11,6 +11,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
+import { Badge } from "@/components/ui/badge";
+
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
@@ -114,10 +116,10 @@ export default function AdminOrganizationList({
                 onOrganizationSelect={handleOrganizationSelect}
               />
 
-              <div className="flex-1 space-y-2 sm:space-y-3 rounded-lg md:shadow-lg overflow-hidden ml-0 md:ml-4 md:bg-white md:min-h-[calc(100vh-14rem)] transition-all duration-150 ease-in-out">
+              <div className="flex-1 space-y-3 sm:space-y-4 rounded-lg md:shadow-lg overflow-hidden ml-0 md:ml-4 md:bg-white md:min-h-[calc(100vh-14rem)] transition-all duration-150 ease-in-out">
                 {organizationId && org && (
-                  <div className="flex items-center mx-auto w-full max-w-7xl px-2 md:px-4">
-                    <Breadcrumb className="pt-0">
+                  <div className="md:pt-4 flex items-center mx-auto max-w-4xl">
+                    <Breadcrumb className="md:px-5 md:pt-5">
                       <BreadcrumbList>
                         <BreadcrumbItem>
                           <BreadcrumbLink
@@ -160,12 +162,17 @@ export default function AdminOrganizationList({
                 <Page
                   hideTitleOnPage
                   title={org?.name || ""}
-                  className="mx-auto w-full max-w-7xl px-2 md:px-4"
+                  className="mx-auto max-w-4xl md:px-2"
                 >
                   {organizationId && org && (
                     <>
                       <div className="flex items-center">
                         <h2 className="text-xl font-semibold">{org.name}</h2>
+                        {org.org_type && (
+                          <Badge variant="indigo" className="ml-2 w-auto">
+                            {t(`SYSTEM__org_type__${org.org_type}`)}
+                          </Badge>
+                        )}
                       </div>
 
                       {org.description && (
@@ -178,7 +185,7 @@ export default function AdminOrganizationList({
                     </>
                   )}
 
-                  <div className="mt-2 md:pb-2">
+                  <div className="mt-4 md:pb-2">
                     <AdminOrganizationView
                       id={organizationId}
                       organizationType={organizationType}

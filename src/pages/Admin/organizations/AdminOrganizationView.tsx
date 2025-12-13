@@ -64,6 +64,9 @@ function DeleteOrgDialog({
       queryClient.invalidateQueries({
         queryKey: ["organization", "list", organizationType, parentId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["organization", "list", organizationType],
+      });
       toast.success(t("organization_deleted_successfully"));
     },
   });
@@ -117,6 +120,9 @@ function OrganizationCard({
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["organization", "list", organizationType, parentId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization", "list", organizationType],
       });
       toast.success(t("organization_deleted_successfully"));
     },

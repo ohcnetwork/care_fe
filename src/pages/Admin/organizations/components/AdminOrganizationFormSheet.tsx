@@ -100,6 +100,9 @@ export default function AdminOrganizationFormSheet({
       queryClient.invalidateQueries({
         queryKey: ["organization", "list", organizationType, parentId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["organization", "list", organizationType],
+      });
       toast.success(t("organization_created_successfully"));
       setOpen(false);
       form.reset();
@@ -115,6 +118,9 @@ export default function AdminOrganizationFormSheet({
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["organization", "list", organizationType, parentId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["organization", "list", organizationType],
       });
       queryClient.invalidateQueries({
         queryKey: ["organization", org?.id],
