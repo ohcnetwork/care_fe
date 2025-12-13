@@ -204,6 +204,17 @@ export const PractitionerSelector = ({
       getItemValue(p).toLowerCase().includes(term),
     );
   }, [organizationUsers?.users, practitionerSearch]);
+
+  const filteredChildOrganizations = useMemo(() => {
+    if (!childOrganizations?.results) return [];
+    const term = practitionerSearch.trim().toLowerCase();
+    if (!term) return childOrganizations.results;
+    return childOrganizations.results.filter(
+      (org) =>
+        org.name.toLowerCase().includes(term) ||
+        org.description?.toLowerCase().includes(term),
+    );
+  }, [childOrganizations?.results, practitionerSearch]);
   const handleUserSelect = (user: UserReadMinimal) => {
     if (selected && multiple) {
       onSelect([...selected, user]);
@@ -505,8 +516,8 @@ export const PractitionerSelector = ({
 
           {/* Sidebar Content */}
           <div className="flex-1 overflow-y-auto max-h-[400px]">
-            {/* Practitioner Search Inside Department */}
-            {currentOrganizationId && !childOrganizations?.results?.length && (
+            {/* Practitioner Search Inside Department - Always show */}
+            {currentOrganizationId && (
               <div className="px-3 py-2 border-b bg-white sticky top-0 z-10">
                 <label className="sr-only" htmlFor="practitioner-search">
                   {t("search_practitioners")}
@@ -524,45 +535,47 @@ export const PractitionerSelector = ({
                 </div>
               </div>
             )}
-            {/* Show child organizations if current org has children */}
-            {childOrganizations?.results?.length ? (
-              <div className="p-2">
-                <h3 className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                  {t("departments")}
-                </h3>
-                {childOrganizations.results.map((organization) => (
-                  <div
-                    key={organization.id}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-                    onClick={() => handleChildOrganizationClick(organization)}
-                  >
-                    <div className="flex-shrink-0">
-                      <div
-                        className={cn(
-                          "h-3 w-3 rounded-full flex-shrink-0 border",
-                          getColorForTag(organization.id),
-                        )}
-                      />
-                    </div>
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <span className="font-medium text-sm truncate">
-                        {organization.name}
-                      </span>
-                      {organization.description && (
-                        <span className="text-xs text-gray-500 truncate mt-0.5">
-                          {organization.description}
+            <div className="p-2 space-y-2">
+              {/* Departments Section */}
+              {filteredChildOrganizations.length > 0 && (
+                <div className="space-y-1">
+                  <h3 className="px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    {t("departments")}
+                  </h3>
+                  {filteredChildOrganizations.map((organization) => (
+                    <div
+                      key={organization.id}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
+                      onClick={() => handleChildOrganizationClick(organization)}
+                    >
+                      <div className="flex-shrink-0">
+                        <div
+                          className={cn(
+                            "h-3 w-3 rounded-full flex-shrink-0 border",
+                            getColorForTag(organization.id),
+                          )}
+                        />
+                      </div>
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <span className="font-medium text-sm truncate">
+                          {organization.name}
                         </span>
+                        {organization.description && (
+                          <span className="text-xs text-gray-500 truncate mt-0.5">
+                            {organization.description}
+                          </span>
+                        )}
+                      </div>
+                      {organization.has_children && (
+                        <ChevronRight className="h-4 w-4 text-gray-500" />
                       )}
                     </div>
-                    {organization.has_children && (
-                      <ChevronRight className="h-4 w-4 text-gray-500" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              /* Show users if current org has no children or is a leaf organization */
-              <div className="p-2">
+                  ))}
+                </div>
+              )}
+
+              {/* Practitioners Section */}
+              <div className="space-y-1">
                 {isLoadingOrganizationUsers ? (
                   <div className="p-6 space-y-3">
                     <div className="flex items-center gap-3">
@@ -573,34 +586,40 @@ export const PractitionerSelector = ({
                       </div>
                     </div>
                   </div>
-                ) : organizationUsers?.users?.length ? (
+                ) : filteredPractitioners.length > 0 ? (
                   <>
-                    <div className="flex items-center justify-between">
-                      <h3 className="px-2 py-1 text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    <div className="flex items-center justify-between sticky top-0 bg-white z-10 py-1">
+                      <h3 className="px-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
                         {t("practitioners")}
                       </h3>
                       {multiple && (
-                        <div className="max-h-[400px] overflow-y-auto space-x-1">
+                        <div className="space-x-1">
                           <Button
                             variant="outline"
                             size="xs"
                             onClick={() => {
-                              handleSelectAll(
-                                organizationUsers.users as NonEmptyArray<UserReadMinimal>,
-                              );
+                              if (organizationUsers?.users) {
+                                handleSelectAll(
+                                  organizationUsers.users as NonEmptyArray<UserReadMinimal>,
+                                );
+                              }
                             }}
                           >
                             {t("select_all")}
                           </Button>
                           {selected.filter((s) =>
-                            organizationUsers.users.some((u) => u.id === s.id),
+                            organizationUsers?.users?.some(
+                              (u) => u.id === s.id,
+                            ),
                           ).length > 1 && (
                             <Button
                               variant="outline"
                               size="xs"
-                              onClick={() =>
-                                clearOrganizationUsers(organizationUsers)
-                              }
+                              onClick={() => {
+                                if (organizationUsers) {
+                                  clearOrganizationUsers(organizationUsers);
+                                }
+                              }}
                             >
                               {t("clear_all")}
                             </Button>
@@ -639,16 +658,32 @@ export const PractitionerSelector = ({
                       );
                     })}
                   </>
-                ) : (
+                ) : null}
+              </div>
+
+              {/* No Results Message */}
+              {!isLoadingOrganizationUsers &&
+                filteredChildOrganizations.length === 0 &&
+                filteredPractitioners.length === 0 && (
                   <div className="p-6 text-center text-gray-500">
-                    <Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <div className="text-sm">
-                      {t("no_users_in_organization")}
-                    </div>
+                    {practitionerSearch ? (
+                      <>
+                        <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <div className="text-sm">
+                          {t("no_results")} "{practitionerSearch}"
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <div className="text-sm">
+                          {t("no_users_in_organization")}
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
+            </div>
           </div>
         </div>
       )}
