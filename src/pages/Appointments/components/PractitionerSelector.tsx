@@ -543,9 +543,10 @@ export const PractitionerSelector = ({
                     {t("departments")}
                   </h3>
                   {filteredChildOrganizations.map((organization) => (
-                    <div
+                    <button
+                      type="button"
                       key={organization.id}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
+                      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-primary focus-visible:outline-hidden text-left"
                       onClick={() => handleChildOrganizationClick(organization)}
                     >
                       <div className="flex-shrink-0">
@@ -569,7 +570,7 @@ export const PractitionerSelector = ({
                       {organization.has_children && (
                         <ChevronRight className="h-4 w-4 text-gray-500" />
                       )}
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
