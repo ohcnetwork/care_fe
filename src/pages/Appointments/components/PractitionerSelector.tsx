@@ -236,6 +236,7 @@ export const PractitionerSelector = ({
   const handleChildOrganizationClick = (
     organization: FacilityOrganizationRead,
   ) => {
+    setPractitionerSearch("");
     if (organization.has_children) {
       // Navigate deeper into child organizations
       setNavigationStack((prev) => [...prev, organization]);
@@ -505,7 +506,7 @@ export const PractitionerSelector = ({
           {/* Sidebar Content */}
           <div className="flex-1 overflow-y-auto max-h-[400px]">
             {/* Practitioner Search Inside Department */}
-            {currentOrganizationId && (
+            {currentOrganizationId && !childOrganizations?.results?.length && (
               <div className="px-3 py-2 border-b bg-white sticky top-0 z-10">
                 <label className="sr-only" htmlFor="practitioner-search">
                   {t("search_practitioners")}
