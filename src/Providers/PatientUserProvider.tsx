@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { navigate, usePath } from "raviger";
 import { createContext, useEffect, useState } from "react";
 
 import { useAuthContext } from "@/hooks/useAuthUser";
@@ -31,6 +31,8 @@ export default function PatientUserProvider({ children }: Props) {
 
   const { patientToken: tokenData } = useAuthContext();
 
+  const path = usePath();
+
   const { data: userData } = useQuery({
     queryKey: ["patients", tokenData],
     queryFn: query(publicPatientApi.list, {
@@ -48,11 +50,11 @@ export default function PatientUserProvider({ children }: Props) {
     }
   }, [userData]);
 
-  if (tokenData) {
-    navigate("/patient/home", {
-      replace: true,
-    });
-  }
+  useEffect(() => {
+    if (tokenData?.token && path === "/login") {
+      navigate("/patient/home", { replace: true });
+    }
+  }, [tokenData?.token, path]);
 
   if (!tokenData) {
     navigate("/");

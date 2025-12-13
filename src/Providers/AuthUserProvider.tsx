@@ -22,6 +22,8 @@ import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/otp/otp";
 import userApi from "@/types/user/userApi";
 
+// import Login from "@/components/Auth/Login";
+
 interface Props {
   children: React.ReactNode;
   unauthorized: React.ReactNode;
@@ -194,16 +196,14 @@ export default function AuthUserProvider({
     };
   }, [signOut]);
 
+  useEffect(() => {
+    if (user && (path?.startsWith("/login") || path?.startsWith("/patient"))) {
+      navigate("/", { replace: true });
+    }
+  }, [user, path]);
+
   if (isLoading) {
     return <Loading />;
-  }
-
-  if (accessToken) {
-    if (path?.startsWith("/login")) {
-      navigate("/", {
-        replace: true,
-      });
-    }
   }
 
   return (
