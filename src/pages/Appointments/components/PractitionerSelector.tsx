@@ -195,25 +195,28 @@ export const PractitionerSelector = ({
     );
     onSelect(remainingSelected);
   };
+  const cleanPractitionerSearch = useMemo(
+    () => practitionerSearch.trim().toLowerCase(),
+    [practitionerSearch],
+  );
+
   const filteredPractitioners = useMemo(() => {
     if (!organizationUsers?.users) return [];
-    const term = practitionerSearch.trim().toLowerCase();
-    if (!term) return organizationUsers.users;
+    if (!cleanPractitionerSearch) return organizationUsers.users;
     return organizationUsers.users.filter((p) =>
-      getItemValue(p).toLowerCase().includes(term),
+      getItemValue(p).toLowerCase().includes(cleanPractitionerSearch),
     );
-  }, [organizationUsers?.users, practitionerSearch]);
+  }, [organizationUsers?.users, cleanPractitionerSearch]);
 
   const filteredChildOrganizations = useMemo(() => {
     if (!childOrganizations?.results) return [];
-    const term = practitionerSearch.trim().toLowerCase();
-    if (!term) return childOrganizations.results;
+    if (!cleanPractitionerSearch) return childOrganizations.results;
     return childOrganizations.results.filter(
       (org) =>
-        org.name.toLowerCase().includes(term) ||
-        org.description?.toLowerCase().includes(term),
+        org.name.toLowerCase().includes(cleanPractitionerSearch) ||
+        org.description?.toLowerCase().includes(cleanPractitionerSearch),
     );
-  }, [childOrganizations?.results, practitionerSearch]);
+  }, [childOrganizations?.results, cleanPractitionerSearch]);
   const handleUserSelect = (user: UserReadMinimal) => {
     if (selected && multiple) {
       onSelect([...selected, user]);
@@ -588,7 +591,7 @@ export const PractitionerSelector = ({
                   </div>
                 ) : filteredPractitioners.length > 0 ? (
                   <>
-                    <div className="flex items-center justify-between sticky top-0 bg-white z-10 py-1">
+                    <div className="flex items-center justify-between sticky top-14 bg-white z-10 py-1">
                       <h3 className="px-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
                         {t("practitioners")}
                       </h3>
