@@ -48,6 +48,12 @@ export default function PatientUserProvider({ children }: Props) {
     }
   }, [userData]);
 
+  if (tokenData) {
+    navigate("/patient/home", {
+      replace: true,
+    });
+  }
+
   if (!tokenData) {
     navigate("/");
     return null;

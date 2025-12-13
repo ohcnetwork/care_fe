@@ -198,6 +198,14 @@ export default function AuthUserProvider({
     return <Loading />;
   }
 
+  if (accessToken) {
+    if (path?.startsWith("/login")) {
+      navigate("/", {
+        replace: true,
+      });
+    }
+  }
+
   return (
     <AuthUserContext.Provider
       value={{
