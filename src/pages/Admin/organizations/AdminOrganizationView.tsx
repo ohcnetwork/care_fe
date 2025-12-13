@@ -62,11 +62,13 @@ function DeleteOrgDialog({
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["organization", "list", organizationType, parentId],
-      });
-      queryClient.invalidateQueries({
         queryKey: ["organization", "list", organizationType],
       });
+      if (parentId !== undefined && parentId !== null) {
+        queryClient.invalidateQueries({
+          queryKey: ["organization", "list", organizationType, parentId],
+        });
+      }
       toast.success(t("organization_deleted_successfully"));
     },
   });

@@ -97,12 +97,16 @@ export default function AdminOrganizationFormSheet({
         body,
       })(body),
     onSuccess: () => {
+      // Refresh parent-scoped list so the parent reflects has_children immediately.
       queryClient.invalidateQueries({
         queryKey: ["organization", "list", organizationType, parentId],
       });
-      queryClient.invalidateQueries({
-        queryKey: ["organization", "list", organizationType],
-      });
+      // Only refresh the broader list if parentId is provided to avoid duplicate refetches.
+      if (parentId !== undefined && parentId !== null) {
+        queryClient.invalidateQueries({
+          queryKey: ["organization", "list", organizationType],
+        });
+      }
       toast.success(t("organization_created_successfully"));
       setOpen(false);
       form.reset();
@@ -119,9 +123,11 @@ export default function AdminOrganizationFormSheet({
       queryClient.invalidateQueries({
         queryKey: ["organization", "list", organizationType, parentId],
       });
-      queryClient.invalidateQueries({
-        queryKey: ["organization", "list", organizationType],
-      });
+      if (parentId !== undefined && parentId !== null) {
+        queryClient.invalidateQueries({
+          queryKey: ["organization", "list", organizationType],
+        });
+      }
       queryClient.invalidateQueries({
         queryKey: ["organization", org?.id],
       });
