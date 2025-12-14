@@ -39,6 +39,7 @@ import { PLUGIN_Component } from "@/PluginEngine";
 import {
   ENCOUNTER_STATUS_COLORS,
   EncounterRead,
+  inactiveEncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
@@ -90,18 +91,25 @@ export const EncounterShow = (props: Props) => {
     "2xl": 12,
   });
 
-  const { canViewEncounter } = getPermissions(
+  const { canReadEncounter, canReadEncounterClinicalData } = getPermissions(
     hasPermission,
     primaryEncounter?.permissions ?? [],
   );
 
   useEncounterShortcuts();
-  const { canViewClinicalData } = getPermissions(
-    hasPermission,
-    patient?.permissions ?? [],
-  );
+  // const { canViewClinicalData } = getPermissions(
+  //   hasPermission,
+  //   patient?.permissions ?? [],
+  // );
 
-  const canAccess = canViewClinicalData || canViewEncounter;
+  const canAccess = canReadEncounterClinicalData || canReadEncounter;
+  const hasToken = primaryEncounter?.appointment?.token;
+  const isEncounterActive =
+    primaryEncounter?.appointment?.id &&
+    !inactiveEncounterStatus.includes(primaryEncounter?.status ?? "");
+
+  // Header is shown either when token is present or encounter is active and has an appointment
+  const canViewAppointmentEncounterHeader = hasToken || isEncounterActive;
 
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
@@ -130,18 +138,22 @@ export const EncounterShow = (props: Props) => {
     },
     plots: {
       label: t(`ENCOUNTER_TAB__plots`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterPlotsTab />,
     },
     observations: {
       label: t(`ENCOUNTER_TAB__observations`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterObservationsTab />,
     },
     medicines: {
       label: t(`ENCOUNTER_TAB__medicines`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterMedicinesTab />,
     },
     responses: {
       label: t(`ENCOUNTER_TAB__qnr_responses`),
+      visible: canReadEncounterClinicalData,
       component: (
         <EncounterResponsesTab
           patientId={patient?.id}
@@ -152,10 +164,12 @@ export const EncounterShow = (props: Props) => {
     },
     files: {
       label: t(`ENCOUNTER_TAB__files`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterFilesTab />,
     },
     notes: {
       label: t(`ENCOUNTER_TAB__notes`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterNotesTab />,
     },
     devices: {
@@ -168,10 +182,12 @@ export const EncounterShow = (props: Props) => {
     },
     service_requests: {
       label: t(`ENCOUNTER_TAB__service_requests`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterServiceRequestTab />,
     },
     diagnostic_reports: {
       label: t(`ENCOUNTER_TAB__diagnostic_reports`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterDiagnosticReportsTab />,
     },
 
@@ -199,24 +215,21 @@ export const EncounterShow = (props: Props) => {
       hideTitleOnPage
       style={
         {
-          "--encounter-header-offset":
-            primaryEncounter?.appointment?.id && canWritePrimaryEncounter
-              ? "3.5rem"
-              : "0.5rem",
+          "--encounter-header-offset": canViewAppointmentEncounterHeader
+            ? "3rem"
+            : "0rem",
         } as React.CSSProperties
       }
     >
-      {primaryEncounter &&
-        primaryEncounter.appointment?.id &&
-        canWritePrimaryEncounter &&
-        primaryEncounter.status !== "discharged" && (
-          <div className="flex items-center justify-center -mt-2 mb-2">
-            <AppointmentEncounterHeader
-              appointment={primaryEncounter.appointment}
-              encounter={primaryEncounter}
-            />
-          </div>
-        )}
+      {primaryEncounter.appointment && canViewAppointmentEncounterHeader && (
+        <div className="flex items-center justify-center -mt-2 mb-2">
+          <AppointmentEncounterHeader
+            canWritePrimaryEncounter={canWritePrimaryEncounter}
+            appointment={primaryEncounter.appointment}
+            encounter={primaryEncounter}
+          />
+        </div>
+      )}
 
       <div className="flex flex-col gap-2">
         <PatientHeader

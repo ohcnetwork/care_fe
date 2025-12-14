@@ -48,8 +48,10 @@ export interface BaseActivityDefinitionSpec {
   slug_config: SlugConfig;
 }
 
-export interface ActivityDefinitionCreateSpec
-  extends Omit<BaseActivityDefinitionSpec, "id" | "slug_config" | "slug"> {
+export interface ActivityDefinitionCreateSpec extends Omit<
+  BaseActivityDefinitionSpec,
+  "id" | "slug_config" | "slug"
+> {
   slug_value: string;
   facility: string;
   specimen_requirements: string[];
@@ -60,11 +62,10 @@ export interface ActivityDefinitionCreateSpec
   healthcare_service: string | null;
 }
 
-export interface ActivityDefinitionUpdateSpec
-  extends Omit<
-    BaseActivityDefinitionSpec,
-    "category" | "slug_config" | "slug"
-  > {
+export interface ActivityDefinitionUpdateSpec extends Omit<
+  BaseActivityDefinitionSpec,
+  "category" | "slug_config" | "slug"
+> {
   slug_value: string;
   facility: string;
   specimen_requirements: string[];

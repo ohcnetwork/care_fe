@@ -79,6 +79,14 @@ export default function EditUserRoleSheet({
       queryClient.invalidateQueries({
         queryKey: ["facilityOrganizationUsers", facilityId, organizationId],
       });
+      queryClient.invalidateQueries({
+        queryKey: [
+          "facilityOrganizations",
+          "byUser",
+          facilityId,
+          userRole.user.id,
+        ],
+      });
       toast.success(t("user_removed_success"));
       setOpen(false);
     },
@@ -118,7 +126,7 @@ export default function EditUserRoleSheet({
             <div className="rounded-lg border border-gray-200 p-4 space-y-4">
               <div className="flex items-start gap-4">
                 <Avatar
-                  name={`${userRole.user.first_name} ${userRole.user.last_name}`}
+                  name={formatName(userRole.user, true)}
                   className="size-12"
                   imageUrl={userRole.user.profile_picture_url}
                 />
