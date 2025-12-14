@@ -119,11 +119,9 @@ export default function AdminOrganizationFormSheet({
       queryClient.invalidateQueries({
         queryKey: ["organization", "list", organizationType],
       });
-      if (parentId !== undefined && parentId !== null) {
-        queryClient.invalidateQueries({
-          queryKey: ["organization", "list", organizationType, parentId],
-        });
-      }
+      queryClient.invalidateQueries({
+        queryKey: ["organization", "list", organizationType, parentId],
+      });
       queryClient.invalidateQueries({
         queryKey: ["organization", org?.id],
       });
