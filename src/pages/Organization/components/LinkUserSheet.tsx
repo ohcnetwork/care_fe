@@ -116,18 +116,16 @@ export default function LinkUserSheet({
             selected={selectedUser}
             onChange={handleUserChange}
             placeholder={t("search_for_a_user")}
-            noOptionsMessage={t("no_users_found_want_to_add", {
-              defaultValue: "No users found. Want to add a new user?",
-            })}
+            noOptionsMessage={t("no_users_found_want_to_add")}
             popoverClassName="w-full"
-            onAddUser={() => {
-              if (onAddUserSheetOpen) {
-                setOpen(false);
-                setTimeout(() => {
-                  onAddUserSheetOpen();
-                }, 300);
-              }
-            }}
+            onAddUser={
+              onAddUserSheetOpen
+                ? () => {
+                    setOpen(false);
+                    setTimeout(onAddUserSheetOpen, 300);
+                  }
+                : undefined
+            }
           />
           {selectedUser && (
             <div className="space-y-4">

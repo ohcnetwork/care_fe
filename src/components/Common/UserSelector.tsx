@@ -91,11 +91,14 @@ function UserCommandContent({
                 type="button"
                 variant="outline"
                 className="mt-2 border-primary-500 text-primary-600 flex items-center gap-1 hover:bg-primary-50"
-                onClick={onAddUser}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddUser && onAddUser();
+                }}
                 data-testid="add-user-btn"
               >
                 <span className="text-lg font-bold">+</span>
-                {t("add_user", { defaultValue: "+ Add User" })}
+                {t("add_user")}
               </Button>
             </div>
           ) : (

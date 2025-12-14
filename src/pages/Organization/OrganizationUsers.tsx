@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { toast } from "sonner";
 
+import { formatName } from "@/Utils/utils";
+
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Button } from "@/components/ui/button";
@@ -114,13 +116,18 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
     },
     onError: (error) => {
       const errorData = error.cause as
-        | { errors?: { msg?: string[] } }
+        | { errors?: { msg?: unknown } }
         | undefined;
-      const messages = errorData?.errors?.msg;
-      if (messages?.length) {
-        messages.forEach((er) => toast.error(er));
+      if (
+        errorData &&
+        errorData.errors &&
+        Array.isArray(errorData.errors.msg)
+      ) {
+        errorData.errors.msg.forEach((er) => {
+          toast.error(er);
+        });
       } else {
-        toast.error(t("error_removing_user"));
+        toast.error(t("something_went_wrong"));
       }
       setRemovingUserRole(null);
     },
@@ -249,17 +256,15 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                         roleName={userRole.role.name}
                         actions={
                           canManageOrganizationUsers && (
-                            <div className="flex items-center gap-2">
-                              <EditUserRoleSheet
-                                organizationId={id}
-                                userRole={userRole}
-                                trigger={
-                                  <Button variant="outline" size="sm">
-                                    <span>{t("edit_role")}</span>
-                                  </Button>
-                                }
-                              />
-                            </div>
+                            <EditUserRoleSheet
+                              organizationId={id}
+                              userRole={userRole}
+                              trigger={
+                                <Button variant="outline" size="sm">
+                                  <span>{t("edit_role")}</span>
+                                </Button>
+                              }
+                            />
                           )
                         }
                         userOptions={
@@ -275,9 +280,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                                   variant="outline"
                                   size="sm"
                                   className="px-2"
-                                  onMouseEnter={() =>
-                                    setOpenDropdownId(userRole.id)
-                                  }
+                                  aria-label={t("user_options")}
                                 >
                                   <CareIcon
                                     icon="l-ellipsis-v"
@@ -285,11 +288,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                                   />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                align="end"
-                                className="w-48"
-                                onMouseLeave={() => setOpenDropdownId(null)}
-                              >
+                              <DropdownMenuContent align="end" className="w-48">
                                 <DropdownMenuItem
                                   className="cursor-pointer flex items-center gap-2"
                                   onClick={() =>
@@ -303,7 +302,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                                   onClick={() =>
                                     setRemovingUserRole({
                                       id: userRole.id,
-                                      userName: `${userRole.user.first_name} ${userRole.user.last_name}`,
+                                      userName: formatName(userRole.user),
                                     })
                                   }
                                 >
