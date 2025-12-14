@@ -129,7 +129,9 @@ export default function DispenseDrawer({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { facilityId } = useCurrentFacility();
-
+  const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
+    `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
+  );
   const [currentLocation, setCurrentLocation] = useState<LocationList>(
     () =>
       ({
@@ -426,6 +428,9 @@ export default function DispenseDrawer({
             quantity: lot.quantity,
             days_supply: 1,
             fully_dispensed: true,
+            create_dispense_order: {
+              alternate_identifier: alternateIdentifier,
+            },
           };
 
           requests.push({
