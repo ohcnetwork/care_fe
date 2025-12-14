@@ -64,12 +64,12 @@ Once you have the local backend running and loaded dummy data, you can use the f
 # Default Local Backend Credentials
 ROLE            USERNAME                PASSWORD
 ----------------------------------------------------------------
-Volunteer       volunteer_2_0           Coronasafe@123
-Doctor          doctor_2_0              Coronasafe@123
-Staff           staff_2_0               Coronasafe@123
-Nurse           nurse_2_0               Coronasafe@123
-Administrator   administrator_2_0       Coronasafe@123
-Facility Admin  facility_admin_2_0      Coronasafe@123
+Volunteer       volunteer_4_0           Coronasafe@123
+Doctor          doctor_4_0              Coronasafe@123
+Staff           staff_4_0               Coronasafe@123
+Nurse           nurse_4_0               Coronasafe@123
+Administrator   administrator_4_0       Coronasafe@123
+Facility Admin  facility_admin_4_0      Coronasafe@123
 ```
 
 #### 📱 Patient Login in Staging
