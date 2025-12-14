@@ -81,8 +81,9 @@ function DeleteOrgDialog({
             variant="ghost"
             size="icon"
             onClick={() => setShowDeleteDialog(true)}
+            aria-label={t("delete")}
           >
-            <Trash className="size-4" />
+            <Trash className="size-4" aria-hidden="true" focusable="false" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>{t("delete")}</TooltipContent>
@@ -331,7 +332,11 @@ export default function AdminOrganizationView({ id, organizationType }: Props) {
                                         size="icon"
                                         aria-label={t("edit")}
                                       >
-                                        <PenLine className="size-4" />
+                                        <PenLine
+                                          className="size-4"
+                                          aria-hidden="true"
+                                          focusable="false"
+                                        />
                                       </Button>
                                     }
                                   />
