@@ -10,15 +10,9 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { invoiceStatusFilter } from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import {
@@ -29,53 +23,49 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/Common/Table";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 
 import useFilters from "@/hooks/useFilters";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 
-import query from "@/Utils/request/query";
 import {
   INVOICE_STATUS_COLORS,
   InvoiceRead,
-  InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
-
-const statusMap: Record<InvoiceStatus, { label: string; color: string }> = {
-  [InvoiceStatus.draft]: {
-    label: "draft",
-    color: "bg-gray-100 text-gray-900 border-gray-200",
-  },
-  [InvoiceStatus.issued]: {
-    label: "issued",
-    color: "bg-blue-100 text-blue-900 border-blue-200",
-  },
-  [InvoiceStatus.balanced]: {
-    label: "balanced",
-    color: "bg-green-100 text-green-900 border-green-200",
-  },
-  [InvoiceStatus.cancelled]: {
-    label: "cancelled",
-    color: "bg-red-100 text-red-900 border-red-200",
-  },
-  [InvoiceStatus.entered_in_error]: {
-    label: "entered_in_error",
-    color: "bg-red-100 text-red-900 border-red-200",
-  },
-};
+import query from "@/Utils/request/query";
 
 export default function InvoicesData({
   facilityId,
   accountId,
+  showIdentifierFilter = false,
 }: {
   facilityId: string;
   accountId?: string;
+  showIdentifierFilter?: boolean;
 }) {
   const { t } = useTranslation();
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: RESULTS_PER_PAGE_LIMIT,
     disableCache: true,
+  });
+
+  const filters = [invoiceStatusFilter("status")];
+
+  const onFilterUpdate = (query: Record<string, unknown>) => {
+    updateQuery(query);
+  };
+
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useMultiFilterState(filters, onFilterUpdate, {
+    ...qParams,
+    status: qParams.status ? [qParams.status] : undefined,
   });
 
   const { data: response, isLoading } = useQuery({
@@ -88,6 +78,7 @@ export default function InvoicesData({
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         number: qParams.search,
         status: qParams.status,
+        patient: qParams.patient,
       },
     }),
   });
@@ -96,58 +87,47 @@ export default function InvoicesData({
 
   return (
     <>
-      <div className="flex flex-row justify-between items-center gap-2 max-sm:flex-col pb-4">
-        <Tabs
-          defaultValue={qParams.status ?? "all"}
-          onValueChange={(value) =>
-            updateQuery({ status: value === "all" ? undefined : value })
-          }
-          className="max-sm:hidden"
-        >
-          <TabsList>
-            <TabsTrigger value="all">{t("all")}</TabsTrigger>
-            {Object.values(InvoiceStatus).map((status) => (
-              <TabsTrigger key={status} value={status}>
-                {t(statusMap[status].label)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-        <div className="relative w-full sm:max-w-xs border border-gray-400 rounded-md">
-          <CareIcon
-            icon="l-search"
-            className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500"
-          />
-          <Input
-            placeholder={t("search_invoices")}
-            value={qParams.search || ""}
-            onChange={(e) =>
-              updateQuery({ search: e.target.value || undefined })
-            }
-            className="w-full pl-10"
-          />
+      <div className="flex flex-col md:flex-row justify-between gap-2 pb-4">
+        <div className="w-full md:w-auto md:flex gap-2 space-y-2 md:space-y-0">
+          {showIdentifierFilter && (
+            <PatientIdentifierFilter
+              onSelect={(patientId, patientName) =>
+                updateQuery({ patient: patientId, patient_name: patientName })
+              }
+              patientId={qParams.patient}
+              patientName={qParams.patient_name}
+              placeholder={t("filter_by_patient")}
+              className="h-9 rounded-md"
+            />
+          )}
+
+          <div>
+            <div className="relative flex-1">
+              <CareIcon
+                icon="l-search"
+                className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500 pointer-events-none z-10"
+              />
+              <Input
+                placeholder={t("search_invoices")}
+                value={qParams.search || ""}
+                onChange={(e) =>
+                  updateQuery({ search: e.target.value || undefined })
+                }
+                className="w-full md:w-auto pl-10 h-9"
+              />
+            </div>
+          </div>
         </div>
 
-        <Select
-          defaultValue={qParams.status ?? "all"}
-          onValueChange={(value) =>
-            updateQuery({ status: value === "all" ? undefined : value })
-          }
-        >
-          <SelectTrigger className="sm:hidden">
-            <SelectValue placeholder={t("filter_by_status")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="all">{t("all")}</SelectItem>
-              {Object.values(InvoiceStatus).map((status) => (
-                <SelectItem key={status} value={status}>
-                  {t(statusMap[status].label)}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        <MultiFilter
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
+          onOperationChange={handleOperationChange}
+          onClearAll={handleClearAll}
+          onClearFilter={handleClearFilter}
+          className="flex flex-row flex-wrap sm:items-center"
+          facilityId={facilityId}
+        />
       </div>
       {isLoading ? (
         <TableSkeleton count={3} />
@@ -197,7 +177,7 @@ export default function InvoicesData({
 
                   <TableCell>
                     <Badge variant={INVOICE_STATUS_COLORS[invoice.status]}>
-                      {t(statusMap[invoice.status].label)}
+                      {t(invoice.status)}
                     </Badge>
                   </TableCell>
                   <TableCell>

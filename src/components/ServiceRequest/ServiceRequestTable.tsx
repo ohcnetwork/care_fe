@@ -109,7 +109,7 @@ export default function ServiceRequestTable({
                     currentTags={request.tags ?? []}
                     onUpdate={() => {
                       queryClient.invalidateQueries({
-                        queryKey: ["serviceRequests", facilityId, locationId],
+                        queryKey: ["serviceRequests", facilityId],
                       });
                     }}
                     patientId={request.encounter.patient.id}
