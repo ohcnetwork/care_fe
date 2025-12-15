@@ -325,6 +325,7 @@ export function DeliveryOrderShow({
         supplied_item_condition: confirmDialog.condition,
         supplied_item_type: delivery.supplied_item_type,
         supply_request: delivery.supply_request?.id,
+        extensions: delivery.extensions,
       }));
 
     upsertSupplyDeliveries({
