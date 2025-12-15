@@ -91,6 +91,11 @@ export function LocationActionButtons({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {status === "reserved" && onComplete && (
+              <DropdownMenuItem onClick={() => onComplete(location)}>
+                {t("complete_bed_stay")}
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={() => onCancel()}>
               {status === "planned" ? t("cancel_plan") : t("mark_as_error")}
             </DropdownMenuItem>

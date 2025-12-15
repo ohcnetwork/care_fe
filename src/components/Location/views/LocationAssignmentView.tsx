@@ -5,18 +5,19 @@ import { Button } from "@/components/ui/button";
 import { LocationHistory } from "@/types/emr/encounter/encounter";
 import { LocationList } from "@/types/location/location";
 
-import { LocationNavigation } from "../LocationNavigation";
+import { LocationNavigation } from "@/components/Location/LocationNavigation";
 import {
   EditingState,
   LocationSheetState,
-} from "../hooks/useLocationAssignment";
-import { CurrentLocationsList } from "./CurrentLocationsList";
+} from "@/components/Location/hooks/useLocationAssignment";
+import { CurrentLocationsList } from "@/components/Location/views/CurrentLocationsList";
 
 interface LocationAssignmentViewProps {
   // Location data
   allLocations: LocationList[];
   allBeds: LocationList[];
   selectedLocation: LocationList | null;
+  selectedLinkedBed: LocationHistory | null;
   locationHistory: LocationList[];
   selectedBed: string | null;
   currentLocation?: LocationHistory;
@@ -48,6 +49,7 @@ interface assignmentHandlers {
 export interface navigationHandlers {
   onLocationClick: (location: LocationList) => void;
   onBedSelect: (bedId: string) => void;
+  onLinkedBedSelect: (bed: LocationHistory) => void;
   onCheckBedStatus: (bed: LocationList) => void;
   onSearchChange: (value: string) => void;
   onSearch: (e: React.FormEvent) => void;
@@ -69,6 +71,7 @@ export function LocationAssignmentView({
   allLocations,
   allBeds,
   selectedLocation,
+  selectedLinkedBed,
   locationHistory,
   selectedBed,
   currentLocation,
@@ -95,6 +98,7 @@ export function LocationAssignmentView({
   const {
     onLocationClick,
     onBedSelect,
+    onLinkedBedSelect,
     onCheckBedStatus,
     onSearchChange,
     onSearch,
@@ -126,8 +130,6 @@ export function LocationAssignmentView({
           setEditingState={setEditingState}
           isPending={isPending}
           showMoveButton={true}
-          keepBedActive={keepBedActive}
-          onKeepBedActiveChange={onKeepBedActiveChange}
           onMove={onMove}
           onComplete={onComplete}
           onUpdateTime={onUpdateTime}
@@ -167,12 +169,14 @@ export function LocationAssignmentView({
         selectedLocation={selectedLocation}
         locationHistory={locationHistory}
         selectedBed={selectedBed}
+        selectedLinkedBed={selectedLinkedBed ?? undefined}
         showAvailableOnly={showAvailableOnly}
         searchTerm={searchTerm}
         isLoadingLocations={isLoadingLocations}
         isLoadingBeds={isLoadingBeds}
         hasMore={hasMore}
         onLocationClick={onLocationClick}
+        onLinkedBedSelect={onLinkedBedSelect}
         onBedSelect={onBedSelect}
         onCheckBedStatus={onCheckBedStatus}
         onSearchChange={onSearchChange}
@@ -181,18 +185,22 @@ export function LocationAssignmentView({
         onLoadMore={onLoadMore}
         onClearSelection={onClearSelection}
         onGoBack={onGoBack}
-        linkedLocations={activeLocations.map((location) => location.location)}
+        linkedLocations={activeLocations}
       />
 
       <div className="mt-8 flex justify-end gap-2">
         <Button
           variant="outline"
-          disabled={!selectedBed}
+          disabled={!selectedBed && !selectedLinkedBed}
           onClick={onScheduleForLater}
         >
           {t("schedule_for_later")}
         </Button>
-        <Button variant="primary" disabled={!selectedBed} onClick={onAssignNow}>
+        <Button
+          variant="primary"
+          disabled={!selectedBed && !selectedLinkedBed}
+          onClick={onAssignNow}
+        >
           {t("assign_bed_now")}
         </Button>
       </div>

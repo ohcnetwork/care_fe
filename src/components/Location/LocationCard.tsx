@@ -1,31 +1,49 @@
 import { format } from "date-fns";
-import { BedSingle, Clock, MoveRight } from "lucide-react";
+import { ArrowRight, BedSingle, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Badge } from "@/components/ui/badge";
 
-import { stringifyNestedObject } from "@/Utils/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { LocationHistory } from "@/types/emr/encounter/encounter";
 import { LocationAssociationStatus } from "@/types/location/association";
-import { Checkbox } from "../ui/checkbox";
-import { Label } from "../ui/label";
+import { LocationList } from "@/types/location/location";
 
 interface LocationCardProps {
   locationHistory: LocationHistory;
   status: LocationAssociationStatus;
-  showBedHold?: boolean;
   keepBedActive?: boolean;
   onKeepBedActiveChange?: (value: boolean) => void;
 }
 
+const LocationBreadcrumb = ({ location }: { location: LocationList }) => {
+  const breadcrumb = [];
+  while (location.parent && Object.keys(location.parent).length > 0) {
+    breadcrumb.unshift(location.parent);
+    location = location.parent;
+  }
+  return (
+    <div className="flex flex-row items-center gap-1">
+      {breadcrumb.map((location, ind) => (
+        <div key={location.id} className="flex flex-row items-center gap-1">
+          <span className="text-sm font-medium text-gray-500">
+            {location.name}
+          </span>
+          {ind !== breadcrumb.length - 1 && (
+            <ArrowRight className="size-4 text-gray-400" />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export function LocationCard({
   locationHistory,
   status,
-  showBedHold = true,
   keepBedActive = true,
   onKeepBedActiveChange,
 }: LocationCardProps) {
@@ -36,95 +54,77 @@ export function LocationCard({
     <div className="flex flex-col gap-1 w-full">
       <div
         className={cn(
-          "rounded-lg border p-2",
+          "rounded-lg border p-1",
           status === "active"
             ? "border-green-200 bg-green-50"
             : "border-blue-200 bg-blue-50",
         )}
       >
-        <div className="flex flex-wrap justify-between items-start">
-          <div className="space-y-2">
-            {/* Parent locations */}
-            {location.parent?.parent && (
-              <div className="flex items-center text-sm font-medium text-gray-700">
-                {stringifyNestedObject(
-                  location.parent.parent,
-                  <MoveRight className="mx-2 size-5" />,
-                  true,
-                )}
+        <div className="flex flex-col flex-wrap justify-between items-start gap-2">
+          <Badge variant={status === "active" ? "primary" : "secondary"}>
+            {t(status)}
+          </Badge>
+          <div className="flex flex-row justify-between w-full">
+            <div className="space-y-1">
+              <div className="flex flex-row items-center gap-1">
+                <LocationBreadcrumb location={location} />
               </div>
-            )}
 
-            {/* Immediate parent */}
-            <div className="ml-4 flex items-center">
-              <CareIcon
-                icon="l-corner-down-right"
-                className="size-4 mr-2 mb-1 text-gray-400"
-              />
-              <span className="text-sm font-medium text-gray-800">
-                {location.parent?.name}
-              </span>
-            </div>
-
-            {/* Current bed location */}
-            <div className="ml-12 flex items-center">
-              <CareIcon
-                icon="l-corner-down-right"
-                className="size-4 mr-2 mb-1 text-gray-400"
-              />
-              <div
-                className={cn(
-                  "p-1 rounded mr-2",
-                  status === "active" ? "bg-teal-100" : "bg-blue-100",
-                )}
-              >
-                <BedSingle
+              {/* Current bed location */}
+              <div className="flex items-center">
+                <div
                   className={cn(
-                    "size-5",
-                    status === "active" ? "text-teal-600" : "text-blue-600",
+                    "p-1 rounded mr-2",
+                    status === "active" ? "bg-teal-100" : "bg-blue-100",
                   )}
-                />
-              </div>
-              <span className="text-sm font-medium text-gray-800">
-                {location.name}
-              </span>
-            </div>
-          </div>
-          <div className="flex flex-col items-end">
-            <Badge variant={status === "active" ? "primary" : "secondary"}>
-              {t(status)}
-            </Badge>
-            <div className="mt-4 flex justify-center sm:justify-end">
-              <div className="flex flex-row text-xs text-gray-500 gap-4">
-                <div className="flex flex-col">
-                  <span className="text-xs font-medium">{t("start_time")}</span>
-                  <div className="flex items-center gap-1">
-                    <Clock className="size-3" />
-                    <span className="font-semibold">
-                      {format(
-                        new Date(locationHistory.start_datetime),
-                        "dd MMM yyyy, hh:mm a",
-                      )}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs">{t("end_time")}</span>
-                  <div className="flex items-center gap-1">
-                    {locationHistory.end_datetime ? (
-                      <>
-                        <Clock className="size-3" />
-                        <span className="font-semibold">
-                          {format(
-                            new Date(locationHistory.end_datetime),
-                            "dd MMM yyyy, hh:mm a",
-                          )}
-                        </span>
-                      </>
-                    ) : (
-                      // eslint-disable-next-line i18next/no-literal-string
-                      <span className="text-xs text-gray-500">-- : --</span>
+                >
+                  <BedSingle
+                    className={cn(
+                      "size-5",
+                      status === "active" ? "text-teal-600" : "text-blue-600",
                     )}
+                  />
+                </div>
+                <span className="text-sm font-medium text-gray-800">
+                  {location.name}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col items-end">
+              <div className="mt-4 flex justify-center sm:justify-end">
+                <div className="flex flex-row text-xs text-gray-500 gap-4">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium">
+                      {t("start_time")}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <Clock className="size-3" />
+                      <span className="font-semibold">
+                        {format(
+                          new Date(locationHistory.start_datetime),
+                          "dd MMM yyyy, hh:mm a",
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs">{t("end_time")}</span>
+                    <div className="flex items-center gap-1">
+                      {locationHistory.end_datetime ? (
+                        <>
+                          <Clock className="size-3" />
+                          <span className="font-semibold">
+                            {format(
+                              new Date(locationHistory.end_datetime),
+                              "dd MMM yyyy, hh:mm a",
+                            )}
+                          </span>
+                        </>
+                      ) : (
+                        // eslint-disable-next-line i18next/no-literal-string
+                        <span className="text-xs text-gray-500">-- : --</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -132,7 +132,7 @@ export function LocationCard({
           </div>
         </div>
       </div>
-      {showBedHold && onKeepBedActiveChange && (
+      {onKeepBedActiveChange && (
         <div className="flex items-start gap-2 mt-1">
           <Checkbox
             id="keep-bed-as-active"

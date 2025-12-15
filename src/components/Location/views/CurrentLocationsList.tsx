@@ -1,9 +1,10 @@
 import { LocationHistory } from "@/types/emr/encounter/encounter";
 import { LocationAssociationStatus } from "@/types/location/association";
 
-import { LocationActionButtons } from "../LocationActionButtons";
-import { LocationCardWrapper } from "../LocationCardWrapper";
-import { EditingState } from "../hooks/useLocationAssignment";
+import { LocationActionButtons } from "@/components/Location/LocationActionButtons";
+import { LocationCardWrapper } from "@/components/Location/LocationCardWrapper";
+import { EditingState } from "@/components/Location/hooks/useLocationAssignment";
+import { useTranslation } from "react-i18next";
 
 interface CurrentLocationsListProps {
   currentLocation?: LocationHistory;
@@ -42,6 +43,7 @@ export function CurrentLocationsList({
   onConfirmEdit,
   linkedLocations,
 }: CurrentLocationsListProps) {
+  const { t } = useTranslation();
   const renderLocationCard = (
     locationHistory: LocationHistory,
     status: LocationAssociationStatus,
@@ -68,7 +70,11 @@ export function CurrentLocationsList({
             status={status}
             location={locationHistory}
             onMove={onMove}
-            onComplete={status === "active" ? onComplete : undefined}
+            onComplete={
+              status === "active" || status === "reserved"
+                ? onComplete
+                : undefined
+            }
             onUpdateTime={onUpdateTime}
             onCancel={() =>
               onCancel(status as "planned" | "active", locationHistory)
@@ -87,8 +93,13 @@ export function CurrentLocationsList({
   return (
     <>
       {currentLocation && renderLocationCard(currentLocation, "active")}
-      {linkedLocations?.map((location) =>
-        renderLocationCard(location, location.status, true),
+      {linkedLocations && linkedLocations.length > 0 && (
+        <>
+          <h3 className="text-base font-semibold">{t("linked_locations")}</h3>
+          {linkedLocations.map((location) =>
+            renderLocationCard(location, location.status, true),
+          )}
+        </>
       )}
       {plannedLocations.map((location) =>
         renderLocationCard(location, "planned"),

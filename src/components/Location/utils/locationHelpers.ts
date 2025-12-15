@@ -23,17 +23,19 @@ export interface CurrentLocations {
 export function getCurrentLocations(
   encounter: EncounterRead,
 ): CurrentLocations {
+  const currentEncounterLocation = encounter.current_location;
   const currentLocation = encounter.location_history.find(
     (loc) =>
       loc.status === "active" &&
-      loc.location.id === encounter.current_location.id,
+      currentEncounterLocation &&
+      loc.location.id === currentEncounterLocation.id,
   );
 
   const activeLocations = encounter.location_history.filter(
     (loc) =>
-      loc.status === "active" ||
-      (loc.status === "reserved" &&
-        loc.location.id !== encounter.current_location.id),
+      (loc.status === "active" || loc.status === "reserved") &&
+      currentEncounterLocation &&
+      loc.location.id !== currentEncounterLocation.id,
   );
 
   const plannedLocations = encounter.location_history.filter(

@@ -1,11 +1,11 @@
 import { LocationHistory } from "@/types/emr/encounter/encounter";
 
-import { LocationCardWrapper } from "../LocationCardWrapper";
 import {
   EditingState,
   LocationSheetState,
-} from "../hooks/useLocationAssignment";
-import { CurrentLocationsList } from "./CurrentLocationsList";
+} from "@/components/Location/hooks/useLocationAssignment";
+import { LocationCardWrapper } from "@/components/Location/LocationCardWrapper";
+import { CurrentLocationsList } from "@/components/Location/views/CurrentLocationsList";
 
 interface assignmentHandlers {
   sheetState: LocationSheetState;
@@ -28,6 +28,7 @@ interface LocationModifyViewProps {
   currentLocation?: LocationHistory;
   plannedLocations: LocationHistory[];
   selectedBedLocation?: LocationHistory;
+  selectedLinkedBed?: LocationHistory;
   assignmentHandlers: assignmentHandlers;
   onAssignNowPlanned: (location: LocationHistory) => void;
 }
@@ -36,6 +37,7 @@ export function LocationModifyView({
   currentLocation,
   plannedLocations,
   selectedBedLocation,
+  selectedLinkedBed,
   assignmentHandlers,
   onAssignNowPlanned,
 }: LocationModifyViewProps) {
@@ -56,9 +58,12 @@ export function LocationModifyView({
     onConfirmTime,
   } = assignmentHandlers;
   const showNewBedCard =
-    selectedBedLocation &&
+    (selectedBedLocation || selectedLinkedBed) &&
     (sheetState.action === "new" || sheetState.action === "move") &&
     !editingState.locationId;
+  const locationId = selectedBedLocation?.id || selectedLinkedBed?.id || "";
+  const locationHistory = (selectedBedLocation || selectedLinkedBed)!;
+  console.log("got here with locationHistory", locationHistory);
 
   return (
     <div className="space-y-4">
@@ -82,10 +87,10 @@ export function LocationModifyView({
 
       {showNewBedCard && (
         <LocationCardWrapper
-          locationHistory={selectedBedLocation}
+          locationHistory={locationHistory}
           status={sheetState.timeConfig.status}
           editingState={{
-            locationId: selectedBedLocation.id,
+            locationId,
             timeConfig: sheetState.timeConfig,
           }}
           setEditingState={(newState) => {
@@ -93,7 +98,7 @@ export function LocationModifyView({
               setSheetState((prev) => ({
                 ...prev,
                 timeConfig: newState({
-                  locationId: selectedBedLocation.id,
+                  locationId: locationId,
                   timeConfig: prev.timeConfig,
                 }).timeConfig,
               }));

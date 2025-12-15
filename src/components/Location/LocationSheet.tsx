@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -60,8 +60,10 @@ export function LocationSheet({
   const mutations = useLocationMutations(encounter.id);
 
   // Derived state
-  const { currentLocation, activeLocations, plannedLocations } =
-    getCurrentLocations(encounter);
+  const { currentLocation, activeLocations, plannedLocations } = useMemo(
+    () => getCurrentLocations(encounter),
+    [encounter],
+  );
 
   const selectedBedDetails = navigation.selectedBed
     ? navigation.allBeds.find((bed) => bed.id === navigation.selectedBed)
@@ -245,17 +247,27 @@ export function LocationSheet({
     if (
       assignment.editingState.timeConfig.status === "active" &&
       currentLocation &&
-      !isUpdatingActiveLocation &&
-      !assignment.keepBedActive
+      !isUpdatingActiveLocation
     ) {
-      requests.push(
-        createCompleteLocationRequest(
-          currentLocation,
-          facilityId,
-          encounter.id,
-          new Date(),
-        ),
-      );
+      if (!assignment.keepBedActive) {
+        requests.push(
+          createCompleteLocationRequest(
+            currentLocation,
+            facilityId,
+            encounter.id,
+            new Date(),
+          ),
+        );
+      } else {
+        requests.push(
+          createLocationUpdateRequest(
+            currentLocation,
+            { ...assignment.editingState.timeConfig, status: "reserved" },
+            facilityId,
+            encounter.id,
+          ),
+        );
+      }
     }
 
     // Update the selected location
@@ -268,9 +280,28 @@ export function LocationSheet({
       ),
     );
 
+    // If completing an active location, also complete all reserved locations
+    if (
+      location.status === "active" &&
+      assignment.editingState.timeConfig.status === "completed"
+    ) {
+      activeLocations.forEach((activeLocation) => {
+        if (activeLocation.status === "reserved") {
+          requests.push(
+            createCompleteLocationRequest(
+              activeLocation,
+              facilityId,
+              encounter.id,
+              new Date(),
+            ),
+          );
+        }
+      });
+    }
+
     if (requests.length > 0) {
       await mutations.executeBatch.mutateAsync({ requests });
-      assignment.resetEditingState();
+      resetAll();
     }
   };
 
@@ -281,7 +312,7 @@ export function LocationSheet({
     } else {
       navigation.goBack();
     }
-    navigation.setSelectedBed(null);
+    navigation.clearBedSelection();
   };
 
   const handleScheduleForLater = () => {
@@ -313,6 +344,7 @@ export function LocationSheet({
   const navigationHandlers = {
     onLocationClick: navigation.handleLocationClick,
     onBedSelect: navigation.setSelectedBed,
+    onLinkedBedSelect: navigation.handleLinkedBedClick,
     onCheckBedStatus: handleCheckBedStatus,
     onSearchChange: navigation.setSearchTerm,
     onSearch: navigation.handleSearch,
@@ -322,7 +354,7 @@ export function LocationSheet({
       navigation.setAllBeds([]);
     },
     onLoadMore: navigation.handleLoadMore,
-    onClearSelection: () => navigation.setSelectedBed(null),
+    onClearSelection: navigation.clearBedSelection,
     onGoBack: handleGoBack,
     onAssignNowPlanned: handleAssignNowPlanned,
     onScheduleForLater: handleScheduleForLater,
@@ -345,6 +377,7 @@ export function LocationSheet({
             currentLocation={currentLocation}
             plannedLocations={plannedLocations}
             selectedBedLocation={selectedBedLocation}
+            selectedLinkedBed={navigation.selectedLinkedBed}
             assignmentHandlers={assignmentHandlers}
             onAssignNowPlanned={handleAssignNowPlanned}
           />
@@ -359,6 +392,7 @@ export function LocationSheet({
             selectedLocation={navigation.selectedLocation}
             locationHistory={navigation.locationHistory}
             selectedBed={navigation.selectedBed}
+            selectedLinkedBed={navigation.selectedLinkedBed || null}
             currentLocation={currentLocation}
             plannedLocations={plannedLocations}
             activeLocations={activeLocations}

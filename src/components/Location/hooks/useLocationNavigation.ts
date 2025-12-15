@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import query from "@/Utils/request/query";
+import { LocationHistory } from "@/types/emr/encounter/encounter";
 import { LocationList } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -23,6 +24,9 @@ export function useLocationNavigation({
   );
   const [locationHistory, setLocationHistory] = useState<LocationList[]>([]);
   const [selectedBed, setSelectedBed] = useState<string | null>(null);
+  const [selectedLinkedBed, setSelectedLinkedBed] = useState<
+    LocationHistory | undefined
+  >();
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [locationsPage, setLocationsPage] = useState(1);
@@ -111,6 +115,9 @@ export function useLocationNavigation({
   }, [bedsData, bedsPage]);
 
   const handleLocationClick = (location: LocationList) => {
+    if (selectedLinkedBed) {
+      setSelectedLinkedBed(undefined);
+    }
     const locationIndex = locationHistory.findIndex(
       (loc) => loc.id === location.id,
     );
@@ -128,6 +135,21 @@ export function useLocationNavigation({
     setAllBeds([]);
     setSelectedBed(null);
     setSearchTerm("");
+  };
+
+  const handleLinkedBedClick = (bed: LocationHistory) => {
+    setSelectedLinkedBed(bed);
+    setSelectedBed(null);
+  };
+
+  const handleBedSelect = (bedId: string) => {
+    setSelectedBed(bedId);
+    setSelectedLinkedBed(undefined);
+  };
+
+  const clearBedSelection = () => {
+    setSelectedBed(null);
+    setSelectedLinkedBed(undefined);
   };
 
   const handleLoadMore = () => {
@@ -178,6 +200,7 @@ export function useLocationNavigation({
     selectedLocation,
     locationHistory,
     selectedBed,
+    selectedLinkedBed,
     showAvailableOnly,
     searchTerm,
     allLocations,
@@ -188,7 +211,7 @@ export function useLocationNavigation({
     isLoadingBeds,
 
     // Setters
-    setSelectedBed,
+    setSelectedBed: handleBedSelect,
     setShowAvailableOnly,
     setSearchTerm,
     setBedsPage,
@@ -196,8 +219,10 @@ export function useLocationNavigation({
 
     // Handlers
     handleLocationClick,
+    handleLinkedBedClick,
     handleLoadMore,
     handleSearch,
+    clearBedSelection,
     goBack,
     resetNavigation,
   };

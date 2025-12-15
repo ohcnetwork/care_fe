@@ -8,8 +8,10 @@ import { Switch } from "@/components/ui/switch";
 
 import { LocationList } from "@/types/location/location";
 
+import { LocationHistory } from "@/types/emr/encounter/encounter";
 import { BedListing } from "./BedListing";
 import { BedStatusLegend } from "./BedStatusLegend";
+import { LinkedBedListing } from "./LinkedBedListing";
 import { LocationBreadcrumb } from "./LocationBreadcrumb";
 import { LocationCardList } from "./LocationCardList";
 
@@ -19,6 +21,7 @@ interface LocationNavigationProps {
   selectedLocation: LocationList | null;
   locationHistory: LocationList[];
   selectedBed: string | null;
+  selectedLinkedBed: LocationHistory | undefined;
   showAvailableOnly: boolean;
   searchTerm: string;
   isLoadingLocations: boolean;
@@ -26,6 +29,7 @@ interface LocationNavigationProps {
   hasMore: boolean;
   onLocationClick: (location: LocationList) => void;
   onBedSelect: (bedId: string) => void;
+  onLinkedBedSelect: (bed: LocationHistory) => void;
   onCheckBedStatus: (bed: LocationList) => void;
   onSearchChange: (value: string) => void;
   onSearch: (e: React.FormEvent) => void;
@@ -33,7 +37,7 @@ interface LocationNavigationProps {
   onLoadMore: () => void;
   onGoBack: () => void;
   onClearSelection: () => void;
-  linkedLocations: LocationList[];
+  linkedLocations: LocationHistory[];
 }
 
 export function LocationNavigation({
@@ -42,6 +46,7 @@ export function LocationNavigation({
   selectedLocation,
   locationHistory,
   selectedBed,
+  selectedLinkedBed,
   showAvailableOnly,
   searchTerm,
   isLoadingLocations,
@@ -49,6 +54,7 @@ export function LocationNavigation({
   hasMore,
   onLocationClick,
   onBedSelect,
+  onLinkedBedSelect,
   onCheckBedStatus,
   onSearchChange,
   onSearch,
@@ -77,13 +83,24 @@ export function LocationNavigation({
         </div>
       </form>
 
-      <LocationCardList
-        locations={linkedLocations}
-        onLocationClick={onLocationClick}
-      />
+      {linkedLocations.length > 0 && (
+        <div className="space-y-2 mt-4">
+          <h2 className="text-base font-semibold mt-2">
+            {t("linked_locations")}
+          </h2>
+          <LinkedBedListing
+            linkedBeds={linkedLocations}
+            selectedLinkedBed={selectedLinkedBed}
+            onLinkedBedSelect={onLinkedBedSelect}
+          />
+        </div>
+      )}
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col justify-between">
+          <h2 className="text-base font-semibold mt-4">
+            {t("locations_under_my_care")}
+          </h2>
           <div className="flex-1">
             <LocationBreadcrumb
               selectedLocation={selectedLocation}
@@ -119,7 +136,9 @@ export function LocationNavigation({
 
         <LocationCardList
           locations={locations}
-          onLocationClick={onLocationClick}
+          onLocationClick={(location) =>
+            onLocationClick(location as LocationList)
+          }
         />
 
         {selectedLocation && (

@@ -19,11 +19,7 @@ export function LocationBreadcrumb({
   const { t } = useTranslation();
 
   if (!selectedLocation) {
-    return (
-      <h2 className="text-sm font-semibold mt-4">
-        {t("locations_under_my_care_for_immediate_transfer")}
-      </h2>
-    );
+    return <></>;
   }
 
   return (

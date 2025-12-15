@@ -102,17 +102,19 @@ export function LocationCardWrapper({
 
       <div className="flex flex-col gap-1">
         <h3 className="text-base font-semibold">
-          {status === "active"
-            ? t("patient_current_location")
-            : status === "reserved"
-              ? t("linked_locations")
-              : t("planned_location")}
+          {status === "active" ? (
+            t("patient_current_location")
+          ) : status === "planned" ? (
+            t("planned_location")
+          ) : (
+            <></>
+          )}
         </h3>
 
         <div
           className={cn(
             "flex gap-2 border border-gray-200 rounded-lg bg-gray-50 px-2 py-1",
-            areLinkedLocations
+            areLinkedLocations && !isEditing
               ? "flex-row items-start"
               : "flex-col justify-between",
           )}
