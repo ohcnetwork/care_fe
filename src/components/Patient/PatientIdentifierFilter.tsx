@@ -47,6 +47,7 @@ import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   getPartialId,
   PartialPatientModel,
+  PatientListRead,
   PatientRead,
 } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -265,10 +266,10 @@ export default function PatientIdentifierFilter({
   const { facility, facilityId } = useCurrentFacility();
   const [open, setOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<
-    PatientRead | PartialPatientModel | null
+    PatientListRead | PartialPatientModel | null
   >(null);
   const [pendingPatient, setPendingPatient] = useState<
-    PatientRead | PartialPatientModel | null
+    PatientListRead | PartialPatientModel | null
   >(null);
   const [searchType, setSearchType] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -341,7 +342,7 @@ export default function PatientIdentifierFilter({
   // Patient search query (for identifier-based search)
   const { data: patientList, isFetching: isPatientFetching } = useQuery({
     queryKey: ["patient-search", searchTerm, searchType],
-    queryFn: query.debounced(patientApi.searchPatient, {
+    queryFn: query.debounced(patientApi.search, {
       body:
         searchType && searchTerm
           ? { config: searchType, value: searchTerm, page_size: 20 }
@@ -368,7 +369,7 @@ export default function PatientIdentifierFilter({
   });
 
   const handleSelectPatient = useCallback(
-    (patient: PatientRead | PartialPatientModel) => {
+    (patient: PatientListRead | PartialPatientModel) => {
       setSelectedPatient(patient);
       setOpen(false);
       setSearchTerm("");
@@ -387,7 +388,9 @@ export default function PatientIdentifierFilter({
     }
   }, [verifiedPatient, handleSelectPatient]);
 
-  const handlePatientSelect = (patient: PatientRead | PartialPatientModel) => {
+  const handlePatientSelect = (
+    patient: PatientListRead | PartialPatientModel,
+  ) => {
     if (patientList?.partial) {
       setPendingPatient(patient);
       setVerificationOpen(true);
