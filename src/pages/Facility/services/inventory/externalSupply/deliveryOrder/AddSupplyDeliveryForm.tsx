@@ -380,7 +380,7 @@ export function AddSupplyDeliveryForm({
 
         const priceComponents = buildPriceComponents(item);
         const chargeItemCreate: ChargeItemDefinitionCreate = {
-          slug_value: crypto.randomUUID().replace(/-/g, "").substring(0, 25),
+          slug_value: crypto.randomUUID().replace(/-/g, ""),
           category,
           title: `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
           status: ChargeItemDefinitionStatus.active,

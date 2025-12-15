@@ -288,13 +288,23 @@ export function MonetaryComponentSelector({
         type === MonetaryComponentType.tax ? t("tax") : t("discount");
       const addLabel =
         type === MonetaryComponentType.tax ? t("add_tax") : t("add_discount");
+      const ariaLabel =
+        type === MonetaryComponentType.tax
+          ? t("select_tax_components")
+          : t("select_discount_components");
 
       const valuesDisplay = selectedComponents
         .map((c) => formatComponentValue(c))
         .join(", ");
 
       return (
-        <Button type="button" variant="ghost" size="xs" disabled={disabled}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="xs"
+          disabled={disabled}
+          aria-label={ariaLabel}
+        >
           {selectedComponents.length === 0 ? (
             <span>{addLabel}</span>
           ) : (
