@@ -34,6 +34,9 @@ interface ImportMetaEnv {
   readonly REACT_CUSTOM_REMOTE_I18N_URL?: string;
   readonly REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE?: string;
   readonly REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE?: string;
+  readonly REACT_AUTO_REFRESH_INTERVAL?: string;
+  readonly REACT_AUTO_REFRESH_BY_DEFAULT?: string;
+
   // Plugins related envs...
   readonly REACT_SENTRY_DSN?: string;
   readonly REACT_SENTRY_ENVIRONMENT?: string;
