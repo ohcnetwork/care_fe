@@ -1,3 +1,4 @@
+import { CURRENCY_SYMBOL } from "@/components/ui/monetary-display";
 import { Code } from "@/types/base/code/code";
 import { Condition } from "@/types/base/condition/condition";
 
@@ -54,7 +55,7 @@ export function getComponentNumericValue(component: MonetaryComponent): number {
  */
 export function formatComponentValue(
   component: MonetaryComponent,
-  currencySymbol = "₹",
+  currencySymbol = CURRENCY_SYMBOL,
 ): string {
   const value = getComponentNumericValue(component);
   return isPercentageBased(component)
@@ -70,6 +71,10 @@ export function isSameComponentCode(
   a: MonetaryComponent,
   b: MonetaryComponent,
 ): boolean {
+  // Components without codes cannot be compared by code identity
+  if (!a.code || !b.code) {
+    return false;
+  }
   return a.code?.code === b.code?.code && a.code?.system === b.code?.system;
 }
 

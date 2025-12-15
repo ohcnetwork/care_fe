@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle } from "lucide-react";
 import { useQueryParams } from "raviger";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -134,7 +134,6 @@ export function AddSupplyDeliveryForm({
   const [newlyAddedRowIndex, setNewlyAddedRowIndex] = useState<number | null>(
     null,
   );
-  const addNewAfterSaveRef = useRef(false);
 
   // Default values for a new empty item row
   const createEmptyItem = useCallback(
@@ -313,32 +312,17 @@ export function AddSupplyDeliveryForm({
 
     // Informational components (MRP, Purchase Price, etc.)
     if (item.informational_components?.length) {
-      components.push(
-        ...item.informational_components.map((ic) => ({
-          ...ic,
-          monetary_component_type: MonetaryComponentType.informational,
-        })),
-      );
+      components.push(...item.informational_components);
     }
 
     // Tax components
     if (item.tax_components?.length) {
-      components.push(
-        ...item.tax_components.map((tc) => ({
-          ...tc,
-          monetary_component_type: MonetaryComponentType.tax,
-        })),
-      );
+      components.push(...item.tax_components);
     }
 
     // Discount components
     if (item.discount_components?.length) {
-      components.push(
-        ...item.discount_components.map((dc) => ({
-          ...dc,
-          monetary_component_type: MonetaryComponentType.discount,
-        })),
-      );
+      components.push(...item.discount_components);
     }
 
     return components;
@@ -430,7 +414,7 @@ export function AddSupplyDeliveryForm({
 
         const priceComponents = buildPriceComponents(item);
         const chargeItemCreate: ChargeItemDefinitionCreate = {
-          slug_value: crypto.randomUUID().replace(/-/g, ""),
+          slug_value: crypto.randomUUID(),
           category,
           title: `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
           status: ChargeItemDefinitionStatus.active,
@@ -545,16 +529,8 @@ export function AddSupplyDeliveryForm({
         t("items_created_successfully", { count: successfulIndices.length }),
       );
 
-      if (addNewAfterSaveRef.current) {
-        // Reset form and add a new empty row
-        form.reset();
-        addNewAfterSaveRef.current = false;
-        append(createEmptyItem());
-        setNewlyAddedRowIndex(0);
-      } else {
-        onSuccess();
-        form.reset();
-      }
+      onSuccess();
+      form.reset();
     } else if (successfulIndices.length > 0) {
       // Partial success - show success count but don't close form
       toast.success(
@@ -749,7 +725,7 @@ export function AddSupplyDeliveryForm({
                                           {...field}
                                           onChange={(e) =>
                                             field.onChange(
-                                              parseInt(e.target.value),
+                                              parseInt(e.target.value) || 1,
                                             )
                                           }
                                         />

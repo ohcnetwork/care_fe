@@ -2206,6 +2206,7 @@
   "expiry": "Expiry",
   "expiry_date": "Expiry Date",
   "expiry_date_required_at_row": "Expiry date is required at row {{row}}",
+  "expiry_short": "Exp",
   "export": "Export",
   "export_live_patients": "Export Live Patients",
   "exporting": "Exporting",

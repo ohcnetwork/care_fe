@@ -218,7 +218,8 @@ export function SmartExternalDeliveryRow({
                                 #{product.batch?.lot_number || "N/A"}
                               </span>
                               <span className="text-xs text-muted-foreground">
-                                Exp: {getExpirationDisplay(product)}
+                                {t("expiry_short")}:{" "}
+                                {getExpirationDisplay(product)}
                               </span>
                             </div>
                             {suppliedItem?.id === product.id && (
