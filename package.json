@@ -193,8 +193,8 @@
   "optionalDependencies": {
     "@esbuild/linux-arm64": "latest",
     "@esbuild/linux-x64": "latest",
-    "@rollup/rollup-linux-arm64-gnu": "4.53.3",
-    "@rollup/rollup-linux-x64-gnu": "4.53.2"
+    "@rollup/rollup-linux-arm64-gnu": "4.53.4",
+    "@rollup/rollup-linux-x64-gnu": "4.53.4"
   },
   "browserslist": {
     "production": [
