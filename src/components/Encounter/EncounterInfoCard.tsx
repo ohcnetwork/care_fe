@@ -132,6 +132,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           {t("patient_home")}
         </Link>
         <Link
+          basePath="/"
           href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
         >
           <Button

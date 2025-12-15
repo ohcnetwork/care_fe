@@ -29,6 +29,10 @@ import {
   AccountStatus,
 } from "@/types/billing/account/Account";
 import {
+  INVOICE_STATUS_COLORS,
+  InvoiceStatus,
+} from "@/types/billing/invoice/invoice";
+import {
   ENCOUNTER_CLASS_FILTER_COLORS,
   ENCOUNTER_PRIORITY_FILTER_COLORS,
   ENCOUNTER_STATUS_FILTER_COLORS,
@@ -269,6 +273,43 @@ export const accountStatusFilter = (
       getOperations: () => customOperations || [{ label: "is" }],
       mode,
       icon: <CircleDashed className="w-4 h-4" />,
+      showColorIndicators: false,
+    },
+  );
+
+export const invoiceStatusFilter = (
+  key: string = "status",
+  mode: FilterMode = "single",
+  customOperations?: Operation[],
+) =>
+  createFilterConfig(
+    key,
+    t("invoice_status"),
+    "command",
+    Object.values(InvoiceStatus).map((value) => ({
+      value: value,
+      label: t(value),
+      color: INVOICE_STATUS_COLORS[value],
+    })),
+    {
+      renderSelected: (selected: FilterValues) => {
+        const selectedStatus = selected as string[];
+        if (typeof selectedStatus[0] === "string") {
+          const option = selectedStatus[0];
+          const variant = INVOICE_STATUS_COLORS[option as InvoiceStatus];
+          return (
+            <GenericSelectedBadge
+              selectedValue={option}
+              selectedLength={selectedStatus.length}
+              variant={variant}
+            />
+          );
+        }
+        return <></>;
+      },
+      getOperations: () => customOperations || [{ label: "is" }],
+      mode,
+      icon: <CircleDashed className="size-4" />,
       showColorIndicators: false,
     },
   );
