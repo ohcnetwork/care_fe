@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { calculateTotal } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import {
@@ -144,6 +145,7 @@ export function SupplyDeliveryTable({
           <TableHead>{t("base")}</TableHead>
           <TableHead>{t("tax")}</TableHead>
           <TableHead>{t("disc")}</TableHead>
+          <TableHead>{t("total")}</TableHead>
           <TableHead>{t("status")}</TableHead>
           <TableHead>{t("condition")}</TableHead>
           {showActionsColumn && <TableHead>{t("actions")}</TableHead>}
@@ -220,6 +222,11 @@ export function SupplyDeliveryTable({
                     ))
                   : "-";
               })()}
+            </TableCell>
+            <TableCell>
+              <MonetaryDisplay
+                amount={calculateTotal(delivery, internal).toFixed(2)}
+              />
             </TableCell>
             <TableCell>
               <Badge variant={SUPPLY_DELIVERY_STATUS_COLORS[delivery.status]}>

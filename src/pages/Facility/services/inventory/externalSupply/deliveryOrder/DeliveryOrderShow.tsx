@@ -43,8 +43,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
+import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
+import {
+  calculateTotal,
+  getInventoryBasePath,
+} from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
 import {
@@ -57,12 +62,24 @@ import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
   SupplyDeliveryCondition,
+  SupplyDeliveryRead,
   SupplyDeliveryStatus,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+
+function calculateTotalPrice(
+  deliveries: SupplyDeliveryRead[],
+  internal: boolean,
+): number {
+  return deliveries
+    .filter(
+      (delivery) => delivery.status !== SupplyDeliveryStatus.entered_in_error,
+    )
+    .reduce((sum, delivery) => sum + calculateTotal(delivery, internal), 0);
+}
 
 interface Props {
   facilityId: string;
@@ -383,12 +400,23 @@ export function DeliveryOrderShow({
       title={t("delivery_order_details")}
       hideTitleOnPage
       shortCutContext="facility:inventory:delivery"
-      className="max-w-7xl mx-auto"
+      className="max-w-[1600px] mx-auto"
     >
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-4">
-            <BackButton size="icon" className="shrink-0">
+            <BackButton
+              size="icon"
+              className="shrink-0"
+              to={getInventoryBasePath(
+                facilityId,
+                locationId,
+                internal,
+                false,
+                isRequester,
+                "",
+              )}
+            >
               <ChevronLeft />
             </BackButton>
             <div>
@@ -738,6 +766,22 @@ export function DeliveryOrderShow({
                 ) : (
                   <></>
                 )}
+
+                {/* Total Price Display */}
+                {supplyDeliveries?.results &&
+                  supplyDeliveries.results.length > 0 && (
+                    <div className="flex justify-end border-t pt-4 mt-4">
+                      <div className="flex items-center gap-2 text-lg font-semibold">
+                        <span>{t("total")}:</span>
+                        <MonetaryDisplay
+                          amount={calculateTotalPrice(
+                            supplyDeliveries.results,
+                            internal,
+                          ).toFixed(2)}
+                        />
+                      </div>
+                    </div>
+                  )}
 
                 {/* Add New Supply Delivery Form - Always show when in draft mode */}
                 {canAddSupplyDeliveries && (
