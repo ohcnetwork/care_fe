@@ -38,11 +38,6 @@ test.describe("User Management in Departments", () => {
       const gender = faker.helpers.arrayElement(GENDERS);
       await page.getByRole("combobox", { name: "User Type *" }).click();
       await page.getByRole("option", { name: userType }).click();
-      await page
-        .getByRole("combobox")
-        .filter({ hasText: "Select or type" })
-        .click();
-      await page.getByRole("option").first().click();
       await page.getByRole("textbox", { name: "First Name *" }).fill(firstName);
       await page.getByRole("textbox", { name: "Last Name *" }).fill(lastName);
       await page.getByRole("textbox", { name: "Username" }).fill(username);
@@ -63,22 +58,23 @@ test.describe("User Management in Departments", () => {
       await createButton.click();
     });
 
-    await test.step("Link user to department with role", async () => {
+    await test.step("Link user to organization", async () => {
       await page
         .getByRole("combobox")
         .filter({ hasText: "Select Role" })
         .click();
-      await page.getByRole("option").first().click();
+      await page.getByPlaceholder("Search Roles").fill("Nurse");
+      await page.getByRole("option", { name: "Nurse" }).click();
       await page.getByRole("button", { name: "Add to Organization" }).click();
 
       await expect(
         page
-          .getByRole("region", { name: "Notifications alt+T" })
+          .getByRole("region", { name: "Notifications" })
           .getByText("User added successfully"),
       ).toBeVisible({ timeout: 10000 });
       await expect(
         page
-          .getByRole("region", { name: "Notifications alt+T" })
+          .getByRole("region", { name: "Notifications" })
           .getByText("User added to organization successfully"),
       ).toBeVisible({ timeout: 10000 });
     });
