@@ -120,18 +120,16 @@ export default function DispensesView({
                 {t("prescription_tags")}:
               </span>
               <div className="flex flex-wrap items-start gap-2 text-sm whitespace-nowrap">
-                <>
-                  {prescriptionTags?.map((tag) => (
-                    <Badge
-                      key={tag.id}
-                      variant="secondary"
-                      className="capitalize"
-                      title={tag.description}
-                    >
-                      {getTagHierarchyDisplay(tag)}
-                    </Badge>
-                  ))}
-                </>
+                {prescriptionTags?.map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    variant="secondary"
+                    className="capitalize"
+                    title={tag.description}
+                  >
+                    {getTagHierarchyDisplay(tag)}
+                  </Badge>
+                ))}
               </div>
             </div>
           )}
