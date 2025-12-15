@@ -764,17 +764,6 @@ export function AddSupplyDeliveryForm({
                     {t("cancel")}
                   </Button>
                   <div className="flex space-x-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={isProcessing}
-                      onClick={() => {
-                        addNewAfterSaveRef.current = true;
-                        form.handleSubmit(onSubmit)();
-                      }}
-                    >
-                      {isProcessing ? t("saving") : t("save_and_add_new")}
-                    </Button>
                     <Button type="submit" disabled={isProcessing}>
                       {isProcessing ? t("saving") : t("save")}
                       <ShortcutBadge actionId="submit-action" />
