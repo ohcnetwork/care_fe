@@ -273,6 +273,7 @@ export function DeliveryOrderShow({
         supplied_item_condition: delivery.supplied_item_condition,
         supplied_item_type: delivery.supplied_item_type,
         supply_request: delivery.supply_request?.id,
+        extensions: delivery.extensions,
       }));
 
     if (selectedSupplyDeliveries.length === 0) {
@@ -298,6 +299,7 @@ export function DeliveryOrderShow({
         supplied_item_condition: SupplyDeliveryCondition.damaged,
         supplied_item_type: delivery.supplied_item_type,
         supply_request: delivery.supply_request?.id,
+        extensions: delivery.extensions,
       }));
 
     if (selectedSupplyDeliveries.length === 0) {

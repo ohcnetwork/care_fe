@@ -11,6 +11,7 @@ import { z } from "zod";
 import careConfig from "@/../care.config";
 import { cn } from "@/lib/utils";
 
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -62,6 +63,8 @@ import {
 } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { RequestOrderStatus } from "@/types/inventory/requestOrder/requestOrder";
+import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
 import {
   SupplyDeliveryCondition,
   SupplyDeliveryStatus,
@@ -124,8 +127,9 @@ export function AddSupplyDeliveryForm({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [qParams] = useQueryParams();
+  const [qParams, setQueryParams] = useQueryParams();
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
+  const [requestOrderSearch, setRequestOrderSearch] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [newlyAddedRowIndex, setNewlyAddedRowIndex] = useState<number | null>(
     null,
@@ -167,6 +171,25 @@ export function AddSupplyDeliveryForm({
     enabled: !!qParams.supplyOrder,
   });
 
+  const { data: requestOrders, isLoading: isLoadingRequestOrders } = useQuery({
+    queryKey: [
+      "requestOrders",
+      facilityId,
+      requestOrderSearch,
+      destination,
+      origin,
+    ],
+    queryFn: query.debounced(requestOrderApi.listRequestOrder, {
+      pathParams: { facilityId },
+      queryParams: {
+        search: requestOrderSearch || undefined,
+        status: RequestOrderStatus.pending,
+        ...(!origin ? { destination } : { origin }),
+      },
+    }),
+    enabled: !qParams.supplyOrder,
+  });
+
   const form = useForm<SupplyDeliveryFormValues>({
     resolver: zodResolver(createFormSchema),
     defaultValues: {
@@ -186,6 +209,33 @@ export function AddSupplyDeliveryForm({
   };
 
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+
+  // Render the request order selector dropdown
+  const renderRequestOrderSelector = () => (
+    <Autocomplete
+      options={
+        requestOrders?.results?.map((order) => ({
+          label: order.name,
+          value: order.id,
+        })) || []
+      }
+      value=""
+      onChange={(value) => {
+        if (value) {
+          setQueryParams({
+            ...qParams,
+            supplyOrder: value,
+          });
+        }
+      }}
+      isLoading={isLoadingRequestOrders}
+      onSearch={setRequestOrderSearch}
+      placeholder={t("select_order")}
+      inputPlaceholder={t("search_order")}
+      noOptionsMessage={t("no_orders_found")}
+      className="px-10"
+    />
+  );
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -730,7 +780,7 @@ export function AddSupplyDeliveryForm({
                   </div>
                 </div>
 
-                <div className="flex flex-row gap-2 mt-4">
+                <div className="flex flex-row gap-2 mt-4 items-end">
                   <Button
                     type="button"
                     variant="outline"
@@ -777,22 +827,30 @@ export function AddSupplyDeliveryForm({
               <h4>{t("add_items_to_delivery")}</h4>
               <p>{t("add_items_to_delivery_description")}</p>
               <div className="flex flex-row gap-2 items-center mt-2">
-                {supplyRequests?.results?.length &&
-                  supplyRequests?.results?.length > 0 && (
-                    <>
-                      <Button
-                        type="button"
-                        variant="outline_primary"
-                        onClick={loadFromSupplyRequests}
-                      >
-                        {t("load_from_order")} ({supplyRequests?.count}{" "}
-                        {t("items")}
-                        )
-                        <ShortcutBadge actionId="load-from-order" />
-                      </Button>
-                      <p>- {t("or")} -</p>
-                    </>
-                  )}
+                {qParams.supplyOrder
+                  ? supplyRequests?.results?.length &&
+                    supplyRequests?.results?.length > 0 && (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline_primary"
+                          onClick={loadFromSupplyRequests}
+                        >
+                          {t("load_from_order")} ({supplyRequests?.count}{" "}
+                          {t("items")}
+                          )
+                          <ShortcutBadge actionId="load-from-order" />
+                        </Button>
+                        <p>- {t("or")} -</p>
+                      </>
+                    )
+                  : requestOrders?.results &&
+                    requestOrders.results.length > 0 && (
+                      <>
+                        {renderRequestOrderSelector()}
+                        <p>- {t("or")} -</p>
+                      </>
+                    )}
                 <Button
                   type="button"
                   variant="outline_primary"
