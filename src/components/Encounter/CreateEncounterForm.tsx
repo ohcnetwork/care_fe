@@ -275,7 +275,9 @@ export default function CreateEncounterForm({
                     >
                       <FormControl>
                         <SelectTrigger ref={field.ref}>
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue
+                            placeholder={t("placeholder_select_status")}
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -307,7 +309,9 @@ export default function CreateEncounterForm({
                     >
                       <FormControl>
                         <SelectTrigger ref={field.ref}>
-                          <SelectValue placeholder="Select priority" />
+                          <SelectValue
+                            placeholder={t("placeholder_select_priority")}
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

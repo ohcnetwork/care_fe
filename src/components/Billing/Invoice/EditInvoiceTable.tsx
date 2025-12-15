@@ -349,7 +349,7 @@ export function EditInvoiceTable({
                                 field.onChange(e.target.value);
                                 handleBaseAmountChange(index, e.target.value);
                               }}
-                              placeholder="0.00"
+                              placeholder={t("zero_amount_placeholder")}
                             />
                           </FormControl>
                         </FormItem>
@@ -539,7 +539,9 @@ export function EditInvoiceTable({
                                                 );
                                               }
                                             }}
-                                            placeholder="0.00"
+                                            placeholder={t(
+                                              "zero_amount_placeholder",
+                                            )}
                                             disabled={isDisabled}
                                           />
                                         </FormControl>

@@ -60,7 +60,7 @@ import resourceCategoryApi from "@/types/base/resourceCategory/resourceCategoryA
  *   resourceType={ResourceCategoryResourceType.charge_item_definition}
  *   value={selectedCategorySlug}
  *   onValueChange={setSelectedCategorySlug}
- *   placeholder="Select a category"
+ *   placeholder={t("placeholder_select_category")}
  *   className="w-full"
  * />
  * ```

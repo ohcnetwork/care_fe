@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
 import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryComponent";
+import { t } from "i18next";
 
 // Currency configuration
 export const CURRENCY_CODE = "INR";
@@ -85,7 +86,7 @@ function MonetaryAmountInput({
         type="text"
         inputMode="decimal"
         pattern="^\d*\.?\d{0,2}$"
-        placeholder="0.00"
+        placeholder={t("zero_amount_placeholder")}
         data-care-input="monetary-amount"
         {...props}
         onChange={handleChange}

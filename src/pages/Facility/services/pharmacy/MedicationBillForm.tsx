@@ -1886,7 +1886,9 @@ export default function MedicationBillForm({ patientId }: Props) {
                                                           );
                                                         }}
                                                         className="border-gray-300 border rounded-none w-24"
-                                                        placeholder="0"
+                                                        placeholder={t(
+                                                          "placeholder_zero_quantity",
+                                                        )}
                                                       />
                                                     </FormControl>
                                                     <FormMessage />

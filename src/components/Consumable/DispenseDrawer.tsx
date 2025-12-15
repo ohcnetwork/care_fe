@@ -770,7 +770,9 @@ export default function DispenseDrawer({
                                                           );
                                                         }}
                                                         className="border-gray-300 border rounded-md w-24"
-                                                        placeholder="0"
+                                                        placeholder={t(
+                                                          "placeholder_zero_quantity",
+                                                        )}
                                                       />
                                                     </FormControl>
                                                     <FormMessage />

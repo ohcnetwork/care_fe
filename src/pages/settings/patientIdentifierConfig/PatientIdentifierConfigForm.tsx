@@ -279,7 +279,9 @@ export default function PatientIdentifierConfigForm({
                           <FormControl>
                             <Input
                               {...field}
-                              placeholder="https://example.org/identifier-system"
+                              placeholder={t(
+                                "placeholder_identifier_system_url",
+                              )}
                             />
                           </FormControl>
                           <FormDescription>{t("system_help")}</FormDescription>

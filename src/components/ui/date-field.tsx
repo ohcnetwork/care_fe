@@ -158,7 +158,7 @@ export default function DateField({
           type="number"
           inputMode="numeric"
           pattern="[0-9]*"
-          placeholder="DD"
+          placeholder={t("placeholder_day")}
           value={day}
           onChange={handleDayChange}
           onBlur={handleDayBlur}
@@ -176,7 +176,7 @@ export default function DateField({
           type="number"
           inputMode="numeric"
           pattern="[0-9]*"
-          placeholder="MM"
+          placeholder={t("placeholder_month")}
           value={month}
           onChange={handleMonthChange}
           onBlur={handleMonthBlur}
@@ -194,7 +194,7 @@ export default function DateField({
           type="number"
           inputMode="numeric"
           pattern="[0-9]*"
-          placeholder="YYYY"
+          placeholder={t("placeholder_year")}
           value={year}
           onChange={handleYearChange}
           min={1900}

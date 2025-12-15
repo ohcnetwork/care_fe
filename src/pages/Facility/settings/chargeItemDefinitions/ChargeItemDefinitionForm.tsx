@@ -1127,7 +1127,7 @@ export function ChargeItemDefinitionForm({
                               onChange={(e) =>
                                 field.onChange(String(e.target.value))
                               }
-                              placeholder="0.00"
+                              placeholder={t("zero_amount_placeholder")}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1152,7 +1152,7 @@ export function ChargeItemDefinitionForm({
                           {...field}
                           value={field.value ?? 0}
                           onChange={(e) => field.onChange(e.target.value)}
-                          placeholder="0.00"
+                          placeholder={t("zero_amount_placeholder")}
                         />
                       </FormControl>
                       <FormMessage />
@@ -1175,7 +1175,7 @@ export function ChargeItemDefinitionForm({
                           {...field}
                           value={field.value ?? 0}
                           onChange={(e) => field.onChange(e.target.value)}
-                          placeholder="0.00"
+                          placeholder={t("zero_amount_placeholder")}
                         />
                       </FormControl>
                       <FormMessage />

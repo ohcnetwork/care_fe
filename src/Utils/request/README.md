@@ -113,7 +113,7 @@ function SearchComponent() {
     <Input
       value={search}
       onChange={(e) => setSearch(e.target.value)}
-      placeholder="Search..."
+      placeholder={t("placeholder_search")}
     />
   );
 }

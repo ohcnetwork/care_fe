@@ -184,7 +184,7 @@ export function ProductFormDrawer({
                         </FormLabel>
                         <FormControl>
                           <Input
-                            placeholder=""
+                            placeholder={t("placeholder_lot_number_hint")}
                             {...field}
                             className="border-gray-300 h-11 text-base"
                           />

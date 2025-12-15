@@ -761,7 +761,7 @@ export function DiagnosticReportForm({
                         {componentData.unit ? (
                           componentData.unit
                         ) : (
-                          <SelectValue placeholder="Unit" />
+                          <SelectValue placeholder={t("placeholder_unit")} />
                         )}
                       </SelectTrigger>
                       <SelectContent>

@@ -839,7 +839,9 @@ const NewAvailabilityCard = ({
                           inputMode="numeric"
                           pattern="[0-9]*"
                           min={0}
-                          placeholder="e.g. 10"
+                          placeholder={t(
+                            "placeholder_schedule_template_example_count",
+                          )}
                           {...field}
                           value={field.value ?? ""}
                           onChange={(e) =>
@@ -867,7 +869,9 @@ const NewAvailabilityCard = ({
                           inputMode="numeric"
                           pattern="[0-9]*"
                           min={0}
-                          placeholder="e.g. 1"
+                          placeholder={t(
+                            "placeholder_schedule_template_example_simple",
+                          )}
                           {...field}
                           value={field.value ?? ""}
                           onChange={(e) =>

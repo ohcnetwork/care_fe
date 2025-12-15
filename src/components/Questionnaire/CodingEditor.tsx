@@ -188,7 +188,7 @@ export function CodingEditor({
                     <Input
                       {...field}
                       value={code.display}
-                      placeholder="Unverified"
+                      placeholder={t("placeholder_unverified_status")}
                       className={!code.display ? "text-gray-500" : undefined}
                       readOnly
                     />

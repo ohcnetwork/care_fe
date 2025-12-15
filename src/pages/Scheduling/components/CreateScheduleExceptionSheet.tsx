@@ -228,7 +228,9 @@ export default function CreateScheduleExceptionSheet({
                       <FormLabel aria-required>{t("reason")}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="e.g. Holiday Leave, Conference, etc."
+                          placeholder={t(
+                            "placeholder_schedule_exception_example",
+                          )}
                           {...field}
                         />
                       </FormControl>
