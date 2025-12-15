@@ -113,6 +113,7 @@ export function ProductFormDrawer({
       expiration_date: formattedData.expiration_date,
       product_knowledge: productKnowledgeSlug,
       charge_item_definition: formattedData.charge_item_definition || undefined,
+      extensions: {},
     };
 
     createProduct(createPayload);

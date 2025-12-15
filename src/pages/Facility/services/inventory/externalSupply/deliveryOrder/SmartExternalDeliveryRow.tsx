@@ -1,8 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ChevronDown, Plus } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { UseFormReturn, useWatch } from "react-hook-form";
+import { useState } from "react";
+import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -38,325 +37,63 @@ import {
   CURRENCY_SYMBOL,
   MonetaryDisplay,
 } from "@/components/ui/monetary-display";
-import {
-  SupplyDeliveryFormValues,
-  SupplyDeliveryItemValues,
-} from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
-import {
-  calculateItemTotal,
-  MonetaryComponent,
-  MonetaryComponentRead,
-  MonetaryComponentType,
-} from "@/types/base/monetaryComponent/monetaryComponent";
+import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
-import {
-  getComponentsFromChargeItem,
-  MRP_CODE,
-} from "@/types/billing/chargeItem/chargeItem";
-import facilityApi from "@/types/facility/facilityApi";
 import { ProductRead } from "@/types/inventory/product/product";
-import productApi from "@/types/inventory/product/productApi";
-import query from "@/Utils/request/query";
+
+import { SupplyDeliveryFormValues } from "./AddSupplyDeliveryForm";
+import { useDeliveryRowItem } from "./useDeliveryRowItem";
 
 interface Props {
   form: UseFormReturn<SupplyDeliveryFormValues>;
   index: number;
-  facilityId: string;
   informationalCodes: Code[];
   autoOpenProductSelect?: boolean;
   onProductSelectOpened?: () => void;
 }
 
-// Type-safe field path helper for items array
-type ItemFieldPath<K extends keyof SupplyDeliveryItemValues> =
-  `items.${number}.${K}`;
-
-function getItemFieldPath<K extends keyof SupplyDeliveryItemValues>(
-  index: number,
-  field: K,
-): ItemFieldPath<K> {
-  return `items.${index}.${field}` as ItemFieldPath<K>;
-}
-
-/**
- * Reset all item-specific form fields when product knowledge changes
- */
-function resetItemFormFields(
-  form: UseFormReturn<SupplyDeliveryFormValues>,
-  index: number,
-) {
-  form.setValue(getItemFieldPath(index, "supplied_item"), undefined);
-  form.setValue(getItemFieldPath(index, "batch_number"), "");
-  form.setValue(getItemFieldPath(index, "expiry_date"), "");
-  form.setValue(getItemFieldPath(index, "charge_item_definition"), undefined);
-  form.setValue(getItemFieldPath(index, "unit_price"), 0);
-  form.setValue(getItemFieldPath(index, "informational_components"), []);
-  form.setValue(getItemFieldPath(index, "tax_components"), []);
-  form.setValue(getItemFieldPath(index, "discount_components"), []);
-  form.setValue(getItemFieldPath(index, "charge_item_category"), undefined);
-  form.setValue(getItemFieldPath(index, "is_manually_edited"), false);
-}
-
 export function SmartExternalDeliveryRow({
   form,
   index,
-  facilityId,
   informationalCodes,
   autoOpenProductSelect = false,
   onProductSelectOpened,
 }: Props) {
+  const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
   const [batchSelectorOpen, setBatchSelectorOpen] = useState(false);
-  const [isCreatingNew, setIsCreatingNew] = useState(false);
 
-  const productKnowledge = useWatch({
-    control: form.control,
-    name: `items.${index}.product_knowledge`,
-  });
-
-  const suppliedItem = useWatch({
-    control: form.control,
-    name: getItemFieldPath(index, "supplied_item"),
-  });
-
-  const batchNumber = useWatch({
-    control: form.control,
-    name: getItemFieldPath(index, "batch_number"),
-  });
-
-  const unitPrice = useWatch({
-    control: form.control,
-    name: getItemFieldPath(index, "unit_price"),
-  });
-
-  const quantity = useWatch({
-    control: form.control,
-    name: getItemFieldPath(index, "supplied_item_quantity"),
-  });
-
-  const taxComponents = useWatch({
-    control: form.control,
-    name: getItemFieldPath(index, "tax_components"),
-  });
-
-  const discountComponents = useWatch({
-    control: form.control,
-    name: getItemFieldPath(index, "discount_components"),
-  });
-
-  const informationalComponents = useWatch({
-    control: form.control,
-    name: getItemFieldPath(index, "informational_components"),
-  });
-
-  const chargeItemCategory = useWatch({
-    control: form.control,
-    name: getItemFieldPath(index, "charge_item_category"),
-  });
-
-  const isTaxInclusive = useWatch({
-    control: form.control,
-    name: getItemFieldPath(index, "is_tax_inclusive"),
-  });
-
-  // Fetch facility data for tax/discount/informational components
-  const { data: facilityData } = useQuery({
-    queryKey: ["facility", facilityId],
-    queryFn: query(facilityApi.get, {
-      pathParams: { facilityId },
-    }),
-  });
-
-  // Fetch products for the selected product knowledge
-  const { data: productsResponse, isLoading: isLoadingProducts } = useQuery({
-    queryKey: ["products", facilityId, productKnowledge?.slug],
-    queryFn: query(productApi.listProduct, {
-      pathParams: { facilityId },
-      queryParams: {
-        product_knowledge: productKnowledge?.slug,
-        ordering: "-created_date",
-        limit: 100,
-        status: "active",
-      },
-    }),
-    enabled: !!productKnowledge?.slug,
-  });
-
-  const products = useMemo(
-    () => productsResponse?.results || [],
-    [productsResponse?.results],
-  );
-
-  const fillFormFromProduct = useCallback(
-    (product: ProductRead) => {
-      form.setValue(`items.${index}.supplied_item`, product);
-
-      if (product.batch?.lot_number) {
-        form.setValue(`items.${index}.batch_number`, product.batch.lot_number);
-      }
-      if (product.expiration_date) {
-        form.setValue(
-          `items.${index}.expiry_date`,
-          format(new Date(product.expiration_date), "yyyy-MM-dd"),
-        );
-      }
-
-      const chargeItemDef = product.charge_item_definition;
-      if (chargeItemDef) {
-        form.setValue(`items.${index}.charge_item_definition`, chargeItemDef);
-
-        // Set the charge item category so it persists when editing
-        if (chargeItemDef.category?.slug) {
-          form.setValue(
-            getItemFieldPath(index, "charge_item_category"),
-            chargeItemDef.category.slug,
-          );
-        }
-
-        // Extract pricing components using shared utility
-        const baseComponents = getComponentsFromChargeItem(
-          chargeItemDef,
-          MonetaryComponentType.base,
-        );
-        if (baseComponents[0]?.amount) {
-          form.setValue(
-            `items.${index}.unit_price`,
-            parseFloat(baseComponents[0].amount),
-          );
-        }
-
-        const informational = getComponentsFromChargeItem(
-          chargeItemDef,
-          MonetaryComponentType.informational,
-        );
-        if (informational.length) {
-          form.setValue(
-            getItemFieldPath(index, "informational_components"),
-            informational,
-          );
-        }
-
-        const taxes = getComponentsFromChargeItem(
-          chargeItemDef,
-          MonetaryComponentType.tax,
-        );
-        if (taxes.length) {
-          form.setValue(getItemFieldPath(index, "tax_components"), taxes);
-        }
-
-        const discounts = getComponentsFromChargeItem(
-          chargeItemDef,
-          MonetaryComponentType.discount,
-        );
-        if (discounts.length) {
-          form.setValue(
-            getItemFieldPath(index, "discount_components"),
-            discounts,
-          );
-        }
-      } else {
-        form.setValue(`items.${index}.unit_price`, 0);
-      }
-
-      form.setValue(`items.${index}.is_manually_edited`, false);
-      setIsCreatingNew(false);
-    },
-    [form, index],
-  );
-
-  // Determine if category selection is needed for charge item definition
-  // Show picker when: product knowledge selected AND (creating new item OR no existing products)
-  // Note: Charge item category is separate from product knowledge category
-  const needsCategorySelection = useMemo(() => {
-    if (!productKnowledge) return false;
-    // If we have an existing product selected with a charge item, don't show picker
-    if (suppliedItem?.charge_item_definition?.category) return false;
-    // If creating new item OR no products exist, need to select charge item category
-    if (isCreatingNew || products.length === 0) return true;
-    return false;
-  }, [productKnowledge, suppliedItem, products.length, isCreatingNew]);
-
-  // Auto-fill from last product when product knowledge is selected
-  useEffect(() => {
-    if (
-      products.length > 0 &&
-      !suppliedItem &&
-      !form.getValues(`items.${index}.is_manually_edited`)
-    ) {
-      const lastProduct = products[0];
-      fillFormFromProduct(lastProduct);
-    }
-  }, [products, suppliedItem, index, form, fillFormFromProduct]);
+  const {
+    productKnowledge,
+    suppliedItem,
+    batchNumber,
+    unitPrice,
+    taxComponents,
+    discountComponents,
+    informationalComponents,
+    chargeItemCategory,
+    isTaxInclusive,
+    computedTotal,
+    needsCategorySelection,
+    isCreatingNew,
+    isLoadingProducts,
+    products,
+    availableTaxes,
+    availableDiscounts,
+    setField,
+    resetFields,
+    markAsEdited,
+    fillFromProduct,
+    updateInformationalComponent,
+  } = useDeliveryRowItem({ form, index });
 
   const handleProductSelect = (product: ProductRead) => {
-    fillFormFromProduct(product);
+    fillFromProduct(product);
     setBatchSelectorOpen(false);
   };
-
-  const markAsEdited = () => {
-    form.setValue(`items.${index}.is_manually_edited`, true);
-    form.setValue(`items.${index}.supplied_item`, undefined);
-    setIsCreatingNew(true);
-  };
-
-  // Calculate computed total using shared utility
-  const computedTotal = useMemo(() => {
-    return calculateItemTotal(
-      unitPrice || 0,
-      quantity || 1,
-      taxComponents,
-      discountComponents,
-    );
-  }, [unitPrice, quantity, taxComponents, discountComponents]);
-
-  // Available components from facility
-  const availableTaxes = useMemo(
-    () =>
-      (facilityData?.instance_tax_monetary_components ||
-        []) as MonetaryComponentRead[],
-    [facilityData],
-  );
-
-  const availableDiscounts = useMemo(
-    () =>
-      [
-        ...(facilityData?.discount_monetary_components || []),
-        ...(facilityData?.instance_discount_monetary_components || []),
-      ].map((component) => ({
-        ...component,
-        amount:
-          component?.amount != null
-            ? String(component.amount)
-            : component.amount,
-      })) as MonetaryComponentRead[],
-    [facilityData],
-  );
-
-  // Get MRP value from informational components
-  const mrpValue = useMemo(() => {
-    const mrpComponent = informationalComponents?.find(
-      (c) => c.code?.code === MRP_CODE,
-    );
-    return mrpComponent?.amount ? parseFloat(mrpComponent.amount) : 0;
-  }, [informationalComponents]);
-
-  // Calculate total tax factor (sum of all tax percentages)
-  const totalTaxFactor = useMemo(() => {
-    if (!taxComponents?.length) return 0;
-    return taxComponents.reduce((sum, tax) => sum + (tax.factor || 0), 0);
-  }, [taxComponents]);
-
-  // Calculate base price from MRP when tax inclusive is enabled
-  // Formula: base_price = mrp / (1 + totalTaxRate/100)
-  useEffect(() => {
-    if (isTaxInclusive && mrpValue > 0) {
-      const calculatedBasePrice = mrpValue / (1 + totalTaxFactor / 100);
-      const roundedBasePrice = Math.round(calculatedBasePrice * 100) / 100;
-      form.setValue(getItemFieldPath(index, "unit_price"), roundedBasePrice);
-    }
-  }, [isTaxInclusive, mrpValue, totalTaxFactor, form, index]);
 
   const getExpirationDisplay = (product: ProductRead) => {
     return product.expiration_date
@@ -379,8 +116,7 @@ export function SmartExternalDeliveryRow({
                   onChange={(value) => {
                     field.onChange(value);
                     onProductSelectOpened?.();
-                    resetItemFormFields(form, index);
-                    setIsCreatingNew(false);
+                    resetFields();
                   }}
                   placeholder={t("select_product")}
                   className="w-full min-w-[180px]"
@@ -395,7 +131,7 @@ export function SmartExternalDeliveryRow({
         />
       </TableCell>
 
-      {/* Batch Number - Combined Selector + Input */}
+      {/* Batch Number */}
       <TableCell className="align-top p-2 pb-4!">
         <Popover open={batchSelectorOpen} onOpenChange={setBatchSelectorOpen}>
           <PopoverTrigger asChild>
@@ -409,9 +145,8 @@ export function SmartExternalDeliveryRow({
               <Input
                 value={batchNumber || ""}
                 onChange={(e) => {
-                  form.setValue(`items.${index}.batch_number`, e.target.value);
+                  setField("batch_number", e.target.value);
                   markAsEdited();
-                  // Keep popover open while typing for suggestions
                   if (!batchSelectorOpen && e.target.value) {
                     setBatchSelectorOpen(true);
                   }
@@ -433,7 +168,6 @@ export function SmartExternalDeliveryRow({
           <PopoverContent className="w-[320px] p-0" align="start">
             <Command>
               <CommandList className="max-h-[250px]">
-                {/* Create new option - always show if there's input */}
                 {batchNumber && (
                   <CommandGroup>
                     <CommandItem
@@ -541,7 +275,7 @@ export function SmartExternalDeliveryRow({
         />
       </TableCell>
 
-      {/* Category - Charge Item Definition Category */}
+      {/* Category */}
       <TableCell className="align-top p-2 text-center">
         {needsCategorySelection ? (
           <ResourceCategoryPicker
@@ -549,10 +283,7 @@ export function SmartExternalDeliveryRow({
             resourceType={ResourceCategoryResourceType.charge_item_definition}
             value={chargeItemCategory}
             onValueChange={(category) => {
-              form.setValue(
-                getItemFieldPath(index, "charge_item_category"),
-                category?.slug || "",
-              );
+              setField("charge_item_category", category?.slug || "");
             }}
             placeholder={t("select_category")}
             className="w-full min-w-[140px]"
@@ -578,10 +309,7 @@ export function SmartExternalDeliveryRow({
               value={unitPrice || ""}
               placeholder="0.00"
               onChange={(e) => {
-                form.setValue(
-                  `items.${index}.unit_price`,
-                  parseFloat(e.target.value) || 0,
-                );
+                setField("unit_price", parseFloat(e.target.value) || 0);
                 markAsEdited();
               }}
               disabled={!productKnowledge || isTaxInclusive}
@@ -595,10 +323,7 @@ export function SmartExternalDeliveryRow({
             <Checkbox
               checked={isTaxInclusive || false}
               onCheckedChange={(checked) => {
-                form.setValue(
-                  getItemFieldPath(index, "is_tax_inclusive"),
-                  !!checked,
-                );
+                setField("is_tax_inclusive", !!checked);
                 markAsEdited();
               }}
               disabled={!productKnowledge}
@@ -629,24 +354,10 @@ export function SmartExternalDeliveryRow({
                 value={currentValue?.amount || ""}
                 placeholder="0.00"
                 onChange={(e) => {
-                  const newValue = parseFloat(e.target.value) || 0;
-                  const newComponent: MonetaryComponent = {
-                    monetary_component_type:
-                      MonetaryComponentType.informational,
-                    amount: newValue.toString(),
-                    code: code,
-                  };
-                  const updated: MonetaryComponent[] = [
-                    ...(informationalComponents || []).filter(
-                      (c) => c.code?.code !== code.code,
-                    ),
-                    ...(newValue > 0 ? [newComponent] : []),
-                  ];
-                  form.setValue(
-                    getItemFieldPath(index, "informational_components"),
-                    updated,
+                  updateInformationalComponent(
+                    code,
+                    parseFloat(e.target.value) || 0,
                   );
-                  markAsEdited();
                 }}
                 disabled={!productKnowledge}
                 className="w-[90px] text-right"
@@ -685,10 +396,7 @@ export function SmartExternalDeliveryRow({
           components={availableTaxes}
           selectedComponents={taxComponents || []}
           onSelectionChange={(components) => {
-            form.setValue(
-              getItemFieldPath(index, "tax_components"),
-              components,
-            );
+            setField("tax_components", components);
             markAsEdited();
           }}
           disabled={!productKnowledge}
@@ -703,10 +411,7 @@ export function SmartExternalDeliveryRow({
           components={availableDiscounts}
           selectedComponents={discountComponents || []}
           onSelectionChange={(components) => {
-            form.setValue(
-              getItemFieldPath(index, "discount_components"),
-              components,
-            );
+            setField("discount_components", components);
             markAsEdited();
           }}
           disabled={!productKnowledge}

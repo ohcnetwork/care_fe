@@ -417,6 +417,7 @@ export function AddSupplyDeliveryForm({
           expiration_date: item.expiry_date!,
           product_knowledge: item.product_knowledge.slug,
           charge_item_definition: chargeItemSlug,
+          extensions: {},
         };
 
         const newProduct = await createProduct(productCreate);
@@ -444,6 +445,7 @@ export function AddSupplyDeliveryForm({
       origin: origin,
       destination: destination,
       order: deliveryOrderId,
+      extensions: {},
     };
 
     await createSupplyDelivery(deliveryPayload);
@@ -719,7 +721,6 @@ export function AddSupplyDeliveryForm({
                               key={field.id}
                               form={form}
                               index={index}
-                              facilityId={facilityId}
                               informationalCodes={informationalCodes}
                               autoOpenProductSelect={
                                 newlyAddedRowIndex === index
@@ -736,6 +737,14 @@ export function AddSupplyDeliveryForm({
                 </div>
 
                 <div className="flex flex-row gap-2 mt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleAddAnotherItem}
+                  >
+                    <PlusCircle className="mr-2 size-4" />
+                    {t("add_another")}
+                  </Button>
                   {supplyRequests?.results?.length &&
                     supplyRequests?.results?.length > 0 && (
                       <Button
