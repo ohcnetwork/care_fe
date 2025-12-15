@@ -51,7 +51,6 @@ import {
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
-  ChargeItemDefinitionBase,
   ChargeItemDefinitionCreate,
   ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
@@ -91,7 +90,7 @@ const supplyDeliveryItemSchema = z.object({
   _is_inward_stock: z.boolean().optional(),
   batch_number: z.string().optional(),
   expiry_date: z.string().optional(),
-  charge_item_definition: z.custom<ChargeItemDefinitionBase>().optional(),
+  charge_item_definition: z.object({ slug: z.string() }).optional(),
   unit_price: z.number().optional(),
   is_manually_edited: z.boolean().optional(),
   is_tax_inclusive: z.boolean().optional(),
@@ -438,7 +437,7 @@ export function AddSupplyDeliveryForm({
         // This ensures on retry: we reuse our ChargeItem but still create Product if needed
         form.setValue(`items.${index}.charge_item_definition`, {
           slug: chargeItemSlug,
-        } as ChargeItemDefinitionBase);
+        });
         form.setValue(`items.${index}.is_manually_edited`, false);
       }
 
@@ -474,8 +473,7 @@ export function AddSupplyDeliveryForm({
       supplied_item_quantity: item.supplied_item_quantity,
       ...(origin
         ? { supplied_inventory_item: item.supplied_inventory_item }
-        : {}),
-      supplied_item: productId,
+        : { supplied_item: productId }),
       supply_request: item.supply_request?.id,
       origin: origin,
       destination: destination,

@@ -302,9 +302,9 @@ export function SmartExternalDeliveryRow({
             <Input
               type="number"
               min={0}
-              step="0.01"
+              step="1"
               value={unitPrice || ""}
-              placeholder="0.00"
+              placeholder="0"
               onChange={(e) => {
                 setField("unit_price", parseFloat(e.target.value) || 0);
                 markAsEdited();
@@ -347,9 +347,9 @@ export function SmartExternalDeliveryRow({
               <Input
                 type="number"
                 min={0}
-                step="0.01"
+                step="1"
                 value={currentValue?.amount || ""}
-                placeholder="0.00"
+                placeholder="0"
                 onChange={(e) => {
                   updateInformationalComponent(
                     code,
