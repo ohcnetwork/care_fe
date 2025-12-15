@@ -10,7 +10,7 @@
 
 @import "tw-animate-css";
 
-@config '../../tailwind.config.js';
+@config "../../tailwind.config.js";
 
 /* Custom animations for the SessionExpired component */
 @keyframes ping-slow {

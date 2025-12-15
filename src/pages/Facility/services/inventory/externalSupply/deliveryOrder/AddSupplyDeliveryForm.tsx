@@ -11,6 +11,7 @@ import { z } from "zod";
 import careConfig from "@/../care.config";
 import { cn } from "@/lib/utils";
 
+import { DisablingCover } from "@/components/Common/DisablingCover";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -541,275 +542,236 @@ export function AddSupplyDeliveryForm({
 
   return (
     <>
-      <Card className="bg-gray-50 py-4 rounded-md">
-        <CardContent className="space-y-4 ">
-          {fields.length > 0 ? (
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="supplied_item_type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("item_type")}</FormLabel>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            value={field.value}
-                            className="flex flex-col sm:flex-row gap-2"
-                          >
-                            {Object.values(SupplyDeliveryType).map((type) => (
-                              <div
-                                key={type}
-                                className={cn(
-                                  "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
-                                  field.value === type &&
-                                    "border-primary bg-primary/10",
-                                )}
-                              >
-                                <RadioGroupItem value={type} id={type} />
-                                <Label htmlFor={type}>{t(type)}</Label>
-                              </div>
-                            ))}
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="rounded-md border border-gray-200 bg-white shadow overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader className="bg-gray-100">
-                        <TableRow className="divide-x divide-gray-200">
-                          <TableHead className="min-w-[180px] text-xs font-semibold">
-                            {t("product")}
-                          </TableHead>
-                          {origin ? (
-                            <>
-                              <TableHead className="text-xs font-semibold">
-                                {t("inventory_item")}
-                              </TableHead>
-                              <TableHead className="text-xs font-semibold">
-                                {t("quantity")}
-                              </TableHead>
-                            </>
-                          ) : (
-                            <>
-                              <TableHead className="min-w-[140px] text-xs font-semibold">
-                                {t("batch")}
-                              </TableHead>
-                              <TableHead className="min-w-[130px] text-xs font-semibold">
-                                {t("expiry")}
-                              </TableHead>
-                              <TableHead className="min-w-[140px] text-xs font-semibold text-center">
-                                {t("category")}
-                              </TableHead>
-                              <TableHead className="min-w-[100px] text-xs font-semibold">
-                                {t("base_price")}
-                              </TableHead>
-                              {informationalCodes.map((code) => (
-                                <TableHead
-                                  key={code.code}
-                                  className="min-w-[100px] text-xs font-semibold"
-                                >
-                                  {code.display}
-                                </TableHead>
-                              ))}
-                              <TableHead className="min-w-[70px] text-xs font-semibold">
-                                {t("qty")}
-                              </TableHead>
-                              <TableHead className="min-w-[120px] text-xs font-semibold">
-                                {t("tax")}
-                              </TableHead>
-                            </>
-                          )}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {fields.map((field, index) =>
-                          origin ? (
-                            <TableRow
-                              key={field.id}
-                              className="divide-x divide-gray-200"
+      <DisablingCover disabled={isProcessing} message={t("saving")}>
+        <Card className="bg-gray-50 py-4 rounded-md">
+          <CardContent className="space-y-4 ">
+            {fields.length > 0 ? (
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="supplied_item_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("item_type")}</FormLabel>
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              value={field.value}
+                              className="flex flex-col sm:flex-row gap-2"
                             >
-                              <TableCell className="align-top p-2">
-                                <FormField
-                                  control={form.control}
-                                  name={`items.${index}.product_knowledge`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormControl>
-                                        <ProductKnowledgeSelect
-                                          value={field.value}
-                                          onChange={(productKnowledge) => {
-                                            field.onChange(productKnowledge);
-                                            setNewlyAddedRowIndex(null);
-                                            // Reset inventory item when product changes
-                                            form.setValue(
-                                              `items.${index}.supplied_inventory_item`,
-                                              "",
-                                            );
-                                          }}
-                                          placeholder={t("select_product")}
-                                          className="w-full"
-                                          disableFavorites
-                                          hideClearButton
-                                          defaultOpen={
-                                            newlyAddedRowIndex === index
-                                          }
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
+                              {Object.values(SupplyDeliveryType).map((type) => (
+                                <div
+                                  key={type}
+                                  className={cn(
+                                    "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
+                                    field.value === type &&
+                                      "border-primary bg-primary/10",
                                   )}
-                                />
-                              </TableCell>
-                              <TableCell className="align-top p-2">
-                                <FormField
-                                  control={form.control}
-                                  name={`items.${index}.supplied_inventory_item`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormControl>
-                                        <StockLotSelector
-                                          selectedLots={
-                                            field.value
-                                              ? [
-                                                  {
-                                                    selectedInventoryId:
-                                                      field.value,
-                                                    quantity: 1,
-                                                  },
-                                                ]
-                                              : []
-                                          }
-                                          onLotSelectionChange={(lots) =>
-                                            field.onChange(
-                                              lots[0]?.selectedInventoryId ||
+                                >
+                                  <RadioGroupItem value={type} id={type} />
+                                  <Label htmlFor={type}>{t(type)}</Label>
+                                </div>
+                              ))}
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="rounded-md border border-gray-200 bg-white shadow overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader className="bg-gray-100">
+                          <TableRow className="divide-x divide-gray-200">
+                            <TableHead className="min-w-[180px] text-xs font-semibold">
+                              {t("product")}
+                            </TableHead>
+                            {origin ? (
+                              <>
+                                <TableHead className="text-xs font-semibold">
+                                  {t("inventory_item")}
+                                </TableHead>
+                                <TableHead className="text-xs font-semibold">
+                                  {t("quantity")}
+                                </TableHead>
+                              </>
+                            ) : (
+                              <>
+                                <TableHead className="min-w-[140px] text-xs font-semibold">
+                                  {t("batch")}
+                                </TableHead>
+                                <TableHead className="min-w-[130px] text-xs font-semibold">
+                                  {t("expiry")}
+                                </TableHead>
+                                <TableHead className="min-w-[140px] text-xs font-semibold text-center">
+                                  {t("category")}
+                                </TableHead>
+                                <TableHead className="min-w-[100px] text-xs font-semibold">
+                                  {t("base_price")}
+                                </TableHead>
+                                {informationalCodes.map((code) => (
+                                  <TableHead
+                                    key={code.code}
+                                    className="min-w-[100px] text-xs font-semibold"
+                                  >
+                                    {code.display}
+                                  </TableHead>
+                                ))}
+                                <TableHead className="min-w-[70px] text-xs font-semibold">
+                                  {t("qty")}
+                                </TableHead>
+                                <TableHead className="min-w-[120px] text-xs font-semibold">
+                                  {t("tax")}
+                                </TableHead>
+                              </>
+                            )}
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {fields.map((field, index) =>
+                            origin ? (
+                              <TableRow
+                                key={field.id}
+                                className="divide-x divide-gray-200"
+                              >
+                                <TableCell className="align-top p-2">
+                                  <FormField
+                                    control={form.control}
+                                    name={`items.${index}.product_knowledge`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <ProductKnowledgeSelect
+                                            value={field.value}
+                                            onChange={(productKnowledge) => {
+                                              field.onChange(productKnowledge);
+                                              setNewlyAddedRowIndex(null);
+                                              // Reset inventory item when product changes
+                                              form.setValue(
+                                                `items.${index}.supplied_inventory_item`,
                                                 "",
-                                            )
-                                          }
-                                          facilityId={facilityId}
-                                          locationId={origin || ""}
-                                          productKnowledge={form.watch(
-                                            `items.${index}.product_knowledge`,
-                                          )}
-                                          enableSearch={true}
-                                          multiSelect={false}
-                                          className="w-full h-9"
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </TableCell>
-                              <TableCell className="align-top p-2">
-                                <FormField
-                                  control={form.control}
-                                  name={`items.${index}.supplied_item_quantity`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormControl>
-                                        <Input
-                                          type="number"
-                                          min={1}
-                                          {...field}
-                                          onChange={(e) =>
-                                            field.onChange(
-                                              parseInt(e.target.value) || 1,
-                                            )
-                                          }
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </TableCell>
-                            </TableRow>
-                          ) : (
-                            <SmartExternalDeliveryRow
-                              key={field.id}
-                              form={form}
-                              index={index}
-                              informationalCodes={informationalCodes}
-                              autoOpenProductSelect={
-                                newlyAddedRowIndex === index
-                              }
-                              onProductSelectOpened={() =>
-                                setNewlyAddedRowIndex(null)
-                              }
-                            />
-                          ),
-                        )}
-                      </TableBody>
-                    </Table>
+                                              );
+                                            }}
+                                            placeholder={t("select_product")}
+                                            className="w-full"
+                                            disableFavorites
+                                            hideClearButton
+                                            defaultOpen={
+                                              newlyAddedRowIndex === index
+                                            }
+                                          />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </TableCell>
+                                <TableCell className="align-top p-2">
+                                  <FormField
+                                    control={form.control}
+                                    name={`items.${index}.supplied_inventory_item`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <StockLotSelector
+                                            selectedLots={
+                                              field.value
+                                                ? [
+                                                    {
+                                                      selectedInventoryId:
+                                                        field.value,
+                                                      quantity: 1,
+                                                    },
+                                                  ]
+                                                : []
+                                            }
+                                            onLotSelectionChange={(lots) =>
+                                              field.onChange(
+                                                lots[0]?.selectedInventoryId ||
+                                                  "",
+                                              )
+                                            }
+                                            facilityId={facilityId}
+                                            locationId={origin || ""}
+                                            productKnowledge={form.watch(
+                                              `items.${index}.product_knowledge`,
+                                            )}
+                                            enableSearch={true}
+                                            multiSelect={false}
+                                            className="w-full h-9"
+                                          />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </TableCell>
+                                <TableCell className="align-top p-2">
+                                  <FormField
+                                    control={form.control}
+                                    name={`items.${index}.supplied_item_quantity`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <Input
+                                            type="number"
+                                            min={1}
+                                            {...field}
+                                            onChange={(e) =>
+                                              field.onChange(
+                                                parseInt(e.target.value) || 1,
+                                              )
+                                            }
+                                          />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              <SmartExternalDeliveryRow
+                                key={field.id}
+                                form={form}
+                                index={index}
+                                informationalCodes={informationalCodes}
+                                autoOpenProductSelect={
+                                  newlyAddedRowIndex === index
+                                }
+                                onProductSelectOpened={() =>
+                                  setNewlyAddedRowIndex(null)
+                                }
+                              />
+                            ),
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex flex-row gap-2 mt-4 items-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleAddAnotherItem}
-                  >
-                    <PlusCircle className="mr-2 size-4" />
-                    {t("add_another")}
-                  </Button>
-                  {supplyRequests?.results?.length &&
-                    supplyRequests?.results?.length > 0 && (
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={loadFromSupplyRequests}
-                      >
-                        {t("load_from_order")} ({supplyRequests?.count}{" "}
-                        {t("items")}
-                        )
-                        <ShortcutBadge actionId="load-from-order" />
-                      </Button>
-                    )}
-                </div>
-
-                <div className="flex justify-between">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isProcessing}
-                    onClick={() => form.reset()}
-                  >
-                    {t("cancel")}
-                  </Button>
-                  <div className="flex space-x-3">
-                    <Button type="submit" disabled={isProcessing}>
-                      {isProcessing ? t("saving") : t("save")}
-                      <ShortcutBadge actionId="submit-action" />
+                  <div className="flex flex-row gap-2 mt-4 items-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddAnotherItem}
+                    >
+                      <PlusCircle className="mr-2 size-4" />
+                      {t("add_another")}
                     </Button>
-                  </div>
-                </div>
-              </form>
-            </Form>
-          ) : (
-            <div className="flex flex-col gap-3 items-center">
-              <h4>{t("add_items_to_delivery")}</h4>
-              <p>{t("add_items_to_delivery_description")}</p>
-              <div className="flex flex-row gap-2 items-center mt-2">
-                {qParams.supplyOrder
-                  ? supplyRequests?.results?.length &&
-                    supplyRequests?.results?.length > 0 && (
-                      <>
+                    {supplyRequests?.results?.length &&
+                      supplyRequests?.results?.length > 0 && (
                         <Button
                           type="button"
-                          variant="outline_primary"
+                          variant="secondary"
                           onClick={loadFromSupplyRequests}
                         >
                           {t("load_from_order")} ({supplyRequests?.count}{" "}
@@ -817,30 +779,71 @@ export function AddSupplyDeliveryForm({
                           )
                           <ShortcutBadge actionId="load-from-order" />
                         </Button>
-                        <p>- {t("or")} -</p>
-                      </>
-                    )
-                  : requestOrders?.results &&
-                    requestOrders.results.length > 0 && (
-                      <>
-                        {renderRequestOrderSelector()}
-                        <p>- {t("or")} -</p>
-                      </>
-                    )}
-                <Button
-                  type="button"
-                  variant="outline_primary"
-                  onClick={() => handleAddAnotherItem()}
-                >
-                  <PlusCircle className="mr-2 size-4" />
-                  {t("add_item")}
-                  <ShortcutBadge actionId="add-item" />
-                </Button>
+                      )}
+                  </div>
+
+                  <div className="flex justify-between">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={isProcessing}
+                      onClick={() => form.reset()}
+                    >
+                      {t("cancel")}
+                    </Button>
+                    <div className="flex space-x-3">
+                      <Button type="submit" disabled={isProcessing}>
+                        {isProcessing ? t("saving") : t("save")}
+                        <ShortcutBadge actionId="submit-action" />
+                      </Button>
+                    </div>
+                  </div>
+                </form>
+              </Form>
+            ) : (
+              <div className="flex flex-col gap-3 items-center">
+                <h4>{t("add_items_to_delivery")}</h4>
+                <p>{t("add_items_to_delivery_description")}</p>
+                <div className="flex flex-row gap-2 items-center mt-2">
+                  {qParams.supplyOrder
+                    ? supplyRequests?.results?.length &&
+                      supplyRequests?.results?.length > 0 && (
+                        <>
+                          <Button
+                            type="button"
+                            variant="outline_primary"
+                            onClick={loadFromSupplyRequests}
+                          >
+                            {t("load_from_order")} ({supplyRequests?.count}{" "}
+                            {t("items")}
+                            )
+                            <ShortcutBadge actionId="load-from-order" />
+                          </Button>
+                          <p>- {t("or")} -</p>
+                        </>
+                      )
+                    : requestOrders?.results &&
+                      requestOrders.results.length > 0 && (
+                        <>
+                          {renderRequestOrderSelector()}
+                          <p>- {t("or")} -</p>
+                        </>
+                      )}
+                  <Button
+                    type="button"
+                    variant="outline_primary"
+                    onClick={() => handleAddAnotherItem()}
+                  >
+                    <PlusCircle className="mr-2 size-4" />
+                    {t("add_item")}
+                    <ShortcutBadge actionId="add-item" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      </DisablingCover>
       {supplyRequests && (
         <Dialog open={isSelectDialogOpen} onOpenChange={setIsSelectDialogOpen}>
           <DialogContent className="sm:max-w-xl">
