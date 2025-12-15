@@ -58,7 +58,7 @@ export const formatName = (
     prefix?: string | null;
     suffix?: string | null;
     username: string;
-  },
+  } | null,
   hidePrefixSuffix: boolean = false,
 ) => {
   if (!user) return "-";

@@ -12,6 +12,7 @@ import {
 import query from "@/Utils/request/query";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
+import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
 
 type PrintQuestionnaireResponseProps = {
   questionnaireResponseId: string;
@@ -54,7 +55,7 @@ export function PrintQuestionnaireResponse({
       encounterId,
       patientId,
     ],
-    queryFn: query(patientApi.getQuestionnaireResponse, {
+    queryFn: query(questionnaireResponseApi.get, {
       pathParams: { patientId, responseId: questionnaireResponseId },
     }),
   });

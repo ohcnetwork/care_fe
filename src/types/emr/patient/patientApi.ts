@@ -1,12 +1,5 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
-import {
-  Observation,
-  ObservationAnalyzeResponse,
-} from "@/types/emr/observation";
-import { Message } from "@/types/notes/messages";
-import { Thread } from "@/types/notes/threads";
-import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 import { UserReadMinimal } from "@/types/user/user";
 
 import {
@@ -55,54 +48,6 @@ export default {
     method: HttpMethod.POST,
     TBody: Type<PatientSearchRetrieveRequest>(),
     TRes: Type<PatientRead>(),
-  },
-
-  // Questionnaire Responses
-  getQuestionnaireResponses: {
-    path: "/api/v1/patient/{patientId}/questionnaire_response/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<QuestionnaireResponse>>(),
-  },
-  getQuestionnaireResponse: {
-    path: "/api/v1/patient/{patientId}/questionnaire_response/{responseId}/",
-    method: HttpMethod.GET,
-    TRes: Type<QuestionnaireResponse>(),
-  },
-
-  // Observations
-  listObservations: {
-    path: "/api/v1/patient/{patientId}/observation/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<Observation>>(),
-  },
-  observationsAnalyse: {
-    path: "/api/v1/patient/{patientId}/observation/analyse/",
-    method: HttpMethod.POST,
-    TRes: Type<ObservationAnalyzeResponse>(),
-  },
-
-  // Notes and Threads
-  listThreads: {
-    path: "/api/v1/patient/{patientId}/thread/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<Thread>>(),
-  },
-  createThread: {
-    path: "/api/v1/patient/{patientId}/thread/",
-    method: HttpMethod.POST,
-    TBody: Type<{ title: string; encounter?: string }>(),
-    TRes: Type<Thread>(),
-  },
-  getMessages: {
-    path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",
-    method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<Message>>(),
-  },
-  postMessage: {
-    path: "/api/v1/patient/{patientId}/thread/{threadId}/note/",
-    method: HttpMethod.POST,
-    TBody: Type<{ message: string }>(),
-    TRes: Type<Message>(),
   },
 
   // User Management
