@@ -3,6 +3,7 @@ import {
   DataTypeFor,
   RequestTypeFor,
 } from "@/components/Questionnaire/structured/types";
+import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 
 import { readFileAsDataURL } from "@/Utils/utils";
 
@@ -61,6 +62,8 @@ export const structuredHandlers: {
         return [];
       }
 
+      const prescriptionIdentifier = `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+
       return [
         {
           url: `/api/v1/patient/${patientId}/medication/request/upsert/`,
@@ -68,6 +71,12 @@ export const structuredHandlers: {
           body: {
             datapoints: medications.map((medication) => ({
               ...medication,
+              ...(!medication.id && {
+                create_prescription: {
+                  status: PrescriptionStatus.active,
+                  alternate_identifier: prescriptionIdentifier,
+                },
+              }),
               note: sanitizeNote(medication.note),
               encounter: encounterId,
               patient: patientId,
@@ -148,21 +157,19 @@ export const structuredHandlers: {
     },
   },
   encounter: {
-    getRequests: async (encounters, { facilityId, patientId, encounterId }) => {
+    getRequests: async (encounters, { facilityId, encounterId }) => {
       if (!encounterId) return [];
       if (!facilityId) {
         throw new Error("Cannot create encounter without a facility");
       }
       return encounters.map((encounter) => {
         const body: RequestTypeFor<"encounter"> = {
-          patient: patientId,
           status: encounter.status,
           encounter_class: encounter.encounter_class,
           period: encounter.period,
           hospitalization: encounter.hospitalization,
           priority: encounter.priority,
           external_identifier: encounter.external_identifier,
-          facility: facilityId,
           discharge_summary_advice: encounter.discharge_summary_advice,
         };
 

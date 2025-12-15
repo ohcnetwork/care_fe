@@ -50,6 +50,8 @@ export interface InvoiceRead extends InvoiceList {
   payment_reconciliations?: PaymentReconciliationRead[];
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
+  total_payments: number;
+  payments: PaymentReconciliationRead[];
 }
 
 export interface InvoiceCancel {
