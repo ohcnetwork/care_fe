@@ -132,6 +132,20 @@ export function AddSupplyDeliveryForm({
   );
   const addNewAfterSaveRef = useRef(false);
 
+  // Default values for a new empty item row
+  const createEmptyItem = useCallback(
+    (): SupplyDeliveryItemValues => ({
+      product_knowledge: {} as ProductKnowledgeBase,
+      supplied_inventory_item: "",
+      supplied_item_quantity: 1,
+      supplied_item: undefined,
+      supply_request: undefined,
+      _is_inward_stock: !origin,
+      is_tax_inclusive: careConfig.inventory.defaultTaxInclusive,
+    }),
+    [origin],
+  );
+
   // Fetch facility data for informational codes
   const { data: facilityData } = useQuery({
     queryKey: ["facility", facilityId],
@@ -161,7 +175,7 @@ export function AddSupplyDeliveryForm({
     },
   });
 
-  const { fields, append } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "items",
   });
@@ -170,40 +184,6 @@ export function AddSupplyDeliveryForm({
     setIsSelectDialogOpen(true);
     handleSelectAll(true);
   };
-
-  const { mutate: upsertDelivery } = useMutation({
-    mutationFn: mutate(supplyDeliveryApi.upsertSupplyDelivery),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
-      setIsProcessing(false);
-
-      toast.success(t("supply_delivery_created"));
-
-      if (addNewAfterSaveRef.current) {
-        // Reset form but add a new empty item immediately
-        form.reset();
-        addNewAfterSaveRef.current = false;
-        // Append new item and set index to 0 (since form was just reset)
-        append({
-          product_knowledge: {} as ProductKnowledgeBase,
-          supplied_inventory_item: "",
-          supplied_item_quantity: 1,
-          supplied_item: undefined,
-          supply_request: undefined,
-          _is_inward_stock: !origin,
-          is_tax_inclusive: careConfig.inventory.defaultTaxInclusive,
-        });
-        setNewlyAddedRowIndex(0);
-      } else {
-        onSuccess();
-        form.reset();
-      }
-    },
-    onError: (_error) => {
-      setIsProcessing(false);
-      toast.error(t("error_creating_supply_delivery"));
-    },
-  });
 
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
@@ -245,31 +225,74 @@ export function AddSupplyDeliveryForm({
 
   const handleAddAnotherItem = () => {
     const newIndex = fields.length;
-    append({
-      product_knowledge: {} as ProductKnowledgeBase,
-      supplied_inventory_item: "",
-      supplied_item_quantity: 1,
-      supplied_item: undefined,
-      supply_request: undefined,
-      _is_inward_stock: !origin,
-      is_tax_inclusive: careConfig.inventory.defaultTaxInclusive,
-    });
+    append(createEmptyItem());
     setNewlyAddedRowIndex(newIndex);
   };
 
   const { mutateAsync: createProduct } = useMutation({
     mutationFn: mutate(productApi.createProduct, {
       pathParams: { facilityId },
-      silent: true,
     }),
   });
 
   const { mutateAsync: createChargeItemDefinition } = useMutation({
     mutationFn: mutate(chargeItemDefinitionApi.createChargeItemDefinition, {
       pathParams: { facilityId },
-      silent: true,
     }),
   });
+
+  const { mutateAsync: createSupplyDelivery } = useMutation({
+    mutationFn: mutate(supplyDeliveryApi.createSupplyDelivery),
+  });
+
+  /**
+   * Build price components array from item's monetary components
+   */
+  const buildPriceComponents = (
+    item: SupplyDeliveryFormValues["items"][number],
+  ): MonetaryComponent[] => {
+    const components: MonetaryComponent[] = [];
+
+    // Base price component
+    if (item.unit_price !== undefined) {
+      components.push({
+        monetary_component_type: MonetaryComponentType.base,
+        amount: item.unit_price.toString(),
+      });
+    }
+
+    // Informational components (MRP, Purchase Price, etc.)
+    if (item.informational_components?.length) {
+      components.push(
+        ...item.informational_components.map((ic) => ({
+          ...ic,
+          monetary_component_type: MonetaryComponentType.informational,
+        })),
+      );
+    }
+
+    // Tax components
+    if (item.tax_components?.length) {
+      components.push(
+        ...item.tax_components.map((tc) => ({
+          ...tc,
+          monetary_component_type: MonetaryComponentType.tax,
+        })),
+      );
+    }
+
+    // Discount components
+    if (item.discount_components?.length) {
+      components.push(
+        ...item.discount_components.map((dc) => ({
+          ...dc,
+          monetary_component_type: MonetaryComponentType.discount,
+        })),
+      );
+    }
+
+    return components;
+  };
 
   const validateFormWithToasts = useCallback(
     (data: SupplyDeliveryFormValues) => {
@@ -326,145 +349,165 @@ export function AddSupplyDeliveryForm({
     [origin, t],
   );
 
+  async function processRowItem(
+    item: SupplyDeliveryFormValues["items"][number],
+    index: number,
+    suppliedItemType: SupplyDeliveryType,
+  ) {
+    let productId = item.supplied_item?.id;
+    let chargeItemSlug = item.charge_item_definition?.slug;
+
+    // Create ChargeItemDefinition and Product for external supply (no origin)
+    if (!origin && (!productId || item.is_manually_edited)) {
+      // If is_manually_edited is true, we're creating NEW entities
+      // Any existing IDs are from a reference product selection, not our creation
+      // Clear them so we create fresh ones (but only on first attempt)
+      if (item.is_manually_edited) {
+        productId = undefined;
+        chargeItemSlug = undefined;
+      }
+
+      // Only create ChargeItemDefinition if we don't already have one from our creation
+      if (!chargeItemSlug) {
+        const category = item.charge_item_category;
+        if (!category) {
+          throw new Error(
+            t("charge_item_category_required_for_item", {
+              item: item.product_knowledge.name,
+            }),
+          );
+        }
+
+        const priceComponents = buildPriceComponents(item);
+        const chargeItemCreate: ChargeItemDefinitionCreate = {
+          slug_value: crypto.randomUUID().replace(/-/g, "").substring(0, 25),
+          category,
+          title: `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
+          status: ChargeItemDefinitionStatus.active,
+          price_components:
+            priceComponents.length > 0
+              ? priceComponents
+              : [
+                  {
+                    monetary_component_type: MonetaryComponentType.base,
+                    amount: "0",
+                  },
+                ],
+        };
+
+        const newChargeItem =
+          await createChargeItemDefinition(chargeItemCreate);
+        chargeItemSlug = newChargeItem.slug;
+
+        // Persist to form state and mark as no longer manually edited
+        // This ensures on retry: we reuse our ChargeItem but still create Product if needed
+        form.setValue(`items.${index}.charge_item_definition`, {
+          slug: chargeItemSlug,
+        } as ChargeItemDefinitionBase);
+        form.setValue(`items.${index}.is_manually_edited`, false);
+      }
+
+      // Only create Product if we don't already have one from our creation
+      if (!productId) {
+        const productCreate: ProductCreate = {
+          status: ProductStatusOptions.active,
+          batch: {
+            lot_number: item.batch_number!,
+          },
+          expiration_date: item.expiry_date!,
+          product_knowledge: item.product_knowledge.slug,
+          charge_item_definition: chargeItemSlug,
+        };
+
+        const newProduct = await createProduct(productCreate);
+        productId = newProduct.id;
+
+        // Immediately persist Product to form state
+        // So if Delivery fails, we won't recreate it on retry
+        form.setValue(`items.${index}.supplied_item`, {
+          id: productId,
+        } as ProductRead);
+      }
+    }
+
+    // Create the SupplyDelivery for this item
+    const deliveryPayload = {
+      status: SupplyDeliveryStatus.in_progress,
+      supplied_item_type: suppliedItemType,
+      supplied_item_condition: SupplyDeliveryCondition.normal,
+      supplied_item_quantity: item.supplied_item_quantity,
+      ...(origin
+        ? { supplied_inventory_item: item.supplied_inventory_item }
+        : {}),
+      supplied_item: productId,
+      supply_request: item.supply_request?.id,
+      origin: origin,
+      destination: destination,
+      order: deliveryOrderId,
+    };
+
+    await createSupplyDelivery(deliveryPayload);
+  }
+
   async function onSubmit(data: SupplyDeliveryFormValues) {
     if (!validateFormWithToasts(data)) {
       return;
     }
 
     setIsProcessing(true);
-    try {
-      const processedItems = await Promise.all(
-        data.items.map(
-          async (item: SupplyDeliveryFormValues["items"][number]) => {
-            let productId = item.supplied_item?.id;
-            let chargeItemSlug = item.charge_item_definition?.slug;
 
-            if (!origin && (!productId || item.is_manually_edited)) {
-              // Build price components array with all monetary components
-              const priceComponents: MonetaryComponent[] = [];
+    // Process all rows in parallel
+    const results = await Promise.allSettled(
+      data.items.map((item, index) =>
+        processRowItem(item, index, data.supplied_item_type).then(() => index),
+      ),
+    );
 
-              // Base price component
-              if (item.unit_price !== undefined) {
-                priceComponents.push({
-                  monetary_component_type: MonetaryComponentType.base,
-                  amount: item.unit_price.toString(),
-                });
-              }
+    // Separate successful and failed results
+    const successfulIndices = results
+      .map((result) => (result.status === "fulfilled" ? result.value : null))
+      .filter((index): index is number => index !== null);
 
-              // Informational components (MRP, Purchase Price, etc. - from facility config)
-              const informationalComponents = item.informational_components;
-              if (informationalComponents?.length) {
-                priceComponents.push(
-                  ...informationalComponents.map((ic) => ({
-                    ...ic,
-                    monetary_component_type:
-                      MonetaryComponentType.informational,
-                  })),
-                );
-              }
+    const failedCount = results.filter(
+      (result) => result.status === "rejected",
+    ).length;
 
-              // Tax components
-              const taxComponents = item.tax_components;
-              if (taxComponents?.length) {
-                priceComponents.push(
-                  ...taxComponents.map((tc) => ({
-                    ...tc,
-                    monetary_component_type: MonetaryComponentType.tax,
-                  })),
-                );
-              }
+    // Remove successful rows from form (in reverse order to maintain correct indices)
+    [...successfulIndices].sort((a, b) => b - a).forEach((idx) => remove(idx));
 
-              // Discount components
-              const discountComponents = item.discount_components;
-              if (discountComponents?.length) {
-                priceComponents.push(
-                  ...discountComponents.map((dc) => ({
-                    ...dc,
-                    monetary_component_type: MonetaryComponentType.discount,
-                  })),
-                );
-              }
+    // Invalidate queries if any items were successful
+    if (successfulIndices.length > 0) {
+      queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
+      queryClient.invalidateQueries({ queryKey: ["products", facilityId] });
+      queryClient.invalidateQueries({
+        queryKey: ["chargeItemDefinitions", facilityId],
+      });
+    }
 
-              // Create new Charge Item Definition with short unique slug (max 25 chars)
-              const shortId = crypto
-                .randomUUID()
-                .replace(/-/g, "")
-                .substring(0, 25);
+    setIsProcessing(false);
 
-              // Use user-selected charge item category (separate from product knowledge category)
-              const category = item.charge_item_category;
-              if (!category) {
-                throw new Error(
-                  t("charge_item_category_required_for_item", {
-                    item: item.product_knowledge.name,
-                  }),
-                );
-              }
-
-              const chargeItemCreate: ChargeItemDefinitionCreate = {
-                slug_value: shortId,
-                category: category,
-                title: `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
-                status: ChargeItemDefinitionStatus.active,
-                price_components:
-                  priceComponents.length > 0
-                    ? priceComponents
-                    : [
-                        {
-                          monetary_component_type: MonetaryComponentType.base,
-                          amount: "0",
-                        },
-                      ],
-              };
-
-              const newChargeItem =
-                await createChargeItemDefinition(chargeItemCreate);
-              chargeItemSlug = newChargeItem.slug;
-
-              // Create Product
-              const productCreate: ProductCreate = {
-                status: ProductStatusOptions.active,
-                batch: {
-                  lot_number: item.batch_number!,
-                },
-                expiration_date: item.expiry_date!,
-                product_knowledge: item.product_knowledge.slug,
-                charge_item_definition: chargeItemSlug,
-              };
-
-              const newProduct = await createProduct(productCreate);
-              productId = newProduct.id;
-            }
-
-            return {
-              status: SupplyDeliveryStatus.in_progress,
-              supplied_item_type: data.supplied_item_type,
-              supplied_item_condition: SupplyDeliveryCondition.normal,
-              supplied_item_quantity: item.supplied_item_quantity,
-              ...(origin
-                ? { supplied_inventory_item: item.supplied_inventory_item }
-                : {}),
-              supplied_item: productId,
-              supply_request: item.supply_request?.id,
-              origin: origin,
-              destination: destination,
-              order: deliveryOrderId,
-            };
-          },
-        ),
+    // Handle completion based on success/failure
+    if (failedCount === 0) {
+      // All items succeeded
+      toast.success(
+        t("items_created_successfully", { count: successfulIndices.length }),
       );
 
-      upsertDelivery({
-        datapoints: processedItems,
-      });
-    } catch (error) {
-      console.error(error);
-      setIsProcessing(false);
-      if (error instanceof Error) {
-        toast.error(error.message);
+      if (addNewAfterSaveRef.current) {
+        // Reset form and add a new empty row
+        form.reset();
+        addNewAfterSaveRef.current = false;
+        append(createEmptyItem());
+        setNewlyAddedRowIndex(0);
       } else {
-        toast.error(t("error_processing_items"));
+        onSuccess();
+        form.reset();
       }
+    } else if (successfulIndices.length > 0) {
+      // Partial success - show success count but don't close form
+      toast.success(
+        t("items_created_successfully", { count: successfulIndices.length }),
+      );
     }
   }
 

@@ -2669,6 +2669,8 @@
   "item_type": "Item Type",
   "items": "Items",
   "items_added_current_location_warning": "You’ve already added items for <strong>{{location}}</strong>, but haven’t marked them as dispensed. <br> <br> Switching to a new location will discard your current list.",
+  "items_created_successfully_one": "{{count}} item created successfully",
+  "items_created_successfully_other": "{{count}} items created successfully",
   "items_dispensed_successfully": "Items dispensed successfully",
   "items_section": "Items",
   "items_selected": "items selected",
