@@ -230,7 +230,7 @@ const careConfig = {
    */
   inventory: {
     defaultTaxInclusive: booleanFromString(
-      "REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE",
+      env.REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE,
       false,
     ),
   },
