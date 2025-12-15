@@ -84,6 +84,7 @@ const envSchema = z
     REACT_PAYMENT_LOCATION_REQUIRED: booleanAsStringSchema.optional(),
     REACT_ENCOUNTER_DEFAULT_DATE_FILTER: numberAsString.optional(),
     REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE: booleanAsStringSchema.optional(),
+    REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE: booleanAsStringSchema.optional(),
     REACT_OBSERVATION_PLOTS_CONFIG_URL: z.string().url().optional(),
     REACT_DEFAULT_COUNTRY: z.string().optional(),
     REACT_DEFAULT_COUNTRY_NAME: z.string().optional(),
