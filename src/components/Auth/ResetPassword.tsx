@@ -20,33 +20,45 @@ interface ResetPasswordProps {
   token: string;
 }
 
+interface ResetPasswordForm {
+  password: string;
+  confirm: string;
+  token?: string;
+}
+
+interface ResetPasswordFormErrors {
+  password?: string | null;
+  confirm?: string | null;
+  [key: string]: string | null | undefined;
+}
+
 const ResetPassword = (props: ResetPasswordProps) => {
-  const initForm: any = {
+  const initForm: ResetPasswordForm = {
     password: "",
     confirm: "",
   };
 
-  const initErr: any = {};
-  const [form, setForm] = useState(initForm);
-  const [errors, setErrors] = useState(initErr);
+  const initErr: ResetPasswordFormErrors = {};
+  const [form, setForm] = useState<ResetPasswordForm>(initForm);
+  const [errors, setErrors] = useState<ResetPasswordFormErrors>(initErr);
   const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
 
   const { t } = useTranslation();
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
-    const fieldValue = Object.assign({}, form);
-    const errorField = Object.assign({}, errors);
-    if (errorField[name]) {
-      errorField[name] = null;
+    const fieldValue = { ...form };
+    const errorField = { ...errors };
+    if (errorField[name as keyof ResetPasswordFormErrors]) {
+      errorField[name as keyof ResetPasswordFormErrors] = null;
       setErrors(errorField);
     }
-    fieldValue[name] = value;
+    (fieldValue as Record<string, string>)[name] = value;
     setForm(fieldValue);
   };
 
-  const validateData = () => {
+  const validateData = (): ResetPasswordForm | false => {
     let hasError = false;
-    const err = Object.assign({}, errors);
+    const err: ResetPasswordFormErrors = { ...errors };
     if (form.password !== form.confirm) {
       hasError = true;
       err.confirm = t("password_mismatch");
@@ -57,12 +69,14 @@ const ResetPassword = (props: ResetPasswordProps) => {
       err.password = t("invalid_password");
     }
 
-    Object.keys(form).forEach((key) => {
-      if (!form[key]) {
-        hasError = true;
-        err[key] = t("field_required");
-      }
-    });
+    if (!form.password) {
+      hasError = true;
+      err.password = t("field_required");
+    }
+    if (!form.confirm) {
+      hasError = true;
+      err.confirm = t("field_required");
+    }
     if (hasError) {
       setErrors(err);
       return false;
@@ -80,17 +94,18 @@ const ResetPassword = (props: ResetPasswordProps) => {
     },
     onError: (error) => {
       if (error.cause) {
-        setErrors(error.cause);
+        setErrors(error.cause as ResetPasswordFormErrors);
       }
     },
   });
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>,
+  ) => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
-      valid.token = props.token;
-      resetPassword(valid);
+      resetPassword({ ...valid, token: props.token });
     }
   };
 

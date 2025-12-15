@@ -42,7 +42,6 @@ import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
-import { invalidateAllLocationCaches } from "@/atoms/location-atom";
 import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/otp/otp";
 import otpApi from "@/types/otp/otpApi";
@@ -76,6 +75,18 @@ interface LoginProps {
   forgot?: boolean;
 }
 
+interface LoginForm {
+  username: string;
+  password: string;
+  "g-recaptcha-response"?: string;
+}
+
+interface LoginFormErrors {
+  username?: string | null;
+  password?: string | null;
+  [key: string]: string | null | undefined;
+}
+
 const Login = (props: LoginProps) => {
   const { signIn, patientLogin, isAuthenticating } = useAuthContext();
   const {
@@ -87,16 +98,16 @@ const Login = (props: LoginProps) => {
     resendOtpTimeout,
     disablePatientLogin,
   } = careConfig;
-  const initForm: any = {
+  const initForm: LoginForm = {
     username: "",
     password: "",
   };
   const { forgot } = props;
   const [params, setQueryParams] = useQueryParams();
   const { mode } = params;
-  const initErr: any = {};
-  const [form, setForm] = useState(initForm);
-  const [errors, setErrors] = useState(initErr);
+  const initErr: LoginFormErrors = {};
+  const [form, setForm] = useState<LoginForm>(initForm);
+  const [errors, setErrors] = useState<LoginFormErrors>(initErr);
   const [isCaptchaEnabled, setCaptcha] = useState(false);
   const { t } = useTranslation();
   const [forgotPassword, setForgotPassword] = useState(forgot);
@@ -134,7 +145,7 @@ const Login = (props: LoginProps) => {
       setOtpError("");
       toast.success(t("send_otp_success"));
     },
-    onError: (error: any) => {
+    onError: (error: Error & { data?: OtpError[] }) => {
       const errors = error?.data || [];
       if (Array.isArray(errors) && errors.length > 0) {
         const firstError = errors[0] as OtpError;
@@ -166,7 +177,8 @@ const Login = (props: LoginProps) => {
         patientLogin(tokenData, `/patient/home`);
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error & { cause?: { errors?: OtpValidationError[] } }) => {
+      console.log(error);
       let errorMessage = "invalid_otp";
       if (
         error.cause &&
@@ -196,36 +208,37 @@ const Login = (props: LoginProps) => {
   });
 
   // Login form validation
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
-    const fieldValue = Object.assign({}, form);
-    const errorField = Object.assign({}, errors);
-    if (errorField[name]) {
-      errorField[name] = null;
+    const fieldValue = { ...form };
+    const errorField = { ...errors };
+    if (errorField[name as keyof LoginFormErrors]) {
+      errorField[name as keyof LoginFormErrors] = null;
       setErrors(errorField);
     }
-    fieldValue[name] = value;
+    (fieldValue as Record<string, string>)[name] = value;
     if (name === "username") {
-      fieldValue[name] = value.toLowerCase();
+      fieldValue.username = value.toLowerCase();
     }
     setForm(fieldValue);
   };
 
-  const validateData = () => {
+  const validateData = (): LoginForm | false => {
     let hasError = false;
-    const err = Object.assign({}, errors);
-    Object.keys(form).forEach((key) => {
+    const err: LoginFormErrors = { ...errors };
+    (Object.keys(form) as Array<keyof LoginForm>).forEach((key) => {
+      const value = form[key];
       if (
-        typeof form[key] === "string" &&
+        typeof value === "string" &&
         key !== "password" &&
-        key !== "confirm"
+        key !== "g-recaptcha-response"
       ) {
-        if (!form[key].match(/\w/)) {
+        if (!value.match(/\w/)) {
           hasError = true;
           err[key] = "field_required";
         }
       }
-      if (!form[key]) {
+      if (!value) {
         hasError = true;
         err[key] = "field_required";
       }
@@ -244,7 +257,6 @@ const Login = (props: LoginProps) => {
     if (!validated) return;
 
     FiltersCache.invalidateAll();
-    invalidateAllLocationCaches();
     try {
       await signIn(validated);
     } catch (error) {
@@ -283,9 +295,9 @@ const Login = (props: LoginProps) => {
     submitForgetPassword(valid);
   };
 
-  const onCaptchaChange = (value: any) => {
+  const onCaptchaChange = (value: string | null) => {
     if (value && isCaptchaEnabled) {
-      const formCaptcha = { ...form };
+      const formCaptcha: LoginForm = { ...form };
       formCaptcha["g-recaptcha-response"] = value;
       setForm(formCaptcha);
     }
@@ -377,6 +389,7 @@ const Login = (props: LoginProps) => {
                             id="username"
                             name="username"
                             type="text"
+                            data-cy="username"
                             autoComplete="username"
                             value={form.username}
                             onChange={handleChange}
@@ -396,6 +409,7 @@ const Login = (props: LoginProps) => {
                           <PasswordInput
                             id="password"
                             name="password"
+                            data-cy="password"
                             autoComplete="current-password"
                             value={form.password}
                             onChange={handleChange}
@@ -433,6 +447,7 @@ const Login = (props: LoginProps) => {
                           type="submit"
                           className="w-full"
                           variant="primary"
+                          data-cy="submit"
                           disabled={isLoading}
                         >
                           {isLoading ? (
@@ -536,6 +551,7 @@ const Login = (props: LoginProps) => {
                               id="username"
                               name="username"
                               type="text"
+                              data-cy="username"
                               autoComplete="username"
                               value={form.username}
                               onChange={handleChange}
@@ -555,6 +571,7 @@ const Login = (props: LoginProps) => {
                             <PasswordInput
                               id="password"
                               name="password"
+                              data-cy="password"
                               autoComplete="current-password"
                               value={form.password}
                               onChange={handleChange}
@@ -592,6 +609,7 @@ const Login = (props: LoginProps) => {
                             type="submit"
                             className="w-full"
                             variant="primary"
+                            data-cy="submit"
                             disabled={isLoading}
                           >
                             {isLoading ? (
@@ -697,7 +715,6 @@ const Login = (props: LoginProps) => {
                             </Label>
                             <div className="flex justify-center">
                               <InputOTP
-                                id="otp"
                                 value={otp}
                                 maxLength={5}
                                 pattern={REGEXP_ONLY_DIGITS}
