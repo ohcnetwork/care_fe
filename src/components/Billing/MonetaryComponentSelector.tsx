@@ -19,10 +19,12 @@ import { cn } from "@/lib/utils";
 
 import { ConditionForm, Metrics } from "@/types/base/condition/condition";
 import {
-  getComponentValue,
+  formatComponentValue,
+  getComponentNumericValue,
   isComponentSelected,
+  isPercentageBased,
+  isSameComponentCode,
   MonetaryComponent,
-  monetaryComponentIsEqual,
   MonetaryComponentRead,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -56,6 +58,24 @@ export interface MonetaryComponentSelectorProps {
 }
 
 /**
+ * Convert a MonetaryComponentRead to MonetaryComponent for selection
+ */
+function toMonetaryComponent(
+  component: MonetaryComponentRead,
+  type: MonetaryComponentType,
+): MonetaryComponent {
+  return {
+    monetary_component_type: type,
+    code: component.code,
+    factor: isPercentageBased(component) ? component.factor : undefined,
+    amount: isPercentageBased(component)
+      ? undefined
+      : String(component.amount || 0),
+    conditions: [],
+  };
+}
+
+/**
  * Shared component for selecting tax and discount monetary components.
  * Supports both inline (compact) and full display modes.
  */
@@ -75,12 +95,12 @@ export function MonetaryComponentSelector({
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [tempSelected, setTempSelected] = useState<MonetaryComponent[]>([]);
+  const [draftSelection, setDraftSelection] = useState<MonetaryComponent[]>([]);
 
-  // Initialize temp selections when dropdown opens
+  // Initialize draft selection when dropdown opens
   useEffect(() => {
     if (isOpen) {
-      setTempSelected(selectedComponents);
+      setDraftSelection(selectedComponents);
     }
   }, [isOpen, selectedComponents]);
 
@@ -137,9 +157,11 @@ export function MonetaryComponentSelector({
     );
   }, [nonGroupComponents, searchQuery]);
 
-  const handleRadioChange = (groupKey: string, selected: string) => {
-    if (!selected) {
-      setTempSelected((prev) => prev.filter((c) => c.code?.code !== groupKey));
+  const handleRadioChange = (groupKey: string, selectedValue: string) => {
+    if (!selectedValue) {
+      setDraftSelection((prev) =>
+        prev.filter((c) => c.code?.code !== groupKey),
+      );
       return;
     }
 
@@ -147,29 +169,13 @@ export function MonetaryComponentSelector({
     if (!group) return;
 
     const selectedComponent = group.find(
-      (c) => getComponentValue(c).toString() === selected,
+      (c) => getComponentNumericValue(c).toString() === selectedValue,
     );
-
     if (!selectedComponent) return;
 
-    setTempSelected((prev) => {
+    setDraftSelection((prev) => {
       const filtered = prev.filter((c) => c.code?.code !== groupKey);
-      return [
-        ...filtered,
-        {
-          ...selectedComponent,
-          monetary_component_type: type,
-          factor:
-            selectedComponent.factor != null
-              ? selectedComponent.factor
-              : undefined,
-          amount:
-            selectedComponent.factor != null
-              ? undefined
-              : String(selectedComponent.amount || 0),
-          conditions: [],
-        },
-      ];
+      return [...filtered, toMonetaryComponent(selectedComponent, type)];
     });
   };
 
@@ -178,28 +184,19 @@ export function MonetaryComponentSelector({
     checked: boolean,
   ) => {
     if (checked) {
-      setTempSelected((prev) => [
+      setDraftSelection((prev) => [
         ...prev,
-        {
-          ...component,
-          monetary_component_type: type,
-          factor: component.factor != null ? component.factor : undefined,
-          amount:
-            component.factor != null
-              ? undefined
-              : String(component.amount || 0),
-          conditions: [],
-        },
+        toMonetaryComponent(component, type),
       ]);
     } else {
-      setTempSelected((prev) =>
-        prev.filter((c) => !monetaryComponentIsEqual(c, component)),
+      setDraftSelection((prev) =>
+        prev.filter((c) => !isSameComponentCode(c, component)),
       );
     }
   };
 
   const handleDone = () => {
-    onSelectionChange(tempSelected);
+    onSelectionChange(draftSelection);
     setIsOpen(false);
     setSearchQuery("");
   };
@@ -207,12 +204,12 @@ export function MonetaryComponentSelector({
   const handleCancel = () => {
     setIsOpen(false);
     setSearchQuery("");
-    setTempSelected([]);
+    setDraftSelection([]);
   };
 
   const handleRemoveComponent = (component: MonetaryComponent) => {
     onSelectionChange(
-      selectedComponents.filter((c) => !monetaryComponentIsEqual(c, component)),
+      selectedComponents.filter((c) => !isSameComponentCode(c, component)),
     );
   };
 
@@ -221,30 +218,32 @@ export function MonetaryComponentSelector({
   ) => {
     if (Object.keys(groups).length === 0) return null;
 
-    return Object.entries(groups).map(([key, comps]) => {
-      const selectedInGroup = comps.find((c) =>
-        isComponentSelected(c, tempSelected),
+    return Object.entries(groups).map(([groupCode, groupItems]) => {
+      const selectedInGroup = groupItems.find((item) =>
+        isComponentSelected(item, draftSelection),
       );
       const selectedValue = selectedInGroup
-        ? `${getComponentValue(selectedInGroup)}`
+        ? String(getComponentNumericValue(selectedInGroup))
         : "";
 
-      const radioOptions = comps.map((c) => ({
-        label: `${getComponentValue(c)} ${c.factor != null ? "%" : "₹"}`,
-        value: `${getComponentValue(c)}`,
+      const radioOptions = groupItems.map((item) => ({
+        label: formatComponentValue(item),
+        value: String(getComponentNumericValue(item)),
       }));
 
       return (
-        <div key={key} className="flex flex-col gap-2 mb-3">
+        <div key={groupCode} className="flex flex-col gap-2 mb-3">
           <div className="flex items-center gap-2 p-2">
             <Component className="size-4 text-black/80" strokeWidth={1.25} />
             <div className="text-sm font-semibold text-gray-900 uppercase">
-              {key}
+              {groupCode}
             </div>
           </div>
           <RadioInput
             value={selectedValue}
-            onValueChange={(value: string) => handleRadioChange(key, value)}
+            onValueChange={(value: string) =>
+              handleRadioChange(groupCode, value)
+            }
             options={radioOptions}
             className="flex flex-row gap-1 justify-end mr-2"
           />
@@ -257,7 +256,7 @@ export function MonetaryComponentSelector({
     if (listComponents.length === 0) return null;
 
     return listComponents.map((component, idx) => {
-      const isSelected = isComponentSelected(component, tempSelected);
+      const isSelected = isComponentSelected(component, draftSelection);
       return (
         <div
           key={`${component.title}-${component.code?.code || idx}`}
@@ -274,11 +273,8 @@ export function MonetaryComponentSelector({
             <div className="text-sm font-medium text-gray-900">
               {component.code?.display}
             </div>
-            <div className="flex flex-row items-center gap-2">
-              {getComponentValue(component)}
-              <span className="text-gray-500">
-                {component.factor != null ? "%" : "₹"}
-              </span>
+            <div className="text-sm text-gray-600">
+              {formatComponentValue(component)}
             </div>
           </div>
         </div>
@@ -294,10 +290,7 @@ export function MonetaryComponentSelector({
         type === MonetaryComponentType.tax ? t("add_tax") : t("add_discount");
 
       const valuesDisplay = selectedComponents
-        .map((c) => {
-          const value = getComponentValue(c);
-          return c.factor != null ? `${value}%` : `₹${value}`;
-        })
+        .map((c) => formatComponentValue(c))
         .join(", ");
 
       return (
@@ -337,8 +330,7 @@ export function MonetaryComponentSelector({
                   variant="secondary"
                   className="text-[10px] px-1 rounded-sm"
                 >
-                  {c.code?.display} @ {getComponentValue(c)}
-                  {c.factor != null ? "%" : "₹"}
+                  {c.code?.display} @ {formatComponentValue(c)}
                 </Badge>
               ))}
               {selectedComponents.length > 2 && (
@@ -365,21 +357,15 @@ export function MonetaryComponentSelector({
             </span>
           ) : type === MonetaryComponentType.tax ? (
             <>
-              {selectedComponents.slice(0, 3).map((component, idx) => {
-                const value = getComponentValue(component);
-                const suffix = component.factor != null ? "%" : "₹";
-                const display = component.code?.display;
-                return (
-                  <Badge
-                    key={`${component.code?.code}-${idx}`}
-                    variant="secondary"
-                    className="text-xs p-1 rounded-sm"
-                  >
-                    {display} @ {value}
-                    {suffix}
-                  </Badge>
-                );
-              })}
+              {selectedComponents.slice(0, 3).map((component, idx) => (
+                <Badge
+                  key={`${component.code?.code}-${idx}`}
+                  variant="secondary"
+                  className="text-xs p-1 rounded-sm"
+                >
+                  {component.code?.display} @ {formatComponentValue(component)}
+                </Badge>
+              ))}
               {selectedComponents.length > 3 && (
                 <Badge variant="secondary" className="text-xs">
                   +{selectedComponents.length - 3} {t("more")}
@@ -411,7 +397,7 @@ export function MonetaryComponentSelector({
 
             {selectedComponents.map((component, idx) => {
               const componentRead = components.find((c) =>
-                monetaryComponentIsEqual(c, component),
+                isSameComponentCode(c, component),
               );
 
               return (
@@ -423,8 +409,7 @@ export function MonetaryComponentSelector({
                     <div>
                       <div className="font-medium text-md">
                         {idx + 1}. {componentRead?.code?.display} -{" "}
-                        {getComponentValue(component)}
-                        {component.factor != null ? "%" : "₹"}
+                        {formatComponentValue(component)}
                       </div>
                     </div>
                     <Button

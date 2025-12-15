@@ -32,51 +32,73 @@ export const MonetaryComponentOrder = {
 // Utility functions for monetary component operations
 
 /**
- * Compare two monetary components for equality based on type and code
+ * Check if component uses percentage-based factor (vs fixed amount)
  */
-export function monetaryComponentIsEqual<T extends MonetaryComponent>(
-  a: T,
-  b: T,
-): boolean {
-  return (
-    a.monetary_component_type === b.monetary_component_type &&
-    a.code?.code === b.code?.code &&
-    a.code?.system === b.code?.system
-  );
+export function isPercentageBased(component: MonetaryComponent): boolean {
+  return component.factor != null;
 }
 
 /**
- * Get the effective value of a monetary component (factor or amount)
+ * Get the numeric value of a monetary component
+ * Returns the factor (percentage) or parsed amount (fixed)
  */
-export function getComponentValue(
+export function getComponentNumericValue(component: MonetaryComponent): number {
+  if (component.factor != null) {
+    return component.factor;
+  }
+  return parseFloat(component.amount || "0") || 0;
+}
+
+/**
+ * Format component value for display with appropriate suffix
+ */
+export function formatComponentValue(
   component: MonetaryComponent,
-): number | string {
-  return component.factor ?? component.amount ?? 0;
+  currencySymbol = "₹",
+): string {
+  const value = getComponentNumericValue(component);
+  return isPercentageBased(component)
+    ? `${value}%`
+    : `${currencySymbol}${value}`;
 }
 
 /**
- * Check if two components have the same amount or factor value
+ * Compare two monetary components for equality based on code identity
+ * Note: Does not compare values, only identity (code system + code)
  */
-export function isSameAmountOrFactor(
+export function isSameComponentCode(
   a: MonetaryComponent,
   b: MonetaryComponent,
 ): boolean {
-  return (
-    (a.factor != null && a.factor === b.factor) ||
-    (a.amount != null && a.amount === b.amount)
-  );
+  return a.code?.code === b.code?.code && a.code?.system === b.code?.system;
 }
 
 /**
- * Check if a component is selected in a list of components
+ * Check if two components have the same value (factor or amount)
+ */
+export function isSameValue(
+  a: MonetaryComponent,
+  b: MonetaryComponent,
+): boolean {
+  if (isPercentageBased(a) && isPercentageBased(b)) {
+    return a.factor === b.factor;
+  }
+  if (!isPercentageBased(a) && !isPercentageBased(b)) {
+    return a.amount === b.amount;
+  }
+  return false;
+}
+
+/**
+ * Check if a component exists in a list with matching code and value
  */
 export function isComponentSelected(
   component: MonetaryComponent,
   selectedComponents: MonetaryComponent[],
 ): boolean {
   return selectedComponents.some(
-    (c) =>
-      monetaryComponentIsEqual(c, component) &&
-      isSameAmountOrFactor(c, component),
+    (selected) =>
+      isSameComponentCode(selected, component) &&
+      isSameValue(selected, component),
   );
 }

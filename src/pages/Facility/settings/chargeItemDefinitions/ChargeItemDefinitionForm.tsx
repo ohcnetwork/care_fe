@@ -45,8 +45,8 @@ import {
   conditionSchema,
 } from "@/types/base/condition/condition";
 import {
+  isSameComponentCode,
   MonetaryComponent,
-  monetaryComponentIsEqual,
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
@@ -441,7 +441,7 @@ export function ChargeItemDefinitionForm({
   ) => {
     const currentComponents = form.getValues("price_components");
     const componentIndex = currentComponents.findIndex((c) =>
-      monetaryComponentIsEqual(c, component),
+      isSameComponentCode(c, component),
     );
 
     if (componentIndex === -1) return;
