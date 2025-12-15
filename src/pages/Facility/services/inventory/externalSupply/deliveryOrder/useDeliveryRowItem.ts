@@ -9,7 +9,6 @@ import {
   MonetaryComponent,
   MonetaryComponentRead,
   MonetaryComponentType,
-  calculateItemTotal,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   MRP_CODE,
@@ -198,18 +197,6 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
     return isCreatingNew || products.length === 0;
   }, [productKnowledge, suppliedItem, products.length, isCreatingNew]);
 
-  // Calculate computed total
-  const computedTotal = useMemo(
-    () =>
-      calculateItemTotal(
-        unitPrice || 0,
-        quantity,
-        taxComponents,
-        discountComponents,
-      ),
-    [unitPrice, quantity, taxComponents, discountComponents],
-  );
-
   // Available tax components from facility
   const availableTaxes = useMemo(
     () =>
@@ -285,7 +272,6 @@ export function useDeliveryRowItem({ form, index }: UseDeliveryRowItemProps) {
     isTaxInclusive,
 
     // Computed values
-    computedTotal,
     needsCategorySelection,
     isCreatingNew,
     isLoadingProducts,

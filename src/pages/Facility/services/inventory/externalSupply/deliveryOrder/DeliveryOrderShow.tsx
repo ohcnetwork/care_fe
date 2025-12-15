@@ -43,13 +43,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
-import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
-import {
-  calculateTotal,
-  getInventoryBasePath,
-} from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
+import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
 import {
@@ -62,24 +58,12 @@ import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import {
   SupplyDeliveryCondition,
-  SupplyDeliveryRead,
   SupplyDeliveryStatus,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-
-function calculateTotalPrice(
-  deliveries: SupplyDeliveryRead[],
-  internal: boolean,
-): number {
-  return deliveries
-    .filter(
-      (delivery) => delivery.status !== SupplyDeliveryStatus.entered_in_error,
-    )
-    .reduce((sum, delivery) => sum + calculateTotal(delivery, internal), 0);
-}
 
 interface Props {
   facilityId: string;
@@ -90,7 +74,7 @@ interface Props {
 
 interface AllSupplyDeliveriesProps {
   facilityId: string;
-  deliveryOrder: any;
+  deliveryOrder: DeliveryOrderRetrieve;
   locationId: string;
   internal: boolean;
   isRequester: boolean;
@@ -766,22 +750,6 @@ export function DeliveryOrderShow({
                 ) : (
                   <></>
                 )}
-
-                {/* Total Price Display */}
-                {supplyDeliveries?.results &&
-                  supplyDeliveries.results.length > 0 && (
-                    <div className="flex justify-end border-t pt-4 mt-4">
-                      <div className="flex items-center gap-2 text-lg font-semibold">
-                        <span>{t("total")}:</span>
-                        <MonetaryDisplay
-                          amount={calculateTotalPrice(
-                            supplyDeliveries.results,
-                            internal,
-                          ).toFixed(2)}
-                        />
-                      </div>
-                    </div>
-                  )}
 
                 {/* Add New Supply Delivery Form - Always show when in draft mode */}
                 {canAddSupplyDeliveries && (

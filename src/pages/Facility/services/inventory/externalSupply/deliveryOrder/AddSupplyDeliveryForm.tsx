@@ -603,12 +603,6 @@ export function AddSupplyDeliveryForm({
                               <TableHead className="min-w-[120px] text-xs font-semibold">
                                 {t("tax")}
                               </TableHead>
-                              <TableHead className="min-w-[120px] text-xs font-semibold">
-                                {t("discount")}
-                              </TableHead>
-                              <TableHead className="min-w-[80px] text-xs font-semibold text-right">
-                                {t("total")}
-                              </TableHead>
                             </>
                           )}
                         </TableRow>

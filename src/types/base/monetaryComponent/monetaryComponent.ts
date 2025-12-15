@@ -80,39 +80,3 @@ export function isComponentSelected(
       isSameAmountOrFactor(c, component),
   );
 }
-
-/**
- * Calculate total price from base price, quantity, taxes, and discounts
- */
-export function calculateItemTotal(
-  basePrice: number,
-  quantity: number,
-  taxComponents?: MonetaryComponent[],
-  discountComponents?: MonetaryComponent[],
-): number {
-  let total = basePrice * quantity;
-
-  // Apply taxes
-  if (taxComponents?.length) {
-    taxComponents.forEach((tax) => {
-      if (tax.factor) {
-        total += basePrice * quantity * (tax.factor / 100);
-      } else if (tax.amount) {
-        total += parseFloat(tax.amount);
-      }
-    });
-  }
-
-  // Apply discounts
-  if (discountComponents?.length) {
-    discountComponents.forEach((discount) => {
-      if (discount.factor) {
-        total -= basePrice * quantity * (discount.factor / 100);
-      } else if (discount.amount) {
-        total -= parseFloat(discount.amount);
-      }
-    });
-  }
-
-  return total;
-}

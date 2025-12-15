@@ -33,10 +33,7 @@ import { cn } from "@/lib/utils";
 
 import { MonetaryComponentSelector } from "@/components/Billing/MonetaryComponentSelector";
 import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
-import {
-  CURRENCY_SYMBOL,
-  MonetaryDisplay,
-} from "@/components/ui/monetary-display";
+import { CURRENCY_SYMBOL } from "@/components/ui/monetary-display";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
@@ -76,7 +73,6 @@ export function SmartExternalDeliveryRow({
     informationalComponents,
     chargeItemCategory,
     isTaxInclusive,
-    computedTotal,
     needsCategorySelection,
     isCreatingNew,
     isLoadingProducts,
@@ -402,39 +398,19 @@ export function SmartExternalDeliveryRow({
           disabled={!productKnowledge}
           displayMode="inline"
         />
-      </TableCell>
-
-      {/* Discounts */}
-      <TableCell className="align-top p-2">
-        <MonetaryComponentSelector
-          type={MonetaryComponentType.discount}
-          components={availableDiscounts}
-          selectedComponents={discountComponents || []}
-          onSelectionChange={(components) => {
-            setField("discount_components", components);
-            markAsEdited();
-          }}
-          disabled={!productKnowledge}
-          displayMode="inline"
-        />
-      </TableCell>
-
-      {/* Total */}
-      <TableCell className="align-top p-2">
-        <div className="flex flex-col items-end min-w-[80px]">
-          <MonetaryDisplay
-            amount={computedTotal.toFixed(2)}
-            className="font-semibold text-gray-900"
+        <span className="text-xs text-gray-500">
+          <MonetaryComponentSelector
+            type={MonetaryComponentType.discount}
+            components={availableDiscounts}
+            selectedComponents={discountComponents || []}
+            onSelectionChange={(components) => {
+              setField("discount_components", components);
+              markAsEdited();
+            }}
+            disabled={!productKnowledge}
+            displayMode="short"
           />
-          {isCreatingNew && (
-            <Badge
-              variant="outline"
-              className="text-[10px] mt-1 text-green-600 border-green-300"
-            >
-              {t("new")}
-            </Badge>
-          )}
-        </div>
+        </span>
       </TableCell>
     </TableRow>
   );

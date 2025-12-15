@@ -49,8 +49,8 @@ export interface MonetaryComponentSelectorProps {
   ) => void;
   /** Whether the selector is disabled */
   disabled?: boolean;
-  /** Display mode: 'inline' for compact table cell, 'full' for full-width */
-  displayMode?: "inline" | "full";
+  /** Display mode: 'inline' for compact table cell, 'full' for full-width, 'short' for minimal count display */
+  displayMode?: "inline" | "full" | "short";
   /** Additional CSS classes */
   className?: string;
 }
@@ -287,6 +287,33 @@ export function MonetaryComponentSelector({
   };
 
   const renderTrigger = () => {
+    if (displayMode === "short") {
+      const label =
+        type === MonetaryComponentType.tax ? t("tax") : t("discount");
+      const addLabel =
+        type === MonetaryComponentType.tax ? t("add_tax") : t("add_discount");
+
+      const valuesDisplay = selectedComponents
+        .map((c) => {
+          const value = getComponentValue(c);
+          return c.factor != null ? `${value}%` : `₹${value}`;
+        })
+        .join(", ");
+
+      return (
+        <Button type="button" variant="ghost" size="xs" disabled={disabled}>
+          {selectedComponents.length === 0 ? (
+            <span>{addLabel}</span>
+          ) : (
+            <span>
+              {label}: {valuesDisplay}
+            </span>
+          )}
+          <ChevronDown />
+        </Button>
+      );
+    }
+
     if (displayMode === "inline") {
       return (
         <Button
