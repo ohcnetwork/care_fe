@@ -718,6 +718,9 @@ export default function MedicationBillForm({ patientId }: Props) {
   const [prescriptionCompletionMap, setPrescriptionCompletionMap] = useState<
     Record<string, boolean>
   >({});
+  const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
+    `${patientId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
+  );
 
   const { mutate: updateMedicationRequest } = useMutation({
     mutationFn: (medication: MedicationRequestRead) => {
@@ -797,7 +800,7 @@ export default function MedicationBillForm({ patientId }: Props) {
 
   const { data: patient } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: {
         id: patientId,
       },
@@ -1178,6 +1181,9 @@ export default function MedicationBillForm({ patientId }: Props) {
           quantity: lot.quantity,
           days_supply: item.daysSupply,
           fully_dispensed: item.fully_dispensed,
+          create_dispense_order: {
+            alternate_identifier: alternateIdentifier,
+          },
         };
 
         if (
