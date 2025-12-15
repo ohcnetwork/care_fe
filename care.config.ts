@@ -1,3 +1,4 @@
+import { booleanFromString } from "@/common/utils";
 import {
   ENCOUNTER_CLASS,
   EncounterClass,
@@ -13,12 +14,6 @@ interface ILogo {
   light: string;
   dark: string;
 }
-
-const boolean = (key: string, fallback = false) => {
-  if (env[key] === "true") return true;
-  if (env[key] === "false") return false;
-  return fallback;
-};
 
 const logo = (value?: string, fallback?: ILogo) => {
   if (!value) {
@@ -102,16 +97,25 @@ const careConfig = {
       : 0,
 
     // Kill switch in-case the heatmap API doesn't scale as expected
-    useAvailabilityStatsAPI: boolean(
-      "REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API",
+    useAvailabilityStatsAPI: booleanFromString(
+      env.REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API,
       true,
     ),
   },
 
   /**
+   * Auto refresh interval in milliseconds
+   */
+  appointmentAndQueueRefreshInterval:
+    parseInt(env.REACT_AUTO_REFRESH_INTERVAL || "10", 10) * 1000,
+
+  /**
    * Flag to make location field mandatory for payment reconciliation
    */
-  paymentLocationRequired: boolean("REACT_PAYMENT_LOCATION_REQUIRED", true),
+  paymentLocationRequired: booleanFromString(
+    env.REACT_PAYMENT_LOCATION_REQUIRED,
+    true,
+  ),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
@@ -160,7 +164,18 @@ const careConfig = {
   /**
    * Disable patient login if set to "true"
    */
-  disablePatientLogin: boolean("REACT_DISABLE_PATIENT_LOGIN", false),
+  disablePatientLogin: booleanFromString(
+    env.REACT_DISABLE_PATIENT_LOGIN,
+    false,
+  ),
+
+  /**
+   * Enable auto refresh if set to "true"
+   */
+  enableAutoRefresh: booleanFromString(
+    env.REACT_AUTO_REFRESH_BY_DEFAULT,
+    false,
+  ),
 
   patientRegistration: {
     /**
@@ -179,8 +194,8 @@ const careConfig = {
 
     defaultGeoOrganization: env.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG,
 
-    minimalPatientRegistration: boolean(
-      "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
+    minimalPatientRegistration: booleanFromString(
+      env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION,
       false,
     ),
   },
@@ -204,8 +219,8 @@ const careConfig = {
   /**
    * Enable automatic invoice sheet after dispensing items
    */
-  enableAutoInvoiceAfterDispense: boolean(
-    "REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE",
+  enableAutoInvoiceAfterDispense: booleanFromString(
+    env.REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE,
     false,
   ),
 } as const;
