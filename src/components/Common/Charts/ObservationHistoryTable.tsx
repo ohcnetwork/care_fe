@@ -15,18 +15,12 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
-import { ObservationWithUser } from "@/types/emr/observation";
-import patientApi from "@/types/emr/patient/patientApi";
+import { ObservationListRead } from "@/types/emr/observation/observation";
+import observationApi from "@/types/emr/observation/observationApi";
 import { useTranslation } from "react-i18next";
-
-interface PaginatedResponse<T> {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: T[];
-}
 
 interface ObservationHistoryTableProps {
   patientId: string;
@@ -55,7 +49,7 @@ export const ObservationHistoryTable = ({
   const { t } = useTranslation();
 
   const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteQuery<
-    PaginatedResponse<ObservationWithUser>
+    PaginatedResponse<ObservationListRead>
   >({
     queryKey: [
       "infinite-observations",
@@ -64,7 +58,7 @@ export const ObservationHistoryTable = ({
       codes.map((c) => c.code),
     ],
     queryFn: async ({ pageParam = 0 }) => {
-      const response = await query(patientApi.listObservations, {
+      const response = await query(observationApi.list, {
         pathParams: { patientId },
         queryParams: {
           encounter: encounterId,
@@ -73,7 +67,7 @@ export const ObservationHistoryTable = ({
           offset: String(pageParam),
         },
       })({ signal: new AbortController().signal });
-      return response as PaginatedResponse<ObservationWithUser>;
+      return response;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
@@ -129,13 +123,10 @@ export const ObservationHistoryTable = ({
                     {formatDate(observation.effective_datetime)}
                   </TableCell>
                   <TableCell>
-                    {codes.find((c) => c.code === observation.main_code.code)
-                      ?.display || observation.main_code.code}
+                    {codes.find((c) => c.code === observation.main_code?.code)
+                      ?.display || observation.main_code?.code}
                   </TableCell>
-                  <TableCell>
-                    {observation.value.value_quantity?.value?.toFixed(2) ||
-                      observation.value.value}
-                  </TableCell>
+                  <TableCell>{observation.value.value || "-"}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar name={name} className="size-6" />
