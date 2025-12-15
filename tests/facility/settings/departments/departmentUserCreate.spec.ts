@@ -6,6 +6,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 const USER_TYPES = ["Doctor", "Nurse", "Staff", "Volunteer", "Administrator"];
 const GENDERS = ["Male", "Female", "Non Binary", "Transgender"];
+const ROLES = ["Nurse", "Doctor", "Staff"];
 
 test.describe("User Management in Departments", () => {
   let facilityId: string;
@@ -59,12 +60,13 @@ test.describe("User Management in Departments", () => {
     });
 
     await test.step("Link user to organization", async () => {
+      const role = faker.helpers.arrayElement(ROLES);
       await page
         .getByRole("combobox")
         .filter({ hasText: "Select Role" })
         .click();
-      await page.getByPlaceholder("Search Roles").fill("Nurse");
-      await page.getByRole("option", { name: "Nurse" }).click();
+      await page.getByPlaceholder("Search Roles").fill(role);
+      await page.getByRole("option", { name: role }).click();
       await page.getByRole("button", { name: "Add to Organization" }).click();
 
       await expect(
