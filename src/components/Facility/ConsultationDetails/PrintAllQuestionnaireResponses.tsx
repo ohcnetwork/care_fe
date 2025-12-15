@@ -20,6 +20,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
+import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
 
 type PrintAllQuestionnaireResponsesProps = {
   questionnaireId: string;
@@ -62,7 +63,7 @@ export function PrintAllQuestionnaireResponses({
       encounterId,
       patientId,
     ],
-    queryFn: query(patientApi.getQuestionnaireResponses, {
+    queryFn: query(questionnaireResponseApi.list, {
       queryParams: {
         questionnaire: questionnaireId,
         encounter: encounterId,
