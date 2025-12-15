@@ -19,7 +19,9 @@ import PatientIdentifierConfigList from "@/pages/settings/patientIdentifierConfi
 const AdminRoutes: AppRoutes = {
   "/admin/questionnaire": () => <QuestionnaireList />,
   "/admin/questionnaire/create": () => <QuestionnaireEditor />,
-  "/admin/questionnaire/:id/edit": ({ id }) => <QuestionnaireEditor id={id} />,
+  "/admin/questionnaire/:slug/edit": ({ slug }) => (
+    <QuestionnaireEditor slug={slug} />
+  ),
   "/admin/valuesets": () => <ValueSetList />,
   "/admin/valuesets/create": () => (
     <ValueSetEditor onSuccess={() => navigate(`/admin/valuesets`)} />
