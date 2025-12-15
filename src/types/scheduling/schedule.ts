@@ -5,8 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Time } from "@/Utils/types";
 import { formatName } from "@/Utils/utils";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { PatientRead, PublicPatientRead } from "@/types/emr/patient/patient";
+import { EncounterListRead } from "@/types/emr/encounter/encounter";
+import {
+  PatientListRead,
+  PublicPatientRead,
+} from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
@@ -233,7 +236,7 @@ export type AppointmentBase = {
 } & ScheduleResource;
 
 export type Appointment = AppointmentBase & {
-  patient: PatientRead;
+  patient: PatientListRead;
 };
 
 export type PublicAppointment = AppointmentBase & {
@@ -245,7 +248,7 @@ export type AppointmentRead = Appointment & {
   updated_by: UserReadMinimal | null;
   created_by: UserReadMinimal;
   modified_date: string;
-  associated_encounter?: EncounterRead;
+  associated_encounter?: EncounterListRead;
 };
 
 export interface AppointmentCreateRequest {
