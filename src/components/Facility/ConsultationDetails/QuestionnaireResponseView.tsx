@@ -10,10 +10,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
-import { formatDateTime } from "@/Utils/utils";
-import patientApi from "@/types/emr/patient/patientApi";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { QuestionnaireResponse as Response } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
+import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
 
 export default function QuestionnaireResponseView({
   responseId,
@@ -25,7 +25,7 @@ export default function QuestionnaireResponseView({
   const { t } = useTranslation();
   const { data: formResponse, isLoading } = useQuery({
     queryKey: ["getQuestionnaireResponse", patientId, responseId],
-    queryFn: query(patientApi.getQuestionnaireResponse, {
+    queryFn: query(questionnaireResponseApi.get, {
       pathParams: { patientId, responseId },
     }),
   });
@@ -68,8 +68,7 @@ export default function QuestionnaireResponseView({
               <div className="flex items-center gap-2">
                 <CareIcon icon="l-user" className="size-4" />
                 <span>
-                  {formResponse.created_by?.first_name}{" "}
-                  {formResponse.created_by?.last_name}
+                  {formatName(formResponse.created_by)}
                   {` (${formResponse.created_by?.user_type})`}
                 </span>
               </div>

@@ -888,13 +888,7 @@ function ActivityDefinitionFormContent({
                             chargeItemDefinitionApi.listChargeItemDefinition,
                           pathParams: { facilityId },
                         }}
-                        translations={{
-                          searchPlaceholder: "search_charge_item_definitions",
-                          selectPlaceholder: "select_charge_item_definition",
-                          noResultsFound:
-                            "no_charge_item_definitions_found_for",
-                          noItemsFound: "no_charge_item_definitions_found",
-                        }}
+                        translationBaseKey="charge_item_definition"
                         mapper={(item) => ({
                           id: item.id,
                           title: item.title,

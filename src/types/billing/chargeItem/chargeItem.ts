@@ -1,5 +1,8 @@
 import { BatchSuccessResponse } from "@/types/base/batch/batch";
-import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryComponent";
+import {
+  MonetaryComponent,
+  MonetaryComponentType,
+} from "@/types/base/monetaryComponent/monetaryComponent";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 
@@ -48,15 +51,14 @@ export interface ChargeItemBase {
   paid_invoice?: InvoiceRead;
 }
 
-export interface ChargeItemCreate
-  extends Omit<
-    ChargeItemBase,
-    | "id"
-    | "service_resource_id"
-    | "service_resource"
-    | "paid_invoice"
-    | "total_price"
-  > {
+export interface ChargeItemCreate extends Omit<
+  ChargeItemBase,
+  | "id"
+  | "service_resource_id"
+  | "service_resource"
+  | "paid_invoice"
+  | "total_price"
+> {
   encounter?: string;
   patient?: string;
   account?: string;
@@ -77,11 +79,10 @@ export interface ApplyMultipleChargeItemDefinitionRequest {
   requests: ApplyChargeItemDefinitionRequest[];
 }
 
-export interface ChargeItemUpdate
-  extends Omit<
-    ChargeItemBase,
-    "service_resource_id" | "service_resource" | "paid_invoice" | "total_price"
-  > {
+export interface ChargeItemUpdate extends Omit<
+  ChargeItemBase,
+  "service_resource_id" | "service_resource" | "paid_invoice" | "total_price"
+> {
   account?: string;
 }
 
@@ -103,6 +104,37 @@ export function extractChargeItemsFromBatchResponse(
   return response.results
     .map((item) => item.data?.charge_item)
     .filter((item): item is ChargeItemRead => !!item);
+}
+
+export enum PriceComponentType {
+  unit_price = "unit_price",
+  total_price = "total_price",
+}
+
+export function getComponentsFromChargeItem(
+  item: ChargeItemRead | ChargeItemDefinitionBase,
+  componentType: MonetaryComponentType,
+  componentField: PriceComponentType = PriceComponentType.total_price,
+): MonetaryComponent[] {
+  let components: MonetaryComponent[];
+
+  if ("total_price_components" in item) {
+    if (componentField === PriceComponentType.unit_price) {
+      components = item.unit_price_components;
+    } else if (componentField === PriceComponentType.total_price) {
+      components = item.total_price_components;
+    } else {
+      throw new Error(
+        `Invalid componentField "${componentField}" for ChargeItemRead. Expected "unit_price" or "total_price".`,
+      );
+    }
+  } else {
+    components = item.price_components;
+  }
+
+  return components.filter(
+    (component) => component.monetary_component_type === componentType,
+  );
 }
 
 export const MRP_CODE = "mrp";

@@ -123,7 +123,7 @@ export default function LinkUserSheet({
               <div className="rounded-lg border border-gray-200 p-4 space-y-4">
                 <div className="flex gap-4 flex-row">
                   <Avatar
-                    name={`${selectedUser.first_name} ${selectedUser.last_name}`}
+                    name={formatName(selectedUser, true)}
                     imageUrl={selectedUser.profile_picture_url}
                     className="size-12"
                   />
@@ -176,7 +176,6 @@ export default function LinkUserSheet({
                 className="w-full"
                 onClick={handleAddUser}
                 disabled={!selectedRole}
-                data-cy="link-user-button"
               >
                 {t("link_to_organization")}
               </Button>

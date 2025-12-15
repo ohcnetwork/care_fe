@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { LocationDetail } from "@/types/location/location";
 import { Organization } from "@/types/organization/organization";
 
@@ -31,6 +32,7 @@ export interface DeliveryOrderCreate extends DeliveryOrder {
   supplier?: string;
   origin?: string;
   destination: string;
+  extensions: Record<string, unknown>;
 }
 
 export interface DeliveryOrderUpdate extends DeliveryOrder {
@@ -47,4 +49,5 @@ export interface DeliveryOrderRetrieve extends DeliveryOrder {
   origin?: LocationDetail;
   destination: LocationDetail;
   supplier?: Organization;
+  tags: TagConfig[];
 }

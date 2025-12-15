@@ -1,4 +1,5 @@
 import { Code } from "@/types/base/code/code";
+import { Interpretation } from "@/types/base/qualifiedRange/qualifiedRange";
 import { ObservationDefinitionRead } from "@/types/emr/observationDefinition/observationDefinition";
 import { QuestionType } from "@/types/questionnaire/question";
 import { SubjectType } from "@/types/questionnaire/questionnaire";
@@ -21,10 +22,9 @@ export interface Performer {
 }
 
 export interface ObservationReferenceRange {
-  low?: number;
-  high?: number;
-  unit?: string;
-  text?: string;
+  min?: number;
+  max?: number;
+  interpretation?: Interpretation;
 }
 
 export type QuestionnaireSubmitResultValue = {
@@ -71,7 +71,7 @@ export interface ObservationBase {
   component?: ObservationComponent[];
 }
 
-export interface ObservationRead extends ObservationBase {
+export interface ObservationListRead extends ObservationBase {
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
   data_entered_by?: UserReadMinimal | null;
@@ -80,13 +80,43 @@ export interface ObservationRead extends ObservationBase {
 
 export type ObservationCreate = Omit<ObservationBase, "id">;
 
-export interface ObservationUpdate {
-  observation_id: string;
-  observation: Partial<ObservationCreate>;
+export type ObservationUpsert = Omit<
+  ObservationBase,
+  "id" | "encounter" | "subject_type"
+>;
+
+export interface ObservationAnalyzeRequest {
+  codes: Code[];
+  page_size?: number;
 }
 
-export interface ObservationFromDefinitionCreate {
-  observation_definition?: string;
-  observation_id?: string;
-  observation: Partial<ObservationCreate>;
+export interface ObservationAnalyzeGroup {
+  code: Code;
+  results: ObservationListRead[];
 }
+export interface ObservationAnalyzeResponse {
+  results: ObservationAnalyzeGroup[];
+}
+
+export interface ObservationUpsertRequest {
+  observation: ObservationUpsert;
+  observation_id?: string | null;
+  observation_definition?: string | null;
+}
+
+export interface ObservationBatchUpsertRequest {
+  observations: ObservationUpsertRequest[];
+}
+
+export interface ObservationBatchUpsertResponse {
+  message: string;
+}
+
+export type ObservationPlotConfig = {
+  id: string;
+  name: string;
+  groups: {
+    title: string;
+    codes: Code[];
+  }[];
+}[];

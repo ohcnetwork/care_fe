@@ -70,7 +70,7 @@ export function UserCard(props: UserCardProps) {
       <CardContent className="p-4 flex flex-col h-full justify-between">
         <div className="flex items-start gap-3">
           <Avatar
-            name={`${user.first_name} ${user.last_name}`}
+            name={formatName(user, true)}
             imageUrl={user.profile_picture_url}
             className="h-12 w-12 sm:h-14 sm:w-14 text-xl sm:text-2xl flex-shrink-0"
           />
@@ -92,9 +92,7 @@ export function UserCard(props: UserCardProps) {
             <div className="mt-4 -ml-12 sm:ml-0 grid grid-cols-2 gap-2 text-sm">
               <div>
                 <div className="text-gray-500">{t("role")}</div>
-                <div className="font-medium truncate" data-cy="user-role">
-                  {roleName}
-                </div>
+                <div className="font-medium truncate">{roleName}</div>
               </div>
               <div>
                 <div className="text-gray-500">{t("phone_number")}</div>

@@ -53,11 +53,10 @@ export function FacilityNavUser({
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              data-cy="user-menu-dropdown"
             >
               <Avatar
                 className="size-8 rounded-lg"
-                name={`${user.first_name} ${user.last_name}`}
+                name={formatName(user)}
                 imageUrl={user.profile_picture_url}
               />
               {(open || isMobile) && (
@@ -83,7 +82,7 @@ export function FacilityNavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar
                   className="size-8 rounded-lg"
-                  name={`${user.first_name} ${user.last_name}`}
+                  name={formatName(user)}
                   imageUrl={user.profile_picture_url}
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -97,10 +96,7 @@ export function FacilityNavUser({
             {newVersion && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  data-cy="user-menu-update"
-                  onClick={updateApp}
-                >
+                <DropdownMenuItem onClick={updateApp}>
                   <RefreshCw />
                   {t("update_available")}
                 </DropdownMenuItem>
@@ -109,7 +105,6 @@ export function FacilityNavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
-                data-cy="user-menu-profile"
                 onClick={() => {
                   const profileUrl = selectedFacilityId
                     ? `/facility/${selectedFacilityId}/users/${user.username}`
@@ -123,7 +118,6 @@ export function FacilityNavUser({
               {pluginNavItems.map((item) => (
                 <DropdownMenuItem
                   key={item.name}
-                  data-cy={`user-menu-${item.name}`}
                   onClick={() => {
                     navigate(
                       `/facility/${selectedFacilityId}/users/${user.username}/${item.url}`,
@@ -136,7 +130,7 @@ export function FacilityNavUser({
               ))}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem data-cy="user-menu-logout" onClick={signOut}>
+            <DropdownMenuItem onClick={signOut}>
               <LogOut />
               {t("logout")}
             </DropdownMenuItem>
@@ -164,7 +158,6 @@ export function PatientNavUser() {
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              data-cy="user-menu-dropdown"
             >
               {(open || isMobile) && (
                 <>
@@ -216,7 +209,7 @@ export function PatientNavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem data-cy="user-menu-logout" onClick={signOut}>
+            <DropdownMenuItem onClick={signOut}>
               <LogOut />
               {t("logout")}
             </DropdownMenuItem>

@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import Autocomplete from "@/components/ui/autocomplete";
+import { ResourceDefinitionCategoryPicker } from "@/components/Common/ResourceDefinitionCategoryPicker";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -39,14 +39,12 @@ import {
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import { mergeAutocompleteOptions } from "@/Utils/utils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
+import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
 import {
+  ChargeItemDefinitionBase,
   ChargeItemDefinitionRead,
-  ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import chargeItemDefinitionApi from "@/types/billing/chargeItemDefinition/chargeItemDefinitionApi";
 import {
@@ -61,7 +59,8 @@ import {
   ProductKnowledgeStatus,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
-
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 const formSchema = z.object({
   status: z.nativeEnum(ProductStatusOptions),
   product_knowledge: z.string().min(1, "Product Knowledge is required"),
@@ -73,7 +72,6 @@ const formSchema = z.object({
     .required(),
   expiration_date: z.date(),
 });
-
 export default function ProductForm({
   facilityId,
   productId,
@@ -84,9 +82,7 @@ export default function ProductForm({
   onSuccess?: (product: ProductRead) => void;
 }) {
   const { t } = useTranslation();
-
   const isEditMode = Boolean(productId);
-
   const { data: existingData, isFetching } = useQuery({
     queryKey: ["product", productId],
     queryFn: query(productApi.retrieveProduct, {
@@ -97,7 +93,6 @@ export default function ProductForm({
     }),
     enabled: isEditMode,
   });
-
   if (isEditMode && isFetching) {
     return (
       <Page title={t("edit_product")} hideTitleOnPage>
@@ -112,7 +107,6 @@ export default function ProductForm({
       </Page>
     );
   }
-
   return (
     <Page
       title={isEditMode ? t("edit_product") : t("create_product")}
@@ -140,15 +134,21 @@ export default function ProductForm({
     </Page>
   );
 }
-
 export function ProductFormContent({
   facilityId,
   productId,
   existingData,
   slug,
   containerClassName,
-  onSuccess = () => navigate(`/facility/${facilityId}/settings/product`),
-  onCancel = () => navigate(`/facility/${facilityId}/settings/product`),
+  onSuccess = (product: ProductRead) =>
+    navigate(`/facility/${facilityId}/settings/product/${product.id}`),
+  onCancel = () => {
+    if (productId) {
+      navigate(`/facility/${facilityId}/settings/product/${productId}`);
+    } else {
+      navigate(`/facility/${facilityId}/settings/product`);
+    }
+  },
   disableButtons = false,
   enabled = true,
   ref,
@@ -169,8 +169,12 @@ export function ProductFormContent({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isEditMode = Boolean(productId);
-  const [cidSearch, setCidSearch] = useState("");
   const [createCidOpen, setCreateCidOpen] = useState(false);
+  const [selectedChargeItemDefinition, setSelectedChargeItemDefinition] =
+    useState<ChargeItemDefinitionRead | null>(
+      (existingData?.charge_item_definition as ChargeItemDefinitionRead) ||
+        null,
+    );
 
   // Get product knowledge list for the dropdown
   const { data: productKnowledgeResponse } = useQuery({
@@ -184,7 +188,6 @@ export function ProductFormContent({
     }),
     enabled,
   });
-
   const { data: existingProductKnowledge } = useQuery({
     queryKey: ["productKnowledge", slug],
     queryFn: query(productKnowledgeApi.retrieveProductKnowledge, {
@@ -197,7 +200,6 @@ export function ProductFormContent({
     }),
     enabled: !!slug && enabled,
   });
-
   // Add selected product knowledge to the product knowledge list if it's not already there
   const productKnowledgeData: ProductKnowledgeBase[] =
     productKnowledgeResponse?.results.find(
@@ -208,26 +210,6 @@ export function ProductFormContent({
           ...(productKnowledgeResponse?.results || []),
           ...(existingProductKnowledge ? [existingProductKnowledge] : []),
         ];
-
-  // Get charge item definition list for the dropdown with search
-  const { data: chargeItemDefinitionResponse, isLoading: isLoadingCID } =
-    useQuery({
-      queryKey: ["chargeItemDefinitions", cidSearch],
-      queryFn: query.debounced(
-        chargeItemDefinitionApi.listChargeItemDefinition,
-        {
-          pathParams: { facilityId },
-          queryParams: {
-            limit: 100,
-            status: ChargeItemDefinitionStatus.active,
-            title: cidSearch,
-          },
-        },
-      ),
-    });
-
-  const chargeItemDefinitionOptions =
-    chargeItemDefinitionResponse?.results || [];
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -247,7 +229,6 @@ export function ProductFormContent({
             product_knowledge: slug,
           },
   });
-
   const { mutate: createProduct, isPending: isCreating } = useMutation({
     mutationFn: mutate(productApi.createProduct, {
       pathParams: { facilityId },
@@ -258,7 +239,6 @@ export function ProductFormContent({
       onSuccess?.(product);
     },
   });
-
   const { mutate: updateProduct, isPending: isUpdating } = useMutation({
     mutationFn: mutate(productApi.updateProduct, {
       pathParams: {
@@ -266,22 +246,20 @@ export function ProductFormContent({
         productId: productId || "",
       },
     }),
-    onSuccess: () => {
+    onSuccess: (product: ProductRead) => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({
         queryKey: ["product", productId],
       });
       toast.success(t("product_updated_successfully"));
-      navigate(`/facility/${facilityId}/settings/product`);
+      onSuccess(product);
     },
   });
-
   useImperativeHandle(ref, () => ({
     createNewProduct: () => {
       form.handleSubmit(onSubmit)();
     },
   }));
-
   const isPending = isCreating || isUpdating;
   function onSubmit(data: z.infer<typeof formSchema>) {
     // Format the data for API submission
@@ -291,7 +269,6 @@ export function ProductFormContent({
         ? format(data.expiration_date, "yyyy-MM-dd")
         : undefined,
     };
-
     if (isEditMode && productId) {
       const updatePayload: ProductUpdate = {
         id: productId,
@@ -313,7 +290,6 @@ export function ProductFormContent({
       createProduct(createPayload);
     }
   }
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -346,7 +322,6 @@ export function ProductFormContent({
                 </FormItem>
               )}
             />
-
             {!isEditMode && !existingProductKnowledge && (
               <FormField
                 control={form.control}
@@ -373,7 +348,6 @@ export function ProductFormContent({
                 )}
               />
             )}
-
             <FormField
               control={form.control}
               name="batch.lot_number"
@@ -394,7 +368,6 @@ export function ProductFormContent({
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="expiration_date"
@@ -423,7 +396,6 @@ export function ProductFormContent({
             />
           </div>
         </div>
-
         <div className="rounded-lg border border-gray-200 bg-white p-6">
           <div className="mb-4">
             <h2 className="text-lg font-medium text-gray-900">
@@ -441,32 +413,36 @@ export function ProductFormContent({
                 <FormItem>
                   <FormLabel>{t("charge_item_definition")}</FormLabel>
                   <div className="flex flex-col gap-2 sm:flex-row">
-                    <FormControl className="flex-1">
-                      <Autocomplete
-                        options={mergeAutocompleteOptions(
-                          chargeItemDefinitionOptions.map((cid) => ({
-                            label: cid.title,
-                            value: cid.slug,
-                          })),
-                          field.value
-                            ? {
-                                label:
-                                  chargeItemDefinitionOptions.find(
-                                    (cid) => cid.slug === field.value,
-                                  )?.title || "",
-                                value: field.value,
-                              }
-                            : undefined,
-                        )}
-                        value={field.value || ""}
-                        onChange={field.onChange}
-                        onSearch={setCidSearch}
-                        placeholder={t("select_charge_item_definition")}
-                        isLoading={isLoadingCID}
-                        noOptionsMessage={t("no_charge_item_definitions_found")}
-                        data-cy="charge-item-definition-search"
-                      />
-                    </FormControl>
+                    <div className="flex-1 min-w-0">
+                      <FormControl>
+                        <ResourceDefinitionCategoryPicker<ChargeItemDefinitionBase>
+                          facilityId={facilityId}
+                          value={selectedChargeItemDefinition || undefined}
+                          onValueChange={(selectedDef) => {
+                            if (!selectedDef) {
+                              setSelectedChargeItemDefinition(null);
+                              field.onChange("");
+                              return;
+                            }
+                            const def = selectedDef as ChargeItemDefinitionRead;
+                            setSelectedChargeItemDefinition(def);
+                            field.onChange(def.slug);
+                          }}
+                          placeholder={t("select_charge_item_definition")}
+                          className="w-full"
+                          resourceType={
+                            ResourceCategoryResourceType.charge_item_definition
+                          }
+                          listDefinitions={{
+                            queryFn:
+                              chargeItemDefinitionApi.listChargeItemDefinition,
+                            pathParams: { facilityId },
+                            queryParams: { status: "active" },
+                          }}
+                          translationBaseKey="charge_item_definition"
+                        />
+                      </FormControl>
+                    </div>
                     <Sheet open={createCidOpen} onOpenChange={setCreateCidOpen}>
                       <SheetTrigger asChild>
                         <Button
@@ -514,13 +490,15 @@ export function ProductFormContent({
             />
           </div>
         </div>
-
         {!disableButtons && (
           <div className="flex justify-end gap-4">
             <Button type="button" variant="outline" onClick={onCancel}>
               {t("cancel")}
             </Button>
-            <Button type="submit" disabled={isPending}>
+            <Button
+              type="submit"
+              disabled={isPending || !form.formState.isDirty}
+            >
               {isPending ? t("saving") : isEditMode ? t("update") : t("create")}
             </Button>
           </div>

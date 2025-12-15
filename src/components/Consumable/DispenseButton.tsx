@@ -2,12 +2,13 @@ import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 
+import careConfig from "@careConfig";
+
 import { LocationSelectorDialog } from "@/components/ui/sidebar/facility/location/location-switcher";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { buildEncounterUrl } from "@/pages/Encounters/utils/utils";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   AccountBillingStatus,
   AccountStatus,
@@ -22,9 +23,11 @@ import DispenseDrawer from "./DispenseDrawer";
 export const DispenseButton = ({
   open,
   setOpen,
+  facilityId,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
+  facilityId: string;
 }) => {
   const [location, setLocation] = useState<LocationList | undefined>(undefined);
   const [showDrawer, setShowDrawer] = useState(false);
@@ -34,7 +37,6 @@ export const DispenseButton = ({
   >([]);
   const [accountId, setAccountId] = useState<string | undefined>(undefined);
   const { selectedEncounter } = useEncounter();
-  const { facilityId } = useCurrentFacility();
 
   const { refetch: refetchAccount } = useQuery({
     queryKey: ["accounts", selectedEncounter?.patient.id],
@@ -102,8 +104,12 @@ export const DispenseButton = ({
             path: getLocationPath(location),
           }}
           onDispenseComplete={async (chargeItems: ChargeItemRead[]) => {
-            setExtractedChargeItems(chargeItems);
             setShowDrawer(false);
+
+            if (!careConfig.enableAutoInvoiceAfterDispense) {
+              return;
+            }
+            setExtractedChargeItems(chargeItems);
             const result = await refetchAccount();
             const fetchedAccountId = result.data?.results?.[0]?.id;
 

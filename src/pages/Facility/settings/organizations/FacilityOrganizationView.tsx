@@ -39,6 +39,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import facilityOrganizationApi from "@/types/facilityOrganization/facilityOrganizationApi";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import FacilityOrganizationFormSheet from "./components/FacilityOrganizationFormSheet";
 
 interface Props {
@@ -74,7 +75,6 @@ function DeleteOrgDialog({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            data-cy="delete-organization-button"
             variant="ghost"
             size="icon"
             onClick={() => setShowDeleteDialog(true)}
@@ -137,7 +137,7 @@ function OrganizationCard({
                 </TooltipProvider>
               )}
             </div>
-            {!org.has_children && org.org_type !== "root" && (
+            {canWrite && !org.has_children && org.org_type !== "root" && (
               <DeleteOrgDialog org={org} facilityId={facilityId} />
             )}
           </div>
@@ -154,12 +154,7 @@ function OrganizationCard({
               parentId={parentId}
               org={org}
               trigger={
-                <Button
-                  data-cy="edit-department-team"
-                  variant="white"
-                  size="sm"
-                  className="font-semibold"
-                >
+                <Button variant="white" size="sm" className="font-semibold">
                   {t("edit")}
                 </Button>
               }
@@ -167,10 +162,7 @@ function OrganizationCard({
           )}
 
           <Button variant="white" size="sm" className="font-semibold" asChild>
-            <Link
-              href={`/departments/${org.id}/departments`}
-              data-cy="view-department-team"
-            >
+            <Link href={`/departments/${org.id}/departments`}>
               {t("see_details")}
             </Link>
           </Button>
@@ -187,10 +179,11 @@ export default function FacilityOrganizationView({
 }: Props) {
   const { t } = useTranslation();
   const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
-    limit: 12,
+    limit: 14,
     disableCache: true,
   });
 
+  const authUser = useAuthUser();
   const { hasPermission } = usePermissions();
 
   const { data: children, isLoading } = useQuery({
@@ -216,11 +209,15 @@ export default function FacilityOrganizationView({
 
   const { canCreateFacilityOrganization, canManageFacilityOrganization } =
     getPermissions(hasPermission, permissions);
+  const { isGeoAdmin } = getPermissions(
+    hasPermission,
+    authUser?.permissions || [],
+  );
 
   return (
-    <div className="space-y-6 mx-auto max-w-4xl md:pt-3">
+    <div className="space-y-4 mx-auto max-w-4xl md:px-2">
       <div className="flex flex-col flex-wrap sm:flex-row sm:items-center sm:justify-between w-full gap-4">
-        <div className="relative w-full sm:w-[18rem] max-w-full">
+        <div className="relative w-full sm:w-72 max-w-full">
           <CareIcon
             icon="l-search"
             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 size-4"
@@ -228,7 +225,6 @@ export default function FacilityOrganizationView({
           <Input
             placeholder={t("search_by_department_team_name")}
             value={qParams.search || ""}
-            data-cy="search-department-team"
             onChange={(e) => {
               updateQuery({ search: e.target.value || undefined });
             }}
@@ -236,13 +232,13 @@ export default function FacilityOrganizationView({
           />
         </div>
 
-        {canCreateFacilityOrganization && (
+        {(canCreateFacilityOrganization || isGeoAdmin) && (
           <div className="w-full sm:w-auto flex justify-center sm:justify-start">
             <FacilityOrganizationFormSheet
               facilityId={facilityId}
               parentId={id}
               trigger={
-                <Button className="w-full" data-cy="add-department/team-button">
+                <Button className="w-full">
                   <CareIcon icon="l-plus" className="mr-2 size-4" />
                   {t("add_department_team")}
                 </Button>
@@ -256,13 +252,10 @@ export default function FacilityOrganizationView({
           <CardListSkeleton count={4} />
         </div>
       ) : (
-        <div className="space-y-6 md:pb-6">
+        <div className="md:pb-4">
           {children?.results?.length ? (
             <>
-              <div
-                className="hidden sm:block rounded-lg border"
-                data-cy="department-team-list"
-              >
+              <div className="hidden sm:block rounded-lg border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -317,7 +310,7 @@ export default function FacilityOrganizationView({
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="flex items-center justify-end gap-1">
-                            {canManageFacilityOrganization &&
+                            {(canManageFacilityOrganization || isGeoAdmin) &&
                             org.org_type !== "root" ? (
                               <FacilityOrganizationFormSheet
                                 facilityId={facilityId}
@@ -325,26 +318,24 @@ export default function FacilityOrganizationView({
                                 org={org}
                                 tooltip={t("edit")}
                                 trigger={
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    data-cy="edit-department-button"
-                                  >
+                                  <Button variant="ghost" size="icon">
                                     <PenLine className="size-4" />
                                   </Button>
                                 }
                               />
                             ) : (
-                              <div className="size-10" />
+                              <div className="size-9" />
                             )}
 
-                            {!org.has_children && org.org_type !== "root" ? (
+                            {(canManageFacilityOrganization || isGeoAdmin) &&
+                            !org.has_children &&
+                            org.org_type !== "root" ? (
                               <DeleteOrgDialog
                                 org={org}
                                 facilityId={facilityId}
                               />
                             ) : (
-                              <div className="size-10" />
+                              <div className="size-9" />
                             )}
                           </div>
                         </TableCell>
@@ -359,7 +350,7 @@ export default function FacilityOrganizationView({
                     key={org.id}
                     org={org}
                     facilityId={facilityId}
-                    canWrite={canManageFacilityOrganization}
+                    canWrite={canManageFacilityOrganization || isGeoAdmin}
                     parentId={id}
                   />
                 ))}

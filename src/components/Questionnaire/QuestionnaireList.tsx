@@ -42,7 +42,7 @@ import useFilters from "@/hooks/useFilters";
 import query from "@/Utils/request/query";
 import {
   QUESTIONNAIRE_STATUS_COLORS,
-  QuestionnaireDetail,
+  QuestionnaireRead,
 } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
@@ -68,7 +68,7 @@ const RenderCard = ({
   questionnaireList,
   isLoading,
 }: {
-  questionnaireList: QuestionnaireDetail[];
+  questionnaireList: QuestionnaireRead[];
   isLoading: boolean;
 }) => {
   const { t } = useTranslation();
@@ -82,7 +82,7 @@ const RenderCard = ({
         <EmptyState />
       ) : (
         <>
-          {questionnaireList.map((questionnaire: QuestionnaireDetail) => (
+          {questionnaireList.map((questionnaire: QuestionnaireRead) => (
             <Card
               key={questionnaire.id}
               className="overflow-hidden bg-white rounded-lg cursor-pointer"
@@ -122,7 +122,6 @@ const RenderCard = ({
 
                 <div className="mt-4 flex justify-end">
                   <Button
-                    data-cy="questionnaire-view"
                     variant="outline"
                     size="sm"
                     onClick={(e) => {
@@ -150,7 +149,7 @@ const RenderTable = ({
   questionnaireList,
   isLoading,
 }: {
-  questionnaireList: QuestionnaireDetail[];
+  questionnaireList: QuestionnaireRead[];
   isLoading: boolean;
 }) => {
   const navigate = useNavigate();
@@ -175,7 +174,7 @@ const RenderTable = ({
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-gray-200 bg-white">
-            {questionnaireList.map((questionnaire: QuestionnaireDetail) => (
+            {questionnaireList.map((questionnaire: QuestionnaireRead) => (
               <TableRow
                 key={questionnaire.id}
                 className="cursor-pointer hover:bg-gray-50"
@@ -205,7 +204,6 @@ const RenderTable = ({
                       {questionnaire.description}
                     </div>
                     <Button
-                      data-cy="questionnaire-view"
                       variant="outline"
                       size="sm"
                       className="font-semibold shadow-gray-300 text-gray-950 border-gray-400"
@@ -284,7 +282,6 @@ export function QuestionnaireList() {
           <div className="relative w-full sm:max-w-md">
             <Search className="absolute left-2 top-2.5 size-4 text-gray-500" />
             <Input
-              data-cy="questionnaire-search"
               placeholder={t("search_forms")}
               className="pl-10 w-full"
               value={qParams.title || ""}

@@ -43,7 +43,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { mergeAutocompleteOptions, valuesOf } from "@/Utils/utils";
+import { formatName, mergeAutocompleteOptions, valuesOf } from "@/Utils/utils";
 import validators from "@/Utils/validators";
 import patientApi from "@/types/emr/patient/patientApi";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
@@ -97,7 +97,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
 
   const { data: patientData } = useQuery({
     queryKey: ["patient", related_patient],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: { id: String(related_patient) },
     }),
     enabled: !!related_patient,
@@ -211,14 +211,10 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
   };
 
   const fillMyDetails = () => {
-    form.setValue(
-      "referring_facility_contact_name",
-      `${authUser.first_name} ${authUser.last_name}`.trim(),
-      {
-        shouldDirty: true,
-        shouldValidate: true,
-      },
-    );
+    form.setValue("referring_facility_contact_name", formatName(authUser), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
     if (authUser.phone_number) {
       form.setValue(
         "referring_facility_contact_number",
@@ -285,7 +281,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                       <Autocomplete
                         {...field}
                         showClearButton={!id}
-                        data-cy="select-facility"
                         options={mergeAutocompleteOptions(
                           facilityOptions ?? [],
                           field.value
@@ -359,10 +354,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     <FormLabel aria-required>{t("status")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger
-                          data-cy="select-status-dropdown"
-                          ref={field.ref}
-                        >
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue placeholder={t("select_status")} />
                         </SelectTrigger>
                       </FormControl>
@@ -387,10 +379,7 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     <FormLabel aria-required>{t("category")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger
-                          data-cy="select-category-dropdown"
-                          ref={field.ref}
-                        >
+                        <SelectTrigger ref={field.ref}>
                           <SelectValue
                             placeholder={t("category_description")}
                           />
@@ -450,7 +439,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                   <FormLabel aria-required>{t("request_title")}</FormLabel>
                   <FormControl>
                     <Input
-                      data-cy="title-input"
                       {...field}
                       placeholder={t("request_title_placeholder")}
                       onChange={(value) => field.onChange(value)}
@@ -473,7 +461,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                   <FormControl>
                     <Textarea
                       {...field}
-                      data-cy="reason-input"
                       placeholder={t("request_reason_placeholder")}
                       onChange={(value) => field.onChange(value)}
                     />
@@ -504,7 +491,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                 variant="outline"
                 onClick={fillMyDetails}
                 className="shrink-0"
-                data-cy="fill_my_details_button"
               >
                 <CareIcon icon="l-user" className="mr-2 size-4" />
                 {t("fill_my_details")}
@@ -522,7 +508,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                       <Input
                         {...field}
                         onChange={(value) => field.onChange(value)}
-                        data-cy="contact_person"
                       />
                     </FormControl>
                     <FormDescription>
@@ -542,7 +527,6 @@ export default function ResourceForm({ facilityId, id }: ResourceProps) {
                     <FormControl>
                       <PhoneInput
                         {...field}
-                        data-cy="contact_person_phone"
                         onChange={(value) => field.onChange(value)}
                       />
                     </FormControl>
