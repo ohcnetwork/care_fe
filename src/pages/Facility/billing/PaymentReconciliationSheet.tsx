@@ -9,13 +9,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import * as z from "zod";
 
-import {
-  Banknote,
-  CreditCard,
-  Landmark,
-  ScanQrCode,
-  Signature,
-} from "lucide-react";
+import { Banknote, CreditCard, Landmark, Signature } from "lucide-react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -50,6 +44,7 @@ import { locationAtomFamily } from "@/atoms/location-atom";
 import { LocationPicker } from "@/components/Location/LocationPicker";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
+import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import {
   PaymentReconciliationCreate,
@@ -70,6 +65,7 @@ interface PaymentReconciliationSheetProps {
   onOpenChange: (open: boolean) => void;
   facilityId: string;
   invoice?: InvoiceRead;
+  account?: AccountRead;
   accountId: string;
   onSuccess?: () => void;
   isCreditNote?: boolean;
@@ -123,6 +119,7 @@ export function PaymentReconciliationSheet({
   onOpenChange,
   facilityId,
   invoice,
+  account,
   accountId,
   onSuccess,
   isCreditNote = false,
@@ -146,7 +143,7 @@ export function PaymentReconciliationSheet({
       outcome: PaymentReconciliationOutcome.complete,
       method: PaymentReconciliationPaymentMethod.cash,
       payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-      amount: String(invoice?.total_gross || "0"),
+      amount: String(invoice?.account.total_balance || "0"),
       tendered_amount: "0",
       returned_amount: "0",
       target_invoice: invoice?.id,
@@ -173,7 +170,7 @@ export function PaymentReconciliationSheet({
     if (invoice) {
       form.setValue("target_invoice", invoice.id);
       form.setValue("amount", String(invoice.total_gross));
-      setTenderAmount(String(invoice.total_gross));
+      setTenderAmount(String(invoice.account.total_balance));
     }
   }, [invoice, form]);
 
@@ -254,7 +251,7 @@ export function PaymentReconciliationSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full max-w-md sm:max-w-lg overflow-y-auto">
+      <SheetContent className="w-full max-w-md sm:max-w-lg overflow-y-auto pb-0">
         <SheetHeader>
           <SheetTitle className="m-0">{t("record_payment")}</SheetTitle>
           <SheetDescription className="text-gray-700">
@@ -269,49 +266,51 @@ export function PaymentReconciliationSheet({
         <Form {...form}>
           <form onSubmit={handleSubmit} className="space-y-6 py-4">
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-medium">
-                    {t("payment_details")}
-                  </h3>
-                </div>
+              <div className="rounded-lg bg-gray-50 border border-gray-200 p-3 space-y-3">
                 {invoice && (
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500">{t("total_amount")}</p>
-                    <p className="text-lg font-semibold">
-                      <MonetaryDisplay amount={String(invoice.total_gross)} />
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {invoice && (
-                <div className="rounded-lg bg-linear-to-b from-gray-100 to-gray-50 border border-gray-200 p-3 space-y-3">
                   <div className="flex text-sm justify-center text-gray-700">
                     {t("invoice_total")}:
                     <p className="font-bold ml-1">
                       <MonetaryDisplay amount={String(invoice.total_gross)} />
                     </p>
                   </div>
+                )}
 
-                  <div className="bg-white p-3 text-center">
-                    <p className="text-sm text-gray-600 mb-1">
-                      {t("balance_due")}
-                    </p>
-                    <p className="text-3xl font-bold text-gray-900">
-                      <MonetaryDisplay amount={String(invoice.total_gross)} />
-                    </p>
-                  </div>
-                  <div
-                    className="h-4 w-full bg-repeat-x -mt-4"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='10.4' height='12' viewBox='2 3 10.4 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg filter='url(%23filter0_dd_31940_236060)'%3E%3Cpath d='M7.19629 12L12.3924 3H2.00014L7.19629 12Z' fill='white'/%3E%3C/g%3E%3Cdefs%3E%3Cfilter id='filter0_dd_31940_236060' x='-0.803711' y='-1' width='16' height='16' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'%3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'/%3E%3CfeColorMatrix in='SourceAlpha' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0' result='hardAlpha'/%3E%3CfeOffset dy='1'/%3E%3CfeGaussianBlur stdDeviation='1'/%3E%3CfeComposite in2='hardAlpha' operator='out'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0'/%3E%3CfeBlend mode='normal' in2='BackgroundImageFix' result='effect1_dropShadow_31940_236060'/%3E%3CfeColorMatrix in='SourceAlpha' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0' result='hardAlpha'/%3E%3CfeOffset dy='1'/%3E%3CfeGaussianBlur stdDeviation='0.5'/%3E%3CfeComposite in2='hardAlpha' operator='out'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3CfeBlend mode='normal' in2='effect1_dropShadow_31940_236060' result='effect2_dropShadow_31940_236060'/%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='effect2_dropShadow_31940_236060' result='shape'/%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E")`,
-                      backgroundSize: "10.4px 12px",
-                      backgroundPosition: "center",
-                    }}
-                  />
+                <div className="bg-white  p-3 text-center">
+                  {invoice ? (
+                    <>
+                      <p className="text-sm text-gray-600 mb-1">
+                        {t("playment_received")}
+                      </p>
+                      <p className="text-3xl font-bold text-gray-900">
+                        <MonetaryDisplay
+                          amount={String(invoice.total_payments || "-")}
+                        />
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-gray-600 mb-1">
+                        {t("balance_due")}
+                      </p>
+                      <p className="text-3xl font-bold text-gray-900">
+                        <MonetaryDisplay
+                          amount={String(account?.total_balance || "-")}
+                        />
+                      </p>
+                    </>
+                  )}
                 </div>
-              )}
+
+                <div
+                  className="h-4 w-full bg-repeat-x -mt-4"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='10.4' height='12' viewBox='2 3 10.4 9' xmlns='http://www.w3.org/2000/svg'%3E%3Cg filter='url(%23filter0_dd_31940_236060)'%3E%3Cpath d='M7.19629 12L12.3924 3H2.00014L7.19629 12Z' fill='white'/%3E%3C/g%3E%3Cdefs%3E%3Cfilter id='filter0_dd_31940_236060' x='-0.803711' y='-1' width='16' height='16' filterUnits='userSpaceOnUse' color-interpolation-filters='sRGB'%3E%3CfeFlood flood-opacity='0' result='BackgroundImageFix'/%3E%3CfeColorMatrix in='SourceAlpha' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0' result='hardAlpha'/%3E%3CfeOffset dy='1'/%3E%3CfeGaussianBlur stdDeviation='1'/%3E%3CfeComposite in2='hardAlpha' operator='out'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0'/%3E%3CfeBlend mode='normal' in2='BackgroundImageFix' result='effect1_dropShadow_31940_236060'/%3E%3CfeColorMatrix in='SourceAlpha' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0' result='hardAlpha'/%3E%3CfeOffset dy='1'/%3E%3CfeGaussianBlur stdDeviation='0.5'/%3E%3CfeComposite in2='hardAlpha' operator='out'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3CfeBlend mode='normal' in2='effect1_dropShadow_31940_236060' result='effect2_dropShadow_31940_236060'/%3E%3CfeBlend mode='normal' in='SourceGraphic' in2='effect2_dropShadow_31940_236060' result='shape'/%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E")`,
+                    backgroundSize: "10.4px 12px",
+                    backgroundPosition: "center",
+                  }}
+                />
+              </div>
 
               <FormField
                 control={form.control}
@@ -327,11 +326,6 @@ export function PaymentReconciliationSheet({
                       className="grid grid-cols-3 gap-3"
                     >
                       {[
-                        {
-                          value: "upi" as PaymentReconciliationPaymentMethod,
-                          icon: ScanQrCode,
-                          label: t("upi"),
-                        },
                         {
                           value: PaymentReconciliationPaymentMethod.cash,
                           icon: Banknote,
@@ -362,7 +356,7 @@ export function PaymentReconciliationSheet({
                         return (
                           <Label
                             key={method.value}
-                            className="relative flex cursor-pointer flex-col items-center rounded-md border border-gray-400 shadow-ms p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-green-50"
+                            className="relative flex cursor-pointer flex-col items-center rounded-md border border-gray-400 shadow-sm p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-green-50"
                           >
                             <RadioGroupItem
                               value={method.value}
@@ -412,7 +406,7 @@ export function PaymentReconciliationSheet({
                       ].map((type) => (
                         <Label
                           key={type.value}
-                          className="flex cursor-pointer gap-2 items-center justify-center rounded-md border border-gray-400 shadow-ms p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-primary-100/50"
+                          className="flex cursor-pointer gap-2 items-center justify-center rounded-md border border-gray-400 shadow-sm p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-primary-100/50"
                         >
                           <RadioGroupItem
                             value={type.value}
@@ -589,21 +583,37 @@ export function PaymentReconciliationSheet({
               />
             </div>
 
-            <SheetFooter>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? (
-                  <>
-                    <CareIcon
-                      icon="l-spinner"
-                      className="mr-2 size-4 animate-spin"
-                    />
-                    {t("processing_with_dots")}
-                  </>
-                ) : (
-                  t("record_payment")
-                )}
-                <ShortcutBadge actionId="submit-action" />
-              </Button>
+            <SheetFooter className="sticky bottom-0 bg-white p-4 border-t border-gray-200 -mx-6">
+              <div className="flex justify-between gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  aria-label={t("cancel")}
+                >
+                  {t("cancel")}
+                  <ShortcutBadge actionId="cancel-action" />
+                </Button>
+
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  aria-label={t("record_payment")}
+                >
+                  {isPending ? (
+                    <>
+                      <CareIcon
+                        icon="l-spinner"
+                        className="mr-2 size-4 animate-spin"
+                      />
+                      {t("processing_with_dots")}
+                    </>
+                  ) : (
+                    t("record_payment")
+                  )}
+                  <ShortcutBadge actionId="submit-action" />
+                </Button>
+              </div>
             </SheetFooter>
           </form>
         </Form>
