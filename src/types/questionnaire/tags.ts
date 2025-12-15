@@ -1,11 +1,10 @@
-export interface QuestionnaireTagBase {
+export interface QuestionnaireTagModel {
+  id: string;
   slug: string;
   name: string;
 }
 
-export interface QuestionnaireTagRead extends QuestionnaireTagBase {
-  id: string;
-}
+export type QuestionnaireTag = Omit<QuestionnaireTagModel, "id">;
 
 export interface QuestionnaireTagSet {
   tags: string[];

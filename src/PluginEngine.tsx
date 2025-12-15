@@ -75,9 +75,14 @@ export default function PluginEngine({
       );
 
       if (availablePlugins.length === 0) {
+        console.log("No plugins found");
         return;
       }
 
+      console.log(
+        `Loading ${filteredManifests.length} plugins; available plugins`,
+        availablePlugins,
+      );
       setPluginManifests(availablePlugins);
     };
 

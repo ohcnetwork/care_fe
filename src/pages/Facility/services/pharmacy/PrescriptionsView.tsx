@@ -35,7 +35,7 @@ export default function PrescriptionsView({
 
   const { data: patientData } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.get, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: { id: patientId ?? "" },
       silent: true,
     }),

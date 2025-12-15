@@ -17,11 +17,11 @@ import {
   ENCOUNTER_STATUS_COLORS,
   ENCOUNTER_STATUS_FILTER_COLORS,
   ENCOUNTER_STATUS_ICONS,
-  EncounterListRead,
+  EncounterRead,
 } from "@/types/emr/encounter/encounter";
 
 interface TimelineEncounterCardProps {
-  encounter: EncounterListRead;
+  encounter: EncounterRead;
   permissions: string[];
   facilityId?: string;
   isLast?: boolean;

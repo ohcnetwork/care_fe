@@ -27,11 +27,7 @@ import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 import useFilters from "@/hooks/useFilters";
 
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
-import {
-  EncounterClass,
-  EncounterListRead,
-  EncounterRead,
-} from "@/types/emr/encounter/encounter";
+import { EncounterClass, EncounterRead } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
@@ -41,7 +37,7 @@ import careConfig from "@careConfig";
 import { subDays } from "date-fns";
 
 interface EncounterListProps {
-  encounters?: EncounterListRead[];
+  encounters?: EncounterRead[];
   facilityId: string;
   encounterClass?: EncounterClass;
 }
@@ -315,15 +311,13 @@ export function EncounterList({
             </div>
           ) : (
             <>
-              {encounters.map(
-                (encounter: EncounterListRead | EncounterRead) => (
-                  <EncounterInfoCard
-                    key={encounter.id}
-                    encounter={encounter}
-                    facilityId={facilityId}
-                  />
-                ),
-              )}
+              {encounters.map((encounter: EncounterRead) => (
+                <EncounterInfoCard
+                  key={encounter.id}
+                  encounter={encounter}
+                  facilityId={facilityId}
+                />
+              ))}
               {queryEncounters?.count &&
                 queryEncounters.count > resultsPerPage && (
                   <div className="col-span-full">

@@ -40,7 +40,7 @@ export const PrintPrescription = (props: {
 
   const { data: patient, isLoading: patientLoading } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.get, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: { id: patientId || "" },
     }),
     enabled: !!patientId,

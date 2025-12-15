@@ -71,7 +71,7 @@ export default function TreatmentSummary({
 
   const { data: patient } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.get, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: {
         id: patientId,
       },

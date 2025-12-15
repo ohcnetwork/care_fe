@@ -81,7 +81,7 @@ export function PrintAppointments({
 
   const { data: patientDetails } = useQuery({
     queryKey: ["patient-details", qParams.patient],
-    queryFn: query(patientApi.get, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: { id: qParams.patient! },
     }),
     enabled: !!qParams.patient,

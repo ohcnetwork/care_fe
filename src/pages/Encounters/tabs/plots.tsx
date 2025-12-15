@@ -5,13 +5,15 @@ import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { ObservationVisualizer } from "@/components/Common/Charts/ObservationChart";
+import {
+  ObservationPlotConfig,
+  ObservationVisualizer,
+} from "@/components/Common/Charts/ObservationChart";
 import Loading from "@/components/Common/Loading";
 
 import useBreakpoints from "@/hooks/useBreakpoints";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { ObservationPlotConfig } from "@/types/emr/observation/observation";
 
 type QueryParams = {
   plot: ObservationPlotConfig[number]["id"];

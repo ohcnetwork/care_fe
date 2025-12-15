@@ -240,6 +240,8 @@ const AppointmentEncounterHeaderActions = ({
         reference_id: "encounter-closed",
         body: {
           ...encounter,
+          patient: encounter.patient.id,
+          facility: encounter.facility.id,
           status: EncounterStatus.COMPLETED,
           period: {
             start: encounter.period.start,
@@ -285,6 +287,8 @@ const AppointmentEncounterHeaderActions = ({
     startEncounter({
       ...encounter,
       status: EncounterStatus.IN_PROGRESS,
+      patient: encounter.patient.id,
+      facility: encounter.facility.id,
     });
   };
 

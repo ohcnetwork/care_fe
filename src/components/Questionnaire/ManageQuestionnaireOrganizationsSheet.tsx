@@ -189,7 +189,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
   const { data: organizations, isLoading } = useQuery({
     queryKey: ["questionnaire", questionnaireId, "organizations"],
     queryFn: query(questionnaireApi.getOrganizations, {
-      pathParams: { slug: questionnaireId },
+      pathParams: { id: questionnaireId },
     }),
     enabled: open,
   });
@@ -208,7 +208,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
 
   const { mutate: setOrganizations, isPending: isUpdating } = useMutation({
     mutationFn: mutate(questionnaireApi.setOrganizations, {
-      pathParams: { slug: questionnaireId },
+      pathParams: { id: questionnaireId },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({

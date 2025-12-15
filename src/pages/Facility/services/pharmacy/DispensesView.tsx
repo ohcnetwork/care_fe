@@ -70,7 +70,7 @@ export default function DispensesView({
 
   const { data: patientData } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.get, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: { id: patientId ?? "" },
     }),
     enabled: !!patientId,

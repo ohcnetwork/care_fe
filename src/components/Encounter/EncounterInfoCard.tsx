@@ -20,13 +20,12 @@ import {
   ENCOUNTER_CLASSES_COLORS,
   ENCOUNTER_PRIORITY_COLORS,
   ENCOUNTER_STATUS_COLORS,
-  EncounterListRead,
   EncounterRead,
 } from "@/types/emr/encounter/encounter";
 import { formatDateTime, formatPatientAge } from "@/Utils/utils";
 
 export interface EncounterInfoCardProps {
-  encounter: EncounterListRead | EncounterRead;
+  encounter: EncounterRead;
   facilityId: string;
   hideBorder?: boolean;
 }
@@ -125,7 +124,7 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
         <Link
           href={`/facility/${facilityId}/patients/verify?${new URLSearchParams({
             phone_number: encounter.patient.phone_number,
-            year_of_birth: encounter.patient.year_of_birth?.toString() || "",
+            year_of_birth: encounter.patient.year_of_birth.toString(),
             partial_id: encounter.patient.id.slice(0, 5),
           }).toString()}`}
           className="text-gray-700 underline hover:text-gray-900 text-sm font-medium"
@@ -133,7 +132,6 @@ export default function EncounterInfoCard(props: EncounterInfoCardProps) {
           {t("patient_home")}
         </Link>
         <Link
-          basePath="/"
           href={`/facility/${facilityId}/patient/${encounter.patient.id}/encounter/${encounter.id}/updates`}
         >
           <Button

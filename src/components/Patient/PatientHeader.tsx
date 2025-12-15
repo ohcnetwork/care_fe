@@ -5,11 +5,7 @@ import { Card } from "@/components/ui/card";
 
 import { cn } from "@/lib/utils";
 import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
-import {
-  PatientListRead,
-  PatientRead,
-  PublicPatientRead,
-} from "@/types/emr/patient/patient";
+import { PatientRead } from "@/types/emr/patient/patient";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import dayjs from "dayjs";
 
@@ -20,7 +16,7 @@ export function PatientHeader({
   className,
   isPatientPage = false,
 }: {
-  patient: PatientRead | PublicPatientRead | PatientListRead;
+  patient: PatientRead;
   facilityId?: string;
   actions?: React.ReactNode;
   className?: string;
@@ -42,23 +38,22 @@ export function PatientHeader({
           disabled={isPatientPage}
         />
         <div className="flex flex-wrap xl:gap-5 gap-2">
-          {"instance_identifiers" in patient &&
-            patient.instance_identifiers
-              ?.filter(({ config }) => !config.config.auto_maintained)
-              .map((identifier) => (
-                <div
-                  key={identifier.config.id}
-                  className="flex flex-col gap-1 items-start md:hidden xl:flex"
-                >
-                  <span className="text-xs text-gray-700 md:w-auto">
-                    {identifier.config.config.display}:{" "}
-                  </span>
-                  <span className="text-sm font-semibold">
-                    {identifier.value}
-                  </span>
-                </div>
-              ))}
-          {"instance_tags" in patient && patient.instance_tags.length > 0 && (
+          {patient.instance_identifiers
+            ?.filter(({ config }) => !config.config.auto_maintained)
+            .map((identifier) => (
+              <div
+                key={identifier.config.id}
+                className="flex flex-col gap-1 items-start md:hidden xl:flex"
+              >
+                <span className="text-xs text-gray-700 md:w-auto">
+                  {identifier.config.config.display}:{" "}
+                </span>
+                <span className="text-sm font-semibold">
+                  {identifier.value}
+                </span>
+              </div>
+            ))}
+          {patient.instance_tags?.length > 0 && (
             <div className="flex flex-col gap-1 items-start">
               <span className="text-xs text-gray-700">
                 {t("patient_tags")}:
@@ -86,11 +81,7 @@ export function PatientHeader({
   );
 }
 
-export const PatientDeceasedInfo = ({
-  patient,
-}: {
-  patient: PatientRead | PatientListRead;
-}) => {
+export const PatientDeceasedInfo = ({ patient }: { patient: PatientRead }) => {
   const { t } = useTranslation();
 
   if (!patient.deceased_datetime) return null;

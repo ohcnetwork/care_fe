@@ -18,9 +18,3 @@ export const formatDateTime = (date: DateLike, format?: string) => {
 
   return obj.format(DATE_TIME_FORMAT);
 };
-
-export function booleanFromString(str: string | undefined, fallback = false) {
-  if (str === "true") return true;
-  if (str === "false") return false;
-  return fallback;
-}

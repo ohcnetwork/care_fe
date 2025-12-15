@@ -24,7 +24,7 @@ export default function UserProfile() {
 function PatientDetails({ id }: { id: string }) {
   const { data } = useQuery({
     queryKey: ['patient', id],
-    queryFn: query(patientApi.get, {
+    queryFn: query(patientApi.getPatient, {
       pathParams: { id }
     })
   });

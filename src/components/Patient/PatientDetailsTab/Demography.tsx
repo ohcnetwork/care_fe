@@ -231,9 +231,7 @@ export const Demography = (props: PatientProps) => {
             </div>
           ),
         },
-        ...(patientData.geo_organization
-          ? getGeoOrgDetails(patientData.geo_organization)
-          : []),
+        ...getGeoOrgDetails(patientData.geo_organization),
       ],
     },
     {

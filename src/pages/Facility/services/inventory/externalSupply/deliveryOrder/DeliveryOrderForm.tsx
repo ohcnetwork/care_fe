@@ -260,7 +260,6 @@ export default function DeliveryOrderForm({
       createDeliveryOrder({
         ...data,
         status: DeliveryOrderStatus.draft,
-        extensions: {},
       });
     }
   }

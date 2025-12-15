@@ -1,25 +1,20 @@
 import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
-import {
-  EncounterCreate,
-  EncounterEdit,
-  EncounterListRead,
-  EncounterRead,
-} from "@/types/emr/encounter/encounter";
+import { EncounterCreate, EncounterEdit, EncounterRead } from "./encounter";
 
 export default {
   // Encounter CRUD Operations
   list: {
     path: "/api/v1/encounter/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<EncounterListRead>>(),
+    TRes: Type<PaginatedResponse<EncounterRead>>(),
   },
   create: {
     path: "/api/v1/encounter/",
     method: HttpMethod.POST,
-    TBody: Type<EncounterCreate>(),
     TRes: Type<EncounterRead>(),
+    TBody: Type<EncounterCreate>(),
   },
   get: {
     path: "/api/v1/encounter/{id}/",

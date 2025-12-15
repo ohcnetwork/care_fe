@@ -99,9 +99,9 @@ import {
   QuestionType,
   SUPPORTED_QUESTION_TYPES,
 } from "@/types/questionnaire/question";
-import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
+import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import { QuestionnaireTagRead } from "@/types/questionnaire/tags";
+import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 
 import { generateSlug } from "@/Utils/utils";
 import { CodingEditor } from "./CodingEditor";
@@ -113,7 +113,7 @@ import ValueSetSelect from "./ValueSetSelect";
 import { scrollToQuestion } from "./utils";
 
 interface QuestionnaireEditorProps {
-  slug?: string;
+  id?: string;
 }
 interface Organization {
   id: string;
@@ -244,9 +244,7 @@ function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
   return null;
 }
 
-export default function QuestionnaireEditor({
-  slug,
-}: QuestionnaireEditorProps) {
+export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
@@ -254,7 +252,7 @@ export default function QuestionnaireEditor({
     new Set(),
   );
   const [selectedOrgs, setSelectedOrgs] = useState<Organization[]>([]);
-  const [selectedTags, setSelectedTags] = useState<QuestionnaireTagRead[]>([]);
+  const [selectedTags, setSelectedTags] = useState<QuestionnaireTagModel[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [tagSearchQuery, setTagSearchQuery] = useState("");
   const [orgError, setOrgError] = useState<string | undefined>();
@@ -267,7 +265,7 @@ export default function QuestionnaireEditor({
   const [selectedImportFile, setSelectedImportFile] = useState<File | null>(
     null,
   );
-  const [importedData, setImportedData] = useState<QuestionnaireRead | null>(
+  const [importedData, setImportedData] = useState<QuestionnaireDetail | null>(
     null,
   );
   const queryClient = useQueryClient();
@@ -323,19 +321,19 @@ export default function QuestionnaireEditor({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["questionnaireDetail", slug],
-    queryFn: query(questionnaireApi.get, {
-      pathParams: { slug: slug! },
+    queryKey: ["questionnaireDetail", id],
+    queryFn: query(questionnaireApi.detail, {
+      pathParams: { id: id! },
     }),
-    enabled: !!slug,
+    enabled: !!id,
   });
 
   const { data: organizations } = useQuery({
-    queryKey: ["questionnaire", slug, "organizations"],
+    queryKey: ["questionnaire", id, "organizations"],
     queryFn: query(questionnaireApi.getOrganizations, {
-      pathParams: { slug: slug! },
+      pathParams: { id: id! },
     }),
-    enabled: !!slug,
+    enabled: !!id,
   });
 
   const {
@@ -381,11 +379,9 @@ export default function QuestionnaireEditor({
     mutationFn: mutate(questionnaireApi.create, {
       silent: true,
     }),
-    onSuccess: (data: QuestionnaireRead) => {
+    onSuccess: (data: QuestionnaireDetail) => {
       toast.success(t("questionnaire_created_successfully"));
-      queryClient.invalidateQueries({
-        queryKey: ["questionnaireDetail", slug],
-      });
+      queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
       navigate(`/admin/questionnaire/${data.slug}/edit`);
     },
     onError: (error) =>
@@ -394,15 +390,13 @@ export default function QuestionnaireEditor({
 
   const { mutate: updateQuestionnaire, isPending: isUpdating } = useMutation({
     mutationFn: mutate(questionnaireApi.update, {
-      pathParams: { slug: slug! },
+      pathParams: { id: id! },
       silent: true,
     }),
-    onSuccess: (data: QuestionnaireRead) => {
+    onSuccess: (data: QuestionnaireDetail) => {
       toast.success(t("questionnaire_updated_successfully"));
       navigate(`/admin/questionnaire/${data.slug}/edit`);
-      queryClient.invalidateQueries({
-        queryKey: ["questionnaireDetail", slug],
-      });
+      queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
     },
     onError: (error) =>
       handleOnErrors(error, t("failed_to_update_questionnaire")),
@@ -460,9 +454,9 @@ export default function QuestionnaireEditor({
     ),
   });
 
-  const [questionnaire, setQuestionnaire] = useState<QuestionnaireRead | null>(
-    () => {
-      if (!slug) {
+  const [questionnaire, setQuestionnaire] =
+    useState<QuestionnaireDetail | null>(() => {
+      if (!id) {
         return {
           id: "",
           title: "",
@@ -473,11 +467,10 @@ export default function QuestionnaireEditor({
           questions: [],
           slug: "",
           tags: [],
-        };
+        } as QuestionnaireDetail;
       }
       return null;
-    },
-  );
+    });
 
   const form = useForm<any>({
     resolver: zodResolver(QuestionnaireFormPartialSchema),
@@ -580,7 +573,7 @@ export default function QuestionnaireEditor({
     }, 100);
   };
 
-  if (slug && isLoading) return <Loading />;
+  if (id && isLoading) return <Loading />;
 
   if (error) {
     return (
@@ -604,7 +597,7 @@ export default function QuestionnaireEditor({
   }
 
   const updateQuestionnaireField = (
-    field: keyof QuestionnaireRead,
+    field: keyof QuestionnaireDetail,
     value: unknown,
   ) => {
     form.setValue(field, value, {
@@ -614,8 +607,8 @@ export default function QuestionnaireEditor({
     });
   };
   const handleValidatedChange = (
-    field: keyof QuestionnaireRead,
-    value: QuestionnaireRead[keyof QuestionnaireRead],
+    field: keyof QuestionnaireDetail,
+    value: QuestionnaireDetail[keyof QuestionnaireDetail],
   ) => {
     let finalValue = value;
     if (field === "slug" && typeof value === "string") {
@@ -644,7 +637,7 @@ export default function QuestionnaireEditor({
   };
 
   const validateOrganizations = (): boolean => {
-    if (slug) {
+    if (id) {
       if (!organizations?.results || organizations.results.length === 0) {
         setOrgError(t("organization_selection_required"));
         return false;
@@ -755,7 +748,7 @@ export default function QuestionnaireEditor({
       return;
     }
 
-    if (slug) {
+    if (id) {
       updateQuestionnaire({
         ...form.getValues(),
         version: String(questionnaire.version), //TODO: remove when backend is fixed
@@ -806,7 +799,7 @@ export default function QuestionnaireEditor({
     if (!importedData) return;
 
     // Map only the necessary fields, ignoring id, created_by, tags etc.
-    const mappedData: Partial<QuestionnaireRead> = {
+    const mappedData: Partial<QuestionnaireDetail> = {
       title: importedData.title,
       description: importedData.description,
       status: importedData.status,
@@ -827,8 +820,7 @@ export default function QuestionnaireEditor({
     setQuestionnaire({
       ...form.getValues(),
       ...mappedData,
-    });
-
+    } as QuestionnaireDetail);
     form.reset({
       title: mappedData.title || "",
       slug: mappedData.slug || "",
@@ -890,7 +882,7 @@ export default function QuestionnaireEditor({
     );
   };
 
-  const handleTagCreated = (tag: QuestionnaireTagRead) => {
+  const handleTagCreated = (tag: QuestionnaireTagModel) => {
     setSelectedTags((current) => [...current, tag]);
   };
 
@@ -916,7 +908,7 @@ export default function QuestionnaireEditor({
       <div className="mb-4 flex flex-col md:flex-row items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">
-            {slug
+            {id
               ? t("edit") + " " + form.watch("title")
               : t("create_questionnaire")}
           </h1>
@@ -931,13 +923,13 @@ export default function QuestionnaireEditor({
           >
             {t("cancel")}
           </Button>
-          {slug && (
+          {id && (
             <Button variant="outline" onClick={handleDownload}>
               <CareIcon icon="l-import" className="mr-1 size-4" />
               {t("download")}
             </Button>
           )}
-          {!slug && (
+          {!id && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" disabled={isCreating || isUpdating}>
@@ -963,7 +955,7 @@ export default function QuestionnaireEditor({
             disabled={!isDirty || isCreating || isUpdating}
           >
             <CareIcon icon="l-save" className="mr-2 size-4" />
-            {slug ? t("save") : t("create")}
+            {id ? t("save") : t("create")}
           </Button>
         </div>
       </div>
@@ -1055,7 +1047,7 @@ export default function QuestionnaireEditor({
                 <QuestionnaireProperties
                   form={form}
                   updateQuestionnaireField={updateQuestionnaireField}
-                  id={slug}
+                  id={id}
                   organizations={organizations}
                   organizationSelection={{
                     selectedOrgs: selectedOrgs,
@@ -1075,7 +1067,7 @@ export default function QuestionnaireEditor({
                     setSearchQuery: setTagSearchQuery,
                     available: tagOptions,
                     isLoading: isLoadingAvailableTags,
-                    onTagCreated: !slug ? handleTagCreated : undefined,
+                    onTagCreated: !id ? handleTagCreated : undefined,
                   }}
                 />
                 <QuestionActions
@@ -1307,7 +1299,7 @@ export default function QuestionnaireEditor({
               <QuestionnaireProperties
                 form={form}
                 updateQuestionnaireField={updateQuestionnaireField}
-                id={slug}
+                id={id}
                 organizations={organizations}
                 organizationSelection={{
                   selectedOrgs: selectedOrgs,
@@ -1354,7 +1346,7 @@ export default function QuestionnaireEditor({
             </CardHeader>
             <CardContent>
               <QuestionnaireForm
-                questionnaireSlug={slug}
+                questionnaireSlug={id}
                 patientId="preview"
                 subjectType={form.watch("subject_type")}
                 encounterId="preview"

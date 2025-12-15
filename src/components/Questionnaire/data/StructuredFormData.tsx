@@ -1,6 +1,6 @@
-import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
+import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
 
-const encounterQuestionnaire: QuestionnaireRead = {
+const encounterQuestionnaire: QuestionnaireDetail = {
   id: "encounter",
   slug: "encounter",
   version: "0.0.1",
@@ -20,7 +20,7 @@ const encounterQuestionnaire: QuestionnaireRead = {
   tags: [],
 };
 
-const medication_request_questionnaire: QuestionnaireRead = {
+const medication_request_questionnaire: QuestionnaireDetail = {
   id: "medication_request",
   slug: "medication_request",
   version: "0.0.1",
@@ -40,7 +40,7 @@ const medication_request_questionnaire: QuestionnaireRead = {
   tags: [],
 };
 
-const allergy_intolerance_questionnaire: QuestionnaireRead = {
+const allergy_intolerance_questionnaire: QuestionnaireDetail = {
   id: "allergy_intolerance",
   slug: "allergy_intolerance",
   version: "0.0.1",
@@ -60,7 +60,7 @@ const allergy_intolerance_questionnaire: QuestionnaireRead = {
   tags: [],
 };
 
-const medication_statement_questionnaire: QuestionnaireRead = {
+const medication_statement_questionnaire: QuestionnaireDetail = {
   id: "medication_statement",
   slug: "medication_statement",
   version: "0.0.1",
@@ -80,7 +80,7 @@ const medication_statement_questionnaire: QuestionnaireRead = {
   tags: [],
 };
 
-const service_request_questionnaire: QuestionnaireRead = {
+const service_request_questionnaire: QuestionnaireDetail = {
   id: "service_request",
   slug: "service_request",
   version: "0.0.1",
@@ -100,7 +100,7 @@ const service_request_questionnaire: QuestionnaireRead = {
   tags: [],
 };
 
-const diagnosis_questionnaire: QuestionnaireRead = {
+const diagnosis_questionnaire: QuestionnaireDetail = {
   id: "diagnosis",
   slug: "diagnosis",
   version: "0.0.1",
@@ -120,7 +120,7 @@ const diagnosis_questionnaire: QuestionnaireRead = {
   tags: [],
 };
 
-const symptom_questionnaire: QuestionnaireRead = {
+const symptom_questionnaire: QuestionnaireDetail = {
   id: "symptom",
   slug: "symptom",
   version: "0.0.1",
@@ -140,7 +140,7 @@ const symptom_questionnaire: QuestionnaireRead = {
   tags: [],
 };
 
-const files_questionnaire: QuestionnaireRead = {
+const files_questionnaire: QuestionnaireDetail = {
   id: "files",
   slug: "files",
   version: "0.0.1",
@@ -160,7 +160,7 @@ const files_questionnaire: QuestionnaireRead = {
   tags: [],
 };
 
-const time_of_death_questionnaire: QuestionnaireRead = {
+const time_of_death_questionnaire: QuestionnaireDetail = {
   id: "time_of_death",
   slug: "time_of_death",
   version: "0.0.1",
@@ -180,7 +180,7 @@ const time_of_death_questionnaire: QuestionnaireRead = {
   tags: [],
 };
 
-const charge_item_questionnaire: QuestionnaireRead = {
+const charge_item_questionnaire: QuestionnaireDetail = {
   id: "charge_item",
   slug: "charge_item",
   version: "0.0.1",
@@ -200,7 +200,7 @@ const charge_item_questionnaire: QuestionnaireRead = {
   tags: [],
 };
 
-const appointment_questionnaire: QuestionnaireRead = {
+const appointment_questionnaire: QuestionnaireDetail = {
   id: "appointment",
   slug: "appointment",
   version: "0.0.1",
@@ -270,15 +270,15 @@ export const STRUCTURED_QUESTIONS = [
   },
 ] as const;
 
-export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireRead> =
+export const FIXED_QUESTIONNAIRES: Record<string, QuestionnaireDetail> =
   STRUCTURED_QUESTIONS.reduce(
     (acc, question) => {
       if ("questionnaire" in question) {
-        acc[question.questionnaire.slug] = question.questionnaire;
+        acc[question.questionnaire.id] = question.questionnaire;
       }
       return acc;
     },
-    {} as Record<string, QuestionnaireRead>,
+    {} as Record<string, QuestionnaireDetail>,
   );
 
 export type StructuredQuestionType =

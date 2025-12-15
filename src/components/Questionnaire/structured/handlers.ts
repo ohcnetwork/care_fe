@@ -157,19 +157,21 @@ export const structuredHandlers: {
     },
   },
   encounter: {
-    getRequests: async (encounters, { facilityId, encounterId }) => {
+    getRequests: async (encounters, { facilityId, patientId, encounterId }) => {
       if (!encounterId) return [];
       if (!facilityId) {
         throw new Error("Cannot create encounter without a facility");
       }
       return encounters.map((encounter) => {
         const body: RequestTypeFor<"encounter"> = {
+          patient: patientId,
           status: encounter.status,
           encounter_class: encounter.encounter_class,
           period: encounter.period,
           hospitalization: encounter.hospitalization,
           priority: encounter.priority,
           external_identifier: encounter.external_identifier,
+          facility: facilityId,
           discharge_summary_advice: encounter.discharge_summary_advice,
         };
 

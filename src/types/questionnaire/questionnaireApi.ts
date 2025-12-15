@@ -2,55 +2,51 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Organization } from "@/types/organization/organization";
 
-import {
-  QuestionnaireCreate,
-  QuestionnaireRead,
-  QuestionnaireSetOrganizations,
-  QuestionnaireUpdate,
-} from "./questionnaire";
-import {
-  QuestionnaireTagBase,
-  QuestionnaireTagRead,
-  QuestionnaireTagSet,
-} from "./tags";
+import { QuestionnaireCreate, QuestionnaireDetail } from "./questionnaire";
+import { QuestionnaireTagModel, QuestionnaireTagSet } from "./tags";
 
 export default {
   list: {
     path: "/api/v1/questionnaire/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<QuestionnaireRead>>(),
+    TRes: Type<PaginatedResponse<QuestionnaireDetail>>(),
   },
-  get: {
-    path: "/api/v1/questionnaire/{slug}/",
+
+  detail: {
+    path: "/api/v1/questionnaire/{id}/",
     method: HttpMethod.GET,
-    TRes: Type<QuestionnaireRead>(),
+    TRes: Type<QuestionnaireDetail>(),
   },
+
   create: {
     path: "/api/v1/questionnaire/",
     method: HttpMethod.POST,
+    TRes: Type<QuestionnaireDetail>(),
     TBody: Type<QuestionnaireCreate>(),
-    TRes: Type<QuestionnaireRead>(),
   },
+
   update: {
-    path: "/api/v1/questionnaire/{slug}/",
+    path: "/api/v1/questionnaire/{id}/",
     method: HttpMethod.PUT,
-    TBody: Type<QuestionnaireUpdate>(),
-    TRes: Type<QuestionnaireRead>(),
+    TRes: Type<QuestionnaireDetail>(),
+    TBody: Type<QuestionnaireDetail>(),
   },
+
   partialUpdate: {
-    path: "/api/v1/questionnaire/{slug}/",
+    path: "/api/v1/questionnaire/{id}/",
     method: HttpMethod.PATCH,
-    TBody: Type<Partial<QuestionnaireRead>>(),
-    TRes: Type<QuestionnaireRead>(),
+    TRes: Type<QuestionnaireDetail>(),
+    TBody: Type<Partial<QuestionnaireDetail>>(),
   },
+
   delete: {
-    path: "/api/v1/questionnaire/{slug}/",
+    path: "/api/v1/questionnaire/{id}/",
     method: HttpMethod.DELETE,
     TRes: Type<Record<string, never>>(),
   },
 
   submit: {
-    path: "/api/v1/questionnaire/{slug}/submit/",
+    path: "/api/v1/questionnaire/{id}/submit/",
     method: HttpMethod.POST,
     TRes: Type<Record<string, never>>(),
     TBody: Type<{
@@ -67,41 +63,43 @@ export default {
     }>(),
   },
   getOrganizations: {
-    path: "/api/v1/questionnaire/{slug}/get_organizations/",
+    path: "/api/v1/questionnaire/{id}/get_organizations/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<Organization>>(),
   },
   setOrganizations: {
-    path: "/api/v1/questionnaire/{slug}/set_organizations/",
+    path: "/api/v1/questionnaire/{id}/set_organizations/",
     method: HttpMethod.POST,
-    TBody: Type<QuestionnaireSetOrganizations>(),
     TRes: Type<PaginatedResponse<Organization>>(),
+    TBody: {} as { organizations: string[] },
   },
 
   setTags: {
     path: "/api/v1/questionnaire/{slug}/set_tags/",
     method: HttpMethod.POST,
+    TRes: Type<unknown>(),
     TBody: Type<QuestionnaireTagSet>(),
-    TRes: Type<void>(),
   },
 
   tags: {
     list: {
       path: "/api/v1/questionnaire_tag/",
       method: HttpMethod.GET,
-      TRes: Type<PaginatedResponse<QuestionnaireTagRead>>(),
+      TRes: Type<PaginatedResponse<QuestionnaireTagModel>>(),
     },
+
     create: {
       path: "/api/v1/questionnaire_tag/",
       method: HttpMethod.POST,
-      TBody: Type<QuestionnaireTagBase>(),
-      TRes: Type<QuestionnaireTagRead>(),
+      TRes: Type<QuestionnaireTagModel>(),
+      TBody: Type<Omit<QuestionnaireTagModel, "id">>(),
     },
+
     update: {
       path: "/api/v1/questionnaire_tag/{slug}/",
       method: HttpMethod.PUT,
-      TBody: Type<QuestionnaireTagBase>(),
-      TRes: Type<QuestionnaireTagRead>(),
+      TRes: Type<QuestionnaireTagModel>(),
+      TBody: Type<QuestionnaireTagModel>(),
     },
   },
-} as const;
+};

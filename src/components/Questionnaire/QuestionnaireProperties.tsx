@@ -14,11 +14,11 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import {
-  QuestionnaireRead,
+  QuestionnaireDetail,
   QuestionStatus,
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
-import { QuestionnaireTagRead } from "@/types/questionnaire/tags";
+import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
 
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import CreateQuestionnaireTagSheet from "./CreateQuestionnaireTagSheet";
@@ -40,10 +40,10 @@ interface OrganizationResponse {
 }
 
 interface QuestionnairePropertiesProps {
-  form: UseFormReturn<QuestionnaireRead>;
-  updateQuestionnaireField: <K extends keyof QuestionnaireRead>(
+  form: UseFormReturn<QuestionnaireDetail>;
+  updateQuestionnaireField: <K extends keyof QuestionnaireDetail>(
     field: K,
-    value: QuestionnaireRead[K],
+    value: QuestionnaireDetail[K],
   ) => void;
   id?: string;
   organizations?: OrganizationResponse;
@@ -57,15 +57,15 @@ interface QuestionnairePropertiesProps {
     error: string | undefined;
     setError: (error?: string) => void;
   };
-  tags?: QuestionnaireTagRead[];
+  tags?: QuestionnaireTagModel[];
   tagSelection: {
-    selectedTags: QuestionnaireTagRead[];
+    selectedTags: QuestionnaireTagModel[];
     onToggle: (tagId: string) => void;
     searchQuery: string;
     setSearchQuery: (query: string) => void;
-    available?: QuestionnaireTagRead[];
+    available?: QuestionnaireTagModel[];
     isLoading?: boolean;
-    onTagCreated?: (tag: QuestionnaireTagRead) => void;
+    onTagCreated?: (tag: QuestionnaireTagModel) => void;
   };
 }
 
@@ -250,7 +250,7 @@ function TagSelector({
 }: {
   id?: string;
   selection: QuestionnairePropertiesProps["tagSelection"];
-  form: UseFormReturn<QuestionnaireRead>;
+  form: UseFormReturn<QuestionnaireDetail>;
 }) {
   const { t } = useTranslation();
   const tags = useWatch({ control: form.control, name: "tags" });
