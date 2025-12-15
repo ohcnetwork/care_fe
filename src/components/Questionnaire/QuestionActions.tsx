@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { Question } from "@/types/questionnaire/question";
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 
 import MoveQuestionDialog from "./MoveQuestionDialog";
 import { removeQuestionsFromSource } from "./utils";
@@ -25,7 +25,7 @@ interface QuestionActionsProps {
   selectedQuestions: Set<string>;
   questions: Question[];
   updateQuestionnaireField: (
-    field: keyof QuestionnaireDetail,
+    field: keyof QuestionnaireRead,
     value: unknown,
   ) => void;
   onQuestionsChange: (questions: Question[]) => void;
