@@ -91,7 +91,6 @@ export default function DispensesView({
     }),
     select: (data: PaginatedResponse<PrescriptionSummary>) =>
       data.results.flatMap((item) => item.tags),
-    enabled: !!patientId,
   });
 
   return (
