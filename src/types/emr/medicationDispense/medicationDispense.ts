@@ -172,8 +172,16 @@ export interface MedicationDispenseBase {
   substitution?: MedicationDispenseSubstitution;
 }
 
-export interface MedicationDispenseCreate
-  extends Omit<MedicationDispenseBase, "id"> {
+export interface MedicationDispenseOrderCreate {
+  name?: string;
+  note?: string;
+  alternate_identifier: string;
+}
+
+export interface MedicationDispenseCreate extends Omit<
+  MedicationDispenseBase,
+  "id"
+> {
   encounter: string;
   location?: string;
   authorizing_request: string | null;
@@ -181,10 +189,13 @@ export interface MedicationDispenseCreate
   quantity: number;
   days_supply: number;
   fully_dispensed: boolean;
+  create_dispense_order: MedicationDispenseOrderCreate;
 }
 
-export interface MedicationDispenseUpsert
-  extends Omit<MedicationDispenseBase, "id"> {
+export interface MedicationDispenseUpsert extends Omit<
+  MedicationDispenseBase,
+  "id"
+> {
   id?: string;
 }
 

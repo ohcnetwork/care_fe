@@ -97,8 +97,8 @@ export default function EditUserRoleSheet({
             <div className="rounded-lg border border-gray-200 p-4">
               <div className="flex items-start gap-4">
                 <Avatar
-                  name={`${userRole.user.first_name} ${userRole.user.last_name}`}
-                  className="size-16"
+                  name={formatName(userRole.user, true)}
+                  className="size-12"
                   imageUrl={userRole.user.profile_picture_url}
                 />
                 <div className="flex flex-col gap-1 flex-1">

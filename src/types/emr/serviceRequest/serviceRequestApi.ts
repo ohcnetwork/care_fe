@@ -22,6 +22,16 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<ServiceRequestReadSpec>(),
   },
+  cancelServiceRequest: {
+    path: "/api/v1/facility/{facilityId}/service_request/{serviceRequestId}/cancel/",
+    method: HttpMethod.POST,
+    TRes: Type<void>(),
+  },
+  completeServiceRequest: {
+    path: "/api/v1/facility/{facilityId}/service_request/{serviceRequestId}/complete/",
+    method: HttpMethod.POST,
+    TRes: Type<void>(),
+  },
   createServiceRequest: {
     path: "/api/v1/facility/{facilityId}/service_request/",
     method: HttpMethod.POST,

@@ -19,17 +19,22 @@ test.describe("Device Service History", () => {
   test("Open random device and create a new service record", async ({
     page,
   }) => {
-    await page.waitForLoadState("networkidle");
-
+    // Wait for device list to load by checking for at least one device card
     const firstDeviceLink = page
       .getByRole("link")
       .filter({ has: page.locator('[data-slot="card"]') })
       .first();
 
-    await expect(firstDeviceLink).toBeVisible();
+    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
 
     await firstDeviceLink.click();
-    await page.waitForLoadState("networkidle");
+
+    // Wait for device details page to load by checking for Add Service Record button
+    await expect(
+      page.getByRole("button", { name: "Add Service Record" }),
+    ).toBeVisible({
+      timeout: 10000,
+    });
 
     await page.getByRole("button", { name: "Add Service Record" }).click();
 
@@ -43,17 +48,22 @@ test.describe("Device Service History", () => {
   test("Edit an existing service record and verify changes", async ({
     page,
   }) => {
-    await page.waitForLoadState("networkidle");
-
+    // Wait for device list to load by checking for at least one device card
     const firstDeviceLink = page
       .getByRole("link")
       .filter({ has: page.locator('[data-slot="card"]') })
       .first();
 
-    await expect(firstDeviceLink).toBeVisible();
+    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
 
     await firstDeviceLink.click();
-    await page.waitForLoadState("networkidle");
+
+    // Wait for device details page to load by checking for Add Service Record button
+    await expect(
+      page.getByRole("button", { name: "Add Service Record" }),
+    ).toBeVisible({
+      timeout: 10000,
+    });
 
     await page.getByRole("button", { name: "Add Service Record" }).click();
 
@@ -98,17 +108,22 @@ test.describe("Device Service History", () => {
   test("Show validation error for future date in service record", async ({
     page,
   }) => {
-    await page.waitForLoadState("networkidle");
-
+    // Wait for device list to load by checking for at least one device card
     const firstDeviceLink = page
       .getByRole("link")
       .filter({ has: page.locator('[data-slot="card"]') })
       .first();
 
-    await expect(firstDeviceLink).toBeVisible();
+    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
 
     await firstDeviceLink.click();
-    await page.waitForLoadState("networkidle");
+
+    // Wait for device details page to load by checking for Add Service Record button
+    await expect(
+      page.getByRole("button", { name: "Add Service Record" }),
+    ).toBeVisible({
+      timeout: 10000,
+    });
 
     await page.getByRole("button", { name: "Add Service Record" }).click();
 
@@ -137,17 +152,22 @@ test.describe("Device Service History", () => {
   test("Save button should be disabled when no changes are made in edit mode", async ({
     page,
   }) => {
-    await page.waitForLoadState("networkidle");
-
+    // Wait for device list to load by checking for at least one device card
     const firstDeviceLink = page
       .getByRole("link")
       .filter({ has: page.locator('[data-slot="card"]') })
       .first();
 
-    await expect(firstDeviceLink).toBeVisible();
+    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
 
     await firstDeviceLink.click();
-    await page.waitForLoadState("networkidle");
+
+    // Wait for device details page to load by checking for Add Service Record button
+    await expect(
+      page.getByRole("button", { name: "Add Service Record" }),
+    ).toBeVisible({
+      timeout: 10000,
+    });
 
     await page.getByRole("button", { name: "Add Service Record" }).click();
 

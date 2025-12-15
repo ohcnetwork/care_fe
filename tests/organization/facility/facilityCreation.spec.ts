@@ -64,7 +64,7 @@ test.describe("Facility Creation", () => {
       .filter({ hasText: "Select Facility Type" })
       .click();
     await page.getByPlaceholder("Search facility type").fill(facilityType);
-    await page.getByRole("option", { name: facilityType }).click();
+    await page.getByRole("option", { name: facilityType, exact: true }).click();
     await page
       .getByRole("textbox", { name: "Facility Name *" })
       .fill(facilityName);
@@ -111,7 +111,7 @@ test.describe("Facility Creation", () => {
       .filter({ hasText: "Select Facility Type" })
       .click();
     await page.getByPlaceholder("Search facility type").fill(facilityType);
-    await page.getByRole("option", { name: facilityType }).click();
+    await page.getByRole("option", { name: facilityType, exact: true }).click();
     await page
       .getByRole("textbox", { name: "Facility Name *" })
       .fill(facilityName);

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -52,12 +53,16 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { dateQueryString, formatName } from "@/Utils/utils";
+import { Avatar } from "@/components/Common/Avatar";
 import { Code } from "@/types/base/code/code";
 import {
   Onset,
   SYMPTOM_CLINICAL_STATUS,
+  SYMPTOM_CLINICAL_STATUS_COLORS,
   SYMPTOM_SEVERITY,
+  SYMPTOM_SEVERITY_COLORS,
   SYMPTOM_VERIFICATION_STATUS,
+  SYMPTOM_VERIFICATION_STATUS_COLORS,
   Symptom,
   SymptomRequest,
 } from "@/types/emr/symptom/symptom";
@@ -791,7 +796,7 @@ export function SymptomQuestion({
   return (
     <div className="space-y-2">
       <HistoricalRecordSelector<SymptomRequest>
-        title={t("symptom_history")}
+        title={t("past_symptoms")}
         structuredTypes={[
           {
             type: t("symptoms"),
@@ -804,30 +809,78 @@ export function SymptomQuestion({
               {
                 key: "clinical_status",
                 label: t("status"),
-                render: (status: string) => t(status),
+                render: (status: string) => (
+                  <Badge
+                    variant={
+                      SYMPTOM_CLINICAL_STATUS_COLORS[
+                        status as keyof typeof SYMPTOM_CLINICAL_STATUS_COLORS
+                      ]
+                    }
+                  >
+                    {t(status)}
+                  </Badge>
+                ),
+              },
+              {
+                key: "verification_status",
+                label: t("verification"),
+                render: (verification_status: string) => (
+                  <Badge
+                    variant={
+                      SYMPTOM_VERIFICATION_STATUS_COLORS[
+                        verification_status as keyof typeof SYMPTOM_VERIFICATION_STATUS_COLORS
+                      ]
+                    }
+                  >
+                    {t(verification_status)}
+                  </Badge>
+                ),
+              },
+              {
+                key: "severity",
+                label: t("severity"),
+                render: (severity: string) => (
+                  <Badge
+                    variant={
+                      SYMPTOM_SEVERITY_COLORS[
+                        severity as keyof typeof SYMPTOM_SEVERITY_COLORS
+                      ]
+                    }
+                  >
+                    {t(severity)}
+                  </Badge>
+                ),
+              },
+              {
+                key: "created_by",
+                label: t("recorded_by"),
+                render: (created_by) => (
+                  <div className="flex items-center gap-2">
+                    <Avatar
+                      imageUrl={created_by?.profile_picture_url}
+                      name={formatName(created_by, true)}
+                      className="size-6 rounded-full"
+                    />
+                    <span className="text-sm truncate">
+                      {formatName(created_by)}
+                    </span>
+                  </div>
+                ),
               },
               {
                 key: "onset",
                 label: t("onset_date"),
                 render: (onset: Onset) =>
                   onset?.onset_datetime
-                    ? format(new Date(onset.onset_datetime), "dd-MM-yyyy")
+                    ? format(new Date(onset.onset_datetime), "dd MMM yyyy")
                     : "",
               },
-              {
-                key: "severity",
-                label: t("severity"),
-                render: (severity: string) => t(severity),
-              },
+            ],
+            expandableFields: [
               {
                 key: "note",
                 label: t("notes"),
-                render: (note: string | undefined) => note || "-",
-              },
-              {
-                key: "created_by",
-                label: t("recorded_by"),
-                render: (created_by) => formatName(created_by),
+                render: (note) => note,
               },
             ],
             queryKey: ["symptoms", patientId],

@@ -293,7 +293,7 @@ export default function PatientIdentifierFilter({
         }
 
         handleScanSuccess(extractedId);
-        toast.success(t("patient_details_scanned_successfully"));
+        toast.info(t("patient_details_scanned_successfully"));
       }
     },
     enabled: !open && !verificationOpen && !scanDialogOpen,

@@ -47,11 +47,10 @@ import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 
 // Extend the base type to use UserReadMinimal for requester
-interface ServiceRequestApplyActivityDefinitionSpec
-  extends Omit<
-    BaseServiceRequestApplyActivityDefinitionSpec,
-    "service_request"
-  > {
+interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
+  BaseServiceRequestApplyActivityDefinitionSpec,
+  "service_request"
+> {
   service_request: Omit<
     BaseServiceRequestApplyActivityDefinitionSpec["service_request"],
     "requester"
@@ -487,10 +486,6 @@ export function ServiceRequestQuestion({
     }),
     enabled: !!selectedActivityDefinition,
   });
-
-  useEffect(() => {
-    console.log("selectedActivityDefinition", selectedActivityDefinition);
-  }, [selectedActivityDefinition]);
 
   useEffect(() => {
     if (selectedActivityDefinition && selectedActivityDefinitionData) {
