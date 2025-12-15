@@ -135,26 +135,6 @@ export function PaymentReconciliationSheet({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      reconciliation_type: PaymentReconciliationType.payment,
-      status: PaymentReconciliationStatus.active,
-      kind: PaymentReconciliationKind.deposit,
-      issuer_type: PaymentReconciliationIssuerType.patient,
-      outcome: PaymentReconciliationOutcome.complete,
-      method: PaymentReconciliationPaymentMethod.cash,
-      payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-      amount: String(invoice?.total_gross || "0"),
-      tendered_amount: "0",
-      returned_amount: "0",
-      target_invoice: invoice?.id,
-      reference_number: "",
-      authorization: "",
-      disposition: "",
-      note: "",
-      account: accountId,
-      is_credit_note: isCreditNote,
-      location: selectedLocationObject?.id,
-    },
   });
 
   // Watch for payment method changes
@@ -245,9 +225,28 @@ export function PaymentReconciliationSheet({
 
   useEffect(() => {
     if (open) {
-      form.reset();
+      form.reset({
+        reconciliation_type: PaymentReconciliationType.payment,
+        status: PaymentReconciliationStatus.active,
+        kind: PaymentReconciliationKind.deposit,
+        issuer_type: PaymentReconciliationIssuerType.patient,
+        outcome: PaymentReconciliationOutcome.complete,
+        method: PaymentReconciliationPaymentMethod.cash,
+        payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+        amount: String(invoice?.total_gross || "0"),
+        tendered_amount: String(invoice?.total_gross || "0"),
+        returned_amount: "0",
+        target_invoice: invoice?.id,
+        reference_number: "",
+        authorization: "",
+        disposition: "",
+        note: "",
+        account: accountId,
+        is_credit_note: isCreditNote,
+        location: selectedLocationObject?.id,
+      });
     }
-  }, [open]);
+  }, [open, invoice, accountId, isCreditNote, selectedLocationObject, form]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -276,7 +275,7 @@ export function PaymentReconciliationSheet({
                   </div>
                 )}
 
-                <div className="bg-white  p-3 text-center">
+                <div className="bg-white p-3 text-center">
                   {invoice ? (
                     <>
                       <p className="text-sm text-gray-600 mb-1">
@@ -284,7 +283,7 @@ export function PaymentReconciliationSheet({
                       </p>
                       <p className="text-3xl font-bold text-gray-900">
                         <MonetaryDisplay
-                          amount={String(invoice.total_payments || "-")}
+                          amount={String(invoice.total_payments)}
                         />
                       </p>
                     </>
@@ -295,7 +294,7 @@ export function PaymentReconciliationSheet({
                       </p>
                       <p className="text-3xl font-bold text-gray-900">
                         <MonetaryDisplay
-                          amount={String(account?.total_balance || "-")}
+                          amount={String(account?.total_balance)}
                         />
                       </p>
                     </>

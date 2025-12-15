@@ -3742,6 +3742,7 @@
   "payment_type": "Payment Type",
   "payments": "Payments",
   "payments_received": "Payments Received",
+  "payments_received_against_this_invoice": "Payments Received Against This Invoice",
   "pdf": "PDF",
   "pending": "Pending",
   "pending_deliveries": "Pending Deliveries",
