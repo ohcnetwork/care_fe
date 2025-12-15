@@ -81,21 +81,18 @@ export default function DispensesView({
     enabled: !!patientId,
   });
 
-  const { data: prescriptionQueue } = useQuery<
-    PaginatedResponse<PrescriptionSummary>
-  >({
+  const { data: prescriptionTags } = useQuery({
     queryKey: ["prescriptionQueue", facilityId, patientId],
-    queryFn: query.debounced(prescriptionApi.summary, {
+    queryFn: query(prescriptionApi.summary, {
       pathParams: { facilityId },
       queryParams: {
         patient_external_id: patientId,
       },
     }),
+    select: (data: PaginatedResponse<PrescriptionSummary>) =>
+      data.results.flatMap((item) => item.tags),
+    enabled: !!patientId,
   });
-
-  const prescriptionTags = prescriptionQueue?.results.flatMap(
-    (item) => item.tags,
-  );
 
   return (
     <Page title={t("pharmacy_medications")} hideTitleOnPage>
