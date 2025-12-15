@@ -304,7 +304,7 @@ export function InvoiceShow({
             <ChevronLeft />
             <span>{t("back")}</span>
           </BackButton>
-          <div className="h-auto w-px bg-gray-300" />
+          <div className="h-auto w-px bg-gray-300" aria-hidden="true" />
           <div>
             <label className="text-gray-700 text-sm font-medium">
               {t("patient_name")}
@@ -345,7 +345,7 @@ export function InvoiceShow({
                 {t("amount_due")}
               </label>
               <div className="font-semibold text-gray-950">
-                {invoice.account.total_balance}
+                <MonetaryDisplay amount={invoice.account.total_balance} />
               </div>
             </div>
             <div>
