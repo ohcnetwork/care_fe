@@ -75,6 +75,9 @@ export interface ObservationListRead extends ObservationBase {
   created_by: UserReadMinimal;
   updated_by: UserReadMinimal;
   data_entered_by?: UserReadMinimal | null;
+}
+
+export interface ObservationRead extends ObservationListRead {
   observation_definition?: ObservationDefinitionRead | null;
 }
 
