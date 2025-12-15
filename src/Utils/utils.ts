@@ -5,7 +5,11 @@ import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
-import { PatientRead, PublicPatientRead } from "@/types/emr/patient/patient";
+import {
+  PatientListRead,
+  PatientRead,
+  PublicPatientRead,
+} from "@/types/emr/patient/patient";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -141,7 +145,7 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
 };
 
 export const formatPatientAge = (
-  obj: PatientRead | PublicPatientRead,
+  obj: PatientRead | PatientListRead | PublicPatientRead,
   abbreviated = false,
 ) => {
   const suffixes = getRelativeDateSuffix(abbreviated);

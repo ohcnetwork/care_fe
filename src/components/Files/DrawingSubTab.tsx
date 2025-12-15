@@ -152,7 +152,7 @@ export const DrawingPage = ({
   });
   const { data: patientData } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: { id: patientId ?? "" },
     }),
     enabled: !!patient && !!patientId,
