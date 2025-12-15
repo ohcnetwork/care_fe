@@ -143,7 +143,7 @@ export function PaymentReconciliationSheet({
       outcome: PaymentReconciliationOutcome.complete,
       method: PaymentReconciliationPaymentMethod.cash,
       payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-      amount: String(invoice?.account.total_balance || "0"),
+      amount: String(invoice?.total_gross || "0"),
       tendered_amount: "0",
       returned_amount: "0",
       target_invoice: invoice?.id,
@@ -170,7 +170,7 @@ export function PaymentReconciliationSheet({
     if (invoice) {
       form.setValue("target_invoice", invoice.id);
       form.setValue("amount", String(invoice.total_gross));
-      setTenderAmount(String(invoice.account.total_balance));
+      setTenderAmount(String(invoice.total_gross));
     }
   }, [invoice, form]);
 
@@ -280,7 +280,7 @@ export function PaymentReconciliationSheet({
                   {invoice ? (
                     <>
                       <p className="text-sm text-gray-600 mb-1">
-                        {t("playment_received")}
+                        {t("payment_received")}
                       </p>
                       <p className="text-3xl font-bold text-gray-900">
                         <MonetaryDisplay
