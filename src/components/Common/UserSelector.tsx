@@ -93,7 +93,8 @@ function UserCommandContent({
                 className="mt-2 border-primary-500 text-primary-600 flex items-center gap-1 hover:bg-primary-50"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onAddUser && onAddUser();
+                  setOpen(false);
+                  onAddUser?.();
                 }}
                 data-testid="add-user-btn"
               >

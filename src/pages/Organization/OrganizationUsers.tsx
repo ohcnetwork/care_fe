@@ -280,7 +280,7 @@ export default function OrganizationUsers({ id, navOrganizationId }: Props) {
                                   variant="outline"
                                   size="sm"
                                   className="px-2"
-                                  aria-label={t("user_options")}
+                                  aria-label={t("user_card_options")}
                                 >
                                   <CareIcon
                                     icon="l-ellipsis-v"

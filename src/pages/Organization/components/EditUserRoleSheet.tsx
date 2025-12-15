@@ -45,7 +45,7 @@ export default function EditUserRoleSheet({
     if (open) {
       setSelectedRole(userRole.role);
     }
-  }, [open, userRole.role]);
+  }, [open, userRole]);
 
   const { mutate: updateRole } = useMutation({
     mutationFn: (body: { user: string; role: string }) =>
