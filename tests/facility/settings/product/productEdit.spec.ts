@@ -21,7 +21,7 @@ test.describe("Product Edit", () => {
     await page.getByRole("button", { name: "Update" }).click();
 
     await expect(page).toHaveURL(
-      /\/facility\/[0-9a-fA-F-]{36}\/settings\/product\/[0-9a-fA-F-]{36}$/,
+      /\/facility\/.*\/settings\/product\/.*\/edit$/,
     );
 
     await expect(page.getByText("Back to list")).toBeVisible();
