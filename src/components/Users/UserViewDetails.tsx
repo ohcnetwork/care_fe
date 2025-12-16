@@ -3,10 +3,7 @@ import { formatPhoneNumberIntl } from "react-phone-number-input";
 
 import { TooltipComponent } from "@/components/ui/tooltip";
 
-import {
-  Organization,
-  renderGeoOrganizations,
-} from "@/types/organization/organization";
+import { renderGeoOrganizations } from "@/types/organization/organization";
 import { UserRead } from "@/types/user/user";
 
 interface UserViewDetailsProps {
@@ -119,9 +116,7 @@ export const ContactInfoDetails = ({ user }: UserViewDetailsProps) => {
 export const GeoOrgDetails = ({ user }: UserViewDetailsProps) => {
   const { t } = useTranslation();
   const geoOrganization =
-    "geo_organization" in user
-      ? (user.geo_organization as Organization)
-      : undefined;
+    "geo_organization" in user ? user.geo_organization : undefined;
 
   if (!geoOrganization) {
     return <></>;

@@ -99,9 +99,9 @@ import {
   QuestionType,
   SUPPORTED_QUESTION_TYPES,
 } from "@/types/questionnaire/question";
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
+import { QuestionnaireTagRead } from "@/types/questionnaire/tags";
 
 import { generateSlug } from "@/Utils/utils";
 import { CodingEditor } from "./CodingEditor";
@@ -113,7 +113,7 @@ import ValueSetSelect from "./ValueSetSelect";
 import { scrollToQuestion } from "./utils";
 
 interface QuestionnaireEditorProps {
-  id?: string;
+  slug?: string;
 }
 interface Organization {
   id: string;
@@ -244,7 +244,9 @@ function findFirstErrorPath(errors: any, path: number[] = []): number[] | null {
   return null;
 }
 
-export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
+export default function QuestionnaireEditor({
+  slug,
+}: QuestionnaireEditorProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
@@ -252,7 +254,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     new Set(),
   );
   const [selectedOrgs, setSelectedOrgs] = useState<Organization[]>([]);
-  const [selectedTags, setSelectedTags] = useState<QuestionnaireTagModel[]>([]);
+  const [selectedTags, setSelectedTags] = useState<QuestionnaireTagRead[]>([]);
   const [orgSearchQuery, setOrgSearchQuery] = useState("");
   const [tagSearchQuery, setTagSearchQuery] = useState("");
   const [orgError, setOrgError] = useState<string | undefined>();
@@ -265,7 +267,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   const [selectedImportFile, setSelectedImportFile] = useState<File | null>(
     null,
   );
-  const [importedData, setImportedData] = useState<QuestionnaireDetail | null>(
+  const [importedData, setImportedData] = useState<QuestionnaireRead | null>(
     null,
   );
   const queryClient = useQueryClient();
@@ -321,19 +323,19 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["questionnaireDetail", id],
-    queryFn: query(questionnaireApi.detail, {
-      pathParams: { id: id! },
+    queryKey: ["questionnaireDetail", slug],
+    queryFn: query(questionnaireApi.get, {
+      pathParams: { slug: slug! },
     }),
-    enabled: !!id,
+    enabled: !!slug,
   });
 
   const { data: organizations } = useQuery({
-    queryKey: ["questionnaire", id, "organizations"],
+    queryKey: ["questionnaire", slug, "organizations"],
     queryFn: query(questionnaireApi.getOrganizations, {
-      pathParams: { id: id! },
+      pathParams: { slug: slug! },
     }),
-    enabled: !!id,
+    enabled: !!slug,
   });
 
   const {
@@ -379,9 +381,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     mutationFn: mutate(questionnaireApi.create, {
       silent: true,
     }),
-    onSuccess: (data: QuestionnaireDetail) => {
+    onSuccess: (data: QuestionnaireRead) => {
       toast.success(t("questionnaire_created_successfully"));
-      queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaireDetail", slug],
+      });
       navigate(`/admin/questionnaire/${data.slug}/edit`);
     },
     onError: (error) =>
@@ -390,13 +394,15 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
 
   const { mutate: updateQuestionnaire, isPending: isUpdating } = useMutation({
     mutationFn: mutate(questionnaireApi.update, {
-      pathParams: { id: id! },
+      pathParams: { slug: slug! },
       silent: true,
     }),
-    onSuccess: (data: QuestionnaireDetail) => {
+    onSuccess: (data: QuestionnaireRead) => {
       toast.success(t("questionnaire_updated_successfully"));
       navigate(`/admin/questionnaire/${data.slug}/edit`);
-      queryClient.invalidateQueries({ queryKey: ["questionnaireDetail", id] });
+      queryClient.invalidateQueries({
+        queryKey: ["questionnaireDetail", slug],
+      });
     },
     onError: (error) =>
       handleOnErrors(error, t("failed_to_update_questionnaire")),
@@ -454,9 +460,9 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     ),
   });
 
-  const [questionnaire, setQuestionnaire] =
-    useState<QuestionnaireDetail | null>(() => {
-      if (!id) {
+  const [questionnaire, setQuestionnaire] = useState<QuestionnaireRead | null>(
+    () => {
+      if (!slug) {
         return {
           id: "",
           title: "",
@@ -467,10 +473,11 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           questions: [],
           slug: "",
           tags: [],
-        } as QuestionnaireDetail;
+        };
       }
       return null;
-    });
+    },
+  );
 
   const form = useForm<any>({
     resolver: zodResolver(QuestionnaireFormPartialSchema),
@@ -573,7 +580,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     }, 100);
   };
 
-  if (id && isLoading) return <Loading />;
+  if (slug && isLoading) return <Loading />;
 
   if (error) {
     return (
@@ -597,7 +604,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   }
 
   const updateQuestionnaireField = (
-    field: keyof QuestionnaireDetail,
+    field: keyof QuestionnaireRead,
     value: unknown,
   ) => {
     form.setValue(field, value, {
@@ -607,8 +614,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     });
   };
   const handleValidatedChange = (
-    field: keyof QuestionnaireDetail,
-    value: QuestionnaireDetail[keyof QuestionnaireDetail],
+    field: keyof QuestionnaireRead,
+    value: QuestionnaireRead[keyof QuestionnaireRead],
   ) => {
     let finalValue = value;
     if (field === "slug" && typeof value === "string") {
@@ -637,7 +644,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
   };
 
   const validateOrganizations = (): boolean => {
-    if (id) {
+    if (slug) {
       if (!organizations?.results || organizations.results.length === 0) {
         setOrgError(t("organization_selection_required"));
         return false;
@@ -748,7 +755,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       return;
     }
 
-    if (id) {
+    if (slug) {
       updateQuestionnaire({
         ...form.getValues(),
         version: String(questionnaire.version), //TODO: remove when backend is fixed
@@ -799,7 +806,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     if (!importedData) return;
 
     // Map only the necessary fields, ignoring id, created_by, tags etc.
-    const mappedData: Partial<QuestionnaireDetail> = {
+    const mappedData: Partial<QuestionnaireRead> = {
       title: importedData.title,
       description: importedData.description,
       status: importedData.status,
@@ -820,7 +827,8 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     setQuestionnaire({
       ...form.getValues(),
       ...mappedData,
-    } as QuestionnaireDetail);
+    });
+
     form.reset({
       title: mappedData.title || "",
       slug: mappedData.slug || "",
@@ -882,7 +890,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
     );
   };
 
-  const handleTagCreated = (tag: QuestionnaireTagModel) => {
+  const handleTagCreated = (tag: QuestionnaireTagRead) => {
     setSelectedTags((current) => [...current, tag]);
   };
 
@@ -908,7 +916,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
       <div className="mb-4 flex flex-col md:flex-row items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold">
-            {id
+            {slug
               ? t("edit") + " " + form.watch("title")
               : t("create_questionnaire")}
           </h1>
@@ -923,13 +931,13 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
           >
             {t("cancel")}
           </Button>
-          {id && (
+          {slug && (
             <Button variant="outline" onClick={handleDownload}>
               <CareIcon icon="l-import" className="mr-1 size-4" />
               {t("download")}
             </Button>
           )}
-          {!id && (
+          {!slug && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" disabled={isCreating || isUpdating}>
@@ -955,7 +963,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             disabled={!isDirty || isCreating || isUpdating}
           >
             <CareIcon icon="l-save" className="mr-2 size-4" />
-            {id ? t("save") : t("create")}
+            {slug ? t("save") : t("create")}
           </Button>
         </div>
       </div>
@@ -1047,7 +1055,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                 <QuestionnaireProperties
                   form={form}
                   updateQuestionnaireField={updateQuestionnaireField}
-                  id={id}
+                  id={slug}
                   organizations={organizations}
                   organizationSelection={{
                     selectedOrgs: selectedOrgs,
@@ -1067,7 +1075,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
                     setSearchQuery: setTagSearchQuery,
                     available: tagOptions,
                     isLoading: isLoadingAvailableTags,
-                    onTagCreated: !id ? handleTagCreated : undefined,
+                    onTagCreated: !slug ? handleTagCreated : undefined,
                   }}
                 />
                 <QuestionActions
@@ -1299,7 +1307,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
               <QuestionnaireProperties
                 form={form}
                 updateQuestionnaireField={updateQuestionnaireField}
-                id={id}
+                id={slug}
                 organizations={organizations}
                 organizationSelection={{
                   selectedOrgs: selectedOrgs,
@@ -1346,7 +1354,7 @@ export default function QuestionnaireEditor({ id }: QuestionnaireEditorProps) {
             </CardHeader>
             <CardContent>
               <QuestionnaireForm
-                questionnaireSlug={id}
+                questionnaireSlug={slug}
                 patientId="preview"
                 subjectType={form.watch("subject_type")}
                 encounterId="preview"

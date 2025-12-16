@@ -1,6 +1,6 @@
 import { AccountRead } from "@/types/billing/account/Account";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 export enum PaymentReconciliationType {
   payment = "payment",
@@ -92,7 +92,7 @@ export interface PaymentReconciliationRead extends PaymentReconciliationBase {
   target_invoice: InvoiceRead;
   account: AccountRead;
   is_credit_note: boolean;
-  location: LocationList | null;
+  location: LocationRead | null;
 }
 
 export interface PaymentReconciliationCancel {
