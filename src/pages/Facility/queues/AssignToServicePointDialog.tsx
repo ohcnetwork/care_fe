@@ -42,6 +42,10 @@ export function AssignToServicePointDialog({
     facilityId,
   });
 
+  const availableServicePoints = assignedServicePoints.filter(
+    (sp) => sp.id !== token.sub_queue?.id,
+  );
+
   const { mutate: updateToken, isPending } = useMutation({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
@@ -89,7 +93,7 @@ export function AssignToServicePointDialog({
           value={selectedSubQueueId}
           onValueChange={setSelectedSubQueueId}
         >
-          {assignedServicePoints.map((subQueue) => (
+          {availableServicePoints.map((subQueue) => (
             <div
               key={subQueue.id}
               className={cn(
@@ -110,7 +114,7 @@ export function AssignToServicePointDialog({
               </span>
             </div>
           ))}
-          {assignedServicePoints.length === 0 && (
+          {availableServicePoints.length === 0 && (
             <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
               <RadioGroupItem value="none" id="none" disabled />
               <label

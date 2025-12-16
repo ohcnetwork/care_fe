@@ -35,6 +35,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
+import { useQueueServicePoints } from "./useQueueServicePoints";
 import { useTokenListInfiniteQuery } from "./utils";
 
 export function OngoingQueueTokenCard({
@@ -49,6 +50,7 @@ export function OngoingQueueTokenCard({
   const { t } = useTranslation();
   const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const { assignedServicePoints } = useQueueServicePoints();
 
   const [showAssignToServicePointDialog, setShowAssignToServicePointDialog] =
     useState(false);
@@ -77,6 +79,43 @@ export function OngoingQueueTokenCard({
     },
   });
 
+  const { mutate: assignToServicePoint, isPending: isAssigning } = useMutation({
+    mutationFn: mutate(tokenApi.update, {
+      pathParams: {
+        facility_id: facilityId,
+        queue_id: token?.queue.id ?? "",
+        id: token?.id ?? "",
+      },
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["infinite-tokens", facilityId, token?.queue.id ?? ""],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["token-queue-summary", facilityId, token?.queue.id ?? ""],
+      });
+      toast.success(t("token_assigned_to_service_point"));
+    },
+  });
+
+  const handleAssignToServicePoint = () => {
+    if (!token) return;
+
+    const availableServicePoints = assignedServicePoints.filter(
+      (sp) => sp.id !== token.sub_queue?.id,
+    );
+
+    if (availableServicePoints.length === 1) {
+      assignToServicePoint({
+        sub_queue: availableServicePoints[0].id,
+        status: TokenStatus.CREATED,
+        note: token.note,
+      });
+    } else {
+      setShowAssignToServicePointDialog(true);
+    }
+  };
+
   return (
     <ContextMenu>
       <ContextMenuTrigger ref={contextMenuTriggerRef}>
@@ -85,6 +124,7 @@ export function OngoingQueueTokenCard({
             "relative flex gap-3 items-center justify-between p-3 bg-gray-50 rounded-lg shadow",
             token?.status === TokenStatus.IN_PROGRESS &&
               "border border-primary-500",
+            isAssigning && "opacity-50 pointer-events-none",
           )}
         >
           <div className="flex flex-col">
@@ -225,9 +265,7 @@ export function OngoingQueueTokenCard({
               </ContextMenuItem>
             )}
 
-            <ContextMenuItem
-              onClick={() => setShowAssignToServicePointDialog(true)}
-            >
+            <ContextMenuItem onClick={handleAssignToServicePoint}>
               {token.sub_queue ? (
                 <>
                   <RedoDot className="size-4 mr-2" />
