@@ -85,13 +85,13 @@ export const FilesPage = ({
     hasPermission,
     patient?.permissions ?? [],
   );
-  const { canViewEncounter } = getPermissions(
+  const { canReadEncounterClinicalData, canReadEncounter } = getPermissions(
     hasPermission,
     encounter?.permissions ?? [],
   );
   const canAccess =
     type === "encounter"
-      ? canViewClinicalData || canViewEncounter
+      ? canReadEncounterClinicalData || canReadEncounter
       : canViewClinicalData;
 
   const { data: files, isLoading: filesLoading } = useQuery({

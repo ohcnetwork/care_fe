@@ -2,7 +2,7 @@ import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { MedicationRequestDosageInstruction } from "@/types/emr/medicationRequest/medicationRequest";
 import { InventoryRead } from "@/types/inventory/product/inventory";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import { TFunction } from "i18next";
 
 export enum MedicationDispenseStatus {
@@ -173,6 +173,12 @@ export interface MedicationDispenseBase {
   substitution?: MedicationDispenseSubstitution;
 }
 
+export interface MedicationDispenseOrderCreate {
+  name?: string;
+  note?: string;
+  alternate_identifier: string;
+}
+
 export interface MedicationDispenseCreate extends Omit<
   MedicationDispenseBase,
   "id"
@@ -184,6 +190,7 @@ export interface MedicationDispenseCreate extends Omit<
   quantity: number;
   days_supply: number;
   fully_dispensed: boolean;
+  create_dispense_order: MedicationDispenseOrderCreate;
 }
 
 export interface MedicationDispenseUpsert extends Omit<
@@ -197,7 +204,7 @@ export interface MedicationDispenseRead extends MedicationDispenseBase {
   item: InventoryRead;
   charge_item: ChargeItemRead;
   created_date: string;
-  location: LocationList;
+  location: LocationRead;
   quantity: number;
 }
 
