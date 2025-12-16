@@ -236,7 +236,7 @@ const UpcomingAppointmentsSummary = ({
       queryParams: {
         limit: 1,
         facility: facilityId,
-        data_after: dateQueryString(new Date()),
+        date_after: dateQueryString(new Date()),
         status: UpcomingAppointmentStatuses.join(","),
       },
     }),
