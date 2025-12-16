@@ -202,14 +202,14 @@ function HealthcareServiceFormContent({
         ...data,
         facility: facilityId,
         locations: data.locations.map((loc) => loc.id),
-        managing_organization: data.managing_organization || null,
+        managing_organization: data.managing_organization || undefined,
       } as HealthcareServiceUpdateSpec);
     } else {
       const payload: HealthcareServiceCreateSpec = {
         ...data,
         facility: facilityId,
         locations: data.locations.map((loc) => loc.id),
-        managing_organization: data.managing_organization || null,
+        managing_organization: data.managing_organization || undefined,
       };
       createHealthcareService(payload);
     }

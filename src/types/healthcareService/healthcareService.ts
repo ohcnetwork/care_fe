@@ -28,13 +28,13 @@ export interface HealthcareServiceCreateSpec extends Omit<
 > {
   facility: string;
   locations: string[];
-  managing_organization: string | null;
+  managing_organization?: string;
 }
 
 export interface HealthcareServiceUpdateSpec extends BaseHealthcareServiceSpec {
   facility: string;
   locations: string[];
-  managing_organization: string | null;
+  managing_organization?: string;
 }
 
 export interface HealthcareServiceReadSpec extends BaseHealthcareServiceSpec {
