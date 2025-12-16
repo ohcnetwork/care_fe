@@ -2,7 +2,7 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "baseUrl": "../",
-    "types": [],
+    "types": ["node"],
     "paths": {
       "tests/*": ["./tests/*"]
     }

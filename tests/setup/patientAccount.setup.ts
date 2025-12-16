@@ -13,22 +13,31 @@ test("navigate to an patient - create and save account id", async ({
   const facilityId = getFacilityId();
   const patientId = getPatientId();
 
-  // Navigate to patient page
+  // Navigate to patient page and open Accounts tab
   await page.goto(`facility/${facilityId}/patient/${patientId}`);
+  await page.getByRole("tab", { name: "Accounts" }).click();
 
   try {
-    // Navigate to Accounts tab and create account
-    await page.getByRole("tab", { name: "Accounts" }).click();
-    await page.getByRole("button", { name: "Create Account" }).click();
+    // Wait for content to load
+    await page.waitForLoadState("networkidle");
 
-    // Generate random account name using faker
-    const accountName = faker.finance.accountName();
+    // Check if "No accounts found" heading exists
+    const noAccountsText = await page
+      .locator('h3:has-text("No accounts found")')
+      .isVisible();
 
-    await page.getByRole("textbox", { name: "Name *" }).click();
-    await page.getByRole("textbox", { name: "Name *" }).fill(accountName);
-    await page.getByRole("button", { name: "Create" }).click();
+    if (noAccountsText) {
+      // Create new account
+      await page.getByRole("button", { name: "Create Account" }).click();
 
-    await page.getByRole("button", { name: "Go to account" }).click();
+      const accountName = faker.finance.accountName();
+      await page.getByRole("textbox", { name: "Name *" }).fill(accountName);
+      await page.getByRole("button", { name: "Create" }).click();
+      await page.getByRole("button", { name: "Go to account" }).click();
+    } else {
+      // Click first "Go to account" button
+      await page.locator('button:has-text("Go to account")').first().click();
+    }
 
     // Wait for navigation and extract account ID from URL
     await page.waitForURL(/\/account\/[a-f0-9-]+/);
@@ -41,7 +50,7 @@ test("navigate to an patient - create and save account id", async ({
     // Save account ID to meta file
     const metaPath = path.resolve("tests/.auth/accountMeta.json");
     fs.writeFileSync(metaPath, JSON.stringify({ id: accountId }, null, 2));
-    console.log(`✅ Account created and saved: ${accountId}`);
+    console.log(`✅ Account setup completed: ${accountId}`);
   } catch (error) {
     console.error("❌ Failed to set up account:", error);
     throw error;
