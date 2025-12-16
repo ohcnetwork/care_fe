@@ -17,6 +17,7 @@ import patientApi from "@/types/emr/patient/patientApi";
 interface ArchivePatientSectionProps {
   patientId: string;
   patientName: string;
+  facilityId: string;
 }
 
 const CONFIRMATION_TEXT = "Archive Patient";
@@ -24,6 +25,7 @@ const CONFIRMATION_TEXT = "Archive Patient";
 const ArchivePatientSection = ({
   patientId,
   patientName,
+  facilityId,
 }: ArchivePatientSectionProps) => {
   const { t } = useTranslation();
   const authUser = useAuthUser();
@@ -37,7 +39,7 @@ const ArchivePatientSection = ({
     onSuccess: () => {
       toast.success(t("patient_archived_successfully"));
       setOpen(false);
-      navigate("/");
+      navigate(`/facility/${facilityId}/overview`);
     },
   });
 

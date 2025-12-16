@@ -400,6 +400,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
           <ArchivePatientSection
             patientId={patientId}
             patientName={patientQuery.data.name}
+            facilityId={facilityId}
           />
         )}
       </div>
