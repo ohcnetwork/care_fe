@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/collapsible";
 import { DatePicker } from "@/components/ui/date-picker";
 
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
@@ -21,7 +22,10 @@ import {
   renderTokenNumber,
   TOKEN_STATUS_COLORS,
   TokenRetrieve,
+  TokenStatus,
 } from "@/types/tokens/token/token";
+import tokenApi from "@/types/tokens/token/tokenApi";
+import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import { ChevronsDownUp, ChevronsUpDown, TicketIcon } from "lucide-react";
@@ -29,11 +33,15 @@ import { ChevronsDownUp, ChevronsUpDown, TicketIcon } from "lucide-react";
 interface PatientTokensListProps {
   patientId: string;
   facility: FacilityRead;
+  tokenId?: string;
+  queueId?: string;
 }
 
 export default function PatientTokensList({
   patientId,
   facility,
+  tokenId,
+  queueId,
 }: PatientTokensListProps) {
   const { t } = useTranslation();
   const [expandedTokens, setExpandedTokens] = useState<Set<string>>(new Set());
@@ -44,6 +52,12 @@ export default function PatientTokensList({
       setSelectedDate(date);
     }
   };
+
+  useEffect(() => {
+    if (tokenId) {
+      setExpandedTokens(new Set([tokenId]));
+    }
+  }, [tokenId]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["tokens", patientId, facility.id, selectedDate],
@@ -57,7 +71,19 @@ export default function PatientTokensList({
     }),
   });
 
+  const { mutate: updateToken } = useMutation({
+    mutationFn: mutate(tokenApi.update, {
+      pathParams: {
+        facility_id: facility.id,
+        queue_id: queueId ?? "",
+        id: tokenId ?? "",
+      },
+    }),
+  });
+
   const tokens = data?.results || [];
+
+  const orderedTokens = tokens.filter((token) => token.id === tokenId);
 
   const toggleTokenExpansion = (tokenId: string) => {
     const newExpanded = new Set(expandedTokens);
@@ -120,7 +146,10 @@ export default function PatientTokensList({
         />
       )}
 
-      {tokens.map((token) => {
+      {[
+        ...orderedTokens,
+        ...tokens.filter((token) => token.id !== tokenId),
+      ].map((token) => {
         const isExpanded = expandedTokens.has(token.id);
 
         return (
@@ -176,7 +205,7 @@ export default function PatientTokensList({
                 <CardContent className="p-1 bg-gray-100 border-gray-100 rounded-md">
                   <div
                     id={`print-token-${token.id}`}
-                    className="print:block print:w-[400px] print:border print:rounded-md"
+                    className="flex flex-col gap-2 print:block print:w-[400px] print:border print:rounded-md"
                   >
                     <TokenCard
                       showlogo={false}
@@ -185,6 +214,23 @@ export default function PatientTokensList({
                       id={`token-card-${token.id}`}
                       className="rounded-md border-none shadow-xs hover:shadow-xs hover:scale-none"
                     />
+                    {tokenId && (
+                      <div className="flex justify-center items-center bg-white p-2 rounded-md mb-1 shadow-xs">
+                        <Button
+                          variant="outline_primary"
+                          className="w-full"
+                          onClick={() =>
+                            updateToken({
+                              status: TokenStatus.IN_PROGRESS,
+                              note: "",
+                              sub_queue: null,
+                            })
+                          }
+                        >
+                          {t("mark_as_in_service")}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </CollapsibleContent>

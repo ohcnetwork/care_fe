@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
+  ArrowLeft,
   ChevronRight,
   SquareActivity,
   Stethoscope,
@@ -30,6 +31,7 @@ import { getPermissions } from "@/common/Permissions";
 
 import { usePermissions } from "@/context/PermissionContext";
 
+import BackButton from "@/components/Common/BackButton";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import { Badge } from "@/components/ui/badge";
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -54,7 +56,8 @@ export default function VerifyPatient() {
   const [qParams] = useQueryParams();
   const queryClient = useQueryClient();
 
-  const { phone_number, year_of_birth, partial_id } = qParams;
+  const { phone_number, year_of_birth, partial_id, queue_id, token_id } =
+    qParams;
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
@@ -99,7 +102,13 @@ export default function VerifyPatient() {
           </AlertDescription>
         </Alert>
       ) : patientData ? (
-        <div className="space-y-6 md:max-w-5xl mx-auto">
+        <div className="space-y-5 md:max-w-5xl mx-auto">
+          {queue_id && (
+            <BackButton>
+              <ArrowLeft />
+              {t("back")}
+            </BackButton>
+          )}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
               <div>
@@ -183,12 +192,13 @@ export default function VerifyPatient() {
                 canListTokens={canListTokens}
               />
             </div>
-
             <div className="space-y-4">
               {canListTokens && !isTab && (
                 <PatientTokensList
                   patientId={patientData.id}
                   facility={facility}
+                  tokenId={token_id}
+                  queueId={queue_id}
                 />
               )}
             </div>
