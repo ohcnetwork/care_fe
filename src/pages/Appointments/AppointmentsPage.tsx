@@ -2,7 +2,7 @@ import { CheckIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { addDays, differenceInDays } from "date-fns";
 import { TFunction } from "i18next";
-import { FilterIcon } from "lucide-react";
+import { FilterIcon, InfoIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -39,6 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSidebar } from "@/components/ui/sidebar";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -83,6 +84,7 @@ import {
   formatPatientAge,
 } from "@/Utils/utils";
 
+import { booleanFromString } from "@/common/utils";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import {
   dateFilter,
@@ -94,6 +96,12 @@ import {
   FilterDateRange,
   shortDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -318,6 +326,11 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     return <Loading />;
   }
 
+  const shouldAutoRefresh = booleanFromString(
+    qParams.autoRefresh ?? "",
+    careConfig.enableAutoRefresh,
+  );
+
   return (
     <Page
       title={t("appointments")}
@@ -378,6 +391,32 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-sm font-medium">{t("auto_refresh")}</Label>
+            <Switch
+              checked={shouldAutoRefresh}
+              onCheckedChange={(checked) =>
+                updateQuery({
+                  autoRefresh: checked ? "true" : "false",
+                })
+              }
+            />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help hidden md:block">
+                    <InfoIcon className="size-4 text-gray-500" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t("auto_refresh_tooltip", {
+                    interval:
+                      careConfig.appointmentAndQueueRefreshInterval / 1000,
+                  })}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           {activeTab === "list" && (
             <Button
               variant="outline"
@@ -433,6 +472,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 tags={selectedTags.map((tag) => tag.id)}
                 tags_behavior={qParams.tags_behavior}
                 patient={qParams.patient}
+                autoRefresh={shouldAutoRefresh}
               />
             ))}
           </div>
@@ -455,6 +495,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           patient={qParams.patient}
           resourceType={resourceType}
           resourceIds={resourceId ? [resourceId] : practitionerIds}
+          autoRefresh={shouldAutoRefresh}
         />
       )}
     </Page>
@@ -472,6 +513,7 @@ function AppointmentColumn(props: {
   patient?: string;
   resourceType: SchedulableResourceType;
   resourceIds: string[];
+  autoRefresh: boolean;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -529,6 +571,8 @@ function AppointmentColumn(props: {
       return currentOffset < lastPage.count ? currentOffset : null;
     },
     enabled: !!props.resourceIds.length && props.canViewAppointments,
+    refetchInterval:
+      props.autoRefresh && careConfig.appointmentAndQueueRefreshInterval,
   });
 
   const appointments =
@@ -761,6 +805,7 @@ function AppointmentRow(props: {
   patient?: string;
   resourceType: SchedulableResourceType;
   resourceIds: string[];
+  autoRefresh: boolean;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -797,6 +842,8 @@ function AppointmentRow(props: {
       },
     }),
     enabled: !!props.resourceIds.length && props.canViewAppointments,
+    refetchInterval:
+      props.autoRefresh && careConfig.appointmentAndQueueRefreshInterval,
   });
 
   const appointments = data?.results ?? [];

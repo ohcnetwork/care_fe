@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -15,12 +16,11 @@ import { formatDateTime, formatName, properCase } from "@/Utils/utils";
 import React, { useEffect } from "react";
 
 import { CardListSkeleton } from "@/components/Common/SkeletonLoading";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import patientApi from "@/types/emr/patient/patientApi";
 import { ResponseValue } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
+import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -523,7 +523,7 @@ export default function QuestionnaireResponsesList({
         encounterId,
       ],
       queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(patientApi.getQuestionnaireResponses, {
+        const response = await query(questionnaireResponseApi.list, {
           pathParams: { patientId },
           queryParams: {
             ...(!isPrintPreview && {
