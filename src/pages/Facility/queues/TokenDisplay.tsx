@@ -86,7 +86,7 @@ const combineResourceSubQueues = (
     }
   }
 
-  return servicePoints;
+  return servicePoints.filter((sp) => sp.queue);
 };
 
 /**
@@ -171,16 +171,15 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
     return <Loading />;
   }
 
-  if (servicePoints.length === 0) {
+  const itemCount = servicePoints.length;
+
+  if (itemCount === 0) {
     return (
       <div className="text-center text-black">
         {t("no_service_points_found")}
       </div>
     );
   }
-
-  const filteredServicePoints = servicePoints.filter((sp) => sp.queue);
-  const itemCount = filteredServicePoints.length;
 
   return (
     <>
@@ -191,7 +190,7 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
           getGridClass(itemCount),
         )}
       >
-        {filteredServicePoints.map((servicePoint, index) => (
+        {servicePoints.map((servicePoint, index) => (
           <div
             key={servicePoint.id}
             className={getColSpanClass(index, itemCount)}
