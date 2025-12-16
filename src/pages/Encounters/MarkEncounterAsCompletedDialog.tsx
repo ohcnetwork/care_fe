@@ -63,7 +63,6 @@ export function MarkEncounterAsCompletedDialog(
               updateEncounter({
                 ...encounter,
                 status: EncounterStatus.COMPLETED,
-                patient: encounter.patient.id,
                 encounter_class: encounter.encounter_class,
                 period: {
                   start: encounter.period.start,
@@ -74,7 +73,6 @@ export function MarkEncounterAsCompletedDialog(
                 hospitalization: encounter.hospitalization,
                 priority: encounter.priority,
                 external_identifier: encounter.external_identifier,
-                facility: encounter.facility.id,
                 discharge_summary_advice: encounter.discharge_summary_advice,
               });
             }}

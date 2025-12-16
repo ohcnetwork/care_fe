@@ -488,10 +488,6 @@ export function ServiceRequestQuestion({
   });
 
   useEffect(() => {
-    console.log("selectedActivityDefinition", selectedActivityDefinition);
-  }, [selectedActivityDefinition]);
-
-  useEffect(() => {
     if (selectedActivityDefinition && selectedActivityDefinitionData) {
       const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec = {
         service_request: {
