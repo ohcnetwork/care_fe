@@ -60,6 +60,49 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 
+const PAYMENT_METHODS = [
+  {
+    value: PaymentReconciliationPaymentMethod.cash,
+    icon: Banknote,
+    label: "cash",
+  },
+  {
+    value: PaymentReconciliationPaymentMethod.ddpo,
+    icon: Landmark,
+    label: "bank_transfer",
+  },
+  {
+    value: PaymentReconciliationPaymentMethod.ccca,
+    icon: CreditCard,
+    label: "credit_card",
+  },
+  {
+    value: PaymentReconciliationPaymentMethod.debc,
+    icon: CreditCard,
+    label: "debit_card",
+  },
+  {
+    value: PaymentReconciliationPaymentMethod.chck,
+    icon: Signature,
+    label: "cheque",
+  },
+] as const;
+
+const PAYMENT_TYPES = [
+  {
+    value: PaymentReconciliationType.payment,
+    label: "payment",
+  },
+  {
+    value: PaymentReconciliationType.adjustment,
+    label: "adjustment",
+  },
+  {
+    value: PaymentReconciliationType.advance,
+    label: "advance",
+  },
+] as const;
+
 interface PaymentReconciliationSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -246,7 +289,7 @@ export function PaymentReconciliationSheet({
         location: selectedLocationObject?.id,
       });
     }
-  }, [open, invoice, accountId, isCreditNote, selectedLocationObject, form]);
+  }, [open, invoice, accountId, isCreditNote, selectedLocationObject]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -324,33 +367,7 @@ export function PaymentReconciliationSheet({
                       value={field.value}
                       className="grid grid-cols-3 gap-3"
                     >
-                      {[
-                        {
-                          value: PaymentReconciliationPaymentMethod.cash,
-                          icon: Banknote,
-                          label: t("cash"),
-                        },
-                        {
-                          value: PaymentReconciliationPaymentMethod.ddpo,
-                          icon: Landmark,
-                          label: t("bank_transfer"),
-                        },
-                        {
-                          value: PaymentReconciliationPaymentMethod.ccca,
-                          icon: CreditCard,
-                          label: t("credit_card"),
-                        },
-                        {
-                          value: PaymentReconciliationPaymentMethod.debc,
-                          icon: CreditCard,
-                          label: t("debit_card"),
-                        },
-                        {
-                          value: PaymentReconciliationPaymentMethod.chck,
-                          icon: Signature,
-                          label: t("cheque"),
-                        },
-                      ].map((method) => {
+                      {PAYMENT_METHODS.map((method) => {
                         const Icon = method.icon;
                         return (
                           <Label
@@ -365,7 +382,7 @@ export function PaymentReconciliationSheet({
                             <div className="grid grow justify-items-center gap-1">
                               <Icon className="size-5 text-gray-600" />
                               <span className="text-sm font-medium text-center text-gray-950">
-                                {method.label}
+                                {t(method.label)}
                               </span>
                             </div>
                           </Label>
@@ -389,20 +406,7 @@ export function PaymentReconciliationSheet({
                       value={field.value}
                       className="flex flex-wrap"
                     >
-                      {[
-                        {
-                          value: PaymentReconciliationType.payment,
-                          label: t("payment"),
-                        },
-                        {
-                          value: PaymentReconciliationType.adjustment,
-                          label: t("adjustment"),
-                        },
-                        {
-                          value: PaymentReconciliationType.advance,
-                          label: t("advance"),
-                        },
-                      ].map((type) => (
+                      {PAYMENT_TYPES.map((type) => (
                         <Label
                           key={type.value}
                           className="flex cursor-pointer gap-2 items-center justify-center rounded-md border border-gray-400 shadow-sm p-2.5 outline-none has-checked:border-primary-600 has-checked:bg-primary-100/50"
@@ -412,7 +416,7 @@ export function PaymentReconciliationSheet({
                             aria-label={`payment-type-${type.value}`}
                           />
                           <span className="text-sm font-medium text-gray-950">
-                            {type.label}
+                            {t(type.label)}
                           </span>
                         </Label>
                       ))}
