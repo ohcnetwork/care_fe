@@ -151,7 +151,6 @@ export function SupplyDeliveryTable({
           ))}
           <TableHead>{t("tax")}</TableHead>
           <TableHead>{t("disc")}</TableHead>
-          <TableHead>{t("total")}</TableHead>
           <TableHead>{t("status")}</TableHead>
           <TableHead>{t("condition")}</TableHead>
           {showActionsColumn && <TableHead>{t("actions")}</TableHead>}
