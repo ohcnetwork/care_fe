@@ -1,6 +1,12 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, SquareActivity, Stethoscope, Ticket } from "lucide-react";
-import { useQueryParams } from "raviger";
+import {
+  AlertCircle,
+  ChevronRight,
+  SquareActivity,
+  Stethoscope,
+  Ticket,
+} from "lucide-react";
+import { Link, useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
@@ -25,11 +31,22 @@ import { getPermissions } from "@/common/Permissions";
 import { usePermissions } from "@/context/PermissionContext";
 
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
+import { Badge } from "@/components/ui/badge";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import patientApi from "@/types/emr/patient/patientApi";
+import {
+  Appointment,
+  APPOINTMENT_STATUS_COLORS,
+  formatScheduleResourceName,
+  UpcomingAppointmentStatuses,
+} from "@/types/scheduling/schedule";
+import scheduleApi from "@/types/scheduling/scheduleApi";
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
+import { dateQueryString } from "@/Utils/utils";
+import { format } from "date-fns";
 
 export default function VerifyPatient() {
   useShortcutSubContext("facility:patient:home");
@@ -49,6 +66,7 @@ export default function VerifyPatient() {
     canListEncounters,
     canWriteToken,
     canListTokens,
+    canViewAppointments,
   } = getPermissions(hasPermission, facility?.permissions ?? []);
 
   const {
@@ -84,7 +102,7 @@ export default function VerifyPatient() {
         <div className="space-y-6 md:max-w-5xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="space-y-6 lg:col-span-2">
-              <div className="">
+              <div>
                 <PatientInfoCard
                   tags={patientData.instance_tags}
                   tagEntityType="patient"
@@ -103,6 +121,13 @@ export default function VerifyPatient() {
                   }}
                 />
               </div>
+
+              {canViewAppointments && (
+                <UpcomingAppointmentsSummary
+                  patientId={patientData.id}
+                  facilityId={facilityId}
+                />
+              )}
 
               <div className="grid gap-4 grid-cols-2  lg:grid-cols-3">
                 {canCreateEncounter && (
@@ -193,3 +218,87 @@ export default function VerifyPatient() {
     </div>
   );
 }
+
+const UpcomingAppointmentsSummary = ({
+  patientId,
+  facilityId,
+}: {
+  patientId: string;
+  facilityId: string;
+}) => {
+  const { t } = useTranslation();
+  const [, setQueryParams] = useQueryParams<{ tab?: string }>();
+
+  const { data } = useQuery({
+    queryKey: ["upcoming-appointments", patientId, facilityId],
+    queryFn: query(scheduleApi.appointments.getAppointments, {
+      pathParams: { patientId },
+      queryParams: {
+        limit: 1,
+        facility: facilityId,
+        data_after: dateQueryString(new Date()),
+        status: UpcomingAppointmentStatuses.join(","),
+      },
+    }),
+    select: (data: PaginatedResponse<Appointment>) => ({
+      appointment: data.results[0],
+      totalCount: data.count,
+    }),
+  });
+
+  if (!data?.appointment) {
+    return null;
+  }
+
+  const { appointment, totalCount } = data;
+
+  return (
+    <div className="flex flex-col gap-2 items-start">
+      <h6 className="text-base font-semibold">{t("upcoming_appointment")}</h6>
+
+      <div className="flex w-full gap-2 py-2 pl-4 pr-3 bg-white rounded-lg border border-indigo-400">
+        <div className="flex w-full justify-between items-center">
+          <div className="flex gap-3 items-center">
+            <span className="text-sm font-semibold">
+              {appointment.token_slot.availability.name}
+            </span>
+            <div className="h-6 w-0 border" />
+            <span className="text-sm font-medium">
+              {format(
+                appointment.token_slot.start_datetime,
+                "hh:mm a; dd/MM/yyyy",
+              )}
+            </span>
+            <div className="h-6 w-0 border" />
+            <span className="text-sm font-medium">
+              {formatScheduleResourceName(appointment)}
+            </span>
+          </div>
+          <Badge variant={APPOINTMENT_STATUS_COLORS[appointment.status]}>
+            {t(appointment.status)}
+          </Badge>
+        </div>
+
+        <Button variant="ghost" size="lg" asChild>
+          <Link
+            href={`/facility/${facilityId}/patient/${patientId}/appointments/${appointment.id}`}
+          >
+            <ChevronRight size={20} />
+          </Link>
+        </Button>
+      </div>
+
+      {totalCount > 1 && (
+        <Button
+          variant="link"
+          className="underline"
+          onClick={() =>
+            setQueryParams({ tab: "appointments" }, { overwrite: false })
+          }
+        >
+          {t("view_all_appointments", { count: totalCount })}
+        </Button>
+      )}
+    </div>
+  );
+};
