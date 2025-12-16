@@ -75,7 +75,6 @@ import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
-import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import dayjs from "@/Utils/dayjs";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
@@ -564,7 +563,7 @@ export function InvoiceShow({
                     verifiedPatient.instance_identifiers
                       .filter(
                         ({ config }) =>
-                          config.config.use === PatientIdentifierUse.official &&
+                          // config.config.use === PatientIdentifierUse.official &&
                           !config.config.auto_maintained,
                       )
                       .map((identifier) => (
