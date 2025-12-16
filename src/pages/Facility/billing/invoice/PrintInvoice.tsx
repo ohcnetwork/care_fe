@@ -33,6 +33,7 @@ import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
 import { getPartialId } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import query from "@/Utils/request/query";
 
 type PrintInvoiceProps = {
@@ -190,7 +191,7 @@ export function PrintInvoice({ facilityId, invoiceId }: PrintInvoiceProps) {
                 verifiedPatient.instance_identifiers
                   .filter(
                     ({ config }) =>
-                      // config.config.use === PatientIdentifierUse.official &&
+                      config.config.use === PatientIdentifierUse.official &&
                       !config.config.auto_maintained,
                   )
                   .map((identifier) => (
