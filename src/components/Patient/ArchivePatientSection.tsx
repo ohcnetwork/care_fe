@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 
@@ -57,13 +57,10 @@ const ArchivePatientSection = ({
           </p>
           <CriticalActionConfirmationDialog
             trigger={
-              <button
-                className={buttonVariants({ variant: "destructive" })}
-                type="button"
-              >
+              <Button variant="destructive">
                 <ArchiveIcon className="size-4" />
                 {t("archive_patient")}
-              </button>
+              </Button>
             }
             title={t("verify_patient_archive_request")}
             description={
