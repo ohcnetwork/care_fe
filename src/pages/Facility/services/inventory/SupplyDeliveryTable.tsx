@@ -39,52 +39,6 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import { EllipsisVertical } from "lucide-react";
 
-function calculateLineTotal(
-  delivery: SupplyDeliveryRead,
-  internal: boolean,
-): number {
-  const priceComponents = internal
-    ? delivery.supplied_inventory_item?.product?.charge_item_definition
-        ?.price_components
-    : delivery.supplied_item?.charge_item_definition?.price_components;
-
-  if (!priceComponents) return 0;
-
-  const baseComponent = priceComponents.find(
-    (c) => c.monetary_component_type === MonetaryComponentType.base,
-  );
-  const basePrice = baseComponent?.amount
-    ? parseFloat(baseComponent.amount)
-    : 0;
-  const quantity = delivery.supplied_item_quantity || 1;
-
-  let total = basePrice * quantity;
-
-  // Apply taxes
-  priceComponents
-    .filter((c) => c.monetary_component_type === MonetaryComponentType.tax)
-    .forEach((tax) => {
-      if (tax.factor) {
-        total += basePrice * quantity * (tax.factor / 100);
-      } else if (tax.amount) {
-        total += parseFloat(tax.amount);
-      }
-    });
-
-  // Apply discounts
-  priceComponents
-    .filter((c) => c.monetary_component_type === MonetaryComponentType.discount)
-    .forEach((discount) => {
-      if (discount.factor) {
-        total -= basePrice * quantity * (discount.factor / 100);
-      } else if (discount.amount) {
-        total -= parseFloat(discount.amount);
-      }
-    });
-
-  return total;
-}
-
 interface SupplyDeliveryTableProps {
   deliveries: SupplyDeliveryRead[];
   showCheckbox?: boolean;
@@ -288,11 +242,6 @@ export function SupplyDeliveryTable({
                   </div>
                 ));
               })()}
-            </TableCell>
-            <TableCell>
-              <MonetaryDisplay
-                amount={calculateLineTotal(delivery, internal).toFixed(2)}
-              />
             </TableCell>
             <TableCell>
               <Badge variant={SUPPLY_DELIVERY_STATUS_COLORS[delivery.status]}>

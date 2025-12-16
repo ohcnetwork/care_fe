@@ -197,7 +197,7 @@ export function AddSupplyDeliveryForm({
     },
   });
 
-  const { fields, append } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "items",
   });
