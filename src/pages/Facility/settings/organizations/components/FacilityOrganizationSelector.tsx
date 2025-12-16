@@ -45,6 +45,7 @@ export default function FacilityOrganizationSelector(
 ) {
   const { t } = useTranslation();
   const {
+    value,
     onChange,
     facilityId,
     currentOrganizations,
@@ -93,6 +94,19 @@ export default function FacilityOrganizationSelector(
       enabled: !!level.id,
     })),
   });
+
+  useEffect(() => {
+    if (value && value.length > 0) {
+      const selectedOrganizations = value
+        .map((id) => currentOrganizations?.find((org) => org.id === id))
+        .filter((org) => org !== undefined);
+      if (selectedOrganizations.length > 0) {
+        setSelectedOrganizations(selectedOrganizations);
+      }
+    } else {
+      setSelectedOrganizations([]);
+    }
+  }, [value, currentOrganizations]);
 
   const handleSelect = (org: FacilityOrganizationRead) => {
     const isAlreadySelected = !!currentOrganizations?.find(
