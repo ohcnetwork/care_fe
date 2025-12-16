@@ -229,8 +229,8 @@ const careConfig = {
    * When true, base price is calculated from MRP by removing tax
    */
   inventory: {
-    defaultTaxInclusive: boolean(
-      "REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE",
+    defaultTaxInclusive: booleanFromString(
+      env.REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE,
       false,
     ),
   },

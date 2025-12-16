@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusCircle } from "lucide-react";
 import { useQueryParams } from "raviger";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -11,6 +11,8 @@ import { z } from "zod";
 import careConfig from "@/../care.config";
 import { cn } from "@/lib/utils";
 
+import { DisablingCover } from "@/components/Common/DisablingCover";
+import Autocomplete from "@/components/ui/autocomplete";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -49,7 +51,6 @@ import {
   MonetaryComponentType,
 } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
-  ChargeItemDefinitionBase,
   ChargeItemDefinitionCreate,
   ChargeItemDefinitionStatus,
 } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
@@ -62,6 +63,8 @@ import {
 } from "@/types/inventory/product/product";
 import productApi from "@/types/inventory/product/productApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
+import { RequestOrderStatus } from "@/types/inventory/requestOrder/requestOrder";
+import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
 import {
   SupplyDeliveryCondition,
   SupplyDeliveryStatus,
@@ -87,7 +90,7 @@ const supplyDeliveryItemSchema = z.object({
   _is_inward_stock: z.boolean().optional(),
   batch_number: z.string().optional(),
   expiry_date: z.string().optional(),
-  charge_item_definition: z.custom<ChargeItemDefinitionBase>().optional(),
+  charge_item_definition: z.object({ slug: z.string() }).optional(),
   unit_price: z.number().optional(),
   is_manually_edited: z.boolean().optional(),
   is_tax_inclusive: z.boolean().optional(),
@@ -124,13 +127,27 @@ export function AddSupplyDeliveryForm({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [qParams] = useQueryParams();
+  const [qParams, setQueryParams] = useQueryParams();
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
+  const [requestOrderSearch, setRequestOrderSearch] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [newlyAddedRowIndex, setNewlyAddedRowIndex] = useState<number | null>(
     null,
   );
-  const addNewAfterSaveRef = useRef(false);
+
+  // Default values for a new empty item row
+  const createEmptyItem = useCallback(
+    (): SupplyDeliveryItemValues => ({
+      product_knowledge: {} as ProductKnowledgeBase,
+      supplied_inventory_item: "",
+      supplied_item_quantity: 1,
+      supplied_item: undefined,
+      supply_request: undefined,
+      _is_inward_stock: !origin,
+      is_tax_inclusive: careConfig.inventory.defaultTaxInclusive,
+    }),
+    [origin],
+  );
 
   // Fetch facility data for informational codes
   const { data: facilityData } = useQuery({
@@ -153,6 +170,25 @@ export function AddSupplyDeliveryForm({
     enabled: !!qParams.supplyOrder,
   });
 
+  const { data: requestOrders, isLoading: isLoadingRequestOrders } = useQuery({
+    queryKey: [
+      "requestOrders",
+      facilityId,
+      requestOrderSearch,
+      destination,
+      origin,
+    ],
+    queryFn: query.debounced(requestOrderApi.listRequestOrder, {
+      pathParams: { facilityId },
+      queryParams: {
+        search: requestOrderSearch || undefined,
+        status: RequestOrderStatus.pending,
+        ...(!origin ? { destination } : { origin }),
+      },
+    }),
+    enabled: !qParams.supplyOrder,
+  });
+
   const form = useForm<SupplyDeliveryFormValues>({
     resolver: zodResolver(createFormSchema),
     defaultValues: {
@@ -171,41 +207,34 @@ export function AddSupplyDeliveryForm({
     handleSelectAll(true);
   };
 
-  const { mutate: upsertDelivery } = useMutation({
-    mutationFn: mutate(supplyDeliveryApi.upsertSupplyDelivery),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
-      setIsProcessing(false);
-
-      toast.success(t("supply_delivery_created"));
-
-      if (addNewAfterSaveRef.current) {
-        // Reset form but add a new empty item immediately
-        form.reset();
-        addNewAfterSaveRef.current = false;
-        // Append new item and set index to 0 (since form was just reset)
-        append({
-          product_knowledge: {} as ProductKnowledgeBase,
-          supplied_inventory_item: "",
-          supplied_item_quantity: 1,
-          supplied_item: undefined,
-          supply_request: undefined,
-          _is_inward_stock: !origin,
-          is_tax_inclusive: careConfig.inventory.defaultTaxInclusive,
-        });
-        setNewlyAddedRowIndex(0);
-      } else {
-        onSuccess();
-        form.reset();
-      }
-    },
-    onError: (_error) => {
-      setIsProcessing(false);
-      toast.error(t("error_creating_supply_delivery"));
-    },
-  });
-
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+
+  // Render the request order selector dropdown
+  const renderRequestOrderSelector = () => (
+    <Autocomplete
+      options={
+        requestOrders?.results?.map((order) => ({
+          label: order.name,
+          value: order.id,
+        })) || []
+      }
+      value=""
+      onChange={(value) => {
+        if (value) {
+          setQueryParams({
+            ...qParams,
+            supplyOrder: value,
+          });
+        }
+      }}
+      isLoading={isLoadingRequestOrders}
+      onSearch={setRequestOrderSearch}
+      placeholder={t("select_order")}
+      inputPlaceholder={t("search_order")}
+      noOptionsMessage={t("no_orders_found")}
+      className="px-10"
+    />
+  );
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -245,31 +274,59 @@ export function AddSupplyDeliveryForm({
 
   const handleAddAnotherItem = () => {
     const newIndex = fields.length;
-    append({
-      product_knowledge: {} as ProductKnowledgeBase,
-      supplied_inventory_item: "",
-      supplied_item_quantity: 1,
-      supplied_item: undefined,
-      supply_request: undefined,
-      _is_inward_stock: !origin,
-      is_tax_inclusive: careConfig.inventory.defaultTaxInclusive,
-    });
+    append(createEmptyItem());
     setNewlyAddedRowIndex(newIndex);
   };
 
   const { mutateAsync: createProduct } = useMutation({
     mutationFn: mutate(productApi.createProduct, {
       pathParams: { facilityId },
-      silent: true,
     }),
   });
 
   const { mutateAsync: createChargeItemDefinition } = useMutation({
     mutationFn: mutate(chargeItemDefinitionApi.createChargeItemDefinition, {
       pathParams: { facilityId },
-      silent: true,
     }),
   });
+
+  const { mutateAsync: createSupplyDelivery } = useMutation({
+    mutationFn: mutate(supplyDeliveryApi.createSupplyDelivery),
+  });
+
+  /**
+   * Build price components array from item's monetary components
+   */
+  const buildPriceComponents = (
+    item: SupplyDeliveryFormValues["items"][number],
+  ): MonetaryComponent[] => {
+    const components: MonetaryComponent[] = [];
+
+    // Base price component
+    if (item.unit_price !== undefined) {
+      components.push({
+        monetary_component_type: MonetaryComponentType.base,
+        amount: item.unit_price.toString(),
+      });
+    }
+
+    // Informational components (MRP, Purchase Price, etc.)
+    if (item.informational_components?.length) {
+      components.push(...item.informational_components);
+    }
+
+    // Tax components
+    if (item.tax_components?.length) {
+      components.push(...item.tax_components);
+    }
+
+    // Discount components
+    if (item.discount_components?.length) {
+      components.push(...item.discount_components);
+    }
+
+    return components;
+  };
 
   const validateFormWithToasts = useCallback(
     (data: SupplyDeliveryFormValues) => {
@@ -326,452 +383,465 @@ export function AddSupplyDeliveryForm({
     [origin, t],
   );
 
+  async function processRowItem(
+    item: SupplyDeliveryFormValues["items"][number],
+    index: number,
+    suppliedItemType: SupplyDeliveryType,
+  ) {
+    let productId = item.supplied_item?.id;
+    let chargeItemSlug = item.charge_item_definition?.slug;
+
+    // Create ChargeItemDefinition and Product for external supply (no origin)
+    if (!origin && (!productId || item.is_manually_edited)) {
+      // If is_manually_edited is true, we're creating NEW entities
+      // Any existing IDs are from a reference product selection, not our creation
+      // Clear them so we create fresh ones (but only on first attempt)
+      if (item.is_manually_edited) {
+        productId = undefined;
+        chargeItemSlug = undefined;
+      }
+
+      // Only create ChargeItemDefinition if we don't already have one from our creation
+      if (!chargeItemSlug) {
+        const category = item.charge_item_category;
+        if (!category) {
+          throw new Error(
+            t("charge_item_category_required_for_item", {
+              item: item.product_knowledge.name,
+            }),
+          );
+        }
+
+        const priceComponents = buildPriceComponents(item);
+        const chargeItemCreate: ChargeItemDefinitionCreate = {
+          slug_value: crypto.randomUUID(),
+          category,
+          title: `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
+          status: ChargeItemDefinitionStatus.active,
+          price_components:
+            priceComponents.length > 0
+              ? priceComponents
+              : [
+                  {
+                    monetary_component_type: MonetaryComponentType.base,
+                    amount: "0",
+                  },
+                ],
+        };
+
+        const newChargeItem =
+          await createChargeItemDefinition(chargeItemCreate);
+        chargeItemSlug = newChargeItem.slug;
+
+        // Persist to form state and mark as no longer manually edited
+        // This ensures on retry: we reuse our ChargeItem but still create Product if needed
+        form.setValue(`items.${index}.charge_item_definition`, {
+          slug: chargeItemSlug,
+        });
+        form.setValue(`items.${index}.is_manually_edited`, false);
+      }
+
+      // Only create Product if we don't already have one from our creation
+      if (!productId) {
+        const productCreate: ProductCreate = {
+          status: ProductStatusOptions.active,
+          batch: {
+            lot_number: item.batch_number!,
+          },
+          expiration_date: item.expiry_date!,
+          product_knowledge: item.product_knowledge.slug,
+          charge_item_definition: chargeItemSlug,
+          extensions: {},
+        };
+
+        const newProduct = await createProduct(productCreate);
+        productId = newProduct.id;
+
+        // Immediately persist Product to form state
+        // So if Delivery fails, we won't recreate it on retry
+        form.setValue(`items.${index}.supplied_item`, {
+          id: productId,
+        } as ProductRead);
+      }
+    }
+
+    // Create the SupplyDelivery for this item
+    const deliveryPayload = {
+      status: SupplyDeliveryStatus.in_progress,
+      supplied_item_type: suppliedItemType,
+      supplied_item_condition: SupplyDeliveryCondition.normal,
+      supplied_item_quantity: item.supplied_item_quantity,
+      ...(origin
+        ? { supplied_inventory_item: item.supplied_inventory_item }
+        : { supplied_item: productId }),
+      supply_request: item.supply_request?.id,
+      origin: origin,
+      destination: destination,
+      order: deliveryOrderId,
+      extensions: {},
+    };
+
+    await createSupplyDelivery(deliveryPayload);
+  }
+
   async function onSubmit(data: SupplyDeliveryFormValues) {
     if (!validateFormWithToasts(data)) {
       return;
     }
 
     setIsProcessing(true);
-    try {
-      const processedItems = await Promise.all(
-        data.items.map(
-          async (item: SupplyDeliveryFormValues["items"][number]) => {
-            let productId = item.supplied_item?.id;
-            let chargeItemSlug = item.charge_item_definition?.slug;
 
-            if (!origin && (!productId || item.is_manually_edited)) {
-              // Build price components array with all monetary components
-              const priceComponents: MonetaryComponent[] = [];
+    // Process all rows in parallel
+    const results = await Promise.allSettled(
+      data.items.map((item, index) =>
+        processRowItem(item, index, data.supplied_item_type).then(() => index),
+      ),
+    );
 
-              // Base price component
-              if (item.unit_price !== undefined) {
-                priceComponents.push({
-                  monetary_component_type: MonetaryComponentType.base,
-                  amount: item.unit_price.toString(),
-                });
-              }
+    // Separate successful and failed results
+    const successfulIndices = results
+      .map((result) => (result.status === "fulfilled" ? result.value : null))
+      .filter((index): index is number => index !== null);
 
-              // Informational components (MRP, Purchase Price, etc. - from facility config)
-              const informationalComponents = item.informational_components;
-              if (informationalComponents?.length) {
-                priceComponents.push(
-                  ...informationalComponents.map((ic) => ({
-                    ...ic,
-                    monetary_component_type:
-                      MonetaryComponentType.informational,
-                  })),
-                );
-              }
+    const failedCount = results.filter(
+      (result) => result.status === "rejected",
+    ).length;
 
-              // Tax components
-              const taxComponents = item.tax_components;
-              if (taxComponents?.length) {
-                priceComponents.push(
-                  ...taxComponents.map((tc) => ({
-                    ...tc,
-                    monetary_component_type: MonetaryComponentType.tax,
-                  })),
-                );
-              }
+    // Remove successful rows from form (in reverse order to maintain correct indices)
+    [...successfulIndices].sort((a, b) => b - a).forEach((idx) => remove(idx));
 
-              // Discount components
-              const discountComponents = item.discount_components;
-              if (discountComponents?.length) {
-                priceComponents.push(
-                  ...discountComponents.map((dc) => ({
-                    ...dc,
-                    monetary_component_type: MonetaryComponentType.discount,
-                  })),
-                );
-              }
+    // Invalidate queries if any items were successful
+    if (successfulIndices.length > 0) {
+      queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
+      queryClient.invalidateQueries({ queryKey: ["products", facilityId] });
+      queryClient.invalidateQueries({
+        queryKey: ["chargeItemDefinitions", facilityId],
+      });
+    }
 
-              // Create new Charge Item Definition with short unique slug (max 25 chars)
-              const shortId = crypto
-                .randomUUID()
-                .replace(/-/g, "")
-                .substring(0, 25);
+    setIsProcessing(false);
 
-              // Use user-selected charge item category (separate from product knowledge category)
-              const category = item.charge_item_category;
-              if (!category) {
-                throw new Error(
-                  t("charge_item_category_required_for_item", {
-                    item: item.product_knowledge.name,
-                  }),
-                );
-              }
-
-              const chargeItemCreate: ChargeItemDefinitionCreate = {
-                slug_value: shortId,
-                category: category,
-                title: `${item.product_knowledge.name}${item.batch_number ? ` - ${item.batch_number}` : ""}`,
-                status: ChargeItemDefinitionStatus.active,
-                price_components:
-                  priceComponents.length > 0
-                    ? priceComponents
-                    : [
-                        {
-                          monetary_component_type: MonetaryComponentType.base,
-                          amount: "0",
-                        },
-                      ],
-              };
-
-              const newChargeItem =
-                await createChargeItemDefinition(chargeItemCreate);
-              chargeItemSlug = newChargeItem.slug;
-
-              // Create Product
-              const productCreate: ProductCreate = {
-                status: ProductStatusOptions.active,
-                batch: {
-                  lot_number: item.batch_number!,
-                },
-                expiration_date: item.expiry_date!,
-                product_knowledge: item.product_knowledge.slug,
-                charge_item_definition: chargeItemSlug,
-              };
-
-              const newProduct = await createProduct(productCreate);
-              productId = newProduct.id;
-            }
-
-            return {
-              status: SupplyDeliveryStatus.in_progress,
-              supplied_item_type: data.supplied_item_type,
-              supplied_item_condition: SupplyDeliveryCondition.normal,
-              supplied_item_quantity: item.supplied_item_quantity,
-              ...(origin
-                ? { supplied_inventory_item: item.supplied_inventory_item }
-                : {}),
-              supplied_item: productId,
-              supply_request: item.supply_request?.id,
-              origin: origin,
-              destination: destination,
-              order: deliveryOrderId,
-            };
-          },
-        ),
+    // Handle completion based on success/failure
+    if (failedCount === 0) {
+      // All items succeeded
+      toast.success(
+        t("items_created_successfully", { count: successfulIndices.length }),
       );
 
-      upsertDelivery({
-        datapoints: processedItems,
-      });
-    } catch (error) {
-      console.error(error);
-      setIsProcessing(false);
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error(t("error_processing_items"));
-      }
+      onSuccess();
+      form.reset();
+    } else if (successfulIndices.length > 0) {
+      // Partial success - show success count but don't close form
+      toast.success(
+        t("items_created_successfully", { count: successfulIndices.length }),
+      );
     }
   }
 
   return (
     <>
-      <Card className="bg-gray-50 py-4 rounded-md">
-        <CardContent className="space-y-4 ">
-          {fields.length > 0 ? (
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="supplied_item_type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("item_type")}</FormLabel>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            value={field.value}
-                            className="flex flex-col sm:flex-row gap-2"
-                          >
-                            {Object.values(SupplyDeliveryType).map((type) => (
-                              <div
-                                key={type}
-                                className={cn(
-                                  "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
-                                  field.value === type &&
-                                    "border-primary bg-primary/10",
-                                )}
-                              >
-                                <RadioGroupItem value={type} id={type} />
-                                <Label htmlFor={type}>{t(type)}</Label>
-                              </div>
-                            ))}
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="rounded-md border border-gray-200 bg-white shadow overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader className="bg-gray-100">
-                        <TableRow className="divide-x divide-gray-200">
-                          <TableHead className="min-w-[180px] text-xs font-semibold">
-                            {t("product")}
-                          </TableHead>
-                          {origin ? (
-                            <>
-                              <TableHead className="text-xs font-semibold">
-                                {t("inventory_item")}
-                              </TableHead>
-                              <TableHead className="text-xs font-semibold">
-                                {t("quantity")}
-                              </TableHead>
-                            </>
-                          ) : (
-                            <>
-                              <TableHead className="min-w-[140px] text-xs font-semibold">
-                                {t("batch")}
-                              </TableHead>
-                              <TableHead className="min-w-[130px] text-xs font-semibold">
-                                {t("expiry")}
-                              </TableHead>
-                              <TableHead className="min-w-[70px] text-xs font-semibold">
-                                {t("qty")}
-                              </TableHead>
-                              <TableHead className="min-w-[140px] text-xs font-semibold text-center">
-                                {t("category")}
-                              </TableHead>
-                              <TableHead className="min-w-[100px] text-xs font-semibold">
-                                {t("base_price")}
-                              </TableHead>
-                              {informationalCodes.map((code) => (
-                                <TableHead
-                                  key={code.code}
-                                  className="min-w-[100px] text-xs font-semibold"
-                                >
-                                  {code.display}
-                                </TableHead>
-                              ))}
-                              <TableHead className="min-w-[120px] text-xs font-semibold">
-                                {t("tax")}
-                              </TableHead>
-                              <TableHead className="min-w-[120px] text-xs font-semibold">
-                                {t("discount")}
-                              </TableHead>
-                              <TableHead className="min-w-[80px] text-xs font-semibold text-right">
-                                {t("total")}
-                              </TableHead>
-                            </>
-                          )}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {fields.map((field, index) =>
-                          origin ? (
-                            <TableRow
-                              key={field.id}
-                              className="divide-x divide-gray-200"
+      <DisablingCover disabled={isProcessing} message={t("saving")}>
+        <Card className="bg-gray-50 py-4 rounded-md">
+          <CardContent className="space-y-4 ">
+            {fields.length > 0 ? (
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="supplied_item_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("item_type")}</FormLabel>
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              value={field.value}
+                              className="flex flex-col sm:flex-row gap-2"
                             >
-                              <TableCell className="align-top p-2">
-                                <FormField
-                                  control={form.control}
-                                  name={`items.${index}.product_knowledge`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormControl>
-                                        <ProductKnowledgeSelect
-                                          value={field.value}
-                                          onChange={(productKnowledge) => {
-                                            field.onChange(productKnowledge);
-                                            setNewlyAddedRowIndex(null);
-                                            // Reset inventory item when product changes
-                                            form.setValue(
-                                              `items.${index}.supplied_inventory_item`,
-                                              "",
-                                            );
-                                          }}
-                                          placeholder={t("select_product")}
-                                          className="w-full"
-                                          disableFavorites
-                                          hideClearButton
-                                          defaultOpen={
-                                            newlyAddedRowIndex === index
-                                          }
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
+                              {Object.values(SupplyDeliveryType).map((type) => (
+                                <div
+                                  key={type}
+                                  className={cn(
+                                    "flex items-center space-x-2 rounded-md border border-gray-200 bg-white p-2",
+                                    field.value === type &&
+                                      "border-primary bg-primary/10",
                                   )}
-                                />
-                              </TableCell>
-                              <TableCell className="align-top p-2">
-                                <FormField
-                                  control={form.control}
-                                  name={`items.${index}.supplied_inventory_item`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormControl>
-                                        <StockLotSelector
-                                          selectedLots={
-                                            field.value
-                                              ? [
-                                                  {
-                                                    selectedInventoryId:
-                                                      field.value,
-                                                    quantity: 1,
-                                                  },
-                                                ]
-                                              : []
-                                          }
-                                          onLotSelectionChange={(lots) =>
-                                            field.onChange(
-                                              lots[0]?.selectedInventoryId ||
-                                                "",
-                                            )
-                                          }
-                                          facilityId={facilityId}
-                                          locationId={origin || ""}
-                                          productKnowledge={form.watch(
-                                            `items.${index}.product_knowledge`,
-                                          )}
-                                          enableSearch={true}
-                                          multiSelect={false}
-                                          className="w-full h-9"
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </TableCell>
-                              <TableCell className="align-top p-2">
-                                <FormField
-                                  control={form.control}
-                                  name={`items.${index}.supplied_item_quantity`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormControl>
-                                        <Input
-                                          type="number"
-                                          min={1}
-                                          {...field}
-                                          onChange={(e) =>
-                                            field.onChange(
-                                              parseInt(e.target.value),
-                                            )
-                                          }
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </TableCell>
-                            </TableRow>
-                          ) : (
-                            <SmartExternalDeliveryRow
-                              key={field.id}
-                              form={form}
-                              index={index}
-                              facilityId={facilityId}
-                              informationalCodes={informationalCodes}
-                              autoOpenProductSelect={
-                                newlyAddedRowIndex === index
-                              }
-                              onProductSelectOpened={() =>
-                                setNewlyAddedRowIndex(null)
-                              }
-                            />
-                          ),
-                        )}
-                      </TableBody>
-                    </Table>
+                                >
+                                  <RadioGroupItem value={type} id={type} />
+                                  <Label htmlFor={type}>{t(type)}</Label>
+                                </div>
+                              ))}
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
-                </div>
 
-                <div className="flex flex-row gap-2 mt-4">
-                  {supplyRequests?.results?.length &&
-                    supplyRequests?.results?.length > 0 && (
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={loadFromSupplyRequests}
-                      >
-                        {t("load_from_order")} ({supplyRequests?.count}{" "}
-                        {t("items")}
-                        )
-                        <ShortcutBadge actionId="load-from-order" />
-                      </Button>
-                    )}
-                </div>
+                  <div className="rounded-md border border-gray-200 bg-white shadow overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader className="bg-gray-100">
+                          <TableRow className="divide-x divide-gray-200">
+                            <TableHead className="min-w-[180px] text-xs font-semibold">
+                              {t("product")}
+                            </TableHead>
+                            {origin ? (
+                              <>
+                                <TableHead className="text-xs font-semibold">
+                                  {t("inventory_item")}
+                                </TableHead>
+                                <TableHead className="text-xs font-semibold">
+                                  {t("quantity")}
+                                </TableHead>
+                              </>
+                            ) : (
+                              <>
+                                <TableHead className="min-w-[140px] text-xs font-semibold">
+                                  {t("batch")}
+                                </TableHead>
+                                <TableHead className="min-w-[130px] text-xs font-semibold">
+                                  {t("expiry")}
+                                </TableHead>
+                                <TableHead className="min-w-[140px] text-xs font-semibold text-center">
+                                  {t("category")}
+                                </TableHead>
+                                <TableHead className="min-w-[100px] text-xs font-semibold">
+                                  {t("base_price")}
+                                </TableHead>
+                                {informationalCodes.map((code) => (
+                                  <TableHead
+                                    key={code.code}
+                                    className="min-w-[100px] text-xs font-semibold"
+                                  >
+                                    {code.display}
+                                  </TableHead>
+                                ))}
+                                <TableHead className="min-w-[70px] text-xs font-semibold">
+                                  {t("qty")}
+                                </TableHead>
+                                <TableHead className="min-w-[120px] text-xs font-semibold">
+                                  {t("tax")}
+                                </TableHead>
+                              </>
+                            )}
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {fields.map((field, index) =>
+                            origin ? (
+                              <TableRow
+                                key={field.id}
+                                className="divide-x divide-gray-200"
+                              >
+                                <TableCell className="align-top p-2">
+                                  <FormField
+                                    control={form.control}
+                                    name={`items.${index}.product_knowledge`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <ProductKnowledgeSelect
+                                            value={field.value}
+                                            onChange={(productKnowledge) => {
+                                              field.onChange(productKnowledge);
+                                              setNewlyAddedRowIndex(null);
+                                              // Reset inventory item when product changes
+                                              form.setValue(
+                                                `items.${index}.supplied_inventory_item`,
+                                                "",
+                                              );
+                                            }}
+                                            placeholder={t("select_product")}
+                                            className="w-full"
+                                            disableFavorites
+                                            hideClearButton
+                                            defaultOpen={
+                                              newlyAddedRowIndex === index
+                                            }
+                                          />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </TableCell>
+                                <TableCell className="align-top p-2">
+                                  <FormField
+                                    control={form.control}
+                                    name={`items.${index}.supplied_inventory_item`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <StockLotSelector
+                                            selectedLots={
+                                              field.value
+                                                ? [
+                                                    {
+                                                      selectedInventoryId:
+                                                        field.value,
+                                                      quantity: 1,
+                                                    },
+                                                  ]
+                                                : []
+                                            }
+                                            onLotSelectionChange={(lots) =>
+                                              field.onChange(
+                                                lots[0]?.selectedInventoryId ||
+                                                  "",
+                                              )
+                                            }
+                                            facilityId={facilityId}
+                                            locationId={origin || ""}
+                                            productKnowledge={form.watch(
+                                              `items.${index}.product_knowledge`,
+                                            )}
+                                            enableSearch={true}
+                                            multiSelect={false}
+                                            className="w-full h-9"
+                                          />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </TableCell>
+                                <TableCell className="align-top p-2">
+                                  <FormField
+                                    control={form.control}
+                                    name={`items.${index}.supplied_item_quantity`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <Input
+                                            type="number"
+                                            min={1}
+                                            {...field}
+                                            onChange={(e) =>
+                                              field.onChange(
+                                                parseInt(e.target.value) || 1,
+                                              )
+                                            }
+                                          />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              <SmartExternalDeliveryRow
+                                key={field.id}
+                                form={form}
+                                index={index}
+                                informationalCodes={informationalCodes}
+                                autoOpenProductSelect={
+                                  newlyAddedRowIndex === index
+                                }
+                                onProductSelectOpened={() =>
+                                  setNewlyAddedRowIndex(null)
+                                }
+                              />
+                            ),
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
 
-                <div className="flex justify-between">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isProcessing}
-                    onClick={() => form.reset()}
-                  >
-                    {t("cancel")}
-                  </Button>
-                  <div className="flex space-x-3">
+                  <div className="flex flex-row gap-2 mt-4 items-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddAnotherItem}
+                    >
+                      <PlusCircle className="mr-2 size-4" />
+                      {t("add_another")}
+                    </Button>
+                    {supplyRequests?.results?.length &&
+                      supplyRequests?.results?.length > 0 && (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={loadFromSupplyRequests}
+                        >
+                          {t("load_from_order")} ({supplyRequests?.count}{" "}
+                          {t("items")}
+                          )
+                          <ShortcutBadge actionId="load-from-order" />
+                        </Button>
+                      )}
+                  </div>
+
+                  <div className="flex justify-between">
                     <Button
                       type="button"
                       variant="outline"
                       disabled={isProcessing}
-                      onClick={() => {
-                        addNewAfterSaveRef.current = true;
-                        form.handleSubmit(onSubmit)();
-                      }}
+                      onClick={() => form.reset()}
                     >
-                      {isProcessing ? t("saving") : t("save_and_add_new")}
+                      {t("cancel")}
                     </Button>
-                    <Button type="submit" disabled={isProcessing}>
-                      {isProcessing ? t("saving") : t("save")}
-                      <ShortcutBadge actionId="submit-action" />
-                    </Button>
-                  </div>
-                </div>
-              </form>
-            </Form>
-          ) : (
-            <div className="flex flex-col gap-3 items-center">
-              <h4>{t("add_items_to_delivery")}</h4>
-              <p>{t("add_items_to_delivery_description")}</p>
-              <div className="flex flex-row gap-2 items-center mt-2">
-                {supplyRequests?.results?.length &&
-                  supplyRequests?.results?.length > 0 && (
-                    <>
-                      <Button
-                        type="button"
-                        variant="outline_primary"
-                        onClick={loadFromSupplyRequests}
-                      >
-                        {t("load_from_order")} ({supplyRequests?.count}{" "}
-                        {t("items")}
-                        )
-                        <ShortcutBadge actionId="load-from-order" />
+                    <div className="flex space-x-3">
+                      <Button type="submit" disabled={isProcessing}>
+                        {isProcessing ? t("saving") : t("save")}
+                        <ShortcutBadge actionId="submit-action" />
                       </Button>
-                      <p>- {t("or")} -</p>
-                    </>
-                  )}
-                <Button
-                  type="button"
-                  variant="outline_primary"
-                  onClick={() => handleAddAnotherItem()}
-                >
-                  <PlusCircle className="mr-2 size-4" />
-                  {t("add_item")}
-                  <ShortcutBadge actionId="add-item" />
-                </Button>
+                    </div>
+                  </div>
+                </form>
+              </Form>
+            ) : (
+              <div className="flex flex-col gap-3 items-center">
+                <h4>{t("add_items_to_delivery")}</h4>
+                <p>{t("add_items_to_delivery_description")}</p>
+                <div className="flex flex-row gap-2 items-center mt-2">
+                  {qParams.supplyOrder
+                    ? supplyRequests?.results?.length &&
+                      supplyRequests?.results?.length > 0 && (
+                        <>
+                          <Button
+                            type="button"
+                            variant="outline_primary"
+                            onClick={loadFromSupplyRequests}
+                          >
+                            {t("load_from_order")} ({supplyRequests?.count}{" "}
+                            {t("items")}
+                            )
+                            <ShortcutBadge actionId="load-from-order" />
+                          </Button>
+                          <p>- {t("or")} -</p>
+                        </>
+                      )
+                    : requestOrders?.results &&
+                      requestOrders.results.length > 0 && (
+                        <>
+                          {renderRequestOrderSelector()}
+                          <p>- {t("or")} -</p>
+                        </>
+                      )}
+                  <Button
+                    type="button"
+                    variant="outline_primary"
+                    onClick={() => handleAddAnotherItem()}
+                  >
+                    <PlusCircle className="mr-2 size-4" />
+                    {t("add_item")}
+                    <ShortcutBadge actionId="add-item" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      </DisablingCover>
       {supplyRequests && (
         <Dialog open={isSelectDialogOpen} onOpenChange={setIsSelectDialogOpen}>
           <DialogContent className="sm:max-w-xl">

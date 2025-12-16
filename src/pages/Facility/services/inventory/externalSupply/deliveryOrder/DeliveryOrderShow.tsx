@@ -46,6 +46,7 @@ import { Label } from "@/components/ui/label";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AddSupplyDeliveryForm } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/AddSupplyDeliveryForm";
+import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { SupplyDeliveryTable } from "@/pages/Facility/services/inventory/SupplyDeliveryTable";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
@@ -132,7 +133,7 @@ interface Props {
 
 interface AllSupplyDeliveriesProps {
   facilityId: string;
-  deliveryOrder: any;
+  deliveryOrder: DeliveryOrderRetrieve;
   locationId: string;
   internal: boolean;
   isRequester: boolean;
@@ -331,6 +332,7 @@ export function DeliveryOrderShow({
         supplied_item_condition: delivery.supplied_item_condition,
         supplied_item_type: delivery.supplied_item_type,
         supply_request: delivery.supply_request?.id,
+        extensions: delivery.extensions,
       }));
 
     if (selectedSupplyDeliveries.length === 0) {
@@ -356,6 +358,7 @@ export function DeliveryOrderShow({
         supplied_item_condition: SupplyDeliveryCondition.damaged,
         supplied_item_type: delivery.supplied_item_type,
         supply_request: delivery.supply_request?.id,
+        extensions: delivery.extensions,
       }));
 
     if (selectedSupplyDeliveries.length === 0) {
@@ -383,6 +386,7 @@ export function DeliveryOrderShow({
         supplied_item_condition: confirmDialog.condition,
         supplied_item_type: delivery.supplied_item_type,
         supply_request: delivery.supply_request?.id,
+        extensions: delivery.extensions,
       }));
 
     upsertSupplyDeliveries({
@@ -442,12 +446,23 @@ export function DeliveryOrderShow({
       title={t("delivery_order_details")}
       hideTitleOnPage
       shortCutContext="facility:inventory:delivery"
-      className="max-w-7xl mx-auto"
+      className="max-w-[100vw] mx-auto"
     >
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-4">
-            <BackButton size="icon" className="shrink-0">
+            <BackButton
+              size="icon"
+              className="shrink-0"
+              to={getInventoryBasePath(
+                facilityId,
+                locationId,
+                internal,
+                false,
+                isRequester,
+                "",
+              )}
+            >
               <ChevronLeft />
             </BackButton>
             <div>
