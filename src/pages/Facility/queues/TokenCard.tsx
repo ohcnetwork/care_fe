@@ -148,12 +148,12 @@ const TokenCard = ({
                   <Label className="justify-end text-sm font-normal text-gray-600">
                     {t("token_no")}
                   </Label>
-                  <div className="flex justify-end text-xl font-bold leading-none">
+                  <div className="flex justify-end text-2xl font-bold leading-none">
                     {renderTokenNumber(token)}
                   </div>
                 </div>
               </div>
-              <div className="mt-3">
+              <div className="mt-2">
                 <QRCodeSVG
                   size={isLargeScreen ? 96 : 60}
                   value={JSON.stringify({
