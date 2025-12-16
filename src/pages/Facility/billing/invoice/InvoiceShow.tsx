@@ -72,7 +72,10 @@ import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryCo
 import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
+import { getPartialId } from "@/types/emr/patient/patient";
+import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import dayjs from "@/Utils/dayjs";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
@@ -125,6 +128,22 @@ export function InvoiceShow({
     queryFn: query(invoiceApi.retrieveInvoice, {
       pathParams: { facilityId, invoiceId },
     }),
+  });
+
+  const patient = invoice?.account.patient;
+
+  // Fetch patient data for identifiers
+  const { data: verifiedPatient } = useQuery({
+    queryKey: ["patient-verify", patient?.id, patient?.year_of_birth],
+    queryFn: query(patientApi.searchRetrieve, {
+      pathParams: { facilityId },
+      body: {
+        phone_number: patient?.phone_number ?? "",
+        year_of_birth: patient?.year_of_birth?.toString() ?? "",
+        partial_id: patient ? getPartialId(patient) : "",
+      },
+    }),
+    enabled: !!patient,
   });
 
   const { mutate: removeChargeItem, isPending: isRemoving } = useMutation({
@@ -540,6 +559,23 @@ export function InvoiceShow({
                       invoice.account.patient.phone_number,
                     )}
                   </p>
+                  {verifiedPatient &&
+                    "instance_identifiers" in verifiedPatient &&
+                    verifiedPatient.instance_identifiers
+                      .filter(
+                        ({ config }) =>
+                          config.config.use === PatientIdentifierUse.official &&
+                          !config.config.auto_maintained,
+                      )
+                      .map((identifier) => (
+                        <p
+                          key={identifier.config.id}
+                          className="font-medium text-gray-700 text-sm ml-2"
+                        >
+                          <span>{identifier.config.config.display}: </span>
+                          <span>{identifier.value}</span>
+                        </p>
+                      ))}
                 </div>
                 <div className="mt-2">
                   {invoice.note && <p>{invoice.note}</p>}
