@@ -162,10 +162,11 @@ export default function CreateTokenForm({
     };
 
     createToken(tokenRequest);
+    handleOpenChange(false);
   }
 
   const handleOpenChange = (open: boolean) => {
-    if (open) {
+    if (!open) {
       form.reset();
       setSelectedResource({
         resource: null,
