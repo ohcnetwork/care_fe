@@ -130,6 +130,7 @@ interface ServiceRequestFormProps {
   isPreview?: boolean;
   activityDefinition?: ActivityDefinitionReadSpec;
   facilityId?: string;
+  locations?: LocationList[];
 }
 
 function ServiceRequestForm({
@@ -144,8 +145,28 @@ function ServiceRequestForm({
   isPreview = false,
   activityDefinition,
   facilityId = "",
+  locations = [],
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
+
+  const getLocationDetails = () => {
+    if (
+      activityDefinition?.locations &&
+      activityDefinition.locations.length > 0
+    ) {
+      return activityDefinition.locations;
+    }
+
+    const locationIds = serviceRequest.service_request.locations || [];
+    return locationIds
+      .map((locId) => {
+        const locationId = typeof locId === "string" ? locId : locId;
+        return locations.find((loc) => loc.id === locationId);
+      })
+      .filter((loc): loc is LocationList => loc !== undefined);
+  };
+
+  const locationDetails = getLocationDetails();
 
   const renderInfoSection = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-2 w-full">
@@ -195,24 +216,24 @@ function ServiceRequestForm({
           </Badge>
         </div>
       )}
-      <div className="flex items-center gap-2 flex-wrap col-span-1 sm:col-span-2 xl:col-span-4">
-        <span className="font-medium text-sm text-gray-700">
-          {t("locations")}:
-        </span>
-        {activityDefinition?.locations &&
-          activityDefinition?.locations.length > 0 &&
-          activityDefinition?.locations.map((location) => {
+      {locationDetails.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap col-span-1 sm:col-span-2 xl:col-span-4">
+          <span className="font-medium text-sm text-gray-700">
+            {t("locations")}:
+          </span>
+          {locationDetails.map((location) => {
             return (
               <Badge
                 key={location.id}
                 variant="outline"
                 className="bg-gray-50 text-gray-700 border-gray-200"
               >
-                {location?.name || location.id}
+                {location.name}
               </Badge>
             );
           })}
-      </div>
+        </div>
+      )}
     </div>
   );
 
@@ -670,6 +691,7 @@ export function ServiceRequestQuestion({
           questionId={questionnaireResponse.question_id}
           index={index}
           facilityId={facilityId}
+          locations={locations?.results || []}
         />
       ))}
 
@@ -706,6 +728,7 @@ export function ServiceRequestQuestion({
           disabled={disabled}
           isPreview
           facilityId={facilityId}
+          locations={locations?.results || []}
         />
       )}
 
