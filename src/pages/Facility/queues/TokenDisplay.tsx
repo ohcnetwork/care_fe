@@ -173,13 +173,14 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
 
   if (servicePoints.length === 0) {
     return (
-      <div className="text-center text-white">
+      <div className="text-center text-black">
         {t("no_service_points_found")}
       </div>
     );
   }
 
-  const itemCount = servicePoints.length;
+  const filteredServicePoints = servicePoints.filter((sp) => sp.queue);
+  const itemCount = filteredServicePoints.length;
 
   return (
     <>
@@ -190,16 +191,14 @@ export const TokenDisplay = ({ facilityId, resources }: TokenDisplayProps) => {
           getGridClass(itemCount),
         )}
       >
-        {servicePoints
-          .filter((servicePoint) => servicePoint.queue)
-          .map((servicePoint, index) => (
-            <div
-              key={servicePoint.id}
-              className={getColSpanClass(index, itemCount)}
-            >
-              <ServicePointDisplay facilityId={facilityId} {...servicePoint} />
-            </div>
-          ))}
+        {filteredServicePoints.map((servicePoint, index) => (
+          <div
+            key={servicePoint.id}
+            className={getColSpanClass(index, itemCount)}
+          >
+            <ServicePointDisplay facilityId={facilityId} {...servicePoint} />
+          </div>
+        ))}
       </div>
     </>
   );
