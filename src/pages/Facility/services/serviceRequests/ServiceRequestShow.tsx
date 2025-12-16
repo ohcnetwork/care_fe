@@ -41,7 +41,6 @@ import activityDefinitionApi from "@/types/emr/activityDefinition/activityDefini
 import { DiagnosticReportStatus } from "@/types/emr/diagnosticReport/diagnosticReport";
 import {
   EDITABLE_SERVICE_REQUEST_STATUSES,
-  ServiceRequestUpdateSpec,
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
@@ -133,22 +132,32 @@ export default function ServiceRequestShow({
     },
   });
 
-  const { mutate: updateServiceRequest, isPending: isUpdatingServiceRequest } =
-    useMutation({
-      mutationFn: mutate(serviceRequestApi.updateServiceRequest, {
-        pathParams: { facilityId, serviceRequestId },
-      }),
-      onSuccess: (data: ServiceRequestUpdateSpec) => {
-        if (data.status === Status.completed) {
-          toast.success(t("service_request_completed"));
-        } else {
-          toast.success(t("status_updated_successfully"));
-        }
-        queryClient.invalidateQueries({
-          queryKey: ["serviceRequest", facilityId, serviceRequestId],
-        });
-      },
-    });
+  const {
+    mutate: cancelServiceRequest,
+    isPending: isCancellingServiceRequest,
+  } = useMutation({
+    mutationFn: mutate(serviceRequestApi.cancelServiceRequest, {
+      pathParams: { facilityId, serviceRequestId },
+    }),
+    onSuccess: () => {
+      toast.success(t("service_request_cancelled"));
+      queryClient.invalidateQueries({
+        queryKey: ["serviceRequest", facilityId, serviceRequestId],
+      });
+    },
+  });
+
+  const { mutate: completeServiceRequest } = useMutation({
+    mutationFn: mutate(serviceRequestApi.completeServiceRequest, {
+      pathParams: { facilityId, serviceRequestId },
+    }),
+    onSuccess: () => {
+      toast.success(t("service_request_completed"));
+      queryClient.invalidateQueries({
+        queryKey: ["serviceRequest", facilityId, serviceRequestId],
+      });
+    },
+  });
 
   const createDraftSpecimen = (requirement: SpecimenDefinitionRead) => {
     const matchingSpecimens = request?.specimens.filter(
@@ -338,11 +347,7 @@ export default function ServiceRequestShow({
                         <AlertDialogFooter>
                           <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() =>
-                              updateServiceRequest({
-                                status: Status.completed,
-                              })
-                            }
+                            onClick={() => completeServiceRequest({})}
                           >
                             {t("confirm")}
                           </AlertDialogAction>
@@ -367,62 +372,27 @@ export default function ServiceRequestShow({
                 </div>
               )}
               {request.status !== Status.completed &&
-                request.status !== Status.entered_in_error && (
+                request.status !== Status.revoked && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
                         className="border-gray-400 px-2"
+                        disabled={isCancellingServiceRequest}
                       >
                         <CareIcon icon="l-ellipsis-v" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {request.status !== Status.on_hold && (
-                        <DropdownMenuItem asChild className="text-primary-900">
-                          <Button
-                            variant="ghost"
-                            onClick={() =>
-                              updateServiceRequest({
-                                status: Status.on_hold,
-                              })
-                            }
-                            className="w-full flex flex-row justify-stretch items-center"
-                            disabled={isUpdatingServiceRequest}
-                          >
-                            <CareIcon icon="l-pause" className="mr-1" />
-                            {t("mark_as_on_hold")}
-                          </Button>
-                        </DropdownMenuItem>
-                      )}
-                      {(request.status === Status.on_hold ||
-                        request.status === Status.revoked) && (
-                        <DropdownMenuItem asChild className="text-primary-900">
-                          <Button
-                            variant="ghost"
-                            onClick={() =>
-                              updateServiceRequest({
-                                status: Status.active,
-                              })
-                            }
-                            className="w-full flex flex-row justify-stretch items-center"
-                            disabled={isUpdatingServiceRequest}
-                          >
-                            <CareIcon icon="l-play" className="mr-1" />
-                            {t("mark_as_active")}
-                          </Button>
-                        </DropdownMenuItem>
-                      )}
                       <DropdownMenuItem asChild className="text-primary-900">
                         <Button
                           variant="ghost"
                           onClick={() =>
-                            updateServiceRequest({
+                            cancelServiceRequest({
                               status: Status.entered_in_error,
                             })
                           }
-                          disabled={isUpdatingServiceRequest}
-                          className="w-full flex flex-row self-center"
+                          className="w-full flex flex-row "
                         >
                           <CareIcon
                             icon="l-exclamation-circle"
@@ -435,11 +405,10 @@ export default function ServiceRequestShow({
                         <Button
                           variant="ghost"
                           onClick={() =>
-                            updateServiceRequest({
+                            cancelServiceRequest({
                               status: Status.revoked,
                             })
                           }
-                          disabled={isUpdatingServiceRequest}
                           className="w-full flex flex-row justify-stretch items-center"
                         >
                           <CareIcon icon="l-ban" className="mr-1" />

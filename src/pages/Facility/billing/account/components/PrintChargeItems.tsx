@@ -63,7 +63,7 @@ export const PrintChargeItems = (props: {
 
   const { data: patient } = useQuery({
     queryKey: ["patient", account?.patient?.id],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: { id: account?.patient?.id || "" },
     }),
     enabled: !!account?.patient?.id,
