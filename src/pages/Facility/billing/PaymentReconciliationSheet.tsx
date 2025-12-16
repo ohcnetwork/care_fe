@@ -244,6 +244,12 @@ export function PaymentReconciliationSheet({
     submitPayment(submissionData);
   });
 
+  useEffect(() => {
+    if (open) {
+      form.reset();
+    }
+  }, [open]);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full max-w-md sm:max-w-lg overflow-y-auto">
