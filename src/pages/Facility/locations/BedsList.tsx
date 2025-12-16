@@ -5,7 +5,7 @@ import { useLocationState } from "@/hooks/useLocationState";
 
 import query from "@/Utils/request/query";
 import LocationContent from "@/pages/Facility/locations/LocationContent";
-import { LocationList as LocationListType } from "@/types/location/location";
+import { LocationRead as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 export default function BedsList({
