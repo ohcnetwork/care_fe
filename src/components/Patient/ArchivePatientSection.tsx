@@ -9,6 +9,8 @@ import { buttonVariants } from "@/components/ui/button";
 
 import CriticalActionConfirmationDialog from "@/components/Common/CriticalActionConfirmationDialog";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
 import mutate from "@/Utils/request/mutate";
 import patientApi from "@/types/emr/patient/patientApi";
 
@@ -24,6 +26,7 @@ const ArchivePatientSection = ({
   patientName,
 }: ArchivePatientSectionProps) => {
   const { t } = useTranslation();
+  const authUser = useAuthUser();
 
   const [open, setOpen] = useState(false);
 
@@ -37,6 +40,10 @@ const ArchivePatientSection = ({
       navigate("/");
     },
   });
+
+  if (!authUser.is_superuser) {
+    return null;
+  }
 
   return (
     <div className="w-full border-t border-gray-200 py-6 mt-6">
