@@ -277,6 +277,7 @@ export function ProductFormContent({
         expiration_date: formattedData.expiration_date,
         charge_item_definition: formattedData.charge_item_definition,
         product_knowledge: formattedData.product_knowledge,
+        extensions: {},
       };
       updateProduct(updatePayload);
     } else {
@@ -286,6 +287,7 @@ export function ProductFormContent({
         expiration_date: formattedData.expiration_date,
         product_knowledge: formattedData.product_knowledge,
         charge_item_definition: formattedData.charge_item_definition,
+        extensions: {},
       };
       createProduct(createPayload);
     }

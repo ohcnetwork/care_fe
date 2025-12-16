@@ -223,6 +223,17 @@ const careConfig = {
     env.REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE,
     false,
   ),
+
+  /**
+   * Default state for tax inclusive pricing in inventory
+   * When true, base price is calculated from MRP by removing tax
+   */
+  inventory: {
+    defaultTaxInclusive: booleanFromString(
+      env.REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE,
+      false,
+    ),
+  },
 } as const;
 
 export default careConfig;
