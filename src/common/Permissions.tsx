@@ -13,6 +13,8 @@ export const PERMISSION_CREATE_ENCOUNTER = "can_create_encounter";
 export const PERMISSION_LIST_ENCOUNTERS = "can_list_encounter";
 export const PERMISSION_WRITE_ENCOUNTER = "can_write_encounter";
 export const PERMISSION_READ_ENCOUNTER = "can_read_encounter";
+export const PERMISSION_READ_ENCOUNTER_CLINICAL_DATA =
+  "can_read_encounter_clinical_data";
 export const PERMISSION_SUBMIT_ENCOUNTER_QUESTIONNAIRE =
   "can_submit_encounter_questionnaire";
 
@@ -77,7 +79,12 @@ export const PERMISSION_CREATE_USER = "can_create_user";
 export const PERMISSION_LIST_USER = "can_list_user";
 
 // Template Permissions
-export const PERMISSION_LIST_TEMPLATE = "can_list_template";
+export const PERMISSION_LIST_TEMPLATE = "can_read_template";
+export const PERMISSION_WRITE_TEMPLATE = "can_write_template";
+export const PERMISSION_PREVIEW_TEMPLATE = "can_preview_template";
+export const PERMISSION_VIEW_TEMPLATE_SCHEMA = "can_view_template_schema";
+export const PERMISSION_GENERATE_REPORT_FROM_TEMPLATE =
+  "can_generate_report_from_template";
 export const PERMISSION_MANAGE_TEMPLATE = "can_manage_template";
 export const PERMISSION_CREATE_CHARGE_ITEM_DEFINITION =
   "can_create_charge_item_definition";
@@ -122,7 +129,9 @@ export interface Permissions {
   /** Permission slug: "can_write_encounter" */
   canWriteEncounter: boolean;
   /** Permission slug: "can_read_encounter" */
-  canViewEncounter: boolean;
+  canReadEncounter: boolean;
+  /** Permission slug: "can_read_encounter_clinical_data" */
+  canReadEncounterClinicalData: boolean;
   /** Permission slug: "can_submit_encounter_questionnaire" */
   canSubmitEncounterQuestionnaire: boolean;
 
@@ -211,6 +220,15 @@ export interface Permissions {
   // Template Permissions
   /** Permission slug: "can_list_template" */
   canListTemplate: boolean;
+  /** Permission slug: "can_write_template" */
+  canWriteTemplate: boolean;
+  /** Permission slug: "can_preview_template" */
+  canPreviewTemplate: boolean;
+  /** Permission slug: "can_view_template_schema" */
+  canViewTemplateSchema: boolean;
+  /** Permission slug: "can_generate_report_from_template" */
+  canGenerateReportFromTemplate: boolean;
+  // @deprecated Use canWriteTemplate instead
   /** Permission slug: "can_manage_template" */
   canManageTemplate: boolean;
   /** Permission slug: "can_create_charge_item_definition" */
@@ -268,7 +286,11 @@ export function getPermissions(
     canCreateEncounter: hasPermission(PERMISSION_CREATE_ENCOUNTER, permissions),
     canListEncounters: hasPermission(PERMISSION_LIST_ENCOUNTERS, permissions),
     canWriteEncounter: hasPermission(PERMISSION_WRITE_ENCOUNTER, permissions),
-    canViewEncounter: hasPermission(PERMISSION_READ_ENCOUNTER, permissions),
+    canReadEncounter: hasPermission(PERMISSION_READ_ENCOUNTER, permissions),
+    canReadEncounterClinicalData: hasPermission(
+      PERMISSION_READ_ENCOUNTER_CLINICAL_DATA,
+      permissions,
+    ),
     canSubmitEncounterQuestionnaire: hasPermission(
       PERMISSION_SUBMIT_ENCOUNTER_QUESTIONNAIRE,
       permissions,
@@ -395,6 +417,17 @@ export function getPermissions(
 
     // Template
     canListTemplate: hasPermission(PERMISSION_LIST_TEMPLATE, permissions),
+    canWriteTemplate: hasPermission(PERMISSION_WRITE_TEMPLATE, permissions),
+    canPreviewTemplate: hasPermission(PERMISSION_PREVIEW_TEMPLATE, permissions),
+    canViewTemplateSchema: hasPermission(
+      PERMISSION_VIEW_TEMPLATE_SCHEMA,
+      permissions,
+    ),
+    canGenerateReportFromTemplate: hasPermission(
+      PERMISSION_GENERATE_REPORT_FROM_TEMPLATE,
+      permissions,
+    ),
+    // @deprecated Use canWriteTemplate instead
     canManageTemplate: hasPermission(PERMISSION_MANAGE_TEMPLATE, permissions),
     canSetChargeItemDefinition: hasPermission(
       PERMISSION_SET_CHARGE_ITEM_DEFINITION,

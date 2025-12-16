@@ -84,6 +84,7 @@ const envSchema = z
     REACT_PAYMENT_LOCATION_REQUIRED: booleanAsStringSchema.optional(),
     REACT_ENCOUNTER_DEFAULT_DATE_FILTER: numberAsString.optional(),
     REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE: booleanAsStringSchema.optional(),
+    REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE: booleanAsStringSchema.optional(),
     REACT_OBSERVATION_PLOTS_CONFIG_URL: z.string().url().optional(),
     REACT_DEFAULT_COUNTRY: z.string().optional(),
     REACT_DEFAULT_COUNTRY_NAME: z.string().optional(),
@@ -113,6 +114,8 @@ const envSchema = z
     REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG: z.string().uuid().optional(),
     REACT_CUSTOM_REMOTE_I18N_URL: z.string().url().optional(),
     REACT_CUSTOM_SHORTCUTS: customShortcutsSchemaString.optional(),
+    REACT_AUTO_REFRESH_INTERVAL: numberAsString.optional(),
+    REACT_AUTO_REFRESH_BY_DEFAULT: booleanAsStringSchema.optional(),
   })
   .superRefine(async (data, ctx) => {
     const allowedClasses =

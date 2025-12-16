@@ -1,0 +1,418 @@
+import { format } from "date-fns";
+import { ChevronDown, Plus } from "lucide-react";
+import { useState } from "react";
+import { UseFormReturn } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { TableCell, TableRow } from "@/components/ui/table";
+
+import { cn } from "@/lib/utils";
+
+import { MonetaryComponentSelector } from "@/components/Billing/MonetaryComponentSelector";
+import { ResourceCategoryPicker } from "@/components/Common/ResourceCategoryPicker";
+import { CURRENCY_SYMBOL } from "@/components/ui/monetary-display";
+import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { Code } from "@/types/base/code/code";
+import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
+import { ProductRead } from "@/types/inventory/product/product";
+
+import { SupplyDeliveryFormValues } from "./AddSupplyDeliveryForm";
+import { useDeliveryRowItem } from "./useDeliveryRowItem";
+
+interface Props {
+  form: UseFormReturn<SupplyDeliveryFormValues>;
+  index: number;
+  informationalCodes: Code[];
+  autoOpenProductSelect?: boolean;
+  onProductSelectOpened?: () => void;
+}
+
+export function SmartExternalDeliveryRow({
+  form,
+  index,
+  informationalCodes,
+  autoOpenProductSelect = false,
+  onProductSelectOpened,
+}: Props) {
+  const { facilityId } = useCurrentFacility();
+  const { t } = useTranslation();
+  const [batchSelectorOpen, setBatchSelectorOpen] = useState(false);
+
+  const {
+    productKnowledge,
+    suppliedItem,
+    batchNumber,
+    unitPrice,
+    taxComponents,
+    discountComponents,
+    informationalComponents,
+    chargeItemCategory,
+    isTaxInclusive,
+    needsCategorySelection,
+    isCreatingNew,
+    isLoadingProducts,
+    products,
+    availableTaxes,
+    availableDiscounts,
+    setField,
+    resetFields,
+    markAsEdited,
+    fillFromProduct,
+    updateInformationalComponent,
+  } = useDeliveryRowItem({ form, index });
+
+  const handleProductSelect = (product: ProductRead) => {
+    fillFromProduct(product);
+    setBatchSelectorOpen(false);
+  };
+
+  const getExpirationDisplay = (product: ProductRead) => {
+    return product.expiration_date
+      ? format(new Date(product.expiration_date), "MMM yyyy")
+      : "N/A";
+  };
+
+  return (
+    <TableRow className="divide-x divide-gray-200 hover:bg-gray-50/50">
+      {/* Product Knowledge */}
+      <TableCell className="align-top p-2">
+        <FormField
+          control={form.control}
+          name={`items.${index}.product_knowledge`}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <ProductKnowledgeSelect
+                  value={field.value}
+                  onChange={(value) => {
+                    field.onChange(value);
+                    onProductSelectOpened?.();
+                    resetFields();
+                  }}
+                  placeholder={t("select_product")}
+                  className="w-full min-w-[180px]"
+                  disableFavorites
+                  hideClearButton
+                  defaultOpen={autoOpenProductSelect}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </TableCell>
+
+      {/* Batch Number */}
+      <TableCell className="align-top p-2 pb-4!">
+        <Popover open={batchSelectorOpen} onOpenChange={setBatchSelectorOpen}>
+          <PopoverTrigger asChild>
+            <div
+              className={cn(
+                "flex items-center border rounded-md h-9 p-1! cursor-pointer hover:border-gray-400 transition-colors",
+                !productKnowledge && "opacity-50 pointer-events-none",
+                isCreatingNew && "border-green-500 bg-green-50",
+              )}
+            >
+              <Input
+                value={batchNumber || ""}
+                onChange={(e) => {
+                  setField("batch_number", e.target.value);
+                  markAsEdited();
+                  if (!batchSelectorOpen && e.target.value) {
+                    setBatchSelectorOpen(true);
+                  }
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setBatchSelectorOpen(true);
+                }}
+                placeholder={t("batch_no")}
+                disabled={!productKnowledge}
+                className={cn(
+                  "border-0 h-7 p-0 focus-visible:ring-0 focus-visible:ring-offset-0 min-w-[100px] border-none! shadow-none!",
+                  isCreatingNew && "bg-green-50",
+                )}
+              />
+              <ChevronDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent className="w-[320px] p-0" align="start">
+            <Command>
+              <CommandList className="max-h-[250px]">
+                {batchNumber && (
+                  <CommandGroup>
+                    <CommandItem
+                      onSelect={() => {
+                        markAsEdited();
+                        setBatchSelectorOpen(false);
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2 text-green-700">
+                        <Plus className="h-4 w-4" />
+                        <span>
+                          {t("create_batch")}: <strong>{batchNumber}</strong>
+                        </span>
+                      </div>
+                    </CommandItem>
+                  </CommandGroup>
+                )}
+
+                {isLoadingProducts ? (
+                  <div className="py-6 text-center text-sm">
+                    <CareIcon
+                      icon="l-spinner"
+                      className="size-4 animate-spin mx-auto mb-2"
+                    />
+                    {t("loading")}...
+                  </div>
+                ) : products.length === 0 ? (
+                  !batchNumber && (
+                    <CommandEmpty>{t("type_batch_number")}</CommandEmpty>
+                  )
+                ) : (
+                  <CommandGroup heading={t("existing_batches")}>
+                    {products
+                      .filter(
+                        (p) =>
+                          !batchNumber ||
+                          p.batch?.lot_number
+                            ?.toLowerCase()
+                            .includes(batchNumber.toLowerCase()),
+                      )
+                      .map((product) => (
+                        <CommandItem
+                          key={product.id}
+                          value={product.id}
+                          onSelect={() => handleProductSelect(product)}
+                          className="cursor-pointer"
+                        >
+                          <div className="flex w-full items-center justify-between">
+                            <div className="flex flex-col">
+                              <span className="font-medium">
+                                #{product.batch?.lot_number || "N/A"}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {t("expiry_short")}:{" "}
+                                {getExpirationDisplay(product)}
+                              </span>
+                            </div>
+                            {suppliedItem?.id === product.id && (
+                              <CareIcon
+                                icon="l-check"
+                                className="size-4 text-green-600"
+                              />
+                            )}
+                          </div>
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                )}
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+        {isCreatingNew && (
+          <Badge
+            variant="outline"
+            className="text-[10px] mt-1 text-green-600 border-green-300"
+          >
+            {t("new")}
+          </Badge>
+        )}
+      </TableCell>
+
+      {/* Expiry Date */}
+      <TableCell className="align-top p-2">
+        <FormField
+          control={form.control}
+          name={`items.${index}.expiry_date`}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="date"
+                  onChange={(e) => {
+                    field.onChange(e);
+                    markAsEdited();
+                  }}
+                  disabled={!productKnowledge}
+                  className="w-full min-w-[10rem]"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </TableCell>
+
+      {/* Category */}
+      <TableCell className="align-top p-2 text-center">
+        {needsCategorySelection ? (
+          <ResourceCategoryPicker
+            facilityId={facilityId}
+            resourceType={ResourceCategoryResourceType.charge_item_definition}
+            value={chargeItemCategory}
+            onValueChange={(category) => {
+              setField("charge_item_category", category?.slug || "");
+            }}
+            placeholder={t("select_category")}
+            className="w-full min-w-[140px]"
+          />
+        ) : (
+          <span className="text-sm text-gray-500">
+            {suppliedItem?.charge_item_definition?.category?.title || "-"}
+          </span>
+        )}
+      </TableCell>
+
+      {/* Base Price */}
+      <TableCell className="align-top p-2!">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center">
+            <span className="text-xs text-gray-500 mr-1">
+              {CURRENCY_SYMBOL}
+            </span>
+            <Input
+              type="number"
+              min={0}
+              step="1"
+              value={unitPrice || ""}
+              placeholder="0"
+              onChange={(e) => {
+                setField("unit_price", parseFloat(e.target.value) || 0);
+                markAsEdited();
+              }}
+              disabled={!productKnowledge || isTaxInclusive}
+              className={cn(
+                "w-[90px] text-right",
+                isTaxInclusive && "bg-gray-100 text-gray-600",
+              )}
+            />
+          </div>
+          <label className="flex items-center gap-1.5 cursor-pointer">
+            <Checkbox
+              checked={isTaxInclusive || false}
+              onCheckedChange={(checked) => {
+                setField("is_tax_inclusive", !!checked);
+                markAsEdited();
+              }}
+              disabled={!productKnowledge}
+              className="h-3.5 w-3.5"
+            />
+            <span className="text-[10px] text-gray-500 whitespace-nowrap">
+              {t("tax_inclusive")}
+            </span>
+          </label>
+        </div>
+      </TableCell>
+
+      {/* Dynamic Informational Components (MRP, Purchase Price, etc.) */}
+      {informationalCodes.map((code) => {
+        const currentValue = informationalComponents?.find(
+          (c) => c.code?.code === code.code,
+        );
+        return (
+          <TableCell key={code.code} className="align-top p-2">
+            <div className="flex items-center">
+              <span className="text-xs text-gray-500 mr-1">
+                {CURRENCY_SYMBOL}
+              </span>
+              <Input
+                type="number"
+                min={0}
+                step="1"
+                value={currentValue?.amount || ""}
+                placeholder="0"
+                onChange={(e) => {
+                  updateInformationalComponent(
+                    code,
+                    parseFloat(e.target.value) || 0,
+                  );
+                }}
+                disabled={!productKnowledge}
+                className="w-[90px] text-right"
+              />
+            </div>
+          </TableCell>
+        );
+      })}
+
+      {/* Quantity */}
+      <TableCell className="align-top p-2">
+        <FormField
+          control={form.control}
+          name={`items.${index}.supplied_item_quantity`}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={1}
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  className="w-full min-w-[70px]"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </TableCell>
+
+      {/* Taxes */}
+      <TableCell className="align-top p-2">
+        <MonetaryComponentSelector
+          type={MonetaryComponentType.tax}
+          components={availableTaxes}
+          selectedComponents={taxComponents || []}
+          onSelectionChange={(components) => {
+            setField("tax_components", components);
+            markAsEdited();
+          }}
+          disabled={!productKnowledge}
+          displayMode="inline"
+        />
+        <span className="text-xs text-gray-500">
+          <MonetaryComponentSelector
+            type={MonetaryComponentType.discount}
+            components={availableDiscounts}
+            selectedComponents={discountComponents || []}
+            onSelectionChange={(components) => {
+              setField("discount_components", components);
+              markAsEdited();
+            }}
+            disabled={!productKnowledge}
+            displayMode="short"
+          />
+        </span>
+      </TableCell>
+    </TableRow>
+  );
+}

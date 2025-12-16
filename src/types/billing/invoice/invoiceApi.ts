@@ -2,9 +2,9 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
 import {
-  InvoiceBase,
   InvoiceCancel,
   InvoiceCreate,
+  InvoiceList,
   InvoiceRead,
 } from "./invoice";
 
@@ -12,7 +12,7 @@ export default {
   listInvoice: {
     path: "/api/v1/facility/{facilityId}/invoice/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<InvoiceBase>>(),
+    TRes: Type<PaginatedResponse<InvoiceList>>(),
     defaultQueryParams: {
       ordering: "-created_date",
     },
