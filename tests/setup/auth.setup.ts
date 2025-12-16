@@ -1,5 +1,5 @@
-import { ensureAuthenticated } from "@/tests/support/authUtils";
 import { test as setup } from "@playwright/test";
+import { ensureAuthenticated } from "tests/support/authUtils";
 
 const authFile = "tests/.auth/user.json";
 
