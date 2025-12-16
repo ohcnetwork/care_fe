@@ -6,6 +6,7 @@ import {
 } from "@/components/Location/hooks/useLocationAssignment";
 import { LocationCardWrapper } from "@/components/Location/LocationCardWrapper";
 import { CurrentLocationsList } from "@/components/Location/views/CurrentLocationsList";
+import { useTranslation } from "react-i18next";
 
 interface assignmentHandlers {
   sheetState: LocationSheetState;
@@ -41,6 +42,7 @@ export function LocationModifyView({
   assignmentHandlers,
   onAssignNowPlanned,
 }: LocationModifyViewProps) {
+  const { t } = useTranslation();
   const {
     sheetState,
     editingState,
@@ -63,8 +65,7 @@ export function LocationModifyView({
     !editingState.locationId;
   const locationId = selectedBedLocation?.id || selectedLinkedBed?.id || "";
   const locationHistory = (selectedBedLocation || selectedLinkedBed)!;
-  console.log("got here with locationHistory", locationHistory);
-
+  const isEditingCurrentLocation = currentLocation?.id === locationId;
   return (
     <div className="space-y-4">
       <CurrentLocationsList
@@ -114,6 +115,11 @@ export function LocationModifyView({
           }
           handleConfirmEdit={() => onConfirmTime()}
           isPending={isPending}
+          title={
+            isEditingCurrentLocation
+              ? t("patient_current_location")
+              : t("patient_next_location")
+          }
         />
       )}
     </div>

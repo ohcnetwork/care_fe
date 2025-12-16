@@ -37,6 +37,7 @@ interface LocationCardWrapperProps {
   keepBedActive?: boolean;
   onKeepBedActiveChange?: (value: boolean) => void;
   areLinkedLocations?: boolean;
+  onComplete?: (location: LocationHistory) => void;
 }
 
 export function LocationCardWrapper({
@@ -53,6 +54,7 @@ export function LocationCardWrapper({
   keepBedActive,
   onKeepBedActiveChange,
   areLinkedLocations = false,
+  onComplete,
 }: LocationCardWrapperProps) {
   const { t } = useTranslation();
   const isEditing = editingState.locationId === locationHistory.id;
@@ -101,16 +103,30 @@ export function LocationCardWrapper({
       )}
 
       <div className="flex flex-col gap-1">
-        <h3 className="text-base font-semibold">
-          {status === "active" ? (
-            t("patient_current_location")
-          ) : status === "planned" ? (
-            t("planned_location")
-          ) : (
-            <></>
-          )}
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold">
+            {title ? (
+              title
+            ) : status === "active" ? (
+              t("patient_current_location")
+            ) : status === "planned" ? (
+              t("planned_location")
+            ) : (
+              <></>
+            )}
+          </h3>
 
+          {onComplete && (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => onComplete(locationHistory)}
+              className="self-end mb-1"
+            >
+              {t("complete_patient_stay")}
+            </Button>
+          )}
+        </div>
         <div
           className={cn(
             "flex gap-2 border border-gray-200 rounded-lg bg-gray-50 px-2 py-1",

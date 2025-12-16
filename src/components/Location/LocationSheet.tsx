@@ -196,7 +196,11 @@ export function LocationSheet({
         requests.push(
           createLocationUpdateRequest(
             currentLocation,
-            { ...assignment.sheetState.timeConfig, status: "reserved" },
+            {
+              start: new Date(currentLocation.start_datetime),
+              end: undefined,
+              status: "reserved",
+            },
             facilityId,
             encounter.id,
           ),
@@ -305,6 +309,53 @@ export function LocationSheet({
     }
   };
 
+  const handleAssignLinkedBed = async (location: LocationHistory) => {
+    const requests = [];
+    if (currentLocation && assignment.sheetState.action === "move") {
+      if (assignment.keepBedActive) {
+        requests.push(
+          createLocationUpdateRequest(
+            currentLocation,
+            {
+              start: new Date(currentLocation.start_datetime),
+              end: undefined,
+              status: "reserved",
+            },
+            facilityId,
+            encounter.id,
+          ),
+        );
+      } else {
+        requests.push(
+          createCompleteLocationRequest(
+            currentLocation,
+            facilityId,
+            encounter.id,
+            new Date(),
+          ),
+        );
+      }
+
+      requests.push(
+        createLocationUpdateRequest(
+          location,
+          {
+            start: new Date(location.start_datetime || new Date()),
+            end: undefined,
+            status: "active",
+          },
+          facilityId,
+          encounter.id,
+        ),
+      );
+    }
+
+    if (requests.length > 0) {
+      await mutations.executeBatch.mutateAsync({ requests });
+      resetAll();
+    }
+  };
+
   // Navigation handlers
   const handleGoBack = () => {
     if (assignment.sheetState.screen === "modify") {
@@ -339,6 +390,7 @@ export function LocationSheet({
     onCancelEdit: assignment.resetEditingState,
     onConfirmEdit: handleConfirmEdit,
     onConfirmTime: handleConfirmTime,
+    onAssignLinkedBed: handleAssignLinkedBed,
   };
 
   const navigationHandlers = {

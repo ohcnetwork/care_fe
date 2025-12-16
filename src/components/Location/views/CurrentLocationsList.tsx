@@ -63,6 +63,7 @@ export function CurrentLocationsList({
         status === "active" ? onKeepBedActiveChange : undefined
       }
       areLinkedLocations={areLinkedLocations}
+      onComplete={status === "active" ? onComplete : undefined}
     >
       {showMoveButton && (
         <div className="flex justify-end gap-2">

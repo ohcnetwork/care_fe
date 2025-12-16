@@ -44,6 +44,7 @@ interface assignmentHandlers {
   onCancelEdit: () => void;
   onConfirmEdit: (location: LocationHistory) => void;
   onConfirmTime: (plannedLocation?: LocationHistory) => void;
+  onAssignLinkedBed: (location: LocationHistory) => void;
 }
 
 export interface navigationHandlers {
@@ -94,6 +95,7 @@ export function LocationAssignmentView({
     onCancel,
     onCancelEdit,
     onConfirmEdit,
+    onAssignLinkedBed,
   } = assignmentHandlers;
   const {
     onLocationClick,
@@ -120,9 +122,11 @@ export function LocationAssignmentView({
     sheetState.action === "move" ||
     (!currentLocation && !plannedLocations.length);
 
+  const isLinkedBed = selectedLinkedBed !== null;
+
   if (!shouldShowNavigation) {
     return (
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <CurrentLocationsList
           currentLocation={currentLocation}
           plannedLocations={plannedLocations}
@@ -199,7 +203,11 @@ export function LocationAssignmentView({
         <Button
           variant="primary"
           disabled={!selectedBed && !selectedLinkedBed}
-          onClick={onAssignNow}
+          onClick={
+            isLinkedBed
+              ? () => onAssignLinkedBed(selectedLinkedBed!)
+              : onAssignNow
+          }
         >
           {t("assign_bed_now")}
         </Button>

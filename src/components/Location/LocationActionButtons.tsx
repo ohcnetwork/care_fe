@@ -53,15 +53,6 @@ export function LocationActionButtons({
     });
   }
 
-  if (status === "active" && onComplete) {
-    buttons.push({
-      label: t("complete_bed_stay"),
-      onClick: () => onComplete(location),
-      variant: "primary",
-      className: "border-gray-400 shadow-sm",
-    });
-  }
-
   if (status === "planned" && onAssignNow) {
     buttons.push({
       label: t("assign_bed_now"),
