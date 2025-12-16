@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { cn } from "@/lib/utils";
-
 import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { cn } from "@/lib/utils";
 
 interface AudioPlayerProps {
   src: string;
@@ -48,25 +46,26 @@ function AudioPlayer({ src, className }: AudioPlayerProps) {
   }, []);
 
   useEffect(() => {
-    // Create the audio element
     const audio = new Audio(src);
     audio.preload = "metadata";
 
-    // Add event listeners
+    // ✅ FIX: stable function reference
+    const handleEnded = () => {
+      setIsPlaying(false);
+    };
+
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("durationchange", handleDurationChange);
     audio.addEventListener("timeupdate", handleTimeUpdate);
-    audio.addEventListener("ended", () => setIsPlaying(false));
+    audio.addEventListener("ended", handleEnded);
 
-    // Set the ref
     audioRef.current = audio;
 
-    // Cleanup
     return () => {
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("durationchange", handleDurationChange);
       audio.removeEventListener("timeupdate", handleTimeUpdate);
-      audio.removeEventListener("ended", () => setIsPlaying(false));
+      audio.removeEventListener("ended", handleEnded);
       audio.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
