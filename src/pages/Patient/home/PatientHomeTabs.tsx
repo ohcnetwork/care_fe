@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import PatientTokensList from "@/components/Tokens/PatientTokensList";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { BookingsList } from "@/pages/Appointments/BookAppointment/BookingsList";
 import { FacilityRead } from "@/types/facility/facility";
+import { useQueryParams } from "raviger";
 import PatientHomeEncounters from "./PatientHomeEncounters";
 
 interface PatientHomeTabsProps {
@@ -25,7 +26,11 @@ export default function PatientHomeTabs({
   canListTokens,
 }: PatientHomeTabsProps) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("encounters");
+  const [{ tab }, setQueryParams] = useQueryParams<{ tab?: string }>();
+  const activeTab = tab || "encounters";
+  const setActiveTab = (tab: string) => {
+    setQueryParams({ tab }, { overwrite: false });
+  };
   const isTab = useBreakpoints({ default: true, lg: false });
 
   const tabs = [
