@@ -1,26 +1,10 @@
 import { useState } from "react";
 
+import {
+  EditingState,
+  LocationSheetState,
+} from "@/components/Location/utils/locationHelpers";
 import { LocationAssociationStatus } from "@/types/location/association";
-
-export type LocationScreen = "view" | "assign" | "modify";
-export type LocationAction = "move" | "complete" | "cancel" | "new";
-
-export interface LocationTimeConfig {
-  start: Date;
-  end?: Date;
-  status: LocationAssociationStatus;
-}
-
-export interface LocationSheetState {
-  screen: LocationScreen;
-  action: LocationAction;
-  timeConfig: LocationTimeConfig;
-}
-
-export interface EditingState {
-  locationId: string | null;
-  timeConfig: LocationTimeConfig;
-}
 
 const initialState: LocationSheetState = {
   screen: "assign",

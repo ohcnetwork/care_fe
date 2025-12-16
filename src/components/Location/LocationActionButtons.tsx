@@ -11,17 +11,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { LocationHistory } from "@/types/emr/encounter/encounter";
-import { LocationAssociationStatus } from "@/types/location/association";
+import {
+  LocationAssociationRead,
+  LocationAssociationStatus,
+} from "@/types/location/association";
 
 interface LocationActionButtonsProps {
   status: LocationAssociationStatus;
-  location: LocationHistory;
+  location: LocationAssociationRead;
   onMove: () => void;
-  onComplete?: (location: LocationHistory) => void;
+  onComplete?: (location: LocationAssociationRead) => void;
   onCancel: () => void;
   onAssignNow?: () => void;
-  onUpdateTime?: (location: LocationHistory) => void;
+  onUpdateTime?: (location: LocationAssociationRead) => void;
 }
 
 export function LocationActionButtons({

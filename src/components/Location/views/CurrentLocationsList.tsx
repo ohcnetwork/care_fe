@@ -1,14 +1,16 @@
-import { LocationHistory } from "@/types/emr/encounter/encounter";
-import { LocationAssociationStatus } from "@/types/location/association";
+import {
+  LocationAssociationRead,
+  LocationAssociationStatus,
+} from "@/types/location/association";
 
 import { LocationActionButtons } from "@/components/Location/LocationActionButtons";
 import { LocationCardWrapper } from "@/components/Location/LocationCardWrapper";
-import { EditingState } from "@/components/Location/hooks/useLocationAssignment";
+import { EditingState } from "@/components/Location/utils/locationHelpers";
 import { useTranslation } from "react-i18next";
 
 interface CurrentLocationsListProps {
-  currentLocation?: LocationHistory;
-  plannedLocations: LocationHistory[];
+  currentLocation?: LocationAssociationRead;
+  plannedLocations: LocationAssociationRead[];
   editingState: EditingState;
   setEditingState: React.Dispatch<React.SetStateAction<EditingState>>;
   isPending: boolean;
@@ -16,13 +18,16 @@ interface CurrentLocationsListProps {
   keepBedActive?: boolean;
   onKeepBedActiveChange?: (value: boolean) => void;
   onMove: () => void;
-  onComplete: (location: LocationHistory) => void;
-  onUpdateTime: (location: LocationHistory) => void;
-  onCancel: (status: "active" | "planned", location: LocationHistory) => void;
-  onAssignNow: (location: LocationHistory) => void;
+  onComplete: (location: LocationAssociationRead) => void;
+  onUpdateTime: (location: LocationAssociationRead) => void;
+  onCancel: (
+    status: "active" | "planned",
+    location: LocationAssociationRead,
+  ) => void;
+  onAssignNow: (location: LocationAssociationRead) => void;
   onCancelEdit: () => void;
-  onConfirmEdit: (location: LocationHistory) => void;
-  linkedLocations?: LocationHistory[];
+  onConfirmEdit: (location: LocationAssociationRead) => void;
+  linkedLocations?: LocationAssociationRead[];
 }
 
 export function CurrentLocationsList({
@@ -45,7 +50,7 @@ export function CurrentLocationsList({
 }: CurrentLocationsListProps) {
   const { t } = useTranslation();
   const renderLocationCard = (
-    locationHistory: LocationHistory,
+    locationHistory: LocationAssociationRead,
     status: LocationAssociationStatus,
     areLinkedLocations?: boolean,
   ) => (

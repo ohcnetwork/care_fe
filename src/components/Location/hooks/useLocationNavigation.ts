@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import query from "@/Utils/request/query";
-import { LocationHistory } from "@/types/emr/encounter/encounter";
-import { LocationList } from "@/types/location/location";
+import { LocationAssociationRead } from "@/types/location/association";
+import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 const ITEMS_PER_PAGE = 20;
@@ -19,13 +19,13 @@ export function useLocationNavigation({
   open,
   tab,
 }: UseLocationNavigationProps) {
-  const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
+  const [selectedLocation, setSelectedLocation] = useState<LocationRead | null>(
     null,
   );
-  const [locationHistory, setLocationHistory] = useState<LocationList[]>([]);
+  const [locationHistory, setLocationHistory] = useState<LocationRead[]>([]);
   const [selectedBed, setSelectedBed] = useState<string | null>(null);
   const [selectedLinkedBed, setSelectedLinkedBed] = useState<
-    LocationHistory | undefined
+    LocationAssociationRead | undefined
   >();
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,8 +33,8 @@ export function useLocationNavigation({
   const [bedsPage, setBedsPage] = useState(1);
   const [hasMoreLocations, setHasMoreLocations] = useState(true);
   const [hasMoreBeds, setHasMoreBeds] = useState(true);
-  const [allLocations, setAllLocations] = useState<LocationList[]>([]);
-  const [allBeds, setAllBeds] = useState<LocationList[]>([]);
+  const [allLocations, setAllLocations] = useState<LocationRead[]>([]);
+  const [allBeds, setAllBeds] = useState<LocationRead[]>([]);
 
   const { data: locationsData, isLoading: isLoadingLocations } = useQuery({
     queryKey: [
@@ -114,7 +114,7 @@ export function useLocationNavigation({
     setSelectedBed(null);
   }, [bedsData, bedsPage]);
 
-  const handleLocationClick = (location: LocationList) => {
+  const handleLocationClick = (location: LocationRead) => {
     if (selectedLinkedBed) {
       setSelectedLinkedBed(undefined);
     }
@@ -137,7 +137,7 @@ export function useLocationNavigation({
     setSearchTerm("");
   };
 
-  const handleLinkedBedClick = (bed: LocationHistory) => {
+  const handleLinkedBedClick = (bed: LocationAssociationRead) => {
     setSelectedLinkedBed(bed);
     setSelectedBed(null);
   };

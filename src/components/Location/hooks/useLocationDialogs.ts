@@ -1,20 +1,20 @@
 import { useState } from "react";
 
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 export function useLocationDialogs() {
   const [showDischargeDialog, setShowDischargeDialog] = useState(false);
   const [showOccupiedDialog, setShowOccupiedDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedDischargedBed, setSelectedDischargedBed] =
-    useState<LocationList | null>(null);
+    useState<LocationRead | null>(null);
   const [locationToDelete, setLocationToDelete] = useState<{
     locationId: string;
     associationId: string;
     status: "active" | "planned";
   } | null>(null);
 
-  const openDischargeDialog = (bed: LocationList) => {
+  const openDischargeDialog = (bed: LocationRead) => {
     setSelectedDischargedBed(bed);
     setShowDischargeDialog(true);
   };

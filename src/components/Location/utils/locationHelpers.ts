@@ -1,9 +1,23 @@
+import { EncounterRead } from "@/types/emr/encounter/encounter";
 import {
-  EncounterRead,
-  LocationHistory,
-} from "@/types/emr/encounter/encounter";
-import { LocationAssociationStatus } from "@/types/location/association";
-import { LocationList } from "@/types/location/location";
+  LocationAssociationRead,
+  LocationAssociationStatus,
+} from "@/types/location/association";
+import { LocationRead } from "@/types/location/location";
+
+export type LocationScreen = "view" | "assign" | "modify";
+export type LocationAction = "move" | "complete" | "cancel" | "new";
+
+export interface LocationSheetState {
+  screen: LocationScreen;
+  action: LocationAction;
+  timeConfig: LocationTimeConfig;
+}
+
+export interface EditingState {
+  locationId: string | null;
+  timeConfig: LocationTimeConfig;
+}
 
 export interface LocationTimeConfig {
   start: Date;
@@ -12,9 +26,9 @@ export interface LocationTimeConfig {
 }
 
 export interface CurrentLocations {
-  currentLocation: LocationHistory | undefined;
-  activeLocations: LocationHistory[];
-  plannedLocations: LocationHistory[];
+  currentLocation: LocationAssociationRead | undefined;
+  activeLocations: LocationAssociationRead[];
+  plannedLocations: LocationAssociationRead[];
 }
 
 /**
@@ -49,16 +63,14 @@ export function getCurrentLocations(
  * Transforms a selected bed into LocationHistory format for preview
  */
 export function createLocationHistoryFromBed(
-  bed: LocationList,
+  bed: LocationRead,
   timeConfig: LocationTimeConfig,
-): LocationHistory {
+): LocationAssociationRead {
   return {
     id: bed.id,
     location: bed,
-    start_datetime: new Date(timeConfig.start).toISOString(),
-    end_datetime: timeConfig.end
-      ? new Date(timeConfig.end).toISOString()
-      : undefined,
+    start_datetime: timeConfig.start.toISOString(),
+    end_datetime: timeConfig.end ? timeConfig.end.toISOString() : undefined,
     status: timeConfig.status,
   };
 }
@@ -67,7 +79,7 @@ export function createLocationHistoryFromBed(
  * Creates a location update request for batch API
  */
 export function createLocationUpdateRequest(
-  location: LocationHistory,
+  location: LocationAssociationRead,
   config: LocationTimeConfig,
   facilityId: string,
   encounterId: string,
@@ -78,12 +90,12 @@ export function createLocationUpdateRequest(
     reference_id: "updateLocation",
     body: {
       encounter: encounterId,
-      start_datetime: new Date(config.start).toISOString(),
+      start_datetime: config.start.toISOString(),
       ...(config.status === "active" || config.status === "reserved"
         ? { end_datetime: null }
         : config.end
           ? {
-              end_datetime: new Date(config.end).toISOString(),
+              end_datetime: config.end.toISOString(),
             }
           : {}),
       status: config.status,
@@ -106,9 +118,9 @@ export function createLocationAssociationRequest(
     reference_id: "createLocationAssociation",
     body: {
       encounter: encounterId,
-      start_datetime: new Date(timeConfig.start).toISOString(),
+      start_datetime: timeConfig.start.toISOString(),
       ...(timeConfig.end && {
-        end_datetime: new Date(timeConfig.end).toISOString(),
+        end_datetime: timeConfig.end.toISOString(),
       }),
       status: timeConfig.status,
     },
@@ -119,7 +131,7 @@ export function createLocationAssociationRequest(
  * Creates a request to complete (mark as completed) a location
  */
 export function createCompleteLocationRequest(
-  location: LocationHistory,
+  location: LocationAssociationRead,
   facilityId: string,
   encounterId: string,
   endTime: Date = new Date(),
@@ -135,4 +147,45 @@ export function createCompleteLocationRequest(
       start_datetime: location.start_datetime,
     },
   };
+}
+export interface AssignmentHandlers {
+  sheetState: LocationSheetState;
+  setSheetState: React.Dispatch<React.SetStateAction<LocationSheetState>>;
+  isPending: boolean;
+  editingState: EditingState;
+  setEditingState: React.Dispatch<React.SetStateAction<EditingState>>;
+  keepBedActive?: boolean;
+  onKeepBedActiveChange?: (value: boolean) => void;
+  onMove: () => void;
+  onComplete: (location: LocationAssociationRead) => void;
+  onUpdateTime: (location: LocationAssociationRead) => void;
+  onCancel: (
+    status: "active" | "planned",
+    location: LocationAssociationRead,
+  ) => void;
+  onCancelEdit: () => void;
+  onConfirmEdit: (location: LocationAssociationRead) => void;
+  onConfirmTime: (plannedLocation?: LocationAssociationRead) => void;
+  onAssignLinkedBed?: (location: LocationAssociationRead) => void;
+}
+
+export interface NavigationHandlers {
+  onLocationClick: (location: LocationRead) => void;
+  onBedSelect: (bedId: string) => void;
+  onLinkedBedSelect: (bed: LocationAssociationRead) => void;
+  onCheckBedStatus: (bed: LocationRead) => void;
+  onSearchChange: (value: string) => void;
+  onSearch: (e: React.FormEvent) => void;
+  onShowAvailableChange: (value: boolean) => void;
+  onLoadMore: () => void;
+  onClearSelection: () => void;
+  onGoBack: () => void;
+  onAssignNowPlanned: (location: LocationAssociationRead) => void;
+  onScheduleForLater: () => void;
+  onAssignNow: () => void;
+  showAvailableOnly: boolean;
+  searchTerm: string;
+  isLoadingLocations: boolean;
+  isLoadingBeds: boolean;
+  hasMore: boolean;
 }

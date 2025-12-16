@@ -8,22 +8,28 @@ import { Badge } from "@/components/ui/badge";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { LocationHistory } from "@/types/emr/encounter/encounter";
-import { LocationAssociationStatus } from "@/types/location/association";
-import { LocationList } from "@/types/location/location";
+import {
+  LocationAssociationRead,
+  LocationAssociationStatus,
+} from "@/types/location/association";
+import { LocationRead } from "@/types/location/location";
 
 interface LocationCardProps {
-  locationHistory: LocationHistory;
+  locationHistory: LocationAssociationRead;
   status: LocationAssociationStatus;
   keepBedActive?: boolean;
   onKeepBedActiveChange?: (value: boolean) => void;
 }
 
-const LocationBreadcrumb = ({ location }: { location: LocationList }) => {
+const LocationBreadcrumb = ({ location }: { location: LocationRead }) => {
   const breadcrumb = [];
-  while (location.parent && Object.keys(location.parent).length > 0) {
-    breadcrumb.unshift(location.parent);
-    location = location.parent;
+  let currentLocation = location;
+  while (
+    currentLocation.parent &&
+    Object.keys(currentLocation.parent).length > 0
+  ) {
+    breadcrumb.unshift(currentLocation.parent);
+    currentLocation = currentLocation.parent;
   }
   return (
     <div className="flex flex-row items-center gap-1">

@@ -41,10 +41,10 @@ export interface LocationDetail extends LocationBase {
   sort_index: number;
 }
 
-export interface LocationList extends LocationBase {
+export interface LocationRead extends LocationBase {
   id: string;
   has_children: boolean;
-  parent?: LocationList;
+  parent?: LocationRead;
   current_encounter?: EncounterRead;
   sort_index: number;
 }

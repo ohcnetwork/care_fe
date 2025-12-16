@@ -2,12 +2,12 @@ import { cn } from "@/lib/utils";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { LocationHistory } from "@/types/emr/encounter/encounter";
+import { LocationAssociationRead } from "@/types/location/association";
 
 interface LinkedBedListingProps {
-  linkedBeds: LocationHistory[];
-  selectedLinkedBed: LocationHistory | undefined;
-  onLinkedBedSelect: (bed: LocationHistory) => void;
+  linkedBeds: LocationAssociationRead[];
+  selectedLinkedBed: LocationAssociationRead | undefined;
+  onLinkedBedSelect: (bed: LocationAssociationRead) => void;
 }
 
 export function LinkedBedListing({

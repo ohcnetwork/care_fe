@@ -2,70 +2,31 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
-import { LocationHistory } from "@/types/emr/encounter/encounter";
-import { LocationList } from "@/types/location/location";
+import { LocationAssociationRead } from "@/types/location/association";
+import { LocationRead } from "@/types/location/location";
 
 import { LocationNavigation } from "@/components/Location/LocationNavigation";
 import {
-  EditingState,
-  LocationSheetState,
-} from "@/components/Location/hooks/useLocationAssignment";
+  AssignmentHandlers,
+  NavigationHandlers,
+} from "@/components/Location/utils/locationHelpers";
 import { CurrentLocationsList } from "@/components/Location/views/CurrentLocationsList";
 
 interface LocationAssignmentViewProps {
   // Location data
-  allLocations: LocationList[];
-  allBeds: LocationList[];
-  selectedLocation: LocationList | null;
-  selectedLinkedBed: LocationHistory | null;
-  locationHistory: LocationList[];
+  allLocations: LocationRead[];
+  allBeds: LocationRead[];
+  selectedLocation: LocationRead | null;
+  selectedLinkedBed: LocationAssociationRead | null;
+  locationHistory: LocationRead[];
   selectedBed: string | null;
-  currentLocation?: LocationHistory;
-  plannedLocations: LocationHistory[];
-  activeLocations: LocationHistory[];
+  currentLocation?: LocationAssociationRead;
+  plannedLocations: LocationAssociationRead[];
+  activeLocations: LocationAssociationRead[];
   // Flags
   isPending: boolean;
-  assignmentHandlers: assignmentHandlers;
-  navigationHandlers: navigationHandlers;
-}
-
-interface assignmentHandlers {
-  sheetState: LocationSheetState;
-  setSheetState: React.Dispatch<React.SetStateAction<LocationSheetState>>;
-  isPending: boolean;
-  editingState: EditingState;
-  setEditingState: React.Dispatch<React.SetStateAction<EditingState>>;
-  keepBedActive?: boolean;
-  onKeepBedActiveChange?: (value: boolean) => void;
-  onMove: () => void;
-  onComplete: (location: LocationHistory) => void;
-  onUpdateTime: (location: LocationHistory) => void;
-  onCancel: (status: "active" | "planned", location: LocationHistory) => void;
-  onCancelEdit: () => void;
-  onConfirmEdit: (location: LocationHistory) => void;
-  onConfirmTime: (plannedLocation?: LocationHistory) => void;
-  onAssignLinkedBed: (location: LocationHistory) => void;
-}
-
-export interface navigationHandlers {
-  onLocationClick: (location: LocationList) => void;
-  onBedSelect: (bedId: string) => void;
-  onLinkedBedSelect: (bed: LocationHistory) => void;
-  onCheckBedStatus: (bed: LocationList) => void;
-  onSearchChange: (value: string) => void;
-  onSearch: (e: React.FormEvent) => void;
-  onShowAvailableChange: (value: boolean) => void;
-  onLoadMore: () => void;
-  onClearSelection: () => void;
-  onGoBack: () => void;
-  onAssignNowPlanned: (location: LocationHistory) => void;
-  onScheduleForLater: () => void;
-  onAssignNow: () => void;
-  showAvailableOnly: boolean;
-  searchTerm: string;
-  isLoadingLocations: boolean;
-  isLoadingBeds: boolean;
-  hasMore: boolean;
+  assignmentHandlers: AssignmentHandlers;
+  navigationHandlers: NavigationHandlers;
 }
 
 export function LocationAssignmentView({
@@ -203,11 +164,11 @@ export function LocationAssignmentView({
         <Button
           variant="primary"
           disabled={!selectedBed && !selectedLinkedBed}
-          onClick={
+          onClick={() => {
             isLinkedBed
-              ? () => onAssignLinkedBed(selectedLinkedBed!)
-              : onAssignNow
-          }
+              ? onAssignLinkedBed?.(selectedLinkedBed)
+              : onAssignNow();
+          }}
         >
           {t("assign_bed_now")}
         </Button>

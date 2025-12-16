@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
-import { LocationHistory } from "@/types/emr/encounter/encounter";
+import { LocationAssociationRead } from "@/types/location/association";
 import { BedListing } from "./BedListing";
 import { BedStatusLegend } from "./BedStatusLegend";
 import { LinkedBedListing } from "./LinkedBedListing";
@@ -16,28 +16,28 @@ import { LocationBreadcrumb } from "./LocationBreadcrumb";
 import { LocationCardList } from "./LocationCardList";
 
 interface LocationNavigationProps {
-  locations: LocationList[];
-  beds: LocationList[];
-  selectedLocation: LocationList | null;
-  locationHistory: LocationList[];
+  locations: LocationRead[];
+  beds: LocationRead[];
+  selectedLocation: LocationRead | null;
+  locationHistory: LocationRead[];
   selectedBed: string | null;
-  selectedLinkedBed: LocationHistory | undefined;
+  selectedLinkedBed: LocationAssociationRead | undefined;
   showAvailableOnly: boolean;
   searchTerm: string;
   isLoadingLocations: boolean;
   isLoadingBeds: boolean;
   hasMore: boolean;
-  onLocationClick: (location: LocationList) => void;
+  onLocationClick: (location: LocationRead) => void;
   onBedSelect: (bedId: string) => void;
-  onLinkedBedSelect: (bed: LocationHistory) => void;
-  onCheckBedStatus: (bed: LocationList) => void;
+  onLinkedBedSelect: (bed: LocationAssociationRead) => void;
+  onCheckBedStatus: (bed: LocationRead) => void;
   onSearchChange: (value: string) => void;
   onSearch: (e: React.FormEvent) => void;
   onShowAvailableChange: (value: boolean) => void;
   onLoadMore: () => void;
   onGoBack: () => void;
   onClearSelection: () => void;
-  linkedLocations: LocationHistory[];
+  linkedLocations: LocationAssociationRead[];
 }
 
 export function LocationNavigation({
@@ -136,9 +136,7 @@ export function LocationNavigation({
 
         <LocationCardList
           locations={locations}
-          onLocationClick={(location) =>
-            onLocationClick(location as LocationList)
-          }
+          onLocationClick={(location) => onLocationClick(location)}
         />
 
         {selectedLocation && (

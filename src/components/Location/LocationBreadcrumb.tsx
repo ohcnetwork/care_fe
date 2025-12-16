@@ -1,12 +1,12 @@
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 interface LocationBreadcrumbProps {
-  selectedLocation: LocationList | null;
-  locationHistory: LocationList[];
-  onLocationClick: (location: LocationList) => void;
+  selectedLocation: LocationRead | null;
+  locationHistory: LocationRead[];
+  onLocationClick: (location: LocationRead) => void;
   onRootClick: () => void;
 }
 

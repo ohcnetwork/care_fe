@@ -12,29 +12,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
-import {
-  EncounterRead,
-  LocationHistory,
-} from "@/types/emr/encounter/encounter";
-import { LocationList } from "@/types/location/location";
+import { EncounterRead } from "@/types/emr/encounter/encounter";
+import { LocationAssociationRead } from "@/types/location/association";
+import { LocationRead } from "@/types/location/location";
 
-import { useLocationAssignment } from "./hooks/useLocationAssignment";
-import { useLocationDialogs } from "./hooks/useLocationDialogs";
-import { useLocationMutations } from "./hooks/useLocationMutations";
-import { useLocationNavigation } from "./hooks/useLocationNavigation";
-import { LocationHistory as LocationHistoryComponent } from "./LocationHistory";
+import { useLocationAssignment } from "@/components/Location/hooks/useLocationAssignment";
+import { useLocationDialogs } from "@/components/Location/hooks/useLocationDialogs";
+import { useLocationMutations } from "@/components/Location/hooks/useLocationMutations";
+import { useLocationNavigation } from "@/components/Location/hooks/useLocationNavigation";
+import { LocationHistory as LocationHistoryComponent } from "@/components/Location/LocationHistory";
 import {
   createCompleteLocationRequest,
   createLocationAssociationRequest,
   createLocationHistoryFromBed,
   createLocationUpdateRequest,
   getCurrentLocations,
-} from "./utils/locationHelpers";
-import { LocationAssignmentView } from "./views/LocationAssignmentView";
-import { LocationModifyView } from "./views/LocationModifyView";
+} from "@/components/Location/utils/locationHelpers";
+import { LocationAssignmentView } from "@/components/Location/views/LocationAssignmentView";
+import { LocationModifyView } from "@/components/Location/views/LocationModifyView";
 
 interface LocationSheetProps {
-  history: LocationHistory[];
+  history: LocationAssociationRead[];
   facilityId: string;
   encounter: EncounterRead;
   open: boolean;
@@ -90,7 +88,7 @@ export function LocationSheet({
   };
 
   // Bed status check handler
-  const handleCheckBedStatus = (selectedBed: LocationList) => {
+  const handleCheckBedStatus = (selectedBed: LocationRead) => {
     if (!selectedBed.current_encounter) return;
 
     if (selectedBed.current_encounter.status === "discharged") {
@@ -121,7 +119,7 @@ export function LocationSheet({
     assignment.startMove();
   };
 
-  const handleCompleteBedStay = (location: LocationHistory) => {
+  const handleCompleteBedStay = (location: LocationAssociationRead) => {
     assignment.startCompletingStay(
       location.id,
       new Date(location.start_datetime),
@@ -129,7 +127,7 @@ export function LocationSheet({
     );
   };
 
-  const handleUpdateTime = (location: LocationHistory) => {
+  const handleUpdateTime = (location: LocationAssociationRead) => {
     assignment.startEditingTime(
       location.id,
       new Date(location.start_datetime),
@@ -138,13 +136,13 @@ export function LocationSheet({
     );
   };
 
-  const handleAssignNowPlanned = (plannedLocation: LocationHistory) => {
+  const handleAssignNowPlanned = (plannedLocation: LocationAssociationRead) => {
     assignment.startAssigningPlanned(plannedLocation.id, "active");
   };
 
   const handleCancelPlan = (
     status: "active" | "planned",
-    locationToCancel: LocationHistory,
+    locationToCancel: LocationAssociationRead,
   ) => {
     dialogs.openDeleteDialog(
       locationToCancel.location.id,
@@ -169,7 +167,7 @@ export function LocationSheet({
 
   // Confirm time for new/move assignment
   const handleConfirmTime = async (
-    currentPlannedLocation?: LocationHistory,
+    currentPlannedLocation?: LocationAssociationRead,
   ) => {
     const requests = [];
 
@@ -241,7 +239,7 @@ export function LocationSheet({
   };
 
   // Confirm edit for existing location
-  const handleConfirmEdit = async (location: LocationHistory) => {
+  const handleConfirmEdit = async (location: LocationAssociationRead) => {
     const requests = [];
 
     const isUpdatingActiveLocation =
@@ -309,7 +307,7 @@ export function LocationSheet({
     }
   };
 
-  const handleAssignLinkedBed = async (location: LocationHistory) => {
+  const handleAssignLinkedBed = async (location: LocationAssociationRead) => {
     const requests = [];
     if (currentLocation && assignment.sheetState.action === "move") {
       if (assignment.keepBedActive) {

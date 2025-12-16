@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 
 import { DateTimeInput } from "@/components/Common/DateTimeInput";
 
-import { LocationHistory } from "@/types/emr/encounter/encounter";
-import { LocationAssociationStatus } from "@/types/location/association";
+import {
+  LocationAssociationRead,
+  LocationAssociationStatus,
+} from "@/types/location/association";
 
 import { cn } from "@/lib/utils";
 import { LocationCard } from "./LocationCard";
@@ -24,20 +26,20 @@ interface EditingState {
 }
 
 interface LocationCardWrapperProps {
-  locationHistory: LocationHistory;
+  locationHistory: LocationAssociationRead;
   status: LocationAssociationStatus;
   children?: React.ReactNode;
   editingState: EditingState;
   setEditingState: React.Dispatch<React.SetStateAction<EditingState>>;
   handleCancelEdit: () => void;
-  handleConfirmEdit: (location: LocationHistory) => void;
+  handleConfirmEdit: (location: LocationAssociationRead) => void;
   isPending: boolean;
   showBackButton?: boolean;
   title?: string;
   keepBedActive?: boolean;
   onKeepBedActiveChange?: (value: boolean) => void;
   areLinkedLocations?: boolean;
-  onComplete?: (location: LocationHistory) => void;
+  onComplete?: (location: LocationAssociationRead) => void;
 }
 
 export function LocationCardWrapper({
@@ -91,6 +93,13 @@ export function LocationCardWrapper({
     handleConfirmEdit(locationHistory);
   };
 
+  const getTitle = () => {
+    if (title) return title;
+    if (status === "active") return t("patient_current_location");
+    if (status === "planned") return t("planned_location");
+    return "";
+  };
+
   return (
     <div className="space-y-4">
       {showBackButton && (
@@ -104,17 +113,7 @@ export function LocationCardWrapper({
 
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold">
-            {title ? (
-              title
-            ) : status === "active" ? (
-              t("patient_current_location")
-            ) : status === "planned" ? (
-              t("planned_location")
-            ) : (
-              <></>
-            )}
-          </h3>
+          <h3 className="text-base font-semibold">{getTitle()}</h3>
 
           {onComplete && (
             <Button
@@ -218,8 +217,10 @@ export function LocationCardWrapper({
                 </Button>
               </div>
             </div>
+          ) : children ? (
+            <div>{children}</div>
           ) : (
-            children && <div>{children}</div>
+            <></>
           )}
         </div>
       </div>

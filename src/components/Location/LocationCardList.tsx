@@ -6,15 +6,14 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader } from "@/components/ui/card";
 
-import { LocationHistory } from "@/types/emr/encounter/encounter";
 import {
   LOCATION_TYPE_BADGE_COLORS,
-  LocationList,
+  LocationRead,
 } from "@/types/location/location";
 
 interface LocationCardListProps {
-  locations: LocationList[];
-  onLocationClick: (location: LocationList | LocationHistory) => void;
+  locations: LocationRead[];
+  onLocationClick: (location: LocationRead) => void;
   className?: string;
 }
 
