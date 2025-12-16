@@ -101,8 +101,24 @@ test.describe("Charge Item Definition Creation", () => {
       .filter({ hasText: /^Add tax$/ })
       .first()
       .click();
-    await page.locator("div").filter({ hasText: /^9 %$/ }).first().click();
-    await page.locator("div").filter({ hasText: /^6 %$/ }).nth(2).click();
+
+    await page.getByRole("textbox", { name: "Search for tax code" }).fill("9");
+
+    // Select 9% under CGST section using XPath
+    await page
+      .locator(
+        'xpath=//div[contains(@class, "flex-col") and .//div[contains(text(), "cgst")]]//button[@role="radio" and @value="9"]',
+      )
+      .click();
+
+    await page.getByRole("textbox", { name: "Search for tax code" }).fill("6");
+
+    // Select 6% under SGST section using XPath
+    await page
+      .locator(
+        'xpath=//div[contains(@class, "flex-col") and .//div[contains(text(), "sgst")]]//button[@role="radio" and @value="6"]',
+      )
+      .click();
     const doneButton = page.getByRole("button", { name: "Done" });
     await doneButton.scrollIntoViewIfNeeded();
     await doneButton.click();
