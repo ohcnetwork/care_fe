@@ -3,10 +3,10 @@ import { Suspense, createContext, useContext } from "react";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
-import { PluginManifest } from "@/pluginTypes";
+import { PluginManifestWithMeta } from "@/pluginTypes";
 import { t } from "i18next";
 
-export const CareAppsContext = createContext<PluginManifest[]>([]);
+export const CareAppsContext = createContext<PluginManifestWithMeta[]>([]);
 
 export const useCareApps = () => {
   const ctx = useContext(CareAppsContext);
