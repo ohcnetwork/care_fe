@@ -957,7 +957,7 @@
   "cancel_token_confirmation": "Are you sure you want to cancel the token {{tokenNumber}} for {{patientName}}? This action cannot be undone.",
   "cancelled": "Cancelled",
   "cannot_add_conclusion_without_results": "Cannot add conclusion without results",
-  "cannot_close_account_with_pending_items": "You cannot close an account with pending charge items.",
+  "close_account_with_pending_items_caution_message": "This account has pending charge items. Consider reconciling them before closing the account.",
   "cannot_complete_unpaid_medication": "Cannot complete unpaid medication. Please ensure payment is completed first.",
   "cannot_delete_organization_with_children": "Cannot delete an organization with children",
   "cannot_go_before_prescription_date": "Cannot view slots before the earliest prescription date",
