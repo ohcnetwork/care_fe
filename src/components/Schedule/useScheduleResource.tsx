@@ -48,32 +48,38 @@ export function useScheduleResourceFromPath() {
   return extractPathParams(path);
 }
 
-export function useScheduleResource(): ScheduleResource | undefined {
+export function useScheduleResource(
+  params?: ReturnType<typeof extractPathParams>,
+): ScheduleResource | undefined {
   const path = useFullPath();
-  const { facilityId, resourceType, resourceId } = extractPathParams(path);
+  params = params ?? extractPathParams(path);
+  const { facilityId, resourceId, resourceType } = params;
 
   const practitionerQuery = useQuery({
-    queryKey: ["facility-user", facilityId, resourceId],
+    queryKey: ["scheduleResource", params],
     queryFn: query(facilityApi.getUser, {
       pathParams: { facilityId, userId: resourceId },
     }),
     enabled: resourceType === SchedulableResourceType.Practitioner,
+    staleTime: 1000 * 60 * 60, // cache for 1 hour
   });
 
   const locationQuery = useQuery({
-    queryKey: ["location", facilityId, resourceId],
+    queryKey: ["scheduleResource", params],
     queryFn: query(locationApi.get, {
       pathParams: { facility_id: facilityId, id: resourceId },
     }),
     enabled: resourceType === SchedulableResourceType.Location,
+    staleTime: 1000 * 60 * 60, // cache for 1 hour
   });
 
   const healthcareServiceQuery = useQuery({
-    queryKey: ["service", facilityId, resourceId],
+    queryKey: ["scheduleResource", params],
     queryFn: query(healthcareServiceApi.retrieveHealthcareService, {
       pathParams: { facilityId, healthcareServiceId: resourceId },
     }),
     enabled: resourceType === SchedulableResourceType.HealthcareService,
+    staleTime: 1000 * 60 * 60, // cache for 1 hour
   });
 
   if (resourceType === SchedulableResourceType.Practitioner) {

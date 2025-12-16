@@ -103,6 +103,26 @@ const careConfig = {
     ),
   },
 
+  tokenDisplay: {
+    /**
+     * Refresh interval for the token display in milliseconds.
+     * Default: 10 seconds
+     */
+    tokenRefreshInterval: parseInt(
+      env.REACT_TOKEN_DISPLAY_TOKEN_REFRESH_INTERVAL || "10000", // 10 seconds
+      10,
+    ),
+
+    /**
+     * Refresh interval for the token display config in milliseconds.
+     * Default: 5 minutes
+     */
+    configRefreshInterval: parseInt(
+      env.REACT_TOKEN_DISPLAY_CONFIG_REFRESH_INTERVAL || "300000", // 5 minutes
+      10,
+    ),
+  },
+
   /**
    * Auto refresh interval in milliseconds
    */

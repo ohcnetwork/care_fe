@@ -1,11 +1,12 @@
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
+import { TokenReadMinimal } from "@/types/tokens/token/token";
 
 export enum TokenSubQueueStatus {
   ACTIVE = "active",
   INACTIVE = "inactive",
 }
 
-export interface TokenSubQueue {
+interface TokenSubQueue {
   id: string;
   name: string;
   status: TokenSubQueueStatus;
@@ -16,7 +17,9 @@ export interface TokenSubQueueCreate extends Omit<TokenSubQueue, "id"> {
   resource_id: string;
 }
 
-export type TokenSubQueueRead = TokenSubQueue;
+export interface TokenSubQueueRead extends TokenSubQueue {
+  current_token: TokenReadMinimal | null;
+}
 
 export interface TokenSubQueueUpdate {
   name: string;

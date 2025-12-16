@@ -5,6 +5,8 @@ import AppointmentsPage from "@/pages/Appointments/AppointmentsPage";
 import { PrintAppointments } from "@/pages/Appointments/components/PrintAppointments";
 import { ManageQueuePage } from "@/pages/Facility/queues/ManageQueue";
 import QueuesIndex from "@/pages/Facility/queues/QueuesIndex";
+import { TokenDisplay } from "@/pages/Facility/queues/TokenDisplay";
+import { decodeTokenDisplayResourcesParam } from "@/pages/Facility/queues/utils";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { Redirect } from "raviger";
 
@@ -61,6 +63,19 @@ const ScheduleRoutes: AppRoutes = {
         tab="completed"
       />
     ),
+
+  // `encodedResources` would be of the format "l:resourceId1,p:resourceId2,"
+  "/facility/:facilityId/token_display/:encodedResources": ({
+    facilityId,
+    encodedResources,
+  }) => {
+    return (
+      <TokenDisplay
+        facilityId={facilityId}
+        resources={decodeTokenDisplayResourcesParam(encodedResources)}
+      />
+    );
+  },
 };
 
 export default ScheduleRoutes;
