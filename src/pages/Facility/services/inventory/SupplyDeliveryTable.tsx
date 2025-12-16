@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import { DeliveryOrderStatus } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import {
@@ -65,6 +66,9 @@ export function SupplyDeliveryTable({
 }: SupplyDeliveryTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { facility } = useCurrentFacility();
+
+  const informationalCodes = facility?.instance_informational_codes || [];
 
   const { mutate: updateDeliveryStatus } = useMutation({
     mutationFn: ({
@@ -142,6 +146,9 @@ export function SupplyDeliveryTable({
             {isRequester ? t("received_date") : t("dispatched_date")}
           </TableHead>
           <TableHead>{t("base")}</TableHead>
+          {informationalCodes.map((code) => (
+            <TableHead key={code.code}>{code.display}</TableHead>
+          ))}
           <TableHead>{t("tax")}</TableHead>
           <TableHead>{t("disc")}</TableHead>
           <TableHead>{t("status")}</TableHead>
@@ -187,10 +194,26 @@ export function SupplyDeliveryTable({
                   delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.filter(
                     (c) =>
                       c.monetary_component_type === MonetaryComponentType.base,
-                  )[0].amount
+                  )[0]?.amount
                 }
               />
             </TableCell>
+            {informationalCodes.map((code) => {
+              const informationalComponent =
+                delivery.supplied_inventory_item?.product.charge_item_definition?.price_components.find(
+                  (c) =>
+                    c.monetary_component_type ===
+                      MonetaryComponentType.informational &&
+                    c.code?.code === code.code,
+                );
+              return (
+                <TableCell key={code.code}>
+                  {informationalComponent?.amount && (
+                    <MonetaryDisplay amount={informationalComponent.amount} />
+                  )}
+                </TableCell>
+              );
+            })}
             <TableCell>
               <MonetaryDisplay
                 factor={
@@ -212,13 +235,11 @@ export function SupplyDeliveryTable({
                       MonetaryComponentType.discount,
                   );
 
-                return discountComponents && discountComponents.length
-                  ? discountComponents.map((component, index) => (
-                      <div key={index}>
-                        <MonetaryDisplay {...component} />
-                      </div>
-                    ))
-                  : "-";
+                return discountComponents?.map((component, index) => (
+                  <div key={index}>
+                    <MonetaryDisplay {...component} />
+                  </div>
+                ));
               })()}
             </TableCell>
             <TableCell>
