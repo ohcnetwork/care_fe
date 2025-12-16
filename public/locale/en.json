@@ -2234,6 +2234,7 @@
   "facility_updated_successfully": "Facility updated successfully",
   "factor": "Factor",
   "failed_to_archive_child_tag": "Failed to archive child tag",
+  "failed_to_assign_token_to_service_point": "Failed to assign token to service point",
   "failed_to_cancel_invoice": "Failed to cancel invoice",
   "failed_to_capture_image": "Failed to capture image",
   "failed_to_create_appointment": "Failed to create an appointment",

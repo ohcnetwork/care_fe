@@ -56,7 +56,11 @@ export function OngoingQueueTokenCard({
     useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
-  const { mutate: updateToken } = useMutation({
+  const {
+    mutate: updateToken,
+    mutateAsync: updateTokenAsync,
+    isPending,
+  } = useMutation({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
         facility_id: facilityId,
@@ -79,26 +83,7 @@ export function OngoingQueueTokenCard({
     },
   });
 
-  const { mutate: assignToServicePoint, isPending: isAssigning } = useMutation({
-    mutationFn: mutate(tokenApi.update, {
-      pathParams: {
-        facility_id: facilityId,
-        queue_id: token?.queue.id ?? "",
-        id: token?.id ?? "",
-      },
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["infinite-tokens", facilityId, token?.queue.id ?? ""],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["token-queue-summary", facilityId, token?.queue.id ?? ""],
-      });
-      toast.success(t("token_assigned_to_service_point"));
-    },
-  });
-
-  const handleAssignToServicePoint = () => {
+  const handleAssignToServicePoint = async () => {
     if (!token) return;
 
     const availableServicePoints = assignedServicePoints.filter(
@@ -106,11 +91,16 @@ export function OngoingQueueTokenCard({
     );
 
     if (availableServicePoints.length === 1) {
-      assignToServicePoint({
-        sub_queue: availableServicePoints[0].id,
-        status: TokenStatus.CREATED,
-        note: token.note,
-      });
+      try {
+        await updateTokenAsync({
+          sub_queue: availableServicePoints[0].id,
+          status: TokenStatus.CREATED,
+          note: token.note,
+        });
+        toast.success(t("token_assigned_to_service_point"));
+      } catch (_error) {
+        toast.error(t("failed_to_assign_token_to_service_point"));
+      }
     } else {
       setShowAssignToServicePointDialog(true);
     }
@@ -124,7 +114,7 @@ export function OngoingQueueTokenCard({
             "relative flex gap-3 items-center justify-between p-3 bg-gray-50 rounded-lg shadow",
             token?.status === TokenStatus.IN_PROGRESS &&
               "border border-primary-500",
-            isAssigning && "opacity-50 pointer-events-none",
+            isPending && "opacity-50 pointer-events-none",
           )}
         >
           <div className="flex flex-col">
