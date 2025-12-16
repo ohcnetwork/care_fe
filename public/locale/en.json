@@ -3580,7 +3580,7 @@
   "organization_selection_required": "At least one organization must be selected",
   "organizations": "Organizations",
   "organizations_fetch_error": "Error while fetching organizations",
-  "organizations_updated_successfully": "Organization updated successfully",
+  "organizations_updated_successfully": "Organizations updated successfully",
   "origin": "Origin",
   "origin_facility": "Current facility",
   "origin_required": "Origin is required",
