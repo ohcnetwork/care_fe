@@ -321,7 +321,7 @@ export const PractitionerSelector = ({
               </div>
             </div>
 
-            <CommandList className="max-h-[400px]">
+            <CommandList className="max-h-[calc(100vh-30rem)]">
               <CommandEmpty>
                 {searchQuery ? (
                   <div className="p-6 text-center text-gray-500">
@@ -706,6 +706,7 @@ export const PractitionerSelector = ({
           <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
           <PopoverContent
             align="start"
+            side="bottom"
             className={cn(
               "p-0",
               !multiple && "w-[var(--radix-popover-trigger-width)]",
