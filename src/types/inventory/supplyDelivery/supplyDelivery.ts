@@ -43,6 +43,7 @@ export interface SupplyDeliveryCreate extends Omit<SupplyDeliveryBase, "id"> {
   supplied_item?: string; // Product ID
   supplied_inventory_item?: string; // Inventory Item ID
   supply_request?: string; // Supply Request ID
+  extensions: Record<string, unknown>;
 }
 
 export interface SupplyDeliveryUpsert extends Omit<SupplyDeliveryBase, "id"> {
@@ -51,6 +52,7 @@ export interface SupplyDeliveryUpsert extends Omit<SupplyDeliveryBase, "id"> {
   supplied_item?: string; // Product ID
   supplied_inventory_item?: string; // Inventory Item ID
   supply_request?: string; // Supply Request ID
+  extensions: Record<string, unknown>;
 }
 
 export interface SupplyDeliveryUpdate {
@@ -65,4 +67,5 @@ export interface SupplyDeliveryRead extends SupplyDeliveryBase {
   created_date?: string;
   modified_date?: string;
   supply_request?: SupplyRequestRead;
+  extensions: Record<string, unknown>;
 }
