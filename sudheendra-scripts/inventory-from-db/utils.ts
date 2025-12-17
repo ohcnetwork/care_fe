@@ -31,6 +31,7 @@ export const getCategoriesToImport = async () => {
   return pharmacyCategories.map((category) => ({
     slug_value: createSlug(category.CATEGORY),
     name: category.CATEGORY,
+    id: category.ID,
   }));
 };
 
@@ -47,6 +48,28 @@ export const getLocationsToImport = async () => {
 //     name: item.DESCRIPTION,
 //   }));
 // };
+export const getProductKnowledgeToImport = async () => {
+  const categories = await getCategoriesToImport();
+  const categoryMap = new Map(
+    categories.map((category) => [category.id, category]),
+  );
+  return Object.entries(
+    Object.fromEntries(
+      items.map((item) => {
+        return [
+          createSlug(item.ITEM_NAME),
+          {
+            name: item.ITEM_NAME,
+            hsnCode: item.HSN_CODE,
+            resourceCategorySlug: `pk-${
+              categoryMap.get(item.PHARMACY_CATGRY_ID)?.slug_value
+            }`,
+          },
+        ];
+      }),
+    ),
+  );
+};
 
 const getExistingPaginatedData = async <TInput, TOutput>(
   url: string,
