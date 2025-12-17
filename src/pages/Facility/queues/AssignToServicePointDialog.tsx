@@ -91,29 +91,26 @@ export function AssignToServicePointDialog({
           onValueChange={setSelectedSubQueueId}
         >
           {assignedServicePoints.map((subQueue) => (
-            <div
+            <Label
               key={subQueue.id}
+              htmlFor={subQueue.id}
               className={cn(
                 "flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer",
                 subQueue.id === token.sub_queue?.id && "hidden",
               )}
-              onClick={() => setSelectedSubQueueId(subQueue.id)}
             >
               <RadioGroupItem value={subQueue.id} id={subQueue.id} />
-              <Label
-                htmlFor={subQueue.id}
-                className="flex-1 text-sm font-medium cursor-pointer"
-              >
+              <span className="flex-1 text-sm font-medium">
                 {subQueue.name}
-              </Label>
+              </span>
               <span className="text-sm text-gray-600">
                 {preferredServicePointCategories?.[subQueue.id]?.name ??
                   t("all")}
               </span>
-            </div>
+            </Label>
           ))}
           {assignedServicePoints.length === 0 && (
-            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
+            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-not-allowed">
               <RadioGroupItem value="none" id="none" disabled />
               <span className="flex-1 text-sm font-medium text-gray-500">
                 {t("no_service_points_available")}
