@@ -7,6 +7,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { AssignToServicePointDialog } from "@/pages/Facility/queues/AssignToServicePointDialog";
@@ -80,52 +81,47 @@ export function OngoingQueueTokenCard({
     },
   });
 
+  const patientVerifyUrl = token?.patient
+    ? `/facility/${facilityId}/patients/verify?${new URLSearchParams({
+        phone_number: token.patient.phone_number,
+        year_of_birth: token.patient.year_of_birth?.toString() ?? "",
+        partial_id: token.patient.id.slice(0, 5),
+        queue_id: token.queue.id,
+        token_id: token.id,
+      }).toString()}`
+    : "#";
+
   return (
     <ContextMenu>
       <ContextMenuTrigger ref={contextMenuTriggerRef}>
         <div
           className={cn(
-            "relative flex gap-3 items-center justify-between p-3 bg-gray-50 rounded-lg shadow",
+            "relative flex items-center bg-gray-50 rounded-lg shadow p-1",
             token?.status === TokenStatus.IN_PROGRESS &&
               "border border-primary-500",
           )}
         >
-          <div className="flex flex-col">
-            {token ? (
-              <>
-                <Link
-                  basePath="/"
-                  href={
-                    token.patient
-                      ? `/facility/${facilityId}/patients/verify?${new URLSearchParams(
-                          {
-                            phone_number: token.patient.phone_number,
-                            year_of_birth:
-                              token.patient.year_of_birth?.toString() ?? "",
-                            partial_id: token.patient.id.slice(0, 5),
-                            queue_id: token.queue.id,
-                            token_id: token.id,
-                          },
-                        ).toString()}`
-                      : "#"
-                  }
-                  className="font-semibold hover:underline transition-colors"
-                >
-                  <span className="font-semibold flex items-center gap-1">
+          <Link
+            basePath="/"
+            href={patientVerifyUrl}
+            className="flex gap-3 items-center p-3 flex-1 min-w-0 hover:bg-gray-100 transition-colors rounded-l-lg"
+          >
+            <div className="flex flex-col min-w-0 flex-1">
+              {token ? (
+                <>
+                  <div className="font-semibold flex items-center gap-1 group">
                     {token.patient
                       ? token.patient.name
                       : renderTokenNumber(token)}
-                    <ExternalLink className="size-4" />
-                  </span>
-                </Link>
-                {token.patient && (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700">
-                      {formatPatientAge(token.patient, true)},{" "}
-                      {t(`GENDER__${token.patient.gender}`)}
-                    </span>
-                    {"instance_tags" in token.patient &&
-                      token.patient.instance_tags.length > 0 && (
+                    <ExternalLink className="size-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  {token.patient && (
+                    <div className="flex flex-col gap-1 mt-1">
+                      <span className="text-xs text-gray-700">
+                        {formatPatientAge(token.patient, true)},{" "}
+                        {t(`GENDER__${token.patient.gender}`)}
+                      </span>
+                      {token.patient.instance_tags?.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {token.patient.instance_tags.map((tag) => (
                             <Badge
@@ -140,45 +136,55 @@ export function OngoingQueueTokenCard({
                           ))}
                         </div>
                       )}
-                  </div>
-                )}
-              </>
-            ) : (
-              <Skeleton className="h-4 w-36 my-2" />
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            {token ? (
-              <div className="flex gap-2 items-center justify-center p-2 bg-gray-100 border border-gray-200 rounded-lg">
-                <span className="text-lg font-bold text-black">
-                  {renderTokenNumber(token)}
-                </span>
-              </div>
-            ) : (
-              <Skeleton className="h-12 w-20" />
-            )}
-            {options}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => {
-                e.preventDefault();
-                const rect = e.currentTarget.getBoundingClientRect();
-                const x = rect.left + rect.width / 2;
-                const y = rect.bottom;
-                contextMenuTriggerRef.current?.dispatchEvent(
-                  new MouseEvent("contextmenu", {
-                    bubbles: true,
-                    cancelable: true,
-                    clientX: x,
-                    clientY: y,
-                  }),
-                );
-              }}
-            >
-              <MoreHorizontal className="size-4" />
-            </Button>
-          </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Skeleton className="h-5 w-36" />
+                  <Skeleton className="h-4 w-24 mt-1" />
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              {token ? (
+                <div className="flex gap-2 items-center justify-center p-2 bg-gray-100 border border-gray-200 rounded-lg">
+                  <span className="text-lg font-bold text-black">
+                    {renderTokenNumber(token)}
+                  </span>
+                </div>
+              ) : (
+                <Skeleton className="h-12 w-20" />
+              )}
+              {options}
+            </div>
+          </Link>
+          <Separator
+            orientation="vertical"
+            className="data-[orientation=vertical]:h-24 mx-1"
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="py-12"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = rect.left + rect.width / 2;
+              const y = rect.bottom;
+              contextMenuTriggerRef.current?.dispatchEvent(
+                new MouseEvent("contextmenu", {
+                  bubbles: true,
+                  cancelable: true,
+                  clientX: x,
+                  clientY: y,
+                }),
+              );
+            }}
+          >
+            <MoreHorizontal className="size-4" />
+          </Button>
         </div>
       </ContextMenuTrigger>
       {token && (
