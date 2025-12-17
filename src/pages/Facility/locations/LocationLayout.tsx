@@ -21,6 +21,8 @@ import { DeliveryOrderList } from "@/pages/Facility/services/inventory/externalS
 import { DeliveryOrderShow } from "@/pages/Facility/services/inventory/externalSupply/deliveryOrder/DeliveryOrderShow";
 import { ToDispatch } from "@/pages/Facility/services/inventory/ToDispatch";
 import { ToReceive } from "@/pages/Facility/services/inventory/ToReceive";
+import DispenseOrderList from "@/pages/Facility/services/pharmacy/DispenseOrderList";
+import DispenseOrderView from "@/pages/Facility/services/pharmacy/DispenseOrderView";
 import DispensesView from "@/pages/Facility/services/pharmacy/DispensesView";
 import MedicationBillForm from "@/pages/Facility/services/pharmacy/MedicationBillForm";
 import MedicationDispenseHistory from "@/pages/Facility/services/pharmacy/MedicationDispenseHistory";
@@ -28,6 +30,7 @@ import MedicationRequestList from "@/pages/Facility/services/pharmacy/Medication
 import PrescriptionsView, {
   PharmacyMedicationTab,
 } from "@/pages/Facility/services/pharmacy/PrescriptionsView";
+import { PrintDispenseOrder } from "@/pages/Facility/services/pharmacy/PrintDispenseOrder";
 import { PrintPharmacyPrescription } from "@/pages/Facility/services/pharmacy/PrintPharmacyPrescription";
 import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
@@ -49,6 +52,30 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   "/medication_dispense": () => (
     <MedicationDispenseHistory
       facilityId={facilityId}
+      locationId={locationId}
+    />
+  ),
+  "/dispense_orders": () => (
+    <DispenseOrderList facilityId={facilityId} locationId={locationId} />
+  ),
+  "/dispense_orders/:dispenseOrderId": ({
+    dispenseOrderId,
+  }: {
+    dispenseOrderId: string;
+  }) => (
+    <DispenseOrderView
+      facilityId={facilityId}
+      dispenseOrderId={dispenseOrderId}
+    />
+  ),
+  "/dispense_orders/:dispenseOrderId/print": ({
+    dispenseOrderId,
+  }: {
+    dispenseOrderId: string;
+  }) => (
+    <PrintDispenseOrder
+      facilityId={facilityId}
+      dispenseOrderId={dispenseOrderId}
       locationId={locationId}
     />
   ),
