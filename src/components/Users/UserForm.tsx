@@ -826,10 +826,24 @@ export default function UserForm({
             isLoadingUser ||
             !form.formState.isDirty ||
             updatePending ||
-            createPending
+            createPending ||
+            !form.formState.isValid
           }
         >
-          {isEditMode ? t("update_user") : t("create_user")}
+          {updatePending || createPending ? (
+            <>
+              <CareIcon
+                icon="l-spinner"
+                className="mr-2 h-4 w-4 animate-spin"
+              />
+
+              {t("saving")}
+            </>
+          ) : isEditMode ? (
+            t("update_user")
+          ) : (
+            t("create_user")
+          )}
         </Button>
       </form>
     </Form>
