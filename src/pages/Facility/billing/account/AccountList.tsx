@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpRightSquare, EditIcon, HashIcon, PlusIcon } from "lucide-react";
+import { ArrowUpRightSquare, EditIcon, Hash, PlusIcon } from "lucide-react";
 import { navigate } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -314,7 +314,7 @@ export function AccountList({
                             size="xs"
                             className="rounded-sm"
                           >
-                            <HashIcon strokeWidth={1.5} />
+                            <Hash strokeWidth={1.5} />
                             {account.tags && account.tags.length > 0
                               ? t("manage_tags")
                               : t("add_tags")}

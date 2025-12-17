@@ -1,6 +1,6 @@
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { MoreVertical } from "lucide-react";
+import { Hash, MoreVertical } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -482,11 +482,8 @@ export function AccountShow({
                   }}
                   patientId={account.patient.id}
                   trigger={
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      className="rounded-sm mt-1"
-                    >
+                    <Button variant="outline" size="xs" className="rounded-sm">
+                      <Hash />
                       {account.tags && account.tags.length > 0
                         ? t("manage_tags")
                         : t("add_tags")}
