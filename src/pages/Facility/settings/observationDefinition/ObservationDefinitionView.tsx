@@ -188,7 +188,7 @@ export default function ObservationDefinitionView({
     isError,
   } = useQuery({
     queryKey: ["observationDefinitions", observationSlug],
-    queryFn: query(observationDefinitionApi.retrieveObservationDefinition, {
+    queryFn: query(observationDefinitionApi.get, {
       pathParams: { observationSlug },
       queryParams: {
         facility: facilityId,
@@ -198,7 +198,7 @@ export default function ObservationDefinitionView({
 
   const { mutate: updateObservationDefinition, isPending: isDeleting } =
     useMutation({
-      mutationFn: mutate(observationDefinitionApi.updateObservationDefinition, {
+      mutationFn: mutate(observationDefinitionApi.update, {
         pathParams: { observationSlug },
         queryParams: {
           facility: facilityId,

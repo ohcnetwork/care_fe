@@ -9,7 +9,7 @@ import {
 } from "./observationDefinition";
 
 export default {
-  listObservationDefinition: {
+  list: {
     path: "/api/v1/observation_definition/",
     method: HttpMethod.GET,
     TRes: Type<PaginatedResponse<ObservationDefinitionRead>>(),
@@ -17,18 +17,18 @@ export default {
       ordering: "-created_date",
     },
   },
-  retrieveObservationDefinition: {
+  get: {
     path: "/api/v1/observation_definition/{observationSlug}/",
     method: HttpMethod.GET,
     TRes: Type<ObservationDefinitionRead>(),
   },
-  createObservationDefinition: {
+  create: {
     path: "/api/v1/observation_definition/",
     method: HttpMethod.POST,
     TRes: Type<ObservationDefinitionRead>(),
     TBody: Type<ObservationDefinitionCreate>(),
   },
-  updateObservationDefinition: {
+  update: {
     path: "/api/v1/observation_definition/{observationSlug}/",
     method: HttpMethod.PUT,
     TRes: Type<ObservationDefinitionRead>(),

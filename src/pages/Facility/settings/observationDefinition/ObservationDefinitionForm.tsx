@@ -79,7 +79,7 @@ export default function ObservationDefinitionForm({
 
   const { data: existingData, isFetching } = useQuery({
     queryKey: ["observationDefinitions", observationSlug],
-    queryFn: query(observationDefinitionApi.retrieveObservationDefinition, {
+    queryFn: query(observationDefinitionApi.get, {
       pathParams: {
         observationSlug: observationSlug!,
       },
@@ -268,7 +268,7 @@ function ObservationDefinitionFormContent({
 
   const { mutate: createObservationDefinition, isPending: isCreating } =
     useMutation({
-      mutationFn: mutate(observationDefinitionApi.createObservationDefinition),
+      mutationFn: mutate(observationDefinitionApi.create),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["observationDefinitions"] });
         toast.success(t("observation_definition_created"));
@@ -278,7 +278,7 @@ function ObservationDefinitionFormContent({
 
   const { mutate: updateObservationDefinition, isPending: isUpdating } =
     useMutation({
-      mutationFn: mutate(observationDefinitionApi.updateObservationDefinition, {
+      mutationFn: mutate(observationDefinitionApi.update, {
         pathParams: { observationSlug: observationSlug || "" },
         queryParams: {
           facility: facilityId,

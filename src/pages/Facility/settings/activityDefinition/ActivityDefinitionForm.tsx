@@ -219,16 +219,13 @@ function ActivityDefinitionFormContent({
   const { data: observationDefinitions, isLoading: isLoadingObservations } =
     useQuery({
       queryKey: ["observationDefinitions", facilityId, observationSearch],
-      queryFn: query.debounced(
-        observationDefinitionApi.listObservationDefinition,
-        {
-          queryParams: {
-            facility: facilityId,
-            limit: 100,
-            title: observationSearch,
-          },
+      queryFn: query.debounced(observationDefinitionApi.list, {
+        queryParams: {
+          facility: facilityId,
+          limit: 100,
+          title: observationSearch,
         },
-      ),
+      }),
     });
 
   const form = useForm({
