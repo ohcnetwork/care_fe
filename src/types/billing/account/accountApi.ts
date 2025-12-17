@@ -39,4 +39,16 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<AccountRead>(),
   },
+  setTags: {
+    path: "/api/v1/facility/{facilityId}/account/{accountId}/set_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<AccountRead>(),
+    TBody: Type<{ tags: string[] }>(),
+  },
+  removeTags: {
+    path: "/api/v1/facility/{facilityId}/account/{accountId}/remove_tags/",
+    method: HttpMethod.POST,
+    TRes: Type<AccountRead>(),
+    TBody: Type<{ tags: string[] }>(),
+  },
 } as const;
