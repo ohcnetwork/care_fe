@@ -35,7 +35,7 @@ import { BedStatusLegend } from "@/components/Location/BedStatusLegend";
 import query from "@/Utils/request/query";
 import {
   LOCATION_TYPE_BADGE_COLORS,
-  LocationList,
+  LocationRead,
   LocationTypeIcons,
 } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
@@ -57,7 +57,7 @@ interface WardStats extends BedStats {
   id: string;
   name: string;
   form: string;
-  beds: LocationList[];
+  beds: LocationRead[];
 }
 
 export default function BedAvailabilityDashboard({

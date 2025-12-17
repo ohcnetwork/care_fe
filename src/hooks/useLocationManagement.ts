@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import batchApi from "@/types/base/batch/batchApi";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -24,7 +24,7 @@ export function useLocationManagement({
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState<LocationList | null>(
+  const [selectedLocation, setSelectedLocation] = useState<LocationRead | null>(
     null,
   );
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -173,7 +173,7 @@ export function useLocationManagement({
     },
   });
 
-  const handleMove = (location: LocationList, direction: "up" | "down") => {
+  const handleMove = (location: LocationRead, direction: "up" | "down") => {
     if (!children?.results) return;
 
     const currentIndex = children.results.findIndex(
@@ -262,7 +262,7 @@ export function useLocationManagement({
     setIsSheetOpen(true);
   };
 
-  const handleEditLocation = (location: LocationList) => {
+  const handleEditLocation = (location: LocationRead) => {
     setSelectedLocation(location);
     setIsSheetOpen(true);
   };
