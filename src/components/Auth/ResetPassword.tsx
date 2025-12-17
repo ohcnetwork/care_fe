@@ -23,13 +23,15 @@ interface ResetPasswordProps {
 interface ResetPasswordForm {
   password: string;
   confirm: string;
-  token?: string;
+}
+
+interface ResetPasswordPayload extends ResetPasswordForm {
+  token: string;
 }
 
 interface ResetPasswordFormErrors {
   password?: string | null;
   confirm?: string | null;
-  [key: string]: string | null | undefined;
 }
 
 const ResetPassword = (props: ResetPasswordProps) => {
@@ -48,12 +50,15 @@ const ResetPassword = (props: ResetPasswordProps) => {
     const { value, name } = e.target;
     const fieldValue = { ...form };
     const errorField = { ...errors };
-    if (errorField[name as keyof ResetPasswordFormErrors]) {
-      errorField[name as keyof ResetPasswordFormErrors] = null;
-      setErrors(errorField);
+
+    if (name === "password" || name === "confirm") {
+      if (errorField[name]) {
+        errorField[name] = null;
+        setErrors(errorField);
+      }
+      fieldValue[name] = value;
+      setForm(fieldValue);
     }
-    (fieldValue as Record<string, string>)[name] = value;
-    setForm(fieldValue);
   };
 
   const validateData = (): ResetPasswordForm | false => {
@@ -105,7 +110,11 @@ const ResetPassword = (props: ResetPasswordProps) => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
-      resetPassword({ ...valid, token: props.token });
+      const payload: ResetPasswordPayload = {
+        ...valid,
+        token: props.token,
+      };
+      resetPassword(payload);
     }
   };
 

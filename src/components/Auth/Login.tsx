@@ -84,7 +84,6 @@ interface LoginForm {
 interface LoginFormErrors {
   username?: string | null;
   password?: string | null;
-  [key: string]: string | null | undefined;
 }
 
 const Login = (props: LoginProps) => {
@@ -178,7 +177,6 @@ const Login = (props: LoginProps) => {
       }
     },
     onError: (error: Error & { cause?: { errors?: OtpValidationError[] } }) => {
-      console.log(error);
       let errorMessage = "invalid_otp";
       if (
         error.cause &&
@@ -212,37 +210,39 @@ const Login = (props: LoginProps) => {
     const { value, name } = e.target;
     const fieldValue = { ...form };
     const errorField = { ...errors };
-    if (errorField[name as keyof LoginFormErrors]) {
-      errorField[name as keyof LoginFormErrors] = null;
-      setErrors(errorField);
+
+    if (name === "username" || name === "password") {
+      if (errorField[name]) {
+        errorField[name] = null;
+        setErrors(errorField);
+      }
+      fieldValue[name] = name === "username" ? value.toLowerCase() : value;
+      setForm(fieldValue);
     }
-    (fieldValue as Record<string, string>)[name] = value;
-    if (name === "username") {
-      fieldValue.username = value.toLowerCase();
-    }
-    setForm(fieldValue);
   };
 
   const validateData = (): LoginForm | false => {
     let hasError = false;
     const err: LoginFormErrors = { ...errors };
-    (Object.keys(form) as Array<keyof LoginForm>).forEach((key) => {
-      const value = form[key];
-      if (
-        typeof value === "string" &&
-        key !== "password" &&
-        key !== "g-recaptcha-response"
-      ) {
-        if (!value.match(/\w/)) {
-          hasError = true;
-          err[key] = "field_required";
-        }
-      }
-      if (!value) {
+
+    // Validate username
+    if (typeof form.username === "string") {
+      if (!form.username.match(/\w/)) {
         hasError = true;
-        err[key] = "field_required";
+        err.username = "field_required";
       }
-    });
+    }
+    if (!form.username) {
+      hasError = true;
+      err.username = "field_required";
+    }
+
+    // Validate password
+    if (!form.password) {
+      hasError = true;
+      err.password = "field_required";
+    }
+
     if (hasError) {
       setErrors(err);
       return false;
@@ -715,6 +715,7 @@ const Login = (props: LoginProps) => {
                             </Label>
                             <div className="flex justify-center">
                               <InputOTP
+                                id="otp"
                                 value={otp}
                                 maxLength={5}
                                 pattern={REGEXP_ONLY_DIGITS}
