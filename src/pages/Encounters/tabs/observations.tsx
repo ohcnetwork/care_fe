@@ -9,14 +9,14 @@ import { Card } from "@/components/ui/card";
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { ObservationWithUser } from "@/types/emr/observation";
-import patientApi from "@/types/emr/patient/patientApi";
+import { ObservationListRead } from "@/types/emr/observation/observation";
+import observationApi from "@/types/emr/observation/observationApi";
 import query from "@/Utils/request/query";
 import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 
 interface GroupedObservations {
-  [key: string]: ObservationWithUser[];
+  [key: string]: ObservationListRead[];
 }
 
 function getDateKey(date: string) {
@@ -56,7 +56,7 @@ function formatDisplayTime(dateStr: string) {
 }
 
 function groupObservationsByDate(
-  observations: ObservationWithUser[],
+  observations: ObservationListRead[],
 ): GroupedObservations {
   return observations.reduce((groups: GroupedObservations, observation) => {
     const dateKey = getDateKey(observation.effective_datetime);
@@ -78,10 +78,10 @@ export const EncounterObservationsTab = () => {
   const { ref, inView } = useInView();
 
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
-    useInfiniteQuery<PaginatedResponse<ObservationWithUser>, HTTPError>({
+    useInfiniteQuery<PaginatedResponse<ObservationListRead>, HTTPError>({
       queryKey: ["infinite-observations", patientId, encounterId],
       queryFn: async ({ pageParam = 0 }) => {
-        const response = await query(patientApi.listObservations, {
+        const response = await query(observationApi.list, {
           pathParams: { patientId },
           queryParams: {
             encounter: encounterId,
@@ -90,7 +90,7 @@ export const EncounterObservationsTab = () => {
             offset: String(pageParam),
           },
         })({ signal: new AbortController().signal });
-        return response as PaginatedResponse<ObservationWithUser>;
+        return response;
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
@@ -143,7 +143,7 @@ export const EncounterObservationsTab = () => {
                   new Date(b.effective_datetime).getTime() -
                   new Date(a.effective_datetime).getTime(),
               )
-              .map((item: ObservationWithUser) => (
+              .map((item: ObservationListRead) => (
                 <div key={item.id} className="flex gap-4">
                   <div className="p-1 h-fit text-sm text-gray-700 bg-gray-100 rounded-md font-medium">
                     {formatDisplayTime(item.effective_datetime)}:
@@ -156,14 +156,6 @@ export const EncounterObservationsTab = () => {
                             {formatValue(item.value.value, item.value_type)}
                           </div>
                         )}
-                        {item.value.value_quantity && (
-                          <div className="mt-1 font-medium">
-                            {item.value.value_quantity.value}{" "}
-                            <div className="text-xs text-gray-600">
-                              {item.value.value_quantity.code.display}
-                            </div>
-                          </div>
-                        )}
                       </div>
                       {item.note && (
                         <div className="mt-1 text-sm text-gray-500">
@@ -171,7 +163,9 @@ export const EncounterObservationsTab = () => {
                         </div>
                       )}
                       <div className="font-medium text-sm text-gray-600">
-                        {item.main_code.display || item.main_code.code}
+                        {item.main_code?.display ||
+                          item.main_code?.code ||
+                          t("unknown")}
                       </div>
                       {item.data_entered_by && (
                         <div className="text-gray-600 text-sm">

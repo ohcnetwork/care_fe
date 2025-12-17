@@ -45,23 +45,23 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
-import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
+import { QuestionnaireTagRead } from "@/types/questionnaire/tags";
 
 interface Props {
-  form: UseFormReturn<QuestionnaireDetail>;
+  form: UseFormReturn<QuestionnaireRead>;
   trigger?: React.ReactNode;
 }
 
 interface TagSelectorProps {
   title?: string;
-  selected: QuestionnaireTagModel[];
+  selected: QuestionnaireTagRead[];
   onToggle: (tagId: string) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   isLoading?: boolean;
-  tagOptions?: QuestionnaireTagModel[];
+  tagOptions?: QuestionnaireTagRead[];
   className?: string;
   triggerClassName?: string;
 }
@@ -182,7 +182,7 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [newTagSlug, setNewTagSlug] = useState("");
-  const [selectedTags, setSelectedTags] = useState<QuestionnaireTagModel[]>([]);
+  const [selectedTags, setSelectedTags] = useState<QuestionnaireTagRead[]>([]);
   const isMobile = useBreakpoints({ default: true, sm: false });
 
   const { data: availableTags, isLoading } = useQuery({
@@ -210,12 +210,11 @@ export default function ManageQuestionnaireTagsSheet({ form, trigger }: Props) {
 
   const { mutate: createTag, isPending: isCreating } = useMutation({
     mutationFn: mutate(questionnaireApi.tags.create),
-    onSuccess: (data: unknown) => {
-      const tagData = data as QuestionnaireTagModel;
+    onSuccess: (data: QuestionnaireTagRead) => {
       queryClient.invalidateQueries({
         queryKey: ["questionnaireTags"],
       });
-      setSelectedTags((current) => [...current, tagData]);
+      setSelectedTags((current) => [...current, data]);
       setNewTagName("");
       setNewTagSlug("");
       setIsCreateOpen(false);
