@@ -165,14 +165,15 @@ export default function CreateTokenForm({
   }
 
   const handleOpenChange = (open: boolean) => {
-    if (open) {
-      form.reset();
+    setIsOpen(open);
+    if (!open) {
+      // Reset all state when closing
       setSelectedResource({
         resource: null,
         resource_type: SchedulableResourceType.Practitioner,
       });
+      form.reset();
     }
-    setIsOpen(open);
   };
 
   return (
