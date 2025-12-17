@@ -50,7 +50,7 @@ export interface AccountRead extends AccountBase {
   total_paid: string;
   total_balance: string;
   created_date: string;
-  tags?: TagConfig[];
+  tags: TagConfig[];
 }
 
 export interface AccountUpdate extends AccountBase {
