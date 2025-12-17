@@ -49,7 +49,10 @@ export const test = base.extend({
     try {
       await saveCoverage(page, testInfo.title);
     } catch (error) {
-      console.warn("Failed to collect coverage:", error);
+      console.warn(
+        `Failed to collect coverage for test "${testInfo.title}":`,
+        error instanceof Error ? error.message : error,
+      );
     }
   },
 });

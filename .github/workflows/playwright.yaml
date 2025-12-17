@@ -234,14 +234,14 @@ jobs:
 
       - name: Download coverage data
         if: steps.skipped.outputs.skipped == 'false'
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v4
         with:
           pattern: coverage-shard-*
           path: coverage-data
 
       - name: Setup Node.js for coverage
         if: steps.skipped.outputs.skipped == 'false'
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"

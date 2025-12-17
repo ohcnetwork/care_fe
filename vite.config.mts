@@ -58,7 +58,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       ...(env.CI
         ? [
             istanbul({
-              include: "src/*",
+              include: "src/**/*",
               exclude: [
                 "node_modules",
                 "tests/",
