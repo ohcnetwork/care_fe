@@ -12,12 +12,12 @@ import { request } from "sudheendra-scripts/utils";
 async function main() {
   const resourceCategories = await getCategoriesToImport();
   const existingResourceCategories = await getExistingResourceCategories();
-  const itemsToImportProductKnowledge = await getItemsToImport(
+  const itemsToImportProductKnowledge = getItemsToImport(
     existingResourceCategories,
     resourceCategories,
     (existing, item) => existing.slug === `pk-${item.slug_value}`,
   );
-  const itemsToImportChargeItemDefinitions = await getItemsToImport(
+  const itemsToImportChargeItemDefinitions = getItemsToImport(
     existingResourceCategories,
     resourceCategories,
     (existing, item) => existing.slug === `cid-${item.slug_value}`,
