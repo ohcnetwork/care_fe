@@ -9,6 +9,7 @@ import { JSDOM } from "jsdom";
 import { marked } from "marked";
 import path from "path";
 import checker from "vite-plugin-checker";
+import istanbul from "vite-plugin-istanbul";
 import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { careConsoleArt } from "./plugins/careConsoleArt";
@@ -54,6 +55,22 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       careConsoleArt(),
       fixSonnerPackageJson(),
       tailwindcss(),
+      ...(env.CI
+        ? [
+            istanbul({
+              include: "src/*",
+              exclude: [
+                "node_modules",
+                "tests/",
+                "**/*.test.*",
+                "**/*.spec.*",
+              ],
+              extension: [".js", ".ts", ".tsx"],
+              requireEnv: false,
+              forceBuildInstrument: true,
+            }),
+          ]
+        : []),
       federation({
         name: "core",
         remotes: {

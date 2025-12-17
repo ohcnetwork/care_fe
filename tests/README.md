@@ -32,15 +32,43 @@ npx playwright test --project=chromium
 
 # View HTML report
 npm run playwright:show-report
+
+# Generate coverage report (after running tests)
+npm run playwright:coverage
 ```
+
+## Code Coverage
+
+Playwright tests automatically collect code coverage data to track which parts of the application are tested. After running tests, you can generate coverage reports.
+
+### Viewing Coverage Reports
+
+```bash
+# 1. Run tests first (this collects coverage data)
+npm run playwright:test
+
+# 2. Generate coverage report
+npm run playwright:coverage
+
+# 3. Open coverage/index.html in your browser to view the report
+```
+
+### Coverage Configuration
+
+Coverage settings are configured in `.nycrc.json`:
+
+- Includes: All files in the `src/` directory
+- Excludes: Test files, type definitions, service worker
+- Formats: HTML (interactive), JSON (for tools), text (console), LCOV (for integrations)
 
 ## Prerequisites
 
 Before running tests, ensure:
 
-1. **Backend is running** - See [CARE Backend Setup](https://care-be-docs.ohc.network/)
+1. **Backend is running** – See [CARE Backend Setup](https://care-be-docs.ohc.network/)
 2. **Frontend dev server is running**: `npm run dev`
-3. **Environment variables** - Create `.env.local` with:
+3. **Environment variables** – Create `.env.local` with:
+
    ```env
    REACT_CARE_API_URL=http://127.0.0.1:9000
    ```
@@ -50,10 +78,10 @@ Before running tests, ensure:
 ```
 tests/
 ├── auth.setup.ts           # Authentication setup
-├── login.spec.ts          # Login functionality tests
-├── homepage.spec.ts       # Homepage tests
-├── authenticated.spec.ts  # Tests requiring authentication
-└── .auth/                 # Stored authentication state (gitignored)
+├── login.spec.ts           # Login functionality tests
+├── homepage.spec.ts        # Homepage tests
+├── authenticated.spec.ts   # Tests requiring authentication
+└── .auth/                  # Stored authentication state (git-ignored)
 ```
 
 ## Writing Tests
@@ -125,7 +153,7 @@ npx playwright test tests/login.spec.ts --debug
 
 ### VS Code Integration
 
-Install the [Playwright Test for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright) extension for:
+Install the [Playwright Test for VS Code](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright) extension for:
 
 - Running tests from the editor
 - Setting breakpoints
@@ -143,7 +171,7 @@ npx playwright show-trace trace.zip
 
 See `playwright.config.ts` for configuration options:
 
-- **baseURL**: http://localhost:4000
+- **baseURL**: `http://localhost:4000`
 - **Browsers**: Chromium, Firefox, WebKit
 - **Retries**: 2 on CI, 0 locally
 - **Trace**: Captured on first retry

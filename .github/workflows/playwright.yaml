@@ -166,6 +166,14 @@ jobs:
         run: |
           echo "::error::Playwright tests failed in shard ${{ matrix.shard }}/${{ env.TEST_SHARDS }}"
 
+      - name: Upload coverage data
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-shard-${{ matrix.shard }}
+          path: .nyc_output/
+          retention-days: 7
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -224,6 +232,48 @@ jobs:
           pattern: playwright-results-shard-*
           path: all-results
 
+      - name: Download coverage data
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/download-artifact@v7
+        with:
+          pattern: coverage-shard-*
+          path: coverage-data
+
+      - name: Setup Node.js for coverage
+        if: steps.skipped.outputs.skipped == 'false'
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install nyc for coverage reporting
+        if: steps.skipped.outputs.skipped == 'false'
+        run: npm install -g nyc
+
+      - name: Merge coverage reports
+        if: steps.skipped.outputs.skipped == 'false'
+        id: coverage
+        run: |
+          mkdir -p .nyc_output
+          find coverage-data -name "*.json" -exec cp {} .nyc_output/ \;
+
+          if [ -n "$(ls -A .nyc_output/*.json 2>/dev/null)" ]; then
+            nyc report --reporter=html --reporter=json-summary --reporter=text
+            
+            if [ -f coverage/coverage-summary.json ]; then
+              COVERAGE=$(node -p "Math.round(require('./coverage/coverage-summary.json').total.lines.pct * 100) / 100")
+              echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
+              echo "has_coverage=true" >> $GITHUB_OUTPUT
+            else
+              echo "percentage=0" >> $GITHUB_OUTPUT
+              echo "has_coverage=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "percentage=0" >> $GITHUB_OUTPUT
+            echo "has_coverage=false" >> $GITHUB_OUTPUT
+            echo "No coverage data collected"
+          fi
+
       - name: Merge test results
         if: steps.skipped.outputs.skipped == 'false'
         id: merge
@@ -275,10 +325,38 @@ jobs:
           path: all-results/
           retention-days: 14
 
+      - name: Upload coverage report
+        if: steps.skipped.outputs.skipped == 'false' && steps.coverage.outputs.has_coverage == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-coverage-report
+          path: coverage/
+          retention-days: 14
+
       - name: Generate PR comment
         if: steps.skipped.outputs.skipped == 'false'
         run: |
-          cat > pr-comment.md << 'EOF'
+          if [ "${{ steps.coverage.outputs.has_coverage }}" == "true" ]; then
+            cat > pr-comment.md << 'EOF'
+          ## 🎭 Playwright Test Results
+
+          **Status:** ${{ steps.merge.outputs.status }}
+          **Test Shards:** ${{ env.TEST_SHARDS }}
+          **Coverage:** ${{ steps.coverage.outputs.percentage }}% 📊
+
+          | Metric | Count |
+          |--------|-------|
+          | Total Tests | ${{ steps.merge.outputs.total }} |
+          | ✅ Passed | ${{ steps.merge.outputs.passed }} |
+          | ❌ Failed | ${{ steps.merge.outputs.failed }} |
+          | ⏭️ Skipped | ${{ steps.merge.outputs.skipped }} |
+
+          📊 Detailed results and coverage report are available in the [workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+          <sub>Run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})</sub>
+          EOF
+          else
+            cat > pr-comment.md << 'EOF'
           ## 🎭 Playwright Test Results
 
           **Status:** ${{ steps.merge.outputs.status }}
@@ -295,6 +373,7 @@ jobs:
 
           <sub>Run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})</sub>
           EOF
+          fi
 
       - name: Upload PR comment
         if: always()

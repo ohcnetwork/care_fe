@@ -1,0 +1,21 @@
+{
+  "all": true,
+  "include": ["src/**/*.{ts,tsx,js,jsx}"],
+  "exclude": [
+    "src/**/*.test.{ts,tsx}",
+    "src/**/*.spec.{ts,tsx}",
+    "src/vite-env.d.ts",
+    "src/globals.d.ts",
+    "src/pluginTypes.ts",
+    "src/service-worker.ts",
+    "**/*.d.ts"
+  ],
+  "reporter": ["html", "json-summary", "text", "lcov"],
+  "report-dir": "coverage",
+  "temp-dir": ".nyc_output",
+  "check-coverage": false,
+  "lines": 50,
+  "statements": 50,
+  "functions": 50,
+  "branches": 40
+}
