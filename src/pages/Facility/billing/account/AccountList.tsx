@@ -288,15 +288,6 @@ export function AccountList({
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
-                      {account.tags?.map((tag) => (
-                        <Badge
-                          key={tag.id}
-                          variant="secondary"
-                          className="text-xs"
-                        >
-                          {tag.display}
-                        </Badge>
-                      ))}
                       <TagAssignmentSheet
                         entityType="account"
                         entityId={account.id}
@@ -321,6 +312,15 @@ export function AccountList({
                           </Button>
                         }
                       />
+                      {account.tags?.map((tag) => (
+                        <Badge
+                          key={tag.id}
+                          variant="secondary"
+                          className="text-xs"
+                        >
+                          {tag.display}
+                        </Badge>
+                      ))}
                     </div>
                   </TableCell>
                   <TableCell className="whitespace-normal">
