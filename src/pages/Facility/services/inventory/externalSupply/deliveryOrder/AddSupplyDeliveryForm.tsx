@@ -79,7 +79,12 @@ import query from "@/Utils/request/query";
 
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
-  supplied_item_quantity: z.number().min(1, "Quantity must be at least 1"),
+  supplied_item_quantity: z
+    .number()
+    .or(z.nan())
+    .refine((val) => !isNaN(val) && val > 0, {
+      message: "Quantity must be at least 1",
+    }),
   product_knowledge: z
     .custom<ProductKnowledgeBase>()
     .refine((data) => data?.slug, {
@@ -725,7 +730,7 @@ export function AddSupplyDeliveryForm({
                                             {...field}
                                             onChange={(e) =>
                                               field.onChange(
-                                                parseInt(e.target.value) || 1,
+                                                parseInt(e.target.value),
                                               )
                                             }
                                           />
