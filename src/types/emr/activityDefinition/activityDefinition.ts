@@ -5,7 +5,7 @@ import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/c
 import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 export enum Status {
   draft = "draft",
@@ -81,7 +81,7 @@ export interface ActivityDefinitionReadSpec extends BaseActivityDefinitionSpec {
   specimen_requirements: SpecimenDefinitionRead[];
   charge_item_definitions: ChargeItemDefinitionRead[];
   observation_result_requirements: ObservationDefinitionReadSpec[];
-  locations: LocationList[];
+  locations: LocationRead[];
   category: ResourceCategoryRead;
   healthcare_service: HealthcareServiceReadSpec;
 }

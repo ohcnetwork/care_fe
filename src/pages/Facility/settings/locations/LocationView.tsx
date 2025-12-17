@@ -30,7 +30,7 @@ import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 import { useLocationManagement } from "@/hooks/useLocationManagement";
 
 import query from "@/Utils/request/query";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import LocationSheet from "./LocationSheet";
@@ -42,7 +42,7 @@ interface Props {
   facilityId: string;
   isNested?: boolean;
   onBackToParent?: () => void;
-  onSelectLocation?: (location: LocationList) => void;
+  onSelectLocation?: (location: LocationRead) => void;
 }
 
 export default function LocationView({
@@ -96,7 +96,7 @@ export default function LocationView({
     setPage(1);
   }, [id, setPage]);
 
-  const handleViewLocation = (location: LocationList) => {
+  const handleViewLocation = (location: LocationRead) => {
     if (isNested && onSelectLocation) {
       onSelectLocation(location);
     } else {
@@ -110,7 +110,7 @@ export default function LocationView({
     if (breadcrumbId === id) return;
 
     if (onSelectLocation) {
-      const locationForNavigation = { id: breadcrumbId } as LocationList;
+      const locationForNavigation = { id: breadcrumbId } as LocationRead;
       onSelectLocation(locationForNavigation);
     } else if (onBackToParent) {
       onBackToParent();
@@ -139,8 +139,8 @@ export default function LocationView({
 
   const breadcrumbs = location ? generateBreadcrumbs(location) : [];
 
-  const handleMoveUp = (location: LocationList) => handleMove(location, "up");
-  const handleMoveDown = (location: LocationList) =>
+  const handleMoveUp = (location: LocationRead) => handleMove(location, "up");
+  const handleMoveDown = (location: LocationRead) =>
     handleMove(location, "down");
 
   return (

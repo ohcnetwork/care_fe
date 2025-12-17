@@ -115,6 +115,9 @@
   "facility:inventory:delivery": [
     { "key": "l", "action": "load-from-order", "description": "Load from Order", "when": "always" }
   ],
+  "facility:service": [
+    { "key": "s", "action": "scan-button", "description": "Scan the QR code", "when": "always" }
+  ],
 
   "encounter": [
     { "key": "a", "action": "add-allergy", "description": "Add Allergy", "when": "canEdit" },
