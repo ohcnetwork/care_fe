@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -10,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { AssignToServicePointDialog } from "@/pages/Facility/queues/AssignToServicePointDialog";
 import { CancelTokenDialog } from "@/pages/Facility/queues/CancelTokenDialog";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import {
   renderTokenNumber,
   TokenRead,
@@ -17,6 +19,7 @@ import {
 } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import mutate from "@/Utils/request/mutate";
+import { formatPatientAge } from "@/Utils/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   BringToFront,
@@ -89,35 +92,60 @@ export function OngoingQueueTokenCard({
         >
           <div className="flex flex-col">
             {token ? (
-              <Link
-                basePath="/"
-                href={
-                  token.patient
-                    ? `/facility/${facilityId}/patients/verify?${new URLSearchParams(
-                        {
-                          phone_number: token.patient.phone_number,
-                          year_of_birth:
-                            token.patient.year_of_birth?.toString() ?? "",
-                          partial_id: token.patient.id.slice(0, 5),
-                          queue_id: token.queue.id,
-                          token_id: token.id,
-                        },
-                      ).toString()}`
-                    : "#"
-                }
-                className="font-semibold hover:underline transition-colors"
-              >
-                <span className="font-semibold flex items-center gap-1">
-                  {token.patient
-                    ? token.patient.name
-                    : renderTokenNumber(token)}
-                  <ExternalLink className="size-4" />
-                </span>
-              </Link>
+              <>
+                <Link
+                  basePath="/"
+                  href={
+                    token.patient
+                      ? `/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                          {
+                            phone_number: token.patient.phone_number,
+                            year_of_birth:
+                              token.patient.year_of_birth?.toString() ?? "",
+                            partial_id: token.patient.id.slice(0, 5),
+                            queue_id: token.queue.id,
+                            token_id: token.id,
+                          },
+                        ).toString()}`
+                      : "#"
+                  }
+                  className="font-semibold hover:underline transition-colors"
+                >
+                  <span className="font-semibold flex items-center gap-1">
+                    {token.patient
+                      ? token.patient.name
+                      : renderTokenNumber(token)}
+                    <ExternalLink className="size-4" />
+                  </span>
+                </Link>
+                {token.patient && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700">
+                      {formatPatientAge(token.patient, true)},{" "}
+                      {t(`GENDER__${token.patient.gender}`)}
+                    </span>
+                    {"instance_tags" in token.patient &&
+                      token.patient.instance_tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {token.patient.instance_tags.map((tag) => (
+                            <Badge
+                              key={tag.id}
+                              variant="secondary"
+                              size="sm"
+                              className="capitalize"
+                              title={tag.description}
+                            >
+                              {getTagHierarchyDisplay(tag)}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                  </div>
+                )}
+              </>
             ) : (
               <Skeleton className="h-4 w-36 my-2" />
             )}
-            {/* TODO: do we show tags here? or something else? */}
           </div>
           <div className="flex items-center gap-3">
             {token ? (
