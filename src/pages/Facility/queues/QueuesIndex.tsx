@@ -226,7 +226,7 @@ export default function QueuesIndex({
 
   const { id: currentUserId } = useAuthUser();
 
-  // Set default resourceId for practitioners - keep as string for consistency
+  // Set default resourceId for practitioners
   const effectiveResourceId =
     qParams.resource_id ||
     resourceId ||
@@ -270,8 +270,7 @@ export default function QueuesIndex({
 
   // Handle resource selection
   const handleResourceChange = (users: UserReadMinimal[]) => {
-    const resourceId = users.length > 0 ? users[0].id : undefined;
-    updateQuery({ resource_id: resourceId });
+    updateQuery({ resource_id: users[0]?.id });
   };
 
   // Fetch queues with all query parameters
