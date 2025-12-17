@@ -40,9 +40,50 @@ export const PatientInfoCard = ({
     <>
       <Card className="bg-white shadow-sm rounded-md">
         <CardHeader className="pb-4 flex flex-row items-center justify-between px-2">
-          <div className="space-y-4">
+          <div className="flex gap-2">
             <PatientHoverCard patient={patient} facilityId={facilityId} />
+            <div className="flex flex-wrap xl:gap-5 gap-2">
+              {"instance_identifiers" in patient &&
+                patient.instance_identifiers
+                  ?.filter(({ config }) => !config.config.auto_maintained)
+                  .map((identifier) => (
+                    <div
+                      key={identifier.config.id}
+                      className="flex flex-col gap-1 items-start md:hidden xl:flex"
+                    >
+                      <span className="text-xs text-gray-700 md:w-auto">
+                        {identifier.config.config.display}:{" "}
+                      </span>
+                      <span className="text-sm font-semibold">
+                        {identifier.value}
+                      </span>
+                    </div>
+                  ))}
+              {"instance_tags" in patient &&
+                patient.instance_tags.length > 0 && (
+                  <div className="flex flex-col gap-1 items-start">
+                    <span className="text-xs text-gray-700">
+                      {t("patient_tags")}:
+                    </span>
+                    <div className="flex flex-wrap gap-2 text-sm whitespace-nowrap">
+                      <>
+                        {patient.instance_tags.map((tag) => (
+                          <Badge
+                            key={tag.id}
+                            variant="secondary"
+                            className="capitalize"
+                            title={tag.description}
+                          >
+                            {getTagHierarchyDisplay(tag)}
+                          </Badge>
+                        ))}
+                      </>
+                    </div>
+                  </div>
+                )}
+            </div>
           </div>
+
           {children}
         </CardHeader>
       </Card>

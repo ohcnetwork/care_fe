@@ -24,6 +24,7 @@ import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
+import { PatientHeader } from "@/components/Patient/PatientHeader";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
   PAYMENT_RECONCILIATION_OUTCOME_COLORS,
@@ -35,7 +36,6 @@ import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paym
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { formatPatientAge } from "@/Utils/utils";
 
 const methodMap: Record<PaymentReconciliationPaymentMethod, string> = {
   cash: "Cash",
@@ -175,39 +175,11 @@ export function PaymentReconciliationShow({
         <div className="lg:col-span-2 space-y-6">
           {/* Patient Information Card */}
           {payment.account?.patient && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  {t("patient_information")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">
-                      {t("patient_name")}
-                    </div>
-                    <div className="font-semibold text-lg">
-                      {payment.account.patient.name || "-"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">{t("age")}</div>
-                    <div className="font-medium">
-                      {formatPatientAge(payment.account.patient, true)}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">{t("sex")}</div>
-                    <div className="font-medium">
-                      {payment.account.patient.gender
-                        ? t(`GENDER__${payment.account.patient.gender}`)
-                        : "-"}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <PatientHeader
+              patient={payment.account.patient}
+              facilityId={facilityId}
+              className="rounded-xl border border-gray-800 bg-white shadow-sm "
+            />
           )}
 
           {/* Payment Amount Card */}
