@@ -49,6 +49,16 @@ const getExistingPaginatedData = async <TInput, TOutput>(
   return data;
 };
 
+export const getItemsToImport = async <TExisting, TItem>(
+  existingItems: TExisting[],
+  importItems: TItem[],
+  isSame: (existing: TExisting, item: TItem) => boolean,
+) => {
+  return importItems.filter((item) =>
+    existingItems.every((existing) => !isSame(existing, item)),
+  );
+};
+
 export const getExistingLocations = async () => {
   return getExistingPaginatedData<LocationRead, { id: string; name: string }>(
     `/api/v1/facility/${FACILITY_ID}/location/`,
