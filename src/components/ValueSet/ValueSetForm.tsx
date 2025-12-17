@@ -305,6 +305,36 @@ export function ValueSetForm({
   isSystemDefined,
 }: ValueSetFormProps) {
   const { t } = useTranslation();
+  const ruleSchema = z
+    .object({
+      system: z.string(),
+      concept: z
+        .array(
+          z.object({
+            code: z.string().min(1, t("field_required")),
+            display: z.string().min(1, t("field_required")),
+          }),
+        )
+        .default([]),
+      filter: z
+        .array(
+          z.object({
+            property: z.string().min(1, t("field_required")),
+            op: z.string().min(1, t("field_required")),
+            value: z.string().min(1, t("field_required")),
+          }),
+        )
+        .default([]),
+    })
+    .refine(
+      (data) =>
+        (data.concept?.length ?? 0) > 0 || (data.filter?.length ?? 0) > 0,
+      {
+        message: t("field_required"),
+        path: ["concept"],
+      },
+    );
+
   const valuesetFormSchema = z.object({
     name: z.string().trim().min(1, t("field_required")),
     slug: z
@@ -322,50 +352,8 @@ export function ValueSetForm({
     ]),
     is_system_defined: z.boolean(),
     compose: z.object({
-      include: z.array(
-        z.object({
-          system: z.string(),
-          concept: z
-            .array(
-              z.object({
-                code: z.string().min(1, t("field_required")),
-                display: z.string().min(1, t("field_required")),
-              }),
-            )
-            .optional(),
-          filter: z
-            .array(
-              z.object({
-                property: z.string().min(1, t("field_required")),
-                op: z.string().min(1, t("field_required")),
-                value: z.string().min(1, t("field_required")),
-              }),
-            )
-            .optional(),
-        }),
-      ),
-      exclude: z.array(
-        z.object({
-          system: z.string(),
-          concept: z
-            .array(
-              z.object({
-                code: z.string().min(1, t("field_required")),
-                display: z.string().min(1, t("field_required")),
-              }),
-            )
-            .optional(),
-          filter: z
-            .array(
-              z.object({
-                property: z.string().min(1, t("field_required")),
-                op: z.string().min(1, t("field_required")),
-                value: z.string().min(1, t("field_required")),
-              }),
-            )
-            .optional(),
-        }),
-      ),
+      include: z.array(ruleSchema),
+      exclude: z.array(ruleSchema),
     }),
   });
 
@@ -389,17 +377,15 @@ export function ValueSetForm({
   return (
     <Form {...form}>
       <div className="flex justify-end">
-        {!initialData?.id && (
-          <ValueSetPreview
-            valueset={form.watch()}
-            trigger={
-              <Button variant="outline_primary">
-                <CareIcon icon={"l-eye"} className="h-4 w-4" />
-                {t("valueset_preview")}
-              </Button>
-            }
-          />
-        )}
+        <ValueSetPreview
+          valueset={form.watch()}
+          trigger={
+            <Button variant="outline_primary">
+              <CareIcon icon={"l-eye"} className="h-4 w-4" />
+              {t("valueset_preview")}
+            </Button>
+          }
+        />
       </div>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField

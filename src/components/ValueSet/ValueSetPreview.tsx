@@ -27,6 +27,22 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState("");
+  const minSearchLength = 3;
+  const isBelowMin = search.length < minSearchLength;
+
+  const compose = valueset.compose?.include?.[0]?.system
+    ? {
+        include: valueset.compose.include ?? [],
+        exclude: valueset.compose.exclude ?? [],
+      }
+    : {
+        include: [{ system: "http://snomed.info/sct" }],
+        exclude: [],
+      };
+
+  const hasValidRules = compose.include?.some(
+    (rule) => (rule.concept?.length ?? 0) > 0 || (rule.filter?.length ?? 0) > 0,
+  );
 
   const { data: searchQuery, isFetching } = useQuery({
     queryKey: ["valueset", "previewSearch", search, valueset.compose],
@@ -36,15 +52,10 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
         ...valueset,
         name: valueset.name || "Preview",
         slug: valueset.slug || "preview-slug",
-        compose: valueset.compose.include[0]?.system
-          ? valueset.compose
-          : {
-              include: [{ system: "http://snomed.info/sct" }],
-              exclude: [],
-            },
+        compose,
       },
     }),
-    enabled: open,
+    enabled: open && !isBelowMin && hasValidRules,
   });
 
   return (
@@ -70,11 +81,18 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
             value={selected}
             onChange={setSelected}
             onSearch={setSearch}
+            isLoading={isFetching}
             placeholder={t("search_concept")}
             noOptionsMessage={
-              searchQuery && !isFetching
-                ? t("no_results_found")
-                : t("searching")
+              !hasValidRules
+                ? t("add_concept")
+                : isBelowMin
+                  ? t("min_char_length_error", {
+                      min_length: minSearchLength,
+                    })
+                  : searchQuery && !isFetching
+                    ? t("no_results_found")
+                    : t("searching")
             }
           />
         </div>
