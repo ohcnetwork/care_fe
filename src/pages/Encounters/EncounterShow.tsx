@@ -91,18 +91,18 @@ export const EncounterShow = (props: Props) => {
     "2xl": 12,
   });
 
-  const { canViewEncounter } = getPermissions(
+  const { canReadEncounter, canReadEncounterClinicalData } = getPermissions(
     hasPermission,
     primaryEncounter?.permissions ?? [],
   );
 
   useEncounterShortcuts();
-  const { canViewClinicalData } = getPermissions(
-    hasPermission,
-    patient?.permissions ?? [],
-  );
+  // const { canViewClinicalData } = getPermissions(
+  //   hasPermission,
+  //   patient?.permissions ?? [],
+  // );
 
-  const canAccess = canViewClinicalData || canViewEncounter;
+  const canAccess = canReadEncounterClinicalData || canReadEncounter;
   const hasToken = primaryEncounter?.appointment?.token;
   const isEncounterActive =
     primaryEncounter?.appointment?.id &&
@@ -138,18 +138,22 @@ export const EncounterShow = (props: Props) => {
     },
     plots: {
       label: t(`ENCOUNTER_TAB__plots`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterPlotsTab />,
     },
     observations: {
       label: t(`ENCOUNTER_TAB__observations`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterObservationsTab />,
     },
     medicines: {
       label: t(`ENCOUNTER_TAB__medicines`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterMedicinesTab />,
     },
     responses: {
       label: t(`ENCOUNTER_TAB__qnr_responses`),
+      visible: canReadEncounterClinicalData,
       component: (
         <EncounterResponsesTab
           patientId={patient?.id}
@@ -160,10 +164,12 @@ export const EncounterShow = (props: Props) => {
     },
     files: {
       label: t(`ENCOUNTER_TAB__files`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterFilesTab />,
     },
     notes: {
       label: t(`ENCOUNTER_TAB__notes`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterNotesTab />,
     },
     devices: {
@@ -176,10 +182,12 @@ export const EncounterShow = (props: Props) => {
     },
     service_requests: {
       label: t(`ENCOUNTER_TAB__service_requests`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterServiceRequestTab />,
     },
     diagnostic_reports: {
       label: t(`ENCOUNTER_TAB__diagnostic_reports`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterDiagnosticReportsTab />,
     },
 

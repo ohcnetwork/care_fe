@@ -40,25 +40,18 @@ import {
   InvoiceRead,
   InvoiceStatus,
 } from "@/types/billing/invoice/invoice";
-import {
-  PAYMENT_RECONCILIATION_STATUS_COLORS,
-  PaymentReconciliationPaymentMethod,
-  PaymentReconciliationType,
-} from "@/types/billing/paymentReconciliation/paymentReconciliation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ArrowLeft,
   BadgeCheck,
-  BanknoteArrowDownIcon,
-  Building2,
   ChevronDown,
-  CreditCard,
+  ChevronLeft,
   FileCheck,
-  FileText,
-  Wallet,
+  PrinterIcon,
+  ReceiptText,
+  SquareArrowOutUpRight,
 } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
-import React, { useState } from "react";
+import { useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import AddChargeItemSheet from "@/components/Billing/Invoice/AddChargeItemSheet";
@@ -72,34 +65,26 @@ import { Separator } from "@/components/ui/separator";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { useCareApps } from "@/hooks/useCareApps";
 import { cn } from "@/lib/utils";
+import { paymentmethodMap } from "@/pages/Facility/billing/paymentReconciliation/PaymentsData";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import { PLUGIN_Component } from "@/PluginEngine";
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ACCOUNT_STATUS_COLORS } from "@/types/billing/account/Account";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 import invoiceApi from "@/types/billing/invoice/invoiceApi";
-import paymentReconciliationApi from "@/types/billing/paymentReconciliation/paymentReconciliationApi";
+import { getPartialId } from "@/types/emr/patient/patient";
+import patientApi from "@/types/emr/patient/patientApi";
 import facilityApi from "@/types/facility/facilityApi";
+import { PatientIdentifierUse } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
 import dayjs from "@/Utils/dayjs";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { formatDateTime, formatName } from "@/Utils/utils";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
-
-const paymentMethodMap: Record<
-  PaymentReconciliationPaymentMethod,
-  { label: string; icon: React.ReactNode }
-> = {
-  cash: { label: "Cash", icon: <BanknoteArrowDownIcon className="size-5" /> },
-  ccca: { label: "Credit Card", icon: <CreditCard className="size-5" /> },
-  cchk: { label: "Credit Check", icon: <FileCheck className="size-5" /> },
-  cdac: { label: "Credit Account", icon: <Wallet className="size-5" /> },
-  chck: { label: "Check", icon: <FileText className="size-5" /> },
-  ddpo: { label: "Direct Deposit", icon: <Building2 className="size-5" /> },
-  debc: { label: "Debit Card", icon: <CreditCard className="size-5" /> },
-};
 
 export function InvoiceShow({
   facilityId,
@@ -123,15 +108,8 @@ export function InvoiceShow({
   );
   const [isAddChargeItemSheetOpen, setIsAddChargeItemSheetOpen] =
     useState(false);
-  const [activeTab, setActiveTab] = useState<
-    "payment_history" | "invoice_activity"
-  >("payment_history");
   const queryClient = useQueryClient();
   useShortcutSubContext("facility:billing:invoice:show");
-
-  const activeTabStyle =
-    "border-b-2 border-primary font-medium text-primary-900";
-  const inactiveTabStyle = "text-gray-500 hover:text-gray-700 font-medium";
 
   const tableHeadClass = "border-r border-gray-200 font-semibold text-center";
   const tableCellClass =
@@ -152,16 +130,20 @@ export function InvoiceShow({
     }),
   });
 
-  const { data: payments, isLoading: isPaymentsLoading } = useQuery({
-    queryKey: ["payments", invoiceId],
-    queryFn: query(paymentReconciliationApi.listPaymentReconciliation, {
+  const patient = invoice?.account.patient;
+
+  // Fetch patient data for identifiers
+  const { data: verifiedPatient } = useQuery({
+    queryKey: ["patient-verify", patient?.id, patient?.year_of_birth],
+    queryFn: query(patientApi.searchRetrieve, {
       pathParams: { facilityId },
-      queryParams: {
-        target_invoice: invoiceId,
-        limit: 100,
-        reconciliation_type: PaymentReconciliationType.payment,
+      body: {
+        phone_number: patient?.phone_number ?? "",
+        year_of_birth: patient?.year_of_birth?.toString() ?? "",
+        partial_id: patient ? getPartialId(patient) : "",
       },
     }),
+    enabled: !!patient,
   });
 
   const { mutate: removeChargeItem, isPending: isRemoving } = useMutation({
@@ -335,22 +317,70 @@ export function InvoiceShow({
 
   return (
     <div className="space-y-8 relative">
-      <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center">
-        <div className="flex items-center gap-4">
-          <BackButton>
-            <ArrowLeft />
+      <div className="flex items-start justify-between flex-col sm:flex-row gap-4 sm:items-center border-b-3 border-double pb-4">
+        <div className="flex gap-3 sm:gap-6 flex-col md:flex-row">
+          <BackButton variant="link" className="px-0 justify-start">
+            <ChevronLeft />
             <span>{t("back")}</span>
           </BackButton>
-        </div>
-        <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
-          <Button variant="outline" asChild>
+          <div className="h-auto w-px bg-gray-300" aria-hidden="true" />
+          <div>
+            <label className="text-gray-700 text-sm font-medium">
+              {t("patient_name")}
+            </label>
+            <Link
+              href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                {
+                  phone_number: invoice.account.patient.phone_number,
+                  year_of_birth:
+                    invoice.account.patient.year_of_birth?.toString() || "",
+                  partial_id: invoice.account.patient.id.slice(0, 5),
+                },
+              ).toString()}`}
+            >
+              <div className="font-semibold text-gray-950 underline">
+                {invoice.account.patient.name}
+                <SquareArrowOutUpRight className="ml-1 size-4 inline" />
+              </div>
+            </Link>
+          </div>
+
+          <div>
+            <label className="text-gray-700 text-sm font-medium">
+              {t("account")}
+            </label>
             <Link
               href={`/facility/${facilityId}/billing/account/${invoice.account.id}`}
             >
-              {t("view_account")}
-              <ShortcutBadge actionId="view-account" />
+              <div className="font-semibold text-gray-950 underline">
+                {invoice.account.name}
+                <SquareArrowOutUpRight className="ml-1 size-4 inline" />
+              </div>
             </Link>
-          </Button>
+          </div>
+          <div className="flex flex-row gap-6">
+            <div>
+              <label className="text-gray-700 text-sm font-medium">
+                {t("amount_due")}
+              </label>
+              <div className="font-semibold text-gray-950">
+                <MonetaryDisplay amount={invoice.account.total_balance} />
+              </div>
+            </div>
+            <div>
+              <label className="text-gray-700 text-sm font-medium">
+                {t("status")}
+              </label>
+              <div className="font-semibold text-gray-950">
+                <Badge variant={ACCOUNT_STATUS_COLORS[invoice.account.status]}>
+                  {t(invoice.account.status)}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
           {invoice?.status === InvoiceStatus.draft && (
             <Button
               variant="outline_primary"
@@ -410,222 +440,544 @@ export function InvoiceShow({
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="md:col-span-2 overflow-x-auto">
-          <div className="flex sm:flex-row flex-col sm:items-center gap-4 justify-between items-start mb-4">
-            <div className="flex flex-row items-center gap-2">
-              <span className="font-semibold text-gray-950 text-base">
-                {t("invoice")}: {invoice.number}
-              </span>
-              <Badge variant={INVOICE_STATUS_COLORS[invoice.status]}>
-                {t(invoice.status)}
-              </Badge>
-            </div>
-            <div className="flex flex-row gap-2">
-              {invoice.status === InvoiceStatus.draft && (
-                <Button
-                  variant="outline"
-                  className="border-gray-400 gap-1"
-                  onClick={() => {
-                    setIsEditDialogOpen(true);
-                    setSelectedChargeItems(invoice.charge_items);
-                  }}
-                >
-                  <CareIcon icon="l-edit" className="size-4" />
-                  {t("edit_items")}
-                  <ShortcutBadge actionId="edit-button" />
-                </Button>
-              )}
+      <div className="md:col-span-2 overflow-x-auto max-w-4xl mx-auto">
+        <div className="flex sm:flex-row flex-col sm:items-center gap-4 justify-between items-start mb-4">
+          <div className="flex flex-row items-center gap-2">
+            <span className="font-semibold text-gray-950 text-base">
+              {t("invoice")}: {invoice.number}
+            </span>
+            <Badge variant={INVOICE_STATUS_COLORS[invoice.status]}>
+              {t(invoice.status)}
+            </Badge>
+          </div>
+          <div className="flex flex-row gap-2">
+            {invoice.status === InvoiceStatus.draft && (
               <Button
                 variant="outline"
-                asChild
                 className="border-gray-400 gap-1"
+                onClick={() => {
+                  setIsEditDialogOpen(true);
+                  setSelectedChargeItems(invoice.charge_items);
+                }}
               >
-                <Link
-                  href={`/facility/${facilityId}/billing/invoice/${invoiceId}/print`}
-                >
-                  <CareIcon icon="l-print" className="size-4" />
-                  {t("print")}
-                  <ShortcutBadge actionId="print-invoice" />
-                </Link>
+                <CareIcon icon="l-edit" className="size-4" />
+                {t("edit_items")}
+                <ShortcutBadge actionId="edit-button" />
               </Button>
-              {canEdit && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="border-gray-400 px-2">
-                      <CareIcon icon="l-ellipsis-v" />
+            )}
+            <Button variant="outline" asChild className="border-gray-400 gap-1">
+              <Link
+                href={`/facility/${facilityId}/billing/invoice/${invoiceId}/print`}
+              >
+                <CareIcon icon="l-print" className="size-4" />
+                {t("print")}
+                <ShortcutBadge actionId="print-invoice" />
+              </Link>
+            </Button>
+            {canEdit && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="border-gray-400 px-2">
+                    <CareIcon icon="l-ellipsis-v" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild className="text-primary-900">
+                    <Button
+                      variant="ghost"
+                      onClick={() =>
+                        handleStatusChange(InvoiceStatus.cancelled)
+                      }
+                      disabled={isCancelPending}
+                      className="w-full flex flex-row justify-stretch items-center"
+                    >
+                      <CareIcon icon="l-times-circle" className="mr-1" />
+                      <span>{t("mark_as_cancelled")}</span>
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild className="text-primary-900">
-                      <Button
-                        variant="ghost"
-                        onClick={() =>
-                          handleStatusChange(InvoiceStatus.cancelled)
-                        }
-                        disabled={isCancelPending}
-                        className="w-full flex flex-row justify-stretch items-center"
-                      >
-                        <CareIcon icon="l-times-circle" className="mr-1" />
-                        <span>{t("mark_as_cancelled")}</span>
-                      </Button>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="text-primary-900">
-                      <Button
-                        variant="ghost"
-                        onClick={() =>
-                          handleStatusChange(InvoiceStatus.entered_in_error)
-                        }
-                        disabled={isCancelPending}
-                        className="w-full flex flex-row justify-stretch items-center"
-                      >
-                        <CareIcon
-                          icon="l-exclamation-circle"
-                          className="mr-1"
-                        />
-                        <span>{t("mark_as_entered_in_error")}</span>
-                      </Button>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="text-primary-900">
+                    <Button
+                      variant="ghost"
+                      onClick={() =>
+                        handleStatusChange(InvoiceStatus.entered_in_error)
+                      }
+                      disabled={isCancelPending}
+                      className="w-full flex flex-row justify-stretch items-center"
+                    >
+                      <CareIcon icon="l-exclamation-circle" className="mr-1" />
+                      <span>{t("mark_as_entered_in_error")}</span>
+                    </Button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
-          <Card className="rounded-sm shadow-sm">
-            <CardHeader className="p-4">
-              <CardTitle>
-                <div>
-                  <div className="font-semibold text-gray-950 text-base uppercase">
-                    {t("tax_invoice")}
-                  </div>
-                  <div className="text-gray-600 text-sm font-medium">
-                    {invoice.number}
-                  </div>
+        </div>
+        <Card className="rounded-sm shadow-sm">
+          <CardHeader className="p-4">
+            <CardTitle>
+              <div>
+                <div className="font-semibold text-gray-950 text-base uppercase">
+                  {t("tax_invoice")}
                 </div>
-              </CardTitle>
-            </CardHeader>
-
-            <div className="px-4 py-0 my-4 text-gray-200">
-              <Separator />
-            </div>
-
-            <CardContent className="space-y-4 px-4 pt-0 pb-8">
-              <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <div className="font-medium text-gray-700 text-sm">
-                    {t("bill_to")}:
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-950 text-base ml-2">
-                      {invoice.account.patient.name}
-                    </p>
-                    <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
-                      {t("address")}:{" "}
-                      <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
-                        {formatPatientAddress(
-                          invoice.account.patient.address,
-                        ) || (
-                          <span className="text-gray-500">
-                            {t("no_address_provided")}
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                    <p className="font-medium text-gray-700 text-sm ml-2">
-                      {t("phone")}:{" "}
-                      {formatPhoneNumberIntl(
-                        invoice.account.patient.phone_number,
-                      )}
-                    </p>
-                  </div>
-                  <div className="mt-2">
-                    {invoice.note && <p>{invoice.note}</p>}
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-medium text-gray-700 text-sm">
-                    {t("issue_date")}:
-                  </div>
-                  <p className="font-medium text-gray-950 text-sm">
-                    {invoice.issue_date
-                      ? format(
-                          new Date(invoice.issue_date),
-                          "dd MMM, yyyy h:mm a",
-                        )
-                      : "-"}
-                  </p>
+                <div className="text-gray-600 text-sm font-medium">
+                  {invoice.number}
                 </div>
               </div>
+            </CardTitle>
+          </CardHeader>
 
-              <div className="rounded-t-sm border border-gray-300">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-b border-gray-200">
-                      <TableHead className={tableHeadClass}>#</TableHead>
-                      <TableHead className={tableHeadClass}>
-                        {t("item")}
-                      </TableHead>
-                      <TableHead className={tableHeadClass}>
-                        {t("mrp")} ({getCurrencySymbol()})
-                      </TableHead>
-                      <TableHead className={tableHeadClass}>
-                        {t("unit_price")} ({getCurrencySymbol()})
-                      </TableHead>
-                      <TableHead className={tableHeadClass}>
-                        {t("qty")}
-                      </TableHead>
-                      <TableHead className={tableHeadClass}>
-                        {t("discount")}
-                      </TableHead>
-                      {getApplicableTaxColumns(invoice).map((taxCode) => (
-                        <TableHead key={taxCode} className={tableHeadClass}>
-                          {t(taxCode)}
-                        </TableHead>
-                      ))}
-                      <TableHead
-                        className={
-                          invoice.status === InvoiceStatus.draft
-                            ? tableHeadClass
-                            : "font-semibold text-center"
-                        }
-                      >
-                        {t("total")} ({getCurrencySymbol()})
-                      </TableHead>
-                      {invoice?.status === InvoiceStatus.draft && (
-                        <TableHead className="font-semibold text-center">
-                          {t("actions")}
-                        </TableHead>
+          <div className="px-4 py-0 my-4 text-gray-200">
+            <Separator />
+          </div>
+
+          <CardContent className="space-y-4 px-4 pt-0 pb-8">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <div className="font-medium text-gray-700 text-sm">
+                  {t("bill_to")}:
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-950 text-base ml-2">
+                    {invoice.account.patient.name}
+                  </p>
+                  <div className="flex gap-1 font-medium text-gray-700 text-sm ml-2">
+                    {t("address")}:{" "}
+                    <p className="font-medium text-gray-700 text-sm whitespace-pre-wrap ml-2">
+                      {formatPatientAddress(
+                        invoice.account.patient.address,
+                      ) || (
+                        <span className="text-gray-500">
+                          {t("no_address_provided")}
+                        </span>
                       )}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invoice.charge_items.length === 0 ? (
-                      <TableRow className="border-b border-gray-200">
-                        <TableCell
-                          colSpan={
-                            invoice?.status === InvoiceStatus.draft
-                              ? 8 + getApplicableTaxColumns(invoice).length
-                              : 7 + getApplicableTaxColumns(invoice).length
-                          }
-                          className="text-center text-gray-500"
+                    </p>
+                  </div>
+                  <p className="font-medium text-gray-700 text-sm ml-2">
+                    {t("phone")}:{" "}
+                    {formatPhoneNumberIntl(
+                      invoice.account.patient.phone_number,
+                    )}
+                  </p>
+                  {verifiedPatient &&
+                    "instance_identifiers" in verifiedPatient &&
+                    verifiedPatient.instance_identifiers
+                      .filter(
+                        ({ config }) =>
+                          config.config.use === PatientIdentifierUse.official &&
+                          !config.config.auto_maintained,
+                      )
+                      .map((identifier) => (
+                        <p
+                          key={identifier.config.id}
+                          className="font-medium text-gray-700 text-sm ml-2"
                         >
-                          {t("no_charge_items")}
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      invoice.charge_items.flatMap((item, index) => {
-                        const baseComponent = getBaseComponent(item);
-                        const baseAmount = baseComponent?.amount || "0";
-                        const mrpAmount = item.unit_price_components.find(
-                          (c) =>
-                            c.monetary_component_type ===
-                              MonetaryComponentType.informational &&
-                            c.code?.code === MRP_CODE,
-                        )?.amount;
+                          <span>{identifier.config.config.display}: </span>
+                          <span>{identifier.value}</span>
+                        </p>
+                      ))}
+                </div>
+                <div className="mt-2">
+                  {invoice.note && <p>{invoice.note}</p>}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="font-medium text-gray-700 text-sm">
+                  {t("issue_date")}:
+                </div>
+                <p className="font-medium text-gray-950 text-sm">
+                  {invoice.issue_date
+                    ? format(
+                        new Date(invoice.issue_date),
+                        "dd MMM, yyyy h:mm a",
+                      )
+                    : "-"}
+                </p>
+              </div>
+            </div>
 
+            <div className="rounded-t-sm border border-gray-300">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-gray-200">
+                    <TableHead className={tableHeadClass}>#</TableHead>
+                    <TableHead className={cn(tableHeadClass, "text-left")}>
+                      {t("item")}
+                    </TableHead>
+                    <TableHead className={tableHeadClass}>
+                      {t("mrp")} ({getCurrencySymbol()})
+                    </TableHead>
+                    <TableHead className={tableHeadClass}>
+                      {t("unit_price")} ({getCurrencySymbol()})
+                    </TableHead>
+                    <TableHead className={tableHeadClass}>{t("qty")}</TableHead>
+                    <TableHead className={tableHeadClass}>
+                      {t("discount")}
+                    </TableHead>
+                    {getApplicableTaxColumns(invoice).map((taxCode) => (
+                      <TableHead key={taxCode} className={tableHeadClass}>
+                        {t(taxCode)}
+                      </TableHead>
+                    ))}
+                    <TableHead
+                      className={
+                        invoice.status === InvoiceStatus.draft
+                          ? tableHeadClass
+                          : "font-semibold text-center"
+                      }
+                    >
+                      {t("total")} ({getCurrencySymbol()})
+                    </TableHead>
+                    {invoice?.status === InvoiceStatus.draft && (
+                      <TableHead className="font-semibold text-center">
+                        {t("actions")}
+                      </TableHead>
+                    )}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {invoice.charge_items.length === 0 ? (
+                    <TableRow className="border-b border-gray-200">
+                      <TableCell
+                        colSpan={
+                          invoice?.status === InvoiceStatus.draft
+                            ? 8 + getApplicableTaxColumns(invoice).length
+                            : 7 + getApplicableTaxColumns(invoice).length
+                        }
+                        className="text-center text-gray-500"
+                      >
+                        {t("no_charge_items")}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    invoice.charge_items.flatMap((item, index) => {
+                      const baseComponent = getBaseComponent(item);
+                      const baseAmount = baseComponent?.amount || "0";
+                      const mrpAmount = item.unit_price_components.find(
+                        (c) =>
+                          c.monetary_component_type ===
+                            MonetaryComponentType.informational &&
+                          c.code?.code === MRP_CODE,
+                      )?.amount;
+
+                      const mainRow = (
+                        <TableRow
+                          key={item.id}
+                          className="border-b border-gray-200 hover:bg-muted/50"
+                        >
+                          <TableCell
+                            className={cn(tableCellClass, "text-center")}
+                          >
+                            {index + 1}
+                          </TableCell>
+                          <TableCell
+                            className={cn(tableCellClass, "font-medium")}
+                          >
+                            {item.title}
+                          </TableCell>
+                          <TableCell
+                            className={cn(tableCellClass, "text-right")}
+                          >
+                            <MonetaryDisplay amount={mrpAmount} hideCurrency />
+                          </TableCell>
+                          <TableCell
+                            className={cn(tableCellClass, "text-right")}
+                          >
+                            <MonetaryDisplay amount={baseAmount} hideCurrency />
+                          </TableCell>
+                          <TableCell
+                            className={cn(tableCellClass, "text-center")}
+                          >
+                            {item.quantity}
+                          </TableCell>
+                          <TableCell
+                            className={cn(tableCellClass, "text-right")}
+                          >
+                            <div className="flex flex-col items-end gap-0.5">
+                              <MonetaryDisplay
+                                amount={String(
+                                  item.total_price_components
+                                    .filter(
+                                      (c) =>
+                                        c.monetary_component_type ===
+                                        MonetaryComponentType.discount,
+                                    )
+                                    .reduce(
+                                      (acc, curr) =>
+                                        acc + Number(curr.amount || 0),
+                                      0,
+                                    ),
+                                )}
+                                hideCurrency
+                              />
+                              {item.unit_price_components
+                                .filter(
+                                  (c) =>
+                                    c.monetary_component_type ===
+                                    MonetaryComponentType.discount,
+                                )
+                                .map((discountComponent, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="text-xs text-gray-500"
+                                  >
+                                    <MonetaryDisplay
+                                      {...discountComponent}
+                                      hideCurrency
+                                    />
+                                  </div>
+                                ))}
+                            </div>
+                          </TableCell>
+                          {facilityData &&
+                            getApplicableTaxColumns(invoice).map((taxCode) => (
+                              <TableCell
+                                key={taxCode}
+                                className={cn(tableCellClass, "text-right")}
+                              >
+                                {(() => {
+                                  const totalAmount =
+                                    item.total_price_components.find(
+                                      (c) => c.code?.code === taxCode,
+                                    )?.amount;
+                                  const unitAmount =
+                                    item.unit_price_components.find(
+                                      (c) => c.code?.code === taxCode,
+                                    );
+                                  return (
+                                    <div className="flex flex-col items-end gap-0.5">
+                                      <MonetaryDisplay
+                                        amount={totalAmount}
+                                        hideCurrency
+                                      />
+                                      <div className="text-xs text-gray-500">
+                                        {totalAmount && (
+                                          <MonetaryDisplay
+                                            {...unitAmount}
+                                            hideCurrency
+                                          />
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
+                              </TableCell>
+                            ))}
+                          <TableCell
+                            className={
+                              invoice.status === InvoiceStatus.draft
+                                ? cn(tableCellClass, "text-right")
+                                : "text-right"
+                            }
+                          >
+                            <MonetaryDisplay
+                              amount={item.total_price}
+                              hideCurrency
+                            />
+                          </TableCell>
+                          {invoice.status === InvoiceStatus.draft && (
+                            <TableCell className="text-center">
+                              <div className="flex items-center justify-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => {
+                                    setIsEditDialogOpen(true);
+                                    // Pass only this item to edit
+                                    setSelectedChargeItems([item]);
+                                  }}
+                                  title={t("edit")}
+                                >
+                                  <CareIcon icon="l-edit" className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive hover:text-destructive"
+                                  onClick={() => setChargeItemToRemove(item.id)}
+                                  title={t("remove")}
+                                >
+                                  <CareIcon
+                                    icon="l-trash"
+                                    className="h-4 w-4"
+                                  />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      );
+
+                      return [mainRow];
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div
+              className={cn(
+                "border-x border-gray-300 p-2 -mt-4 border-t-none space-y-2",
+                invoice.payments?.length === 0 && "border-b rounded-b-md",
+              )}
+            >
+              {invoice.status === InvoiceStatus.draft && (
+                <AddChargeItemSheet
+                  facilityId={facilityId}
+                  invoiceId={invoiceId}
+                  accountId={invoice.account.id}
+                  open={isAddChargeItemSheetOpen}
+                  setOpen={setIsAddChargeItemSheetOpen}
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      className="w-full border border-gray-400 text-gray-950 font-semibold text-sm shadow-sm"
+                      disabled={isAddChargeItemSheetOpen}
+                    >
+                      <CareIcon icon="l-plus" className="mr-2 size-4" />
+                      {t("add_charge_item")}
+                      <ShortcutBadge actionId="add-charge-item" />
+                    </Button>
+                  }
+                />
+              )}
+
+              <div className="flex flex-col items-end space-y-2 text-gray-950 font-mormal text-sm mb-4">
+                {/* Base Amount */}
+                {invoice.total_price_components
+                  ?.filter(
+                    (c) =>
+                      c.monetary_component_type === MonetaryComponentType.base,
+                  )
+                  .map((component, index) => (
+                    <div
+                      key={`base-${index}`}
+                      className="flex w-64 justify-between"
+                    >
+                      <span className="">
+                        {component.code?.display || t("base_amount")}:
+                      </span>
+                      <span className="font-semibold">
+                        <MonetaryDisplay amount={component.amount} />
+                      </span>
+                    </div>
+                  ))}
+
+                {/* Surcharges */}
+                {invoice.total_price_components
+                  ?.filter(
+                    (c) =>
+                      c.monetary_component_type ===
+                      MonetaryComponentType.surcharge,
+                  )
+                  .map((component, index) => (
+                    <div
+                      key={`discount-${index}`}
+                      className="flex w-64 justify-between text-gray-500 text-sm"
+                    >
+                      <span>
+                        {component.code && `${component.code.display} `}(
+                        {t("surcharge")})
+                      </span>
+                      <span>
+                        + <MonetaryDisplay {...component} />
+                      </span>
+                    </div>
+                  ))}
+
+                {/* Discounts */}
+                {invoice.total_price_components
+                  ?.filter(
+                    (c) =>
+                      c.monetary_component_type ===
+                      MonetaryComponentType.discount,
+                  )
+                  .map((component, index) => (
+                    <div
+                      key={`discount-${index}`}
+                      className="flex w-64 justify-between text-gray-500 text-sm"
+                    >
+                      <span>
+                        {component.code && `${component.code.display} `}(
+                        {t("discount")})
+                      </span>
+                      <span>
+                        - <MonetaryDisplay {...component} />
+                      </span>
+                    </div>
+                  ))}
+
+                {/* Taxes */}
+                {invoice.total_price_components
+                  ?.filter(
+                    (c) =>
+                      c.monetary_component_type === MonetaryComponentType.tax,
+                  )
+                  .map((component, index) => (
+                    <div
+                      key={`tax-${index}`}
+                      className="flex w-64 justify-between text-gray-500 text-sm"
+                    >
+                      <span>
+                        {component.code && `${component.code.display} `}(
+                        {t("tax")})
+                      </span>
+                      <span>
+                        + <MonetaryDisplay {...component} />
+                      </span>
+                    </div>
+                  ))}
+
+                {/* Subtotal */}
+                <div className="flex w-64 justify-between">
+                  <span className="text-gray-500">{t("net_amount")}</span>
+                  <MonetaryDisplay amount={String(invoice.total_net)} />
+                </div>
+
+                <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
+
+                {/* Total */}
+                <div className="flex w-64 justify-between font-bold">
+                  <span>{t("total")}</span>
+                  <MonetaryDisplay amount={String(invoice.total_gross)} />
+                </div>
+                <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
+              </div>
+            </div>
+
+            {invoice.payments?.length > 0 && (
+              <>
+                <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b border-gray-200">
+                        <TableHead className={tableHeadClass}>#</TableHead>
+                        <TableHead className={cn(tableHeadClass, "text-left")}>
+                          {t("date_and_time")}
+                        </TableHead>
+                        <TableHead className={cn(tableHeadClass, "text-left")}>
+                          {t("payment_method")}
+                        </TableHead>
+                        <TableHead className={cn(tableHeadClass, "text-left")}>
+                          {t("reference")}
+                        </TableHead>
+                        <TableHead
+                          className={
+                            invoice.status === InvoiceStatus.draft
+                              ? tableHeadClass
+                              : "font-semibold text-right"
+                          }
+                        >
+                          {t("amount")} ({getCurrencySymbol()})
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {invoice.payments.map((payment, index) => {
                         const mainRow = (
                           <TableRow
-                            key={item.id}
+                            key={payment.id}
                             className="border-b border-gray-200 hover:bg-muted/50"
                           >
                             <TableCell
@@ -636,463 +988,77 @@ export function InvoiceShow({
                             <TableCell
                               className={cn(tableCellClass, "font-medium")}
                             >
-                              {item.title}
+                              <span className="flex justify-between items-center">
+                                {payment.payment_datetime
+                                  ? format(
+                                      new Date(payment.payment_datetime),
+                                      "d MMM yyyy, hh:mm a",
+                                    )
+                                  : "-"}
+
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-gray-800 font-semibold text-xs p-2"
+                                  onClick={() => {
+                                    navigate(
+                                      `/facility/${facilityId}/billing/payments/${payment.id}/print`,
+                                    );
+                                  }}
+                                >
+                                  <>
+                                    <PrinterIcon className="size-3" />
+                                    {t("print")}
+                                  </>
+                                </Button>
+                              </span>
                             </TableCell>
                             <TableCell
-                              className={cn(tableCellClass, "text-right")}
+                              className={cn(tableCellClass, "text-left")}
                             >
+                              {paymentmethodMap[payment.method]}
+                            </TableCell>
+                            <TableCell className={tableCellClass}>
+                              {payment.reference_number}
+                            </TableCell>
+                            <TableCell className="text-right">
                               <MonetaryDisplay
-                                amount={mrpAmount}
+                                amount={payment.amount}
                                 hideCurrency
                               />
                             </TableCell>
-                            <TableCell
-                              className={cn(tableCellClass, "text-right")}
-                            >
-                              <MonetaryDisplay
-                                amount={baseAmount}
-                                hideCurrency
-                              />
-                            </TableCell>
-                            <TableCell
-                              className={cn(tableCellClass, "text-center")}
-                            >
-                              {item.quantity}
-                            </TableCell>
-                            <TableCell
-                              className={cn(tableCellClass, "text-right")}
-                            >
-                              <div className="flex flex-col items-end gap-0.5">
-                                <MonetaryDisplay
-                                  amount={String(
-                                    item.total_price_components
-                                      .filter(
-                                        (c) =>
-                                          c.monetary_component_type ===
-                                          MonetaryComponentType.discount,
-                                      )
-                                      .reduce(
-                                        (acc, curr) =>
-                                          acc + Number(curr.amount || 0),
-                                        0,
-                                      ),
-                                  )}
-                                  hideCurrency
-                                />
-                                {item.unit_price_components
-                                  .filter(
-                                    (c) =>
-                                      c.monetary_component_type ===
-                                      MonetaryComponentType.discount,
-                                  )
-                                  .map((discountComponent, idx) => (
-                                    <div
-                                      key={idx}
-                                      className="text-xs text-gray-500"
-                                    >
-                                      <MonetaryDisplay
-                                        {...discountComponent}
-                                        hideCurrency
-                                      />
-                                    </div>
-                                  ))}
-                              </div>
-                            </TableCell>
-                            {facilityData &&
-                              getApplicableTaxColumns(invoice).map(
-                                (taxCode) => (
-                                  <TableCell
-                                    key={taxCode}
-                                    className={cn(tableCellClass, "text-right")}
-                                  >
-                                    {(() => {
-                                      const totalAmount =
-                                        item.total_price_components.find(
-                                          (c) => c.code?.code === taxCode,
-                                        )?.amount;
-                                      const unitAmount =
-                                        item.unit_price_components.find(
-                                          (c) => c.code?.code === taxCode,
-                                        );
-                                      return (
-                                        <div className="flex flex-col items-end gap-0.5">
-                                          <MonetaryDisplay
-                                            amount={totalAmount}
-                                            hideCurrency
-                                          />
-                                          <div className="text-xs text-gray-500">
-                                            {totalAmount && (
-                                              <MonetaryDisplay
-                                                {...unitAmount}
-                                                hideCurrency
-                                              />
-                                            )}
-                                          </div>
-                                        </div>
-                                      );
-                                    })()}
-                                  </TableCell>
-                                ),
-                              )}
-                            <TableCell
-                              className={
-                                invoice.status === InvoiceStatus.draft
-                                  ? cn(tableCellClass, "text-right")
-                                  : "text-right"
-                              }
-                            >
-                              <MonetaryDisplay
-                                amount={item.total_price}
-                                hideCurrency
-                              />
-                            </TableCell>
-                            {invoice.status === InvoiceStatus.draft && (
-                              <TableCell className="text-center">
-                                <div className="flex items-center justify-center gap-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => {
-                                      setIsEditDialogOpen(true);
-                                      // Pass only this item to edit
-                                      setSelectedChargeItems([item]);
-                                    }}
-                                    title={t("edit")}
-                                  >
-                                    <CareIcon
-                                      icon="l-edit"
-                                      className="h-4 w-4"
-                                    />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-destructive hover:text-destructive"
-                                    onClick={() =>
-                                      setChargeItemToRemove(item.id)
-                                    }
-                                    title={t("remove")}
-                                  >
-                                    <CareIcon
-                                      icon="l-trash"
-                                      className="h-4 w-4"
-                                    />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            )}
                           </TableRow>
                         );
 
                         return [mainRow];
-                      })
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-
-              <div className="border-x border-b border-gray-300 rounded-b-md p-2 -mt-4 border-t-none space-y-2">
-                {invoice.status === InvoiceStatus.draft && (
-                  <AddChargeItemSheet
-                    facilityId={facilityId}
-                    invoiceId={invoiceId}
-                    accountId={invoice.account.id}
-                    open={isAddChargeItemSheetOpen}
-                    setOpen={setIsAddChargeItemSheetOpen}
-                    trigger={
-                      <Button
-                        variant="ghost"
-                        className="w-full border border-gray-400 text-gray-950 font-semibold text-sm shadow-sm"
-                        disabled={isAddChargeItemSheetOpen}
-                      >
-                        <CareIcon icon="l-plus" className="mr-2 size-4" />
-                        {t("add_charge_item")}
-                        <ShortcutBadge actionId="add-charge-item" />
-                      </Button>
-                    }
-                  />
-                )}
-
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
                 <div className="flex flex-col items-end space-y-2 text-gray-950 font-mormal text-sm mb-4">
-                  {/* Base Amount */}
-                  {invoice.total_price_components
-                    ?.filter(
-                      (c) =>
-                        c.monetary_component_type ===
-                        MonetaryComponentType.base,
-                    )
-                    .map((component, index) => (
-                      <div
-                        key={`base-${index}`}
-                        className="flex w-64 justify-between"
-                      >
-                        <span className="">
-                          {component.code?.display || t("base_amount")}:
-                        </span>
-                        <span className="font-semibold">
-                          <MonetaryDisplay amount={component.amount} />
-                        </span>
-                      </div>
-                    ))}
-
-                  {/* Surcharges */}
-                  {invoice.total_price_components
-                    ?.filter(
-                      (c) =>
-                        c.monetary_component_type ===
-                        MonetaryComponentType.surcharge,
-                    )
-                    .map((component, index) => (
-                      <div
-                        key={`discount-${index}`}
-                        className="flex w-64 justify-between text-gray-500 text-sm"
-                      >
-                        <span>
-                          {component.code && `${component.code.display} `}(
-                          {t("surcharge")})
-                        </span>
-                        <span>
-                          + <MonetaryDisplay {...component} />
-                        </span>
-                      </div>
-                    ))}
-
-                  {/* Discounts */}
-                  {invoice.total_price_components
-                    ?.filter(
-                      (c) =>
-                        c.monetary_component_type ===
-                        MonetaryComponentType.discount,
-                    )
-                    .map((component, index) => (
-                      <div
-                        key={`discount-${index}`}
-                        className="flex w-64 justify-between text-gray-500 text-sm"
-                      >
-                        <span>
-                          {component.code && `${component.code.display} `}(
-                          {t("discount")})
-                        </span>
-                        <span>
-                          - <MonetaryDisplay {...component} />
-                        </span>
-                      </div>
-                    ))}
-
-                  {/* Taxes */}
-                  {invoice.total_price_components
-                    ?.filter(
-                      (c) =>
-                        c.monetary_component_type === MonetaryComponentType.tax,
-                    )
-                    .map((component, index) => (
-                      <div
-                        key={`tax-${index}`}
-                        className="flex w-64 justify-between text-gray-500 text-sm"
-                      >
-                        <span>
-                          {component.code && `${component.code.display} `}(
-                          {t("tax")})
-                        </span>
-                        <span>
-                          + <MonetaryDisplay {...component} />
-                        </span>
-                      </div>
-                    ))}
-
-                  {/* Subtotal */}
-                  <div className="flex w-64 justify-between">
-                    <span className="text-gray-500">{t("net_amount")}</span>
-                    <MonetaryDisplay amount={String(invoice.total_net)} />
-                  </div>
-
                   <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
 
-                  {/* Total */}
+                  {/* Total Received */}
                   <div className="flex w-64 justify-between font-bold">
-                    <span>{t("total")}</span>
-                    <MonetaryDisplay amount={String(invoice.total_gross)} />
+                    <span>{t("total_received")}</span>
+                    <MonetaryDisplay amount={String(invoice.total_payments)} />
                   </div>
                   <div className="p-1 border-b-2 border-dashed border-gray-200 w-full" />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-          <div>
-            {invoice.payment_terms && (
-              <Card className="mt-8 rounded-sm shadow-sm">
-                <CardHeader className="font-semibold text-gray-950">
-                  {t("payment_terms")}
-                </CardHeader>
-                <CardContent>
-                  <p className="prose w-full text-sm">
-                    {invoice.payment_terms}
-                  </p>
-                </CardContent>
-              </Card>
+              </>
             )}
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex space-x-6">
-            <div
-              className={cn(
-                "pb-2 cursor-pointer",
-                activeTab === "payment_history"
-                  ? activeTabStyle
-                  : inactiveTabStyle,
-              )}
-              onClick={() => setActiveTab("payment_history")}
-            >
-              {t("payment_history")}
-            </div>
-            <div
-              className={cn(
-                "pb-2 cursor-pointer",
-                activeTab === "invoice_activity"
-                  ? activeTabStyle
-                  : inactiveTabStyle,
-              )}
-              onClick={() => setActiveTab("invoice_activity")}
-            >
-              {t("invoice_activity")}
-            </div>
-          </div>
-          {activeTab === "payment_history" ? (
-            <div>
-              {!payments?.results?.length || isPaymentsLoading ? (
-                <div className="py-8 text-center text-sm text-gray-500">
-                  {t("no_payments_recorded")}
-                </div>
-              ) : (
-                payments.results.map((payment, index) => (
-                  <Link
-                    href={`/facility/${facilityId}/billing/payments/${payment.id}/print`}
-                    key={payment.id}
-                    className="relative flex items-start py-8 px-3  group"
-                  >
-                    <div className="absolute left-[38px] top-0 bottom-0 flex flex-col items-center">
-                      {index < payments.results.length - 1 && (
-                        <div className="absolute w-0.5 bg-gray-200 h-full top-12" />
-                      )}
-                      <div className="size-12 rounded-full flex items-center justify-center border-2 border-gray-300 shadow-sm z-10 bg-white text-gray-500">
-                        {paymentMethodMap[payment.method]?.icon}
-                      </div>
-                    </div>
-                    <div className="flex pl-22 w-full">
-                      <div className="flex justify-between items-start w-full -mt-6">
-                        <div>
-                          <p className="font-semibold text-gray-900 text-sm">
-                            {getCurrencySymbol()}{" "}
-                            <MonetaryDisplay
-                              amount={String(payment.amount || "0")}
-                              hideCurrency
-                            />{" "}
-                            {t("paid_via")}{" "}
-                            {t(
-                              paymentMethodMap[payment.method]?.label ||
-                                payment.method,
-                            )}
-                          </p>
-                          <p className="font-medium text-gray-700 text-sm">
-                            {t("on")}{" "}
-                            {payment.payment_datetime
-                              ? format(
-                                  new Date(payment.payment_datetime),
-                                  "dd MMM, yyyy h:mm a",
-                                )
-                              : "-"}
-                          </p>
-                          {payment.reference_number && (
-                            <p className="font-medium text-gray-700 text-sm">
-                              Ref: {payment.reference_number}
-                            </p>
-                          )}
-                        </div>
-                        <Badge
-                          variant={
-                            PAYMENT_RECONCILIATION_STATUS_COLORS[payment.status]
-                          }
-                        >
-                          {t(payment.status)}
-                        </Badge>
-                      </div>
-                    </div>
-                  </Link>
-                ))
-              )}
-            </div>
-          ) : (
-            <div>
-              {(() => {
-                const events = [];
-
-                events.push({
-                  icon: <FileText className="size-5" />,
-                  title: t("invoice_created"),
-                });
-
-                if (invoice.issue_date) {
-                  events.push({
-                    icon: <FileCheck className="size-5" />,
-                    title: t("invoice_issued"),
-                  });
-                }
-
-                if (invoice.status === InvoiceStatus.balanced) {
-                  events.push({
-                    icon: <Wallet className="size-5" />,
-                    title: t("invoice_balanced"),
-                  });
-                }
-
-                if (
-                  invoice.status === InvoiceStatus.cancelled ||
-                  invoice.status === InvoiceStatus.entered_in_error
-                ) {
-                  events.push({
-                    icon: <CareIcon icon="l-times-circle" className="size-5" />,
-                    title:
-                      invoice.status === InvoiceStatus.cancelled
-                        ? t("invoice_cancelled")
-                        : t("invoice_entered_in_error"),
-                  });
-                }
-
-                return events.length === 0 ? (
-                  <div className="py-8 text-center text-sm text-gray-500">
-                    {t("no_activity_recorded")}
-                  </div>
-                ) : (
-                  events.map((event, index) => (
-                    <div
-                      key={index}
-                      className="relative flex items-start py-10 px-3 group"
-                    >
-                      <div className="absolute left-[38px] top-0 bottom-0 flex flex-col items-center">
-                        {index < events.length - 1 && (
-                          <div className="absolute w-0.5 bg-gray-200 h-full top-12" />
-                        )}
-                        <div className="size-12 rounded-full flex items-center justify-center border-2 border-gray-300 shadow-sm z-10 bg-white text-gray-500">
-                          {event.icon}
-                        </div>
-                      </div>
-                      <div className="flex pl-22 w-full">
-                        <div className="flex justify-between items-start w-full -mt-6">
-                          <div>
-                            <p className="font-semibold text-gray-900 text-sm">
-                              {event.title}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                );
-              })()}
-            </div>
+          </CardContent>
+        </Card>
+        <div>
+          {invoice.payment_terms && (
+            <Card className="mt-8 rounded-sm shadow-sm">
+              <CardHeader className="font-semibold text-gray-950">
+                {t("payment_terms")}
+              </CardHeader>
+              <CardContent>
+                <p className="prose w-full text-sm">{invoice.payment_terms}</p>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>
@@ -1191,6 +1157,42 @@ export function InvoiceShow({
           queryClient.invalidateQueries({ queryKey: ["invoice", invoiceId] });
         }}
       />
+
+      <div className="flex gap-10 max-w-4xl mx-auto">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center size-14 bg-white rounded-full border border-gray-200">
+            <FileCheck className="size-4" />
+          </div>
+          <div>
+            <span className="text-sm font-semibold text-gray-950">
+              {t("invoice_updated")}
+            </span>
+            <p className="text-sm text-gray-600">
+              {t("by_label", { label: formatName(invoice.updated_by) })}
+            </p>
+            <p className="text-xs text-gray-500">
+              {formatDateTime(invoice.modified_date, "hh:mm A - MMM DD, YYYY")}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center size-14 bg-white rounded-full border border-gray-200">
+            <ReceiptText className="size-4" />
+          </div>
+          <div>
+            <span className="text-sm font-semibold text-gray-950">
+              {t("draft_invoice_created")}
+            </span>
+            <p className="text-sm text-gray-600">
+              {t("by_label", { label: formatName(invoice.created_by) })}
+            </p>
+            <p className="text-xs text-gray-500">
+              {formatDateTime(invoice.created_date, "hh:mm A - MMM DD, YYYY")}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {sourceUrl && (
         <Alert className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-2xl w-full mx-auto shadow-lg rounded-lg p-0 bg-white border border-gray-200">
