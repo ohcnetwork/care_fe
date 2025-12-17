@@ -417,8 +417,7 @@ export const request = async <TResponse = unknown>(
   method: "GET" | "POST" | "PUT" | "DELETE",
   body?: object,
   canRetry = true,
-  silent = false,
-): Promise<TResponse | undefined> => {
+): Promise<TResponse> => {
   const response = await fetch(`${CARE_API_URL}${url}`, {
     method,
     body: JSON.stringify(body),
@@ -434,13 +433,12 @@ export const request = async <TResponse = unknown>(
   if (!response.ok) {
     if (canRetry) {
       await sleep(1000);
-      return request(url, method, body, false, silent);
+      return request(url, method, body, false);
     }
-    if (!silent) {
-      throw new Error(
-        `Failed to make request to ${url}: ${response.status} ${response.statusText}\n${await response.text()}`,
-      );
-    } else return;
+
+    throw new Error(
+      `Failed to make request to ${url}: ${response.status} ${response.statusText}\n${await response.text()}`,
+    );
   }
 
   return response.json();
