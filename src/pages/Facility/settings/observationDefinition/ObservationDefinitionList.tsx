@@ -98,19 +98,16 @@ export default function ObservationDefinitionList({
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["observationDefinitions", qParams],
-    queryFn: query.debounced(
-      observationDefinitionApi.listObservationDefinition,
-      {
-        queryParams: {
-          facility: facilityId,
-          limit: resultsPerPage,
-          offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-          title: qParams.search,
-          status: qParams.status,
-          category: qParams.category,
-        },
+    queryFn: query.debounced(observationDefinitionApi.list, {
+      queryParams: {
+        facility: facilityId,
+        limit: resultsPerPage,
+        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
+        title: qParams.search,
+        status: qParams.status,
+        category: qParams.category,
       },
-    ),
+    }),
   });
 
   const observationDefinitions = response?.results || [];
