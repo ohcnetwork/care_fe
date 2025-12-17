@@ -302,7 +302,7 @@ export function SmartExternalDeliveryRow({
             <Input
               type="number"
               min={0}
-              step="1"
+              step="0.01"
               value={unitPrice || ""}
               placeholder="0"
               onChange={(e) => {
@@ -347,7 +347,7 @@ export function SmartExternalDeliveryRow({
               <Input
                 type="number"
                 min={0}
-                step="1"
+                step="0.01"
                 value={currentValue?.amount || ""}
                 placeholder="0"
                 onChange={(e) => {
