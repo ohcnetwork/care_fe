@@ -1,3 +1,4 @@
+import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
 import { LocationRead } from "@/types/location/location";
 import { PaginatedResponse } from "@/Utils/request/types";
 import dotenv from "dotenv";
@@ -65,6 +66,15 @@ export const getExistingLocations = async () => {
     (location) => ({
       id: location.id,
       name: location.name,
+    }),
+  );
+};
+
+export const getExistingResourceCategories = async () => {
+  return getExistingPaginatedData<ResourceCategoryRead, { slug: string }>(
+    `/api/v1/facility/${FACILITY_ID}/resource_category/`,
+    (resourceCategory) => ({
+      slug: resourceCategory.slug_config.slug_value,
     }),
   );
 };

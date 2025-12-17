@@ -63,7 +63,7 @@ const requiredHeaderKeys = [
   "baseUnitDisplay",
 ] satisfies (keyof typeof headerMap)[];
 
-function createProductKnowledgeSlug(name: string) {
+export function createProductKnowledgeSlug(name: string) {
   // this will hash the name and return a slug unlike `createSlug`
   return `${createSlug(name).slice(0, 20)}-${createHash("sha256").update(name).digest("hex").slice(0, 5)}`;
 }
