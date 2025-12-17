@@ -2,6 +2,7 @@ import { TokenStatus } from "@/types/tokens/token/token";
 import tokenApi from "@/types/tokens/token/tokenApi";
 import { TokenQueueSummary } from "@/types/tokens/tokenQueue/tokenQueue";
 import query from "@/Utils/request/query";
+import careConfig from "@careConfig";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
 export function getTokenQueueStatusCount(
@@ -45,6 +46,9 @@ export function useTokenListInfiniteQuery({
       const currentOffset = allPages.length * PAGE_SIZE;
       return currentOffset < lastPage.count ? currentOffset : null;
     },
-    refetchInterval: autoRefresh === "true" ? 10000 : false,
+    refetchInterval:
+      autoRefresh === "true"
+        ? careConfig.appointmentAndQueueRefreshInterval
+        : false,
   });
 }

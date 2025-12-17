@@ -28,15 +28,15 @@ import {
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import mutate from "@/Utils/request/mutate";
-import { LocationList, LocationTypeIcons } from "@/types/location/location";
+import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 interface Props {
-  location: LocationList;
-  onEdit?: (location: LocationList) => void;
-  onView?: (location: LocationList) => void;
-  onMoveUp?: (location: LocationList) => void;
-  onMoveDown?: (location: LocationList) => void;
+  location: LocationRead;
+  onEdit?: (location: LocationRead) => void;
+  onView?: (location: LocationRead) => void;
+  onMoveUp?: (location: LocationRead) => void;
+  onMoveDown?: (location: LocationRead) => void;
   className?: string;
   facilityId: string;
   index?: number;
