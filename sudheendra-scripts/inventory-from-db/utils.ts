@@ -49,7 +49,7 @@ const getExistingPaginatedData = async <TInput, TOutput>(
   return data;
 };
 
-export const getItemsToImport = async <TExisting, TItem>(
+export const getItemsToImport = <TExisting, TItem>(
   existingItems: TExisting[],
   importItems: TItem[],
   isSame: (existing: TExisting, item: TItem) => boolean,
