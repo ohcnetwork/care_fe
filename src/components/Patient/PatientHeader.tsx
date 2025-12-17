@@ -12,13 +12,11 @@ import dayjs from "dayjs";
 export function PatientHeader({
   patient,
   facilityId,
-  actions,
   className,
   isPatientPage = false,
 }: {
   patient: PatientRead;
   facilityId?: string;
-  actions?: React.ReactNode;
   className?: string;
   isPatientPage?: boolean;
 }) {
@@ -27,7 +25,7 @@ export function PatientHeader({
   return (
     <Card
       className={cn(
-        "p-2 rounded-none shadow-none border-none md:p-4 flex flex-col md:flex-row md:justify-between bg-transparent gap-6",
+        "p-2 rounded-none shadow-none border-none flex flex-col md:flex-row md:justify-between bg-transparent gap-6",
         className,
       )}
     >
@@ -76,7 +74,6 @@ export function PatientHeader({
           )}
         </div>
       </div>
-      {actions}
     </Card>
   );
 }
