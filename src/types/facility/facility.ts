@@ -53,6 +53,7 @@ export interface FacilityRead extends FacilityBase, FacilityPermissions {
   patient_facility_identifier_configs: PatientIdentifierConfig[];
   features: number[];
   extensions_schema_supply_delivery_order?: JSONSchema2020;
+  extensions_schema_supply_delivery?: JSONSchema2020;
 }
 
 export type FacilityListRead = Omit<
