@@ -10,7 +10,7 @@ import { formatValue } from "@/components/Facility/ConsultationDetails/Questionn
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { ObservationWithUser } from "@/types/emr/observation";
-import patientApi from "@/types/emr/patient/patientApi";
+import observationApi from "@/types/emr/observation/observationApi";
 import query from "@/Utils/request/query";
 import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
@@ -81,7 +81,7 @@ export const EncounterObservationsTab = () => {
     useInfiniteQuery<PaginatedResponse<ObservationWithUser>, HTTPError>({
       queryKey: ["infinite-observations", patientId, encounterId],
       queryFn: async ({ pageParam = 0, signal }) => {
-        const response = await query(patientApi.listObservations, {
+        const response = await query(observationApi.list, {
           pathParams: { patientId },
           queryParams: {
             encounter: encounterId,

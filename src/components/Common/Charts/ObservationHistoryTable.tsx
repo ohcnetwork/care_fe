@@ -19,7 +19,7 @@ import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import { ObservationWithUser } from "@/types/emr/observation";
-import patientApi from "@/types/emr/patient/patientApi";
+import observationApi from "@/types/emr/observation/observationApi";
 import { useTranslation } from "react-i18next";
 
 interface ObservationHistoryTableProps {
@@ -58,7 +58,7 @@ export const ObservationHistoryTable = ({
       codes.map((c) => c.code),
     ],
     queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(patientApi.listObservations, {
+      const response = await query(observationApi.list, {
         pathParams: { patientId },
         queryParams: {
           encounter: encounterId,
@@ -123,8 +123,8 @@ export const ObservationHistoryTable = ({
                     {formatDate(observation.effective_datetime)}
                   </TableCell>
                   <TableCell>
-                    {codes.find((c) => c.code === observation.main_code.code)
-                      ?.display || observation.main_code.code}
+                    {codes.find((c) => c.code === observation.main_code?.code)
+                      ?.display || observation.main_code?.code}
                   </TableCell>
                   <TableCell>
                     {observation.value.value_quantity?.value?.toFixed(2) ||

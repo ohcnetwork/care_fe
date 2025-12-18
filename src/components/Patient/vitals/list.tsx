@@ -10,7 +10,7 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
 import { Observation, ObservationWithUser } from "@/types/emr/observation";
-import patientApi from "@/types/emr/patient/patientApi";
+import observationApi from "@/types/emr/observation/observationApi";
 
 import { VitalsObservation, VitalsTable } from "./VitalsTable";
 
@@ -99,7 +99,7 @@ export const VitalsList = ({
       filteredVitalCodes.map((c) => c.code),
     ],
     queryFn: async ({ pageParam = 0, signal }) => {
-      const response = await query(patientApi.listObservations, {
+      const response = await query(observationApi.list, {
         pathParams: { patientId },
         queryParams: {
           encounter: encounterId,
