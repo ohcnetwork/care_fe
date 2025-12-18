@@ -2,13 +2,13 @@ import { cn } from "@/lib/utils";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 interface BedListingProps {
-  beds: LocationList[];
+  beds: LocationRead[];
   selectedBed: string | null;
   onBedSelect: (bedId: string) => void;
-  onCheckStatus: (bed: LocationList) => void;
+  onCheckStatus: (bed: LocationRead) => void;
 }
 
 export function BedListing({

@@ -13,7 +13,7 @@ import {
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import { buildLocationHierarchy } from "@/types/location/utils";
 import { TokenRead } from "@/types/tokens/token/token";
 import { UserReadMinimal } from "@/types/user/user";
@@ -205,7 +205,7 @@ export const APPOINTMENT_STATUS_COLORS = {
 >;
 
 type LocationResource = {
-  resource: LocationList;
+  resource: LocationRead;
   resource_type: SchedulableResourceType.Location;
 };
 
