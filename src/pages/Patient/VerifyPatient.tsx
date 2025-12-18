@@ -56,8 +56,15 @@ export default function VerifyPatient() {
   const [qParams] = useQueryParams();
   const queryClient = useQueryClient();
 
-  const { phone_number, year_of_birth, partial_id, queue_id, token_id } =
-    qParams;
+  const {
+    phone_number,
+    year_of_birth,
+    partial_id,
+    queue_id,
+    token_id,
+    resource_type,
+    resource_id,
+  } = qParams;
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
   const { hasPermission } = usePermissions();
@@ -104,9 +111,11 @@ export default function VerifyPatient() {
       ) : patientData ? (
         <div className="space-y-5 md:max-w-5xl mx-auto">
           {queue_id && (
-            <BackButton>
+            <BackButton
+              to={`/facility/${facilityId}/${resource_type}/${resource_id}/queues/${queue_id}`}
+            >
               <ArrowLeft />
-              {t("back")}
+              {t("queue")}
             </BackButton>
           )}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -198,7 +207,6 @@ export default function VerifyPatient() {
                   patientId={patientData.id}
                   facility={facility}
                   tokenId={token_id}
-                  queueId={queue_id}
                 />
               )}
             </div>

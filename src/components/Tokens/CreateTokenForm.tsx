@@ -145,6 +145,8 @@ export default function CreateTokenForm({
             partial_id: patient?.id.slice(0, 5),
             queue_id: data.queue.id,
             token_id: data.id,
+            resource_type: selectedResource.resource_type,
+            resource_id: selectedResource.resource?.id ?? "",
           },
         });
       }

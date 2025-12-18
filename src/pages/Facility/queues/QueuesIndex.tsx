@@ -290,7 +290,7 @@ export default function QueuesIndex({
 
   // Fetch sub-queues (service points)
   const { data: subQueuesResponse, isLoading: subQueuesLoading } = useQuery({
-    queryKey: ["tokenSubQueues", facilityId, effectiveResourceId],
+    queryKey: ["servicePoints", facilityId, effectiveResourceId],
     queryFn: query(tokenSubQueueApi.list, {
       pathParams: { facility_id: facilityId },
       queryParams: {

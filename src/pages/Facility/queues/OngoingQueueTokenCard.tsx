@@ -1,3 +1,4 @@
+import { useScheduleResourceFromPath } from "@/components/Schedule/useScheduleResource";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -49,6 +50,7 @@ export function OngoingQueueTokenCard({
   const { t } = useTranslation();
   const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const { resourceType, resourceId } = useScheduleResourceFromPath();
 
   const [showAssignToServicePointDialog, setShowAssignToServicePointDialog] =
     useState(false);
@@ -101,6 +103,8 @@ export function OngoingQueueTokenCard({
                           partial_id: token.patient.id.slice(0, 5),
                           queue_id: token.queue.id,
                           token_id: token.id,
+                          resource_type: resourceType,
+                          resource_id: resourceId,
                         },
                       ).toString()}`
                     : "#"

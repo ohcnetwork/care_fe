@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -14,6 +14,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
+import { ServicepointDialog } from "@/pages/Facility/queues/ServicepointDialog";
 import { TokenCard } from "@/pages/Facility/queues/TokenCard";
 import { FacilityRead } from "@/types/facility/facility";
 import { formatScheduleResourceName } from "@/types/scheduling/schedule";
@@ -22,10 +23,7 @@ import {
   renderTokenNumber,
   TOKEN_STATUS_COLORS,
   TokenRetrieve,
-  TokenStatus,
 } from "@/types/tokens/token/token";
-import tokenApi from "@/types/tokens/token/tokenApi";
-import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
 import { ChevronsDownUp, ChevronsUpDown, TicketIcon } from "lucide-react";
@@ -34,19 +32,17 @@ interface PatientTokensListProps {
   patientId: string;
   facility: FacilityRead;
   tokenId?: string;
-  queueId?: string;
 }
 
 export default function PatientTokensList({
   patientId,
   facility,
   tokenId,
-  queueId,
 }: PatientTokensListProps) {
   const { t } = useTranslation();
   const [expandedTokens, setExpandedTokens] = useState<Set<string>>(new Set());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-
+  const [showServicepointDialog, setShowServicepointDialog] = useState(false);
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
       setSelectedDate(date);
@@ -67,16 +63,6 @@ export default function PatientTokensList({
         facility: facility.id,
         limit: 50,
         date: dateQueryString(selectedDate),
-      },
-    }),
-  });
-
-  const { mutate: updateToken } = useMutation({
-    mutationFn: mutate(tokenApi.update, {
-      pathParams: {
-        facility_id: facility.id,
-        queue_id: queueId ?? "",
-        id: tokenId ?? "",
       },
     }),
   });
@@ -219,18 +205,20 @@ export default function PatientTokensList({
                         <Button
                           variant="outline_primary"
                           className="w-full"
-                          onClick={() =>
-                            updateToken({
-                              status: TokenStatus.IN_PROGRESS,
-                              note: "",
-                              sub_queue: null,
-                            })
-                          }
+                          onClick={() => setShowServicepointDialog(true)}
                         >
-                          {t("mark_as_in_service")}
+                          {t("assign_to_service_point")}
                         </Button>
                       </div>
                     )}
+                    <ServicepointDialog
+                      open={showServicepointDialog}
+                      onOpenChange={setShowServicepointDialog}
+                      token={token}
+                      facilityId={facility.id}
+                      resourceType={token.resource_type}
+                      resourceId={token.resource.id}
+                    />
                   </div>
                 </CardContent>
               </CollapsibleContent>
