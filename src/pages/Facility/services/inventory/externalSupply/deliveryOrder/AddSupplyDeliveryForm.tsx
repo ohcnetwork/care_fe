@@ -725,7 +725,7 @@ export function AddSupplyDeliveryForm({
                                             {...field}
                                             onChange={(e) =>
                                               field.onChange(
-                                                parseInt(e.target.value) || 1,
+                                                parseInt(e.target.value),
                                               )
                                             }
                                           />
