@@ -37,9 +37,7 @@ test.describe("Purchase Delivery", () => {
 
     await page.getByRole("button", { name: /create/i }).click();
 
-    await expect(page.getByText(/created successfully/i)).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByText(/created successfully/i)).toBeVisible();
 
     await expect(
       page.getByRole("heading", { name: testData.orderName }),

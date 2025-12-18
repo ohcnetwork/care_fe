@@ -32,8 +32,8 @@ test.describe("PatientInfoHoverCard Conditional Rendering", () => {
     ).not.toBeVisible();
 
     // But View Profile button should still be visible
-    await expect(page.getByRole("link", { name: "View Profile" })).toBeVisible({
-      timeout: 5000,
-    });
+    await expect(
+      page.getByRole("link", { name: "View Profile" }),
+    ).toBeVisible();
   });
 });

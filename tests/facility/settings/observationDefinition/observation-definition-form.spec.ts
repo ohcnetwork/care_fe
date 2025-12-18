@@ -215,8 +215,8 @@ test.describe("Observation Definition Form with Interpretation", () => {
 
     /*     // Wait for sheet to open
     await expect(
-      page.getByRole("heading", { name: /Add\/Edit Interpretation/i }),
-    ).toBeVisible(); */
+      page.getByRole("heading", { name: /Add\/Edit Interpretation/i })
+      ).toBeVisible(); */
 
     // Add condition
     await addGenderCondition(page, 1, "Male");
@@ -247,7 +247,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
     // Wait for success message
     await expect(
       page.getByText("observation definition created successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   });
 
   test("should create observation definition with component-level interpretation", async ({
@@ -310,7 +310,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
     // Wait for success message
     await expect(
       page.getByText("observation definition created successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   });
 
   test("should enforce mutual exclusivity between root and component interpretations", async ({
@@ -542,7 +542,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
     await page.getByRole("button", { name: "Create" }).click();
     await expect(
       page.getByText("observation definition created successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   });
 
   test("should edit existing interpretation", async ({ page }) => {
@@ -605,7 +605,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
     await page.getByRole("button", { name: "Create" }).click();
     await expect(
       page.getByText("observation definition created successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   });
 
   test("should delete interpretation", async ({ page }) => {
@@ -645,7 +645,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
     await page.getByRole("button", { name: "Create" }).click();
     await expect(
       page.getByText("observation definition created successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   });
 
   test("should validate required fields for interpretation", async ({
@@ -719,7 +719,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
       await page.getByRole("button", { name: "Create" }).click();
       await expect(
         page.getByText("observation definition created successfully"),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
   });
 
@@ -775,6 +775,6 @@ test.describe("Observation Definition Form with Interpretation", () => {
     await page.getByRole("button", { name: "Create" }).click();
     await expect(
       page.getByText("observation definition created successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   });
 });

@@ -119,7 +119,7 @@ test.describe("Patient Registration", () => {
       // Select the state option by visible text
       // TODO: Update to a specific state once fixtures support it
       const stateOption = page.getByRole("option").first();
-      await stateOption.waitFor({ state: "visible", timeout: 5000 });
+      await stateOption.waitFor({ state: "visible" });
       await stateOption.click();
     });
 
@@ -130,7 +130,7 @@ test.describe("Patient Registration", () => {
       // Wait for success message or redirect
       await expect(
         page.getByText(/patient registered successfully/i),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
   });
 
@@ -213,13 +213,13 @@ test.describe("Patient Registration", () => {
         .getByRole("button", { name: /register patient/i })
         .scrollIntoViewIfNeeded();
       const stateCombobox = stateRegion.getByRole("combobox");
-      await stateCombobox.waitFor({ state: "visible", timeout: 5000 });
+      await stateCombobox.waitFor({ state: "visible" });
       await stateCombobox.click();
 
       // Select the state option by visible text
       // TODO: Update to a specific state once fixtures support it
       const stateOption = page.getByRole("option").first();
-      await stateOption.waitFor({ state: "visible", timeout: 5000 });
+      await stateOption.waitFor({ state: "visible" });
       await stateOption.click();
     });
 
@@ -230,7 +230,7 @@ test.describe("Patient Registration", () => {
       // Wait for success message or redirect
       await expect(
         page.getByText(/patient registered successfully/i),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
   });
 
@@ -266,7 +266,7 @@ test.describe("Patient Registration", () => {
       // This would need to be updated based on how your form handles validation
       await expect(
         page.getByText(/entered phone number is not valid/i).first(),
-      ).toBeVisible({ timeout: 5000 });
+      ).toBeVisible();
     });
   });
 
@@ -345,13 +345,13 @@ test.describe("Patient Registration", () => {
         .getByRole("button", { name: /register patient/i })
         .scrollIntoViewIfNeeded();
       const stateCombobox = stateRegion.getByRole("combobox");
-      await stateCombobox.waitFor({ state: "visible", timeout: 5000 });
+      await stateCombobox.waitFor({ state: "visible" });
       await stateCombobox.click();
 
       // Select the state option by visible text
       // TODO: Update to a specific state once fixtures support it
       const stateOption = page.getByRole("option").first();
-      await stateOption.waitFor({ state: "visible", timeout: 5000 });
+      await stateOption.waitFor({ state: "visible" });
       await stateOption.click();
     });
 
@@ -362,7 +362,7 @@ test.describe("Patient Registration", () => {
       // Wait for success message or redirect
       await expect(
         page.getByText(/patient registered successfully/i),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     // TODO: Verify that selected tags are associated with the patient
@@ -401,7 +401,7 @@ test.describe("Patient Registration", () => {
     // Verify Year of Birth preview calculation
     await expect(
       page.locator(`text=Year of Birth: ${expectedYearOfBirth}`),
-    ).toBeVisible({ timeout: 3000 });
+    ).toBeVisible();
 
     // Fill minimal required fields to complete registration
     await page.getByRole("combobox", { name: /blood group/i }).click();
@@ -425,13 +425,13 @@ test.describe("Patient Registration", () => {
     await page.getByRole("button", { name: /register patient/i }).click();
     await expect(
       page.getByText(/patient registered successfully/i),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
 
     // Verify profile display
-    await page.waitForURL("**/patients/**", { timeout: 10000 });
+    await page.waitForURL("**/patients/**");
     await expect(
       page.getByRole("button", { name: new RegExp(`.*${patientAge} Y, Male`) }),
-    ).toBeVisible({ timeout: 5000 });
+    ).toBeVisible();
 
     // Validate calculation
     expect(expectedYearOfBirth).toEqual(currentYear - patientAge);

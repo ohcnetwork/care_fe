@@ -36,7 +36,7 @@ test.describe("Manage departments/teams association to an encounter", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("Organization removed successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   async function selectAllOrganizationsTab(page: Page) {
@@ -62,7 +62,7 @@ test.describe("Manage departments/teams association to an encounter", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("Organization added successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   test("Delete organization from encounter", async ({ page }) => {

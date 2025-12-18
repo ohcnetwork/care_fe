@@ -74,7 +74,7 @@ test.describe("Device Location Association", () => {
 
     // Click on first location result
     const locationItem = page.locator('[data-slot="command-item"]').first();
-    await expect(locationItem).toBeVisible({ timeout: 5000 });
+    await expect(locationItem).toBeVisible();
     await locationItem.click();
 
     // Click associate button in the sheet
@@ -114,7 +114,7 @@ test.describe("Device Location Association", () => {
 
     // Click on first location result
     const locationItem = page.locator('[data-slot="command-item"]').first();
-    await expect(locationItem).toBeVisible({ timeout: 5000 });
+    await expect(locationItem).toBeVisible();
     await locationItem.click();
 
     await page.getByRole("button", { name: "Associate" }).last().click();

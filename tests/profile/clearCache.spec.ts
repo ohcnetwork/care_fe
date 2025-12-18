@@ -39,12 +39,9 @@ test.describe("Clear Cache in profile successfully", () => {
     await reloadPromise;
 
     // Wait for cache to be cleared - use a more reliable check
-    await page.waitForFunction(
-      () => {
-        return caches.keys().then((keys) => !keys.includes("test-cache"));
-      },
-      { timeout: 15000 },
-    );
+    await page.waitForFunction(() => {
+      return caches.keys().then((keys) => !keys.includes("test-cache"));
+    });
 
     // Verify test cache has been deleted
     const remainingCaches = await page.evaluate(() => caches.keys());
@@ -63,6 +60,6 @@ test.describe("Clear Cache in profile successfully", () => {
     // Wait for profile page to be fully loaded and verify user is still on the profile page
     await expect(
       page.getByRole("button", { name: /clear cache/i }),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   });
 });

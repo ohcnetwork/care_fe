@@ -63,7 +63,7 @@ test.describe("Allergy in Encounter", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("Questionnaire submitted successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
 
     await expect(page.getByText(allergyName).first()).toBeVisible();
   });

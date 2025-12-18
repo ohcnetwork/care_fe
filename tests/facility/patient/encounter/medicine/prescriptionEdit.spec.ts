@@ -38,7 +38,7 @@ test.describe("Edit Patient Prescription", () => {
       // Wait for the "Add Medication" button to be visible instead of networkidle
       await expect(
         page.getByText(/Add Medication|Add another Medication/i),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Add medication", async () => {
@@ -75,13 +75,13 @@ test.describe("Edit Patient Prescription", () => {
         page
           .locator("li[data-sonner-toast]")
           .getByText("Questionnaire submitted successfully"),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Verify medication in table", async () => {
       await page.getByRole("tab", { name: "Medicines" }).click();
       const table = page.getByRole("table");
-      await expect(table).toBeVisible({ timeout: 10000 });
+      await expect(table).toBeVisible();
       await expect(table).toContainText(medicineName);
       await expect(table).toContainText(dosage);
       await expect(table).toContainText(frequency);
@@ -94,9 +94,7 @@ test.describe("Edit Patient Prescription", () => {
         .getByRole("link", { name: /Add|Edit|Create Prescription/i })
         .click();
       // Wait for medication to be visible instead of networkidle
-      await expect(page.getByText(medicineName).first()).toBeVisible({
-        timeout: 10000,
-      });
+      await expect(page.getByText(medicineName).first()).toBeVisible();
     });
 
     await test.step("Remove medication", async () => {
@@ -113,7 +111,7 @@ test.describe("Edit Patient Prescription", () => {
         page
           .locator("li[data-sonner-toast]")
           .getByText("Questionnaire submitted successfully"),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Verify medication in stopped medications", async () => {

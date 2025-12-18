@@ -179,7 +179,7 @@ test.describe("Facility Location Creation", () => {
     await test.step("Verify bed created", async () => {
       await expect(
         page.locator("li[data-sonner-toast]").getByText("Location Created"),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Verify bed in child table", async () => {
@@ -222,7 +222,7 @@ test.describe("Facility Location Creation", () => {
         page
           .locator("li[data-sonner-toast]")
           .getByText(`${bedCount} Beds created successfully`),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
 
     await test.step("Verify each bed in child table", async () => {
@@ -250,7 +250,7 @@ test.describe("Facility Location Creation", () => {
         page
           .locator("li[data-sonner-toast]")
           .getByText(/Beds can only be created under a parent location/i),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible();
     });
   });
 });

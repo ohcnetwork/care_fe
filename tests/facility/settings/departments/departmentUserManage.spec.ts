@@ -55,7 +55,7 @@ test.describe("Department User Management", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("User added to organization successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   async function searchUserInTable(page: Page, userName: string) {
@@ -87,7 +87,7 @@ test.describe("Department User Management", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("User role updated successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   async function removeUser(page: Page) {
@@ -100,7 +100,7 @@ test.describe("Department User Management", () => {
       page
         .locator("li[data-sonner-toast]")
         .getByText("User removed from organization successfully"),
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible();
   }
 
   async function closeDialog(page: Page) {

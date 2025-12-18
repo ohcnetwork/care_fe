@@ -20,15 +20,13 @@ test.describe("Facility Device Edit", () => {
       .first();
 
     // Verify at least one device exists
-    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
+    await expect(firstDeviceLink).toBeVisible();
 
     // Click on the first device to view details
     await firstDeviceLink.click();
 
     // Wait for device details page to load by checking for Edit button
-    await expect(page.getByRole("button", { name: "Edit" })).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
 
     // Click Edit button
     await page.getByRole("button", { name: "Edit" }).click();
@@ -146,15 +144,13 @@ test.describe("Facility Device Edit", () => {
       .filter({ has: page.locator('[data-slot="card"]') })
       .first();
 
-    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
+    await expect(firstDeviceLink).toBeVisible();
 
     // Click on the first device to view details
     await firstDeviceLink.click();
 
     // Wait for device details page to load by checking for Edit button
-    await expect(page.getByRole("button", { name: "Edit" })).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
 
     // Click Edit button
     await page.getByRole("button", { name: "Edit" }).click();
@@ -191,15 +187,13 @@ test.describe("Facility Device Edit", () => {
       .filter({ has: page.locator('[data-slot="card"]') })
       .first();
 
-    await expect(firstDeviceLink).toBeVisible({ timeout: 10000 });
+    await expect(firstDeviceLink).toBeVisible();
 
     // Click on the first device to view details
     await firstDeviceLink.click();
 
     // Wait for device details page to load by checking for Edit button
-    await expect(page.getByRole("button", { name: "Edit" })).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
 
     // Get original registered name value
     const originalDeviceName = await page
