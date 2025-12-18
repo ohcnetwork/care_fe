@@ -82,7 +82,7 @@ function makeRuleSchema(fieldRequiredMsg: string) {
 }
 
 function makeValueSetFormSchema(
-  ruleSchema: z.ZodType<any>,
+  ruleSchema: z.ZodTypeAny,
   fieldRequiredMsg: string,
   charCountMsg: string,
   slugFormatMsg: string,
