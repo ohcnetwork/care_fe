@@ -27,8 +27,29 @@ const logo = (value?: string, fallback?: ILogo) => {
   }
 };
 
+/**
+ * Parse API URL map from environment variable.
+ * Maps frontend origins (including port) to backend URLs.
+ * Example: '{"http://localhost:3000": "http://careapi.localhost"}'
+ */
+const apiUrlMap: Record<string, string> = env.REACT_CARE_URL_MAP
+  ? JSON.parse(env.REACT_CARE_URL_MAP)
+  : {};
+
+/**
+ * Resolve API URL based on current origin.
+ * Priority: mapped URL for current origin > REACT_CARE_API_URL fallback
+ */
+const resolveApiUrl = (): string => {
+  if (typeof window !== "undefined") {
+    const mappedUrl = apiUrlMap[window.location.origin];
+    if (mappedUrl) return mappedUrl;
+  }
+  return env.REACT_CARE_API_URL ?? "";
+};
+
 const careConfig = {
-  apiUrl: env.REACT_CARE_API_URL,
+  apiUrl: resolveApiUrl(),
   sbomBaseUrl: env.REACT_SBOM_BASE_URL || "https://sbom.ohc.network",
   urls: {
     github: env.REACT_GITHUB_URL || "https://github.com/ohcnetwork",
