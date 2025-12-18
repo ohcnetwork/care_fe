@@ -26,8 +26,8 @@ import { stringifyNestedObject } from "@/Utils/utils";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   LocationForm,
-  LocationList,
   LocationMode,
+  LocationRead,
 } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -35,9 +35,9 @@ interface LocationSearchProps {
   facilityId: string;
   mode?: LocationMode;
   form?: LocationForm;
-  onSelect: (location: LocationList) => void;
+  onSelect: (location: LocationRead) => void;
   disabled?: boolean;
-  value: LocationList | null;
+  value: LocationRead | null;
 }
 
 export function LocationSearch({

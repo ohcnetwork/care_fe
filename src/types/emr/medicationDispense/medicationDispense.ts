@@ -2,7 +2,7 @@ import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { MedicationRequestDosageInstruction } from "@/types/emr/medicationRequest/medicationRequest";
 import { InventoryRead } from "@/types/inventory/product/inventory";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 export enum MedicationDispenseStatus {
   preparation = "preparation",
@@ -203,7 +203,7 @@ export interface MedicationDispenseRead extends MedicationDispenseBase {
   item: InventoryRead;
   charge_item: ChargeItemRead;
   created_date: string;
-  location: LocationList;
+  location: LocationRead;
   quantity: number;
 }
 
