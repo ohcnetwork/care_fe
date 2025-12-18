@@ -156,11 +156,11 @@ export const EncounterObservationsTab = () => {
                             {formatValue(item.value.value, item.value_type)}
                           </div>
                         )}
-                        {item.value.value_quantity && (
+                        {item.value.value && (
                           <div className="mt-1 font-medium">
-                            {item.value.value_quantity.value}{" "}
+                            {item.value.value}{" "}
                             <div className="text-xs text-gray-600">
-                              {item.value.value_quantity.code.display}
+                              {item.value.unit?.display || "-"}
                             </div>
                           </div>
                         )}
@@ -171,7 +171,7 @@ export const EncounterObservationsTab = () => {
                         </div>
                       )}
                       <div className="font-medium text-sm text-gray-600">
-                        {item.main_code.display || item.main_code.code}
+                        {item.main_code?.display || item.main_code?.code}
                       </div>
                       {item.data_entered_by && (
                         <div className="text-gray-600 text-sm">

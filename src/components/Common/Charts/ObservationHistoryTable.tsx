@@ -126,10 +126,7 @@ export const ObservationHistoryTable = ({
                     {codes.find((c) => c.code === observation.main_code?.code)
                       ?.display || observation.main_code?.code}
                   </TableCell>
-                  <TableCell>
-                    {observation.value.value_quantity?.value?.toFixed(2) ||
-                      observation.value.value}
-                  </TableCell>
+                  <TableCell>{observation.value.value || "-"}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar name={name} className="size-6" />
