@@ -826,8 +826,7 @@ export default function UserForm({
             isLoadingUser ||
             !form.formState.isDirty ||
             updatePending ||
-            createPending ||
-            !form.formState.isValid
+            createPending
           }
         >
           {updatePending || createPending ? (
