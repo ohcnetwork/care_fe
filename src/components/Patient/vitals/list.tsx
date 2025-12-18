@@ -59,7 +59,7 @@ function extractVitals(observations: Observation[], vitalCodes: Code[]) {
     vitalCodes.forEach((code) => {
       if (code.display) {
         const vitalField = ob.find(
-          (fields) => fields.main_code.code === code.code,
+          (fields) => fields.main_code?.code === code.code,
         );
         vitalsObject[code.display] = {
           value: vitalField?.value.value,
