@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { PatientHoverCard } from "@/pages/Facility/services/serviceRequests/PatientHoverCard";
+import { PLUGIN_Component } from "@/PluginEngine";
 import {
   PatientListRead,
   PatientRead,
@@ -83,7 +84,12 @@ export const PatientInfoCard = ({
                 )}
             </div>
           </div>
-
+          <PLUGIN_Component
+            __name="PatientInfoCardActions"
+            patient={patient}
+            facilityId={facilityId}
+            className="flex justify-end"
+          />
           {children}
         </CardHeader>
       </Card>
