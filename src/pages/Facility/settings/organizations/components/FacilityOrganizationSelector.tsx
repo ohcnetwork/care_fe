@@ -101,8 +101,6 @@ export default function FacilityOrganizationSelector(
     if (isAlreadySelected) {
       setAlreadySelected(true);
       setCurrentSelection(org);
-      setFacilityOrgSearch("");
-      return;
     }
     if (org.has_children) {
       setNavigationLevels([...navigationLevels, org]);

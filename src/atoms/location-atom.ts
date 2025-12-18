@@ -1,13 +1,13 @@
 import { atomFamily, atomWithStorage, createJSONStorage } from "jotai/utils";
 
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 /**
  * Atom family for location caching per facility
  * Each facility gets its own atom with localStorage persistence
  */
 export const locationAtomFamily = atomFamily((facilityId: string) =>
-  atomWithStorage<LocationList | null>(
+  atomWithStorage<LocationRead | null>(
     `location_cache--${facilityId}`,
     null,
     createJSONStorage(() => localStorage),
