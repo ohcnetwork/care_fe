@@ -44,26 +44,20 @@ test.describe("Queue Creation & Editing", () => {
     const queueName = faker.lorem.word();
     const updatedQueueName = faker.lorem.word();
     await createQueue(page, queueName);
-    await test.step("Open queue edit menu", async () => {
-      await openQueueEditMenu(page, queueName);
-    });
+    await openQueueEditMenu(page, queueName);
 
-    await test.step("Update queue name", async () => {
-      await page
-        .getByRole("textbox", { name: /queue name/i })
-        .fill(updatedQueueName);
-      await page.getByRole("button", { name: /update queue/i }).click();
-    });
+    await page
+      .getByRole("textbox", { name: /queue name/i })
+      .fill(updatedQueueName);
+    await page.getByRole("button", { name: /update queue/i }).click();
 
-    await test.step("Verify queue name updated", async () => {
-      await expect(
-        page
-          .locator("li[data-sonner-toast]")
-          .getByText(/queue updated successfully/i),
-      ).toBeVisible({ timeout: 10000 });
-      await expect(page.getByText(updatedQueueName)).toBeVisible();
-      await expect(page.getByText(queueName)).not.toBeVisible();
-    });
+    await expect(
+      page
+        .locator("li[data-sonner-toast]")
+        .getByText(/queue updated successfully/i),
+    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(updatedQueueName)).toBeVisible();
+    await expect(page.getByText(queueName)).not.toBeVisible();
   });
 
   test("should not allow editing queue name when no changes made", async ({
@@ -71,32 +65,22 @@ test.describe("Queue Creation & Editing", () => {
   }) => {
     const queueName = faker.lorem.word();
     await createQueue(page, queueName);
-    await test.step("Open queue edit menu", async () => {
-      await openQueueEditMenu(page, queueName);
-    });
+    await openQueueEditMenu(page, queueName);
 
-    await test.step("Verify update button is disabled", async () => {
-      await expect(
-        page.getByRole("button", { name: /update queue/i }),
-      ).toBeDisabled();
-    });
+    await expect(
+      page.getByRole("button", { name: /update queue/i }),
+    ).toBeDisabled();
   });
 
   test("should not allow editing queue name when invalid", async ({ page }) => {
     const queueName = faker.lorem.word();
     await createQueue(page, queueName);
 
-    await test.step("Open queue edit menu", async () => {
-      await openQueueEditMenu(page, queueName);
-    });
+    await openQueueEditMenu(page, queueName);
 
-    await test.step("Clear queue name field and attempt update", async () => {
-      await page.getByRole("textbox", { name: /queue name/i }).fill("");
-      await page.getByRole("button", { name: /update queue/i }).click();
-    });
+    await page.getByRole("textbox", { name: /queue name/i }).fill("");
+    await page.getByRole("button", { name: /update queue/i }).click();
 
-    await test.step("Verify error message appears", async () => {
-      await expect(page.getByText(/queue name is required/i)).toBeVisible();
-    });
+    await expect(page.getByText(/queue name is required/i)).toBeVisible();
   });
 });
