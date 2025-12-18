@@ -30,6 +30,7 @@ import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
+import { useEffect } from "react";
 
 export default function VerifyPatient() {
   useShortcutSubContext("facility:patient:home");
@@ -55,6 +56,7 @@ export default function VerifyPatient() {
     data: patientData,
     isPending: isVerifyingPatient,
     isError,
+    status,
   } = useQuery({
     queryKey: ["patient-verify", phone_number, year_of_birth, partial_id],
     queryFn: query(patientApi.searchRetrieve, {
@@ -63,6 +65,22 @@ export default function VerifyPatient() {
     meta: { persist: true },
     enabled: !!(phone_number && year_of_birth && partial_id),
   });
+
+  useEffect(() => {
+    // persist only when success + valid patient returned
+    if (status === "success" && patientData?.id) {
+      queryClient.ensureQueryData({
+        queryKey: ["patient", patientData.id],
+        queryFn: async () => patientData,
+        staleTime: Infinity,
+        gcTime: Infinity,
+        meta: { persist: true },
+      });
+
+      console.log("Patient cached:", patientData.id);
+    }
+    console.log("status:", status);
+  }, [status, patientData?.id]); // depend only on stable values
 
   if (isVerifyingPatient || !facility) {
     return (

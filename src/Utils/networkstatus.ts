@@ -11,6 +11,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { createUserPersister } from "@/OfflineSupport/createUserPersister";
+import { SyncToast } from "@/OfflineSupport/synctoast";
+import React from "react";
 
 /**
  * Ping backend to confirm reachability.
@@ -79,7 +81,14 @@ export default function useNetworkStatus() {
     if (!onlineManager.isOnline()) {
       onlineManager.setOnline(true);
       await restorePersistedCache();
-      toast.success(t("welcome_back_you_are_online"));
+
+      toast.custom((toastId) =>
+        React.createElement(SyncToast, {
+          message: t("welcome_back_you_are_online"),
+          toastId,
+          dismiss: toast.dismiss,
+        }),
+      );
     }
     setIsChecked(true);
 

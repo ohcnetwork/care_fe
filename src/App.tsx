@@ -25,6 +25,7 @@ import { createUserPersister } from "./OfflineSupport/createUserPersister";
 
 import { ShortcutProvider } from "@/context/ShortcutContext";
 
+import { toast } from "sonner";
 import { PubSubProvider } from "./Utils/pubsubContext";
 
 onlineManager.setEventListener(() => {
@@ -44,6 +45,8 @@ const App = () => {
   useEffect(() => {
     displayCareConsoleArt();
   }, []);
+
+  toast.success("Welcome to Care!");
 
   return (
     <>
