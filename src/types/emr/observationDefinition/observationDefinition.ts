@@ -1,6 +1,7 @@
 import { Code } from "@/types/base/code/code";
 import { QualifiedRange } from "@/types/base/qualifiedRange/qualifiedRange";
 import { SlugConfig } from "@/types/base/slug/slugConfig";
+import { FacilityBareMinimum } from "@/types/facility/facility";
 
 export enum QuestionType {
   boolean = "boolean",
@@ -15,7 +16,7 @@ export enum QuestionType {
 export interface ObservationDefinitionComponent {
   code: Code;
   permitted_data_type: QuestionType;
-  permitted_unit: Code | null;
+  permitted_unit?: Code;
   qualified_ranges: QualifiedRange[];
 }
 
@@ -41,7 +42,7 @@ export interface BaseObservationDefinition {
   component: ObservationDefinitionComponent[];
   body_site: Code | null;
   method: Code | null;
-  permitted_unit: Code | null;
+  permitted_unit?: Code;
   derived_from_uri?: string;
   qualified_ranges: QualifiedRange[];
 }
@@ -51,10 +52,7 @@ export interface ObservationDefinitionRead extends BaseObservationDefinition {
   slug: string;
   slug_config: SlugConfig;
   version?: number;
-  facility?: {
-    id: string;
-    name: string;
-  } | null;
+  facility?: FacilityBareMinimum | null;
 }
 
 export interface ObservationDefinitionCreate extends BaseObservationDefinition {

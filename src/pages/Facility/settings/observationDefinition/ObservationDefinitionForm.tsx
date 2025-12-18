@@ -145,13 +145,16 @@ function ObservationDefinitionFormContent({
       code: CodeSchema,
       body_site: CodeSchema.nullable(),
       method: CodeSchema.nullable(),
-      permitted_unit: CodeSchema.nullable(),
+      permitted_unit: CodeSchema.optional(),
       component: z
         .array(
           z.object({
-            code: CodeSchema,
+            code: CodeSchema.refine(
+              (val) => val.code && val.system && val.display,
+              { message: t("required") },
+            ),
             permitted_data_type: z.nativeEnum(QuestionType),
-            permitted_unit: CodeSchema.nullable(),
+            permitted_unit: CodeSchema.optional(),
             qualified_ranges: qualifiedRangeSchema.default([]),
           }),
         )
@@ -200,7 +203,7 @@ function ObservationDefinitionFormContent({
             code: existingData.code,
             body_site: existingData.body_site || null,
             method: existingData.method || null,
-            permitted_unit: existingData.permitted_unit || null,
+            permitted_unit: existingData.permitted_unit ?? undefined,
             component:
               existingData.component?.map((c) => ({
                 ...c,
@@ -237,7 +240,6 @@ function ObservationDefinitionFormContent({
             component: [],
             body_site: null,
             method: null,
-            permitted_unit: null,
           },
   });
 
@@ -740,11 +742,6 @@ function ObservationDefinitionFormContent({
                           {
                             code: { code: "", display: "", system: "" },
                             permitted_data_type: QuestionType.quantity,
-                            permitted_unit: {
-                              code: "",
-                              display: "",
-                              system: "",
-                            },
                             qualified_ranges: [],
                           },
                         ]);
@@ -776,11 +773,6 @@ function ObservationDefinitionFormContent({
                           {
                             code: { code: "", display: "", system: "" },
                             permitted_data_type: QuestionType.quantity,
-                            permitted_unit: {
-                              code: "",
-                              display: "",
-                              system: "",
-                            },
                             qualified_ranges: [],
                           },
                         ]);
@@ -885,9 +877,7 @@ function ObservationDefinitionFormContent({
                               name={`component.${index}.permitted_unit`}
                               render={({ field }) => (
                                 <FormItem className="flex flex-col gap-1">
-                                  <FormLabel aria-required>
-                                    {t("unit")}
-                                  </FormLabel>
+                                  <FormLabel>{t("unit")}</FormLabel>
                                   <FormControl>
                                     <ValueSetSelect
                                       {...field}
