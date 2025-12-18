@@ -106,7 +106,7 @@ export default function FacilityOrganizationSelector(
     } else {
       setSelectedOrganizations([]);
     }
-  }, [value, currentOrganizations]);
+  }, [value, currentOrganizations, showAllOrgs]);
 
   const handleSelect = (org: FacilityOrganizationRead) => {
     const isAlreadySelected = !!currentOrganizations?.find(
