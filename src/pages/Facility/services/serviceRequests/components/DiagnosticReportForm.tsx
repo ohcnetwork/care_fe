@@ -598,7 +598,7 @@ export function DiagnosticReportForm({
             const components: ObservationComponent[] = [];
 
             if (hasComponents && observationDefinition) {
-              observationDefinition.component.forEach(
+              observationDefinition.component?.forEach(
                 (componentDef: ObservationDefinitionComponent) => {
                   const componentCode = componentDef.code.code;
                   const componentData = obsData.components[componentCode];

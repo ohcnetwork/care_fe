@@ -20,26 +20,26 @@ export interface ObservationDefinitionComponent {
   qualified_ranges: QualifiedRange[];
 }
 
-export const OBSERVATION_DEFINITION_CATEGORY = [
-  "social_history",
-  "vital_signs",
-  "imaging",
-  "laboratory",
-  "procedure",
-  "survey",
-  "exam",
-  "therapy",
-  "activity",
-] as string[];
+export enum ObservationDefinitionCategory {
+  SOCIAL_HISTORY = "social_history",
+  VITAL_SIGNS = "vital_signs",
+  IMAGING = "imaging",
+  LABORATORY = "laboratory",
+  PROCEDURE = "procedure",
+  SURVEY = "survey",
+  EXAM = "exam",
+  THERAPY = "therapy",
+  ACTIVITY = "activity",
+}
 
 export interface BaseObservationDefinition {
   title: string;
   status: ObservationDefinitionStatus;
   description: string;
-  category: (typeof OBSERVATION_DEFINITION_CATEGORY)[number];
+  category: ObservationDefinitionCategory;
   code: Code;
   permitted_data_type: QuestionType;
-  component: ObservationDefinitionComponent[];
+  component: ObservationDefinitionComponent[] | null;
   body_site: Code | null;
   method: Code | null;
   permitted_unit?: Code;
@@ -64,19 +64,16 @@ export interface ObservationDefinitionUpdate extends BaseObservationDefinition {
   slug_value: string;
 }
 
-export const OBSERVATION_DEFINITION_STATUS = [
-  "draft",
-  "active",
-  "retired",
-  "unknown",
-] as const;
+export enum ObservationDefinitionStatus {
+  DRAFT = "draft",
+  ACTIVE = "active",
+  RETIRED = "retired",
+  UNKNOWN = "unknown",
+}
 
 export const OBSERVATION_DEFINITION_STATUS_COLORS = {
-  draft: "secondary",
-  active: "primary",
-  retired: "destructive",
-  unknown: "outline",
+  [ObservationDefinitionStatus.DRAFT]: "secondary",
+  [ObservationDefinitionStatus.ACTIVE]: "primary",
+  [ObservationDefinitionStatus.RETIRED]: "destructive",
+  [ObservationDefinitionStatus.UNKNOWN]: "outline",
 } as const satisfies Record<ObservationDefinitionStatus, string>;
-
-export type ObservationDefinitionStatus =
-  (typeof OBSERVATION_DEFINITION_STATUS)[number];

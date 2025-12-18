@@ -25,14 +25,14 @@ export default {
   create: {
     path: "/api/v1/observation_definition/",
     method: HttpMethod.POST,
-    TRes: Type<ObservationDefinitionRead>(),
     TBody: Type<ObservationDefinitionCreate>(),
+    TRes: Type<ObservationDefinitionRead>(),
   },
   update: {
     path: "/api/v1/observation_definition/{observationSlug}/",
     method: HttpMethod.PUT,
-    TRes: Type<ObservationDefinitionRead>(),
     TBody: Type<ObservationDefinitionUpdate>(),
+    TRes: Type<ObservationDefinitionRead>(),
   },
   getAllMetrics: {
     path: "/api/v1/observation_definition/metrics/",

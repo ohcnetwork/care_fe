@@ -51,17 +51,17 @@ import {
   qualifiedRangeSchema,
 } from "@/types/base/qualifiedRange/qualifiedRange";
 import {
-  OBSERVATION_DEFINITION_CATEGORY,
-  OBSERVATION_DEFINITION_STATUS,
+  ObservationDefinitionCategory,
   ObservationDefinitionCreate,
   type ObservationDefinitionRead,
+  ObservationDefinitionStatus,
   ObservationDefinitionUpdate,
   QuestionType,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
-import { generateSlug } from "@/Utils/utils";
+import { generateSlug, valuesOf } from "@/Utils/utils";
 import { ObservationInterpretation } from "./ObservationInterpretation";
 
 export default function ObservationDefinitionForm({
@@ -137,10 +137,8 @@ function ObservationDefinitionFormContent({
         .min(5, t("character_count_validation", { min: 5, max: 25 }))
         .max(25, t("character_count_validation", { min: 5, max: 25 })),
       description: z.string().min(1, t("field_required")),
-      status: z.enum(OBSERVATION_DEFINITION_STATUS),
-      category: z.enum(
-        OBSERVATION_DEFINITION_CATEGORY as [string, ...string[]],
-      ),
+      status: z.nativeEnum(ObservationDefinitionStatus),
+      category: z.nativeEnum(ObservationDefinitionCategory),
       permitted_data_type: z.nativeEnum(QuestionType),
       code: CodeSchema,
       body_site: CodeSchema.nullable(),
@@ -236,7 +234,7 @@ function ObservationDefinitionFormContent({
               })) || [],
           }
         : {
-            status: "active",
+            status: ObservationDefinitionStatus.ACTIVE,
             component: [],
             body_site: null,
             method: null,
@@ -487,11 +485,13 @@ function ObservationDefinitionFormContent({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {OBSERVATION_DEFINITION_STATUS.map((status) => (
-                              <SelectItem key={status} value={status}>
-                                {t(status)}
-                              </SelectItem>
-                            ))}
+                            {valuesOf(ObservationDefinitionStatus).map(
+                              (status) => (
+                                <SelectItem key={status} value={status}>
+                                  {t(status)}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -515,11 +515,13 @@ function ObservationDefinitionFormContent({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {OBSERVATION_DEFINITION_CATEGORY.map((category) => (
-                              <SelectItem key={category} value={category}>
-                                {t(category)}
-                              </SelectItem>
-                            ))}
+                            {valuesOf(ObservationDefinitionCategory).map(
+                              (category) => (
+                                <SelectItem key={category} value={category}>
+                                  {t(category)}
+                                </SelectItem>
+                              ),
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />

@@ -30,10 +30,11 @@ import { ActionButtons } from "@/pages/Facility/settings/ActionButtons";
 import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
+import { valuesOf } from "@/Utils/utils";
 import {
-  OBSERVATION_DEFINITION_CATEGORY,
-  OBSERVATION_DEFINITION_STATUS,
   OBSERVATION_DEFINITION_STATUS_COLORS,
+  ObservationDefinitionCategory,
+  ObservationDefinitionStatus,
   type ObservationDefinitionRead,
 } from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
@@ -92,7 +93,7 @@ export default function ObservationDefinitionList({
     limit: 15,
     disableCache: true,
     defaultQueryParams: {
-      status: "active",
+      status: ObservationDefinitionStatus.ACTIVE,
     },
   });
 
@@ -158,7 +159,7 @@ export default function ObservationDefinitionList({
                 <FilterSelect
                   value={qParams.status || ""}
                   onValueChange={(value) => updateQuery({ status: value })}
-                  options={OBSERVATION_DEFINITION_STATUS as unknown as string[]}
+                  options={valuesOf(ObservationDefinitionStatus)}
                   label={t("status")}
                   onClear={() => updateQuery({ status: undefined })}
                 />
@@ -167,7 +168,7 @@ export default function ObservationDefinitionList({
                 <FilterSelect
                   value={qParams.category || ""}
                   onValueChange={(value) => updateQuery({ category: value })}
-                  options={OBSERVATION_DEFINITION_CATEGORY}
+                  options={valuesOf(ObservationDefinitionCategory)}
                   label={t("category")}
                   onClear={() => updateQuery({ category: undefined })}
                 />

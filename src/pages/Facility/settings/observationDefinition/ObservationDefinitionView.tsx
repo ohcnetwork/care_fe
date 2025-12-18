@@ -31,7 +31,10 @@ import {
   getValuesetSummary,
   QualifiedRange,
 } from "@/types/base/qualifiedRange/qualifiedRange";
-import { OBSERVATION_DEFINITION_STATUS_COLORS } from "@/types/emr/observationDefinition/observationDefinition";
+import {
+  OBSERVATION_DEFINITION_STATUS_COLORS,
+  ObservationDefinitionStatus,
+} from "@/types/emr/observationDefinition/observationDefinition";
 import observationDefinitionApi from "@/types/emr/observationDefinition/observationDefinitionApi";
 
 interface Props {
@@ -214,19 +217,10 @@ export default function ObservationDefinitionView({
   const handleDelete = () => {
     if (!definition) return;
     updateObservationDefinition({
-      title: definition.title,
-      slug_value: definition.slug_config.slug_value,
-      description: definition.description,
-      status: "retired",
-      category: definition.category,
-      code: definition.code,
-      permitted_data_type: definition.permitted_data_type,
+      ...definition,
       component: definition.component || [],
-      body_site: definition.body_site,
-      method: definition.method,
-      permitted_unit: definition.permitted_unit,
-      derived_from_uri: definition.derived_from_uri,
-      qualified_ranges: definition.qualified_ranges,
+      slug_value: definition.slug_config.slug_value,
+      status: ObservationDefinitionStatus.RETIRED,
     });
   };
 
@@ -415,7 +409,7 @@ export default function ObservationDefinitionView({
           </CardContent>
         </Card>
 
-        {definition.component?.length > 0 && (
+        {(definition.component?.length ?? 0) > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>{t("components")}</CardTitle>
@@ -425,7 +419,7 @@ export default function ObservationDefinitionView({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {definition.component.map((comp, index) => (
+                {definition.component?.map((comp, index) => (
                   <div
                     key={index}
                     className="rounded-lg border bg-gray-50/50 p-4 transition-colors hover:bg-gray-50"
