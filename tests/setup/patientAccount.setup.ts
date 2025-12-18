@@ -11,6 +11,9 @@ test("navigate to patient and setup account", async ({ page }) => {
   const facilityId = getFacilityId();
   const patientId = getPatientId();
 
+  // Ensure auth directory exists for saving account metadata
+  fs.mkdirSync("tests/.auth", { recursive: true });
+
   // Navigate to patient page
   await page.goto(`facility/${facilityId}/patient/${patientId}`);
 
@@ -30,6 +33,12 @@ test("navigate to patient and setup account", async ({ page }) => {
 
     // Now wait for the API response we set up earlier
     const accountsData = await (await accountsResponse).json();
+
+    if (!accountsData || typeof accountsData.count !== "number") {
+      throw new Error(
+        `Invalid API response structure: ${JSON.stringify(accountsData)}`,
+      );
+    }
 
     console.log(`API returned ${accountsData.count} accounts for patient`);
 
@@ -72,7 +81,6 @@ test("navigate to patient and setup account", async ({ page }) => {
 
     // Save account ID to meta file for use by other tests
     const metaPath = path.resolve("tests/.auth/accountMeta.json");
-    fs.mkdirSync("tests/.auth", { recursive: true });
     fs.writeFileSync(metaPath, JSON.stringify({ id: accountId }, null, 2));
 
     console.log(`✅ Account setup completed: ${accountId}`);
