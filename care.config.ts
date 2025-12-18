@@ -32,8 +32,8 @@ const logo = (value?: string, fallback?: ILogo) => {
  * Maps frontend origins (including port) to backend URLs.
  * Example: '{"http://localhost:3000": "http://careapi.localhost"}'
  */
-const apiUrlMap: Record<string, string> = env.REACT_API_URL_MAP
-  ? JSON.parse(env.REACT_API_URL_MAP)
+const apiUrlMap: Record<string, string> = env.REACT_CARE_URL_MAP
+  ? JSON.parse(env.REACT_CARE_URL_MAP)
   : {};
 
 /**

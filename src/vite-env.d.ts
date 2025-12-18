@@ -10,7 +10,7 @@ interface ImportMetaEnv {
   readonly REACT_PUBLIC_URL: string;
   readonly REACT_SBOM_BASE_URL?: string;
   readonly REACT_CARE_API_URL?: string;
-  readonly REACT_API_URL_MAP?: string;
+  readonly REACT_CARE_URL_MAP?: string;
   readonly REACT_GITHUB_URL?: string;
   readonly REACT_OHCN_URL?: string;
   readonly REACT_MAIN_LOGO?: string;

@@ -81,7 +81,7 @@ const apiUrlMapSchema = jsonAsStringSchema
 const envSchema = z
   .object({
     REACT_CARE_API_URL: z.string().url().optional(),
-    REACT_API_URL_MAP: apiUrlMapSchema.optional(),
+    REACT_CARE_URL_MAP: apiUrlMapSchema.optional(),
     REACT_APP_TITLE: z.string(),
     REACT_APP_META_DESCRIPTION: z.string(),
     REACT_PUBLIC_URL: z.string().url(),
@@ -144,11 +144,11 @@ const envSchema = z
   })
   .superRefine(async (data, ctx) => {
     // Ensure at least one API URL configuration is provided
-    if (!data.REACT_CARE_API_URL && !data.REACT_API_URL_MAP) {
+    if (!data.REACT_CARE_API_URL && !data.REACT_CARE_URL_MAP) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          "Either REACT_CARE_API_URL or REACT_API_URL_MAP must be provided",
+          "Either REACT_CARE_API_URL or REACT_CARE_URL_MAP must be provided",
         path: ["REACT_CARE_API_URL"],
       });
     }
@@ -184,8 +184,8 @@ const envSchema = z
       // Use REACT_CARE_API_URL for validation, or first URL from map
       const apiUrl =
         data.REACT_CARE_API_URL ||
-        (data.REACT_API_URL_MAP
-          ? Object.values(data.REACT_API_URL_MAP)[0]
+        (data.REACT_CARE_URL_MAP
+          ? Object.values(data.REACT_CARE_URL_MAP)[0]
           : null);
 
       if (apiUrl) {
