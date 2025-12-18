@@ -83,7 +83,7 @@ jobs:
           exit 0
 
       - name: Reopen PR if issue is now linked
-        if: steps.prinfo.outputs.issue_number != 'null'
+        if: steps.prinfo.outputs.issue_number != 'null' && steps.prinfo.outputs.issue_state != 'CLOSED'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
