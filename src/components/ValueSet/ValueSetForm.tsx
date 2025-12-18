@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
+import { useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
@@ -46,6 +47,67 @@ interface ValueSetFormProps {
   onSubmit: (data: ValueSetBase) => void;
   isSubmitting?: boolean;
   isSystemDefined?: boolean;
+}
+
+function makeRuleSchema(fieldRequiredMsg: string) {
+  return z
+    .object({
+      system: z.string(),
+      concept: z
+        .array(
+          z.object({
+            code: z.string().min(1, fieldRequiredMsg),
+            display: z.string().min(1, fieldRequiredMsg),
+          }),
+        )
+        .default([]),
+      filter: z
+        .array(
+          z.object({
+            property: z.string().min(1, fieldRequiredMsg),
+            op: z.string().min(1, fieldRequiredMsg),
+            value: z.string().min(1, fieldRequiredMsg),
+          }),
+        )
+        .default([]),
+    })
+    .refine(
+      (data) =>
+        (data.concept?.length ?? 0) > 0 || (data.filter?.length ?? 0) > 0,
+      {
+        message: fieldRequiredMsg,
+        path: ["concept"],
+      },
+    );
+}
+
+function makeValueSetFormSchema(
+  ruleSchema: z.ZodType<any>,
+  fieldRequiredMsg: string,
+  charCountMsg: string,
+  slugFormatMsg: string,
+) {
+  return z.object({
+    name: z.string().trim().min(1, fieldRequiredMsg),
+    slug: z
+      .string()
+      .trim()
+      .min(5, charCountMsg)
+      .max(25, charCountMsg)
+      .regex(/^[-\w]+$/, { message: slugFormatMsg }),
+    description: z.string(),
+    status: z.enum([
+      ValueSetStatus.ACTIVE,
+      ValueSetStatus.DRAFT,
+      ValueSetStatus.RETIRED,
+      ValueSetStatus.UNKNOWN,
+    ]),
+    is_system_defined: z.boolean(),
+    compose: z.object({
+      include: z.array(ruleSchema),
+      exclude: z.array(ruleSchema),
+    }),
+  });
 }
 
 function ConceptFields({
@@ -305,57 +367,19 @@ export function ValueSetForm({
   isSystemDefined,
 }: ValueSetFormProps) {
   const { t } = useTranslation();
-  const ruleSchema = z
-    .object({
-      system: z.string(),
-      concept: z
-        .array(
-          z.object({
-            code: z.string().min(1, t("field_required")),
-            display: z.string().min(1, t("field_required")),
-          }),
-        )
-        .default([]),
-      filter: z
-        .array(
-          z.object({
-            property: z.string().min(1, t("field_required")),
-            op: z.string().min(1, t("field_required")),
-            value: z.string().min(1, t("field_required")),
-          }),
-        )
-        .default([]),
-    })
-    .refine(
-      (data) =>
-        (data.concept?.length ?? 0) > 0 || (data.filter?.length ?? 0) > 0,
-      {
-        message: t("field_required"),
-        path: ["concept"],
-      },
-    );
 
-  const valuesetFormSchema = z.object({
-    name: z.string().trim().min(1, t("field_required")),
-    slug: z
-      .string()
-      .trim()
-      .min(5, t("character_count_validation", { min: 5, max: 25 }))
-      .max(25, t("character_count_validation", { min: 5, max: 25 }))
-      .regex(/^[-\w]+$/, { message: t("slug_format_message") }),
-    description: z.string(),
-    status: z.enum([
-      ValueSetStatus.ACTIVE,
-      ValueSetStatus.DRAFT,
-      ValueSetStatus.RETIRED,
-      ValueSetStatus.UNKNOWN,
-    ]),
-    is_system_defined: z.boolean(),
-    compose: z.object({
-      include: z.array(ruleSchema),
-      exclude: z.array(ruleSchema),
-    }),
-  });
+  const ruleSchema = useMemo(() => makeRuleSchema(t("field_required")), [t]);
+
+  const valuesetFormSchema = useMemo(
+    () =>
+      makeValueSetFormSchema(
+        ruleSchema,
+        t("field_required"),
+        t("character_count_validation", { min: 5, max: 25 }),
+        t("slug_format_message"),
+      ),
+    [ruleSchema, t],
+  );
 
   const { goBack } = useAppHistory();
 

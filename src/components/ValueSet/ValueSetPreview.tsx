@@ -22,6 +22,28 @@ interface ValueSetPreviewProps {
   trigger: React.ReactNode;
 }
 
+function getNoOptionsMessage(
+  t: (key: string, options?: Record<string, unknown>) => string,
+  hasValidRules: boolean,
+  isBelowMin: boolean,
+  searchQuery: unknown,
+  isFetching: boolean,
+  minSearchLength: number,
+): string {
+  if (!hasValidRules) {
+    return t("add_concept");
+  }
+  if (isBelowMin) {
+    return t("min_char_length_error", {
+      min_length: minSearchLength,
+    });
+  }
+  if (searchQuery && !isFetching) {
+    return t("no_results_found");
+  }
+  return t("searching");
+}
+
 export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
@@ -83,17 +105,14 @@ export function ValueSetPreview({ valueset, trigger }: ValueSetPreviewProps) {
             onSearch={setSearch}
             isLoading={isFetching}
             placeholder={t("search_concept")}
-            noOptionsMessage={
-              !hasValidRules
-                ? t("add_concept")
-                : isBelowMin
-                  ? t("min_char_length_error", {
-                      min_length: minSearchLength,
-                    })
-                  : searchQuery && !isFetching
-                    ? t("no_results_found")
-                    : t("searching")
-            }
+            noOptionsMessage={getNoOptionsMessage(
+              t,
+              hasValidRules,
+              isBelowMin,
+              searchQuery,
+              isFetching,
+              minSearchLength,
+            )}
           />
         </div>
       </SheetContent>
