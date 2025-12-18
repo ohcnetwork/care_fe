@@ -84,6 +84,8 @@ test.describe("Charge Item Definition Creation", () => {
   });
 
   test("create charge item definition with all fields", async ({ page }) => {
+    const cgstRate = "9";
+    const sgstRate = "6";
     await page.getByRole("button", { name: /add definition/i }).click();
     await page.getByRole("textbox", { name: /title/i }).fill(title);
     await page.getByRole("textbox", { name: /slug/i }).fill(slug);
@@ -102,22 +104,26 @@ test.describe("Charge Item Definition Creation", () => {
       .first()
       .click();
 
-    await page.getByRole("textbox", { name: "Search for tax code" }).fill("9");
-
-    // Select 9% under CGST section using XPath
     await page
-      .locator(
-        'xpath=//div[contains(@class, "flex-col") and .//div[contains(text(), "cgst")]]//button[@role="radio" and @value="9"]',
-      )
+      .getByRole("textbox", { name: "Search for tax code" })
+      .fill(cgstRate);
+
+    // Select 9% under CGST section - find exact "cgst" text, navigate to container, find radio button
+    await page
+      .getByText("cgst", { exact: true })
+      .locator("../..")
+      .locator(`button[role="radio"][value="${cgstRate}"]`)
       .click();
 
-    await page.getByRole("textbox", { name: "Search for tax code" }).fill("6");
-
-    // Select 6% under SGST section using XPath
     await page
-      .locator(
-        'xpath=//div[contains(@class, "flex-col") and .//div[contains(text(), "sgst")]]//button[@role="radio" and @value="6"]',
-      )
+      .getByRole("textbox", { name: "Search for tax code" })
+      .fill(sgstRate);
+
+    // Select 6% under SGST section - find exact "sgst" text, navigate to container, find radio button
+    await page
+      .getByText("sgst", { exact: true })
+      .locator("../..")
+      .locator(`button[role="radio"][value="${sgstRate}"]`)
       .click();
     const doneButton = page.getByRole("button", { name: "Done" });
     await doneButton.scrollIntoViewIfNeeded();
