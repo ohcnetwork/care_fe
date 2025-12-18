@@ -80,6 +80,14 @@ export function OngoingQueueTokenCard({
         toast.success(t("token_has_been_completed"));
         return;
       }
+
+      // Show success toast for service point assignment
+      if (data.sub_queue) {
+        toast.success(t("token_assigned_to_service_point"));
+      }
+    },
+    onError: () => {
+      toast.error(t("failed_to_assign_token_to_service_point"));
     },
   });
 
@@ -96,7 +104,6 @@ export function OngoingQueueTokenCard({
         status: TokenStatus.CREATED,
         note: token.note,
       });
-      toast.success(t("token_assigned_to_service_point"));
     } else {
       setShowAssignToServicePointDialog(true);
     }
@@ -251,19 +258,21 @@ export function OngoingQueueTokenCard({
               </ContextMenuItem>
             )}
 
-            <ContextMenuItem onClick={handleAssignToServicePoint}>
-              {token.sub_queue ? (
-                <>
-                  <RedoDot className="size-4 mr-2" />
-                  {t("reassign_service_point")}
-                </>
-              ) : (
-                <>
-                  <TicketCheck className="size-4 mr-2" />
-                  {t("assign_to_service_point")}
-                </>
-              )}
-            </ContextMenuItem>
+            {assignedServicePoints.length > 0 && (
+              <ContextMenuItem onClick={handleAssignToServicePoint}>
+                {token.sub_queue ? (
+                  <>
+                    <RedoDot className="size-4 mr-2" />
+                    {t("reassign_service_point")}
+                  </>
+                ) : (
+                  <>
+                    <TicketCheck className="size-4 mr-2" />
+                    {t("assign_to_service_point")}
+                  </>
+                )}
+              </ContextMenuItem>
+            )}
 
             <ContextMenuSeparator />
             {/* Cancel Token */}
