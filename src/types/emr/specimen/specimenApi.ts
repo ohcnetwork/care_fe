@@ -31,4 +31,10 @@ export default {
     method: HttpMethod.GET,
     TRes: Type<SpecimenRead>(),
   },
+  retrieveByAccessionIdentifier: {
+    path: "/api/v1/facility/{facilityId}/specimen/retrieve_by_accession_identifier/",
+    method: HttpMethod.POST,
+    TRes: Type<SpecimenRead>(),
+    TBody: Type<{ accession_identifier: string }>(),
+  },
 };
