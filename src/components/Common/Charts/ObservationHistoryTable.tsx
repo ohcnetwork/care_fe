@@ -15,18 +15,12 @@ import {
 import { Avatar } from "@/components/Common/Avatar";
 
 import query from "@/Utils/request/query";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import { ObservationWithUser } from "@/types/emr/observation";
 import patientApi from "@/types/emr/patient/patientApi";
 import { useTranslation } from "react-i18next";
-
-interface PaginatedResponse<T> {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: T[];
-}
 
 interface ObservationHistoryTableProps {
   patientId: string;
