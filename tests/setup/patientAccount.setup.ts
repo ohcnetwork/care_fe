@@ -90,6 +90,7 @@ test("navigate to patient and setup account", async ({ page }) => {
 
     // Save account ID to meta file for use by other tests
     const metaPath = path.resolve("tests/.auth/accountMeta.json");
+    fs.mkdirSync("tests/.auth", { recursive: true });
     fs.writeFileSync(metaPath, JSON.stringify({ id: accountId }, null, 2));
 
     console.log(`✅ Account setup completed: ${accountId}`);
