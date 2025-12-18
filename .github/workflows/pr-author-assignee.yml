@@ -20,7 +20,7 @@ jobs:
         run: |
           response=$(gh api graphql -f query='
             query {
-              repository(owner: "ohcnetwork", name: "care_fe") {
+              repository(owner: "${{ github.repository_owner }}", name: "${{ github.event.repository.name }}") {
                 pullRequest(number: '${{ github.event.pull_request.number }}') {
                   author { login }
                   authorAssociation
