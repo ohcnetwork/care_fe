@@ -9,9 +9,9 @@ import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordio
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
-import { ObservationListRead } from "@/types/emr/observation/observation";
+import { Observation, ObservationWithUser } from "@/types/emr/observation";
+import patientApi from "@/types/emr/patient/patientApi";
 
-import observationApi from "@/types/emr/observation/observationApi";
 import { VitalsObservation, VitalsTable } from "./VitalsTable";
 
 interface CodeGroup {
@@ -26,13 +26,10 @@ interface VitalsListProps {
 }
 
 interface GroupedObservations {
-  [key: string]: ObservationListRead[];
+  [key: string]: Observation[];
 }
 const LIMIT = 50;
-function extractVitals(
-  observations: ObservationListRead[],
-  vitalCodes: Code[],
-) {
+function extractVitals(observations: Observation[], vitalCodes: Code[]) {
   if (!observations || observations.length === 0) return [];
   // Group observations by effective_datetime
   const groupedObservations = observations.reduce(
@@ -62,10 +59,10 @@ function extractVitals(
     vitalCodes.forEach((code) => {
       if (code.display) {
         const vitalField = ob.find(
-          (fields) => fields.main_code?.code === code.code,
+          (fields) => fields.main_code.code === code.code,
         );
         vitalsObject[code.display] = {
-          value: vitalField?.value.value || undefined,
+          value: vitalField?.value.value,
           unit: vitalField?.value.unit?.code,
         };
       }
@@ -93,7 +90,7 @@ export const VitalsList = ({
     (code) => code.display && code.code !== "3151-8",
   );
   const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteQuery<
-    PaginatedResponse<ObservationListRead>
+    PaginatedResponse<ObservationWithUser>
   >({
     queryKey: [
       "infinite-observations",
@@ -101,8 +98,8 @@ export const VitalsList = ({
       encounterId,
       filteredVitalCodes.map((c) => c.code),
     ],
-    queryFn: async ({ pageParam = 0 }) => {
-      const response = await query(observationApi.list, {
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(patientApi.listObservations, {
         pathParams: { patientId },
         queryParams: {
           encounter: encounterId,
@@ -110,8 +107,8 @@ export const VitalsList = ({
           codes: filteredVitalCodes.map((c) => c.code).join(","),
           offset: String(pageParam),
         },
-      })({ signal: new AbortController().signal });
-      return response;
+      })({ signal });
+      return response as PaginatedResponse<ObservationWithUser>;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {

@@ -57,11 +57,23 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName, isTouchDevice } from "@/Utils/utils";
-import { NoteRead } from "@/types/notes/messages";
-import { ThreadRead, threadTemplates } from "@/types/notes/thread";
-import threadApi from "@/types/notes/threadApi";
+import patientApi from "@/types/emr/patient/patientApi";
+import { Message } from "@/types/notes/messages";
+import { Thread } from "@/types/notes/threads";
 
 const MESSAGES_LIMIT = 20;
+
+// Thread templates for quick selection
+
+const threadTemplates = [
+  "Treatment Plan",
+  "Medication Notes",
+  "Care Coordination",
+  "General Notes",
+  "Patient History",
+  "Referral Notes",
+  "Lab Results Discussion",
+] as const;
 
 // Info tooltip component for help text
 const InfoTooltip = ({ content }: { content: string }) => (
@@ -76,7 +88,7 @@ const ThreadItem = ({
   isSelected,
   onClick,
 }: {
-  thread: ThreadRead;
+  thread: Thread;
   isSelected: boolean;
   onClick: () => void;
 }) => (
@@ -106,7 +118,7 @@ function MessageItem({
   message,
   className,
   ...props
-}: React.ComponentProps<"div"> & { message: NoteRead }) {
+}: React.ComponentProps<"div"> & { message: Message }) {
   const authUser = useAuthUser();
   const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
   const isCurrentUser = authUser?.id === message.created_by.id;
@@ -343,7 +355,7 @@ export function NoteManager({
   // Fetch threads
   const { data: threadsData, isLoading: threadsLoading } = useQuery({
     queryKey: ["threads", encounterId],
-    queryFn: query(threadApi.list, {
+    queryFn: query(patientApi.listThreads, {
       pathParams: { patientId: patientId },
       queryParams: {
         ...(hideEncounterNotes
@@ -361,10 +373,10 @@ export function NoteManager({
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery<PaginatedResponse<NoteRead>>({
+  } = useInfiniteQuery<PaginatedResponse<Message>>({
     queryKey: ["messages", selectedThread],
-    queryFn: async ({ pageParam = 0 }) => {
-      const response = await query(threadApi.listNotes, {
+    queryFn: async ({ pageParam = 0, signal }) => {
+      const response = await query(patientApi.getMessages, {
         pathParams: {
           patientId,
           threadId: selectedThread!,
@@ -373,8 +385,8 @@ export function NoteManager({
           limit: String(MESSAGES_LIMIT),
           offset: String(pageParam),
         },
-      })({ signal: new AbortController().signal });
-      return response;
+      })({ signal });
+      return response as PaginatedResponse<Message>;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
@@ -391,13 +403,13 @@ export function NoteManager({
 
   // Create thread mutation
   const createThreadMutation = useMutation({
-    mutationFn: mutate(threadApi.create, {
+    mutationFn: mutate(patientApi.createThread, {
       pathParams: { patientId },
     }),
-    onSuccess: (newThread: ThreadRead) => {
+    onSuccess: (newThread) => {
       queryClient.invalidateQueries({ queryKey: ["threads"] });
       setShowNewThreadDialog(false);
-      setSelectedThread(newThread.id);
+      setSelectedThread((newThread as Thread).id);
       toast.success(t("notes__thread_created"));
     },
     onError: () => {
@@ -407,7 +419,7 @@ export function NoteManager({
 
   // Create message mutation
   const createMessageMutation = useMutation({
-    mutationFn: mutate(threadApi.createNote, {
+    mutationFn: mutate(patientApi.postMessage, {
       pathParams: { patientId, threadId: selectedThread! },
     }),
     onSuccess: () => {
