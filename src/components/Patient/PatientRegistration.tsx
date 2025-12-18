@@ -38,6 +38,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
 import { tzAwareDateTime } from "@/lib/validators";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import GovtOrganizationSelector from "@/pages/Organization/components/GovtOrganizationSelector";
@@ -78,6 +79,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { facility, facilityId } = useCurrentFacility();
+  const authUser = useAuthUser();
   const [{ phone_number }] = useQueryParams();
 
   const [suppressDuplicateWarning, setSuppressDuplicateWarning] =
@@ -396,7 +398,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
           </form>
         </Form>
 
-        {patientId && patientQuery.data && (
+        {patientId && patientQuery.data && authUser.is_superuser && (
           <ArchivePatientSection
             patientId={patientId}
             patientName={patientQuery.data.name}
