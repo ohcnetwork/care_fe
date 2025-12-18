@@ -42,10 +42,7 @@ test("navigate to patient and setup account", async ({ page }) => {
 
     if (accountsData.count > 0) {
       // Use existing account - wait for and click "Go to account" button
-      await page.waitForSelector('button:has-text("Go to account")', {
-        timeout: 5000,
-      });
-      await page.locator('button:has-text("Go to account")').first().click();
+      await page.getByRole("button", { name: "Go to account" }).first().click();
     } else {
       // Create new account
       await page.getByRole("button", { name: "Create Account" }).click();
@@ -72,9 +69,6 @@ test("navigate to patient and setup account", async ({ page }) => {
       await createResponse;
 
       // Now wait for and click "Go to account" button
-      await page.waitForSelector('button:has-text("Go to account")', {
-        timeout: 5000,
-      });
       await page.getByRole("button", { name: "Go to account" }).click();
     }
 
