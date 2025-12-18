@@ -61,7 +61,8 @@ export const PatientInfoCard = ({
                     </div>
                   ))}
               {"instance_tags" in patient &&
-                patient.instance_tags.length > 0 && (
+                patient.instance_tags.length > 0 &&
+                tagEntityType !== "patient" && (
                   <div className="flex flex-col gap-1 items-start">
                     <span className="text-xs text-gray-700">
                       {t("patient_tags")}:
@@ -84,13 +85,14 @@ export const PatientInfoCard = ({
                 )}
             </div>
           </div>
-          <PLUGIN_Component
-            __name="PatientInfoCardActions"
-            patient={patient}
-            facilityId={facilityId}
-            className="flex justify-end"
-          />
-          {children}
+          <div className="flex sm:flex-row flex-col gap-2 justify-center">
+            <PLUGIN_Component
+              __name="PatientInfoCardActions"
+              patient={patient}
+              facilityId={facilityId}
+            />
+            {children}
+          </div>
         </CardHeader>
       </Card>
       <Card className="bg-white shadow-sm mx-3 rounded-md rounded-t-none rounded-b-md">
