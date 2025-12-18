@@ -624,15 +624,11 @@ export function AccountShow({
           </Select>
           <ClosedCallout balance={Number(account.total_balance)} />
           {hasBillableItems && (
-            <span className="text-red-500 bg-red-50 text-xs p-2 rounded block -mt-3">
-              {t("cannot_close_account_with_pending_items")}
+            <span className="text-warning-500 bg-warning-50 text-xs p-2 rounded block -mt-3">
+              {t("close_account_with_pending_items_caution_message")}
             </span>
           )}
-          <Button
-            variant="destructive"
-            onClick={handleCloseAccount}
-            disabled={hasBillableItems}
-          >
+          <Button variant="destructive" onClick={handleCloseAccount}>
             {t("close_account")}
           </Button>
         </DialogContent>
