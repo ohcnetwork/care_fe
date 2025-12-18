@@ -74,9 +74,7 @@ test.describe("Symptom Questionnaire", () => {
   test("should add symptom with all fields", async ({ page }) => {
     // Wait for the combobox to be visible and ready
     await expect(
-      page
-        .getByRole("combobox")
-        .filter({ hasText: /Add (another )?Symptom/i }),
+      page.getByRole("combobox").filter({ hasText: /Add (another )?Symptom/i }),
     ).toBeVisible();
 
     await page
@@ -138,9 +136,7 @@ test.describe("Symptom Questionnaire", () => {
     await page.goto(questionnaireUrl);
     // Wait for the combobox to be visible and ready
     await expect(
-      page
-        .getByRole("combobox")
-        .filter({ hasText: /Add (another )?Symptom/i }),
+      page.getByRole("combobox").filter({ hasText: /Add (another )?Symptom/i }),
     ).toBeVisible();
 
     const duplicateSymptomName = faker.helpers.arrayElement([...usedSymptoms]);
