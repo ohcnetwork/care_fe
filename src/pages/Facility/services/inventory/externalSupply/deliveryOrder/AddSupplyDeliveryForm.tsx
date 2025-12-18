@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Trash2 } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useCallback, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -636,6 +636,9 @@ export function AddSupplyDeliveryForm({
                                 </TableHead>
                               </>
                             )}
+                            <TableHead className="text-xs font-semibold">
+                              {t("actions")}
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -740,6 +743,17 @@ export function AddSupplyDeliveryForm({
                                     )}
                                   />
                                 </TableCell>
+                                <TableCell className="align-top p-2">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => remove(index)}
+                                    aria-label={t("remove")}
+                                  >
+                                    <Trash2 className="size-4" />
+                                  </Button>
+                                </TableCell>
                               </TableRow>
                             ) : (
                               <SmartExternalDeliveryRow
@@ -753,6 +767,7 @@ export function AddSupplyDeliveryForm({
                                 onProductSelectOpened={() =>
                                   setNewlyAddedRowIndex(null)
                                 }
+                                onRemove={() => remove(index)}
                               />
                             ),
                           )}
