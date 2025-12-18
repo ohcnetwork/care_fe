@@ -93,7 +93,12 @@ test.describe("Diagnosis", () => {
   test("should add diagnosis with all fields and verify it appears in diagnosis history", async ({
     page,
   }) => {
-    await page.waitForLoadState("networkidle");
+    // Wait for the combobox to be visible and ready
+    await expect(
+      page
+        .getByRole("combobox")
+        .filter({ hasText: /Add (another )?Diagnosis/i }),
+    ).toBeVisible();
 
     await addDiagnosis(page);
 
@@ -150,7 +155,12 @@ test.describe("Diagnosis", () => {
     ).toBeVisible();
 
     await page.goto(questionnaireUrl);
-    await page.waitForLoadState("networkidle");
+    // Wait for the combobox to be visible and ready
+    await expect(
+      page
+        .getByRole("combobox")
+        .filter({ hasText: /Add (another )?Diagnosis/i }),
+    ).toBeVisible();
 
     const duplicateDiagnosisName = faker.helpers.arrayElement([
       ...usedDiagnoses,

@@ -28,7 +28,10 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
   }) => {
     // Navigate to Administration department
     await openDepartment(page, "Administration");
-    await page.waitForLoadState("networkidle");
+    // Wait for the Add Department/Team button to be visible
+    await expect(
+      page.getByRole("button", { name: "Add Department/Team" }),
+    ).toBeVisible();
 
     // Click Add Department/Team button
     await page.getByRole("button", { name: "Add Department/Team" }).click();
@@ -55,7 +58,10 @@ test.describe("Prevent Creating Sub-Department/Team Under Administration", () =>
   }) => {
     // Navigate to Administration department
     await openDepartment(page, "Administration");
-    await page.waitForLoadState("networkidle");
+    // Wait for the Add Department/Team button to be visible
+    await expect(
+      page.getByRole("button", { name: "Add Department/Team" }),
+    ).toBeVisible();
 
     // Click Add Department/Team button
     await page.getByRole("button", { name: "Add Department/Team" }).click();

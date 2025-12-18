@@ -52,8 +52,8 @@ test.describe("Observation Definition Form with Interpretation", () => {
       // Select LOINC code (search and select first available)
       await page.getByRole("combobox", { name: "LOINC Code *" }).click();
       // Wait for search results and select first option
-      await page.waitForTimeout(1000); // Wait for search to load
       const firstCodeOption = page.getByRole("option").first();
+      await expect(firstCodeOption).toBeVisible();
       await firstCodeOption.click();
     });
   }
@@ -267,7 +267,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
 
     // Fill component code
     await page.getByRole("combobox", { name: "Code *", exact: true }).click();
-    await page.waitForTimeout(1000);
+    await expect(page.getByRole("option").first()).toBeVisible();
     await page.getByRole("option").first().click();
 
     // Select component data type
@@ -276,7 +276,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
 
     // Select component unit
     page.getByRole("combobox", { name: "Unit" }).nth(1).click();
-    await page.waitForTimeout(1000);
+    await expect(page.getByRole("option").first()).toBeVisible();
     await page.getByRole("option").first().click();
 
     // Add component-level interpretation
@@ -338,7 +338,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       await page.getByRole("combobox", { name: "Code *", exact: true }).click();
-      await page.waitForTimeout(1000);
+      await expect(page.getByRole("option").first()).toBeVisible();
       await page.getByRole("option").first().click();
 
       await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
@@ -348,7 +348,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       await page.getByRole("combobox", { name: "Unit" }).nth(1).click();
-      await page.waitForTimeout(1000);
+      await expect(page.getByRole("option").first()).toBeVisible();
       await page.getByRole("option").first().click();
     });
 
@@ -428,7 +428,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       await page.getByRole("combobox", { name: "Code *", exact: true }).click();
-      await page.waitForTimeout(1000);
+      await expect(page.getByRole("option").first()).toBeVisible();
       await page.getByRole("option").first().click();
 
       await page.getByRole("combobox", { name: "Data Type" }).nth(1).click();
@@ -438,7 +438,7 @@ test.describe("Observation Definition Form with Interpretation", () => {
         .click();
 
       page.getByRole("combobox", { name: "Unit" }).nth(1).click();
-      await page.waitForTimeout(1000);
+      await expect(page.getByRole("option").first()).toBeVisible();
       await page.getByRole("option").first().click();
 
       // Add component-level interpretation

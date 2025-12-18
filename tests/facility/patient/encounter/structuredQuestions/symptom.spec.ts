@@ -72,7 +72,12 @@ test.describe("Symptom Questionnaire", () => {
   });
 
   test("should add symptom with all fields", async ({ page }) => {
-    await page.waitForLoadState("networkidle");
+    // Wait for the combobox to be visible and ready
+    await expect(
+      page
+        .getByRole("combobox")
+        .filter({ hasText: /Add (another )?Symptom/i }),
+    ).toBeVisible();
 
     await page
       .getByRole("combobox")
@@ -131,7 +136,12 @@ test.describe("Symptom Questionnaire", () => {
     ).toBeVisible();
 
     await page.goto(questionnaireUrl);
-    await page.waitForLoadState("networkidle");
+    // Wait for the combobox to be visible and ready
+    await expect(
+      page
+        .getByRole("combobox")
+        .filter({ hasText: /Add (another )?Symptom/i }),
+    ).toBeVisible();
 
     const duplicateSymptomName = faker.helpers.arrayElement([...usedSymptoms]);
 
