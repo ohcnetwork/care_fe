@@ -37,17 +37,10 @@ export default defineConfig({
     trace: "on-first-retry",
   },
 
-  /* Global setup - applies to all tests */
-  globalSetup: require.resolve("./tests/global-setup.ts"),
-
   /* Configure projects for major browsers */
   projects: [
     // Setup project
-    {
-      name: "setup",
-      testMatch: /.*\.setup\.ts/,
-      testIgnore: /auth\.setup\.ts/,
-    },
+    { name: "setup", testMatch: /.*\.setup\.ts/ },
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
