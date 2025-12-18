@@ -1,5 +1,5 @@
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 // import { Code } from "@/types/questionnaire/code";
 
@@ -28,17 +28,17 @@ export interface HealthcareServiceCreateSpec extends Omit<
 > {
   facility: string;
   locations: string[];
-  managing_organization?: string;
+  managing_organization: string | null;
 }
 
 export interface HealthcareServiceUpdateSpec extends BaseHealthcareServiceSpec {
   facility: string;
   locations: string[];
-  managing_organization?: string;
+  managing_organization: string | null;
 }
 
 export interface HealthcareServiceReadSpec extends BaseHealthcareServiceSpec {
   version?: number;
-  locations: LocationList[];
+  locations: LocationRead[];
   managing_organization: FacilityOrganizationRead | null;
 }
