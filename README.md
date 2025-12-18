@@ -238,8 +238,6 @@ For more details, see [tests/README.md](tests/README.md).
 - [Swagger API Documentation](https://careapi.ohc.network/swagger/)
 - [Testing Documentation](https://docs.coronasafe.network/care-testing-documentation/)
 
-#### Setting up
-
 ## 🚀 Production
 
 #### Build the app for production
