@@ -10,30 +10,23 @@ test.use({ storageState: "tests/.auth/user.json" });
 test("navigate to patient and setup account", async ({ page }) => {
   const facilityId = getFacilityId();
   const patientId = getPatientId();
-  const NAVIGATION_TIMEOUT = 10000;
 
   // Navigate to patient page
   await page.goto(`facility/${facilityId}/patient/${patientId}`);
 
   try {
     // Set up API response listener BEFORE clicking tab to avoid race condition
-    const accountsResponse = page.waitForResponse(
-      (response) => {
-        const url = response.url();
-        return (
-          url.includes(`/api/v1/facility/${facilityId}/account/`) &&
-          url.includes(`patient=${patientId}`) &&
-          response.status() === 200
-        );
-      },
-      { timeout: 10000 },
-    );
+    const accountsResponse = page.waitForResponse((response) => {
+      const url = response.url();
+      return (
+        url.includes(`/api/v1/facility/${facilityId}/account/`) &&
+        url.includes(`patient=${patientId}`) &&
+        response.status() === 200
+      );
+    });
 
     // Click Accounts tab - this triggers the API call
     await page.getByRole("tab", { name: "Accounts" }).click();
-
-    // Wait for content to load
-    await page.waitForLoadState("networkidle");
 
     // Now wait for the API response we set up earlier
     const accountsData = await (await accountsResponse).json();
@@ -51,17 +44,14 @@ test("navigate to patient and setup account", async ({ page }) => {
       await page.getByRole("textbox", { name: "Name *" }).fill(accountName);
 
       // Set up listener for account creation API before clicking Create
-      const createResponse = page.waitForResponse(
-        (response) => {
-          const url = response.url();
-          return (
-            url.includes(`/api/v1/facility/${facilityId}/account/`) &&
-            response.request().method() === "POST" &&
-            response.status() === 200
-          );
-        },
-        { timeout: 10000 },
-      );
+      const createResponse = page.waitForResponse((response) => {
+        const url = response.url();
+        return (
+          url.includes(`/api/v1/facility/${facilityId}/account/`) &&
+          response.request().method() === "POST" &&
+          response.status() === 200
+        );
+      });
 
       await page.getByRole("button", { name: "Create" }).click();
 
@@ -73,9 +63,7 @@ test("navigate to patient and setup account", async ({ page }) => {
     }
 
     // Wait for navigation to account page
-    await page.waitForURL(/\/account\/[a-f0-9-]+/, {
-      timeout: NAVIGATION_TIMEOUT,
-    });
+    await page.waitForURL(/\/account\/[a-f0-9-]+/);
     const accountId = page.url().match(/\/account\/([a-f0-9-]+)/)?.[1];
 
     if (!accountId) {
