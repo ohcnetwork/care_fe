@@ -1,9 +1,8 @@
-import careConfig from "@careConfig";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { addDays, differenceInDays } from "date-fns";
 import { TFunction } from "i18next";
-import { FilterIcon } from "lucide-react";
+import { FilterIcon, InfoIcon } from "lucide-react";
 import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -40,6 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSidebar } from "@/components/ui/sidebar";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -84,6 +84,7 @@ import {
   formatPatientAge,
 } from "@/Utils/utils";
 
+import { booleanFromString } from "@/common/utils";
 import { ScheduleResourceIcon } from "@/components/Schedule/ScheduleResourceIcon";
 import {
   dateFilter,
@@ -95,9 +96,16 @@ import {
   FilterDateRange,
   shortDateRangeOptions,
 } from "@/components/ui/multi-filter/utils/Utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import useAuthUser from "@/hooks/useAuthUser";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import careConfig from "@careConfig";
 import { PractitionerSelector } from "./components/PractitionerSelector";
 
 type AppointmentStatusGroup = {
@@ -150,16 +158,44 @@ interface Props {
   resourceId?: string;
 }
 
+const getDefaultDateFilter = () => {
+  const defaultDays = careConfig.appointments.defaultDateFilter;
+  const today = new Date();
+
+  if (defaultDays === 0) {
+    return {
+      date_from: dateQueryString(today),
+      date_to: dateQueryString(today),
+    };
+  }
+
+  // Past or future days based on configuration
+  const fromDate = defaultDays > 0 ? today : addDays(today, defaultDays);
+  const toDate = defaultDays > 0 ? addDays(today, defaultDays) : today;
+
+  return {
+    date_from: dateQueryString(fromDate),
+    date_to: dateQueryString(toDate),
+  };
+};
+
 export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
+
+  const practitionerFilterEnabled =
+    resourceType === SchedulableResourceType.Practitioner && !resourceId;
+
   const { qParams, updateQuery, resultsPerPage, Pagination } = useFilters({
     limit: 15,
+    defaultQueryParams: {
+      ...(practitionerFilterEnabled ? { practitioners: authUser.id } : {}),
+      ...getDefaultDateFilter(),
+    },
+    cacheBlacklist: ["date_from", "date_to"],
   });
 
   useShortcutSubContext();
-  const practitionerFilterEnabled =
-    resourceType === SchedulableResourceType.Practitioner && !resourceId;
 
   const [activeTab, setActiveTab] = useView("appointments", "board");
   const { open: isSidebarOpen } = useSidebar();
@@ -191,40 +227,6 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
   const practitioners = schedulableUserResources?.filter((r) =>
     practitionerIds.includes(r.id),
   );
-
-  useEffect(() => {
-    // Set default date range if no dates are present
-    if (!qParams.date_from && !qParams.date_to) {
-      const today = new Date();
-      const defaultDays = careConfig.appointments.defaultDateFilter;
-
-      if (defaultDays === 0) {
-        // Today only
-        qParams.date_from = dateQueryString(today);
-        qParams.date_to = dateQueryString(today);
-      } else {
-        // Past or future days based on configuration
-        const fromDate = defaultDays > 0 ? today : addDays(today, defaultDays);
-        const toDate = defaultDays > 0 ? addDays(today, defaultDays) : today;
-        qParams.date_from = dateQueryString(fromDate);
-        qParams.date_to = dateQueryString(toDate);
-      }
-    }
-
-    // Only update if there are changes
-    if (Object.keys(qParams).length > 0) {
-      updateQuery({ ...qParams });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [qParams.date_from, qParams.date_to]);
-
-  useEffect(() => {
-    if (!qParams.practitioners && practitionerFilterEnabled) {
-      updateQuery({
-        practitioners: authUser.id,
-      });
-    }
-  }, []);
 
   // Enabled only if filtered by a practitioner and a single day
   const slotsFilterEnabled =
@@ -324,6 +326,11 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
     return <Loading />;
   }
 
+  const shouldAutoRefresh = booleanFromString(
+    qParams.autoRefresh ?? "",
+    careConfig.enableAutoRefresh,
+  );
+
   return (
     <Page
       title={t("appointments")}
@@ -384,6 +391,32 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="flex items-center justify-between gap-2">
+            <Label className="text-sm font-medium">{t("auto_refresh")}</Label>
+            <Switch
+              checked={shouldAutoRefresh}
+              onCheckedChange={(checked) =>
+                updateQuery({
+                  autoRefresh: checked ? "true" : "false",
+                })
+              }
+            />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help hidden md:block">
+                    <InfoIcon className="size-4 text-gray-500" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t("auto_refresh_tooltip", {
+                    interval:
+                      careConfig.appointmentAndQueueRefreshInterval / 1000,
+                  })}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           {activeTab === "list" && (
             <Button
               variant="outline"
@@ -439,6 +472,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
                 tags={selectedTags.map((tag) => tag.id)}
                 tags_behavior={qParams.tags_behavior}
                 patient={qParams.patient}
+                autoRefresh={shouldAutoRefresh}
               />
             ))}
           </div>
@@ -461,6 +495,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           patient={qParams.patient}
           resourceType={resourceType}
           resourceIds={resourceId ? [resourceId] : practitionerIds}
+          autoRefresh={shouldAutoRefresh}
         />
       )}
     </Page>
@@ -478,6 +513,7 @@ function AppointmentColumn(props: {
   patient?: string;
   resourceType: SchedulableResourceType;
   resourceIds: string[];
+  autoRefresh: boolean;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -535,6 +571,8 @@ function AppointmentColumn(props: {
       return currentOffset < lastPage.count ? currentOffset : null;
     },
     enabled: !!props.resourceIds.length && props.canViewAppointments,
+    refetchInterval:
+      props.autoRefresh && careConfig.appointmentAndQueueRefreshInterval,
   });
 
   const appointments =
@@ -767,6 +805,7 @@ function AppointmentRow(props: {
   patient?: string;
   resourceType: SchedulableResourceType;
   resourceIds: string[];
+  autoRefresh: boolean;
 }) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -803,6 +842,8 @@ function AppointmentRow(props: {
       },
     }),
     enabled: !!props.resourceIds.length && props.canViewAppointments,
+    refetchInterval:
+      props.autoRefresh && careConfig.appointmentAndQueueRefreshInterval,
   });
 
   const appointments = data?.results ?? [];

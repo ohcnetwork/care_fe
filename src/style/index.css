@@ -10,7 +10,7 @@
 
 @import "tw-animate-css";
 
-@config '../../tailwind.config.js';
+@config "../../tailwind.config.js";
 
 /* Custom animations for the SessionExpired component */
 @keyframes ping-slow {
@@ -355,8 +355,8 @@
     #section-to-print img[alt*="logo" i],
     #section-to-print .logo img,
     #section-to-print img.logo {
-      max-width: 200px !important;
-      max-height: 200px !important;
+      max-width: 100px !important;
+      max-height: 100px !important;
       width: auto !important;
       height: auto !important;
       object-fit: contain !important;

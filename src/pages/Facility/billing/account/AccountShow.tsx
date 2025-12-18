@@ -213,7 +213,7 @@ export function AccountShow({
           <h2 className="text-2xl font-bold">{t("account_not_found")}</h2>
           <p className="mt-2 text-gray-600">{t("account_may_not_exist")}</p>
           <Button asChild className="mt-4">
-            <Link href={`/facility/${facilityId}/billing/accounts`}>
+            <Link href={`/facility/${facilityId}/billing/account`}>
               {t("back_to_accounts")}
             </Link>
           </Button>
@@ -624,15 +624,11 @@ export function AccountShow({
           </Select>
           <ClosedCallout balance={Number(account.total_balance)} />
           {hasBillableItems && (
-            <span className="text-red-500 bg-red-50 text-xs p-2 rounded block -mt-3">
-              {t("cannot_close_account_with_pending_items")}
+            <span className="text-warning-500 bg-warning-50 text-xs p-2 rounded block -mt-3">
+              {t("close_account_with_pending_items_caution_message")}
             </span>
           )}
-          <Button
-            variant="destructive"
-            onClick={handleCloseAccount}
-            disabled={hasBillableItems}
-          >
+          <Button variant="destructive" onClick={handleCloseAccount}>
             {t("close_account")}
           </Button>
         </DialogContent>

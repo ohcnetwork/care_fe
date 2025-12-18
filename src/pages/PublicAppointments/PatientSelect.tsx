@@ -177,7 +177,7 @@ export default function PatientSelect({
       return dayjs(patient.date_of_birth).format("DD MMM YYYY");
     }
     const yearOfBirth = patient.year_of_birth;
-    const age = dayjs().year() - yearOfBirth;
+    const age = dayjs().year() - yearOfBirth!;
     return `${age} years`;
   };
 

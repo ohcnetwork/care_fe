@@ -57,8 +57,8 @@ import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
 import queryClient from "@/Utils/request/queryClient";
 import AddMultipleChargeItemsSheet from "@/pages/Facility/services/serviceRequests/components/AddMultipleChargeItemsSheet";
-import { LocationHistory } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
+import { LocationAssociationRead } from "@/types/location/association";
 import { differenceInDays, differenceInHours, format } from "date-fns";
 import EditChargeItemSheet from "./EditChargeItemSheet";
 
@@ -94,7 +94,7 @@ function PriceComponentRow({ label, components }: PriceComponentRowProps) {
 }
 
 interface LocationGroupRowProps {
-  location: LocationHistory;
+  location: LocationAssociationRead;
   setAddChargeItemState: (state: {
     serviceRequestId: string;
     locationId: string;
@@ -229,7 +229,7 @@ export function BedChargeItemsTable({
   const locationHistory = encounter?.location_history || [];
 
   const { data: chargeItems, isLoading } = useQuery({
-    queryKey: ["bedChargeItems", qParams, accountId],
+    queryKey: ["chargeItems", accountId],
     queryFn: query(chargeItemApi.listChargeItem, {
       pathParams: { facilityId },
       queryParams: {
@@ -298,7 +298,7 @@ export function BedChargeItemsTable({
             status: false,
           });
           queryClient.invalidateQueries({
-            queryKey: ["bedChargeItems", qParams, accountId],
+            queryKey: ["chargeItems", accountId],
           });
         }}
       />

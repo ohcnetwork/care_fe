@@ -15,7 +15,7 @@ import {
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import query from "@/Utils/request/query";
 
 import DispenseDrawer from "./DispenseDrawer";
@@ -29,7 +29,7 @@ export const DispenseButton = ({
   setOpen: (open: boolean) => void;
   facilityId: string;
 }) => {
-  const [location, setLocation] = useState<LocationList | undefined>(undefined);
+  const [location, setLocation] = useState<LocationRead | undefined>(undefined);
   const [showDrawer, setShowDrawer] = useState(false);
   const [isInvoiceSheetOpen, setIsInvoiceSheetOpen] = useState(false);
   const [extractedChargeItems, setExtractedChargeItems] = useState<
@@ -51,13 +51,13 @@ export const DispenseButton = ({
     enabled: !!facilityId && !!selectedEncounter?.patient.id,
   });
 
-  const handleLocationSelect = (selectedLocation: LocationList) => {
+  const handleLocationSelect = (selectedLocation: LocationRead) => {
     setLocation(selectedLocation);
     setOpen(false);
     setShowDrawer(true);
   };
 
-  const getLocationPath = (location: LocationList): string => {
+  const getLocationPath = (location: LocationRead): string => {
     const path = [location.name];
     let current = location.parent;
     while (current && current.id) {
