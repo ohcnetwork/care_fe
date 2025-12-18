@@ -31,6 +31,27 @@ interface ConditionalFieldsResult {
 }
 
 /**
+ * Extracts all fields that are controlled by conditional rules
+ * This is independent of form values - just looks at what fields CAN be conditional
+ */
+function extractConditionalFieldsFromRules(
+  rules: ConditionalRule[],
+): Set<string> {
+  const conditionalFields = new Set<string>();
+  for (const rule of rules) {
+    for (const field of rule.then.visibleFields) {
+      conditionalFields.add(field);
+    }
+    if (rule.else) {
+      for (const field of rule.else.visibleFields) {
+        conditionalFields.add(field);
+      }
+    }
+  }
+  return conditionalFields;
+}
+
+/**
  * Gets a value at a nested path (supports dot notation)
  * e.g., getValueAtPath(obj, "cold_chain.temperature") returns obj.cold_chain?.temperature
  */
@@ -72,16 +93,25 @@ export function useConditionalFields<T extends FieldValues>({
     name: basePath as Path<T>,
   }) as Record<string, unknown> | undefined;
 
+  // Always extract which fields are controlled by conditions
+  // This ensures conditional fields are hidden even before form data exists
+  const allConditionalFields = useMemo(
+    () => extractConditionalFieldsFromRules(rules),
+    [rules],
+  );
+
   const evaluation = useMemo(() => {
     if (!rules.length || !extensionValues) {
+      // Return empty required/visible but keep track of ALL conditional fields
+      // This ensures conditional fields stay hidden until their condition is met
       return {
         requiredFields: new Set<string>(),
         visibleFields: new Set<string>(),
-        conditionalFields: new Set<string>(),
+        conditionalFields: allConditionalFields,
       };
     }
     return evaluateConditionalRules(rules, extensionValues);
-  }, [rules, extensionValues]);
+  }, [rules, extensionValues, allConditionalFields]);
 
   // Track previously visible fields to detect when fields become hidden
   const prevVisibleRef = useRef<Set<string>>(new Set());
