@@ -150,20 +150,14 @@ function ServiceRequestForm({
   const { t } = useTranslation();
 
   const getLocationDetails = () => {
-    if (
-      activityDefinition?.locations &&
-      activityDefinition.locations.length > 0
-    ) {
+    if (activityDefinition?.locations?.length) {
       return activityDefinition.locations;
     }
 
     const locationIds = serviceRequest.service_request.locations || [];
     return locationIds
-      .map((locId) => {
-        const locationId = typeof locId === "string" ? locId : locId;
-        return locations.find((loc) => loc.id === locationId);
-      })
-      .filter((loc): loc is LocationList => loc !== undefined);
+      .map((id) => locations.find((loc) => loc.id === id))
+      .filter((loc): loc is LocationList => Boolean(loc));
   };
 
   const locationDetails = getLocationDetails();
