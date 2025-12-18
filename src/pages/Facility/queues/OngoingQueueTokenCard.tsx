@@ -26,7 +26,6 @@ import {
   BringToFront,
   Check,
   CircleDot,
-  ExternalLink,
   Megaphone,
   MoreHorizontal,
   OctagonX,
@@ -81,16 +80,6 @@ export function OngoingQueueTokenCard({
     },
   });
 
-  const patientVerifyUrl = token?.patient
-    ? `/facility/${facilityId}/patients/verify?${new URLSearchParams({
-        phone_number: token.patient.phone_number,
-        year_of_birth: token.patient.year_of_birth?.toString() ?? "",
-        partial_id: token.patient.id.slice(0, 5),
-        queue_id: token.queue.id,
-        token_id: token.id,
-      }).toString()}`
-    : "#";
-
   return (
     <ContextMenu>
       <ContextMenuTrigger ref={contextMenuTriggerRef}>
@@ -103,7 +92,20 @@ export function OngoingQueueTokenCard({
         >
           <Link
             basePath="/"
-            href={patientVerifyUrl}
+            href={
+              token?.patient
+                ? `/facility/${facilityId}/patients/verify?${new URLSearchParams(
+                    {
+                      phone_number: token.patient.phone_number,
+                      year_of_birth:
+                        token.patient.year_of_birth?.toString() ?? "",
+                      partial_id: token.patient.id.slice(0, 5),
+                      queue_id: token.queue.id,
+                      token_id: token.id,
+                    },
+                  ).toString()}`
+                : "#"
+            }
             className="flex gap-3 items-center p-3 flex-1 min-w-0 hover:bg-gray-100 transition-colors rounded-l-lg"
           >
             <div className="flex flex-col min-w-0 flex-1">
@@ -113,7 +115,6 @@ export function OngoingQueueTokenCard({
                     {token.patient
                       ? token.patient.name
                       : renderTokenNumber(token)}
-                    <ExternalLink className="size-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                   {token.patient && (
                     <div className="flex flex-col gap-1 mt-1">
@@ -142,7 +143,6 @@ export function OngoingQueueTokenCard({
               ) : (
                 <>
                   <Skeleton className="h-5 w-36" />
-                  <Skeleton className="h-4 w-24 mt-1" />
                 </>
               )}
             </div>
