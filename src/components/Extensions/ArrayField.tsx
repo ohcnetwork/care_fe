@@ -89,7 +89,7 @@ export function ArrayField<TFieldValues extends FieldValues>({
             }
           >
             <Plus className="h-4 w-4 mr-1" />
-            {t("add_array_item")}
+            {t("add")}
           </Button>
         </div>
         {metadata.description && (
@@ -158,7 +158,7 @@ export function ArrayField<TFieldValues extends FieldValues>({
                         }}
                         disabled={
                           metadata.minItems !== undefined &&
-                          fields.length <= metadata.minItems
+                          fields.length < metadata.minItems
                         }
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
@@ -199,7 +199,7 @@ export function ArrayField<TFieldValues extends FieldValues>({
           }
         >
           <Plus className="h-4 w-4 mr-1" />
-          {t("add_array_item")}
+          {t("add")}
         </Button>
       </div>
       {metadata.description && (
