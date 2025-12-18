@@ -65,12 +65,21 @@ jobs:
           echo "Issue State: ${{ steps.prinfo.outputs.issue_state }}"
 
       - name: Close PR if no linked issue
-        if: steps.prinfo.outputs.issue_number == 'null' || steps.prinfo.outputs.issue_state == 'CLOSED'
+        if: steps.prinfo.outputs.issue_number == 'null'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           gh pr close "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --comment "No linked issue, please do not open PRs if there's no corresponding issue."
+          exit 0
+
+      - name: Close PR if linked issue is closed
+        if: steps.prinfo.outputs.issue_state == 'CLOSED'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr close "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --comment "The linked issue is closed. Please link an open issue before opening a PR."
           exit 0
 
       - name: Reopen PR if issue is now linked
