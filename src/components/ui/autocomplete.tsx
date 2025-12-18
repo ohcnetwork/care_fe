@@ -151,11 +151,6 @@ export default function Autocomplete({
         autoFocus={!isAppleDevice}
       />
       <CommandList className="overflow-y-auto">
-        {isLoading ? (
-          <CardListSkeleton count={3} />
-        ) : (
-          <CommandEmpty>{noOptionsMessage}</CommandEmpty>
-        )}
         <CommandGroup>
           {options.map((option) => (
             <CommandItem
@@ -188,6 +183,11 @@ export default function Autocomplete({
             </CommandItem>
           ))}
         </CommandGroup>
+        {isLoading ? (
+          <CardListSkeleton count={3} />
+        ) : (
+          <CommandEmpty>{noOptionsMessage}</CommandEmpty>
+        )}
       </CommandList>
     </>
   );

@@ -1,5 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useCallback, useState } from "react";
@@ -175,7 +180,7 @@ export function AddSupplyDeliveryForm({
     enabled: !!qParams.supplyOrder,
   });
 
-  const { data: requestOrders, isLoading: isLoadingRequestOrders } = useQuery({
+  const { data: requestOrders, isFetching: isLoadingRequestOrders } = useQuery({
     queryKey: [
       "requestOrders",
       facilityId,
@@ -192,6 +197,7 @@ export function AddSupplyDeliveryForm({
       },
     }),
     enabled: !qParams.supplyOrder,
+    placeholderData: keepPreviousData,
   });
 
   const form = useForm<SupplyDeliveryFormValues>({
