@@ -91,16 +91,12 @@ export function OngoingQueueTokenCard({
     );
 
     if (availableServicePoints.length === 1) {
-      try {
-        await updateTokenAsync({
-          sub_queue: availableServicePoints[0].id,
-          status: TokenStatus.CREATED,
-          note: token.note,
-        });
-        toast.success(t("token_assigned_to_service_point"));
-      } catch (_error) {
-        toast.error(t("failed_to_assign_token_to_service_point"));
-      }
+      await updateTokenAsync({
+        sub_queue: availableServicePoints[0].id,
+        status: TokenStatus.CREATED,
+        note: token.note,
+      });
+      toast.success(t("token_assigned_to_service_point"));
     } else {
       setShowAssignToServicePointDialog(true);
     }
