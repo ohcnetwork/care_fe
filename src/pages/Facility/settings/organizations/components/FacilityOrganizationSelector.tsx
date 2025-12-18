@@ -155,7 +155,6 @@ export default function FacilityOrganizationSelector(
     setSelectedOrganizations([]);
     setCurrentSelection(null);
     setNavigationLevels([]);
-    onChange(null);
   };
 
   const handleOpenChange = (isOpen: boolean) => {
