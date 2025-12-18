@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import {
-  LocationList as LocationListType,
+  LocationRead as LocationListType,
   LocationTypeIcons,
 } from "@/types/location/location";
 

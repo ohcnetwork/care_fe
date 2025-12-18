@@ -37,7 +37,7 @@ import {
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import organizationApi from "@/types/organization/organizationApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -145,7 +145,7 @@ export default function DeliveryOrderForm({
         ordering: "sort_index",
       },
     }),
-    select: (data: PaginatedResponse<LocationList>) => {
+    select: (data: PaginatedResponse<LocationRead>) => {
       // Filter out the current location
       return data.results.filter((location) => location.id !== locationId);
     },
