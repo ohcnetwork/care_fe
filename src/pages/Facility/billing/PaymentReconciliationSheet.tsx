@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -69,7 +69,7 @@ const PAYMENT_METHODS = [
   {
     value: PaymentReconciliationPaymentMethod.ddpo,
     icon: Landmark,
-    label: "bank_transfer",
+    label: "direct_deposit",
   },
   {
     value: PaymentReconciliationPaymentMethod.ccca,
@@ -114,48 +114,48 @@ interface PaymentReconciliationSheetProps {
   isCreditNote?: boolean;
 }
 
-// Add schema before the component
-const formSchema = z
-  .object({
-    reconciliation_type: z.nativeEnum(PaymentReconciliationType),
-    status: z.nativeEnum(PaymentReconciliationStatus),
-    kind: z.nativeEnum(PaymentReconciliationKind),
-    issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
-    outcome: z.nativeEnum(PaymentReconciliationOutcome),
-    method: z.nativeEnum(PaymentReconciliationPaymentMethod),
-    payment_datetime: z.string(),
-    amount: z.string().refine(
-      (val) => {
-        const num = Number(val);
-        return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
-      },
-      { message: t("enter_valid_amount") },
-    ),
-    tendered_amount: z.string().refine(
-      (val) => {
-        const num = Number(val);
-        return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
-      },
-      {
-        message: t("enter_valid_amount"),
-      },
-    ),
-    returned_amount: z.string().optional(),
-    target_invoice: z.string().optional(),
-    reference_number: z.string().optional(),
-    authorization: z.string().optional(),
-    disposition: z.string().optional(),
-    note: z.string().optional(),
-    account: z.string(),
-    is_credit_note: z.boolean().optional(),
-    location: careConfig.paymentLocationRequired
-      ? z.string().min(1)
-      : z.string().optional(),
-  })
-  .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
-    message: t("tender_amount_cannot_be_less_than_payment_amount"),
-    path: ["tendered_amount"],
-  });
+const createFormSchema = () =>
+  z
+    .object({
+      reconciliation_type: z.nativeEnum(PaymentReconciliationType),
+      status: z.nativeEnum(PaymentReconciliationStatus),
+      kind: z.nativeEnum(PaymentReconciliationKind),
+      issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
+      outcome: z.nativeEnum(PaymentReconciliationOutcome),
+      method: z.nativeEnum(PaymentReconciliationPaymentMethod),
+      payment_datetime: z.string(),
+      amount: z.string().refine(
+        (val) => {
+          const num = Number(val);
+          return !isNaN(num) && num > 0 && /^\d+(\.\d{0,2})?$/.test(val);
+        },
+        { message: t("enter_valid_amount") },
+      ),
+      tendered_amount: z.string().refine(
+        (val) => {
+          const num = Number(val);
+          return !isNaN(num) && num >= 0 && /^\d+(\.\d{0,2})?$/.test(val);
+        },
+        {
+          message: t("enter_valid_amount"),
+        },
+      ),
+      returned_amount: z.string().optional(),
+      target_invoice: z.string().optional(),
+      reference_number: z.string().optional(),
+      authorization: z.string().optional(),
+      disposition: z.string().optional(),
+      note: z.string().optional(),
+      account: z.string(),
+      is_credit_note: z.boolean().optional(),
+      location: careConfig.paymentLocationRequired
+        ? z.string().min(1)
+        : z.string().optional(),
+    })
+    .refine((data) => Number(data.tendered_amount) >= Number(data.amount), {
+      message: t("tender_amount_cannot_be_less_than_payment_amount"),
+      path: ["tendered_amount"],
+    });
 
 export function PaymentReconciliationSheet({
   open,
@@ -169,13 +169,12 @@ export function PaymentReconciliationSheet({
 }: PaymentReconciliationSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [tenderAmount, setTenderAmount] = useState<string>("0");
-  const [returnedAmount, setReturnedAmount] = useState<string>("0");
   const [selectedLocationObject, setSelectedLocationObject] = useAtom(
     locationAtomFamily(facilityId),
   );
   useShortcutSubContext();
 
+  const formSchema = createFormSchema();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
@@ -187,36 +186,29 @@ export function PaymentReconciliationSheet({
 
   // Watch for amount changes
   const amount = form.watch("amount");
-
-  // Update form when invoice changes
-  useEffect(() => {
-    if (invoice) {
-      form.setValue("target_invoice", invoice.id);
-      form.setValue("amount", String(invoice.total_gross));
-      setTenderAmount(String(invoice.total_gross));
-    }
-  }, [invoice, form]);
+  const tenderedAmount = form.watch("tendered_amount");
 
   // Calculate returned amount when tender amount, amount or payment method changes
   useEffect(() => {
     if (isCashPayment) {
       // For cash payments, calculate change to return
       const returned = String(
-        Math.max(0, Number(tenderAmount) - (Number(amount) || 0)),
+        Math.max(0, Number(tenderedAmount || 0) - (Number(amount) || 0)),
       );
-      setReturnedAmount(returned);
-      form.setValue("tendered_amount", tenderAmount);
       form.setValue("returned_amount", returned);
     } else {
       // For non-cash payments, tendered amount equals payment amount and returned is 0
       form.setValue("tendered_amount", amount || "0");
       form.setValue("returned_amount", "0");
-      setReturnedAmount("0");
     }
+  }, [tenderedAmount, amount, isCashPayment, form]);
+
+  // Update location when it changes
+  useEffect(() => {
     if (selectedLocationObject?.id) {
       form.setValue("location", selectedLocationObject.id);
     }
-  }, [tenderAmount, amount, isCashPayment, form, selectedLocationObject]);
+  }, [selectedLocationObject, form]);
 
   const { mutate: submitPayment, isPending } = useMutation({
     mutationFn: mutate(paymentReconciliationApi.createPaymentReconciliation, {
@@ -268,6 +260,7 @@ export function PaymentReconciliationSheet({
 
   useEffect(() => {
     if (open) {
+      const initialAmount = String(invoice?.total_gross || "0");
       form.reset({
         reconciliation_type: PaymentReconciliationType.payment,
         status: PaymentReconciliationStatus.active,
@@ -276,8 +269,8 @@ export function PaymentReconciliationSheet({
         outcome: PaymentReconciliationOutcome.complete,
         method: PaymentReconciliationPaymentMethod.cash,
         payment_datetime: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-        amount: String(invoice?.total_gross || "0"),
-        tendered_amount: String(invoice?.total_gross || "0"),
+        amount: initialAmount,
+        tendered_amount: initialAmount,
         returned_amount: "0",
         target_invoice: invoice?.id,
         reference_number: "",
@@ -466,7 +459,7 @@ export function PaymentReconciliationSheet({
                         onChange={(e) => {
                           field.onChange(e.target.value);
                           if (isCreditNote) {
-                            setTenderAmount(e.target.value);
+                            form.setValue("tendered_amount", e.target.value);
                           }
                         }}
                       />
@@ -491,12 +484,8 @@ export function PaymentReconciliationSheet({
                         </FormLabel>
                         <FormControl>
                           <MonetaryAmountInput
-                            value={tenderAmount || ""}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              setTenderAmount(value);
-                              field.onChange(value);
-                            }}
+                            {...field}
+                            value={field.value || ""}
                           />
                         </FormControl>
                         <FormDescription className="text-gray-700 italic -mt-1.5">
@@ -507,14 +496,14 @@ export function PaymentReconciliationSheet({
                     )}
                   />
 
-                  {Number(returnedAmount) > 0 && (
+                  {Number(form.watch("returned_amount")) > 0 && (
                     <div className="rounded-md bg-yellow-50 border border-yellow-500 p-2 mt-2">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-yellow-950">
                           {t("change_to_return")}:
                           <MonetaryDisplay
                             className="font-semibold text-yellow-950 ml-1"
-                            amount={returnedAmount}
+                            amount={form.watch("returned_amount") || "0"}
                           />
                         </span>
                       </div>
@@ -550,6 +539,9 @@ export function PaymentReconciliationSheet({
                   <FormItem>
                     <FormLabel className="text-gray-950">
                       {t("reference_number")}
+                      <span className="text-gray-600 italic">
+                        ({t("optional")})
+                      </span>
                     </FormLabel>
                     <FormControl>
                       <Input {...field} value={field.value || ""} />
