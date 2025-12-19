@@ -128,7 +128,9 @@ export default function FacilityOrganizationSelector(
   const handleConfirmSelection = useCallback(
     (org: FacilityOrganizationRead) => {
       if (!selectedOrganizations.includes(org)) {
-        const newSelection = [...selectedOrganizations, org];
+        const newSelection = singleSelection
+          ? [org]
+          : [...selectedOrganizations, org];
         setSelectedOrganizations(newSelection);
         onChange(newSelection.map((org) => org.id));
         setAlreadySelected(true);
@@ -419,41 +421,17 @@ export default function FacilityOrganizationSelector(
                 </Button>
               </div>
             ))}
-            {(!singleSelection ||
-              (singleSelection && selectedOrganizations.length < 1)) &&
-              (isMobile ? (
-                <>
-                  <Drawer open={open} onOpenChange={setOpen}>
-                    <DrawerTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={open}
-                        className="w-full justify-between border-dashed"
-                        onClick={() => setOpen(true)}
-                        type="button" // Prevents unintended form submission
-                      >
-                        <span className="truncate text-gray-500">
-                          {currentSelection
-                            ? currentSelection.name
-                            : t("select_department")}
-                        </span>
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </DrawerTrigger>
-                    <DrawerContent className="min-h-[50vh] max-h-[85vh]">
-                      {renderOrganizationCommand()}
-                    </DrawerContent>
-                  </Drawer>
-                </>
-              ) : (
-                <Popover open={open} onOpenChange={handleOpenChange}>
-                  <PopoverTrigger asChild>
+            {isMobile ? (
+              <>
+                <Drawer open={open} onOpenChange={setOpen}>
+                  <DrawerTrigger asChild>
                     <Button
                       variant="outline"
                       role="combobox"
                       aria-expanded={open}
                       className="w-full justify-between border-dashed"
+                      onClick={() => setOpen(true)}
+                      type="button" // Prevents unintended form submission
                     >
                       <span className="truncate text-gray-500">
                         {currentSelection
@@ -462,16 +440,38 @@ export default function FacilityOrganizationSelector(
                       </span>
                       <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    align="start"
-                    sideOffset={4}
-                    className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
-                  >
+                  </DrawerTrigger>
+                  <DrawerContent className="min-h-[50vh] max-h-[85vh]">
                     {renderOrganizationCommand()}
-                  </PopoverContent>
-                </Popover>
-              ))}
+                  </DrawerContent>
+                </Drawer>
+              </>
+            ) : (
+              <Popover open={open} onOpenChange={handleOpenChange}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-full justify-between border-dashed"
+                  >
+                    <span className="truncate text-gray-500">
+                      {currentSelection
+                        ? currentSelection.name
+                        : t("select_department")}
+                    </span>
+                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="start"
+                  sideOffset={4}
+                  className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
+                >
+                  {renderOrganizationCommand()}
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
         </div>
       </div>
