@@ -128,15 +128,9 @@ export default function UserDepartmentsTab({ userData }: userChildProps) {
   if (isLoading) {
     return (
       <div className="mt-8 space-y-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">
-            {t("departments")}
-          </h3>
-          <LinkUserToDepartmentSheet
-            userId={userData.id}
-            facilityId={facilityId}
-          />
-        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          {t("departments")}
+        </h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <CardGridSkeleton count={6} />
         </div>

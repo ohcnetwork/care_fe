@@ -12,12 +12,13 @@ import { Avatar } from "@/components/Common/Avatar";
 import { LoginHeader } from "@/components/Common/LoginHeader";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import { FacilityMapsLink } from "@/components/Facility/FacilityMapLink";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import useAppHistory from "@/hooks/useAppHistory";
 import useFilters from "@/hooks/useFilters";
 
-import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
+import facilityApi from "@/types/facility/facilityApi";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 
 import { FeatureBadge } from "./Utils";
@@ -42,9 +43,9 @@ export function FacilityDetailsPage({ id }: Props) {
   });
 
   const { data: docResponse, error: docError } = useQuery({
-    queryKey: [routes.getScheduleAbleFacilityUsers, id],
-    queryFn: query(routes.getScheduleAbleFacilityUsers, {
-      pathParams: { facility_id: id },
+    queryKey: ["facilityUsers", id],
+    queryFn: query(facilityApi.getUsers, {
+      pathParams: { facilityId: id },
       silent: true,
     }),
   });
@@ -60,23 +61,12 @@ export function FacilityDetailsPage({ id }: Props) {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center pb-4">
-          <Button
-            variant="outline"
-            className="border border-secondary-400"
-            onClick={() => goBack("/facilities")}
-          >
-            <CareIcon icon="l-arrow-left" className="size-4 mr-1" />
-            <span className="text-sm underline">{t("back")}</span>
-          </Button>
-          <LoginHeader />
-        </div>
         <Card className="overflow-hidden bg-white border border-gray-200">
           <div className="flex flex-col sm:flex-row m-6">
-            <div className="size-64 shrink-0 overflow-hidden rounded-lg bg-gray-200 animate-pulse" />
+            <Skeleton className="size-64 shrink-0 rounded-lg" />
             <div className="px-4 space-y-2 flex-1">
-              <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
-              <div className="h-6 w-64 bg-gray-200 rounded animate-pulse" />
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-6 w-64" />
             </div>
           </div>
         </Card>
