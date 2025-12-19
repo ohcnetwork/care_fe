@@ -84,7 +84,7 @@ const PAYMENT_METHODS = [
   {
     value: PaymentReconciliationPaymentMethod.chck,
     icon: Signature,
-    label: "cheque",
+    label: "check",
   },
 ] as const;
 

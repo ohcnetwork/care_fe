@@ -22,7 +22,7 @@ test.describe("Payment Reconciliation", () => {
       "Cash",
       "Credit Card",
       "Debit Card",
-      "Cheque",
+      "Check",
       "Direct Deposit",
     ];
     const selectedMethod = faker.helpers.arrayElement(paymentMethods);
