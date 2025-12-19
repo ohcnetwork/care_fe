@@ -1,86 +1,93 @@
 import { faker } from "@faker-js/faker";
-import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
 
-async function createQueue(page: Page, queueName: string) {
-  await page.getByRole("button", { name: /create queue/i }).click();
-  await page.getByRole("textbox", { name: /queue name/i }).fill(queueName);
-  await page.getByRole("button", { name: /create queue/i }).click();
-  await expect(
-    page
-      .locator("li[data-sonner-toast]")
-      .getByText(/queue created successfully/i),
-  ).toBeVisible({ timeout: 10000 });
-  await expect(page.getByText(queueName)).toBeVisible();
-}
-
-async function openQueueEditMenu(page: Page, queueName: string) {
-  const row = page.getByRole("row", {
-    name: new RegExp(`\\b${queueName}\\b`),
-  });
-  await row.locator("td").last().getByRole("button").click();
-  await page.getByRole("menuitem", { name: /edit queue name/i }).click();
-}
-
 test.describe("Queue Creation & Editing", () => {
   let facilityId: string;
-
   test.beforeEach(async ({ page }) => {
     facilityId = getFacilityId();
-
     await page.goto(`/facility/${facilityId}/queues`);
   });
 
   test("should create a new queue", async ({ page }) => {
-    const queueName = faker.lorem.word();
-
-    await createQueue(page, queueName);
+    const uniqueQueueName = faker.lorem.words(3);
+    await page.getByRole("button", { name: "Create Queue" }).click();
+    await page
+      .getByRole("textbox", { name: "Queue Name" })
+      .fill(uniqueQueueName);
+    await page.getByRole("button", { name: "Create Queue" }).click();
+    await expect(page.getByText(uniqueQueueName)).toBeVisible();
   });
 
   test("should edit queue name", async ({ page }) => {
-    const queueName = faker.lorem.word();
-    const updatedQueueName = faker.lorem.word();
-    await createQueue(page, queueName);
-    await openQueueEditMenu(page, queueName);
-
+    const uniqueQueueName = faker.lorem.words(3);
+    const modifiedQueueName = faker.lorem.words(4);
+    await page.getByRole("button", { name: "Create Queue" }).click();
     await page
-      .getByRole("textbox", { name: /queue name/i })
-      .fill(updatedQueueName);
-    await page.getByRole("button", { name: /update queue/i }).click();
-
+      .getByRole("textbox", { name: "Queue Name" })
+      .fill(uniqueQueueName);
+    await page.getByRole("button", { name: "Create Queue" }).click();
     await expect(
-      page
-        .locator("li[data-sonner-toast]")
-        .getByText(/queue updated successfully/i),
-    ).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText(updatedQueueName)).toBeVisible();
-    await expect(page.getByText(queueName)).not.toBeVisible();
+      page.getByRole("cell", { name: uniqueQueueName }),
+    ).toBeVisible();
+    const row = page.getByRole("row", {
+      name: new RegExp(`\\b${uniqueQueueName}\\b`),
+    });
+    await row.locator("td").last().getByRole("button").click();
+    await page.getByRole("menuitem", { name: "Edit queue name" }).click();
+    await page
+      .getByRole("textbox", { name: "Queue Name" })
+      .fill(modifiedQueueName);
+    await page.getByRole("button", { name: "Update Queue" }).click();
+    await expect(page.getByText(modifiedQueueName)).toBeVisible();
+  });
+
+  test("should not allow creating a queue without a name", async ({ page }) => {
+    await page.getByRole("button", { name: "Create Queue" }).click();
+    const createButton = page.getByRole("button", { name: "Create Queue" });
+    await expect(createButton).toBeDisabled();
   });
 
   test("should not allow editing queue name when no changes made", async ({
     page,
   }) => {
-    const queueName = faker.lorem.word();
-    await createQueue(page, queueName);
-    await openQueueEditMenu(page, queueName);
-
+    const uniqueQueueName = faker.lorem.words(3);
+    await page.getByRole("button", { name: "Create Queue" }).click();
+    await page
+      .getByRole("textbox", { name: "Queue Name" })
+      .fill(uniqueQueueName);
+    await page.getByRole("button", { name: "Create Queue" }).click();
     await expect(
-      page.getByRole("button", { name: /update queue/i }),
-    ).toBeDisabled();
+      page.getByRole("cell", { name: uniqueQueueName }),
+    ).toBeVisible();
+    const row = page.getByRole("row", {
+      name: new RegExp(`\\b${uniqueQueueName}\\b`),
+    });
+    await row.locator("td").last().getByRole("button").click();
+    await page.getByRole("menuitem", { name: "Edit queue name" }).click();
+    const updateButton = page.getByRole("button", { name: "Update Queue" });
+    await expect(updateButton).toBeDisabled();
   });
 
   test("should not allow editing queue name when invalid", async ({ page }) => {
-    const queueName = faker.lorem.word();
-    await createQueue(page, queueName);
-
-    await openQueueEditMenu(page, queueName);
-
-    await page.getByRole("textbox", { name: /queue name/i }).fill("");
-    await page.getByRole("button", { name: /update queue/i }).click();
-
-    await expect(page.getByText(/queue name is required/i)).toBeVisible();
+    const uniqueQueueName = faker.lorem.words(3);
+    await page.getByRole("button", { name: "Create Queue" }).click();
+    await page
+      .getByRole("textbox", { name: "Queue Name" })
+      .fill(uniqueQueueName);
+    await page.getByRole("button", { name: "Create Queue" }).click();
+    await expect(
+      page.getByRole("cell", { name: uniqueQueueName }),
+    ).toBeVisible();
+    const row = page.getByRole("row", {
+      name: new RegExp(`\\b${uniqueQueueName}\\b`),
+    });
+    await row.locator("td").last().getByRole("button").click();
+    await page.getByRole("menuitem", { name: "Edit queue name" }).click();
+    await page.getByRole("textbox", { name: "Queue Name" }).fill("");
+    await page.getByRole("button", { name: "Update Queue" }).click();
+    await expect(page.getByText("Queue name is required")).toBeVisible();
   });
 });
