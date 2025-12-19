@@ -147,10 +147,17 @@ export const PractitionerSelector = ({
 
   // Fetch all practitioners for search functionality
   const { data: allPractitioners } = useQuery({
-    queryKey: ["allPractitioners", facilityId, searchQuery],
+    queryKey: ["allPractitioners", facilityId, searchQuery, showAllOrgs],
     queryFn: query(scheduleApi.appointments.availableUsers, {
       pathParams: { facilityId },
-      queryParams: { limit: 10 },
+      queryParams: {
+        limit: 10,
+        ...(showAllOrgs
+          ? {}
+          : {
+              organization_ids: organizations.map((org) => org.id).join(","),
+            }),
+      },
     }),
     enabled: open && !!searchQuery && searchQuery.length > 0,
   });
