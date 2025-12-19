@@ -48,7 +48,13 @@ export function UpdateSpecimenDefinition({
 
   if (isFetching) {
     return (
-      <div className="p-4">
+      <div
+        className="p-4"
+        role="status"
+        aria-live="polite"
+        aria-label={t("loading")}
+      >
+        <span className="sr-only">{t("loading")}</span>
         <FormSkeleton rows={4} />
       </div>
     );
