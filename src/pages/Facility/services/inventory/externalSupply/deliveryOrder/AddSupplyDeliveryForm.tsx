@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Trash2 } from "lucide-react";
 import { useQueryParams } from "raviger";
 import { useCallback, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -81,7 +81,12 @@ import { JSONSchema2020 } from "@/Utils/schema/types";
 
 const supplyDeliveryItemSchema = z.object({
   supplied_inventory_item: z.string().optional(),
-  supplied_item_quantity: z.number().min(1, "Quantity must be at least 1"),
+  supplied_item_quantity: z
+    .number()
+    .or(z.nan())
+    .refine((val) => !isNaN(val) && val > 0, {
+      message: "Quantity must be at least 1",
+    }),
   product_knowledge: z
     .custom<ProductKnowledgeBase>()
     .refine((data) => data?.slug, {
@@ -654,6 +659,9 @@ export function AddSupplyDeliveryForm({
                                 ))}
                               </>
                             )}
+                            <TableHead className="text-xs font-semibold">
+                              {t("actions")}
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -758,6 +766,17 @@ export function AddSupplyDeliveryForm({
                                     )}
                                   />
                                 </TableCell>
+                                <TableCell className="align-top p-2">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => remove(index)}
+                                    aria-label={t("remove")}
+                                  >
+                                    <Trash2 className="size-4" />
+                                  </Button>
+                                </TableCell>
                               </TableRow>
                             ) : (
                               <SmartExternalDeliveryRow
@@ -772,6 +791,7 @@ export function AddSupplyDeliveryForm({
                                   setNewlyAddedRowIndex(null)
                                 }
                                 extensionsSchema={extensionsSchema}
+                                onRemove={() => remove(index)}
                               />
                             ),
                           )}
