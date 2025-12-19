@@ -286,7 +286,7 @@ export function PaymentReconciliationSheet({
         location: selectedLocationObject?.id,
       });
     }
-  }, [open, invoice, accountId, isCreditNote, selectedLocationObject]);
+  }, [open, invoice, accountId, isCreditNote]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
