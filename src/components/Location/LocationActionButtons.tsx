@@ -11,17 +11,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { LocationHistory } from "@/types/emr/encounter/encounter";
-import { LocationAssociationStatus } from "@/types/location/association";
+import {
+  LocationAssociationRead,
+  LocationAssociationStatus,
+} from "@/types/location/association";
 
 interface LocationActionButtonsProps {
   status: LocationAssociationStatus;
-  location: LocationHistory;
+  location: LocationAssociationRead;
   onMove: () => void;
-  onComplete?: (location: LocationHistory) => void;
+  onComplete?: (location: LocationAssociationRead) => void;
   onCancel: () => void;
   onAssignNow?: () => void;
-  onUpdateTime?: (location: LocationHistory) => void;
+  onUpdateTime?: (location: LocationAssociationRead) => void;
 }
 
 export function LocationActionButtons({
@@ -44,24 +46,10 @@ export function LocationActionButtons({
 
   const buttons: ActionButton[] = [];
 
-  buttons.push({
-    label: status === "planned" ? t("cancel_plan") : t("mark_as_error"),
-    onClick: onCancel,
-    variant: "destructive",
-    className: "",
-  });
-
-  buttons.push({
-    label: t("move_to_another_bed"),
-    onClick: onMove,
-    variant: "outline",
-    className: "border-gray-400 shadow-sm",
-  });
-
-  if (status === "active" && onComplete) {
+  if (status !== "reserved") {
     buttons.push({
-      label: t("complete_bed_stay"),
-      onClick: () => onComplete(location),
+      label: t("move_to_another_bed"),
+      onClick: onMove,
       variant: "outline",
       className: "border-gray-400 shadow-sm",
     });
@@ -78,18 +66,16 @@ export function LocationActionButtons({
 
   return (
     <div className="flex flex-wrap gap-2 items-center">
-      <div className="flex flex-wrap gap-2 flex-1">
-        {buttons.map((button, index) => (
-          <Button
-            key={index}
-            variant={button.variant}
-            onClick={button.onClick}
-            className={cn("sm:w-auto w-full", button.className)}
-          >
-            {button.label}
-          </Button>
-        ))}
-      </div>
+      {buttons.map((button, index) => (
+        <Button
+          key={index}
+          variant={button.variant}
+          onClick={button.onClick}
+          className={cn("sm:w-auto w-full", button.className)}
+        >
+          {button.label}
+        </Button>
+      ))}
       {onUpdateTime && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -98,6 +84,14 @@ export function LocationActionButtons({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {status === "reserved" && onComplete && (
+              <DropdownMenuItem onClick={() => onComplete(location)}>
+                {t("complete_bed_stay")}
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={() => onCancel()}>
+              {status === "planned" ? t("cancel_plan") : t("mark_as_error")}
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onUpdateTime(location)}>
               {t("update_time")}
             </DropdownMenuItem>
