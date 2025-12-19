@@ -171,6 +171,7 @@ export default function CreateTokenForm({
         resource: null,
         resource_type: SchedulableResourceType.Practitioner,
       });
+      form.reset();
     }
   };
 
