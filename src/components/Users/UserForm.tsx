@@ -831,10 +831,7 @@ export default function UserForm({
         >
           {updatePending || createPending ? (
             <>
-              <CareIcon
-                icon="l-spinner"
-                className="mr-2 size-4 animate-spin"
-              />
+              <CareIcon icon="l-spinner" className="mr-2 size-4 animate-spin" />
 
               {t("saving")}
             </>
