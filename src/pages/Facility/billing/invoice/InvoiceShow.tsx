@@ -942,13 +942,16 @@ export function InvoiceShow({
                   <span>{t("total")}</span>
                   <MonetaryDisplay amount={String(invoice.total_gross)} />
                 </div>
-                <div className="p-1 border-t-2 border-dashed border-gray-200 w-full" />
+                <div className="p-1 pb-2.5 border-t-2 border-dashed border-gray-200 w-full" />
               </div>
             </div>
 
             {invoice.payments?.length > 0 && (
               <>
                 <div className="border-x border-b border-t border-gray-300 rounded-b-md -mt-4 space-y-2">
+                  <div className="-mt-7 px-3 font-medium ">
+                    {t("payments_received_against_this_invoice")}
+                  </div>
                   <Table>
                     <TableHeader>
                       <TableRow className="border-b border-gray-200">
