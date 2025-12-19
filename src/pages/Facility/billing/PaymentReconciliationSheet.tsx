@@ -125,8 +125,6 @@ export function PaymentReconciliationSheet({
 }: PaymentReconciliationSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [tenderAmount, setTenderAmount] = useState<string>("");
-  const [returnedAmount, setReturnedAmount] = useState<string>("0");
   const [selectedLocationObject, setSelectedLocationObject] = useAtom(
     locationAtomFamily(facilityId),
   );
