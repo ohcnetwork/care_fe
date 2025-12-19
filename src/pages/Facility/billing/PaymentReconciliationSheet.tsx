@@ -266,7 +266,9 @@ export function PaymentReconciliationSheet({
     if (open) {
       const initialAmount = String(invoice?.total_gross || "0");
       form.reset({
-        reconciliation_type: PaymentReconciliationType.payment,
+        reconciliation_type: invoice
+          ? PaymentReconciliationType.payment
+          : PaymentReconciliationType.advance,
         status: PaymentReconciliationStatus.active,
         kind: PaymentReconciliationKind.deposit,
         issuer_type: PaymentReconciliationIssuerType.patient,
