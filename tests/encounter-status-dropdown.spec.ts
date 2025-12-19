@@ -32,4 +32,38 @@ test.describe("Encounter Status Dropdown Logic", () => {
       expect(optionValues).not.toContain("unknown");
     });
   });
+
+  test.describe("Transition to discharged", () => {
+    test("should lock dropdown after discharge", async ({ page }) => {
+      await page.goto(
+        `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
+      );
+
+      // Verify initial state
+      await expect(page.getByTestId("encounter-status-select")).toBeEnabled();
+
+      // Click "Mark for Discharge"
+      await page.getByTestId("mark-as-discharged").click();
+
+      // Handle Critical Verification Dialog
+      const confirmInput = page.getByRole("textbox", {
+        name: /type "Discharge Patient" to confirm/i,
+      });
+      if (await confirmInput.isVisible()) {
+        await confirmInput.fill("Discharge Patient");
+      } else {
+        await page.getByLabel(/type.*to confirm/i).fill("Discharge Patient");
+      }
+
+      await page.getByRole("button", { name: "Proceed" }).click();
+
+      // Verify dropdown is locked
+      await expect(page.getByTestId("encounter-status-select")).toBeDisabled();
+
+      // Verify output shows Discharged
+      await expect(page.getByTestId("encounter-status")).toHaveText(
+        "Discharged",
+      );
+    });
+  });
 });
