@@ -321,7 +321,7 @@ export const PractitionerSelector = ({
               </div>
             </div>
 
-            <CommandList className="max-h-[calc(100vh-30rem)]">
+            <CommandList className="md:max-h-[30dvh] overflow-y-auto">
               <CommandEmpty>
                 {searchQuery ? (
                   <div className="p-6 text-center text-gray-500">
