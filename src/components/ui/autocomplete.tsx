@@ -49,6 +49,7 @@ interface AutocompleteProps {
   align?: "start" | "center" | "end";
   className?: string;
   popoverClassName?: string;
+  popoverContentClassName?: string;
   freeInput?: boolean;
   closeOnSelect?: boolean;
   showClearButton?: boolean;
@@ -72,6 +73,7 @@ export default function Autocomplete({
   align = "center",
   className,
   popoverClassName,
+  popoverContentClassName,
   freeInput = false,
   closeOnSelect = true,
   showClearButton = true,
@@ -290,7 +292,10 @@ export default function Autocomplete({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]"
+          className={cn(
+            "p-0 pointer-events-auto w-[var(--radix-popover-trigger-width)]",
+            popoverContentClassName,
+          )}
           align={align}
         >
           <Command>{commandContent}</Command>
