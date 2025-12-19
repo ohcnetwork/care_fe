@@ -123,7 +123,11 @@ const createFormSchema = () =>
       issuer_type: z.nativeEnum(PaymentReconciliationIssuerType),
       outcome: z.nativeEnum(PaymentReconciliationOutcome),
       method: z.nativeEnum(PaymentReconciliationPaymentMethod),
-      payment_datetime: z.string(),
+      payment_datetime: z
+        .string()
+        .refine((val) => new Date(val) <= new Date(), {
+          message: t("payment_date_cannot_be_in_future"),
+        }),
       amount: z.string().refine(
         (val) => {
           const num = Number(val);
@@ -525,6 +529,7 @@ export function PaymentReconciliationSheet({
                         type="datetime-local"
                         {...field}
                         value={field.value ? field.value : ""}
+                        max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                       />
                     </FormControl>
                     <FormMessage />
