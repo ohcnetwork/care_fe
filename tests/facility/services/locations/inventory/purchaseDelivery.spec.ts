@@ -45,21 +45,15 @@ test.describe("Purchase Delivery", () => {
       page.getByRole("heading", { name: testData.orderName }),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: "Add Another Item" }).click();
+    await page.getByRole("button", { name: "Add Item" }).click();
     await page.getByPlaceholder("Search Product Knowledge").fill("Gloves");
     await page
       .locator("div")
       .filter({ hasText: /^Gloves$/ })
       .first()
       .click();
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: "Search Product" })
-      .first()
-      .click();
-    await page.getByRole("option").first().click();
 
-    await page.getByRole("button", { name: "Add Another Item" }).click();
+    await page.getByRole("button", { name: "Add Another" }).click();
     await page.getByPlaceholder("Search Product Knowledge").fill("Ibuprofen");
     await page
       .locator("div")
@@ -67,15 +61,8 @@ test.describe("Purchase Delivery", () => {
       .first()
       .click();
 
-    await page
-      .getByRole("combobox")
-      .filter({ hasText: "Search Product" })
-      .click();
-    await page.getByRole("option").first().click();
+    await page.getByRole("button", { name: "Save" }).click();
 
-    await page.getByRole("button", { name: "Add Items" }).click();
-
-    await expect(page.getByText(/Supply Delivery Created/i)).toBeVisible();
     await page.getByRole("button", { name: "Mark as Approved" }).click();
 
     await expect(

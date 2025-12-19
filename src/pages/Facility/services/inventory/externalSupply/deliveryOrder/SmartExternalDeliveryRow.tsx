@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
@@ -50,6 +51,7 @@ interface Props {
   informationalCodes: Code[];
   autoOpenProductSelect?: boolean;
   onProductSelectOpened?: () => void;
+  onRemove?: () => void;
 }
 
 export function SmartExternalDeliveryRow({
@@ -58,6 +60,7 @@ export function SmartExternalDeliveryRow({
   informationalCodes,
   autoOpenProductSelect = false,
   onProductSelectOpened,
+  onRemove,
 }: Props) {
   const { facilityId } = useCurrentFacility();
   const { t } = useTranslation();
@@ -302,7 +305,7 @@ export function SmartExternalDeliveryRow({
             <Input
               type="number"
               min={0}
-              step="1"
+              step="0.01"
               value={unitPrice || ""}
               placeholder="0"
               onChange={(e) => {
@@ -347,7 +350,7 @@ export function SmartExternalDeliveryRow({
               <Input
                 type="number"
                 min={0}
-                step="1"
+                step="0.01"
                 value={currentValue?.amount || ""}
                 placeholder="0"
                 onChange={(e) => {
@@ -412,6 +415,17 @@ export function SmartExternalDeliveryRow({
             displayMode="short"
           />
         </span>
+      </TableCell>
+      <TableCell>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onRemove}
+          aria-label={t("remove")}
+        >
+          <Trash2 className="size-4" />
+        </Button>
       </TableCell>
     </TableRow>
   );

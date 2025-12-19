@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-import { LocationHistory as LocationHistoryType } from "@/types/emr/encounter/encounter";
+import { LocationAssociationRead as LocationHistoryType } from "@/types/location/association";
 
 import { LocationTree } from "./LocationTree";
 
