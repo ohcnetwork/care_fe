@@ -238,19 +238,29 @@ export function EncounterQuestion({
 
   const isDischarged = encounter.status === EncounterStatus.DISCHARGED;
 
+  const showStatusOption = (status: EncounterStatus) => {
+    if (isDischarged) return true;
+    return (
+      status !== EncounterStatus.DISCHARGED &&
+      status !== EncounterStatus.UNKNOWN
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Details */}
         <div className="space-y-2">
           <Label>{t("encounter_status")}</Label>
-          <output
-            data-testid="encounter-status"
-            aria-label={t("current_encounter_status")}
-            className="block w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm"
-          >
-            {t(`encounter_status__${encounter.status}`)}
-          </output>
+          {isDischarged && (
+            <output
+              data-testid="encounter-status"
+              aria-label={t("current_encounter_status")}
+              className="block w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm"
+            >
+              {t(`encounter_status__${encounter.status}`)}
+            </output>
+          )}
           <Select
             value={encounter.status}
             onValueChange={(value: EncounterStatus) => {
@@ -266,13 +276,8 @@ export function EncounterQuestion({
             </SelectTrigger>
             <SelectContent>
               {Object.values(EncounterStatus)
-                .filter(
-                  (status) =>
-                    isDischarged ||
-                    (status !== EncounterStatus.DISCHARGED &&
-                      status !== EncounterStatus.UNKNOWN),
-                )
-                .map((encounterStatus: EncounterStatus) => (
+                .filter(showStatusOption)
+                .map((encounterStatus) => (
                   <SelectItem
                     key={encounterStatus}
                     value={encounterStatus}

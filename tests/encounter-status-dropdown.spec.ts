@@ -39,21 +39,44 @@ test.describe("Encounter Status Dropdown Logic", () => {
         `/facility/${facilityId}/patient/${patientId}/encounter/${encounterId}/updates`,
       );
 
-      // Verify initial state
+      // Verify initial state: dropdown should be enabled
       await expect(page.getByTestId("encounter-status-select")).toBeEnabled();
 
-      // Click "Mark for Discharge"
+      // Mock the discharge request to avoid persisting state changes to the backend
+      await page.route(`**/api/v1/encounter/${encounterId}/`, async (route) => {
+        if (
+          route.request().method() === "PATCH" ||
+          route.request().method() === "PUT"
+        ) {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({
+              id: encounterId,
+              status: "discharged",
+              encounter_class: "imp",
+              period: { start: new Date().toISOString() },
+              hospitalization: {
+                discharge_disposition: "home",
+              },
+              patient: { id: patientId },
+              facility: { id: facilityId },
+            }),
+          });
+        } else {
+          await route.continue();
+        }
+      });
+
+      // Trigger the discharge flow
       await page.getByTestId("mark-as-discharged").click();
 
-      // Handle Critical Verification Dialog
+      // Handle the confirmation dialog
       const confirmInput = page.getByRole("textbox", {
         name: /type "Discharge Patient" to confirm/i,
       });
-      if (await confirmInput.isVisible()) {
-        await confirmInput.fill("Discharge Patient");
-      } else {
-        await page.getByLabel(/type.*to confirm/i).fill("Discharge Patient");
-      }
+      await expect(confirmInput).toBeVisible();
+      await confirmInput.fill("Discharge Patient");
 
       await page.getByRole("button", { name: "Proceed" }).click();
 
