@@ -130,7 +130,7 @@ interface ServiceRequestFormProps {
   isPreview?: boolean;
   activityDefinition?: ActivityDefinitionReadSpec;
   facilityId?: string;
-  locations?: LocationList[];
+  locations?: LocationRead[];
 }
 
 function ServiceRequestForm({
@@ -157,7 +157,7 @@ function ServiceRequestForm({
     const locationIds = serviceRequest.service_request.locations || [];
     return locationIds
       .map((id) => locations.find((loc) => loc.id === id))
-      .filter((loc): loc is LocationList => Boolean(loc));
+      .filter((loc): loc is LocationRead => Boolean(loc));
   };
 
   const locationDetails = getLocationDetails();
