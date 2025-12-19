@@ -330,7 +330,8 @@ function checkForDuplicateDiagnosis(
   const isDuplicate = existingDiagnoses.some(
     (diagnosis) =>
       diagnosis.code.code === codeValue &&
-      diagnosis.verification_status !== "entered_in_error",
+      diagnosis.verification_status !== "entered_in_error" &&
+      diagnosis.clinical_status !== "resolved",
   );
 
   if (isDuplicate) {
@@ -399,7 +400,11 @@ export function DiagnosisQuestion({
         questionnaireResponse.question_id,
       );
     }
-  }, [patientDiagnoses]);
+  }, [
+    patientDiagnoses,
+    questionnaireResponse.question_id,
+    updateQuestionnaireResponseCB,
+  ]);
 
   const handleCodeSelect = (code: Code) => {
     if (checkForDuplicateDiagnosis(sortedDiagnoses, code, t)) {

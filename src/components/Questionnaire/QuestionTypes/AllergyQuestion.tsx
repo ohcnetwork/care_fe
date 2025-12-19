@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -550,6 +551,29 @@ const AllergyItem = ({
   );
 };
 
+function checkForDuplicateAllergy(
+  existingAllergies: AllergyIntoleranceRequest[],
+  newAllergy: Pick<AllergyIntoleranceRequest, "code"> | Code,
+  t: (key: string) => string,
+) {
+  const codeToCheck = "code" in newAllergy ? newAllergy.code : newAllergy;
+  const codeValue =
+    typeof codeToCheck === "string" ? codeToCheck : codeToCheck.code;
+
+  const isDuplicate = existingAllergies.some(
+    (allergy) =>
+      allergy.code.code === codeValue &&
+      allergy.verification_status !== "entered_in_error" &&
+      allergy.clinical_status !== "resolved",
+  );
+
+  if (isDuplicate) {
+    toast.warning(t("allergy_already_exist_warning"));
+    return true;
+  }
+  return false;
+}
+
 export function AllergyQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
@@ -593,9 +617,16 @@ export function AllergyQuestion({
         questionnaireResponse.question_id,
       );
     }
-  }, [patientAllergies]);
+  }, [
+    patientAllergies,
+    questionnaireResponse.question_id,
+    updateQuestionnaireResponseCB,
+  ]);
 
   const handleAddAllergy = (code: Code) => {
+    if (checkForDuplicateAllergy(allergies, code, t)) {
+      return;
+    }
     const newAllergy = {
       ...ALLERGY_INITIAL_VALUE,
       code,
