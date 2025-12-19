@@ -275,9 +275,7 @@ export default function CreateEncounterForm({
                     >
                       <FormControl>
                         <SelectTrigger ref={field.ref}>
-                          <SelectValue
-                            placeholder={t("fasting_status_placeholder")}
-                          />
+                          <SelectValue placeholder={t("select_status")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

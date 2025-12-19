@@ -2283,7 +2283,6 @@
   "fasting_duration": "Fasting Duration (optional)",
   "fasting_duration_placeholder": "Duration value (e.g., 8)",
   "fasting_status": "Fasting Status",
-  "fasting_status_placeholder": "Select status",
   "favorites": "Favorites",
   "features": "Features",
   "feed_configurations": "Feed Configurations",
