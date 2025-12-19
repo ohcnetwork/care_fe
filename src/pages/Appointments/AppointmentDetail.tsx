@@ -46,11 +46,10 @@ import {
   SchedulableResourceType,
   formatScheduleResourceName,
 } from "@/types/scheduling/schedule";
-import {
-  formatName,
-  getReadableDuration,
-  stringifyNestedObject,
-} from "@/Utils/utils";
+import scheduleApis from "@/types/scheduling/scheduleApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { formatName, getReadableDuration } from "@/Utils/utils";
 import {
   AvatarIcon,
   CalendarIcon,
@@ -111,10 +110,7 @@ import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
 import { FacilityRead } from "@/types/facility/facility";
-import scheduleApis from "@/types/scheduling/scheduleApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
 import { toast } from "sonner";
 
@@ -526,7 +522,6 @@ export default function AppointmentDetail(props: Props) {
                         />
                       }
                       onSuccess={() => {
-                        console.log("invalidating appointment", appointment.id);
                         queryClient.invalidateQueries({
                           queryKey: ["appointment", appointment.id],
                         });
@@ -699,11 +694,6 @@ const AppointmentDetailsContent = ({
                       <span className="text-gray-500">
                         {t("no_address_provided")}
                       </span>
-                    )}
-                  </p>
-                  <p className="text-gray-600 break-words">
-                    {stringifyNestedObject(
-                      appointment.patient.geo_organization,
                     )}
                   </p>
                   <p className="text-gray-600">

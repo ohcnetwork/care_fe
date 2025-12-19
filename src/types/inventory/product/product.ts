@@ -27,11 +27,13 @@ export interface ProductBase {
 export interface ProductCreate extends Omit<ProductBase, "id"> {
   product_knowledge: string;
   charge_item_definition?: string;
+  extensions: Record<string, unknown>;
 }
 
 export interface ProductUpdate extends ProductBase {
   charge_item_definition?: string;
   product_knowledge: string;
+  extensions: Record<string, unknown>;
 }
 
 export interface ProductRead extends ProductBase {
