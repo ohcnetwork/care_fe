@@ -167,7 +167,7 @@ export default function DispensesView({
               className="border-gray-400 font-semibold"
               onClick={() =>
                 navigate(
-                  `/facility/${facilityId}/locations/${locationId}/dispense_orders/${dispenseOrderId}/print`,
+                  `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/print`,
                 )
               }
             >
