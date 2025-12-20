@@ -42,6 +42,10 @@ test.describe("Facility Location Edit", () => {
         .getByRole("textbox", { name: "Search by name" })
         .fill(locationName);
       await page.locator("button[title='Edit Location']").first().click();
+      // Wait for form to load (skeleton loader to disappear)
+      await expect(
+        page.getByRole("combobox", { name: "Status", exact: true }),
+      ).toBeVisible({ timeout: 10000 });
     });
 
     await test.step("Determine different values", async () => {
@@ -92,6 +96,11 @@ test.describe("Facility Location Edit", () => {
 
     await test.step("Verify updates in edit form", async () => {
       await page.locator("button[title='Edit Location']").first().click();
+
+      // Wait for form to load (skeleton loader to disappear)
+      await expect(
+        page.getByRole("textbox", { name: "Description" }),
+      ).toBeVisible({ timeout: 10000 });
 
       await expect(
         page.getByRole("textbox", { name: "Description" }),

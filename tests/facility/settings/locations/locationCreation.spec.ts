@@ -66,6 +66,11 @@ test.describe("Facility Location Creation", () => {
     await test.step("Verify location in edit form", async () => {
       await page.locator("button[title='Edit Location']").first().click();
 
+      // Wait for form to load (skeleton loader to disappear)
+      await expect(
+        page.getByRole("combobox", { name: "Location Form" }),
+      ).toBeVisible({ timeout: 10000 });
+
       await expect(
         page.getByRole("combobox", { name: "Location Form" }),
       ).toBeDisabled();
@@ -126,6 +131,11 @@ test.describe("Facility Location Creation", () => {
 
     await test.step("Verify location in edit form", async () => {
       await page.locator("button[title='Edit Location']").first().click();
+
+      // Wait for form to load (skeleton loader to disappear)
+      await expect(
+        page.getByRole("combobox", { name: "Location Form" }),
+      ).toBeVisible({ timeout: 10000 });
 
       await expect(
         page.getByRole("combobox", { name: "Location Form" }),

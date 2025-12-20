@@ -67,6 +67,10 @@ test.describe("Specimen Definitions Edit", () => {
       .fill(definitionTitle);
 
     await page.getByRole("link", { name: /edit/i }).first().click();
+    // Wait for form to load (skeleton loader to disappear)
+    await expect(page.getByRole("textbox", { name: "Title *" })).toBeVisible({
+      timeout: 10000,
+    });
 
     // Edit all fields
     await page
