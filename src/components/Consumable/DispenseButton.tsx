@@ -134,7 +134,6 @@ export const DispenseButton = ({
             `/encounter/${selectedEncounter.id}/updates`,
             facilityId,
           )}
-          patientId={selectedEncounter.patient.id}
         />
       )}
     </>

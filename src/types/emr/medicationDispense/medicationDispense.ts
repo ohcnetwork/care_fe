@@ -1,4 +1,5 @@
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
+import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { MedicationRequestDosageInstruction } from "@/types/emr/medicationRequest/medicationRequest";
 import { InventoryRead } from "@/types/inventory/product/inventory";
@@ -205,6 +206,7 @@ export interface MedicationDispenseRead extends MedicationDispenseBase {
   created_date: string;
   location: LocationRead;
   quantity: number;
+  order: DispenseOrderRead;
 }
 
 export interface MedicationDispenseSummary {

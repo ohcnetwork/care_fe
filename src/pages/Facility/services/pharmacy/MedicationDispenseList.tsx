@@ -373,7 +373,7 @@ export default function MedicationDispenseList({
               className="w-full sm:w-auto border-gray-400 font-semibold"
             >
               <Link
-                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`}
+                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/?patientId=${patientId}`}
                 basePath="/"
               >
                 {t("dispenses")}

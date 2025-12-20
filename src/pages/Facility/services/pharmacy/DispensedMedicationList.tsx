@@ -275,6 +275,7 @@ interface Props {
   patientId: string;
   locationId: string;
   status: MedicationDispenseStatus;
+  dispenseOrderId?: string;
 }
 
 export default function DispensedMedicationList({
@@ -282,6 +283,7 @@ export default function DispensedMedicationList({
   patientId,
   locationId,
   status,
+  dispenseOrderId,
 }: Props) {
   useShortcutSubContext("facility:pharmacy");
   const { t } = useTranslation();
@@ -298,14 +300,14 @@ export default function DispensedMedicationList({
   const [createInvoiceSheetOpen, setCreateInvoiceSheetOpen] = useState(false);
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["medication_dispense", patientId, qParams, status],
+    queryKey: ["medication_dispense", dispenseOrderId, qParams, status],
     queryFn: query(medicationDispenseApi.list, {
       queryParams: {
         location: locationId,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
         status: status ?? qParams.status,
-        patient: patientId,
+        order: dispenseOrderId,
       },
     }),
   });
@@ -615,7 +617,7 @@ export default function DispensedMedicationList({
           open={createInvoiceSheetOpen}
           onOpenChange={setCreateInvoiceSheetOpen}
           preSelectedChargeItems={billableChargeItems}
-          sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`}
+          sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/preparation`}
           onSuccess={() => {
             setCreateInvoiceSheetOpen(false);
             setBillableChargeItems([]);

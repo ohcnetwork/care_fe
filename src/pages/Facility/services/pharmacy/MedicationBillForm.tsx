@@ -97,6 +97,10 @@ import {
   extractChargeItemsFromBatchResponse,
 } from "@/types/billing/chargeItem/chargeItem";
 import {
+  DispenseOrderBatchResponse,
+  extractDispenseOrderFromBatchResponse,
+} from "@/types/emr/dispenseOrder/dispenseOrder";
+import {
   MEDICATION_DISPENSE_STATUS_COLORS,
   MedicationDispenseCategory,
   MedicationDispenseCreate,
@@ -721,6 +725,7 @@ export default function MedicationBillForm({ patientId }: Props) {
   const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
     `${patientId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
   );
+  const [dispenseOrderId, setDispenseOrderId] = useState<string | null>(null);
 
   const { mutate: updateMedicationRequest } = useMutation({
     mutationFn: (medication: MedicationRequestRead) => {
@@ -968,11 +973,22 @@ export default function MedicationBillForm({ patientId }: Props) {
 
   const { mutate: dispense, isPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
-    onSuccess: (response) => {
+    onSuccess: (response: any) => {
       toast.success(t("medications_billed_and_prescriptions_completed"));
       queryClient.invalidateQueries({
         queryKey: ["medication_requests", patientId, "dispense"],
       });
+
+      let dispenseOrderId: string | null = null;
+
+      const dispenseOrder = extractDispenseOrderFromBatchResponse(
+        response as DispenseOrderBatchResponse,
+      );
+
+      if (dispenseOrder) {
+        dispenseOrderId = dispenseOrder.id;
+        setDispenseOrderId(dispenseOrderId);
+      }
 
       if (!account?.results[0]) {
         queryClient.invalidateQueries({
@@ -985,9 +1001,11 @@ export default function MedicationBillForm({ patientId }: Props) {
         response as unknown as ChargeItemBatchResponse,
       );
       if (chargeItems.length === 0) {
-        navigate(
-          `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation?payment_status=unpaid`,
-        );
+        if (dispenseOrderId) {
+          navigate(
+            `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/preparation?payment_status=unpaid`,
+          );
+        }
       } else {
         setIsInvoiceSheetOpen(true);
         setExtractedChargeItems(chargeItems);
@@ -2177,13 +2195,12 @@ export default function MedicationBillForm({ patientId }: Props) {
             onSuccess={() => {
               setIsInvoiceSheetOpen(false);
               navigate(
-                `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`,
+                `/facility/${facilityId}/locations/${locationId}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}/preparation` : ""}`,
               );
             }}
-            sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/preparation`}
+            sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}/preparation` : ""}`}
             locationId={locationId}
-            patientId={patientId}
-            showDispenseNowButton={true}
+            dispenseOrderId={dispenseOrderId ?? undefined}
           />
         )}
 

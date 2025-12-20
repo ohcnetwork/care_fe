@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftIcon, ChevronDown } from "lucide-react";
+import { ArrowLeftIcon, ChevronDown, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -15,28 +16,51 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Page from "@/components/Common/Page";
+import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
-import query from "@/Utils/request/query";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
+import { DispenseOrderStatus } from "@/types/emr/dispenseOrder/dispenseOrder";
+import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
 import patientApi from "@/types/emr/patient/patientApi";
+import query from "@/Utils/request/query";
+import { formatDateTime } from "@/Utils/utils";
 
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import DispensedMedicationList from "./DispensedMedicationList";
 
+const DISPENSE_ORDER_STATUS_STYLES: Record<
+  DispenseOrderStatus,
+  React.ComponentProps<typeof Badge>["variant"]
+> = {
+  [DispenseOrderStatus.draft]: "secondary",
+  [DispenseOrderStatus.in_progress]: "yellow",
+  [DispenseOrderStatus.completed]: "green",
+  [DispenseOrderStatus.abandoned]: "secondary",
+  [DispenseOrderStatus.entered_in_error]: "danger",
+};
+
 interface Props {
   facilityId: string;
-  patientId: string;
+  dispenseOrderId: string;
   status?: MedicationDispenseStatus;
 }
 
 export default function DispensesView({
   facilityId,
-  patientId,
+  dispenseOrderId,
   status = MedicationDispenseStatus.completed,
 }: Props) {
   const { t } = useTranslation();
   const { locationId } = useCurrentLocation();
+
+  const { data: dispenseOrder, isLoading: isLoadingOrder } = useQuery({
+    queryKey: ["dispenseOrder", facilityId, dispenseOrderId],
+    queryFn: query(dispenseOrderApi.get, {
+      pathParams: { facilityId, id: dispenseOrderId },
+    }),
+    enabled: !!dispenseOrderId,
+  });
 
   const defaultVisibleStatuses = [
     MedicationDispenseStatus.preparation,
@@ -64,17 +88,25 @@ export default function DispensesView({
     setVisibleTabs(newVisibleTabs);
     setDropdownItems(newDropdownItems);
     navigate(
-      `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/${value}`,
+      `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/${value}`,
     );
   };
 
   const { data: patientData } = useQuery({
-    queryKey: ["patient", patientId],
+    queryKey: ["patient", dispenseOrder?.patient.id],
     queryFn: query(patientApi.get, {
-      pathParams: { id: patientId ?? "" },
+      pathParams: { id: dispenseOrder?.patient.id ?? "" },
     }),
-    enabled: !!patientId,
+    enabled: !!dispenseOrder?.patient.id,
   });
+
+  if (isLoadingOrder) {
+    return <TableSkeleton count={5} />;
+  }
+
+  if (!dispenseOrder) {
+    return null;
+  }
 
   return (
     <Page title={t("pharmacy_medications")} hideTitleOnPage>
@@ -99,11 +131,57 @@ export default function DispensesView({
           <PatientHeader patient={patientData} facilityId={facilityId} />
         </Card>
       )}
+
+      {/* Dispense Order Header */}
+      <div className="bg-white border rounded-md p-4 mb-4">
+        <div className="flex md:flex-row flex-col items-start md:items-center justify-between gap-4">
+          <div className="flex flex-row gap-2">
+            <h2 className="text-xl font-semibold text-gray-900">
+              {dispenseOrder.name}
+            </h2>
+            {dispenseOrder.note && (
+              <p className="text-sm text-gray-600">{dispenseOrder.note}</p>
+            )}
+            <div className="flex items-center gap-4 text-sm text-gray-700">
+              <div>
+                <span className="text-gray-500">{t("created_at")}:</span>{" "}
+                <span className="font-medium">
+                  {formatDateTime(dispenseOrder.patient.created_date)}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500">{t("location")}:</span>{" "}
+                <span className="font-medium">
+                  {dispenseOrder.location.name}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant={DISPENSE_ORDER_STATUS_STYLES[dispenseOrder.status]}>
+              {t("status")}:{" "}
+              {t(`dispense_order_status__${dispenseOrder.status}`)}
+            </Badge>
+            <Button
+              variant="outline"
+              className="border-gray-400 font-semibold"
+              onClick={() =>
+                navigate(
+                  `/facility/${facilityId}/locations/${locationId}/dispense_orders/${dispenseOrderId}/print`,
+                )
+              }
+            >
+              <PrinterIcon className="size-4" />
+              {t("print")}
+            </Button>
+          </div>
+        </div>
+      </div>
       <Tabs
         value={status}
         onValueChange={(value) =>
           navigate(
-            `/facility/${facilityId}/locations/${locationId}/medication_dispense/patient/${patientId}/${value}`,
+            `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/${value}`,
           )
         }
       >
@@ -148,9 +226,10 @@ export default function DispensesView({
             <TabsContent key={statusValue} value={statusValue} className="p-2">
               <DispensedMedicationList
                 facilityId={facilityId}
-                patientId={patientId}
+                patientId={dispenseOrder.patient.id}
                 locationId={locationId}
                 status={statusValue}
+                dispenseOrderId={dispenseOrderId}
               />
             </TabsContent>
           ))}

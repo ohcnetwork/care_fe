@@ -31,6 +31,7 @@ interface Props {
   encounterId: string;
   canAccess: boolean;
   facilityId?: string;
+  dispenseOrderId?: string;
 }
 
 export function DispenseHistory({
@@ -38,19 +39,21 @@ export function DispenseHistory({
   encounterId,
   facilityId,
   canAccess,
+  dispenseOrderId,
 }: Props) {
   const { t } = useTranslation();
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["medication_dispense", patientId],
+    queryKey: ["medication_dispense", patientId, dispenseOrderId],
     queryFn: query(medicationDispenseApi.list, {
       queryParams: {
         encounter: encounterId,
         limit: 100,
         patient: patientId,
+        order: dispenseOrderId,
       },
     }),
-    enabled: !!patientId && canAccess,
+    enabled: !!patientId && canAccess && !!dispenseOrderId,
   });
 
   const medications = response?.results || [];
@@ -140,7 +143,7 @@ export function DispenseHistory({
                       disabled={!facilityId}
                     >
                       <Link
-                        href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/patient/${patientId}/${medication.status}?payment_status=${medication.charge_item?.paid_invoice?.status === InvoiceStatus.balanced ? "paid" : "unpaid"}`}
+                        href={`/facility/${facilityId}/locations/${medication.location.id}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}/${medication.status}?payment_status=${medication.charge_item?.paid_invoice?.status === InvoiceStatus.balanced ? "paid" : "unpaid"}` : ""}`}
                       >
                         {t("dispense")}
                       </Link>

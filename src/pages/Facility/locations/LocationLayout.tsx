@@ -287,16 +287,16 @@ const getRoutes = (facilityId: string, locationId: string) => ({
     <PrintPharmacyPrescription facilityId={facilityId} patientId={patientId} />
   ),
 
-  "/medication_dispense/patient/:patientId/:status": ({
-    patientId,
+  "/medication_dispense/order/:dispenseOrderId/:status": ({
+    dispenseOrderId,
     status,
   }: {
-    patientId: string;
+    dispenseOrderId: string;
     status: string;
   }) => (
     <DispensesView
       facilityId={facilityId}
-      patientId={patientId}
+      dispenseOrderId={dispenseOrderId}
       status={status as MedicationDispenseStatus}
     />
   ),
