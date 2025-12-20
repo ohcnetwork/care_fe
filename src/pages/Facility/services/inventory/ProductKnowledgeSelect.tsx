@@ -29,6 +29,7 @@ interface ProductKnowledgeSelectProps {
   ref?: React.Ref<HTMLButtonElement>;
   hideClearButton?: boolean;
   alignContent?: "start" | "center" | "end";
+  defaultOpen?: boolean;
 }
 
 export function ProductKnowledgeSelect({
@@ -41,6 +42,7 @@ export function ProductKnowledgeSelect({
   ref,
   hideClearButton = false,
   alignContent = "start",
+  defaultOpen = false,
 }: ProductKnowledgeSelectProps) {
   const { t } = useTranslation();
   const { facilityId } = useCurrentFacility();
@@ -96,6 +98,7 @@ export function ProductKnowledgeSelect({
       ref={ref}
       hideClearButton={hideClearButton}
       alignContent={alignContent}
+      defaultOpen={defaultOpen}
     />
   );
 }
