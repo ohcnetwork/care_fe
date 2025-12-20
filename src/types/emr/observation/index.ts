@@ -2,7 +2,8 @@ import type { ObservationListRead } from "./observation";
 
 /**
  * Base observation type for general observation data.
- * Use this type when user attribution (created_by, updated_by) is not the primary concern.
+ * Note: All observations include user attribution fields (created_by, updated_by, data_entered_by)
+ * to track data provenance. Use this as the canonical observation type name in business logic.
  */
 export type Observation = ObservationListRead;
 
