@@ -109,6 +109,26 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
     };
   }, [show]);
 
+  const getMicrophonePermissionHelpLink = () => {
+    const ua = navigator.userAgent.toLowerCase();
+
+    if (ua.includes("firefox")) {
+      return "https://support.mozilla.org/en-US/kb/how-manage-your-camera-and-microphone-permissions";
+    }
+
+    if (ua.includes("edg")) {
+      return "https://support.microsoft.com/microsoft-edge";
+    }
+
+    if (ua.includes("safari") && !ua.includes("chrome")) {
+      return "https://support.apple.com/safari";
+    }
+
+    return "https://support.google.com/chrome/answer/2693767";
+  };
+
+  const helpLink = getMicrophonePermissionHelpLink();
+
   useEffect(() => {
     if (autoRecord && show && status === "RECORDING") {
       handleStartRecording();
@@ -128,7 +148,7 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
             {t("audio__allow_permission_helper")}{" "}
             {/* TODO: find a better link that supports all browsers */}
             <Link
-              href="https://support.google.com/chrome/answer/2693767?hl=en&co=GENIE.Platform%3DAndroid"
+              href={helpLink}
               target="_blank"
               className="text-blue-400 underline"
             >
