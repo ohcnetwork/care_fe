@@ -797,5 +797,11 @@
   "yet_to_be_decided": "अभी निर्णय होना बाकी",
   "you_need_at_least_a_location_to_create_an_assest": "संपत्ति बनाने के लिए आपको कम से कम एक स्थान की आवश्यकता होगी।",
   "zoom_in": "ज़ूम इन",
-  "zoom_out": "ज़ूम आउट"
+  "zoom_out": "ज़ूम आउट",
+  "welcome_back" : "फिर से स्वागत है",
+  "choose_your_login_method_to_continue" : "जारी रखने के लिए लॉगिन तरीका चुनें",
+  "patient_login": "मरीज के रूप में लॉगिन करें",
+  "staff_login" : "स्टाफ के रूप में लॉगिन करें",
+  "enter_phone_number": "फ़ोन नंबर दर्ज करें",
+  "send_otp": "ओटीपी भेजें"
 }

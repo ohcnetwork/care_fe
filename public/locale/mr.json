@@ -92,5 +92,12 @@
   "present_health": "सध्याचे आरोग्य",
   "ongoing_medications": "चालू औषधे",
   "allergies": "अॅलर्जी",
-  "is_pregnant": "गर्भवती आहे"
+  "is_pregnant": "गर्भवती आहे",
+  "welcome_back": "पुन्हा स्वागत आहे",
+  "choose_your_login_method_to_continue": "पुढे जाण्यासाठी लॉगिन पद्धत निवडा",
+  "patient_login": "रुग्ण म्हणून लॉगिन करा",
+  "staff_login": "स्टाफ म्हणून लॉगिन करा",
+  "enter_phone_number": "फोन नंबर टाका",
+  "send_otp": "ओटीपी पाठवा"
+
 }

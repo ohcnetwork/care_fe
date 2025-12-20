@@ -515,12 +515,18 @@ const Login = (props: LoginProps) => {
                       }
                     }}
                   >
-                    <TabsList className="flex w-full">
-                      <TabsTrigger className="flex-1" value="staff">
+                    <TabsList className="flex w-full h-auto">
+                      <TabsTrigger
+                        className="flex-1 whitespace-normal h-auto py-2"
+                        value="staff"
+                      >
                         {t("staff_login")}
                       </TabsTrigger>
                       {!disablePatientLogin && (
-                        <TabsTrigger className="flex-1" value="patient">
+                        <TabsTrigger
+                          className="flex-1 whitespace-normal h-auto py-2"
+                          value="patient"
+                        >
                           {t("patient_login")}
                         </TabsTrigger>
                       )}
