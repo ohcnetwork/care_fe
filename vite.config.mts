@@ -11,6 +11,7 @@ import path from "path";
 import checker from "vite-plugin-checker";
 import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import topLevelAwait from "vite-plugin-top-level-await";
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
@@ -51,6 +52,10 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       ),
     },
     plugins: [
+      topLevelAwait({
+        promiseExportName: "__tla",
+        promiseImportName: (i) => `__tla_${i}`,
+      }),
       careConsoleArt(),
       fixSonnerPackageJson(),
       tailwindcss(),
@@ -104,7 +109,7 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           type: "module",
         },
         injectManifest: {
-          maximumFileSizeToCacheInBytes: 8000000,
+          maximumFileSizeToCacheInBytes: 15000000,
         },
         manifest: {
           name: "Care",
@@ -150,12 +155,12 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
     //   include: getPluginDependencies(),
     // },
     build: {
-      target: "es2022",
+      target: ["es2020", "chrome83", "edge83", "firefox78", "safari14"],
       outDir: "build",
       sourcemap: true,
     },
     esbuild: {
-      target: "es2022",
+      target: "es2020",
     },
     server: {
       port: 4000,
