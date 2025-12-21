@@ -10,6 +10,26 @@ import { useTimer } from "@/hooks/useTimer";
 
 import useVoiceRecorder from "@/Utils/useVoiceRecorder";
 
+const getMicrophonePermissionHelpLink = () => {
+  const ua = navigator.userAgent.toLowerCase();
+
+  if (ua.includes("firefox")) {
+    return "https://support.mozilla.org/en-US/kb/how-manage-your-camera-and-microphone-permissions";
+  }
+
+  if (ua.includes("edg")) {
+    return "https://support.microsoft.com/en-gb/office/troubleshoot-camera-microphone-and-screen-recording-permissions-in-clipchamp-4b5ba409-0651-4416-8112-c0019a7f85dd";
+  }
+
+  if (ua.includes("safari") && !ua.includes("chrome")) {
+    return "https://support.apple.com/guide/safari/websites-ibrwe2159f50/mac";
+  }
+
+  return "https://support.google.com/chrome/answer/2693767";
+};
+
+const helpLink = getMicrophonePermissionHelpLink();
+
 export interface AudioCaptureDialogProps {
   show: boolean;
   onHide: () => void;
@@ -109,26 +129,6 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
     };
   }, [show]);
 
-  const getMicrophonePermissionHelpLink = () => {
-    const ua = navigator.userAgent.toLowerCase();
-
-    if (ua.includes("firefox")) {
-      return "https://support.mozilla.org/en-US/kb/how-manage-your-camera-and-microphone-permissions";
-    }
-
-    if (ua.includes("edg")) {
-      return "https://support.microsoft.com/microsoft-edge";
-    }
-
-    if (ua.includes("safari") && !ua.includes("chrome")) {
-      return "https://support.apple.com/safari";
-    }
-
-    return "https://support.google.com/chrome/answer/2693767";
-  };
-
-  const helpLink = getMicrophonePermissionHelpLink();
-
   useEffect(() => {
     if (autoRecord && show && status === "RECORDING") {
       handleStartRecording();
@@ -146,7 +146,6 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
           </h2>
           <div className="text-secondary-200">
             {t("audio__allow_permission_helper")}{" "}
-            {/* TODO: find a better link that supports all browsers */}
             <Link
               href={helpLink}
               target="_blank"
