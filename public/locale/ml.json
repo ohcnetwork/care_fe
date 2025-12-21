@@ -1654,6 +1654,7 @@
   "send": "അയക്കുക",
   "send_email": "ഇമെയിൽ അയയ്ക്കുക",
   "send_message": "സന്ദേശം അയയ്‌ക്കുക",
+  "send_otp": "OTP അയയ്ക്കുക",
   "send_otp_error": "OTP അയയ്ക്കുന്നതിൽ പരാജയപ്പെട്ടു. ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.",
   "send_otp_success": "അതത് മൊബൈൽ നമ്പറിലേക്ക് OTP അയച്ചിട്ടുണ്ട്",
   "send_reset_link": "പുന: സജ്ജീകരണ ലിങ്ക് അയയ്‌ക്കുക",
@@ -2869,11 +2870,5 @@
   "verifying": "സ്ഥിരീകരിക്കുന്നു",
   "view_associated_encounter": "ബന്ധിച്ച എൻകൗണ്ടർ കാണുക",
   "view_facility_details": "സൗകര്യ വിശദാംശങ്ങൾ കാണുക",
-  "you_have_unsaved_changes_what_would_you_like_to_do": "നിങ്ങൾ സംരക്ഷിക്കാത്ത മാറ്റങ്ങൾ ഉണ്ട്. എന്ത് ചെയ്യാൻ ആഗ്രഹിക്കുന്നു?",
-  "welcome_back": "വീണ്ടും സ്വാഗതം",
-  "choose_your_login_method_to_continue": "തുടരാൻ ലോഗിൻ രീതിയ തിരഞ്ഞെടുക്കുക",
-  "patient_login": "രോഗിയായി ലോഗിൻ ചെയ്യുക",
-  "staff_login": "സ്റ്റാഫായി ലോഗിൻ ചെയ്യുക",
-  "send_otp": "ഒടിപി അയയ്ക്കുക"
-
+  "you_have_unsaved_changes_what_would_you_like_to_do": "നിങ്ങൾ സംരക്ഷിക്കാത്ത മാറ്റങ്ങൾ ഉണ്ട്. എന്ത് ചെയ്യാൻ ആഗ്രഹിക്കുന്നു?"
 }
