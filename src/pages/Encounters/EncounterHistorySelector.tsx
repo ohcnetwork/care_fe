@@ -475,7 +475,7 @@ const EncounterSheetTrigger = () => {
             <Badge
               variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
               size="sm"
-              className="whitespace-nowrap mr-3"
+              className="whitespace-nowrap"
             >
               {t(`encounter_status__${encounter.status}`)}
             </Badge>
