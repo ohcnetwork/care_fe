@@ -472,15 +472,13 @@ const EncounterSheetTrigger = () => {
             </div>
 
             {/* SECOND ROW Badge */}
-            <div className="">
-              <Badge
-                variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
-                size="sm"
-                className="whitespace-nowrap mr-3"
-              >
-                {t(`encounter_status__${encounter.status}`)}
-              </Badge>
-            </div>
+            <Badge
+              variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
+              size="sm"
+              className="whitespace-nowrap mr-3"
+            >
+              {t(`encounter_status__${encounter.status}`)}
+            </Badge>
           </div>
         </div>
       </CardContent>
