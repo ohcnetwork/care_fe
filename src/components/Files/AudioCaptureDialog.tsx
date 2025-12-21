@@ -18,7 +18,7 @@ const getMicrophonePermissionHelpLink = () => {
   }
 
   if (ua.includes("edg")) {
-    return "https://support.microsoft.com/en-gb/office/troubleshoot-camera-microphone-and-screen-recording-permissions-in-clipchamp-4b5ba409-0651-4416-8112-c0019a7f85dd";
+    return "https://support.microsoft.com/en-us/windows/windows-camera-microphone-and-privacy-a83257bc-e990-d54a-d212-b5e41beba857";
   }
 
   if (ua.includes("safari") && !ua.includes("chrome")) {
