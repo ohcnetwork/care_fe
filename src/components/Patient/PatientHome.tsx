@@ -17,6 +17,7 @@ import { getPermissions } from "@/common/Permissions";
 
 import { PLUGIN_Component } from "@/PluginEngine";
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { usePermissions } from "@/context/PermissionContext";
 import patientApi from "@/types/emr/patient/patientApi";
 
@@ -64,7 +65,7 @@ export const PatientHome = (props: {
 
   const { data: patientData, isLoading } = useQuery({
     queryKey: ["patient", id],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: {
         id,
       },
@@ -132,7 +133,6 @@ export const PatientHome = (props: {
             ? "md:max-w-[calc(100vw-25rem)]"
             : "md:max-w-[calc(100vw-8rem)]",
         )}
-        data-testid="patient-dashboard"
       >
         <div className="flex flex-col gap-2">
           <PatientHeader
@@ -152,7 +152,6 @@ export const PatientHome = (props: {
               {tabs.map((tab) => (
                 <Link
                   key={tab.route}
-                  data-cy={`tab-${tab.route}`}
                   href={
                     facilityId
                       ? `/facility/${facilityId}/patient/${id}/${tab.route}`
@@ -200,7 +199,8 @@ export const PatientHome = (props: {
                         href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
                           {
                             phone_number: patientData.phone_number,
-                            year_of_birth: patientData.year_of_birth.toString(),
+                            year_of_birth:
+                              patientData.year_of_birth?.toString() ?? "",
                             partial_id: patientData.id.slice(0, 5),
                           },
                         ).toString()}`}
@@ -231,8 +231,7 @@ export const PatientHome = (props: {
                     <div className="text-xs font-normal leading-5 text-gray-600">
                       {t("last_updated_by")}
                       <div className="font-semibold text-gray-900">
-                        {patientData.updated_by?.first_name}{" "}
-                        {patientData.updated_by?.last_name}
+                        {formatName(patientData.updated_by || undefined)}
                       </div>
                     </div>
 
@@ -249,8 +248,7 @@ export const PatientHome = (props: {
                     <div className="text-xs font-normal leading-5 text-gray-600">
                       {t("patient_profile_created_by")}
                       <div className="font-semibold text-gray-900">
-                        {patientData.created_by?.first_name}{" "}
-                        {patientData.created_by?.last_name}
+                        {formatName(patientData.created_by || undefined)}
                       </div>
                     </div>
                     <div className="whitespace-normal text-xs font-normal text-gray-900">

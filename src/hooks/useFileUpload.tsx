@@ -347,7 +347,6 @@ export default function useFileUpload(
   const Input = (props: FileInputProps) => (
     <input
       {...props}
-      data-cy="upload-files-input"
       id={`file_upload_${fileType}`}
       title={t("change_file")}
       onChange={onFileChange}

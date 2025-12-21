@@ -5,12 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Time } from "@/Utils/types";
 import { formatName } from "@/Utils/utils";
 import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { PatientRead } from "@/types/emr/patient/patient";
+import { EncounterListRead } from "@/types/emr/encounter/encounter";
+import {
+  PatientListRead,
+  PublicPatientRead,
+} from "@/types/emr/patient/patient";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import { buildLocationHierarchy } from "@/types/location/utils";
 import { TokenRead } from "@/types/tokens/token/token";
 import { UserReadMinimal } from "@/types/user/user";
@@ -202,7 +205,7 @@ export const APPOINTMENT_STATUS_COLORS = {
 >;
 
 type LocationResource = {
-  resource: LocationList;
+  resource: LocationRead;
   resource_type: SchedulableResourceType.Location;
 };
 
@@ -221,27 +224,34 @@ export type ScheduleResource =
   | LocationResource
   | HealthcareServiceResource;
 
-export type Appointment = {
+export type AppointmentBase = {
   id: string;
   token_slot: TokenSlot;
-  patient: PatientRead;
   booked_on: string;
   status: AppointmentStatus;
   note: string;
-  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
   facility: FacilityBareMinimum;
   is_updated_offline?: boolean;
   modified_date: string;
 
   token: TokenRead | null;
+  booked_by: UserReadMinimal | null; // This is null if the appointment was booked by the patient itself.
 } & ScheduleResource;
+
+export type Appointment = AppointmentBase & {
+  patient: PatientListRead;
+};
+
+export type PublicAppointment = AppointmentBase & {
+  patient: PublicPatientRead;
+};
 
 export type AppointmentRead = Appointment & {
   tags: TagConfig[];
   updated_by: UserReadMinimal | null;
   created_by: UserReadMinimal | null;
   modified_date: string;
-  associated_encounter?: EncounterRead;
+  associated_encounter?: EncounterListRead;
 };
 
 export interface AppointmentCreateRequest {

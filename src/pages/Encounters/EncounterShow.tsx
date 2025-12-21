@@ -8,6 +8,7 @@ import {
   useEncounterShortcutDisplays,
   useEncounterShortcuts,
 } from "@/hooks/useEncounterShortcuts";
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
 
 import { getPermissions } from "@/common/Permissions";
@@ -15,8 +16,10 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 import { EncounterCommandDialog } from "@/components/Encounter/EncounterCommandDialog";
 import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
+import { Badge } from "@/components/ui/badge";
 import { CommandShortcut } from "@/components/ui/command";
 import { NavTabs } from "@/components/ui/nav-tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { usePermissions } from "@/context/PermissionContext";
 import useAppHistory from "@/hooks/useAppHistory";
 import useBreakpoints from "@/hooks/useBreakpoints";
@@ -34,7 +37,11 @@ import { EncounterPlotsTab } from "@/pages/Encounters/tabs/plots";
 import { EncounterResponsesTab } from "@/pages/Encounters/tabs/responses";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { PLUGIN_Component } from "@/PluginEngine";
-import { EncounterRead } from "@/types/emr/encounter/encounter";
+import {
+  ENCOUNTER_STATUS_COLORS,
+  EncounterRead,
+  inactiveEncounterStatus,
+} from "@/types/emr/encounter/encounter";
 import { PatientRead } from "@/types/emr/patient/patient";
 import { entriesOf } from "@/Utils/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -60,6 +67,7 @@ export const EncounterShow = (props: Props) => {
     facilityId,
     primaryEncounter,
     selectedEncounter,
+    isSelectedEncounterLoading,
     primaryEncounterId,
     selectedEncounterId,
     isPrimaryEncounterLoading,
@@ -116,19 +124,26 @@ export const EncounterShow = (props: Props) => {
     "2xl": 12,
   });
 
-  const { canViewEncounter } = getPermissions(
+  const { canReadEncounter, canReadEncounterClinicalData } = getPermissions(
     hasPermission,
     primaryEncounter?.permissions ?? [],
   );
 
   useEncounterShortcuts();
 
-  const { canViewClinicalData } = getPermissions(
-    hasPermission,
-    patient?.permissions ?? [],
-  );
+  // const { canViewClinicalData } = getPermissions(
+  //   hasPermission,
+  //   patient?.permissions ?? [],
+  // );
 
-  const canAccess = canViewClinicalData || canViewEncounter;
+  const canAccess = canReadEncounterClinicalData || canReadEncounter;
+  const hasToken = primaryEncounter?.appointment?.token;
+  const isEncounterActive =
+    primaryEncounter?.appointment?.id &&
+    !inactiveEncounterStatus.includes(primaryEncounter?.status ?? "");
+
+  // Header is shown either when token is present or encounter is active and has an appointment
+  const canViewAppointmentEncounterHeader = hasToken || isEncounterActive;
 
   useEffect(() => {
     if (!isPrimaryEncounterLoading && !isPatientLoading && !canAccess) {
@@ -157,18 +172,22 @@ export const EncounterShow = (props: Props) => {
     },
     plots: {
       label: t(`ENCOUNTER_TAB__plots`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterPlotsTab />,
     },
     observations: {
       label: t(`ENCOUNTER_TAB__observations`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterObservationsTab />,
     },
     medicines: {
       label: t(`ENCOUNTER_TAB__medicines`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterMedicinesTab />,
     },
     responses: {
       label: t(`ENCOUNTER_TAB__qnr_responses`),
+      visible: canReadEncounterClinicalData,
       component: (
         <EncounterResponsesTab
           patientId={patient?.id}
@@ -179,10 +198,12 @@ export const EncounterShow = (props: Props) => {
     },
     files: {
       label: t(`ENCOUNTER_TAB__files`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterFilesTab />,
     },
     notes: {
       label: t(`ENCOUNTER_TAB__notes`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterNotesTab />,
     },
     devices: {
@@ -195,10 +216,12 @@ export const EncounterShow = (props: Props) => {
     },
     service_requests: {
       label: t(`ENCOUNTER_TAB__service_requests`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterServiceRequestTab />,
     },
     diagnostic_reports: {
       label: t(`ENCOUNTER_TAB__diagnostic_reports`),
+      visible: canReadEncounterClinicalData,
       component: <EncounterDiagnosticReportsTab />,
     },
 
@@ -224,17 +247,23 @@ export const EncounterShow = (props: Props) => {
       title={t("encounter")}
       className="block md:px-1 -mt-4"
       hideTitleOnPage
+      style={
+        {
+          "--encounter-header-offset": canViewAppointmentEncounterHeader
+            ? "3rem"
+            : "0rem",
+        } as React.CSSProperties
+      }
     >
-      {primaryEncounter &&
-        primaryEncounter.appointment?.id &&
-        canWritePrimaryEncounter && (
-          <div className="flex items-center justify-center -mt-2 mb-2">
-            <AppointmentEncounterHeader
-              appointment={primaryEncounter.appointment}
-              encounter={primaryEncounter}
-            />
-          </div>
-        )}
+      {primaryEncounter.appointment && canViewAppointmentEncounterHeader && (
+        <div className="flex items-center justify-center -mt-2 mb-2">
+          <AppointmentEncounterHeader
+            canWritePrimaryEncounter={canWritePrimaryEncounter}
+            appointment={primaryEncounter.appointment}
+            encounter={primaryEncounter}
+          />
+        </div>
+      )}
 
       <div className="flex flex-col gap-2">
         <PatientHeader
@@ -282,22 +311,79 @@ export const EncounterShow = (props: Props) => {
       </div>
       <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row mt-4">
         <EncounterHistorySelector />
-        <NavTabs
-          showMoreAfterIndex={showMoreAfterIndex}
-          className="@container w-full"
-          tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-12rem)]"
-          tabs={tabs}
-          currentTab={props.tab}
-          tabTriggerClassName="max-w-36"
-          onTabChange={(tab) =>
-            navigate(tab, {
-              query:
-                primaryEncounterId !== selectedEncounterId
-                  ? { selectedEncounter: selectedEncounterId }
-                  : undefined,
-            })
-          }
-        />
+        <div className="w-full">
+          <div className="hidden lg:block">
+            {isSelectedEncounterLoading ? (
+              <Skeleton className="h-10 w-md" />
+            ) : (
+              selectedEncounter && (
+                <div className="flex gap-2 items-center">
+                  <h4 className="font-bold">
+                    {t(
+                      `encounter_class__${selectedEncounter?.encounter_class}`,
+                    )}
+                  </h4>
+                  <div className="text-sm text-gray-700 space-x-2">
+                    <span className="">{selectedEncounter?.facility.name}</span>
+
+                    <span>|</span>
+
+                    <span className="whitespace-nowrap">
+                      {selectedEncounter.period.start && (
+                        <span>
+                          {format(
+                            new Date(selectedEncounter.period.start!),
+                            "dd MMM",
+                          )}
+                        </span>
+                      )}
+                      {selectedEncounter.period.end &&
+                        selectedEncounter.period.start && <span>{" - "}</span>}
+                      {selectedEncounter.period.end ? (
+                        <span>
+                          {format(
+                            new Date(selectedEncounter.period.end),
+                            "dd MMM",
+                          )}
+                        </span>
+                      ) : (
+                        <span>
+                          {" - "}
+                          {t("ongoing")}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+
+                  <Badge
+                    variant={ENCOUNTER_STATUS_COLORS[selectedEncounter.status]}
+                    size="sm"
+                    className="whitespace-nowrap"
+                  >
+                    {t(`encounter_status__${selectedEncounter.status}`)}
+                  </Badge>
+                </div>
+              )
+            )}
+          </div>
+
+          <NavTabs
+            showMoreAfterIndex={showMoreAfterIndex}
+            className="@container w-full"
+            tabContentClassName="flex-none overflow-x-auto overflow-y-hidden lg:overflow-y-auto lg:h-[calc(100vh-14rem-var(--encounter-header-offset))]"
+            tabs={tabs}
+            currentTab={props.tab}
+            tabTriggerClassName="max-w-36"
+            onTabChange={(tab) =>
+              navigate(tab, {
+                query:
+                  primaryEncounterId !== selectedEncounterId
+                    ? { selectedEncounter: selectedEncounterId }
+                    : undefined,
+              })
+            }
+          />
+        </div>
       </div>
     </Page>
   );

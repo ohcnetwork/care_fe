@@ -14,11 +14,11 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import {
-  QuestionnaireDetail,
+  QuestionnaireRead,
   QuestionStatus,
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
-import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
+import { QuestionnaireTagRead } from "@/types/questionnaire/tags";
 
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import CreateQuestionnaireTagSheet from "./CreateQuestionnaireTagSheet";
@@ -40,10 +40,10 @@ interface OrganizationResponse {
 }
 
 interface QuestionnairePropertiesProps {
-  form: UseFormReturn<QuestionnaireDetail>;
-  updateQuestionnaireField: <K extends keyof QuestionnaireDetail>(
+  form: UseFormReturn<QuestionnaireRead>;
+  updateQuestionnaireField: <K extends keyof QuestionnaireRead>(
     field: K,
-    value: QuestionnaireDetail[K],
+    value: QuestionnaireRead[K],
   ) => void;
   id?: string;
   organizations?: OrganizationResponse;
@@ -57,15 +57,15 @@ interface QuestionnairePropertiesProps {
     error: string | undefined;
     setError: (error?: string) => void;
   };
-  tags?: QuestionnaireTagModel[];
+  tags?: QuestionnaireTagRead[];
   tagSelection: {
-    selectedTags: QuestionnaireTagModel[];
+    selectedTags: QuestionnaireTagRead[];
     onToggle: (tagId: string) => void;
     searchQuery: string;
     setSearchQuery: (query: string) => void;
-    available?: QuestionnaireTagModel[];
+    available?: QuestionnaireTagRead[];
     isLoading?: boolean;
-    onTagCreated?: (tag: QuestionnaireTagModel) => void;
+    onTagCreated?: (tag: QuestionnaireTagRead) => void;
   };
 }
 
@@ -97,7 +97,6 @@ function StatusSelector({
           >
             <RadioGroupItem value={status} id={`status-${status}`} />
             <Label
-              data-cy={`questionnaire-status-${status}`}
               htmlFor={`status-${status}`}
               className="text-sm mx-1 font-normal text-gray-950"
             >
@@ -188,11 +187,7 @@ function OrganizationSelector({
         <ManageQuestionnaireOrganizationsSheet
           questionnaireId={id}
           trigger={
-            <Button
-              variant="outline"
-              className="w-full justify-start"
-              data-cy="manage-organisation-questionnaire"
-            >
+            <Button variant="outline" className="w-full justify-start">
               <Building className="mr-2 size-4" />
               {t("manage_organization_other")}
             </Button>
@@ -255,7 +250,7 @@ function TagSelector({
 }: {
   id?: string;
   selection: QuestionnairePropertiesProps["tagSelection"];
-  form: UseFormReturn<QuestionnaireDetail>;
+  form: UseFormReturn<QuestionnaireRead>;
 }) {
   const { t } = useTranslation();
   const tags = useWatch({ control: form.control, name: "tags" });

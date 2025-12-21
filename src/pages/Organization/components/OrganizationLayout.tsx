@@ -33,6 +33,7 @@ import OrganizationLayoutSkeleton from "@/pages/Organization/components/Organiza
 import {
   Organization,
   OrganizationParent,
+  OrgType,
 } from "@/types/organization/organization";
 import organizationApi from "@/types/organization/organizationApi";
 
@@ -105,7 +106,9 @@ export default function OrganizationLayout({
       url: `${baseUrl}/${id}/facilities`,
       name: "Facilities",
       icon: <CareIcon icon="d-hospital" />,
-      visibility: hasPermission("can_read_facility", org.permissions),
+      visibility:
+        org.org_type === OrgType.GOVT &&
+        hasPermission("can_read_facility", org.permissions),
     },
   ];
 
@@ -160,7 +163,6 @@ export default function OrganizationLayout({
             .map((item) => (
               <MenubarMenu key={item.url}>
                 <MenubarTrigger
-                  data-cy={`org-nav-${item.name.toLowerCase()}`}
                   className={`${
                     path === item.url
                       ? "font-medium text-primary-700 bg-gray-100"

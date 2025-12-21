@@ -42,6 +42,7 @@ import FiltersCache from "@/Utils/FiltersCache";
 import ViewCache from "@/Utils/ViewCache";
 import mutate from "@/Utils/request/mutate";
 import { HTTPError } from "@/Utils/request/types";
+import { invalidateAllLocationCaches } from "@/atoms/location-atom";
 import authApi from "@/types/auth/authApi";
 import { TokenData } from "@/types/otp/otp";
 import otpApi from "@/types/otp/otpApi";
@@ -166,7 +167,6 @@ const Login = (props: LoginProps) => {
       }
     },
     onError: (error: any) => {
-      console.log(error);
       let errorMessage = "invalid_otp";
       if (
         error.cause &&
@@ -244,6 +244,7 @@ const Login = (props: LoginProps) => {
     if (!validated) return;
 
     FiltersCache.invalidateAll();
+    invalidateAllLocationCaches();
     try {
       await signIn(validated);
     } catch (error) {
@@ -376,7 +377,6 @@ const Login = (props: LoginProps) => {
                             id="username"
                             name="username"
                             type="text"
-                            data-cy="username"
                             autoComplete="username"
                             value={form.username}
                             onChange={handleChange}
@@ -396,7 +396,6 @@ const Login = (props: LoginProps) => {
                           <PasswordInput
                             id="password"
                             name="password"
-                            data-cy="password"
                             autoComplete="current-password"
                             value={form.password}
                             onChange={handleChange}
@@ -434,7 +433,6 @@ const Login = (props: LoginProps) => {
                           type="submit"
                           className="w-full"
                           variant="primary"
-                          data-cy="submit"
                           disabled={isLoading}
                         >
                           {isLoading ? (
@@ -538,7 +536,6 @@ const Login = (props: LoginProps) => {
                               id="username"
                               name="username"
                               type="text"
-                              data-cy="username"
                               autoComplete="username"
                               value={form.username}
                               onChange={handleChange}
@@ -558,7 +555,6 @@ const Login = (props: LoginProps) => {
                             <PasswordInput
                               id="password"
                               name="password"
-                              data-cy="password"
                               autoComplete="current-password"
                               value={form.password}
                               onChange={handleChange}
@@ -596,7 +592,6 @@ const Login = (props: LoginProps) => {
                             type="submit"
                             className="w-full"
                             variant="primary"
-                            data-cy="submit"
                             disabled={isLoading}
                           >
                             {isLoading ? (

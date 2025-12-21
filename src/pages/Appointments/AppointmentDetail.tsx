@@ -1,4 +1,60 @@
 import {
+  ScheduleResourceFormState,
+  ScheduleResourceSelector,
+} from "@/components/Schedule/ResourceSelector";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  ENCOUNTER_CLASSES_COLORS,
+  ENCOUNTER_PRIORITY_COLORS,
+  ENCOUNTER_STATUS_COLORS,
+  EncounterStatus,
+} from "@/types/emr/encounter/encounter";
+import {
+  APPOINTMENT_STATUS_COLORS,
+  Appointment,
+  AppointmentCancelRequest,
+  AppointmentFinalStatuses,
+  AppointmentRead,
+  AppointmentRescheduleRequest,
+  AppointmentStatus,
+  AppointmentUpdateRequest,
+  SchedulableResourceType,
+  ScheduleResource,
+  TokenSlot,
+  formatScheduleResourceName,
+} from "@/types/scheduling/schedule";
+import scheduleApis from "@/types/scheduling/scheduleApi";
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
+import { formatName, getReadableDuration } from "@/Utils/utils";
+import {
   AvatarIcon,
   CalendarIcon,
   CheckCircledIcon,
@@ -18,7 +74,9 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { addDays, format, isBefore } from "date-fns";
+
+import { addDays, format, isBefore, isWithinInterval, subDays } from "date-fns";
+
 import {
   BanIcon,
   CheckCircle2Icon,
@@ -36,116 +94,49 @@ import { navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
-import { useShortcutSubContext } from "@/context/ShortcutContext";
-import { formatPhoneNumberIntl } from "react-phone-number-input";
-import { toast } from "sonner";
-
-import { ChargeItemsSection } from "@/components/Billing/ChargeItems/ChargeItemsSection";
-import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
-
-import { cn } from "@/lib/utils";
-
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Textarea } from "@/components/ui/textarea";
-
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
-import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
-import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
-import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
-
-import useAppHistory from "@/hooks/useAppHistory";
-import useAuthUser from "@/hooks/useAuthUser";
-import { useOfflineEntry } from "@/hooks/useOfflineEntry";
-
 import { getPermissions } from "@/common/Permissions";
-
-import { usePermissions } from "@/context/PermissionContext";
-import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
-import {
-  ENCOUNTER_CLASSES_COLORS,
-  ENCOUNTER_PRIORITY_COLORS,
-  ENCOUNTER_STATUS_COLORS,
-} from "@/types/emr/encounter/encounter";
-import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
-import { FacilityRead } from "@/types/facility/facility";
-import {
-  Appointment,
-  APPOINTMENT_STATUS_COLORS,
-  AppointmentCancelRequest,
-  AppointmentFinalStatuses,
-  AppointmentRead,
-  AppointmentRescheduleRequest,
-  AppointmentStatus,
-  AppointmentUpdateRequest,
-  formatScheduleResourceName,
-  SchedulableResourceType,
-  ScheduleResource,
-  TokenSlot,
-} from "@/types/scheduling/schedule";
-import scheduleApis from "@/types/scheduling/scheduleApi";
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
-import {
-  formatName,
-  getReadableDuration,
-  stringifyNestedObject,
-} from "@/Utils/utils";
-
 import {
   queueCancelAppointmentRecord,
   queueRescheduleOfflineRecord,
   queueUpdateAppointmentRecordOffline,
 } from "@/components/Appointment/offlineQueue";
+import { ChargeItemsSection } from "@/components/Billing/ChargeItems/ChargeItemsSection";
 import { Avatar } from "@/components/Common/Avatar";
 import BackButton from "@/components/Common/BackButton";
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+import CreateEncounterForm from "@/components/Encounter/CreateEncounterForm";
+import { PatientAddressLink } from "@/components/Patient/PatientAddressLink";
 import { PatientDeceasedInfo } from "@/components/Patient/PatientHeader";
 import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import { formatPatientAddress } from "@/components/Patient/utils";
-import {
-  ScheduleResourceFormState,
-  ScheduleResourceSelector,
-} from "@/components/Schedule/ResourceSelector";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
+import TagBadge from "@/components/Tags/TagBadge";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { usePermissions } from "@/context/PermissionContext";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
+import useAppHistory from "@/hooks/useAppHistory";
+import useAuthUser from "@/hooks/useAuthUser";
+import { useOfflineEntry } from "@/hooks/useOfflineEntry";
+import { cn } from "@/lib/utils";
 import { AppCacheDB } from "@/OfflineSupport/AppcacheDB";
 import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers";
 import { AppointmentDateSelection } from "@/pages/Appointments/BookAppointment/AppointmentDateSelection";
 import { AppointmentSlotPicker } from "@/pages/Appointments/BookAppointment/AppointmentSlotPicker";
 import { TokenCard } from "@/pages/Appointments/components/AppointmentTokenCard";
+import { TokenGenerationSheet } from "@/pages/Appointments/components/TokenGenerationSheet";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { ChargeItemServiceResource } from "@/types/billing/chargeItem/chargeItem";
+import { FacilityRead } from "@/types/facility/facility";
 import { CurrentUserRead } from "@/types/user/user";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import { HTTPError } from "@/Utils/request/types";
+import { formatPhoneNumberIntl } from "react-phone-number-input";
+import { toast } from "sonner";
 
 interface Props {
   appointmentId: string;
@@ -168,10 +159,12 @@ export default function AppointmentDetail(props: Props) {
 
   useShortcutSubContext("facility:appointment");
 
-  const { canViewAppointments, canWriteAppointment } = getPermissions(
-    hasPermission,
-    facility?.permissions ?? [],
-  );
+  const {
+    canViewAppointments,
+    canWriteAppointment,
+    canRescheduleAppointment,
+    canWriteToken,
+  } = getPermissions(hasPermission, facility?.permissions ?? []);
 
   const { data: appointment } = useQuery({
     queryKey: ["appointment", props.appointmentId],
@@ -281,9 +274,16 @@ export default function AppointmentDetail(props: Props) {
   }
   const currentStatus = appointment.status;
 
-  const canCheckIn = isBefore(
-    appointment.token_slot.start_datetime,
-    addDays(new Date(), 1),
+  const canCheckIn = isWithinInterval(new Date(), {
+    start: subDays(appointment.token_slot.start_datetime, 1),
+    end: addDays(appointment.token_slot.start_datetime, 1),
+  });
+
+  // Allow mark as fulfilled/no show for past appointments and appointments starting within next 24 hours
+  // i.e., appointments whose start time minus 1 day is before now
+  const canMarkFulfilledOrNoShow = isBefore(
+    subDays(appointment.token_slot.start_datetime, 1),
+    new Date(),
   );
 
   return (
@@ -329,13 +329,13 @@ export default function AppointmentDetail(props: Props) {
                         appointment.token_slot.start_datetime,
                         "do MMMM",
                       ),
-                      time: format(
+                      slot_start_time: format(
                         appointment.token_slot.start_datetime,
                         "h:mm a",
                       ),
-                      duration: getReadableDuration(
-                        appointment.token_slot.start_datetime,
+                      slot_end_time: format(
                         appointment.token_slot.end_datetime,
+                        "h:mm a",
                       ),
                     }}
                   />
@@ -363,13 +363,14 @@ export default function AppointmentDetail(props: Props) {
                     facilityId={facilityId}
                     appointment={appointment}
                     handleUpdateAppointment={handleUpdateAppointment}
-                    canWriteAppointment={canWriteAppointment}
                     isUpdating={isUpdating}
                     canCheckIn={canCheckIn}
+                    canMarkFulfilledOrNoShow={canMarkFulfilledOrNoShow}
                     currentStatus={currentStatus}
                     offlineEntryId={offlineEntryId}
                     db={db}
                     authUser={authUser}
+                    canRescheduleAppointment={canRescheduleAppointment}
                   />
                 </div>
               )
@@ -405,7 +406,8 @@ export default function AppointmentDetail(props: Props) {
                 </div>
               </>
             ) : (
-              !["fulfilled"].includes(appointment.status) && (
+              !["fulfilled"].includes(appointment.status) &&
+              canWriteToken && (
                 <div className="bg-gray-100 border border-gray-200 rounded flex flex-col items-center justify-center text-center">
                   <ReceiptText className="size-8 text-gray-500 mt-4" />
                   <div className="mt-2">
@@ -499,13 +501,13 @@ export default function AppointmentDetail(props: Props) {
                       <div className="text-sm">
                         <div className="flex flex-wrap gap-1">
                           {appointment.associated_encounter.tags.map((tag) => (
-                            <Badge
-                              variant="outline"
+                            <TagBadge
                               key={tag.id}
+                              tag={tag}
+                              hierarchyDisplay
                               className="text-xs"
-                            >
-                              {getTagHierarchyDisplay(tag)}
-                            </Badge>
+                              variant="outline"
+                            />
                           ))}
                         </div>
                       </div>
@@ -552,6 +554,7 @@ export default function AppointmentDetail(props: Props) {
                 <div className="grid gap-1 grid-cols-1 md:grid-cols-2 mt-1">
                   {/* Start Consultation - For booked and checked in appointments */}
                   {["booked", "checked_in"].includes(currentStatus) &&
+                    canCheckIn &&
                     (appointment.associated_encounter?.id ? (
                       // When encounter exists: set status to in_consultation and redirect
                       <QuickAction
@@ -575,6 +578,7 @@ export default function AppointmentDetail(props: Props) {
                         facilityId={facilityId}
                         patientName={appointment.patient.name}
                         appointment={appointment.id}
+                        defaultStatus={EncounterStatus.IN_PROGRESS}
                         trigger={
                           <QuickAction
                             icon={<PlusSquare className="text-primary-500" />}
@@ -780,11 +784,6 @@ const AppointmentDetailsContent = ({
                       </span>
                     )}
                   </p>
-                  <p className="text-gray-600 break-words">
-                    {stringifyNestedObject(
-                      appointment.patient.geo_organization,
-                    )}
-                  </p>
                   <p className="text-gray-600">
                     {t("pincode")}: {appointment.patient.pincode}
                   </p>
@@ -837,26 +836,25 @@ const AppointmentDetailsContent = ({
 interface AppointmentActionsProps {
   facilityId: string;
   appointment: AppointmentRead;
-
   handleUpdateAppointment: (data: AppointmentUpdateRequest) => void;
-  canWriteAppointment: boolean;
-
   isUpdating: boolean;
   canCheckIn: boolean;
+  canMarkFulfilledOrNoShow: boolean;
   currentStatus: AppointmentStatus;
   offlineEntryId?: string;
-
   authUser: CurrentUserRead;
   db: AppCacheDB;
+  canRescheduleAppointment: boolean;
 }
 
 const AppointmentActions = ({
   facilityId,
   appointment,
   handleUpdateAppointment,
-  canWriteAppointment,
   isUpdating,
   canCheckIn,
+  canMarkFulfilledOrNoShow,
+  canRescheduleAppointment,
   currentStatus,
   authUser,
   db,
@@ -1022,7 +1020,7 @@ const AppointmentActions = ({
           `/facility/${facilityId}/patient/${appointment.patient.id}/appointments/${appointment.id}`,
         );
       },
-      onError: (error) => {
+      onError: (error: any) => {
         console.error("Error while Rescheduling Appointment", error);
         toast.error(t("unexpected_error_while_rescheduling_appointment"));
       },
@@ -1114,6 +1112,7 @@ const AppointmentActions = ({
             <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
 
             <DropdownMenuItem
+              disabled={!canMarkFulfilledOrNoShow}
               onClick={() =>
                 handleUpdateAppointment({
                   status: AppointmentStatus.FULFILLED,
@@ -1126,340 +1125,326 @@ const AppointmentActions = ({
             </DropdownMenuItem>
 
             {/* Secondary Actions */}
-            {canWriteAppointment && (
-              <>
-                <DropdownMenuSeparator />
 
-                {/* Reschedule */}
-                {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
-                  <>
-                    <AlertDialog
-                      open={isRescheduleReasonOpen}
-                      onOpenChange={setIsRescheduleReasonOpen}
-                    >
-                      <AlertDialogTrigger asChild>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                          <CalendarIcon className="size-4 mr-2" />
-                          {t("reschedule")}
-                        </DropdownMenuItem>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            {t("reschedule_appointment")}
-                          </AlertDialogTitle>
-                          <Label>{t("note")}</Label>
-                          <Textarea
-                            value={oldNote}
-                            onChange={(e) =>
-                              setRescheduleReason(e.target.value)
-                            }
-                          />
-                          <AlertDialogDescription>
-                            <Alert variant="destructive">
-                              <AlertTitle>{t("warning")}</AlertTitle>
-                              <AlertDescription>
-                                {t("reschedule_appointment_warning")}
-                              </AlertDescription>
-                            </Alert>
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel
-                            onClick={() => setIsRescheduleReasonOpen(false)}
-                          >
-                            {t("cancel")}
-                          </AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => {
-                              setIsRescheduleReasonOpen(false);
-                              setIsRescheduleOpen(true);
-                            }}
-                            disabled={!oldNote.trim()}
-                          >
-                            {t("continue")}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+            <DropdownMenuSeparator />
 
-                    <Sheet
-                      open={isRescheduleOpen}
-                      onOpenChange={setIsRescheduleOpen}
-                    >
-                      <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
-                        <SheetHeader>
-                          <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
-                        </SheetHeader>
+            {/* Reschedule */}
+            {appointment.status !== AppointmentStatus.IN_CONSULTATION &&
+              canRescheduleAppointment && (
+                <>
+                  <AlertDialog
+                    open={isRescheduleReasonOpen}
+                    onOpenChange={setIsRescheduleReasonOpen}
+                  >
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <CalendarIcon className="size-4 mr-2" />
+                        {t("reschedule")}
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          {t("reschedule_appointment")}
+                        </AlertDialogTitle>
+                        <Label>{t("note")}</Label>
+                        <Textarea
+                          value={oldNote}
+                          onChange={(e) => setRescheduleReason(e.target.value)}
+                        />
+                        <AlertDialogDescription>
+                          <Alert variant="destructive">
+                            <AlertTitle>{t("warning")}</AlertTitle>
+                            <AlertDescription>
+                              {t("reschedule_appointment_warning")}
+                            </AlertDescription>
+                          </Alert>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel
+                          onClick={() => setIsRescheduleReasonOpen(false)}
+                        >
+                          {t("cancel")}
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => {
+                            setIsRescheduleReasonOpen(false);
+                            setIsRescheduleOpen(true);
+                          }}
+                          disabled={!oldNote.trim()}
+                        >
+                          {t("continue")}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
 
-                        <div className="mt-6 flex-1">
-                          <div className="text-sm">
-                            <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
-                              <Label className="font-medium">
-                                {t("tags", { count: 2 })}
-                              </Label>
-                              <TagAssignmentSheet
-                                entityType="appointment"
-                                entityId={appointment.id}
-                                facilityId={facilityId}
-                                currentTags={appointment.tags}
-                                onUpdate={() => {
-                                  queryClient.invalidateQueries({
-                                    queryKey: ["appointment", appointment.id],
-                                  });
-                                }}
-                                canWrite={true}
-                              />
-                            </div>
-                            {appointment.tags?.length > 0 ? (
-                              <p className="text-gray-600 flex flex-wrap gap-1">
-                                {appointment.tags.map((tag) => (
-                                  <Badge key={tag.id} variant="secondary">
-                                    {tag.parent
-                                      ? `${tag.parent.display}: `
-                                      : ""}
-                                    {tag.display}
-                                  </Badge>
-                                ))}
-                              </p>
-                            ) : (
-                              <p className="text-gray-600 md:-mt-2">
-                                {t("no_tags_assigned")}
-                              </p>
-                            )}
-                          </div>
-                          <Label className="mb-2 aria-required mt-8">
-                            {t("note")}
-                          </Label>
-                          <Textarea
-                            placeholder={t("appointment_note")}
-                            value={newNote}
-                            onChange={(e) => setNewVisitReason(e.target.value)}
-                          />
-                          <div className="my-4 space-y-4">
-                            <div className="flex flex-col">
-                              <Label className="mb-2 text-sm font-medium text-gray-950">
-                                {t(
-                                  `schedulable_resource__${selectedResource.resource_type}`,
-                                )}
-                              </Label>
-                              <ScheduleResourceSelector
-                                selectedResource={selectedResource}
-                                facilityId={facilityId}
-                                setSelectedResource={setSelectedResource}
-                              />
-                            </div>
-                          </div>
-                          <div className="space-y-4">
-                            <AppointmentDateSelection
+                  <Sheet
+                    open={isRescheduleOpen}
+                    onOpenChange={setIsRescheduleOpen}
+                  >
+                    <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+                      <SheetHeader>
+                        <SheetTitle>{t("reschedule_appointment")}</SheetTitle>
+                      </SheetHeader>
+
+                      <div className="mt-6 flex-1">
+                        <div className="text-sm">
+                          <div className="flex md:flex-row flex-col md:items-center justify-between mb-2 gap-2">
+                            <Label className="font-medium">
+                              {t("tags", { count: 2 })}
+                            </Label>
+                            <TagAssignmentSheet
+                              entityType="appointment"
+                              entityId={appointment.id}
                               facilityId={facilityId}
-                              resourceId={selectedResource.resource?.id}
-                              resourceType={selectedResource.resource_type}
-                              currentAppointment={appointment}
-                              setSelectedDate={setSelectedDate}
-                              selectedDate={selectedDate}
-                            />
-                            <AppointmentSlotPicker
-                              selectedDate={selectedDate}
-                              facilityId={facilityId}
-                              resourceId={selectedResource.resource?.id}
-                              resourceType={selectedResource.resource_type}
-                              selectedSlotId={selectedSlotId}
-                              onSlotSelect={setSelectedSlotId}
-                              onSlotDetailsChange={setOfflineSelectedSlot}
-                              currentAppointment={appointment}
+                              currentTags={appointment.tags}
+                              onUpdate={() => {
+                                queryClient.invalidateQueries({
+                                  queryKey: ["appointment", appointment.id],
+                                });
+                              }}
+                              canWrite={true}
                             />
                           </div>
-
-                          <div className="flex justify-end gap-2 mt-6">
-                            <Button
-                              variant="outline"
-                              onClick={() => {
-                                setIsRescheduleOpen(false);
-                                setSelectedSlotId(undefined);
-                              }}
-                            >
-                              {t("cancel")}
-                            </Button>
-                            <Button
-                              variant="default"
-                              disabled={!selectedSlotId || isRescheduling}
-                              onClick={() => {
-                                if (selectedSlotId) {
-                                  handleRescheduleSubmit({
-                                    new_slot: selectedSlotId,
-                                    previous_booking_note: oldNote,
-                                    new_booking_note: newNote,
-                                    tags: appointment.tags.map((tag) => tag.id),
-                                  });
-                                }
-                              }}
-                            >
-                              {isRescheduling
-                                ? t("rescheduling")
-                                : t("reschedule")}
-                            </Button>
+                          {appointment.tags?.length > 0 ? (
+                            <p className="text-gray-600 flex flex-wrap gap-1">
+                              {appointment.tags.map((tag) => (
+                                <Badge key={tag.id} variant="secondary">
+                                  {tag.parent ? `${tag.parent.display}: ` : ""}
+                                  {tag.display}
+                                </Badge>
+                              ))}
+                            </p>
+                          ) : (
+                            <p className="text-gray-600 md:-mt-2">
+                              {t("no_tags_assigned")}
+                            </p>
+                          )}
+                        </div>
+                        <Label className="mb-2 aria-required mt-8">
+                          {t("note")}
+                        </Label>
+                        <Textarea
+                          placeholder={t("appointment_note")}
+                          value={newNote}
+                          onChange={(e) => setNewVisitReason(e.target.value)}
+                        />
+                        <div className="my-4 space-y-4">
+                          <div className="flex flex-col">
+                            <Label className="mb-2 text-sm font-medium text-gray-950">
+                              {t(
+                                `schedulable_resource__${selectedResource.resource_type}`,
+                              )}
+                            </Label>
+                            <ScheduleResourceSelector
+                              selectedResource={selectedResource}
+                              facilityId={facilityId}
+                              setSelectedResource={setSelectedResource}
+                            />
                           </div>
                         </div>
-                      </SheetContent>
-                    </Sheet>
-                  </>
-                )}
+                        <div className="space-y-4">
+                          <AppointmentDateSelection
+                            facilityId={facilityId}
+                            resourceId={selectedResource.resource?.id}
+                            resourceType={selectedResource.resource_type}
+                            currentAppointment={appointment}
+                            setSelectedDate={setSelectedDate}
+                            selectedDate={selectedDate}
+                          />
+                          <AppointmentSlotPicker
+                            selectedDate={selectedDate}
+                            facilityId={facilityId}
+                            resourceId={selectedResource.resource?.id}
+                            resourceType={selectedResource.resource_type}
+                            selectedSlotId={selectedSlotId}
+                            onSlotSelect={setSelectedSlotId}
+                            onSlotDetailsChange={setOfflineSelectedSlot}
+                            currentAppointment={appointment}
+                          />
+                        </div>
 
-                {/* Mark as No Show */}
-                {[
-                  AppointmentStatus.BOOKED,
-                  AppointmentStatus.CHECKED_IN,
-                ].includes(currentStatus) && (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        <EyeNoneIcon className="size-4 mr-2" />
-                        {t("mark_as_noshow")}
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t("mark_as_noshow")}
-                        </AlertDialogTitle>
-                        <Label>{t("note")}</Label>
-                        <Textarea
-                          value={note}
-                          onChange={(e) => setNote(e.target.value)}
-                        />
-                        <AlertDialogDescription>
-                          <Alert variant="destructive">
-                            <AlertTitle>{t("warning")}</AlertTitle>
-                            <AlertDescription>
-                              {t("mark_as_noshow_warning")}
-                            </AlertDescription>
-                          </Alert>
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() =>
-                            handleUpdateAppointment({
-                              status: AppointmentStatus.NO_SHOW,
-                              note: note,
-                            })
-                          }
-                          className={cn(
-                            buttonVariants({ variant: "destructive" }),
-                          )}
-                          disabled={!note.trim()}
-                        >
-                          {isUpdating ? (
-                            <Loader2 className="size-4 animate-spin mr-2" />
-                          ) : (
-                            t("confirm")
-                          )}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                )}
+                        <div className="flex justify-end gap-2 mt-6">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setIsRescheduleOpen(false);
+                              setSelectedSlotId(undefined);
+                            }}
+                          >
+                            {t("cancel")}
+                          </Button>
+                          <Button
+                            variant="default"
+                            disabled={!selectedSlotId || isRescheduling}
+                            onClick={() => {
+                              if (selectedSlotId) {
+                                handleRescheduleSubmit({
+                                  new_slot: selectedSlotId,
+                                  previous_booking_note: oldNote,
+                                  new_booking_note: newNote,
+                                  tags: appointment.tags.map((tag) => tag.id),
+                                });
+                              }
+                            }}
+                          >
+                            {isRescheduling
+                              ? t("rescheduling")
+                              : t("reschedule")}
+                          </Button>
+                        </div>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                </>
+              )}
 
-                {/* Cancel Appointment */}
-                {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        <BanIcon className="size-4 mr-2" />
-                        {t("cancel_appointment")}
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t("cancel_appointment")}
-                        </AlertDialogTitle>
-                        <Label>{t("note")}</Label>
-                        <Textarea
-                          value={note}
-                          onChange={(e) => setNote(e.target.value)}
-                        />
-                        <AlertDialogDescription>
-                          <Alert variant="destructive">
-                            <AlertTitle>{t("warning")}</AlertTitle>
-                            <AlertDescription>
-                              {t("cancel_appointment_warning")}
-                            </AlertDescription>
-                          </Alert>
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() =>
-                            handleAppointmentCancel({
-                              reason: "cancelled",
-                              note: note,
-                            })
-                          }
-                          className={cn(
-                            buttonVariants({ variant: "destructive" }),
-                          )}
-                          disabled={!note.trim()}
-                        >
-                          {isCancelling ? (
-                            <Loader2 className="size-4 animate-spin mr-2" />
-                          ) : (
-                            t("confirm")
-                          )}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                )}
-
-                {/* Mark as Entered in Error */}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                      <BanIcon className="size-4 mr-2" />
-                      {t("mark_as_entered_in_error")}
-                    </DropdownMenuItem>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        {t("mark_as_entered_in_error")}
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        <Alert variant="destructive" className="mt-4">
-                          <AlertTitle>{t("warning")}</AlertTitle>
-                          <AlertDescription>
-                            {t("entered_in_error_warning")}
-                          </AlertDescription>
-                        </Alert>
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() =>
-                          handleAppointmentCancel({
-                            reason: "entered_in_error",
-                          })
-                        }
-                        className={cn(
-                          buttonVariants({ variant: "destructive" }),
-                        )}
-                      >
-                        {isCancelling ? (
-                          <Loader2 className="size-4 animate-spin mr-2" />
-                        ) : (
-                          t("confirm")
-                        )}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </>
+            {/* Mark as No Show */}
+            {[AppointmentStatus.BOOKED, AppointmentStatus.CHECKED_IN].includes(
+              currentStatus,
+            ) && (
+              <AlertDialog>
+                <AlertDialogTrigger
+                  asChild
+                  disabled={!canMarkFulfilledOrNoShow}
+                >
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <EyeNoneIcon className="size-4 mr-2" />
+                    {t("mark_as_noshow")}
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("mark_as_noshow")}</AlertDialogTitle>
+                    <Label>{t("note")}</Label>
+                    <Textarea
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                    />
+                    <AlertDialogDescription>
+                      <Alert variant="destructive">
+                        <AlertTitle>{t("warning")}</AlertTitle>
+                        <AlertDescription>
+                          {t("mark_as_noshow_warning")}
+                        </AlertDescription>
+                      </Alert>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() =>
+                        handleUpdateAppointment({
+                          status: AppointmentStatus.NO_SHOW,
+                          note: note,
+                        })
+                      }
+                      className={cn(buttonVariants({ variant: "destructive" }))}
+                      disabled={!note.trim()}
+                    >
+                      {isUpdating ? (
+                        <Loader2 className="size-4 animate-spin mr-2" />
+                      ) : (
+                        t("confirm")
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
+
+            {/* Cancel Appointment */}
+            {appointment.status !== AppointmentStatus.IN_CONSULTATION && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <BanIcon className="size-4 mr-2" />
+                    {t("cancel_appointment")}
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {t("cancel_appointment")}
+                    </AlertDialogTitle>
+                    <Label>{t("note")}</Label>
+                    <Textarea
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                    />
+                    <AlertDialogDescription>
+                      <Alert variant="destructive">
+                        <AlertTitle>{t("warning")}</AlertTitle>
+                        <AlertDescription>
+                          {t("cancel_appointment_warning")}
+                        </AlertDescription>
+                      </Alert>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() =>
+                        handleAppointmentCancel({
+                          reason: "cancelled",
+                          note: note,
+                        })
+                      }
+                      className={cn(buttonVariants({ variant: "destructive" }))}
+                      disabled={!note.trim()}
+                    >
+                      {isCancelling ? (
+                        <Loader2 className="size-4 animate-spin mr-2" />
+                      ) : (
+                        t("confirm")
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+
+            {/* Mark as Entered in Error */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <BanIcon className="size-4 mr-2" />
+                  {t("mark_as_entered_in_error")}
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {t("mark_as_entered_in_error")}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    <Alert variant="destructive" className="mt-4">
+                      <AlertTitle>{t("warning")}</AlertTitle>
+                      <AlertDescription>
+                        {t("entered_in_error_warning")}
+                      </AlertDescription>
+                    </Alert>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() =>
+                      handleAppointmentCancel({ reason: "entered_in_error" })
+                    }
+                    className={cn(buttonVariants({ variant: "destructive" }))}
+                  >
+                    {isCancelling ? (
+                      <Loader2 className="size-4 animate-spin mr-2" />
+                    ) : (
+                      t("confirm")
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

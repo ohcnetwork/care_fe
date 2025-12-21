@@ -36,11 +36,11 @@ import {
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import organizationApi from "@/types/organization/organizationApi";
-import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface Props {
-  form: UseFormReturn<QuestionnaireDetail>;
+  form: UseFormReturn<QuestionnaireRead>;
   trigger?: React.ReactNode;
 }
 
@@ -71,7 +71,7 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
     mutationFn: mutate(questionnaireApi.create, {
       silent: true,
     }),
-    onSuccess: async (data: QuestionnaireDetail) => {
+    onSuccess: async (data: QuestionnaireRead) => {
       navigate(`/admin/questionnaire/${data.slug}/edit`);
       setOpen(false);
     },
@@ -97,6 +97,7 @@ export default function CloneQuestionnaireSheet({ form, trigger }: Props) {
       title: `${form.getValues("title")} (Clone)`,
       organizations: selectedIds,
       tags: tags.map((tag) => tag.id),
+      version: "1.0", // TODO: remove once backend handles versioning
     };
 
     cloneQuestionnaire(clonedQuestionnaire);

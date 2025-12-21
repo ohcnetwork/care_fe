@@ -52,10 +52,12 @@ import {
   AnswerOption,
   findQuestionById,
 } from "@/types/questionnaire/question";
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 import { CreateAppointmentQuestion } from "@/types/scheduling/schedule";
 
+import { validateEncounterQuestion } from "@/components/Questionnaire/QuestionTypes/EncounterQuestion";
+import { EncounterEdit } from "@/types/emr/encounter/encounter";
 import { QuestionRenderer } from "./QuestionRenderer";
 import { validateAppointmentQuestion } from "./QuestionTypes/AppointmentQuestion";
 import { validateFileUploadQuestion } from "./QuestionTypes/FileQuestion";
@@ -68,7 +70,7 @@ import { queueQuestionnairBatchrequest } from "./offlineQueue";
 import { getStructuredRequests } from "./structured/handlers";
 
 export interface QuestionnaireFormState {
-  questionnaire: QuestionnaireDetail;
+  questionnaire: QuestionnaireRead;
   responses: QuestionnaireResponse[];
   errors: QuestionValidationError[];
 }
@@ -315,6 +317,10 @@ const STRUCTURED_TYPE_VALIDATORS = {
       required ?? false,
     );
   },
+  encounter: (response: ResponseValue | undefined, questionId: string) => {
+    const encounterData = (response?.value as EncounterEdit[]) || [];
+    return validateEncounterQuestion(encounterData[0], questionId);
+  },
   medication_statement: (
     response: ResponseValue | undefined,
     questionId: string,
@@ -482,8 +488,8 @@ export function QuestionnaireForm({
     error: questionnaireError,
   } = useQuery({
     queryKey: ["questionnaireDetail", questionnaireSlug],
-    queryFn: query(questionnaireApi.detail, {
-      pathParams: { id: questionnaireSlug ?? "" },
+    queryFn: query(questionnaireApi.get, {
+      pathParams: { slug: questionnaireSlug ?? "" },
     }),
     meta: { persist: true },
     enabled: !!questionnaireSlug && !FIXED_QUESTIONNAIRES[questionnaireSlug],
@@ -652,8 +658,8 @@ export function QuestionnaireForm({
   const questionnaireQueries = useQueries({
     queries: slugs.map((slug: string | null) => ({
       queryKey: ["questionnaireDetail", slug],
-      queryFn: query(questionnaireApi.detail, {
-        pathParams: { id: slug ?? "" },
+      queryFn: query(questionnaireApi.get, {
+        pathParams: { slug: slug ?? "" },
       }),
       meta: { persist: true },
       networkMode: "online" as const,
@@ -864,7 +870,7 @@ export function QuestionnaireForm({
           return;
         }
 
-        if (q.required) {
+        if (q.required && isQuestionEnabled(q, form.responses)) {
           // Handle appointment validation
           const response = form.responses.find((r) => r.question_id === q.id);
           const hasValue = response?.values?.some(
@@ -892,7 +898,11 @@ export function QuestionnaireForm({
           }
         }
 
-        if (q.type === "structured" && q.structured_type) {
+        if (
+          q.type === "structured" &&
+          q.structured_type &&
+          isQuestionEnabled(q, form.responses)
+        ) {
           const response = form.responses.find((r) => r.question_id === q.id);
           const validator =
             STRUCTURED_TYPE_VALIDATORS[

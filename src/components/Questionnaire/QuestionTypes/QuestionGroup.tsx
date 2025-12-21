@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useEffect } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -121,6 +121,24 @@ export const QuestionGroup = memo(function QuestionGroup({
 }: QuestionGroupProps) {
   const isEnabled = isQuestionEnabled(question, questionnaireResponses);
 
+  const clearDependentQuestionResponse = (dependentQuestion: Question) => {
+    const dependentQuestionResponse = questionnaireResponses.find(
+      (v) => v.question_id === dependentQuestion.id,
+    );
+    if (dependentQuestionResponse) {
+      updateQuestionnaireResponseCB([], dependentQuestion.id);
+    }
+    dependentQuestion.questions?.forEach((q) => {
+      clearDependentQuestionResponse(q);
+    });
+  };
+
+  useEffect(() => {
+    if (!isEnabled) {
+      clearDependentQuestionResponse(question);
+    }
+  }, [isEnabled]);
+
   if (!isEnabled) {
     return null;
   }
@@ -149,7 +167,6 @@ export const QuestionGroup = memo(function QuestionGroup({
 
   return (
     <div
-      data-cy="group_styling"
       className={cn(
         "sm:rounded-lg bg-gray-100 md:bg-transparent",
         isActive && "ring-2 ring-primary",
@@ -169,7 +186,6 @@ export const QuestionGroup = memo(function QuestionGroup({
         </div>
       )}
       <div
-        data-cy="group_container_styling"
         className={cn(
           "gap-1",
           question.styling_metadata?.containerClasses &&

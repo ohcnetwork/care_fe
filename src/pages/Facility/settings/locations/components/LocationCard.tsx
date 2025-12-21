@@ -28,15 +28,15 @@ import {
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import mutate from "@/Utils/request/mutate";
-import { LocationList, LocationTypeIcons } from "@/types/location/location";
+import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 interface Props {
-  location: LocationList;
-  onEdit?: (location: LocationList) => void;
-  onView?: (location: LocationList) => void;
-  onMoveUp?: (location: LocationList) => void;
-  onMoveDown?: (location: LocationList) => void;
+  location: LocationRead;
+  onEdit?: (location: LocationRead) => void;
+  onView?: (location: LocationRead) => void;
+  onMoveUp?: (location: LocationRead) => void;
+  onMoveDown?: (location: LocationRead) => void;
   className?: string;
   facilityId: string;
   index?: number;
@@ -205,7 +205,6 @@ export function LocationCard({
                       onSelect={(e) => e.preventDefault()}
                       onClick={() => setShowDeleteDialog(true)}
                       className="text-destructive"
-                      data-cy="delete-location-button"
                     >
                       <Trash className="size-4 mr-2" />
                       {t("delete")}
@@ -222,7 +221,6 @@ export function LocationCard({
             <div className="ml-auto">
               {location.form !== "bd" && onView && (
                 <Button
-                  data-cy="view-details-location-button"
                   variant="outline"
                   className="flex items-center gap-2"
                   onClick={() => onView?.(location)}

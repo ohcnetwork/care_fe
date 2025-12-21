@@ -35,14 +35,14 @@ import { dateQueryString } from "@/Utils/utils";
 import dayjs from "dayjs";
 
 const createQueueFormSchema = z.object({
-  name: z.string().min(1, "Queue name is required"),
+  name: z.string().trim().min(1, "Queue name is required"),
   date: z.date({
     required_error: "Date is required",
   }),
 });
 
 const editQueueFormSchema = z.object({
-  name: z.string().min(1, "Queue name is required"),
+  name: z.string().trim().min(1, "Queue name is required"),
 });
 
 type CreateQueueFormData = z.infer<typeof createQueueFormSchema>;
@@ -239,7 +239,11 @@ export default function QueueFormSheet({
               )}
 
               {/* Submit Button */}
-              <Button type="submit" disabled={isPending} className="w-full">
+              <Button
+                type="submit"
+                disabled={isPending || (isEditMode && !form.formState.isDirty)}
+                className="w-full"
+              >
                 {isPending ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />

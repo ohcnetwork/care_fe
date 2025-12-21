@@ -1,3 +1,4 @@
+import { booleanFromString } from "@/common/utils";
 import { AnimatedCounter } from "@/components/Common/AnimatedCounter";
 import BackButton from "@/components/Common/BackButton";
 import Loading from "@/components/Common/Loading";
@@ -45,6 +46,7 @@ import { TokenStatus } from "@/types/tokens/token/token";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { ChevronLeft, Edit3, InfoIcon, SettingsIcon } from "lucide-react";
@@ -70,8 +72,8 @@ export function ManageQueuePage({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const resource = useScheduleResource();
-  const [{ autoRefresh }, setQueryParams] = useQueryParams<{
-    autoRefresh: string;
+  const [qParams, setQueryParams] = useQueryParams<{
+    autoRefresh?: string;
   }>();
   const { data: queue, isLoading: isQueueLoading } = useQuery({
     queryKey: ["tokenQueue", facilityId, queueId],
@@ -105,6 +107,11 @@ export function ManageQueuePage({
     // TODO: build appropriate loading skeleton...
     return <Loading />;
   }
+
+  const shouldAutoRefresh = booleanFromString(
+    qParams.autoRefresh ?? "",
+    careConfig.enableAutoRefresh,
+  );
 
   return (
     <Page
@@ -151,7 +158,7 @@ export function ManageQueuePage({
                       </Badge>
                     )}
                   </div>
-                  <span className="text-xs font-medium text-gray-500">
+                  <span className="text-xs font-medium text-gray-500 break-all">
                     {!queue.system_generated && `${queue.name} - `}
                     {formatDate(queue.date, "dd MMM yyyy")}
                   </span>
@@ -160,9 +167,9 @@ export function ManageQueuePage({
             )}
           </div>
           <div className="flex gap-5 items-center justify-center">
-            <div className="flex flex-col-reverse sm:flex-row gap-2 items-center text-black font-medium text-md">
+            <div className="hidden sm:flex flex-col-reverse sm:flex-row gap-2 items-center text-black font-medium text-md">
               <Switch
-                checked={autoRefresh === "true"}
+                checked={shouldAutoRefresh}
                 onCheckedChange={(checked) =>
                   setQueryParams({
                     autoRefresh: checked ? "true" : "false",
@@ -173,12 +180,17 @@ export function ManageQueuePage({
                 <Label className="whitespace-nowrap">{t("auto_refresh")}</Label>
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger asChild className="hidden sm:block">
+                    <TooltipTrigger asChild>
                       <span className="cursor-help">
                         <InfoIcon className="size-4 text-gray-500" />
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>{t("auto_refresh_tooltip")}</TooltipContent>
+                    <TooltipContent>
+                      {t("auto_refresh_tooltip", {
+                        interval:
+                          careConfig.appointmentAndQueueRefreshInterval / 1000,
+                      })}
+                    </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
@@ -190,6 +202,22 @@ export function ManageQueuePage({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <div className="sm:hidden px-2 py-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <Label className="text-sm font-medium">
+                      {t("auto_refresh")}
+                    </Label>
+                    <Switch
+                      checked={shouldAutoRefresh}
+                      onCheckedChange={(checked) =>
+                        setQueryParams({
+                          autoRefresh: checked ? "true" : "false",
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <DropdownMenuSeparator className="sm:hidden" />
                 <ManageServicePointsDialog
                   trigger={
                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -251,7 +279,7 @@ export function ManageQueuePage({
           onTabChange={(tab) => {
             navigate(tab, {
               query: {
-                autoRefresh,
+                autoRefresh: shouldAutoRefresh.toString(),
               },
             });
           }}

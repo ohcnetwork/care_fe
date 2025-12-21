@@ -49,11 +49,7 @@ export const ResourceRequests = (props: PatientProps) => {
           {t("resource_requests")}
         </h2>
         {facilityId && (
-          <Button
-            variant="outline_primary"
-            asChild
-            data-cy="create-request-button"
-          >
+          <Button variant="outline_primary" asChild>
             <Link
               href={`/facility/${facilityId}/resource/new?related_patient=${patientData.id}`}
             >
@@ -68,7 +64,7 @@ export const ResourceRequests = (props: PatientProps) => {
         {loading ? (
           <TableSkeleton count={5} />
         ) : (
-          <Table data-cy="resource-requests-table">
+          <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>{t("resource_type")}</TableHead>

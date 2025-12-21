@@ -38,7 +38,6 @@ import UserSelector from "@/components/Common/UserSelector";
 import { HistoricalRecordSelector } from "@/components/HistoricalRecordSelector";
 import InstructionsPopover from "@/components/Medicine/InstructionsPopover";
 import { getFrequencyDisplay } from "@/components/Medicine/MedicationsTable";
-import { formatDosage } from "@/components/Medicine/utils";
 import { EntitySelectionDrawer } from "@/components/Questionnaire/EntitySelectionDrawer";
 import MedicationValueSetSelect from "@/components/Questionnaire/MedicationValueSetSelect";
 import { FieldError } from "@/components/Questionnaire/QuestionTypes/FieldError";
@@ -50,6 +49,8 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 import { OfflineWritesEntry } from "@/OfflineSupport/AppcacheDB";
 import query from "@/Utils/request/query";
 import { formatName } from "@/Utils/utils";
+import { Avatar } from "@/components/Common/Avatar";
+import { formatDosage } from "@/components/Medicine/utils";
 import { useCurrentFacilitySilently } from "@/pages/Facility/utils/useCurrentFacility";
 import { Code } from "@/types/base/code/code";
 import {
@@ -68,7 +69,6 @@ import {
 import medicationRequestApi from "@/types/emr/medicationRequest/medicationRequestApi";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 import medicationStatementApi from "@/types/emr/medicationStatement/medicationStatementApi";
-import { PrescriptionStatus } from "@/types/emr/prescription/prescription";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import {
@@ -212,12 +212,6 @@ export function MedicationRequestQuestion({
     (questionnaireResponse.values?.[0]?.value as MedicationRequestCreate[]) ||
     [];
 
-  const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
-    `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
-  );
-
-  console.log("alternateIdentifier", alternateIdentifier);
-
   const { data: patientMedications } = useQuery({
     queryKey: ["medication_requests", patientId, encounterId],
     queryFn: query(medicationRequestApi.list, {
@@ -279,15 +273,9 @@ export function MedicationRequestQuestion({
   const [newMedicationInSheet, setNewMedicationInSheet] =
     useState<MedicationRequestCreate | null>(null);
 
-  const createPrescriptionObject = {
-    status: PrescriptionStatus.active,
-    alternate_identifier: alternateIdentifier,
-  };
-
   const handleAddMedication = (medication: Code) => {
     const initialDetails: MedicationRequestCreate = {
       ...parseMedicationStringToRequest(currentUser, medication),
-      create_prescription: createPrescriptionObject,
       authored_on: new Date().toISOString(),
       requester: currentUser,
     };
@@ -308,7 +296,6 @@ export function MedicationRequestQuestion({
         undefined,
         productKnowledge,
       ),
-      create_prescription: createPrescriptionObject,
       authored_on: new Date().toISOString(),
       requester: currentUser,
     };
@@ -358,14 +345,12 @@ export function MedicationRequestQuestion({
           requested_product: requested_product?.id,
           requested_product_internal: requested_product,
           requester: request.requester || currentUser,
-          create_prescription: createPrescriptionObject,
           medication: requested_product?.id ? null : request.medication,
         } as MedicationRequestCreate;
       } else {
         const statement = record as MedicationStatementRead;
         return {
           ...parseMedicationStringToRequest(currentUser, statement.medication),
-          create_prescription: createPrescriptionObject,
           authored_on: new Date().toISOString(),
           note: statement.note,
           requester: currentUser,
@@ -496,18 +481,40 @@ export function MedicationRequestQuestion({
                 label: t("dosage"),
                 render: (instructions) => {
                   const dosage = formatDosage(instructions[0]) || "";
-
                   const frequency =
-                    getFrequencyDisplay(instructions[0]?.timing)?.meaning || "";
-
-                  const duration = instructions?.[0]?.timing?.repeat
-                    ?.bounds_duration
-                    ? `${instructions[0].timing.repeat.bounds_duration.value} ${instructions[0].timing.repeat.bounds_duration.unit}`
-                    : "";
-
-                  return `${dosage}\n${frequency}\n${duration}`;
+                    getFrequencyDisplay(instructions[0]?.timing)?.meaning ||
+                    "-";
+                  return `${dosage}\n${frequency}`;
                 },
               },
+              {
+                key: "dosage_instruction",
+                label: t("duration"),
+                render: (instructions) => {
+                  const duration =
+                    instructions?.[0]?.timing?.repeat?.bounds_duration;
+                  if (!duration?.value) return "-";
+                  return `${duration.value} ${duration.unit}`;
+                },
+              },
+              {
+                key: "created_by",
+                label: t("prescribed_by"),
+                render: (created_by) => (
+                  <div className="flex items-center gap-2">
+                    <Avatar
+                      imageUrl={created_by?.profile_picture_url}
+                      name={formatName(created_by, true)}
+                      className="size-6 rounded-full"
+                    />
+                    <span className="text-sm truncate">
+                      {formatName(created_by)}
+                    </span>
+                  </div>
+                ),
+              },
+            ],
+            expandableFields: [
               {
                 key: "dosage_instruction",
                 label: t("instructions"),
@@ -518,11 +525,6 @@ export function MedicationRequestQuestion({
                 key: "note",
                 label: t("notes"),
                 render: (note) => note,
-              },
-              {
-                key: "created_by",
-                label: t("prescribed_by"),
-                render: (created_by) => formatName(created_by),
               },
             ],
             queryKey: ["medication_requests", patientId],
@@ -549,23 +551,36 @@ export function MedicationRequestQuestion({
               },
               {
                 key: "dosage_text",
-                label: t("dosage"),
+                label: t("dosage_instruction"),
                 render: (dosage) => dosage,
               },
               {
                 key: "status",
                 label: t("status"),
-                render: (status) => t(status),
-              },
-              {
-                key: "note",
-                label: t("notes"),
-                render: (note) => note || "-",
+                render: (status: string) => t(`medication_status__${status}`),
               },
               {
                 key: "created_by",
                 label: t("prescribed_by"),
-                render: (created_by) => formatName(created_by),
+                render: (created_by) => (
+                  <div className="flex items-center gap-2">
+                    <Avatar
+                      imageUrl={created_by?.profile_picture_url}
+                      name={formatName(created_by, true)}
+                      className="size-6 rounded-full"
+                    />
+                    <span className="text-sm truncate">
+                      {formatName(created_by)}
+                    </span>
+                  </div>
+                ),
+              },
+            ],
+            expandableFields: [
+              {
+                key: "note",
+                label: t("notes"),
+                render: (note) => note,
               },
             ],
             queryKey: ["medication_statements", patientId],
@@ -585,6 +600,7 @@ export function MedicationRequestQuestion({
         ]}
         buttonLabel={t("medication_history")}
         onAddSelected={handleAddHistoricalMedications}
+        disableAPI={isPreview}
       />
       {medications.length > 0 && (
         <div className="md:overflow-x-auto w-auto">
@@ -716,7 +732,6 @@ export function MedicationRequestQuestion({
                                           }}
                                           disabled={isInactive || disabled}
                                           className="size-10 p-4 border border-gray-400 bg-white shadow text-destructive"
-                                          data-cy="remove-medication"
                                           aria-label="Remove medication"
                                         >
                                           <MinusCircledIcon className="size-5" />
@@ -829,7 +844,7 @@ export function MedicationRequestQuestion({
           {newMedicationSheetContent}
         </EntitySelectionDrawer>
       ) : (
-        <div className="max-w-4xl" data-cy="add-medication-request">
+        <div className="max-w-4xl">
           <MedicationValueSetSelect
             placeholder={addMedicationPlaceholder}
             onSelect={handleAddMedication}
@@ -1022,10 +1037,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
     >
       {/* Medicine Name */}
       {desktopLayout && (
-        <div
-          className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm"
-          data-cy="medicine-name-view"
-        >
+        <div className="lg:p-4 lg:px-2 lg:py-1 flex items-center justify-between lg:justify-start lg:col-span-1 lg:border-r border-gray-200 font-medium overflow-hidden text-sm">
           <span
             className={cn(
               "break-words line-clamp-2 hidden lg:block",
@@ -1044,7 +1056,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           {t("dosage")}
           <span className="text-red-500 ml-0.5">*</span>
         </Label>
-        <div data-cy="dosage">
+        <div>
           {dosageInstruction?.dose_and_rate?.dose_range ? (
             <Input
               readOnly
@@ -1067,7 +1079,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
                 )}
               >
                 <ComboboxQuantityInput
-                  data-cy="dosage-input"
                   quantity={dosageInstruction?.dose_and_rate?.dose_quantity}
                   onChange={(value) => {
                     if (value) {
@@ -1164,7 +1175,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
           disabled={disabled || isReadOnly}
         >
           <SelectTrigger
-            data-cy="frequency"
             className={cn(
               "h-9 text-sm",
               hasError(MEDICATION_REQUEST_FIELDS.FREQUENCY.key) &&
@@ -1332,10 +1342,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         )}
       </div>
       {/* Route */}
-      <div
-        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
-        data-cy="route"
-      >
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("route")}</Label>
         <ValueSetSelect
           system="system-route"
@@ -1346,10 +1353,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Site */}
-      <div
-        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
-        data-cy="site"
-      >
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("site")}</Label>
         <ValueSetSelect
           system="system-body-site"
@@ -1360,10 +1364,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Method */}
-      <div
-        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
-        data-cy="method"
-      >
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("method")}</Label>
         <ValueSetSelect
           system="system-administration-method"
@@ -1431,10 +1432,7 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
         />
       </div>
       {/* Notes */}
-      <div
-        className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden"
-        data-cy="notes"
-      >
+      <div className="lg:px-2 lg:py-1 p-1 lg:border-r border-gray-200 overflow-hidden">
         <Label className="mb-1.5 block text-sm lg:hidden">{t("note")}</Label>
         <Input
           value={medication.note || ""}
@@ -1448,7 +1446,6 @@ const MedicationRequestGridRow: React.FC<MedicationRequestGridRowProps> = ({
       {/* Remove Button */}
       <div className="hidden lg:flex lg:px-2 lg:py-1 items-center justify-center sticky right-0 bg-white shadow-[-12px_0_15px_-4px_rgba(0,0,0,0.15)] w-12">
         <Button
-          data-cy="remove-medication"
           variant="ghost"
           size="icon"
           onClick={onRemove}

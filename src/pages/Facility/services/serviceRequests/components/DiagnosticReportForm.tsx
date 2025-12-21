@@ -18,7 +18,6 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
@@ -45,6 +44,7 @@ import useFileUpload from "@/hooks/useFileUpload";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
@@ -54,8 +54,8 @@ import {
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import {
   ObservationComponent,
-  ObservationFromDefinitionCreate,
   ObservationStatus,
+  ObservationUpsertRequest,
   QuestionnaireSubmitResultValue,
 } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
@@ -90,7 +90,7 @@ interface DiagnosticReportFormProps {
 interface ComponentValue {
   value: string;
   unit: string;
-  isNormal: boolean;
+  interpretation: string;
 }
 
 // Interface for observation values
@@ -98,7 +98,7 @@ interface ObservationValue {
   id: string;
   value: string;
   unit: string;
-  isNormal: boolean;
+  interpretation: string;
   status: ObservationStatus;
   components: Record<string, ComponentValue>;
 }
@@ -308,7 +308,7 @@ export function DiagnosticReportForm({
                   components[comp.code.code] = {
                     value: comp.value.value || "",
                     unit: comp.value.unit?.code || "",
-                    isNormal: comp.interpretation === "normal",
+                    interpretation: comp.interpretation || "",
                   };
                 }
               });
@@ -318,7 +318,7 @@ export function DiagnosticReportForm({
               id: obs.id,
               value: obs.value.value || "",
               unit: obs.value.unit?.code || "",
-              isNormal: obs.interpretation === "normal",
+              interpretation: obs.interpretation || "",
               status: obs.status,
               components,
             };
@@ -351,7 +351,7 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          isNormal: true,
+          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -375,7 +375,7 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          isNormal: true,
+          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -383,34 +383,6 @@ export function DiagnosticReportForm({
       observationsList[index] = {
         ...observationsList[index],
         unit,
-      };
-      return {
-        ...prev,
-        [definitionId]: observationsList,
-      };
-    });
-  }
-
-  function handleNormalChange(
-    definitionId: string,
-    index: number,
-    isNormal: boolean,
-  ) {
-    setObservations((prev) => {
-      const observationsList = [...(prev[definitionId] || [])];
-      if (!observationsList[index]) {
-        observationsList[index] = {
-          id: "",
-          value: "",
-          unit: "",
-          isNormal: true,
-          status: ObservationStatus.AMENDED,
-          components: {},
-        };
-      }
-      observationsList[index] = {
-        ...observationsList[index],
-        isNormal,
       };
       return {
         ...prev,
@@ -433,7 +405,7 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          isNormal: true,
+          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -442,7 +414,7 @@ export function DiagnosticReportForm({
       const components = { ...observation.components };
 
       components[componentCode] = {
-        ...(components[componentCode] || { isNormal: true }),
+        ...components[componentCode],
         value,
         unit,
       };
@@ -472,7 +444,7 @@ export function DiagnosticReportForm({
           id: "",
           value: "",
           unit: "",
-          isNormal: true,
+          interpretation: "",
           status: ObservationStatus.AMENDED,
           components: {},
         };
@@ -481,46 +453,8 @@ export function DiagnosticReportForm({
       const components = { ...observation.components };
 
       components[componentCode] = {
-        ...(components[componentCode] || { value: "", isNormal: true }),
+        ...(components[componentCode] || { value: "", interpretation: "" }),
         unit,
-      };
-
-      observationsList[index] = {
-        ...observation,
-        components,
-      };
-
-      return {
-        ...prev,
-        [definitionId]: observationsList,
-      };
-    });
-  }
-
-  function handleComponentNormalChange(
-    definitionId: string,
-    index: number,
-    componentCode: string,
-    isNormal: boolean,
-  ) {
-    setObservations((prev) => {
-      const observationsList = [...(prev[definitionId] || [])];
-      if (!observationsList[index]) {
-        observationsList[index] = {
-          id: "",
-          value: "",
-          unit: "",
-          isNormal: true,
-          status: ObservationStatus.AMENDED,
-          components: {},
-        };
-      }
-      const observation = observationsList[index];
-      const components = { ...observation.components };
-
-      components[componentCode] = {
-        ...(components[componentCode] || { value: "", unit: "" }),
-        isNormal,
       };
 
       observationsList[index] = {
@@ -591,125 +525,128 @@ export function DiagnosticReportForm({
         );
 
       // If there's a conclusion, we must have results first
-      if (conclusion.trim() && !hasObservationValue) {
+      if (
+        conclusion.trim() &&
+        !hasObservationValue &&
+        observationDefinitions.length > 0
+      ) {
         toast.error(t("cannot_add_conclusion_without_results"));
         return;
       }
 
-      // Results are mandatory, unless an observation is being deleted
-      if (!hasObservationValue && !hasDeletions) {
+      // Results are mandatory if observation definitions exist, unless an observation is being deleted
+      if (
+        !hasObservationValue &&
+        !hasDeletions &&
+        observationDefinitions.length > 0
+      ) {
         toast.error(t("please_fill_all_results"));
         return;
       }
 
-      const formattedObservations: ObservationFromDefinitionCreate[] =
-        Object.entries(observations)
-          .flatMap(([definitionId, obsList]) =>
-            obsList.map((obsData) => {
-              const observationDefinition = observationDefinitions.find(
-                (def) => def.id === definitionId,
+      const formattedObservations: ObservationUpsertRequest[] = Object.entries(
+        observations,
+      )
+        .flatMap(([definitionId, obsList]) =>
+          obsList.map((obsData): ObservationUpsertRequest | null => {
+            const observationDefinition = observationDefinitions.find(
+              (def) => def.id === definitionId,
+            );
+
+            // If it's a component-based observation (like blood pressure), we should check if components have values
+            const hasComponents =
+              observationDefinition?.component &&
+              observationDefinition.component.length > 0;
+            const hasComponentValues =
+              hasComponents &&
+              Object.values(obsData.components).some(
+                (comp) => comp.value.trim() !== "",
               );
 
-              // If it's a component-based observation (like blood pressure), we should check if components have values
-              const hasComponents =
-                observationDefinition?.component &&
-                observationDefinition.component.length > 0;
-              const hasComponentValues =
-                hasComponents &&
-                Object.values(obsData.components).some(
-                  (comp) => comp.value.trim() !== "",
-                );
+            // For observations marked for deletion, always include them if they have an ID
+            const isMarkedForDeletion =
+              obsData.status === ObservationStatus.ENTERED_IN_ERROR &&
+              obsData.id;
 
-              // For observations marked for deletion, always include them if they have an ID
-              const isMarkedForDeletion =
-                obsData.status === ObservationStatus.ENTERED_IN_ERROR &&
-                obsData.id;
-
-              // For regular observations, skip if no value is entered
-              // For component-based observations, check component values
-              // But always include observations marked for deletion
-              if (!isMarkedForDeletion) {
-                if (!hasComponents && !obsData.value.trim()) {
-                  return null;
-                }
-
-                if (hasComponents && !hasComponentValues) {
-                  return null;
-                }
+            // For regular observations, skip if no value is entered
+            // For component-based observations, check component values
+            // But always include observations marked for deletion
+            if (!isMarkedForDeletion) {
+              if (!hasComponents && !obsData.value.trim()) {
+                return null;
               }
 
-              const value: QuestionnaireSubmitResultValue = {
-                value: obsData.value,
+              if (hasComponents && !hasComponentValues) {
+                return null;
+              }
+            }
+
+            const value: QuestionnaireSubmitResultValue = {
+              value: obsData.value,
+            };
+
+            if (obsData.unit && observationDefinition?.permitted_unit) {
+              value.unit = {
+                code: obsData.unit,
+                system: observationDefinition.permitted_unit.system,
+                display:
+                  observationDefinition.permitted_unit.display || obsData.unit,
               };
+            }
 
-              if (obsData.unit && observationDefinition?.permitted_unit) {
-                value.unit = {
-                  code: obsData.unit,
-                  system: observationDefinition.permitted_unit.system,
-                  display:
-                    observationDefinition.permitted_unit.display ||
-                    obsData.unit,
-                };
-              }
+            // Create observation components if they exist and have values
+            const components: ObservationComponent[] = [];
 
-              // Create observation components if they exist and have values
-              const components: ObservationComponent[] = [];
+            if (hasComponents && observationDefinition) {
+              observationDefinition.component.forEach(
+                (componentDef: ObservationDefinitionComponentSpec) => {
+                  const componentCode = componentDef.code.code;
+                  const componentData = obsData.components[componentCode];
 
-              if (hasComponents && observationDefinition) {
-                observationDefinition.component.forEach(
-                  (componentDef: ObservationDefinitionComponentSpec) => {
-                    const componentCode = componentDef.code.code;
-                    const componentData = obsData.components[componentCode];
+                  if (componentData && componentData.value.trim()) {
+                    const componentValue: QuestionnaireSubmitResultValue = {
+                      value: componentData.value,
+                    };
 
-                    if (componentData && componentData.value.trim()) {
-                      const componentValue: QuestionnaireSubmitResultValue = {
-                        value: componentData.value,
+                    if (componentData.unit && componentDef.permitted_unit) {
+                      componentValue.unit = {
+                        code: componentData.unit,
+                        system: componentDef.permitted_unit.system,
+                        display:
+                          componentDef.permitted_unit.display ||
+                          componentData.unit,
                       };
-
-                      if (componentData.unit && componentDef.permitted_unit) {
-                        componentValue.unit = {
-                          code: componentData.unit,
-                          system: componentDef.permitted_unit.system,
-                          display:
-                            componentDef.permitted_unit.display ||
-                            componentData.unit,
-                        };
-                      }
-
-                      components.push({
-                        code: componentDef.code,
-                        value: componentValue,
-                        interpretation: componentData.isNormal
-                          ? "normal"
-                          : "abnormal",
-                      });
                     }
-                  },
-                );
-              }
 
-              return {
-                ...(obsData.id
-                  ? { observation_id: obsData.id }
-                  : { observation_definition: observationDefinition?.slug }),
-                observation: {
-                  status:
-                    obsData.status === ObservationStatus.ENTERED_IN_ERROR
-                      ? ObservationStatus.ENTERED_IN_ERROR
-                      : ObservationStatus.FINAL,
-                  subject_type: "patient",
-                  value_type:
-                    observationDefinition?.permitted_data_type || "float",
-                  effective_datetime: new Date().toISOString(),
-                  value,
-                  encounter: null,
-                  interpretation: obsData.isNormal ? "normal" : "abnormal",
-                  component: components.length > 0 ? components : undefined,
+                    components.push({
+                      code: componentDef.code,
+                      value: componentValue,
+                    });
+                  }
                 },
-              };
-            }),
-          )
-          .filter(Boolean) as ObservationFromDefinitionCreate[];
+              );
+            }
+
+            return {
+              ...(obsData.id
+                ? { observation_id: obsData.id }
+                : { observation_definition: observationDefinition?.slug }),
+              observation: {
+                status:
+                  obsData.status === ObservationStatus.ENTERED_IN_ERROR
+                    ? ObservationStatus.ENTERED_IN_ERROR
+                    : ObservationStatus.FINAL,
+                value_type:
+                  observationDefinition?.permitted_data_type || "decimal",
+                effective_datetime: new Date().toISOString(),
+                value,
+                interpretation: obsData.interpretation || "",
+                component: components.length > 0 ? components : undefined,
+              },
+            };
+          }),
+        )
+        .filter((obs): obs is ObservationUpsertRequest => obs !== null);
 
       if (fullReport) {
         // Upsert observations
@@ -764,7 +701,7 @@ export function DiagnosticReportForm({
                   id: "",
                   value: "",
                   unit: "",
-                  isNormal: true,
+                  interpretation: "",
                   status: ObservationStatus.AMENDED,
                   components: {},
                 },
@@ -793,7 +730,7 @@ export function DiagnosticReportForm({
           ] || {
             value: "",
             unit: component.permitted_unit?.code,
-            isNormal: true,
+            interpretation: "",
           };
 
           return (
@@ -868,28 +805,6 @@ export function DiagnosticReportForm({
                     disabled={isErrored || disableEdit}
                   />
                 </div>
-
-                <div className="flex items-center space-x-2 sm:pt-6">
-                  <Checkbox
-                    id={`abnormal-checkbox-${definition.id}-${component.code.code}-${index}`}
-                    checked={!componentData.isNormal}
-                    onCheckedChange={(checked) =>
-                      handleComponentNormalChange(
-                        definition.id,
-                        index,
-                        component.code.code,
-                        !checked, // isNormal is the opposite of checked (isAbnormal)
-                      )
-                    }
-                    disabled={isErrored || disableEdit}
-                  />
-                  <Label
-                    htmlFor={`abnormal-checkbox-${definition.id}-${component.code.code}-${index}`}
-                    className="text-sm font-normal text-gray-950 cursor-pointer"
-                  >
-                    {t("abnormal")}
-                  </Label>
-                </div>
               </div>
             </div>
           );
@@ -931,7 +846,7 @@ export function DiagnosticReportForm({
               <div className="flex items-center gap-2">
                 <CardTitle>
                   <p className="flex items-center gap-1.5">
-                    <NotepadText className="size-[24px] text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
+                    <NotepadText className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
                     <span className="text-base/9 text-gray-950 font-medium">
                       {t("test_results_entry")}
                     </span>
@@ -942,17 +857,12 @@ export function DiagnosticReportForm({
                 {hasReport && fullReport?.created_by && (
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-5 w-full sm:w-auto">
                     <Avatar
-                      name={
-                        fullReport.created_by.first_name ||
-                        fullReport.created_by.username ||
-                        ""
-                      }
+                      name={formatName(fullReport.created_by, true)}
                       className="size-5"
                       imageUrl={fullReport.created_by.profile_picture_url}
                     />
                     <span className="text-sm/9 text-gray-700 font-medium">
-                      {fullReport.created_by.first_name || ""}{" "}
-                      {fullReport.created_by.last_name || ""}
+                      {formatName(fullReport.created_by)}
                     </span>
                   </div>
                 )}
@@ -998,7 +908,7 @@ export function DiagnosticReportForm({
                         id: "",
                         value: "",
                         unit: "",
-                        isNormal: true,
+                        interpretation: "",
                         status: ObservationStatus.AMENDED,
                         components: {},
                       },
@@ -1129,27 +1039,6 @@ export function DiagnosticReportForm({
                                           disabled={isErrored || disableEdit}
                                         />
                                       </div>
-
-                                      <div className="flex items-center space-x-2 sm:pt-6">
-                                        <Checkbox
-                                          id={`abnormal-checkbox-${definition.id}-${index}`}
-                                          checked={!observationData.isNormal}
-                                          onCheckedChange={(checked) =>
-                                            handleNormalChange(
-                                              definition.id,
-                                              index,
-                                              !checked, // isNormal is the opposite of checked (isAbnormal)
-                                            )
-                                          }
-                                          disabled={isErrored || disableEdit}
-                                        />
-                                        <Label
-                                          htmlFor={`abnormal-checkbox-${definition.id}-${index}`}
-                                          className="text-sm font-medium text-gray-700 cursor-pointer"
-                                        >
-                                          {t("abnormal")}
-                                        </Label>
-                                      </div>
                                     </div>
                                   )}
 
@@ -1180,7 +1069,7 @@ export function DiagnosticReportForm({
                                         id: "",
                                         value: "",
                                         unit: "",
-                                        isNormal: true,
+                                        interpretation: "",
                                         status: ObservationStatus.AMENDED,
                                         components: {},
                                       },
@@ -1322,7 +1211,7 @@ export function DiagnosticReportForm({
                       : t("no_test_results_recorded")}
                   </p>
                 </div>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-center">
                   {activityDefinition?.diagnostic_report_codes &&
                     activityDefinition.diagnostic_report_codes.length > 0 && (
                       <div className="flex-1 min-w-0">

@@ -13,6 +13,8 @@ export const PERMISSION_CREATE_ENCOUNTER = "can_create_encounter";
 export const PERMISSION_LIST_ENCOUNTERS = "can_list_encounter";
 export const PERMISSION_WRITE_ENCOUNTER = "can_write_encounter";
 export const PERMISSION_READ_ENCOUNTER = "can_read_encounter";
+export const PERMISSION_READ_ENCOUNTER_CLINICAL_DATA =
+  "can_read_encounter_clinical_data";
 export const PERMISSION_SUBMIT_ENCOUNTER_QUESTIONNAIRE =
   "can_submit_encounter_questionnaire";
 
@@ -54,6 +56,7 @@ export const PERMISSION_MANAGE_ORGANIZATION = "can_manage_organization";
 export const PERMISSION_MANAGE_ORGANIZATION_USERS =
   "can_manage_organization_users";
 export const PERMISSION_LIST_ORGANIZATION_USERS = "can_list_organization_users";
+export const PERMISSION_GEO_ADMIN = "is_geo_admin";
 
 // Questionnaire Permissions
 export const PERMISSION_WRITE_QUESTIONNAIRE = "can_write_questionnaire";
@@ -69,18 +72,39 @@ export const PERMISSION_WRITE_BOOKING = "can_write_booking";
 // Schedule Permissions
 export const PERMISSION_WRITE_SCHEDULE = "can_write_schedule";
 export const PERMISSION_LIST_SCHEDULE = "can_list_schedule";
+export const PERMISSION_RESCHEDULE_APPOINTMENT = "can_reschedule_booking";
 
 // User Permissions
 export const PERMISSION_CREATE_USER = "can_create_user";
 export const PERMISSION_LIST_USER = "can_list_user";
 
 // Template Permissions
-export const PERMISSION_LIST_TEMPLATE = "can_list_template";
+export const PERMISSION_LIST_TEMPLATE = "can_read_template";
+export const PERMISSION_WRITE_TEMPLATE = "can_write_template";
+export const PERMISSION_PREVIEW_TEMPLATE = "can_preview_template";
+export const PERMISSION_VIEW_TEMPLATE_SCHEMA = "can_view_template_schema";
+export const PERMISSION_GENERATE_REPORT_FROM_TEMPLATE =
+  "can_generate_report_from_template";
 export const PERMISSION_MANAGE_TEMPLATE = "can_manage_template";
 export const PERMISSION_CREATE_CHARGE_ITEM_DEFINITION =
   "can_create_charge_item_definition";
 export const PERMISSION_SET_CHARGE_ITEM_DEFINITION =
   "can_set_charge_item_definition";
+
+// Token Permissions
+export const PERMISSION_WRITE_TOKEN_CATEGORY = "can_write_token_category";
+export const PERMISSION_LIST_TOKEN_CATEGORIES = "can_list_token_category";
+export const PERMISSION_WRITE_TOKEN = "can_write_token";
+export const PERMISSION_LIST_TOKENS = "can_list_token";
+
+// Healthcare Permissions
+export const PERMISSION_WRITE_HEALTHCARE_SERVICE =
+  "can_write_healthcare_service";
+export const PERMISSION_READ_HEALTHCARE_SERVICE = "can_read_healthcare_service";
+
+// Resource Category Permissions
+export const PERMISSION_WRITE_RESOURCE_CATEGORY = "can_write_resource_category";
+export const PERMISSION_READ_RESOURCE_CATEGORY = "can_read_resource_category";
 
 export interface Permissions {
   // Patient Permissions
@@ -105,7 +129,9 @@ export interface Permissions {
   /** Permission slug: "can_write_encounter" */
   canWriteEncounter: boolean;
   /** Permission slug: "can_read_encounter" */
-  canViewEncounter: boolean;
+  canReadEncounter: boolean;
+  /** Permission slug: "can_read_encounter_clinical_data" */
+  canReadEncounterClinicalData: boolean;
   /** Permission slug: "can_submit_encounter_questionnaire" */
   canSubmitEncounterQuestionnaire: boolean;
 
@@ -156,6 +182,8 @@ export interface Permissions {
   canManageOrganizationUsers: boolean;
   /** Permission slug: "can_list_organization_users" */
   canListOrganizationUsers: boolean;
+  /** Permission slug: "is_geo_admin" */
+  isGeoAdmin: boolean;
 
   // Questionnaire Permissions
   /** Permission slug: "can_write_questionnaire" */
@@ -180,6 +208,8 @@ export interface Permissions {
   canWriteSchedule: boolean;
   /** Permission slug: "can_list_user_schedule" */
   canViewSchedule: boolean;
+  /** Permission slug: "can_reschedule_booking" */
+  canRescheduleAppointment: boolean;
 
   // User Permissions
   /** Permission slug: "can_create_user" */
@@ -190,10 +220,39 @@ export interface Permissions {
   // Template Permissions
   /** Permission slug: "can_list_template" */
   canListTemplate: boolean;
+  /** Permission slug: "can_write_template" */
+  canWriteTemplate: boolean;
+  /** Permission slug: "can_preview_template" */
+  canPreviewTemplate: boolean;
+  /** Permission slug: "can_view_template_schema" */
+  canViewTemplateSchema: boolean;
+  /** Permission slug: "can_generate_report_from_template" */
+  canGenerateReportFromTemplate: boolean;
+  // @deprecated Use canWriteTemplate instead
   /** Permission slug: "can_manage_template" */
   canManageTemplate: boolean;
   /** Permission slug: "can_create_charge_item_definition" */
   canSetChargeItemDefinition: boolean;
+
+  // Token Permissions
+  /** Permission slug: "can_write_token_category" */
+  canWriteTokenCategory: boolean;
+  /** Permission slug: "can_list_token_category" */
+  canListTokenCategories: boolean;
+  /** Permission slug: "can_write_token" */
+  canWriteToken: boolean;
+  /** Permission slug: "can_list_token" */
+  canListTokens: boolean;
+
+  /** Permission slug: "can_write_healthcare_service" */
+  canWriteHealthcareService: boolean;
+  /** Permission slug: "can_read_healthcare_service" */
+  canReadHealthcareService: boolean;
+
+  /** Permission slug: "can_write_resource_category" */
+  canWriteResourceCategory: boolean;
+  /** Permission slug: "can_read_resource_category" */
+  canReadResourceCategory: boolean;
 }
 
 export type HasPermissionFn = (
@@ -227,7 +286,11 @@ export function getPermissions(
     canCreateEncounter: hasPermission(PERMISSION_CREATE_ENCOUNTER, permissions),
     canListEncounters: hasPermission(PERMISSION_LIST_ENCOUNTERS, permissions),
     canWriteEncounter: hasPermission(PERMISSION_WRITE_ENCOUNTER, permissions),
-    canViewEncounter: hasPermission(PERMISSION_READ_ENCOUNTER, permissions),
+    canReadEncounter: hasPermission(PERMISSION_READ_ENCOUNTER, permissions),
+    canReadEncounterClinicalData: hasPermission(
+      PERMISSION_READ_ENCOUNTER_CLINICAL_DATA,
+      permissions,
+    ),
     canSubmitEncounterQuestionnaire: hasPermission(
       PERMISSION_SUBMIT_ENCOUNTER_QUESTIONNAIRE,
       permissions,
@@ -311,6 +374,7 @@ export function getPermissions(
       PERMISSION_LIST_ORGANIZATION_USERS,
       permissions,
     ),
+    isGeoAdmin: hasPermission(PERMISSION_GEO_ADMIN, permissions),
 
     // Questionnaire
     canWriteQuestionnaire: hasPermission(
@@ -341,6 +405,10 @@ export function getPermissions(
     // Schedules and Availability
     canWriteSchedule: hasPermission(PERMISSION_WRITE_SCHEDULE, permissions),
     canViewSchedule: hasPermission(PERMISSION_LIST_SCHEDULE, permissions),
+    canRescheduleAppointment: hasPermission(
+      PERMISSION_RESCHEDULE_APPOINTMENT,
+      permissions,
+    ),
 
     // User
     canCreateUser: hasPermission(PERMISSION_CREATE_USER, permissions),
@@ -349,9 +417,52 @@ export function getPermissions(
 
     // Template
     canListTemplate: hasPermission(PERMISSION_LIST_TEMPLATE, permissions),
+    canWriteTemplate: hasPermission(PERMISSION_WRITE_TEMPLATE, permissions),
+    canPreviewTemplate: hasPermission(PERMISSION_PREVIEW_TEMPLATE, permissions),
+    canViewTemplateSchema: hasPermission(
+      PERMISSION_VIEW_TEMPLATE_SCHEMA,
+      permissions,
+    ),
+    canGenerateReportFromTemplate: hasPermission(
+      PERMISSION_GENERATE_REPORT_FROM_TEMPLATE,
+      permissions,
+    ),
+    // @deprecated Use canWriteTemplate instead
     canManageTemplate: hasPermission(PERMISSION_MANAGE_TEMPLATE, permissions),
     canSetChargeItemDefinition: hasPermission(
       PERMISSION_SET_CHARGE_ITEM_DEFINITION,
+      permissions,
+    ),
+
+    // Tokens
+    canWriteTokenCategory: hasPermission(
+      PERMISSION_WRITE_TOKEN_CATEGORY,
+      permissions,
+    ),
+    canListTokenCategories: hasPermission(
+      PERMISSION_LIST_TOKEN_CATEGORIES,
+      permissions,
+    ),
+    canWriteToken: hasPermission(PERMISSION_WRITE_TOKEN, permissions),
+    canListTokens: hasPermission(PERMISSION_LIST_TOKENS, permissions),
+
+    //Healthcare Services
+    canWriteHealthcareService: hasPermission(
+      PERMISSION_WRITE_HEALTHCARE_SERVICE,
+      permissions,
+    ),
+    canReadHealthcareService: hasPermission(
+      PERMISSION_READ_HEALTHCARE_SERVICE,
+      permissions,
+    ),
+
+    // Resource Category
+    canWriteResourceCategory: hasPermission(
+      PERMISSION_WRITE_RESOURCE_CATEGORY,
+      permissions,
+    ),
+    canReadResourceCategory: hasPermission(
+      PERMISSION_READ_RESOURCE_CATEGORY,
       permissions,
     ),
   };

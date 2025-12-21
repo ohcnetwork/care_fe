@@ -40,18 +40,17 @@ import {
   ServiceRequestReadSpec,
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 
 // Extend the base type to use UserReadMinimal for requester
-interface ServiceRequestApplyActivityDefinitionSpec
-  extends Omit<
-    BaseServiceRequestApplyActivityDefinitionSpec,
-    "service_request"
-  > {
+interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
+  BaseServiceRequestApplyActivityDefinitionSpec,
+  "service_request"
+> {
   service_request: Omit<
     BaseServiceRequestApplyActivityDefinitionSpec["service_request"],
     "requester"
@@ -234,12 +233,7 @@ function ServiceRequestForm({
           {renderInfoSection()}
           <div className="flex w-full justify-end items-center mt-2 gap-2">
             {onRemove && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onRemove}
-                data-cy="remove-service-request"
-              >
+              <Button variant="ghost" size="icon" onClick={onRemove}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
@@ -323,9 +317,7 @@ function ServiceRequestForm({
         </div>
         {isPreview && (
           <div className="flex justify-end">
-            <Button onClick={onAdd} data-cy="add-service-request">
-              {t("add")}
-            </Button>
+            <Button onClick={onAdd}>{t("add")}</Button>
           </div>
         )}
       </div>
@@ -358,7 +350,6 @@ function ServiceRequestForm({
                   onRemove();
                 }}
                 disabled={disabled}
-                data-cy="remove-service-request"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -497,10 +488,6 @@ export function ServiceRequestQuestion({
   });
 
   useEffect(() => {
-    console.log("selectedActivityDefinition", selectedActivityDefinition);
-  }, [selectedActivityDefinition]);
-
-  useEffect(() => {
     if (selectedActivityDefinition && selectedActivityDefinitionData) {
       const newServiceRequest: ServiceRequestApplyActivityDefinitionSpec = {
         service_request: {
@@ -576,7 +563,7 @@ export function ServiceRequestQuestion({
               ? updates.locations.map((loc) => {
                   if (typeof loc === "string") {
                     const location = locations?.results.find(
-                      (l: LocationList) => l.id === loc,
+                      (l: LocationRead) => l.id === loc,
                     );
 
                     return {
@@ -590,11 +577,11 @@ export function ServiceRequestQuestion({
                       mode: "instance",
                       availability_status: "available",
                       sort_index: location?.sort_index || 0,
-                    } as LocationList;
+                    } as LocationRead;
                   }
                   return loc;
                 })
-              : updates.locations) as LocationList[])
+              : updates.locations) as LocationRead[])
           : sr.service_request.locations || [];
 
         // Create updated service request with proper type handling
@@ -735,12 +722,7 @@ export function ServiceRequestQuestion({
             queryFn: activityDefinitionApi.listActivityDefinition,
             pathParams: { facilityId },
           }}
-          translations={{
-            searchPlaceholder: "search_activity_definitions",
-            selectPlaceholder: "select_activity_definition",
-            noResultsFound: "no_activity_definitions_found_for",
-            noItemsFound: "no_activity_definitions_found",
-          }}
+          translationBaseKey="activity_definition"
         />
       </div>
     </div>

@@ -1,10 +1,12 @@
-import { CountryCode } from "libphonenumber-js/types.cjs";
-
+import { booleanFromString } from "@/common/utils";
 import {
   ENCOUNTER_CLASS,
   EncounterClass,
+  EncounterDischargeDisposition,
 } from "@/types/emr/encounter/encounter";
+
 import { NonEmptyArray } from "@/Utils/types";
+import { CountryCode } from "libphonenumber-js/types.cjs";
 
 const env = import.meta.env;
 
@@ -12,12 +14,6 @@ interface ILogo {
   light: string;
   dark: string;
 }
-
-const boolean = (key: string, fallback = false) => {
-  if (env[key] === "true") return true;
-  if (env[key] === "false") return false;
-  return fallback;
-};
 
 const logo = (value?: string, fallback?: ILogo) => {
   if (!value) {
@@ -74,6 +70,10 @@ const careConfig = {
       ? (env.REACT_ALLOWED_ENCOUNTER_CLASSES?.split(",")[0] as EncounterClass)
       : undefined),
 
+  defaultDischargeDisposition: env.REACT_DEFAULT_DISCHARGE_DISPOSITION as
+    | EncounterDischargeDisposition
+    | undefined,
+
   mapFallbackUrlTemplate:
     env.REACT_MAPS_FALLBACK_URL_TEMPLATE ||
     "https://www.openstreetmap.org/?mlat={lat}&mlon={long}&zoom=15",
@@ -112,11 +112,25 @@ const careConfig = {
       : 0,
 
     // Kill switch in-case the heatmap API doesn't scale as expected
-    useAvailabilityStatsAPI: boolean(
-      "REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API",
+    useAvailabilityStatsAPI: booleanFromString(
+      env.REACT_APPOINTMENTS_USE_AVAILABILITY_STATS_API,
       true,
     ),
   },
+
+  /**
+   * Auto refresh interval in milliseconds
+   */
+  appointmentAndQueueRefreshInterval:
+    parseInt(env.REACT_AUTO_REFRESH_INTERVAL || "10", 10) * 1000,
+
+  /**
+   * Flag to make location field mandatory for payment reconciliation
+   */
+  paymentLocationRequired: booleanFromString(
+    env.REACT_PAYMENT_LOCATION_REQUIRED,
+    true,
+  ),
 
   careApps: env.REACT_ENABLED_APPS
     ? env.REACT_ENABLED_APPS.split(",").map((app) => {
@@ -169,7 +183,18 @@ const careConfig = {
   /**
    * Disable patient login if set to "true"
    */
-  disablePatientLogin: boolean("REACT_DISABLE_PATIENT_LOGIN", false),
+  disablePatientLogin: booleanFromString(
+    env.REACT_DISABLE_PATIENT_LOGIN,
+    false,
+  ),
+
+  /**
+   * Enable auto refresh if set to "true"
+   */
+  enableAutoRefresh: booleanFromString(
+    env.REACT_AUTO_REFRESH_BY_DEFAULT,
+    false,
+  ),
 
   patientRegistration: {
     /**
@@ -188,14 +213,14 @@ const careConfig = {
 
     defaultGeoOrganization: env.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG,
 
-    minimalPatientRegistration: boolean(
-      "REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION",
+    minimalPatientRegistration: booleanFromString(
+      env.REACT_ENABLE_MINIMAL_PATIENT_REGISTRATION,
       false,
     ),
   },
 
   i18nUrl: env.REACT_CUSTOM_REMOTE_I18N_URL,
-  
+
   /**
    * Custom shortcuts configuration from environment variables
    * Format: JSON string with array of shortcut objects
@@ -209,6 +234,25 @@ const careConfig = {
    * System identifier for patient phone number configuration
    */
   phoneNumberConfigSystem: "system.care.ohc.network/patient-phone-number",
+
+  /**
+   * Enable automatic invoice sheet after dispensing items
+   */
+  enableAutoInvoiceAfterDispense: booleanFromString(
+    env.REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE,
+    false,
+  ),
+
+  /**
+   * Default state for tax inclusive pricing in inventory
+   * When true, base price is calculated from MRP by removing tax
+   */
+  inventory: {
+    defaultTaxInclusive: booleanFromString(
+      env.REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE,
+      false,
+    ),
+  },
 } as const;
 
 export default careConfig;

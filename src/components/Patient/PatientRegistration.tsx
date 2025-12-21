@@ -148,7 +148,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
 
   const patientQuery = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: { id: patientId || "" },
     }),
     meta: { persist: true },
@@ -238,7 +238,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
       permanent_address: patientData.permanent_address || "",
       permanent_address_same_as_address:
         patientData.address === patientData.permanent_address,
-      geo_organization: patientData.geo_organization.id,
+      geo_organization: patientData?.geo_organization?.id,
       pincode: patientData.pincode || undefined,
 
       is_deceased: !!patientData.deceased_datetime,
@@ -260,7 +260,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
   const phoneNumber = form.watch("phone_number");
   const patientPhoneSearch = useQuery({
     queryKey: ["patients", "phone-number", phoneNumber],
-    queryFn: query.debounced(patientApi.searchPatient, {
+    queryFn: query.debounced(patientApi.search, {
       body: { phone_number: phoneNumber },
     }),
     meta: { persist: true },
@@ -312,8 +312,8 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
         selectedTags,
         onSuccess: (patientId, _normalizedPatient) => {
           const yob = getYearOfBirth(
-            (patientRequestData as PatientCreate).date_of_birth,
-            (patientRequestData as PatientCreate).age,
+            (patientRequestData as any).date_of_birth,
+            (patientRequestData as any).age,
           );
 
           setNavTarget({
@@ -370,7 +370,8 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     HTTPError,
     PatientCreate
   >({
-    mutationFn: mutate(patientApi.addPatient),
+    mutationKey: ["create_patient"],
+    mutationFn: mutate(patientApi.create),
     onSuccess: async (resp: PatientRead) => {
       if (offlineEntryId) {
         try {
@@ -392,7 +393,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
         },
       });
     },
-
     onError: async (error, variables) => {
       // If network error, push to offline queue
       if (error.message === "Network Error" && variables) {
@@ -409,7 +409,8 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     HTTPError,
     PatientUpdate
   >({
-    mutationFn: mutate(patientApi.updatePatient, {
+    mutationKey: ["update_patient"],
+    mutationFn: mutate(patientApi.update, {
       pathParams: { id: patientId || "" },
     }),
     onSuccess: async (resp: PatientRead) => {
@@ -518,7 +519,6 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
     if (!patientId) {
       const createPatientData: PatientCreate = {
         ...basePayload,
-        facility: facilityId,
         tags: values.tags,
       };
 
@@ -619,7 +619,7 @@ export const PatientRegistration = ({ patientId }: { patientId?: string }) => {
                 <Button
                   type="submit"
                   variant="primary_gradient"
-                  // TODO: disable button if basic info not fille
+                  disabled={!form.formState.isDirty || isPending}
                 >
                   <CheckIcon />
                   {patientId ? t("update") : t("register_patient")}
@@ -698,6 +698,7 @@ const PatientBasicsContent = ({
                 tabIndex={0}
                 placeholder={t("type_name")}
                 {...field}
+                value={field.value ?? ""}
               />
             </FormControl>
             <FormMessage />
@@ -802,7 +803,7 @@ const PatientBasicsContent = ({
               <FormLabel aria-required>{t("date_of_birth_or_age")}</FormLabel>
               <div className="flex gap-1 items-start">
                 <Tabs value={field.value} onValueChange={field.onChange}>
-                  <TabsList className="mt-0.25">
+                  <TabsList className="mt-1 md:mt-0.25">
                     <TabsTrigger value="dob">{t("date")}</TabsTrigger>
                     <TabsTrigger value="age">{t("age")}</TabsTrigger>
                   </TabsList>
@@ -834,23 +835,33 @@ const PatientBasicsContent = ({
                     control={form.control}
                     name="age"
                     render={({ field }) => (
-                      <FormItem className="w-full md:col-span-2">
+                      <FormItem className="w-full md:col-span-2 relative">
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            placeholder={t("age")}
-                            min={1}
-                            max={120}
-                            value={field.value ?? ""}
-                            onChange={(e) => {
-                              field.onChange(
-                                e.target.value ? Number(e.target.value) : null,
-                              );
-                            }}
-                          />
+                          <>
+                            <Input
+                              {...field}
+                              type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              placeholder={t("age")}
+                              min={1}
+                              max={120}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                field.onChange(
+                                  e.target.value
+                                    ? Number(e.target.value)
+                                    : null,
+                                );
+                              }}
+                            />
+                            {field.value && (
+                              <span className="text-xs text-gray-500 absolute right-9 top-3.25 md:top-2.5">
+                                {t("year_of_birth")}:{" "}
+                                {new Date().getFullYear() - Number(field.value)}
+                              </span>
+                            )}
+                          </>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -870,6 +881,7 @@ const PatientBasicsContent = ({
               <FormLabel>{t("blood_group")}</FormLabel>
               <Select
                 {...field}
+                value={field.value ?? ""}
                 onValueChange={field.onChange}
                 defaultValue={field.value}
               >
@@ -903,7 +915,11 @@ const PatientBasicsContent = ({
                 <FormLabel aria-required>{config.display}</FormLabel>
                 <FormDescription>{config.description}</FormDescription>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_identifier_value")} />
+                  <Input
+                    {...field}
+                    value={field.value ?? ""}
+                    placeholder={t("enter_identifier_value")}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -926,6 +942,7 @@ const PatientBasicsContent = ({
               </FormLabel>
               <FormControl>
                 <TagSelectorPopover
+                  facilityId={facilityId}
                   selected={selectedTags}
                   onChange={(tags) => {
                     field.onChange(tags.map((tag) => tag.id));
@@ -1034,6 +1051,7 @@ const AdditionalDetailsContent = ({
             <FormControl>
               <Input
                 {...field}
+                value={field.value ?? ""}
                 placeholder={t("enter_pincode")}
                 onChange={(e) => {
                   const value = e.target.value
@@ -1085,7 +1103,11 @@ const AdditionalDetailsContent = ({
                 <FormLabel>{config.display}</FormLabel>
                 <FormDescription>{config.description}</FormDescription>
                 <FormControl>
-                  <Input {...field} placeholder={t("enter_identifier_value")} />
+                  <Input
+                    {...field}
+                    value={field.value ?? ""}
+                    placeholder={t("enter_identifier_value")}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -1124,7 +1146,6 @@ const AdditionalDetailsContent = ({
                   <FormControl>
                     <DateTimeInput
                       id="death-datetime"
-                      data-cy="death-datetime-input"
                       value={field.value ?? ""}
                       onDateChange={field.onChange}
                       max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}

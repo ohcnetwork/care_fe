@@ -4,7 +4,6 @@ import {
   BatchRequestResponse,
 } from "@/types/base/batch/batch";
 import { Code } from "@/types/base/code/code";
-import { PlugConfig } from "@/types/plugConfig";
 import { UserReadMinimal } from "@/types/user/user";
 
 /**
@@ -65,37 +64,6 @@ const routes = {
       results: BatchRequestResponse[];
     }>(),
     TBody: Type<BatchRequestBody>(),
-  },
-
-  plugConfig: {
-    listPlugConfigs: {
-      path: "/api/v1/plug_config/",
-      method: "GET",
-      TRes: Type<{ configs: PlugConfig[] }>(),
-    },
-    getPlugConfig: {
-      path: "/api/v1/plug_config/{slug}/",
-      method: "GET",
-      TRes: Type<PlugConfig>(),
-    },
-    createPlugConfig: {
-      path: "/api/v1/plug_config/",
-      method: "POST",
-      TReq: Type<PlugConfig>(),
-      TRes: Type<PlugConfig>(),
-    },
-    updatePlugConfig: {
-      path: "/api/v1/plug_config/{slug}/",
-      method: "PATCH",
-      TReq: Type<PlugConfig>(),
-      TRes: Type<PlugConfig>(),
-    },
-    deletePlugConfig: {
-      path: "/api/v1/plug_config/{slug}/",
-      method: "DELETE",
-      TRes: Type<Record<string, never>>(),
-      TBody: Type<void>(),
-    },
   },
 } as const;
 

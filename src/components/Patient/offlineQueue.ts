@@ -234,7 +234,7 @@ export const queuePatientUpdateOffline = async ({
         resourceType: "patient",
         mutationPathParams: {
           id: patientId || "",
-        } satisfies PathParamsObject<typeof patientApi.updatePatient>,
+        } satisfies PathParamsObject<typeof patientApi.update>,
         payload: updatePatientData,
         serverTimestamp: modifiedDate,
         useQueryRouteKey: "getPatient",

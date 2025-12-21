@@ -26,8 +26,8 @@ import { stringifyNestedObject } from "@/Utils/utils";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   LocationForm,
-  LocationList,
   LocationMode,
+  LocationRead,
 } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -35,9 +35,9 @@ interface LocationSearchProps {
   facilityId: string;
   mode?: LocationMode;
   form?: LocationForm;
-  onSelect: (location: LocationList) => void;
+  onSelect: (location: LocationRead) => void;
   disabled?: boolean;
-  value: LocationList | null;
+  value: LocationRead | null;
 }
 
 export function LocationSearch({
@@ -64,7 +64,7 @@ export function LocationSearch({
     enabled: facilityId !== "preview",
   });
   const commandContent = (
-    <Command className="pt-1">
+    <Command className="pt-1" shouldFilter={false}>
       <CommandInput
         placeholder="Search locations..."
         value={search}
@@ -77,7 +77,7 @@ export function LocationSearch({
         {locations?.results.map((location) => (
           <CommandItem
             key={location.id}
-            value={location.name}
+            value={location.id}
             onSelect={() => {
               onSelect(location);
               setOpen(false);
@@ -95,10 +95,7 @@ export function LocationSearch({
       <div className="w-full">
         <Drawer open={open} onOpenChange={setOpen} direction="bottom">
           <DrawerTrigger asChild>
-            <div
-              className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer"
-              data-cy="location-search-trigger"
-            >
+            <div className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer">
               {stringifyNestedObject(value || { name: "" }) ||
                 "Select location..."}
             </div>
@@ -119,11 +116,7 @@ export function LocationSearch({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        asChild
-        disabled={disabled}
-        data-cy="location-search-trigger"
-      >
+      <PopoverTrigger asChild disabled={disabled}>
         <div className="w-full h-9 px-3 rounded-md border border-gray-200 text-sm flex items-center justify-between cursor-pointer">
           {stringifyNestedObject(value || { name: "" }) || "Select location..."}
         </div>

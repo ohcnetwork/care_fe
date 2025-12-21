@@ -55,9 +55,7 @@ export default function ArchivedFileDialog({
             <span className="text-sm text-gray-500">
               {t("archived_reason")}:
             </span>
-            <span className="break-words" data-cy="archived-reason">
-              {file?.archive_reason}
-            </span>
+            <span className="break-words">{file?.archive_reason}</span>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 justify-between text-sm bg-blue-100 text-blue-900 p-2 rounded-md">
             <span className="break-words">
@@ -71,11 +69,7 @@ export default function ArchivedFileDialog({
         </div>
         <DialogFooter className="sm:justify-start">
           <DialogClose asChild>
-            <Button
-              type="button"
-              variant="secondary"
-              data-cy="archive-dialog-close"
-            >
+            <Button type="button" variant="secondary">
               {t("close")}
             </Button>
           </DialogClose>

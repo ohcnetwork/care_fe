@@ -28,7 +28,7 @@ import {
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
 import { Organization } from "@/types/organization/organization";
 import { PatientIdentifier } from "@/types/patient/patientIdentifierConfig/patientIdentifierConfig";
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
 import {
@@ -157,12 +157,9 @@ export const pickPatientCreateFields = (
   date_of_birth: data.date_of_birth,
   deceased_datetime: data.deceased_datetime,
   blood_group: data.blood_group,
-  nationality: data.nationality,
-  is_updated_offline: data.is_updated_offline,
   age: data.age,
   identifiers: data.identifiers,
   geo_organization: data.geo_organization,
-  facility: data.facility,
   tags: data.tags,
 });
 
@@ -179,7 +176,7 @@ export const normalizeOfflinePatientRecord = (
   const payload = entry?.payload as PatientUpdate | PatientCreate;
   const nowIso = new Date(entry.clientTimestamp).toISOString();
 
-  const yob = getYearOfBirth(payload.date_of_birth, payload.age);
+  const yob = getYearOfBirth(payload?.date_of_birth ?? "", payload.age);
 
   return {
     id: entry.id,
@@ -194,13 +191,12 @@ export const normalizeOfflinePatientRecord = (
     date_of_birth: payload.date_of_birth ?? undefined,
     year_of_birth: yob ?? 0,
     deceased_datetime: payload.deceased_datetime,
-
+    facility_identifiers: [],
     created_date: created_date ? created_date : nowIso,
     modified_date: modified_date ? modified_date : nowIso,
     instance_tags: selectedTags ?? [],
     facility_tags: [],
     instance_identifiers: identifierforNormalize ?? [],
-
     geo_organization: selectedGeoLocation ?? {
       id: payload.geo_organization ?? "unknown",
       name: "-",
@@ -247,7 +243,6 @@ export const normalizeOfflinePatientRecord = (
     },
 
     permissions: permissions ?? [],
-    is_updated_offline: true,
   };
 };
 
@@ -283,7 +278,8 @@ export const normalizeOfflineEncounterRecord = (
     },
     hospitalization: payload?.hospitalization,
     priority: payload.priority ?? "Unknown (offline)",
-    external_identifier: payload?.external_identifier,
+    external_identifier: payload?.external_identifier ?? null,
+
     created_by: created_by
       ? created_by
       : {
@@ -322,7 +318,7 @@ export const normalizeOfflineEncounterRecord = (
     permissions: permissions ?? [],
     care_team: [],
     appointment: null,
-    discharge_summary_advice: payload?.discharge_summary_advice ?? undefined,
+    discharge_summary_advice: payload?.discharge_summary_advice ?? null,
     is_updated_offline: true,
     tags: selectedTags ?? [],
   };
@@ -692,7 +688,7 @@ export const updateActiveEncounterList = ({
 
 export const normalizedQuestionnairRequest = (
   questionnair: BatchRequestItem,
-  allQuestionnairsList: QuestionnaireDetail[],
+  allQuestionnairsList: QuestionnaireRead[],
   authUser: CurrentUserRead,
   patientID: string,
   encounterID?: string,
@@ -722,8 +718,14 @@ export const normalizedQuestionnairRequest = (
     subject_id: encounterID ?? patientID,
     responses: questionnair.body.results ?? [],
     encounter: encounterID ?? null,
-    patient: patientID,
     created_by: {
+      ...normalizeUserBase(authUser),
+      last_login: authUser.last_login ?? "",
+      profile_picture_url: authUser.profile_picture_url ?? "",
+      mfa_enabled: false,
+      deleted: false,
+    },
+    updated_by: {
       ...normalizeUserBase(authUser),
       last_login: authUser.last_login ?? "",
       profile_picture_url: authUser.profile_picture_url ?? "",
@@ -1253,7 +1255,7 @@ export const cacheNonStructuredQuestionnairResponse = (
   questionnairpaylod: BatchRequestBody,
   authUser: CurrentUserRead,
   patientID: string,
-  filledQuestionnaires: QuestionnaireDetail[],
+  filledQuestionnaires: QuestionnaireRead[],
   encounterID?: string,
 ) => {
   const normalizedQuestionnairResponse: QuestionnaireResponse[] =

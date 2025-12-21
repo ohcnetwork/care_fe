@@ -125,7 +125,7 @@ export default function EditUserRoleSheet({
             <div className="rounded-lg border border-gray-200 p-4 space-y-4">
               <div className="flex items-start gap-4">
                 <Avatar
-                  name={`${userRole.user.first_name} ${userRole.user.last_name}`}
+                  name={formatName(userRole.user, true)}
                   className="size-12"
                   imageUrl={userRole.user.profile_picture_url}
                 />
@@ -180,7 +180,6 @@ export default function EditUserRoleSheet({
                 variant="destructive"
                 className="w-full"
                 onClick={() => setShowRemoveDialog(true)}
-                data-cy="remove-user"
               >
                 {t("remove_user")}
               </Button>
@@ -189,7 +188,6 @@ export default function EditUserRoleSheet({
                 <Button
                   variant="outline"
                   className="w-full"
-                  data-cy="edit-user-button"
                   onClick={() => setShowEditUserSheet(true)}
                 >
                   {t("edit_user")}

@@ -95,7 +95,8 @@ export function ManageQueueFinishedTab({
                       href={`/facility/${facilityId}/patients/verify?${new URLSearchParams(
                         {
                           phone_number: token.patient.phone_number,
-                          year_of_birth: token.patient.year_of_birth.toString(),
+                          year_of_birth:
+                            token.patient.year_of_birth?.toString() ?? "",
                           partial_id: token.patient.id.slice(0, 5),
                           queue_id: token.queue.id,
                           token_id: token.id,

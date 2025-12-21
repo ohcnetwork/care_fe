@@ -114,7 +114,6 @@ export default function OrganizationPatients({ id, navOrganizationId }: Props) {
             </div>
 
             <SearchInput
-              data-cy="patient-search"
               options={searchOptions}
               onSearch={handleSearch}
               onFieldChange={handleFieldChange}

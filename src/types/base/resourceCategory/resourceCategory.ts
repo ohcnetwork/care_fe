@@ -8,12 +8,14 @@ export enum ResourceCategoryResourceType {
 }
 
 export enum ResourceCategorySubType {
-  location = "location",
-  practitioner = "practitioner",
-  other = "other",
+  charge_item_definition_location_bed_charges = "charge_item_definition:location:bed_charges",
+  charge_item_definition_schedule_practitioner = "charge_item_definition:schedule:practitioner",
+  charge_item_definition_schedule_location = "charge_item_definition:schedule:location",
+  charge_item_definition_schedule_healthcare_service = "charge_item_definition:schedule:healthcare_service",
+  other = "all:other",
 }
 
-export interface ResourceCategoryParent {
+export type ResourceCategoryParent = {
   id: string;
   title: string;
   slug: string;
@@ -22,7 +24,7 @@ export interface ResourceCategoryParent {
   parent?: ResourceCategoryParent;
   resource_type: ResourceCategoryResourceType;
   resource_sub_type: ResourceCategorySubType;
-}
+};
 
 export interface ResourceCategoryBase {
   id: string;

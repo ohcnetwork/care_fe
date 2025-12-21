@@ -9,7 +9,7 @@ import { markWriteStatus } from "./writeQueue";
 
 // queryMap: Used for conflict detection and fetching current server data.
 export const queryMap = {
-  getPatient: patientApi.getPatient,
+  getPatient: patientApi.get,
   getEncounter: encounterApi.get,
   getResourceDetails: resourceRequestApi.get,
   getAppointment: scheduleApis.appointments.retrieve,

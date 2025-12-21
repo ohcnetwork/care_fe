@@ -1,24 +1,24 @@
-import { useQuery } from "@tanstack/react-query";
-import { format, isWithinInterval } from "date-fns";
-import { ClipboardCheck } from "lucide-react";
-import { useTranslation } from "react-i18next";
-
-import { cn } from "@/lib/utils";
-
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-
-import query from "@/Utils/request/query";
-import { dateQueryString } from "@/Utils/utils";
-import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import {
   Appointment,
   GetSlotsForDayResponse,
   SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
+import { format, isWithinInterval } from "date-fns";
+import { useCallback, useEffect, useMemo } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import scheduleApi from "@/types/scheduling/scheduleApi";
+
+import query from "@/Utils/request/query";
+import { dateQueryString } from "@/Utils/utils";
+import { useQuery } from "@tanstack/react-query";
+import { ClipboardCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface AppointmentSlotPickerProps {
   facilityId: string;
@@ -66,21 +66,31 @@ export function AppointmentSlotPicker({
   });
 
   // Update slot details when a slot is selected
-  const handleSlotSelect = (slotId: string | undefined) => {
-    onSlotSelect(slotId);
-    if (slotId && onSlotDetailsChange) {
-      const allSlots = slotsQuery.data || [];
-      const selectedSlot = allSlots.find((slot) => slot.id === slotId);
+  const handleSlotSelect = useCallback(
+    (slotId: string | undefined) => {
+      onSlotSelect(slotId);
+      if (slotId && onSlotDetailsChange) {
+        const allSlots = slotsQuery.data || [];
+        const selectedSlot = allSlots.find((slot) => slot.id === slotId);
 
-      if (selectedSlot) {
-        onSlotDetailsChange(selectedSlot);
+        if (selectedSlot) {
+          onSlotDetailsChange(selectedSlot);
+        }
       }
-    }
-  };
+    },
+    [onSlotSelect, onSlotDetailsChange, slotsQuery.data],
+  );
 
-  const totalSlots = groupSlotsByAvailability(slotsQuery.data || []).flatMap(
-    (group) => group.slots,
-  ).length;
+  const { slotGroups, availableSlots } = useMemo(() => {
+    const slotGroups = groupSlotsByAvailability(slotsQuery.data || []);
+    const availableSlots = slotGroups.flatMap((group) => group.slots);
+    return { slotGroups, availableSlots };
+  }, [slotsQuery.data]);
+
+  // Pre-select the first slot for current date if there are any slots available
+  useEffect(() => {
+    handleSlotSelect(availableSlots?.[0]?.id);
+  }, [availableSlots, handleSlotSelect]);
 
   return (
     <div
@@ -95,7 +105,7 @@ export function AppointmentSlotPicker({
         </span>
         {!!slotsQuery.data?.length && (
           <span className="text-sm font-medium text-gray-700">
-            {totalSlots} {t("available_time_slots")}
+            {availableSlots.length} {t("available_time_slots")}
           </span>
         )}
       </div>
@@ -159,34 +169,32 @@ export function AppointmentSlotPicker({
             </div>
           )}
           {!!slotsQuery.data?.length &&
-            groupSlotsByAvailability(slotsQuery.data).map(
-              ({ availability, slots }) => (
-                <div key={availability.name} className="flex flex-col">
-                  <div className="flex flex-row gap-2 items-center mb-2 mt-2 sm:mt-0">
-                    <ClipboardCheck size={16} />
-                    <span className="text-sm font-medium text-gray-700">
-                      {availability.name}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-1 xl:grid-cols-3 2xl:grid-cols-5 gap-2">
-                    {slots.map((slot) => (
-                      <TokenSlotButton
-                        key={slot.id}
-                        slot={slot}
-                        availability={availability}
-                        selectedSlotId={selectedSlotId}
-                        onClick={() => {
-                          handleSlotSelect(
-                            selectedSlotId === slot.id ? undefined : slot.id,
-                          );
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <Separator className="my-6" />
+            slotGroups.map(({ availability, slots }) => (
+              <div key={availability.name} className="flex flex-col">
+                <div className="flex flex-row gap-2 items-center mb-2 mt-2 sm:mt-0">
+                  <ClipboardCheck size={16} />
+                  <span className="text-sm font-medium text-gray-700">
+                    {availability.name}
+                  </span>
                 </div>
-              ),
-            )}
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-1 xl:grid-cols-3 2xl:grid-cols-5 gap-2">
+                  {slots.map((slot) => (
+                    <TokenSlotButton
+                      key={slot.id}
+                      slot={slot}
+                      availability={availability}
+                      selectedSlotId={selectedSlotId}
+                      onClick={() => {
+                        handleSlotSelect(
+                          selectedSlotId === slot.id ? undefined : slot.id,
+                        );
+                      }}
+                    />
+                  ))}
+                </div>
+                <Separator className="my-6" />
+              </div>
+            ))}
         </div>
       )}
     </div>

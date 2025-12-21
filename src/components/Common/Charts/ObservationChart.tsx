@@ -33,20 +33,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar } from "@/components/Common/Avatar";
 
 import query from "@/Utils/request/query";
+import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
-import patientApi from "@/types/emr/patient/patientApi";
 
+import observationApi from "@/types/emr/observation/observationApi";
 import { ObservationHistoryTable } from "./ObservationHistoryTable";
-
-export type ObservationPlotConfig = {
-  id: string;
-  name: string;
-  groups: {
-    title: string;
-    codes: Code[];
-  }[];
-}[];
-
 interface CodeGroup {
   codes: Code[];
   title: string;
@@ -126,7 +117,7 @@ export const ObservationVisualizer = ({
       allCodes.map((c) => c.code).join(","),
     ],
 
-    queryFn: query(patientApi.observationsAnalyse, {
+    queryFn: query(observationApi.analyse, {
       pathParams: { patientId },
       queryParams: {
         encounter: encounterId,
@@ -167,7 +158,7 @@ export const ObservationVisualizer = ({
               className="flex items-center justify-center text-gray-500"
               style={{ height: `${height}px` }}
             >
-              No data available
+              {t("no_data_available")}
             </div>
           </Card>
         ))}
@@ -210,13 +201,11 @@ export const ObservationVisualizer = ({
         const timestamp = observation.effective_datetime;
         if (!timestamp || typeof timestamp !== "string") return;
 
-        const value =
-          observation.value.value_quantity?.value ||
-          Number(observation.value.value);
+        const value = Number(observation.value.value);
         if (!isNaN(value) && timestamp in processedData && code.display) {
           const details: ObservationDetails = {
             value,
-            enteredBy: `${observation.data_entered_by.first_name} ${observation.data_entered_by.last_name}`,
+            enteredBy: formatName(observation.data_entered_by),
             enteredAt: formatChartDate(observation.effective_datetime).display,
             note: observation.note || undefined,
             status: observation.status,

@@ -58,7 +58,10 @@ const SORT_OPTIONS = {
   created_date: "sort_by_oldest_created",
 };
 
-const methodMap: Record<PaymentReconciliationPaymentMethod, string> = {
+export const paymentmethodMap: Record<
+  PaymentReconciliationPaymentMethod,
+  string
+> = {
   cash: "Cash",
   ccca: "Credit Card",
   cchk: "Credit Check",
@@ -183,7 +186,7 @@ export default function PaymentsData({
           </Select>
           <div className="w-full sm:w-fit">
             <Select
-              value={qParams.ordering}
+              value={qParams.ordering || ""}
               onValueChange={(value) => {
                 updateQuery({ ordering: value });
               }}
@@ -275,7 +278,7 @@ export default function PaymentsData({
                     )}
                   </TableCell>
                   <TableCell>{typeMap[payment.reconciliation_type]}</TableCell>
-                  <TableCell>{methodMap[payment.method]}</TableCell>
+                  <TableCell>{paymentmethodMap[payment.method]}</TableCell>
                   <TableCell>
                     <MonetaryDisplay
                       amount={String(

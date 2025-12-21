@@ -188,7 +188,7 @@ export const queueMarkAscompleteRecord = async ({
 
     const updatedEncounter: EncounterRead = {
       ...encounter,
-      status: "completed",
+      status: "completed" as typeof encounter.status,
       updated_by: {
         ...normalizeUserBase(user),
         last_login: user.last_login ?? "",

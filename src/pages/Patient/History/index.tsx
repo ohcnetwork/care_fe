@@ -34,7 +34,7 @@ export function ClinicalHistoryPage({
 
   const { data: patient } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: { id: patientId },
     }),
   });
@@ -75,7 +75,7 @@ export function ClinicalHistoryPage({
       component: <MedicationHistory patientId={patientId} />,
     },
     responses: {
-      label: t("questionnaire_responses"),
+      label: t("responses"),
       component: <ResponsesHistory patientId={patientId} />,
     },
   } as const;

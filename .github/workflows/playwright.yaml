@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -239,11 +239,12 @@ jobs:
               echo "Processing results from $dir"
               # Use jq to parse JSON if available, otherwise use basic parsing
               if command -v jq &> /dev/null; then
-                # Count all test results (including retries)
-                SHARD_TOTAL=$(jq '[.suites[].specs[].tests[].results[]] | length' "$dir/test-results.json")
-                SHARD_PASSED=$(jq '[.suites[].specs[].tests[].results[] | select(.status == "passed")] | length' "$dir/test-results.json")
-                SHARD_FAILED=$(jq '[.suites[].specs[].tests[].results[] | select(.status == "failed" or .status == "timedOut" or .status == "interrupted")] | length' "$dir/test-results.json")
-                SHARD_SKIPPED=$(jq '[.suites[].specs[].tests[].results[] | select(.status == "skipped")] | length' "$dir/test-results.json")
+                # Count unique tests (including nested test.describe blocks)
+                # Use recursive descent to handle nested suites
+                SHARD_TOTAL=$(jq '[.. | objects | select(has("tests")) | .tests[]] | length' "$dir/test-results.json")
+                SHARD_PASSED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "passed")] | length' "$dir/test-results.json")
+                SHARD_FAILED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "failed" or .results[-1].status == "timedOut" or .results[-1].status == "interrupted")] | length' "$dir/test-results.json")
+                SHARD_SKIPPED=$(jq '[.. | objects | select(has("tests")) | .tests[] | select(.results[-1].status == "skipped")] | length' "$dir/test-results.json")
                 
                 TOTAL_TESTS=$((TOTAL_TESTS + SHARD_TOTAL))
                 PASSED_TESTS=$((PASSED_TESTS + SHARD_PASSED))

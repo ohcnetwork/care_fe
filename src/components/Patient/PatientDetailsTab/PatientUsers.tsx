@@ -125,6 +125,7 @@ export function AddUserSheet({
       setSelectedUser(undefined);
       setSelectedRole(undefined);
     },
+
     onError: async (error, variables) => {
       // If network error, push to offline queue
       if (error.message === "Network Error") {
@@ -213,6 +214,7 @@ export function AddUserSheet({
           </Button>
         </SheetTrigger>
       )}
+
       <SheetContent>
         <SheetHeader>
           <SheetTitle>
@@ -227,7 +229,7 @@ export function AddUserSheet({
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
-          <div className="space-y-4" data-cy="patient-user-selector-container">
+          <div className="space-y-4">
             <h3 className="text-sm font-medium">{t("search_user")}</h3>
             <UserSelector
               selected={selectedUser}
@@ -294,7 +296,6 @@ export function AddUserSheet({
               </div>
 
               <Button
-                data-cy="patient-user-assign-button"
                 className="w-full"
                 onClick={handleAddUser}
                 disabled={!selectedRole}
@@ -348,6 +349,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
       });
       toast.success(t("user_removed_successfully"));
     },
+
     onError: async (error, variables) => {
       // If network error, push to offline queue
       if (error.message === "Network Error") {
@@ -443,7 +445,6 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  data-cy="patient-user-remove-button"
                   className="absolute top-0 right-0"
                   onClick={() => setUserToRemove(user)}
                 >
@@ -492,7 +493,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
   };
 
   return (
-    <div className="mt-4 px-4 md:px-0" data-cy="patient-users">
+    <div className="mt-4 px-4 md:px-0">
       <div className="group my-2 w-full">
         <div className="h-full space-y-2">
           <div className="flex flex-row items-center justify-between">

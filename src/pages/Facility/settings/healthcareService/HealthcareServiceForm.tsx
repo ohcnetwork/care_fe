@@ -51,12 +51,9 @@ const formSchema = z.object({
   //     display: z.string().min(1, "Display name is required"),
   //     system: z.string().min(1, "System is required"),
   //   }),
-  styling_metadata: z
-    .object({
-      careIcon: z.string().optional(),
-    })
-    .nullable()
-    .optional(),
+  styling_metadata: z.object({
+    careIcon: z.string().optional(),
+  }),
   extra_details: z.string(),
   internal_type: z.nativeEnum(InternalType).optional(),
   locations: z
@@ -143,9 +140,11 @@ function HealthcareServiceFormContent({
         ? {
             name: existingData.name,
             // service_type: existingData.service_type,
-            styling_metadata: existingData.styling_metadata,
+            styling_metadata: existingData.styling_metadata || {
+              careIcon: undefined,
+            },
             extra_details: existingData.extra_details,
-            internal_type: existingData.internal_type,
+            internal_type: existingData.internal_type || undefined,
             locations: existingData.locations.map((loc) => ({
               id: loc.id,
               name: loc.name,
@@ -153,7 +152,8 @@ function HealthcareServiceFormContent({
             managing_organization: existingData.managing_organization?.id,
           }
         : {
-            styling_metadata: { careIcon: "" },
+            name: "",
+            styling_metadata: { careIcon: undefined },
             extra_details: "",
             locations: [],
             managing_organization: null,
@@ -197,25 +197,19 @@ function HealthcareServiceFormContent({
   const isPending = isCreating || isUpdating;
 
   function onSubmit(data: FormValues) {
-    // Prepare styling_metadata - only include if careIcon has a value
-    const styling_metadata = data.styling_metadata?.careIcon
-      ? { careIcon: data.styling_metadata.careIcon }
-      : {};
-
     if (isEditMode && healthcareServiceId) {
       updateHealthcareService({
         ...data,
         facility: facilityId,
         locations: data.locations.map((loc) => loc.id),
-        managing_organization: data.managing_organization || undefined,
+        managing_organization: data.managing_organization || null,
       } as HealthcareServiceUpdateSpec);
     } else {
       const payload: HealthcareServiceCreateSpec = {
         ...data,
         facility: facilityId,
-        styling_metadata,
         locations: data.locations.map((loc) => loc.id),
-        managing_organization: data.managing_organization || undefined,
+        managing_organization: data.managing_organization || null,
       };
       createHealthcareService(payload);
     }
@@ -346,7 +340,7 @@ function HealthcareServiceFormContent({
                 <FormField
                   control={form.control}
                   name="locations"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormControl>
                         <RequirementsSelector
@@ -374,6 +368,9 @@ function HealthcareServiceFormContent({
                               value={field.value}
                               onChange={field.onChange}
                             />
+                          }
+                          triggerBtnClassName={
+                            fieldState.error ? "border-red-500" : undefined
                           }
                         />
                       </FormControl>
@@ -476,7 +473,10 @@ function HealthcareServiceFormContent({
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={isPending || !form.formState.isDirty}
+              >
                 {isPending
                   ? isEditMode
                     ? t("saving")

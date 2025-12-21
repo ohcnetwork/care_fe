@@ -13,7 +13,7 @@ import { ManageCareTeam } from "./summary-panel-details-tab/manage-care-team";
 import { SummaryPanelEncounterDetails } from "./summary-panel-details-tab/summary-panel-encounter-details";
 
 export const SummaryPanelDetailTab = () => {
-  const { canWriteSelectedEncounter: canEdit } = useEncounter();
+  const { canWriteClinicalData: canEdit } = useEncounter();
 
   return (
     <div>

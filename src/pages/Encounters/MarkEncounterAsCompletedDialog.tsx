@@ -28,11 +28,14 @@ import { handleOfflineRecordSuccess } from "@/OfflineSupport/offlineWriteHelpers
 import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+
 import {
+  EncounterBase,
   EncounterEdit,
   EncounterRead,
   EncounterStatus,
 } from "@/types/emr/encounter/encounter";
+
 import encounterApi from "@/types/emr/encounter/encounterApi";
 
 export function MarkEncounterAsCompletedDialog(
@@ -88,19 +91,20 @@ export function MarkEncounterAsCompletedDialog(
   const handleMarkAsComplete = async () => {
     if (!encounter) return;
 
-    const encounterUpdatedData: EncounterEdit = {
-      status: "completed" as EncounterStatus,
-      patient: encounter.patient.id,
+    const encounterUpdatedData: EncounterBase = {
+      ...encounter,
+      status: EncounterStatus.COMPLETED,
       encounter_class: encounter.encounter_class,
       period: {
         start: encounter.period.start,
-        end: encounter.period.end ?? new Date().toISOString(),
+        end: encounter.period.end
+          ? encounter.period.end
+          : new Date().toISOString(),
       },
       hospitalization: encounter.hospitalization,
       priority: encounter.priority,
       external_identifier: encounter.external_identifier,
-      facility: encounter.facility.id,
-      discharge_summary_advice: encounter.discharge_summary_advice,
+      discharge_summary_advice: encounter.discharge_summary_advice ?? "",
     };
 
     if (!onlineManager.isOnline()) {

@@ -17,7 +17,7 @@ import {
 import { BatchRequestBody } from "@/types/base/batch/batch";
 import { PatientRead } from "@/types/emr/patient/patient";
 
-import { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import { CurrentUserRead } from "@/types/user/user";
 import {
   STRUCTURED_QUESTIONS,
@@ -33,7 +33,7 @@ interface QueueQuestionnaireBatchRequestParams {
   facilityId: string;
   t: (key: string, params?: any) => string;
   db: AppCacheDB;
-  filledQuestionnaires: QuestionnaireDetail[];
+  filledQuestionnaires: QuestionnaireRead[];
   onSuccess?: () => void;
   onError?: (error: any) => void;
 }

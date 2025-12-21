@@ -30,7 +30,7 @@ import { groupSlotsByAvailability } from "@/pages/Appointments/utils";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
 import PublicAppointmentApi from "@/types/scheduling/PublicAppointmentApi";
 import {
-  Appointment,
+  PublicAppointment,
   SchedulableResourceType,
   TokenSlot,
 } from "@/types/scheduling/schedule";
@@ -160,7 +160,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           Authorization: `Bearer ${tokenData.token}`,
         },
       }),
-      onSuccess: (data: Appointment) => {
+      onSuccess: (data: PublicAppointment) => {
         toast.success(t("appointment_created_success"));
         queryClient.invalidateQueries({
           queryKey: [
@@ -181,7 +181,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
           Authorization: `Bearer ${tokenData.token}`,
         },
       }),
-      onSuccess: (appointment: Appointment) => {
+      onSuccess: (appointment: PublicAppointment) => {
         toast.success(t("appointment_cancelled"));
         queryClient.invalidateQueries({
           queryKey: ["appointment", tokenData.phoneNumber],
@@ -193,7 +193,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
       },
     });
 
-  const handleRescheduleAppointment = (appointment: Appointment) => {
+  const handleRescheduleAppointment = (appointment: PublicAppointment) => {
     cancelAppointment({
       appointment: appointment.id,
       patient: appointment.patient.id,
@@ -243,7 +243,7 @@ export function ScheduleAppointment(props: AppointmentsProps) {
                 <div className="flex flex-col gap-4 py-4 justify-between h-full">
                   <Avatar
                     imageUrl={userData.profile_picture_url}
-                    name={`${userData.first_name} ${userData.last_name}`}
+                    name={formatName(userData, true)}
                     className="size-96 self-center rounded-sm"
                   />
 

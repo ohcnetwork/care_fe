@@ -5,7 +5,11 @@ import { t } from "i18next";
 
 import dayjs from "@/Utils/dayjs";
 import { Time } from "@/Utils/types";
-import { PatientRead } from "@/types/emr/patient/patient";
+import {
+  PatientListRead,
+  PatientRead,
+  PublicPatientRead,
+} from "@/types/emr/patient/patient";
 
 const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
@@ -54,7 +58,7 @@ export const formatName = (
     prefix?: string | null;
     suffix?: string | null;
     username: string;
-  },
+  } | null,
   hidePrefixSuffix: boolean = false,
 ) => {
   if (!user) return "-";
@@ -140,7 +144,10 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
   };
 };
 
-export const formatPatientAge = (obj: PatientRead, abbreviated = false) => {
+export const formatPatientAge = (
+  obj: PatientRead | PatientListRead | PublicPatientRead,
+  abbreviated = false,
+) => {
   const suffixes = getRelativeDateSuffix(abbreviated);
   const start = dayjs(
     obj.date_of_birth
@@ -148,9 +155,10 @@ export const formatPatientAge = (obj: PatientRead, abbreviated = false) => {
       : new Date(obj.year_of_birth!, 0, 1),
   );
 
-  const end = dayjs(
-    obj.deceased_datetime ? new Date(obj.deceased_datetime) : new Date(),
-  );
+  const end =
+    "deceased_datetime" in obj && obj.deceased_datetime
+      ? dayjs(new Date(obj.deceased_datetime))
+      : dayjs(new Date());
 
   const years = end.diff(start, "years");
   if (years) {

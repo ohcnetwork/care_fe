@@ -23,8 +23,8 @@ import {
 } from "./writeQueue";
 
 export const mutationMap = {
-  create_patient: patientApi.addPatient,
-  update_patient: patientApi.updatePatient,
+  create_patient: patientApi.create,
+  update_patient: patientApi.update,
   create_encounter: encounterApi.create,
   mark_encounter_as_complete: encounterApi.update,
   create_resource_request: resourceRequestApi.create,

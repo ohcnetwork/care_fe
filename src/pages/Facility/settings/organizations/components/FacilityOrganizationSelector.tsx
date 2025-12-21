@@ -131,8 +131,6 @@ export default function FacilityOrganizationSelector(
     if (isAlreadySelected) {
       setAlreadySelected(true);
       setCurrentSelection(org);
-      setFacilityOrgSearch("");
-      return;
     }
     if (org.has_children) {
       setNavigationLevels([...navigationLevels, org]);
@@ -351,7 +349,6 @@ export default function FacilityOrganizationSelector(
                 size="sm"
                 className="h-8 gap-2"
                 disabled={alreadySelected}
-                data-cy="confirm-organization"
               >
                 <span>{t("already_selected")}</span>
                 <CareIcon icon="l-multiply" className="h-4 w-4" />
@@ -364,7 +361,6 @@ export default function FacilityOrganizationSelector(
                 className="h-8 gap-2"
                 onClick={() => handleConfirmSelection(currentSelection)}
                 disabled={isDisabled}
-                data-cy="confirm-organization"
               >
                 {isDisabled ? (
                   <>
@@ -410,12 +406,8 @@ export default function FacilityOrganizationSelector(
         className="w-full sm:w-auto"
       >
         <TabsList className="grid w-full grid-cols-2 sm:w-[300px]">
-          <TabsTrigger value="mine" data-cy="my-organizations-tab">
-            {t("my_organizations")}
-          </TabsTrigger>
-          <TabsTrigger value="all" data-cy="all-organizations-tab">
-            {t("all_organizations")}
-          </TabsTrigger>
+          <TabsTrigger value="mine">{t("my_organizations")}</TabsTrigger>
+          <TabsTrigger value="all">{t("all_organizations")}</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -455,7 +447,6 @@ export default function FacilityOrganizationSelector(
                         role="combobox"
                         aria-expanded={open}
                         className="w-full justify-between border-dashed"
-                        data-cy="facility-organization"
                         onClick={() => setOpen(true)}
                         type="button" // Prevents unintended form submission
                       >
@@ -480,7 +471,6 @@ export default function FacilityOrganizationSelector(
                       role="combobox"
                       aria-expanded={open}
                       className="w-full justify-between border-dashed"
-                      data-cy="facility-organization"
                     >
                       <span className="truncate text-gray-500">
                         {currentSelection

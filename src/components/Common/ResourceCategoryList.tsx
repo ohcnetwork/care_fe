@@ -17,18 +17,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
+import { getPermissions } from "@/common/Permissions";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import { usePermissions } from "@/context/PermissionContext";
 
 import { RESULTS_PER_PAGE_LIMIT } from "@/common/constants";
 import { ResourceCategoryForm } from "@/components/Common/ResourceCategoryForm";
 import useFilters from "@/hooks/useFilters";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   ResourceCategoryRead,
   ResourceCategoryResourceType,
@@ -172,7 +169,6 @@ interface ResourceCategoryListProps {
   onCreateItem?: () => void;
   createItemLabel?: string;
   createItemIcon?: "l-plus" | "l-file" | "l-folder-plus";
-  createItemTooltip?: string;
   allowCategoryCreate?: boolean;
   children?: React.ReactNode;
 }
@@ -187,11 +183,16 @@ export function ResourceCategoryList({
   onCreateItem,
   createItemLabel,
   createItemIcon = "l-plus",
-  createItemTooltip,
   allowCategoryCreate = false,
   children,
 }: ResourceCategoryListProps) {
   const { t } = useTranslation();
+  const { hasPermission } = usePermissions();
+  const { facility } = useCurrentFacility();
+  const { canWriteResourceCategory } = getPermissions(
+    hasPermission,
+    facility?.permissions ?? [],
+  );
   // Form state
   const [isCategoryFormOpen, setIsCategoryFormOpen] = React.useState(false);
   const [editingCategory, setEditingCategory] = React.useState<string | null>(
@@ -219,7 +220,7 @@ export function ResourceCategoryList({
         facilityId,
         categorySlug,
         qParams.searchCategory,
-        qParams.page,
+        qParams.page ?? "1",
       ],
       queryFn: query.debounced(resourceCategoryApi.list, {
         pathParams: { facilityId },
@@ -257,123 +258,114 @@ export function ResourceCategoryList({
   };
 
   return (
-    <TooltipProvider>
-      <div className="container mx-auto">
-        <div className="mb-4">
-          {/* Breadcrumb Navigation */}
+    <div className="container mx-auto">
+      <div className="mb-4">
+        {/* Breadcrumb Navigation */}
 
-          <div className="flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4">
-            <div className="flex flex-col items-start space-x-2">
-              <h1 className="text-2xl font-bold text-gray-700">{baseTitle}</h1>
-              <ResourceCategoryBreadcrumb
-                currentCategory={currentCategory}
-                onNavigate={onNavigate}
-                basePath={basePath}
-                baseTitle={baseTitle}
-              />
-            </div>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center space-x-2 gap-2">
+        <div className="flex sm:flex-row sm:items-center sm:justify-between flex-col gap-4">
+          <div className="flex flex-col items-start space-x-2">
+            <h1 className="text-2xl font-bold text-gray-700">{baseTitle}</h1>
+            <ResourceCategoryBreadcrumb
+              currentCategory={currentCategory}
+              onNavigate={onNavigate}
+              basePath={basePath}
+              baseTitle={baseTitle}
+            />
+          </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-x-2 gap-2">
+            {canWriteResourceCategory && (
               <Button
                 variant="outline"
                 onClick={handleCreateCategory}
                 disabled={isLeafCategory && !allowCategoryCreate}
+                hidden={isLeafCategory}
                 className="w-full sm:w-auto"
               >
                 <CareIcon icon="l-folder-plus" className="mr-2" />
                 {t("add_category")}
               </Button>
-              {onCreateItem && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="w-full sm:w-auto">
-                      <Button
-                        className="w-full sm:w-auto"
-                        onClick={onCreateItem}
-                        disabled={!isLeafCategory || false}
-                      >
-                        <CareIcon icon={createItemIcon} className="mr-2" />
-                        {createItemLabel}
-                      </Button>
-                    </div>
-                  </TooltipTrigger>
-                  {createItemTooltip && (
-                    <TooltipContent>
-                      <p>{createItemTooltip}</p>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              )}
-            </div>
+            )}
+            {onCreateItem && (
+              <div className="w-full sm:w-auto">
+                <Button
+                  className="w-full sm:w-auto"
+                  onClick={onCreateItem}
+                  disabled={!isLeafCategory || false}
+                  hidden={!isLeafCategory}
+                >
+                  <CareIcon icon={createItemIcon} className="mr-2" />
+                  {createItemLabel}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Search Section */}
-        {!isLeafCategory && (
-          <div className="relative w-full sm:w-auto mb-4">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <CareIcon icon="l-search" className="size-5" />
-            </span>
-            <Input
-              placeholder={t("search_categories")}
-              value={qParams.searchCategory || ""}
-              onChange={(e) =>
-                updateQuery({ searchCategory: e.target.value || undefined })
-              }
-              className="w-full sm:w-auto pl-10"
-            />
-          </div>
-        )}
-
-        {isLoadingCategories ? (
-          <TableSkeleton count={5} />
-        ) : isRootLevel && categories.length === 0 ? (
-          <EmptyState
-            icon={
-              <CareIcon icon="l-folder-open" className="text-primary size-6" />
-            }
-            title={
-              qParams.searchCategory
-                ? t("no_results")
-                : t("no_categories_found")
-            }
-            description={
-              qParams.searchCategory
-                ? t("try_different_search_terms")
-                : t("create_your_first_category")
-            }
-          />
-        ) : (
-          <>
-            <div className="grid gap-2">
-              {/* Show categories only at root level or in parent categories */}
-              {categories.map((category) => (
-                <CategoryCard
-                  key={category.id}
-                  category={category}
-                  onNavigate={onNavigate}
-                  onEdit={handleEditCategory}
-                />
-              ))}
-            </div>
-
-            {/* Render children (like charge item list) only in leaf categories */}
-            {isLeafCategory && children}
-          </>
-        )}
-
-        {/* Category Form Sheet */}
-        <ResourceCategoryForm
-          facilityId={facilityId}
-          categorySlug={editingCategory || undefined}
-          parentCategorySlug={categorySlug || undefined}
-          resourceType={resourceType}
-          isOpen={isCategoryFormOpen}
-          onClose={() => setIsCategoryFormOpen(false)}
-          onSuccess={handleCategoryFormSuccess}
-        />
-
-        <Pagination totalCount={categoriesResponse?.count || 0} />
       </div>
-    </TooltipProvider>
+
+      {/* Search Section */}
+      {!isLeafCategory && (
+        <div className="relative w-full sm:w-auto mb-4">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <CareIcon icon="l-search" className="size-5" />
+          </span>
+          <Input
+            placeholder={t("search_categories")}
+            value={qParams.searchCategory || ""}
+            onChange={(e) =>
+              updateQuery({ searchCategory: e.target.value || undefined })
+            }
+            className="w-full sm:w-auto pl-10"
+          />
+        </div>
+      )}
+
+      {isLoadingCategories ? (
+        <TableSkeleton count={5} />
+      ) : isRootLevel && categories.length === 0 ? (
+        <EmptyState
+          icon={
+            <CareIcon icon="l-folder-open" className="text-primary size-6" />
+          }
+          title={
+            qParams.searchCategory ? t("no_results") : t("no_categories_found")
+          }
+          description={
+            qParams.searchCategory
+              ? t("try_different_search_terms")
+              : t("create_your_first_category")
+          }
+        />
+      ) : (
+        <>
+          <div className="grid gap-2">
+            {/* Show categories only at root level or in parent categories */}
+            {categories.map((category) => (
+              <CategoryCard
+                key={category.id}
+                category={category}
+                onNavigate={onNavigate}
+                onEdit={handleEditCategory}
+              />
+            ))}
+          </div>
+
+          {/* Render children (like charge item list) only in leaf categories */}
+          {isLeafCategory && children}
+        </>
+      )}
+
+      {/* Category Form Sheet */}
+      <ResourceCategoryForm
+        facilityId={facilityId}
+        categorySlug={editingCategory || undefined}
+        parentCategorySlug={categorySlug || undefined}
+        resourceType={resourceType}
+        isOpen={isCategoryFormOpen}
+        onClose={() => setIsCategoryFormOpen(false)}
+        onSuccess={handleCategoryFormSuccess}
+      />
+
+      <Pagination totalCount={categoriesResponse?.count || 0} />
+    </div>
   );
 }

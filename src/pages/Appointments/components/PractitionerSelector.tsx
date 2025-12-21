@@ -85,20 +85,25 @@ export const PractitionerSelector = ({
   const [currentOrganizationId, setCurrentOrganizationId] = useState<
     string | null
   >(null);
+  const [showAllOrgs, setShowAllOrgs] = useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
 
-  // Fetch root organizations
+  // Fetch root organizations - default to user's departments only
   const { data: organizationsResponse } = useQuery({
-    queryKey: ["facilityOrganizations", facilityId],
-    queryFn: query(facilityOrganizationApi.list, {
-      pathParams: { facilityId },
-      queryParams: {
-        parent: "",
-        active: true,
-        limit: 100,
+    queryKey: ["facilityOrganizations", facilityId, showAllOrgs],
+    queryFn: query(
+      showAllOrgs
+        ? facilityOrganizationApi.list
+        : facilityOrganizationApi.listMine,
+      {
+        pathParams: { facilityId },
+        queryParams: {
+          parent: "",
+          active: true,
+          limit: 100,
+        },
       },
-    }),
-
+    ),
     meta: { persist: true },
     enabled: open,
   });
@@ -188,6 +193,15 @@ export const PractitionerSelector = ({
 
   const handleClearAll = () => {
     onSelect([]);
+  };
+
+  const clearOrganizationUsers = (organizationUsers: {
+    users: UserReadMinimal[];
+  }) => {
+    const remainingSelected = selected.filter(
+      (s) => !organizationUsers.users.some((u) => u.id === s.id),
+    );
+    onSelect(remainingSelected);
   };
 
   const handleUserSelect = (user: UserReadMinimal) => {
@@ -281,11 +295,21 @@ export const PractitionerSelector = ({
         <div className="flex-1 flex flex-col">
           {/* Header */}
           <div className="px-4 py-3 border-b bg-gray-50 rounded-t-md">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-600">
-                {t("select_practitioners")}
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-600">
+                  {t("select_practitioners")}
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAllOrgs(!showAllOrgs)}
+                className="h-7 text-xs"
+              >
+                {showAllOrgs ? t("all_dept") : t("my_dept")}
+              </Button>
             </div>
           </div>
 
@@ -545,7 +569,7 @@ export const PractitionerSelector = ({
                         {t("practitioners")}
                       </h3>
                       {multiple && (
-                        <div className="max-h-[400px] overflow-y-auto">
+                        <div className="max-h-[400px] overflow-y-auto space-x-1">
                           <Button
                             variant="outline"
                             size="xs"
@@ -557,6 +581,19 @@ export const PractitionerSelector = ({
                           >
                             {t("select_all")}
                           </Button>
+                          {selected.filter((s) =>
+                            organizationUsers.users.some((u) => u.id === s.id),
+                          ).length > 1 && (
+                            <Button
+                              variant="outline"
+                              size="xs"
+                              onClick={() =>
+                                clearOrganizationUsers(organizationUsers)
+                              }
+                            >
+                              {t("clear_all")}
+                            </Button>
+                          )}
                         </div>
                       )}
                     </div>
