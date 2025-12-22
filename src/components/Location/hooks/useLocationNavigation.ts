@@ -92,7 +92,7 @@ export function useLocationNavigation({
   });
 
   useEffect(() => {
-    if (locationsData && open) {
+    if (locationsData) {
       if (locationsPage === 1) {
         setAllLocations(locationsData.results);
       } else {
@@ -100,7 +100,7 @@ export function useLocationNavigation({
       }
       setHasMoreLocations(locationsData.count > locationsPage * ITEMS_PER_PAGE);
     }
-  }, [locationsData, locationsPage, open]);
+  }, [locationsData, locationsPage]);
 
   useEffect(() => {
     if (bedsData) {
@@ -193,6 +193,9 @@ export function useLocationNavigation({
     setAllBeds([]);
     setHasMoreLocations(true);
     setHasMoreBeds(true);
+    if (locationsData?.results) {
+      setAllLocations(locationsData.results);
+    }
   };
 
   return {
