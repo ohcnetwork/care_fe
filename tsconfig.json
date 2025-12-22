@@ -1,7 +1,13 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // Using ES2020 target for Chrome 83+ compatibility (Issue #14887)
+    // Polyfills for ES2021+ features are provided via @vitejs/plugin-legacy
+    "target": "ES2020",
+    "lib": [
+      "ES2021",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -15,14 +21,26 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vite/client", "vite-plugin-pwa/client"],
+    "types": [
+      "vite/client",
+      "vite-plugin-pwa/client"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@core/*": ["src/*"],
-      "@careConfig": ["./care.config.ts"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@core/*": [
+        "src/*"
+      ],
+      "@careConfig": [
+        "./care.config.ts"
+      ]
     },
-    "typeRoots": ["./node_modules/@types", "./src/remote-modules.d.ts"]
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/remote-modules.d.ts"
+    ]
   },
   "include": [
     "src/**/*.ts",

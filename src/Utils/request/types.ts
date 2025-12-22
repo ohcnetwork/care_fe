@@ -56,7 +56,8 @@ export class HTTPError extends Error {
     silent: boolean;
     cause?: Record<string, unknown>;
   }) {
-    super(message, { cause });
+    super(message);
+    this.name = "HTTPError";
     this.status = status;
     this.silent = silent;
     this.cause = cause;

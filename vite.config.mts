@@ -1,6 +1,7 @@
 import { type UserConfig, defineConfig, loadEnv } from "vite";
 
 import federation from "@originjs/vite-plugin-federation";
+import legacy from "@vitejs/plugin-legacy";
 import reactScan from "@react-scan/vite-plugin-react-scan";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
@@ -11,6 +12,7 @@ import path from "path";
 import checker from "vite-plugin-checker";
 import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import topLevelAwait from "vite-plugin-top-level-await";
 import { careConsoleArt } from "./plugins/careConsoleArt";
 import { fixSonnerPackageJson } from "./plugins/fixSonnerPackageJson";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
@@ -51,6 +53,12 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
       ),
     },
     plugins: [
+      // Enables top-level await transformation for ES2020 target compatibility
+      // (top-level await is ES2022 syntax, this plugin transforms it for older targets)
+      topLevelAwait({
+        promiseExportName: "__tla",
+        promiseImportName: (i) => `__tla_${i}`,
+      }),
       careConsoleArt(),
       fixSonnerPackageJson(),
       tailwindcss(),
@@ -138,6 +146,27 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
           ],
         },
       }),
+      legacy({
+        targets: ["chrome >= 83", "edge >= 83", "firefox >= 78", "safari >= 14"],
+        modernTargets: [
+          "chrome >= 83",
+          "edge >= 83",
+          "firefox >= 78",
+          "safari >= 14",
+        ],
+        modernPolyfills: [
+          // ES2021 - String.replaceAll is the ONLY feature not natively supported
+          // by our minimum browser versions (Chrome 85+, but we target 83+)
+          "es.string.replace-all",
+          // Other features like Promise.allSettled, globalThis, Object.fromEntries,
+          // Array.flat, and Array.flatMap are already natively supported in:
+          // Chrome 83+, Edge 83+, Firefox 78+, and Safari 14+
+          //
+          // Note: Optional chaining (?.) and nullish coalescing (??) are syntax features
+          // transpiled by esbuild/TypeScript, not runtime polyfills
+        ],
+        renderLegacyChunks: false,
+      }),
     ],
     resolve: {
       alias: {
@@ -150,12 +179,12 @@ export default defineConfig(async ({ mode }): Promise<UserConfig> => {
     //   include: getPluginDependencies(),
     // },
     build: {
-      target: "es2022",
+      target: ["es2020", "chrome83", "edge83", "firefox78", "safari14"],
       outDir: "build",
       sourcemap: true,
     },
     esbuild: {
-      target: "es2022",
+      target: "es2020",
     },
     server: {
       port: 4000,
