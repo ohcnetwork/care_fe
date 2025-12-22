@@ -10,25 +10,22 @@ import {
 import { request } from "sudheendra-scripts/utils";
 
 async function main() {
-  const resourceCategories = await getCategoriesToImport();
+  const resourceCategories = getCategoriesToImport();
   const existingResourceCategories = await getExistingResourceCategories();
+
   const itemsToImportProductKnowledge = getItemsToImport(
     existingResourceCategories,
     resourceCategories,
-    (existing, item) => existing.slug === `pk-${item.slug_value}`,
+    (existing, item) => existing.slug === item.pkSlug,
   );
-  const itemsToImportChargeItemDefinitions = getItemsToImport(
-    existingResourceCategories,
-    resourceCategories,
-    (existing, item) => existing.slug === `cid-${item.slug_value}`,
-  );
+
   for (const item of itemsToImportProductKnowledge) {
     await request(
       `/api/v1/facility/${process.env.FACILITY_ID}/resource_category/`,
       "POST",
       {
         title: item.name,
-        slug_value: `pk-${item.slug_value}`,
+        slug_value: item.pkSlug,
         resource_type: ResourceCategoryResourceType.product_knowledge,
         resource_sub_type: ResourceCategorySubType.other,
       },
@@ -36,13 +33,19 @@ async function main() {
     console.log(`Created ${item.name} product knowledge resource category`);
   }
 
+  const itemsToImportChargeItemDefinitions = getItemsToImport(
+    existingResourceCategories,
+    resourceCategories,
+    (existing, item) => existing.slug === item.cidSlug,
+  );
+
   for (const item of itemsToImportChargeItemDefinitions) {
     await request(
       `/api/v1/facility/${process.env.FACILITY_ID}/resource_category/`,
       "POST",
       {
         title: item.name,
-        slug_value: `cid-${item.slug_value}`,
+        slug_value: item.cidSlug,
         resource_type: ResourceCategoryResourceType.charge_item_definition,
         resource_sub_type: ResourceCategorySubType.other,
       },

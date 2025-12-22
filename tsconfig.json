@@ -31,7 +31,6 @@
     "care.config.ts",
     "scripts/**/*.ts",
     "playwright.config.ts",
-    "plugins/**/*.ts",
-    "sudheendra-scripts/**/*.ts"
+    "plugins/**/*.ts"
   ]
 }

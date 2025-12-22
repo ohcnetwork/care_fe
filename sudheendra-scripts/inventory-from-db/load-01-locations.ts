@@ -22,7 +22,7 @@ async function main() {
   const existingLocations = await getExistingLocations();
   logger(`Found ${existingLocations.length} existing locations`);
 
-  const locationsToImport = await getLocationsToImport();
+  const locationsToImport = getLocationsToImport();
   logger(`Found ${locationsToImport.length} locations to import`);
 
   const locationsToCreate = getItemsToImport(

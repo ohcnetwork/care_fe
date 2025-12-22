@@ -463,6 +463,7 @@ export const batchRequest = async <TRequest, TResponse>(
       batchIndex: number;
       offset: number;
       batchSize: number;
+      completed: number;
     },
   ) => Promise<TResponse[]>,
   batchSize = 100,
@@ -480,6 +481,7 @@ export const batchRequest = async <TRequest, TResponse>(
           batchIndex,
           offset: +groupIndex * workers * batchSize + batchIndex * batchSize,
           batchSize,
+          completed: results.length,
         }),
       ),
     );

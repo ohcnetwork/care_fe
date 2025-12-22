@@ -3,8 +3,14 @@ import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/c
 import { LocationRead } from "@/types/location/location";
 import { PaginatedResponse } from "@/Utils/request/types";
 import dotenv from "dotenv";
-import { createSlug, request } from "sudheendra-scripts/utils";
+import { createSlug, normalizeTitle, request } from "sudheendra-scripts/utils";
 
+import {
+  ProductKnowledgeBase,
+  ProductKnowledgeCreate,
+  ProductKnowledgeStatus,
+  ProductKnowledgeType,
+} from "@/types/inventory/productKnowledge/productKnowledge";
 import itemsJson from "./data/ITEM.json";
 import locations from "./data/LOCATION_MASTER.json";
 import pharmacyCategories from "./data/PHARM_CATEGORY.json";
@@ -17,8 +23,8 @@ type ItemRow = {
   ID: number;
   ITEM_SHORTCODE: string;
   ITEM_NAME: string;
-  ITEM_CATEGORY_ID: number;
-  PHARMACY_CATGRY_ID: number;
+  ITEM_CATEGORY_ID?: number;
+  PHARMACY_CATGRY_ID?: number;
   FIRST_PURCHASE_DATE?: string;
   LAST_SELLING_PRICE?: number;
   LAST_PURCHASE_RATE?: number;
@@ -27,15 +33,19 @@ type ItemRow = {
 
 const items = itemsJson as ItemRow[];
 
-export const getCategoriesToImport = async () => {
-  return pharmacyCategories.map((category) => ({
-    slug_value: createSlug(category.CATEGORY),
-    name: category.CATEGORY,
-    id: category.ID,
-  }));
+export const getCategoriesToImport = () => {
+  return pharmacyCategories.map((category) => {
+    const name = normalizeTitle(category.CATEGORY);
+    return {
+      name,
+      id: category.ID,
+      pkSlug: `pk-${createSlug(name)}`,
+      cidSlug: `cid-${createSlug(name)}`,
+    };
+  });
 };
 
-export const getLocationsToImport = async () => {
+export const getLocationsToImport = () => {
   return locations.map((location) => ({
     id: location.ID,
     name: location.DESCRIPTION,
@@ -48,27 +58,39 @@ export const getLocationsToImport = async () => {
 //     name: item.DESCRIPTION,
 //   }));
 // };
-export const getProductKnowledgeToImport = async () => {
-  const categories = await getCategoriesToImport();
-  const categoryMap = new Map(
-    categories.map((category) => [category.id, category]),
-  );
-  return Object.entries(
-    Object.fromEntries(
-      items.map((item) => {
-        return [
-          createSlug(item.ITEM_NAME),
-          {
-            name: item.ITEM_NAME,
-            hsnCode: item.HSN_CODE,
-            resourceCategorySlug: `pk-${
-              categoryMap.get(item.PHARMACY_CATGRY_ID)?.slug_value
-            }`,
+
+export const getProductKnowledgeToImport = (
+  defaults: Partial<ProductKnowledgeCreate> = {},
+) => {
+  const categories = new Map(getCategoriesToImport().map((c) => [c.id, c]));
+  const productKnowledges = new Map(
+    items
+      .filter(
+        (item): item is ItemRow & { PHARMACY_CATGRY_ID: number } =>
+          item.PHARMACY_CATGRY_ID !== undefined &&
+          categories.has(item.PHARMACY_CATGRY_ID),
+      )
+      .map((item): [string, ProductKnowledgeCreate] => [
+        createSlug(item.ITEM_NAME),
+        {
+          alternate_identifier: item.HSN_CODE,
+          product_type: ProductKnowledgeType.medication,
+          status: ProductKnowledgeStatus.active,
+          name: item.ITEM_NAME,
+          names: [],
+          storage_guidelines: [],
+          base_unit: {
+            code: "d",
+            display: "Day",
+            system: "http://unitsofmeasure.org",
           },
-        ];
-      }),
-    ),
+          slug_value: createSlug(item.ITEM_NAME),
+          category: categories.get(item.PHARMACY_CATGRY_ID)!.pkSlug,
+          ...defaults,
+        },
+      ]),
   );
+  return Array.from(productKnowledges.values());
 };
 
 const getExistingPaginatedData = async <TInput, TOutput>(
@@ -122,6 +144,15 @@ export const getExistingResourceCategories = async () => {
     `/api/v1/facility/${FACILITY_ID}/resource_category/`,
     (resourceCategory) => ({
       slug: resourceCategory.slug_config.slug_value,
+    }),
+  );
+};
+
+export const getExistingProductKnowledge = async () => {
+  return getExistingPaginatedData<ProductKnowledgeBase, { slug: string }>(
+    `/api/v1/product_knowledge/`,
+    (productKnowledge) => ({
+      slug: productKnowledge.slug_config.slug_value,
     }),
   );
 };
