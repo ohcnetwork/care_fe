@@ -9,7 +9,7 @@ import { EncounterAccordionLayout } from "@/components/Patient/EncounterAccordio
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { Code } from "@/types/base/code/code";
-import { Observation, ObservationWithUser } from "@/types/emr/observation";
+import { ObservationListRead } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
 
 import { VitalsObservation, VitalsTable } from "./VitalsTable";
@@ -26,10 +26,13 @@ interface VitalsListProps {
 }
 
 interface GroupedObservations {
-  [key: string]: Observation[];
+  [key: string]: ObservationListRead[];
 }
 const LIMIT = 50;
-function extractVitals(observations: Observation[], vitalCodes: Code[]) {
+function extractVitals(
+  observations: ObservationListRead[],
+  vitalCodes: Code[],
+) {
   if (!observations || observations.length === 0) return [];
   // Group observations by effective_datetime
   const groupedObservations = observations.reduce(
@@ -90,7 +93,7 @@ export const VitalsList = ({
     (code) => code.display && code.code !== "3151-8",
   );
   const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteQuery<
-    PaginatedResponse<ObservationWithUser>
+    PaginatedResponse<ObservationListRead>
   >({
     queryKey: [
       "infinite-observations",
@@ -108,7 +111,7 @@ export const VitalsList = ({
           offset: String(pageParam),
         },
       })({ signal });
-      return response as PaginatedResponse<ObservationWithUser>;
+      return response as PaginatedResponse<ObservationListRead>;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {

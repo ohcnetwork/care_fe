@@ -18,7 +18,7 @@ import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
-import { ObservationWithUser } from "@/types/emr/observation";
+import { ObservationListRead } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
 import { useTranslation } from "react-i18next";
 
@@ -49,7 +49,7 @@ export const ObservationHistoryTable = ({
   const { t } = useTranslation();
 
   const { data, isLoading, hasNextPage, fetchNextPage } = useInfiniteQuery<
-    PaginatedResponse<ObservationWithUser>
+    PaginatedResponse<ObservationListRead>
   >({
     queryKey: [
       "infinite-observations",
@@ -67,7 +67,7 @@ export const ObservationHistoryTable = ({
           offset: String(pageParam),
         },
       })({ signal });
-      return response as PaginatedResponse<ObservationWithUser>;
+      return response as PaginatedResponse<ObservationListRead>;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
