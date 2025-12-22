@@ -67,14 +67,20 @@ export const getResourceCategoriesToImport = () => {
         slug_value: `pk-${createSlug(name)}`,
         resource_type: ResourceCategoryResourceType.product_knowledge,
         resource_sub_type: ResourceCategorySubType.other,
-        ssmm_pharm_category_id: category.ID,
+        meta: {
+          ssmm_pharm_category_id: category.ID,
+        },
+        $facility: FACILITY_ID,
       },
       {
         title: name,
         slug_value: `cid-${createSlug(name)}`,
         resource_type: ResourceCategoryResourceType.charge_item_definition,
         resource_sub_type: ResourceCategorySubType.other,
-        ssmm_pharm_category_id: category.ID,
+        meta: {
+          ssmm_pharm_category_id: category.ID,
+        },
+        $facility: FACILITY_ID,
       },
     ];
   });
@@ -94,7 +100,7 @@ export const getProductKnowledgeToImport = () => {
         (c) =>
           c.resource_type === ResourceCategoryResourceType.product_knowledge,
       )
-      .map((c) => [c.ssmm_pharm_category_id, c]),
+      .map((c) => [c.meta.ssmm_pharm_category_id, c]),
   );
 
   const productKnowledges = new Map(
@@ -121,7 +127,9 @@ export const getProductKnowledgeToImport = () => {
           slug_value: getProductKnowledgeSlug(item),
           category: `f-${FACILITY_ID}-${categories.get(item.PHARMACY_CATGRY_ID)!.slug_value}`,
           facility: FACILITY_ID,
-          ssmm_item_id: item.ID,
+          meta: {
+            ssmm_item_id: item.ID,
+          },
         },
       ]),
   );
@@ -136,7 +144,7 @@ export const getChargeItemDefinitionsToImport =
           (c) =>
             c.resource_type === ResourceCategoryResourceType.product_knowledge,
         )
-        .map((c) => [c.ssmm_pharm_category_id, c]),
+        .map((c) => [c.meta.ssmm_pharm_category_id, c]),
     );
 
     return items
@@ -156,7 +164,10 @@ export const getChargeItemDefinitionsToImport =
             amount: item.LAST_SELLING_PRICE?.toString() || "0",
           },
         ],
-        ssmm_item_id: item.ID,
+        meta: {
+          ssmm_item_id: item.ID,
+        },
+        $facility: FACILITY_ID,
       }));
   };
 export const getProductToImport = () => {
@@ -165,6 +176,7 @@ export const getProductToImport = () => {
     charge_item_definition: `f-${FACILITY_ID}-${getChargeItemDefinitionSlug(item)}`,
     extensions: {},
     status: ProductStatusOptions.active,
+    $facility: FACILITY_ID,
   }));
 };
 
@@ -202,9 +214,9 @@ export const getSupplyDeliveriesToImport = () => {
       status: SupplyDeliveryStatus.completed,
       supplied_item_type: SupplyDeliveryType.product,
       supplied_item_quantity: stock.QTY,
-      supplied_item__product_knowledge: `f-${FACILITY_ID}-${getProductKnowledgeSlug(item)}`,
-      supplied_item__charge_item_definition: `f-${FACILITY_ID}-${getChargeItemDefinitionSlug(item)}`,
-      order__destination: destinationId,
+      $supplied_item__product_knowledge: `f-${FACILITY_ID}-${getProductKnowledgeSlug(item)}`,
+      $upplied_item__charge_item_definition: `f-${FACILITY_ID}-${getChargeItemDefinitionSlug(item)}`,
+      $order__destination: destinationId,
       destination: destinationId,
       extensions: {},
     };
