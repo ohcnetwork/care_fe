@@ -1,6 +1,9 @@
 import dotenv from "dotenv";
 import { writeFile } from "fs/promises";
-import { getCategoriesToImport } from "sudheendra-scripts/inventory-from-db/utils";
+import {
+  getCategoriesToImport,
+  getProductKnowledgeToImport,
+} from "sudheendra-scripts/inventory-from-db/utils";
 import { getLogger } from "sudheendra-scripts/utils";
 
 dotenv.config({ path: [".env.local", ".env"] });
@@ -17,9 +20,12 @@ async function writePayloads(payload: Record<string, object[]>) {
 
 async function main() {
   const resourceCategories = getCategoriesToImport();
-
+  const productKnowledge = getProductKnowledgeToImport({
+    facility: FACILITY_ID,
+  });
   await writePayloads({
     resourceCategories,
+    productKnowledge,
   });
 }
 

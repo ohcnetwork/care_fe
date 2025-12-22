@@ -1,5 +1,4 @@
 import {
-  ResourceCategoryCreate,
   ResourceCategoryRead,
   ResourceCategoryResourceType,
   ResourceCategorySubType,
@@ -38,7 +37,7 @@ type ItemRow = {
 
 const items = itemsJson as ItemRow[];
 
-export const getCategoriesToImport = (): ResourceCategoryCreate[] => {
+export const getCategoriesToImport = () => {
   return pharmacyCategories.flatMap((category) => {
     const name = normalizeTitle(category.CATEGORY);
     return [
@@ -47,12 +46,14 @@ export const getCategoriesToImport = (): ResourceCategoryCreate[] => {
         slug_value: `pk-${createSlug(name)}`,
         resource_type: ResourceCategoryResourceType.product_knowledge,
         resource_sub_type: ResourceCategorySubType.other,
+        ssmm_id: category.ID,
       },
       {
         title: name,
         slug_value: `cid-${createSlug(name)}`,
         resource_type: ResourceCategoryResourceType.charge_item_definition,
         resource_sub_type: ResourceCategorySubType.other,
+        ssmm_id: category.ID,
       },
     ];
   });
@@ -75,7 +76,12 @@ export const getLocationsToImport = () => {
 export const getProductKnowledgeToImport = (
   defaults: Partial<ProductKnowledgeCreate> = {},
 ) => {
-  const categories = new Map(getCategoriesToImport().map((c) => [c.id, c]));
+  const categories = new Map(
+    getCategoriesToImport()
+      .filter((c) => c.slug_value.startsWith("pk-"))
+      .map((c) => [c.ssmm_id, c]),
+  );
+
   const productKnowledges = new Map(
     items
       .filter(
@@ -83,7 +89,7 @@ export const getProductKnowledgeToImport = (
           item.PHARMACY_CATGRY_ID !== undefined &&
           categories.has(item.PHARMACY_CATGRY_ID),
       )
-      .map((item): [string, ProductKnowledgeCreate] => [
+      .map((item) => [
         createSlug(item.ITEM_NAME),
         {
           alternate_identifier: item.HSN_CODE,
@@ -98,8 +104,9 @@ export const getProductKnowledgeToImport = (
             system: "http://unitsofmeasure.org",
           },
           slug_value: createSlug(item.ITEM_NAME),
-          category: categories.get(item.PHARMACY_CATGRY_ID)!.pkSlug,
+          category: categories.get(item.PHARMACY_CATGRY_ID)!.slug_value,
           ...defaults,
+          ssmm_id: item.ID,
         },
       ]),
   );
