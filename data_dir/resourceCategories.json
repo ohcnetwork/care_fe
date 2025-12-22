@@ -1,0 +1,198 @@
+[
+  {
+    "title": "Ortho Implants",
+    "slug_value": "pk-ortho-implants",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 521
+  },
+  {
+    "title": "Ortho Implants",
+    "slug_value": "cid-ortho-implants",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 521
+  },
+  {
+    "title": "Non Surgical",
+    "slug_value": "pk-non-surgical",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 522
+  },
+  {
+    "title": "Non Surgical",
+    "slug_value": "cid-non-surgical",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 522
+  },
+  {
+    "title": "Medicines",
+    "slug_value": "pk-medicines",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 523
+  },
+  {
+    "title": "Medicines",
+    "slug_value": "cid-medicines",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 523
+  },
+  {
+    "title": "General",
+    "slug_value": "pk-general",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 524
+  },
+  {
+    "title": "General",
+    "slug_value": "cid-general",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 524
+  },
+  {
+    "title": "Ortho",
+    "slug_value": "pk-ortho",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 525
+  },
+  {
+    "title": "Ortho",
+    "slug_value": "cid-ortho",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 525
+  },
+  {
+    "title": "Gynec",
+    "slug_value": "pk-gynec",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 526
+  },
+  {
+    "title": "Gynec",
+    "slug_value": "cid-gynec",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 526
+  },
+  {
+    "title": "Paediatric",
+    "slug_value": "pk-paediatric",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 527
+  },
+  {
+    "title": "Paediatric",
+    "slug_value": "cid-paediatric",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 527
+  },
+  {
+    "title": "Cardiology",
+    "slug_value": "pk-cardiology",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 528
+  },
+  {
+    "title": "Cardiology",
+    "slug_value": "cid-cardiology",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 528
+  },
+  {
+    "title": "Lab Materials",
+    "slug_value": "pk-lab-materials",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 529
+  },
+  {
+    "title": "Lab Materials",
+    "slug_value": "cid-lab-materials",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 529
+  },
+  {
+    "title": "Surgical",
+    "slug_value": "pk-surgical",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 530
+  },
+  {
+    "title": "Surgical",
+    "slug_value": "cid-surgical",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 530
+  },
+  {
+    "title": "X-ray",
+    "slug_value": "pk-x-ray",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 531
+  },
+  {
+    "title": "X-ray",
+    "slug_value": "cid-x-ray",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 531
+  },
+  {
+    "title": "Ayurvedam",
+    "slug_value": "pk-ayurvedam",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 532
+  },
+  {
+    "title": "Ayurvedam",
+    "slug_value": "cid-ayurvedam",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 532
+  },
+  {
+    "title": "Homeo",
+    "slug_value": "pk-homeo",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 533
+  },
+  {
+    "title": "Homeo",
+    "slug_value": "cid-homeo",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 533
+  },
+  {
+    "title": "Neuro Implants",
+    "slug_value": "pk-neuro-implants",
+    "resource_type": "product_knowledge",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 541
+  },
+  {
+    "title": "Neuro Implants",
+    "slug_value": "cid-neuro-implants",
+    "resource_type": "charge_item_definition",
+    "resource_sub_type": "all:other",
+    "ssmm_pharm_category_id": 541
+  }
+]

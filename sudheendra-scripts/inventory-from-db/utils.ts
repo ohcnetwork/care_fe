@@ -45,12 +45,10 @@ type ItemRow = {
 };
 
 type SupplyDeliveryRow = {
-  ID: number;
   ITEM_ID: number;
-  QUANTITY: number;
-  DATE: string;
-  SUPPLIER_ID: number;
-  CARE_LOCATION_ID: string;
+  QTY: number;
+  LOCATION_ID: number;
+  CARE_LOCATION_ID?: string;
 };
 
 const items = itemsJson as ItemRow[];
@@ -176,7 +174,7 @@ export const getInventoryItemsToImport = () => {
       return {
         status: SupplyDeliveryStatus.completed,
         supplied_item_type: SupplyDeliveryType.product,
-        supplied_item_quantity: stock.QUANTITY,
+        supplied_item_quantity: stock.QTY,
         supplied_item__product_knowledge: `f-${FACILITY_ID}-${getProductKnowledgeSlug(item)}`,
         supplied_item__charge_item_definition: `f-${FACILITY_ID}-${getChargeItemDefinitionSlug(item)}`,
         destination: stock.CARE_LOCATION_ID,

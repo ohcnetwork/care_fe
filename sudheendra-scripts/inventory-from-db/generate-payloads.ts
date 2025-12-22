@@ -3,6 +3,7 @@ import { writeFile } from "fs/promises";
 import {
   getCategoriesToImport,
   getChargeItemDefinitionsToImport,
+  getInventoryItemsToImport,
   getProductKnowledgeToImport,
   getProductToImport,
 } from "sudheendra-scripts/inventory-from-db/utils";
@@ -25,12 +26,14 @@ async function main() {
   const productKnowledge = getProductKnowledgeToImport();
   const chargeItemDefinitions = getChargeItemDefinitionsToImport();
   const products = getProductToImport();
+  const inventoryItems = getInventoryItemsToImport();
 
   await writePayloads({
-    resourceCategories,
-    productKnowledge,
-    chargeItemDefinitions,
-    products,
+    // resourceCategories,
+    // productKnowledge,
+    // chargeItemDefinitions,
+    // products,
+    inventoryItems,
   });
 }
 
