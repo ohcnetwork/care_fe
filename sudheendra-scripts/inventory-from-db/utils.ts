@@ -1,4 +1,9 @@
-import { ResourceCategoryRead } from "@/types/base/resourceCategory/resourceCategory";
+import {
+  ResourceCategoryCreate,
+  ResourceCategoryRead,
+  ResourceCategoryResourceType,
+  ResourceCategorySubType,
+} from "@/types/base/resourceCategory/resourceCategory";
 import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { LocationRead } from "@/types/location/location";
 import { PaginatedResponse } from "@/Utils/request/types";
@@ -34,15 +39,26 @@ type ItemRow = {
 const items = itemsJson as ItemRow[];
 
 export const getCategoriesToImport = () => {
-  return pharmacyCategories.map((category) => {
-    const name = normalizeTitle(category.CATEGORY);
-    return {
-      name,
-      id: category.ID,
-      pkSlug: `pk-${createSlug(name)}`,
-      cidSlug: `cid-${createSlug(name)}`,
-    };
-  });
+  return [
+    ...pharmacyCategories.map((category): ResourceCategoryCreate => {
+      const name = normalizeTitle(category.CATEGORY);
+      return {
+        title: name,
+        slug_value: `pk-${createSlug(name)}`,
+        resource_type: ResourceCategoryResourceType.product_knowledge,
+        resource_sub_type: ResourceCategorySubType.other,
+      };
+    }),
+    ...pharmacyCategories.map((category): ResourceCategoryCreate => {
+      const name = normalizeTitle(category.CATEGORY);
+      return {
+        title: name,
+        slug_value: `cid-${createSlug(name)}`,
+        resource_type: ResourceCategoryResourceType.charge_item_definition,
+        resource_sub_type: ResourceCategorySubType.other,
+      };
+    }),
+  ] satisfies ResourceCategoryCreate[];
 };
 
 export const getLocationsToImport = () => {
@@ -91,6 +107,13 @@ export const getProductKnowledgeToImport = (
       ]),
   );
   return Array.from(productKnowledges.values());
+};
+
+export const getChargeItemDefinitionsToImport = () => {
+  return items.map((item) => ({
+    id: item.ID,
+    name: item.ITEM_NAME,
+  }));
 };
 
 const getExistingPaginatedData = async <TInput, TOutput>(

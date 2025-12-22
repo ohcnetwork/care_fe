@@ -29,22 +29,17 @@ async function main() {
 
   progress.start();
 
-  await batchRequest(
-    toCreate,
-    async (datapoints) => {
-      const result = await request<ProductKnowledgeBase>(
-        `/api/v1/product_knowledge/`,
-        "POST",
-        datapoints[0],
-      );
+  await batchRequest(toCreate, async (datapoints) => {
+    const result = await request<ProductKnowledgeBase>(
+      `/api/v1/product_knowledge/`,
+      "POST",
+      datapoints[0],
+    );
 
-      progress.tick();
+    progress.tick();
 
-      return [result];
-    },
-    1,
-    1,
-  );
+    return [result];
+  });
 }
 
 main();
