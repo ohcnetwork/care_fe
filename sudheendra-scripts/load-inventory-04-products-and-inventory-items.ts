@@ -285,7 +285,10 @@ async function buildInventoryItems(
               status: SupplyDeliveryStatus.completed,
               supplied_item_type: SupplyDeliveryType.product,
               supplied_item_quantity: +datapoint.quantity,
-              supplied_item: datapoint.product?.id ?? "",
+              supplied_item__product_knowledge:
+                datapoint.product.product_knowledge.id,
+              supplied_item__charge_item_definition:
+                datapoint.product.charge_item_definition.id,
               destination: locationId,
               order: deliveryOrder.id,
               extensions: {},

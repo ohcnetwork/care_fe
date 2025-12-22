@@ -22,13 +22,13 @@ async function writePayloads(payload: Record<string, object[]>) {
 
 async function main() {
   const resourceCategories = getCategoriesToImport();
-  const productKnowledge = getProductKnowledgeToImport();
+  const productKnowledges = getProductKnowledgeToImport();
   const chargeItemDefinitions = getChargeItemDefinitionsToImport();
   const products = getProductToImport();
 
   await writePayloads({
     resourceCategories,
-    productKnowledge,
+    productKnowledges,
     chargeItemDefinitions,
     products,
   });
