@@ -507,7 +507,6 @@ export function ServiceRequestQuestion({
 
       setPreviewServiceRequest(newServiceRequest);
 
-      // Store activity definition data in map
       setActivityDefinitionsMap((prev) => ({
         ...prev,
         [selectedActivityDefinition]: selectedActivityDefinitionData,
@@ -552,7 +551,6 @@ export function ServiceRequestQuestion({
     locations: string[] | Array<{ id: string }> | undefined,
   ): string[] => {
     if (!locations) return [];
-    if (!Array.isArray(locations)) return locations;
     return locations.map((loc) => (typeof loc === "string" ? loc : loc.id));
   };
 
