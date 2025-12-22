@@ -50,7 +50,7 @@ const LocationBreadcrumb = ({ location }: { location: LocationRead }) => {
 export function LocationCard({
   locationHistory,
   status,
-  keepBedActive = true,
+  keepBedActive = false,
   onKeepBedActiveChange,
 }: LocationCardProps) {
   const { t } = useTranslation();
