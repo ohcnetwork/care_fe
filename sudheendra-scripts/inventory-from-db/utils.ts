@@ -38,27 +38,24 @@ type ItemRow = {
 
 const items = itemsJson as ItemRow[];
 
-export const getCategoriesToImport = () => {
-  return [
-    ...pharmacyCategories.map((category): ResourceCategoryCreate => {
-      const name = normalizeTitle(category.CATEGORY);
-      return {
+export const getCategoriesToImport = (): ResourceCategoryCreate[] => {
+  return pharmacyCategories.flatMap((category) => {
+    const name = normalizeTitle(category.CATEGORY);
+    return [
+      {
         title: name,
         slug_value: `pk-${createSlug(name)}`,
         resource_type: ResourceCategoryResourceType.product_knowledge,
         resource_sub_type: ResourceCategorySubType.other,
-      };
-    }),
-    ...pharmacyCategories.map((category): ResourceCategoryCreate => {
-      const name = normalizeTitle(category.CATEGORY);
-      return {
+      },
+      {
         title: name,
         slug_value: `cid-${createSlug(name)}`,
         resource_type: ResourceCategoryResourceType.charge_item_definition,
         resource_sub_type: ResourceCategorySubType.other,
-      };
-    }),
-  ] satisfies ResourceCategoryCreate[];
+      },
+    ];
+  });
 };
 
 export const getLocationsToImport = () => {
