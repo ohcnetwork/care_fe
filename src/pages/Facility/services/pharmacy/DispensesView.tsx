@@ -19,7 +19,10 @@ import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import { DispenseOrderStatus } from "@/types/emr/dispenseOrder/dispenseOrder";
+import {
+  DISPENSE_ORDER_STATUS_STYLES,
+  DispenseOrderStatus,
+} from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -31,17 +34,6 @@ import { PatientHeader } from "@/components/Patient/PatientHeader";
 import mutate from "@/Utils/request/mutate";
 import { toast } from "sonner";
 import DispensedMedicationList from "./DispensedMedicationList";
-
-const DISPENSE_ORDER_STATUS_STYLES: Record<
-  DispenseOrderStatus,
-  React.ComponentProps<typeof Badge>["variant"]
-> = {
-  [DispenseOrderStatus.draft]: "secondary",
-  [DispenseOrderStatus.in_progress]: "yellow",
-  [DispenseOrderStatus.completed]: "green",
-  [DispenseOrderStatus.abandoned]: "secondary",
-  [DispenseOrderStatus.entered_in_error]: "danger",
-};
 
 interface Props {
   facilityId: string;

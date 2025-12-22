@@ -24,24 +24,13 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  DISPENSE_ORDER_STATUS_STYLES,
   DispenseOrderRead,
-  DispenseOrderStatus,
 } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 import { useEffect } from "react";
-
-const DISPENSE_ORDER_STATUS_STYLES: Record<
-  DispenseOrderStatus,
-  React.ComponentProps<typeof Badge>["variant"]
-> = {
-  [DispenseOrderStatus.draft]: "secondary",
-  [DispenseOrderStatus.in_progress]: "yellow",
-  [DispenseOrderStatus.completed]: "green",
-  [DispenseOrderStatus.abandoned]: "secondary",
-  [DispenseOrderStatus.entered_in_error]: "danger",
-};
 
 export default function MedicationDispenseHistory({
   facilityId,

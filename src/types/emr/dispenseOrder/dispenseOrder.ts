@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { BatchSuccessResponse } from "@/types/base/batch/batch";
 import { PatientListRead } from "@/types/emr/patient/patient";
 import { LocationRead } from "@/types/location/location";
@@ -41,3 +42,14 @@ export interface DispenseOrderCreate extends Omit<DispenseOrderBase, "id"> {
   patient: string;
   location: string;
 }
+
+export const DISPENSE_ORDER_STATUS_STYLES: Record<
+  DispenseOrderStatus,
+  React.ComponentProps<typeof Badge>["variant"]
+> = {
+  [DispenseOrderStatus.draft]: "secondary",
+  [DispenseOrderStatus.in_progress]: "yellow",
+  [DispenseOrderStatus.completed]: "green",
+  [DispenseOrderStatus.abandoned]: "secondary",
+  [DispenseOrderStatus.entered_in_error]: "destructive",
+};
