@@ -1,38 +1,40 @@
 import dotenv from "dotenv";
-import { writeFile } from "fs/promises";
+import { existsSync } from "fs";
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
 import {
-  getCategoriesToImport,
   getChargeItemDefinitionsToImport,
-  getInventoryItemsToImport,
+  getDeliveryOrdersToImport,
   getProductKnowledgeToImport,
   getProductToImport,
+  getResourceCategoriesToImport,
+  getSupplyDeliveriesToImport,
 } from "sudheendra-scripts/inventory-from-db/utils";
-import { getLogger } from "sudheendra-scripts/utils";
 
 dotenv.config({ path: [".env.local", ".env"] });
 
-const FACILITY_ID = process.env.FACILITY_ID!;
-
-const logger = getLogger();
+const dir = path.join(__dirname, "payloads");
 
 async function writePayloads(payload: Record<string, object[]>) {
+  if (!existsSync(dir)) {
+    await mkdir(dir, { recursive: true });
+  }
   for (const [key, value] of Object.entries(payload)) {
-    await writeFile(`${key}.json`, JSON.stringify(value, null, 2));
+    await writeFile(
+      path.join(dir, `${key}.json`),
+      JSON.stringify(value, null, 2),
+    );
   }
 }
 
 async function main() {
-  const resourceCategories = getCategoriesToImport();
-  const productKnowledges = getProductKnowledgeToImport();
-  const chargeItemDefinitions = getChargeItemDefinitionsToImport();
-  const products = getProductToImport();
-  const inventoryItems = getInventoryItemsToImport();
-
   await writePayloads({
-    resourceCategories,
-    productKnowledges,
-    chargeItemDefinitions,
-    products,
+    "resource-categories": getResourceCategoriesToImport(),
+    "product-knowledges": getProductKnowledgeToImport(),
+    "charge-item-definitions": getChargeItemDefinitionsToImport(),
+    products: getProductToImport(),
+    "delivery-orders": getDeliveryOrdersToImport(),
+    "supply-deliveries": getSupplyDeliveriesToImport(),
   });
 }
 
