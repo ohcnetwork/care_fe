@@ -2180,6 +2180,7 @@
   "error_updating_charge_item": "Error updating the charge item",
   "error_updating_consent": "Error updating consent",
   "error_updating_delivery": "Error updating delivery",
+  "error_updating_dispense_order": "Error updating dispense order",
   "error_updating_encounter": "Error to Updating Encounter",
   "error_updating_location": "Error updating location",
   "error_updating_order": "Error updating order",

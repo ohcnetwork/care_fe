@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeftIcon, ChevronDown, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useState } from "react";
@@ -26,7 +26,10 @@ import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
+import mutate from "@/Utils/request/mutate";
+import { toast } from "sonner";
 import DispensedMedicationList from "./DispensedMedicationList";
 
 const DISPENSE_ORDER_STATUS_STYLES: Record<
@@ -53,6 +56,7 @@ export default function DispensesView({
 }: Props) {
   const { t } = useTranslation();
   const { locationId } = useCurrentLocation();
+  const queryClient = useQueryClient();
 
   const { data: dispenseOrder, isLoading: isLoadingOrder } = useQuery({
     queryKey: ["dispenseOrder", facilityId, dispenseOrderId],
@@ -61,6 +65,21 @@ export default function DispensesView({
     }),
     enabled: !!dispenseOrderId,
   });
+
+  const { mutate: updateDispenseOrder, isPending: isUpdatingDispenseOrder } =
+    useMutation({
+      mutationFn: mutate(dispenseOrderApi.update, {
+        pathParams: { facilityId, id: dispenseOrderId },
+      }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["dispenseOrder", facilityId, dispenseOrderId],
+        });
+      },
+      onError: () => {
+        toast.error(t("error_updating_dispense_order"));
+      },
+    });
 
   const defaultVisibleStatuses = [
     MedicationDispenseStatus.preparation,
@@ -162,6 +181,29 @@ export default function DispensesView({
               {t("status")}:{" "}
               {t(`dispense_order_status__${dispenseOrder.status}`)}
             </Badge>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="border-gray-400 px-2">
+                  <CareIcon icon="l-ellipsis-v" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {Object.values(DispenseOrderStatus)
+                  .filter((status) => status !== dispenseOrder.status)
+                  .map((status) => (
+                    <DropdownMenuItem asChild key={status}>
+                      <Button
+                        variant="ghost"
+                        onClick={() => updateDispenseOrder({ status })}
+                        className="w-full flex flex-row justify-stretch items-center"
+                        disabled={isUpdatingDispenseOrder}
+                      >
+                        {t(`mark_as_${status}`)}
+                      </Button>
+                    </DropdownMenuItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               variant="outline"
               className="border-gray-400 font-semibold"
