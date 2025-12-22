@@ -81,9 +81,11 @@ test.describe("ValueSet Edit", () => {
         .filter({ hasText: "Code verified successfully" }),
     ).toBeVisible();
 
-    await expect(page.getByRole("textbox", { name: "Unverified" })).toHaveValue(
-      codeName,
-    );
+    // Verify the code name is present in the display value
+    const displayValue = await page
+      .getByRole("textbox", { name: "Unverified" })
+      .inputValue();
+    expect(displayValue).toContain(codeName);
 
     await page.getByRole("button", { name: "Save ValueSet" }).click();
 

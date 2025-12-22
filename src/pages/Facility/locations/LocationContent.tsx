@@ -20,11 +20,11 @@ import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 import EncounterInfoCard from "@/components/Encounter/EncounterInfoCard";
 
 import query from "@/Utils/request/query";
-import { LocationList, LocationTypeIcons } from "@/types/location/location";
+import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 interface BedCardProps {
-  location: LocationList;
+  location: LocationRead;
   facilityId: string;
 }
 
@@ -90,7 +90,7 @@ function BedCard({ location, facilityId }: BedCardProps) {
 }
 
 interface LocationCardProps {
-  location: LocationList;
+  location: LocationRead;
   onClick: () => void;
 }
 
@@ -130,7 +130,7 @@ function LocationCard({ location, onClick }: LocationCardProps) {
 }
 
 interface ChildLocationCardProps {
-  location: LocationList;
+  location: LocationRead;
   onClick: () => void;
   facilityId: string;
 }
@@ -145,15 +145,15 @@ function ChildLocationCard(props: ChildLocationCardProps) {
 }
 
 interface BreadcrumbsProps {
-  location: LocationList;
-  onSelect: (location: LocationList) => void;
+  location: LocationRead;
+  onSelect: (location: LocationRead) => void;
 }
 
 function Breadcrumbs({ location, onSelect }: BreadcrumbsProps) {
   const { t } = useTranslation();
 
   const items = [];
-  let current: LocationList | undefined = location;
+  let current: LocationRead | undefined = location;
 
   while (current) {
     items.unshift(current);
@@ -187,10 +187,10 @@ function Breadcrumbs({ location, onSelect }: BreadcrumbsProps) {
 interface LocationContentProps {
   facilityId: string;
   selectedLocationId: string | null;
-  selectedLocation: LocationList | null;
+  selectedLocation: LocationRead | null;
   searchQuery: string;
   currentPage: number;
-  onLocationSelect: (location: LocationList) => void;
+  onLocationSelect: (location: LocationRead) => void;
   onSearchChange: (value: string) => void;
   onPageChange: (page: number) => void;
   hideBreadcrumbs?: boolean;
@@ -283,8 +283,8 @@ export default function LocationContent({
                   return acc;
                 },
                 {
-                  bedLocations: [] as LocationList[],
-                  nonBedLocations: [] as LocationList[],
+                  bedLocations: [] as LocationRead[],
+                  nonBedLocations: [] as LocationRead[],
                 },
               );
 
