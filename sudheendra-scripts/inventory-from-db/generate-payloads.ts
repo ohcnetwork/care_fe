@@ -23,9 +23,11 @@ async function main() {
   const resourceCategories = getCategoriesToImport();
   const productKnowledge = getProductKnowledgeToImport();
   const chargeItemDefinitions = getChargeItemDefinitionsToImport();
+
   await writePayloads({
     resourceCategories,
     productKnowledge,
+    chargeItemDefinitions,
   });
 }
 
