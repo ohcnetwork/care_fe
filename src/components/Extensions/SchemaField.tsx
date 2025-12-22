@@ -1,4 +1,3 @@
-import { parseISO } from "date-fns";
 import { Control, FieldValues, Path } from "react-hook-form";
 
 import { cn } from "@/lib/utils";
@@ -218,7 +217,7 @@ export function SchemaField<TFieldValues extends FieldValues>({
             <FormControl>
               <RadioGroup
                 onValueChange={field.onChange}
-                defaultValue={String(field.value ?? "")}
+                value={String(field.value ?? "")}
                 disabled={metadata.readOnly}
                 className={cn(
                   isInline ? "flex flex-row gap-4" : "flex flex-col gap-2",
@@ -335,14 +334,14 @@ export function SchemaField<TFieldValues extends FieldValues>({
             </FormLabel>
             <FormControl>
               <DatePicker
-                date={field.value ? parseISO(field.value) : undefined}
-                onChange={(date) => {
+                date={field.value ? new Date(field.value) : undefined}
+                onChange={(date) =>
                   field.onChange(
-                    date ? date.toISOString().split("T")[0] : undefined,
-                  );
-                }}
+                    date ? new Date(date).toISOString() : undefined,
+                  )
+                }
                 disablePicker={metadata.readOnly}
-                dateFormat="yyyy-MM-dd"
+                dateFormat="dd-MM-yyyy"
               />
             </FormControl>
             {metadata.description && (
@@ -436,7 +435,7 @@ export function SchemaField<TFieldValues extends FieldValues>({
             </FormLabel>
             <Select
               onValueChange={field.onChange}
-              defaultValue={String(field.value ?? "")}
+              value={String(field.value ?? "")}
               disabled={metadata.readOnly}
             >
               <FormControl>
@@ -528,15 +527,14 @@ export function SchemaField<TFieldValues extends FieldValues>({
             </FormLabel>
             <FormControl>
               <DatePicker
-                date={field.value ? parseISO(field.value) : undefined}
-                onChange={(date) => {
-                  // Store as ISO date string (YYYY-MM-DD)
+                date={field.value ? new Date(field.value) : undefined}
+                onChange={(date) =>
                   field.onChange(
-                    date ? date.toISOString().split("T")[0] : undefined,
-                  );
-                }}
+                    date ? new Date(date).toISOString() : undefined,
+                  )
+                }
                 disablePicker={metadata.readOnly}
-                dateFormat="yyyy-MM-dd"
+                dateFormat="dd-MM-yyyy"
               />
             </FormControl>
             {metadata.description && (
