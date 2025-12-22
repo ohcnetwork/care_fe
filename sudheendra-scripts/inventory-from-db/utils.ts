@@ -14,6 +14,7 @@ import dotenv from "dotenv";
 import { createSlug, normalizeTitle, request } from "sudheendra-scripts/utils";
 
 import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
+import { ProductStatusOptions } from "@/types/inventory/product/product";
 import {
   ProductKnowledgeBase,
   ProductKnowledgeStatus,
@@ -141,6 +142,14 @@ export const getChargeItemDefinitionsToImport =
         ssmm_item_id: item.ID,
       }));
   };
+export const getProductToImport = () => {
+  return items.map((item) => ({
+    product_knowledge: `f-${FACILITY_ID}-${getProductKnowledgeSlug(item)}`,
+    charge_item_definition: `f-${FACILITY_ID}-${getChargeItemDefinitionSlug(item)}`,
+    extensions: {},
+    status: ProductStatusOptions.active,
+  }));
+};
 
 const getExistingPaginatedData = async <TInput, TOutput>(
   url: string,

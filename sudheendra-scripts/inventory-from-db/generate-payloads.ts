@@ -4,6 +4,7 @@ import {
   getCategoriesToImport,
   getChargeItemDefinitionsToImport,
   getProductKnowledgeToImport,
+  getProductToImport,
 } from "sudheendra-scripts/inventory-from-db/utils";
 import { getLogger } from "sudheendra-scripts/utils";
 
@@ -23,11 +24,13 @@ async function main() {
   const resourceCategories = getCategoriesToImport();
   const productKnowledge = getProductKnowledgeToImport();
   const chargeItemDefinitions = getChargeItemDefinitionsToImport();
+  const products = getProductToImport();
 
   await writePayloads({
     resourceCategories,
     productKnowledge,
     chargeItemDefinitions,
+    products,
   });
 }
 
