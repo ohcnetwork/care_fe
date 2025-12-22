@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 export const PatientInfoCard = ({
   patient,
   tags,
+  facilityTags,
   facilityId,
   onTagsUpdate,
   children,
@@ -29,6 +30,7 @@ export const PatientInfoCard = ({
 }: {
   patient: PublicPatientRead | PatientListRead | PatientRead;
   tags: TagConfig[];
+  facilityTags?: TagConfig[];
   facilityId: string;
   onTagsUpdate: () => void;
   children?: React.ReactNode;
@@ -36,6 +38,8 @@ export const PatientInfoCard = ({
   tagEntityId: string;
 }) => {
   const { t } = useTranslation();
+
+  const allTags = [...tags, ...(facilityTags || [])];
 
   return (
     <>
@@ -57,8 +61,8 @@ export const PatientInfoCard = ({
         <CardHeader className="px-1 py-0 pt-2 md:pt-1">
           <div className="flex flex-col md:flex-row items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              {tags.length > 0 ? (
-                tags.map((t) => (
+              {allTags.length > 0 ? (
+                allTags.map((t) => (
                   <Badge key={t.id} variant="outline">
                     {getTagHierarchyDisplay(t)}
                   </Badge>
@@ -75,6 +79,7 @@ export const PatientInfoCard = ({
               entityId={tagEntityId}
               facilityId={facilityId}
               currentTags={tags}
+              currentFacilityTags={facilityTags}
               canWrite={true}
               onUpdate={() => {
                 onTagsUpdate();
@@ -83,7 +88,7 @@ export const PatientInfoCard = ({
                 <Button variant="ghost">
                   <SettingsIcon className=" text-gray-950" strokeWidth={1.5} />
                   <span className="font-semibold underline">
-                    {tags.length === 0 ? t("add_tags") : t("manage_tags")}
+                    {allTags.length === 0 ? t("add_tags") : t("manage_tags")}
                   </span>
                 </Button>
               }

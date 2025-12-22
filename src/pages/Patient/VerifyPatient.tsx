@@ -58,7 +58,12 @@ export default function VerifyPatient() {
   } = useQuery({
     queryKey: ["patient-verify", phone_number, year_of_birth, partial_id],
     queryFn: query(patientApi.searchRetrieve, {
-      body: { phone_number, year_of_birth, partial_id },
+      body: {
+        phone_number,
+        year_of_birth,
+        partial_id,
+        facility: facilityId,
+      },
     }),
     enabled: !!(phone_number && year_of_birth && partial_id),
   });
@@ -87,6 +92,7 @@ export default function VerifyPatient() {
               <div className="">
                 <PatientInfoCard
                   tags={patientData.instance_tags}
+                  facilityTags={patientData.facility_tags}
                   tagEntityType="patient"
                   tagEntityId={patientData.id}
                   patient={patientData}

@@ -48,6 +48,8 @@ const ENTITY_CONFIG = {
   patient: {
     setTagsApi: patientApi.setInstanceTags,
     removeTagsApi: patientApi.removeInstanceTags,
+    setFacilityTagsApi: patientApi.setFacilityTags,
+    removeFacilityTagsApi: patientApi.removeFacilityTags,
     displayName: "patient",
   },
   encounter: {
@@ -104,6 +106,7 @@ interface TagAssignmentSheetProps {
   entityId: string;
   facilityId?: string;
   currentTags: TagConfig[];
+  currentFacilityTags?: TagConfig[];
   onUpdate: () => void;
   patientId?: string;
   canWrite?: boolean;
@@ -115,6 +118,7 @@ export default function TagAssignmentSheet({
   entityId,
   facilityId,
   currentTags,
+  currentFacilityTags,
   onUpdate,
   patientId,
   canWrite = true,
@@ -125,15 +129,61 @@ export default function TagAssignmentSheet({
 
   const entityConfig = ENTITY_CONFIG[entityType];
 
+  const addFacilityTagFlags = (tags: TagConfig[]) =>
+    tags.map((tag) => ({
+      ...tag,
+      meta: {
+        ...tag.meta,
+        is_facility_tag: true,
+      },
+    }));
+
+  const getCombinedTags = () => [
+    ...currentTags,
+    ...addFacilityTagFlags(currentFacilityTags || []),
+  ];
+
+  const isFacilityTag = (tag: TagConfig) => {
+    return !!tag.meta?.is_facility_tag;
+  };
+
+  const getTagMutationConfig = (
+    tag: TagConfig,
+    operation: "set" | "remove",
+  ) => {
+    const isFacility = entityType === "patient" && isFacilityTag(tag);
+    const patientConfig = entityConfig as typeof ENTITY_CONFIG.patient;
+
+    const apiEndpoint = isFacility
+      ? operation === "set"
+        ? patientConfig.setFacilityTagsApi
+        : patientConfig.removeFacilityTagsApi
+      : operation === "set"
+        ? entityConfig.setTagsApi
+        : entityConfig.removeTagsApi;
+
+    const createBodyPayload = (tags: string[]) =>
+      isFacility ? { tags, facility: facilityId || null } : { tags };
+
+    return { apiEndpoint, createBodyPayload };
+  };
+
   // Set tags mutation
   const { mutateAsync: setTags, isPending: isSettingTags } = useMutation({
-    mutationFn: mutate(entityConfig.setTagsApi, {
-      pathParams: {
-        external_id: entityId,
-        ...(facilityId ? { facilityId } : {}),
-        ...(patientId ? { patientId } : {}),
-      },
-    }),
+    mutationFn: async (payload: { tags: string[]; tag: TagConfig }) => {
+      const { apiEndpoint, createBodyPayload } = getTagMutationConfig(
+        payload.tag,
+        "set",
+      );
+
+      return mutate(apiEndpoint, {
+        pathParams: {
+          external_id: entityId,
+          ...(facilityId && { facilityId }),
+          ...(patientId && { patientId }),
+        },
+      })(createBodyPayload(payload.tags));
+    },
     onError: (error: unknown) => {
       const errorMessage =
         error instanceof Error ? error.message : t("failed_to_update_tags");
@@ -143,13 +193,20 @@ export default function TagAssignmentSheet({
 
   // Remove tags mutation
   const { mutateAsync: removeTags, isPending: isRemovingTags } = useMutation({
-    mutationFn: mutate(entityConfig.removeTagsApi, {
-      pathParams: {
-        external_id: entityId,
-        facilityId: facilityId || "",
-        patientId: patientId || "",
-      },
-    }),
+    mutationFn: async (payload: { tags: string[]; tag: TagConfig }) => {
+      const { apiEndpoint, createBodyPayload } = getTagMutationConfig(
+        payload.tag,
+        "remove",
+      );
+
+      return mutate(apiEndpoint, {
+        pathParams: {
+          external_id: entityId,
+          ...(facilityId && { facilityId }),
+          ...(patientId && { patientId }),
+        },
+      })(createBodyPayload(payload.tags));
+    },
     onError: (error: unknown) => {
       const errorMessage =
         error instanceof Error ? error.message : t("failed_to_remove_tags");
@@ -159,8 +216,9 @@ export default function TagAssignmentSheet({
 
   // Initialize selected tags from current entity tags
   useEffect(() => {
-    setSelectedTags(currentTags);
-  }, [currentTags]);
+    setSelectedTags(getCombinedTags());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTags, currentFacilityTags]);
 
   if (!entityConfig) {
     console.error(`Unsupported entity type: ${entityType}`);
@@ -184,15 +242,12 @@ export default function TagAssignmentSheet({
     setSelectedTags(newTags);
 
     try {
-      // Execute mutations sequentially - Remove first, then add
-      if (tagsToRemove.length > 0) {
-        await removeTags({
-          tags: tagsToRemove.map((tag: TagConfig) => tag.id!),
-        });
+      for (const tag of tagsToRemove) {
+        await removeTags({ tags: [tag.id!], tag });
       }
 
-      if (tagsToAdd.length > 0) {
-        await setTags({ tags: tagsToAdd.map((tag: TagConfig) => tag.id!) });
+      for (const tag of tagsToAdd) {
+        await setTags({ tags: [tag.id!], tag });
       }
 
       onUpdate();
@@ -200,7 +255,7 @@ export default function TagAssignmentSheet({
     } catch (error) {
       console.error("Tag operation failed:", error);
       // Revert local state on error
-      setSelectedTags(currentTags);
+      setSelectedTags(getCombinedTags());
     }
   };
 

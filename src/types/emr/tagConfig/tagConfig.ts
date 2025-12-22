@@ -2,6 +2,7 @@ import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityO
 import { Organization } from "@/types/organization/organization";
 
 export interface TagConfigMeta {
+  is_facility_tag?: boolean;
   [key: string]: unknown;
 }
 
