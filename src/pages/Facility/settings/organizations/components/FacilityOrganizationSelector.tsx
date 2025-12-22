@@ -399,28 +399,6 @@ export default function FacilityOrganizationSelector(
       <div className="space-y-3">
         <div className="space-y-3">
           <div className="flex flex-col gap-2">
-            {selectedOrganizations.map((org, index) => (
-              <div
-                key={index}
-                className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5"
-              >
-                <Building className="size-4 text-sky-600 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-sky-900 truncate">
-                    {org.name}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="size-8 p-0 text-gray-500 hover:text-gray-900"
-                  onClick={() => handleRemoveOrganization(index)}
-                >
-                  <X className="size-4" />
-                  <span className="sr-only">{t("remove_organization")}</span>
-                </Button>
-              </div>
-            ))}
             {isMobile ? (
               <>
                 <Drawer open={open} onOpenChange={setOpen}>
@@ -472,6 +450,28 @@ export default function FacilityOrganizationSelector(
                 </PopoverContent>
               </Popover>
             )}
+            {selectedOrganizations.map((org, index) => (
+              <div
+                key={index}
+                className="flex-1 flex items-center gap-3 rounded-md border border-sky-100 bg-sky-50/50 p-2.5"
+              >
+                <Building className="size-4 text-sky-600 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm text-sky-900 truncate">
+                    {org.name}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="size-8 p-0 text-gray-500 hover:text-gray-900"
+                  onClick={() => handleRemoveOrganization(index)}
+                >
+                  <X className="size-4" />
+                  <span className="sr-only">{t("remove_organization")}</span>
+                </Button>
+              </div>
+            ))}
           </div>
         </div>
       </div>
