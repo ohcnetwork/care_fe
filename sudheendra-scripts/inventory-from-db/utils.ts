@@ -3,20 +3,23 @@ import {
   ResourceCategoryResourceType,
   ResourceCategorySubType,
 } from "@/types/base/resourceCategory/resourceCategory";
-import { ChargeItemDefinitionBase } from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
+import {
+  ChargeItemDefinitionBase,
+  ChargeItemDefinitionCreate,
+  ChargeItemDefinitionStatus,
+} from "@/types/billing/chargeItemDefinition/chargeItemDefinition";
 import { LocationRead } from "@/types/location/location";
 import { PaginatedResponse } from "@/Utils/request/types";
 import dotenv from "dotenv";
 import { createSlug, normalizeTitle, request } from "sudheendra-scripts/utils";
 
+import { MonetaryComponentType } from "@/types/base/monetaryComponent/monetaryComponent";
 import {
   ProductKnowledgeBase,
-  ProductKnowledgeCreate,
   ProductKnowledgeStatus,
   ProductKnowledgeType,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import itemsJson from "./data/ITEM.json";
-import locations from "./data/LOCATION_MASTER.json";
 import pharmacyCategories from "./data/PHARM_CATEGORY.json";
 
 dotenv.config({ path: [".env.local", ".env"] });
@@ -46,40 +49,34 @@ export const getCategoriesToImport = () => {
         slug_value: `pk-${createSlug(name)}`,
         resource_type: ResourceCategoryResourceType.product_knowledge,
         resource_sub_type: ResourceCategorySubType.other,
-        ssmm_id: category.ID,
+        ssmm_pharm_category_id: category.ID,
       },
       {
         title: name,
         slug_value: `cid-${createSlug(name)}`,
         resource_type: ResourceCategoryResourceType.charge_item_definition,
         resource_sub_type: ResourceCategorySubType.other,
-        ssmm_id: category.ID,
+        ssmm_pharm_category_id: category.ID,
       },
     ];
   });
 };
 
-export const getLocationsToImport = () => {
-  return locations.map((location) => ({
-    id: location.ID,
-    name: location.DESCRIPTION,
-  }));
+export const getProductKnowledgeSlug = (item: ItemRow) => {
+  return createSlug(item.ITEM_NAME);
+};
+export const getChargeItemDefinitionSlug = (item: ItemRow) => {
+  return createSlug(`${item.ID}-${item.ITEM_NAME}`);
 };
 
-// export const getChargeItemDefinitionsToImport = async () => {
-//   return items.map((item) => ({
-//     id: item.ID,
-//     name: item.DESCRIPTION,
-//   }));
-// };
-
-export const getProductKnowledgeToImport = (
-  defaults: Partial<ProductKnowledgeCreate> = {},
-) => {
+export const getProductKnowledgeToImport = () => {
   const categories = new Map(
     getCategoriesToImport()
-      .filter((c) => c.slug_value.startsWith("pk-"))
-      .map((c) => [c.ssmm_id, c]),
+      .filter(
+        (c) =>
+          c.resource_type === ResourceCategoryResourceType.product_knowledge,
+      )
+      .map((c) => [c.ssmm_pharm_category_id, c]),
   );
 
   const productKnowledges = new Map(
@@ -90,7 +87,7 @@ export const getProductKnowledgeToImport = (
           categories.has(item.PHARMACY_CATGRY_ID),
       )
       .map((item) => [
-        createSlug(item.ITEM_NAME),
+        getProductKnowledgeSlug(item),
         {
           alternate_identifier: item.HSN_CODE,
           product_type: ProductKnowledgeType.medication,
@@ -103,22 +100,47 @@ export const getProductKnowledgeToImport = (
             display: "Day",
             system: "http://unitsofmeasure.org",
           },
-          slug_value: createSlug(item.ITEM_NAME),
-          category: categories.get(item.PHARMACY_CATGRY_ID)!.slug_value,
-          ...defaults,
-          ssmm_id: item.ID,
+          slug_value: getProductKnowledgeSlug(item),
+          category: `f-${FACILITY_ID}-${categories.get(item.PHARMACY_CATGRY_ID)!.slug_value}`,
+          facility: FACILITY_ID,
+          ssmm_item_id: item.ID,
         },
       ]),
   );
   return Array.from(productKnowledges.values());
 };
 
-export const getChargeItemDefinitionsToImport = () => {
-  return items.map((item) => ({
-    id: item.ID,
-    name: item.ITEM_NAME,
-  }));
-};
+export const getChargeItemDefinitionsToImport =
+  (): ChargeItemDefinitionCreate[] => {
+    const categories = new Map(
+      getCategoriesToImport()
+        .filter(
+          (c) =>
+            c.resource_type === ResourceCategoryResourceType.product_knowledge,
+        )
+        .map((c) => [c.ssmm_pharm_category_id, c]),
+    );
+
+    return items
+      .filter(
+        (item): item is ItemRow & { PHARMACY_CATGRY_ID: number } =>
+          item.PHARMACY_CATGRY_ID !== undefined &&
+          categories.has(item.PHARMACY_CATGRY_ID),
+      )
+      .map((item) => ({
+        status: ChargeItemDefinitionStatus.active,
+        title: item.ITEM_NAME,
+        slug_value: getChargeItemDefinitionSlug(item),
+        category: `f-${FACILITY_ID}-${categories.get(item.PHARMACY_CATGRY_ID)!.slug_value}`,
+        price_components: [
+          {
+            monetary_component_type: MonetaryComponentType.base,
+            amount: item.LAST_SELLING_PRICE?.toString() || "0",
+          },
+        ],
+        ssmm_item_id: item.ID,
+      }));
+  };
 
 const getExistingPaginatedData = async <TInput, TOutput>(
   url: string,

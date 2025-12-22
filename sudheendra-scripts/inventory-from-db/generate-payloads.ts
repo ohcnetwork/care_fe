@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import { writeFile } from "fs/promises";
 import {
   getCategoriesToImport,
+  getChargeItemDefinitionsToImport,
   getProductKnowledgeToImport,
 } from "sudheendra-scripts/inventory-from-db/utils";
 import { getLogger } from "sudheendra-scripts/utils";
@@ -20,9 +21,8 @@ async function writePayloads(payload: Record<string, object[]>) {
 
 async function main() {
   const resourceCategories = getCategoriesToImport();
-  const productKnowledge = getProductKnowledgeToImport({
-    facility: FACILITY_ID,
-  });
+  const productKnowledge = getProductKnowledgeToImport();
+  const chargeItemDefinitions = getChargeItemDefinitionsToImport();
   await writePayloads({
     resourceCategories,
     productKnowledge,
