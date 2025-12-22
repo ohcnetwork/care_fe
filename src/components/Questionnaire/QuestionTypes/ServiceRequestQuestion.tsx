@@ -441,6 +441,13 @@ function ServiceRequestForm({
   );
 }
 
+const normalizeLocations = (
+  locations: string[] | Array<{ id: string }> | undefined,
+): string[] => {
+  if (!locations) return [];
+  return locations.map((loc) => (typeof loc === "string" ? loc : loc.id));
+};
+
 export function ServiceRequestQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
@@ -545,13 +552,6 @@ export function ServiceRequestQuestion({
       [{ type: "service_request", value: newServiceRequests }],
       questionnaireResponse.question_id,
     );
-  };
-
-  const normalizeLocations = (
-    locations: string[] | Array<{ id: string }> | undefined,
-  ): string[] => {
-    if (!locations) return [];
-    return locations.map((loc) => (typeof loc === "string" ? loc : loc.id));
   };
 
   const handleUpdateServiceRequest = (
