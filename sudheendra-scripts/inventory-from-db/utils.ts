@@ -28,9 +28,7 @@ import {
   SupplyDeliveryStatus,
   SupplyDeliveryType,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
-import { readFileSync } from "fs";
 import itemsJson from "./data/ITEM.json";
-import locationMasterJson from "./data/LOCATION_MASTER.json";
 import pharmacyCategories from "./data/PHARM_CATEGORY.json";
 import supplyDeliveriesJson from "./data/stock.json";
 dotenv.config({ path: [".env.local", ".env"] });
@@ -108,8 +106,7 @@ export const getProductKnowledgeToImport = () => {
     items
       .filter(
         (item): item is ItemRow & { PHARMACY_CATGRY_ID: number } =>
-          item.PHARMACY_CATGRY_ID !== undefined &&
-          categories.has(item.PHARMACY_CATGRY_ID),
+          !!item.PHARMACY_CATGRY_ID && categories.has(item.PHARMACY_CATGRY_ID),
       )
       .map((item) => [
         getProductKnowledgeSlug(item),
@@ -137,25 +134,6 @@ export const getProductKnowledgeToImport = () => {
   return Array.from(productKnowledges.values());
 };
 
-export const addCareLocationToStock = () => {
-  const csv = readFileSync(`./careLocationId.csv`, { encoding: "utf-8" });
-  const [header, ...rows] = csv.split("\n");
-  for (const row of rows) {
-    const [ssmLocation, careLocationId] = row.split(",");
-    const id = locationMasterJson.find(
-      (location) => location.DESCRIPTION === ssmLocation,
-    )?.ID;
-    if (id) {
-      stock.forEach((item) => {
-        if (item.LOCATION_ID === id) {
-          item.CARE_LOCATION_ID = careLocationId;
-        }
-      });
-    }
-  }
-  return stock;
-};
-
 export const getChargeItemDefinitionsToImport =
   (): ChargeItemDefinitionCreate[] => {
     const categories = new Map(
@@ -170,8 +148,7 @@ export const getChargeItemDefinitionsToImport =
     return items
       .filter(
         (item): item is ItemRow & { PHARMACY_CATGRY_ID: number } =>
-          item.PHARMACY_CATGRY_ID !== undefined &&
-          categories.has(item.PHARMACY_CATGRY_ID),
+          !!item.PHARMACY_CATGRY_ID && categories.has(item.PHARMACY_CATGRY_ID),
       )
       .map((item) => ({
         status: ChargeItemDefinitionStatus.active,
@@ -191,13 +168,18 @@ export const getChargeItemDefinitionsToImport =
       }));
   };
 export const getProductToImport = () => {
-  return items.map((item) => ({
-    product_knowledge: `f-${FACILITY_ID}-${getProductKnowledgeSlug(item)}`,
-    charge_item_definition: `f-${FACILITY_ID}-${getChargeItemDefinitionSlug(item)}`,
-    extensions: {},
-    status: ProductStatusOptions.active,
-    $facility: FACILITY_ID,
-  }));
+  return items
+    .filter(
+      (item): item is ItemRow & { PHARMACY_CATGRY_ID: number } =>
+        !!item.PHARMACY_CATGRY_ID,
+    )
+    .map((item) => ({
+      product_knowledge: `f-${FACILITY_ID}-${getProductKnowledgeSlug(item)}`,
+      charge_item_definition: `f-${FACILITY_ID}-${getChargeItemDefinitionSlug(item)}`,
+      extensions: {},
+      status: ProductStatusOptions.active,
+      $facility: FACILITY_ID,
+    }));
 };
 
 export const getDeliveryOrdersToImport = () => {
@@ -207,7 +189,7 @@ export const getDeliveryOrdersToImport = () => {
       if (!item) {
         throw new Error(`Item not found for stock: ${stock.ITEM_ID}`);
       }
-      const destinationId = stock.CARE_LOCATION_ID || FALLBACK_LOCATION_ID;
+      const destinationId = "1aa28206-5a5d-4411-9596-17c0745bb41b";
       return [
         destinationId,
         {
@@ -229,13 +211,13 @@ export const getSupplyDeliveriesToImport = () => {
     if (!item) {
       throw new Error(`Item not found for stock: ${stock.ITEM_ID}`);
     }
-    const destinationId = stock.CARE_LOCATION_ID || FALLBACK_LOCATION_ID;
+    const destinationId = "1aa28206-5a5d-4411-9596-17c0745bb41b";
     return {
       status: SupplyDeliveryStatus.completed,
       supplied_item_type: SupplyDeliveryType.product,
       supplied_item_quantity: stock.QTY,
       $supplied_item__product_knowledge: `f-${FACILITY_ID}-${getProductKnowledgeSlug(item)}`,
-      $upplied_item__charge_item_definition: `f-${FACILITY_ID}-${getChargeItemDefinitionSlug(item)}`,
+      $supplied_item__charge_item_definition: `f-${FACILITY_ID}-${getChargeItemDefinitionSlug(item)}`,
       $order__destination: destinationId,
       destination: destinationId,
       extensions: {},
