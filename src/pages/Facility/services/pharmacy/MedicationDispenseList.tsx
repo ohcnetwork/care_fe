@@ -200,12 +200,14 @@ function MedicationTable({
 interface Props {
   facilityId: string;
   patientId: string;
+  patientName?: string;
   prescriptionId: string;
 }
 
 export default function MedicationDispenseList({
   facilityId,
   patientId,
+  patientName,
   prescriptionId,
 }: Props) {
   const { t } = useTranslation();
@@ -373,7 +375,7 @@ export default function MedicationDispenseList({
               className="w-full sm:w-auto border-gray-400 font-semibold"
             >
               <Link
-                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/?patientId=${patientId}`}
+                href={`/facility/${facilityId}/locations/${locationId}/medication_dispense/?patientId=${patientId}&patient_name=${encodeURIComponent(patientName || "")}`}
                 basePath="/"
               >
                 {t("dispenses")}

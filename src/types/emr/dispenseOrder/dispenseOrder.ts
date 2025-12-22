@@ -8,7 +8,7 @@ export interface DispenseOrderBatchResponse {
 
 export function extractDispenseOrderFromBatchResponse(
   response: DispenseOrderBatchResponse,
-): DispenseOrderRead {
+): DispenseOrderRead | undefined {
   const orders = response.results
     .map((item) => item.data?.order)
     .filter((item): item is DispenseOrderRead => !!item);

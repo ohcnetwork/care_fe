@@ -275,7 +275,7 @@ interface Props {
   patientId: string;
   locationId: string;
   status: MedicationDispenseStatus;
-  dispenseOrderId?: string;
+  dispenseOrderId: string;
 }
 
 export default function DispensedMedicationList({

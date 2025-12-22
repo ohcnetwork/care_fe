@@ -71,6 +71,7 @@ export default function PrescriptionsView({
         <MedicationDispenseList
           facilityId={facilityId}
           patientId={patientId}
+          patientName={patientData?.name}
           prescriptionId={prescriptionId}
         />
       </div>

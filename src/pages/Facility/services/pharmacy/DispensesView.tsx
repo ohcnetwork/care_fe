@@ -146,7 +146,7 @@ export default function DispensesView({
               <div>
                 <span className="text-gray-500">{t("created_at")}:</span>{" "}
                 <span className="font-medium">
-                  {formatDateTime(dispenseOrder.patient.created_date)}
+                  {formatDateTime(dispenseOrder.created_date)}
                 </span>
               </div>
               <div>

@@ -21,6 +21,8 @@ import {
 import useFilters from "@/hooks/useFilters";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DispenseOrderRead,
   DispenseOrderStatus,
@@ -50,7 +52,7 @@ export default function MedicationDispenseHistory({
 }) {
   const { t } = useTranslation();
   const [{ patientId }] = useQueryParams();
-  const { qParams, Pagination, resultsPerPage } = useFilters({
+  const { qParams, Pagination, updateQuery, resultsPerPage } = useFilters({
     limit: 14,
     disableCache: true,
   });
@@ -62,10 +64,10 @@ export default function MedicationDispenseHistory({
       queryParams: {
         location: locationId,
         patient: qParams.patientId,
-        /*         status:
+        status:
           qParams.exclude_status === "history"
-            ? "completed,cancelled,entered_in_error,stopped,declined"
-            : "preparation,in_progress,on_hold", */
+            ? "completed,entered_in_error,abandoned"
+            : "draft,in_progress",
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
       },
@@ -74,21 +76,54 @@ export default function MedicationDispenseHistory({
 
   useEffect(() => {
     if (patientId) {
-      qParams.patientId = patientId;
+      updateQuery({ patientId: patientId });
     }
   }, [patientId]);
 
-  /*   const DISPENSE_STATUS_OPTIONS = {
+  const DISPENSE_STATUS_OPTIONS = {
     pending: {
       label: "pending",
     },
     history: {
       label: "history",
     },
-  } as const; */
+  } as const;
 
   return (
     <Page title={t("dispense_orders")}>
+      <div className="mb-4 pt-6">
+        <Tabs
+          value={qParams.exclude_status || "pending"}
+          onValueChange={(value) => updateQuery({ exclude_status: value })}
+          className="w-full"
+        >
+          <TabsList className="w-full justify-evenly sm:justify-start border-b rounded-none bg-transparent p-0 h-auto overflow-x-auto">
+            {Object.entries(DISPENSE_STATUS_OPTIONS).map(([key, { label }]) => (
+              <TabsTrigger
+                key={key}
+                value={key}
+                className="border-b-2 px-2 sm:px-4 py-2 text-gray-600 hover:text-gray-900 data-[state=active]:border-b-primary-700  data-[state=active]:text-primary-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none"
+              >
+                {t(label)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </div>
+      <div className="flex items-center gap-4 mb-6">
+        <PatientIdentifierFilter
+          onSelect={(patientId, patientName) =>
+            updateQuery({
+              patientId: patientId,
+              patient_name: patientName,
+            })
+          }
+          placeholder={t("filter_by_identifier")}
+          className="w-full sm:w-auto rounded-md h-9 text-gray-500 shadow-sm"
+          patientId={qParams.patientId}
+          patientName={qParams.patient_name}
+        />
+      </div>
       <div className="mt-4">
         {isLoading ? (
           <TableSkeleton count={5} />

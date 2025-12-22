@@ -147,7 +147,7 @@ const DispenseOrderPreview = ({
                   )}
                 </div>
               )}
-              <h2 className="mt-2 text-gray-500 uppercase text-sm tracking-wide mt-1 font-semibold">
+              <h2 className="mt-2 text-gray-500 uppercase text-sm tracking-wide font-semibold">
                 {t("dispense_order")}
               </h2>
             </div>
