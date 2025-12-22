@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -37,6 +37,7 @@ import {
 import supplyDeliveryApi from "@/types/inventory/supplyDelivery/supplyDeliveryApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
+import { extractSchemaInfo } from "@/Utils/schema/extensionSchema";
 import { EllipsisVertical } from "lucide-react";
 
 interface SupplyDeliveryTableProps {
@@ -69,6 +70,12 @@ export function SupplyDeliveryTable({
   const { facility } = useCurrentFacility();
 
   const informationalCodes = facility?.instance_informational_codes || [];
+
+  // Extract extension field metadata for table headers
+  const { fieldMetadata: extensionFields } = useMemo(
+    () => extractSchemaInfo(facility?.extensions_schema_supply_delivery),
+    [facility?.extensions_schema_supply_delivery],
+  );
 
   const { mutate: updateDeliveryStatus } = useMutation({
     mutationFn: ({
@@ -153,6 +160,9 @@ export function SupplyDeliveryTable({
           <TableHead>{t("disc")}</TableHead>
           <TableHead>{t("status")}</TableHead>
           <TableHead>{t("condition")}</TableHead>
+          {extensionFields.map((field) => (
+            <TableHead key={field.name}>{field.label}</TableHead>
+          ))}
           {showActionsColumn && <TableHead>{t("actions")}</TableHead>}
         </TableRow>
       </TableHeader>
@@ -260,6 +270,16 @@ export function SupplyDeliveryTable({
                 </Badge>
               )}
             </TableCell>
+            {extensionFields.map((field) => {
+              const value = (
+                delivery.extensions as Record<string, unknown> | undefined
+              )?.[field.name];
+              return (
+                <TableCell key={field.name}>
+                  {value !== undefined && value !== null ? String(value) : "-"}
+                </TableCell>
+              );
+            })}
             {showActionsColumn && (
               <TableCell>
                 {delivery.status === SupplyDeliveryStatus.in_progress && (
