@@ -62,8 +62,6 @@ export const ServicepointDialog = ({
     }),
   });
 
-  console.log("subQueues", subQueues);
-
   const { mutate: updateToken, isPending } = useMutation({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
@@ -80,8 +78,6 @@ export const ServicepointDialog = ({
       onOpenChange(false);
     },
   });
-
-  console.log("selectedSubQueueId", selectedSubQueueId);
 
   const handleConfirm = () => {
     if (selectedSubQueueId) {

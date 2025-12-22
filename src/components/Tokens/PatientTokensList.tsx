@@ -26,7 +26,12 @@ import {
 } from "@/types/tokens/token/token";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
-import { ChevronsDownUp, ChevronsUpDown, TicketIcon } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  TicketIcon,
+} from "lucide-react";
 
 interface PatientTokensListProps {
   patientId: string;
@@ -201,13 +206,14 @@ export default function PatientTokensList({
                       className="rounded-md border-none shadow-xs hover:shadow-xs hover:scale-none"
                     />
                     {tokenId && (
-                      <div className="flex justify-center items-center bg-white p-2 rounded-md mb-1 shadow-xs">
+                      <div className="flex justify-center items-center bg-white p-2 rounded-md mb-1 shadow-xs animate-in slide-in-from-top-2 duration-700">
                         <Button
                           variant="outline_primary"
-                          className="w-full"
+                          className="w-full flex items-center justify-center gap-2 font-semibold"
                           onClick={() => setShowServicepointDialog(true)}
                         >
-                          {t("assign_to_service_point")}
+                          {t("mark_as_in_service")}
+                          <ArrowRight className="size-4 animate-arrow-slide" />
                         </Button>
                       </div>
                     )}
