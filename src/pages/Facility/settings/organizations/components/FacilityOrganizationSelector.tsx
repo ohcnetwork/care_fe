@@ -97,11 +97,11 @@ export default function FacilityOrganizationSelector(
 
   useEffect(() => {
     if (value && value.length > 0) {
-      const selectedOrganizations = value
+      const resolvedOrganizations = value
         .map((id) => currentOrganizations?.find((org) => org.id === id))
         .filter((org) => org !== undefined);
-      if (selectedOrganizations.length > 0) {
-        setSelectedOrganizations(selectedOrganizations);
+      if (resolvedOrganizations.length > 0) {
+        setSelectedOrganizations(resolvedOrganizations);
       }
     } else {
       setSelectedOrganizations([]);
