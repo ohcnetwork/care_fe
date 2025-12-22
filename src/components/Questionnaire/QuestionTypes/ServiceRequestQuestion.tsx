@@ -40,8 +40,6 @@ import {
   ServiceRequestReadSpec,
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
-import { LocationRead } from "@/types/location/location";
-import locationApi from "@/types/location/locationApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
@@ -128,9 +126,8 @@ interface ServiceRequestFormProps {
   questionId?: string;
   index?: number;
   isPreview?: boolean;
-  activityDefinition?: ActivityDefinitionReadSpec;
   facilityId?: string;
-  locations?: LocationRead[];
+  activityDefinitionData?: ActivityDefinitionReadSpec;
 }
 
 function ServiceRequestForm({
@@ -143,24 +140,10 @@ function ServiceRequestForm({
   questionId,
   index,
   isPreview = false,
-  activityDefinition,
   facilityId = "",
-  locations = [],
+  activityDefinitionData,
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
-
-  const getLocationDetails = () => {
-    if (activityDefinition?.locations?.length) {
-      return activityDefinition.locations;
-    }
-
-    const locationIds = serviceRequest.service_request.locations || [];
-    return locationIds
-      .map((id) => locations.find((loc) => loc.id === id))
-      .filter((loc): loc is LocationRead => Boolean(loc));
-  };
-
-  const locationDetails = getLocationDetails();
 
   const renderInfoSection = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-2 w-full">
@@ -210,13 +193,13 @@ function ServiceRequestForm({
           </Badge>
         </div>
       )}
-      {locationDetails.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap col-span-1 sm:col-span-2 xl:col-span-4">
-          <span className="font-medium text-sm text-gray-700">
-            {t("locations")}:
-          </span>
-          {locationDetails.map((location) => {
-            return (
+      {activityDefinitionData?.locations &&
+        activityDefinitionData.locations.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap col-span-1 sm:col-span-2 xl:col-span-4">
+            <span className="font-medium text-sm text-gray-700">
+              {t("locations")}:
+            </span>
+            {activityDefinitionData.locations.map((location) => (
               <Badge
                 key={location.id}
                 variant="outline"
@@ -224,10 +207,9 @@ function ServiceRequestForm({
               >
                 {location.name}
               </Badge>
-            );
-          })}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
     </div>
   );
 
@@ -480,13 +462,9 @@ export function ServiceRequestQuestion({
     (questionnaireResponse.values?.[0]
       ?.value as unknown as ServiceRequestApplyActivityDefinitionSpec[]) || [],
   );
-  const { data: locations } = useQuery({
-    queryKey: ["locations", facilityId],
-    queryFn: query(locationApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: { limit: 100 },
-    }),
-  });
+  const [activityDefinitionsMap, setActivityDefinitionsMap] = useState<
+    Record<string, ActivityDefinitionReadSpec>
+  >({});
 
   const {
     data: selectedActivityDefinitionData,
@@ -528,6 +506,12 @@ export function ServiceRequestQuestion({
       };
 
       setPreviewServiceRequest(newServiceRequest);
+
+      // Store activity definition data in map
+      setActivityDefinitionsMap((prev) => ({
+        ...prev,
+        [selectedActivityDefinition]: selectedActivityDefinitionData,
+      }));
     }
   }, [
     selectedActivityDefinition,
@@ -564,6 +548,14 @@ export function ServiceRequestQuestion({
     );
   };
 
+  const normalizeLocations = (
+    locations: string[] | Array<{ id: string }> | undefined,
+  ): string[] => {
+    if (!locations) return [];
+    if (!Array.isArray(locations)) return locations;
+    return locations.map((loc) => (typeof loc === "string" ? loc : loc.id));
+  };
+
   const handleUpdateServiceRequest = (
     index: number,
     updates: Partial<ServiceRequestReadSpec>,
@@ -572,46 +564,16 @@ export function ServiceRequestQuestion({
       (sr: ServiceRequestApplyActivityDefinitionSpec, i: number) => {
         if (i !== index) return sr;
 
-        // Handle locations update specifically to ensure correct typing
-        const updatedLocations = updates.locations
-          ? ((Array.isArray(updates.locations)
-              ? updates.locations.map((loc) => {
-                  if (typeof loc === "string") {
-                    const location = locations?.results.find(
-                      (l: LocationRead) => l.id === loc,
-                    );
-
-                    return {
-                      id: loc,
-                      has_children: false,
-                      status: "active",
-                      operational_status: "O",
-                      name: location?.name || loc,
-                      description: "",
-                      form: location?.form || "si",
-                      mode: "instance",
-                      availability_status: "available",
-                      sort_index: location?.sort_index || 0,
-                    } as LocationRead;
-                  }
-                  return loc;
-                })
-              : updates.locations) as LocationRead[])
-          : sr.service_request.locations || [];
-
-        // Create updated service request with proper type handling
-        const updatedServiceRequest = {
+        return {
           ...sr,
           service_request: {
             ...sr.service_request,
             ...updates,
-            locations: updatedLocations.map((loc) =>
-              typeof loc === "string" ? loc : loc.id,
-            ),
+            locations: updates.locations
+              ? normalizeLocations(updates.locations)
+              : sr.service_request.locations,
           },
         };
-
-        return updatedServiceRequest;
       },
     );
 
@@ -628,21 +590,14 @@ export function ServiceRequestQuestion({
   ) => {
     if (!previewServiceRequest) return;
 
-    // Handle locations update specifically
-    const updatedLocations = updates.locations
-      ? Array.isArray(updates.locations)
-        ? updates.locations.map((loc) =>
-            typeof loc === "string" ? loc : loc.id,
-          )
-        : updates.locations
-      : previewServiceRequest.service_request.locations;
-
     setPreviewServiceRequest({
       ...previewServiceRequest,
       service_request: {
         ...previewServiceRequest.service_request,
         ...updates,
-        locations: updatedLocations,
+        locations: updates.locations
+          ? normalizeLocations(updates.locations)
+          : previewServiceRequest.service_request.locations,
       },
     });
   };
@@ -685,7 +640,9 @@ export function ServiceRequestQuestion({
           questionId={questionnaireResponse.question_id}
           index={index}
           facilityId={facilityId}
-          locations={locations?.results || []}
+          activityDefinitionData={
+            activityDefinitionsMap[serviceRequest.activity_definition]
+          }
         />
       ))}
 
@@ -712,7 +669,6 @@ export function ServiceRequestQuestion({
       {previewServiceRequest && !isLoadingSelectedAD && (
         <ServiceRequestForm
           serviceRequest={previewServiceRequest}
-          activityDefinition={selectedActivityDefinitionData}
           onUpdate={handlePreviewServiceRequestUpdate}
           onRemove={() => {
             setPreviewServiceRequest(null);
@@ -722,7 +678,11 @@ export function ServiceRequestQuestion({
           disabled={disabled}
           isPreview
           facilityId={facilityId}
-          locations={locations?.results || []}
+          activityDefinitionData={
+            selectedActivityDefinition
+              ? activityDefinitionsMap[selectedActivityDefinition]
+              : undefined
+          }
         />
       )}
 
