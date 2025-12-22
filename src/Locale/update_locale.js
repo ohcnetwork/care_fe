@@ -70,6 +70,6 @@ function getAllJSONFiles(folderName) {
 function writeFile(name, data) {
   return writeFileSync(name, data);
 }
-function readFile(name) {
+export function readFile(name) {
   return readFileSync(name, { encoding: "utf-8" });
 }

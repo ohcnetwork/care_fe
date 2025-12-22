@@ -28,14 +28,15 @@ import {
   SupplyDeliveryStatus,
   SupplyDeliveryType,
 } from "@/types/inventory/supplyDelivery/supplyDelivery";
-import supplyDeliveriesJson from "./data/CURSTOCK.json";
+import { readFileSync } from "fs";
 import itemsJson from "./data/ITEM.json";
+import locationMasterJson from "./data/LOCATION_MASTER.json";
 import pharmacyCategories from "./data/PHARM_CATEGORY.json";
-
+import supplyDeliveriesJson from "./data/stock.json";
 dotenv.config({ path: [".env.local", ".env"] });
 
 const FACILITY_ID = process.env.FACILITY_ID!;
-
+const FALLBACK_LOCATION_ID = process.env.CARE_LOCATION_ID!;
 type ItemRow = {
   ID: number;
   ITEM_SHORTCODE: string;
@@ -52,7 +53,7 @@ type SupplyDeliveryRow = {
   ITEM_ID: number;
   QTY: number;
   LOCATION_ID: number;
-  CARE_LOCATION_ID?: string;
+  CARE_LOCATION_ID: string;
 };
 
 const items = itemsJson as ItemRow[];
@@ -136,6 +137,25 @@ export const getProductKnowledgeToImport = () => {
   return Array.from(productKnowledges.values());
 };
 
+export const addCareLocationToStock = () => {
+  const csv = readFileSync(`./careLocationId.csv`, { encoding: "utf-8" });
+  const [header, ...rows] = csv.split("\n");
+  for (const row of rows) {
+    const [ssmLocation, careLocationId] = row.split(",");
+    const id = locationMasterJson.find(
+      (location) => location.DESCRIPTION === ssmLocation,
+    )?.ID;
+    if (id) {
+      stock.forEach((item) => {
+        if (item.LOCATION_ID === id) {
+          item.CARE_LOCATION_ID = careLocationId;
+        }
+      });
+    }
+  }
+  return stock;
+};
+
 export const getChargeItemDefinitionsToImport =
   (): ChargeItemDefinitionCreate[] => {
     const categories = new Map(
@@ -187,7 +207,7 @@ export const getDeliveryOrdersToImport = () => {
       if (!item) {
         throw new Error(`Item not found for stock: ${stock.ITEM_ID}`);
       }
-      const destinationId = stock.CARE_LOCATION_ID ?? "";
+      const destinationId = stock.CARE_LOCATION_ID || FALLBACK_LOCATION_ID;
       return [
         destinationId,
         {
@@ -209,7 +229,7 @@ export const getSupplyDeliveriesToImport = () => {
     if (!item) {
       throw new Error(`Item not found for stock: ${stock.ITEM_ID}`);
     }
-    const destinationId = stock.CARE_LOCATION_ID ?? "";
+    const destinationId = stock.CARE_LOCATION_ID || FALLBACK_LOCATION_ID;
     return {
       status: SupplyDeliveryStatus.completed,
       supplied_item_type: SupplyDeliveryType.product,
