@@ -288,6 +288,7 @@ async function buildInventoryItems(
               supplied_item: datapoint.product?.id ?? "",
               destination: locationId,
               order: deliveryOrder.id,
+              extensions: {},
             };
           })
           .filter(Boolean) as SupplyDeliveryCreate[],

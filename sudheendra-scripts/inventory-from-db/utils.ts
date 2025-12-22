@@ -20,6 +20,11 @@ import {
   ProductKnowledgeStatus,
   ProductKnowledgeType,
 } from "@/types/inventory/productKnowledge/productKnowledge";
+import {
+  SupplyDeliveryStatus,
+  SupplyDeliveryType,
+} from "@/types/inventory/supplyDelivery/supplyDelivery";
+import supplyDeliveriesJson from "./data/CURSTOCK.json";
 import itemsJson from "./data/ITEM.json";
 import pharmacyCategories from "./data/PHARM_CATEGORY.json";
 
@@ -39,7 +44,17 @@ type ItemRow = {
   HSN_CODE?: string;
 };
 
+type SupplyDeliveryRow = {
+  ID: number;
+  ITEM_ID: number;
+  QUANTITY: number;
+  DATE: string;
+  SUPPLIER_ID: number;
+  CARE_LOCATION_ID: string;
+};
+
 const items = itemsJson as ItemRow[];
+const stock = supplyDeliveriesJson as SupplyDeliveryRow[];
 
 export const getCategoriesToImport = () => {
   return pharmacyCategories.flatMap((category) => {
@@ -149,6 +164,27 @@ export const getProductToImport = () => {
     extensions: {},
     status: ProductStatusOptions.active,
   }));
+};
+
+export const getInventoryItemsToImport = () => {
+  const inventoryItems = stock.map((stock) => {
+    const item = items.find((item) => item.ID === stock.ITEM_ID);
+    if (!item) {
+      throw new Error(`Item not found for stock: ${stock.ITEM_ID}`);
+    }
+    {
+      return {
+        status: SupplyDeliveryStatus.completed,
+        supplied_item_type: SupplyDeliveryType.product,
+        supplied_item_quantity: stock.QUANTITY,
+        supplied_item__product_knowledge: `f-${FACILITY_ID}-${getProductKnowledgeSlug(item)}`,
+        supplied_item__charge_item_definition: `f-${FACILITY_ID}-${getChargeItemDefinitionSlug(item)}`,
+        destination: stock.CARE_LOCATION_ID,
+        extensions: {},
+      };
+    }
+  });
+  return inventoryItems;
 };
 
 const getExistingPaginatedData = async <TInput, TOutput>(
