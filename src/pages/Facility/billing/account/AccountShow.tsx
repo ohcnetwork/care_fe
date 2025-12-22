@@ -617,6 +617,7 @@ export function AccountShow({
         facilityId={facilityId}
         accountId={accountId}
         isCreditNote={paymentSheet.isCreditNote}
+        account={account}
       />
 
       <Dialog
