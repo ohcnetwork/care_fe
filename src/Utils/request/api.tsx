@@ -1,18 +1,4 @@
-/**
- * A fake function that returns an empty object casted to type T
- * @returns Empty object as type T
- */
-export function Type<T>(): T {
-  return {} as T;
-}
-
-export enum HttpMethod {
-  GET = "GET",
-  POST = "POST",
-  PUT = "PUT",
-  PATCH = "PATCH",
-  DELETE = "DELETE",
-}
+import { HttpMethod, Type } from "./types";
 
 export const API = <TResponse, TBody = undefined>(
   route: `${HttpMethod} ${string}`,

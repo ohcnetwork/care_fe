@@ -1,5 +1,4 @@
-import { Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
+import { PaginatedResponse, Type } from "@/Utils/request/types";
 import { MedicationStatementRead } from "@/types/emr/medicationStatement";
 
 const medicationStatementApi = {
