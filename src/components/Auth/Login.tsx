@@ -119,7 +119,7 @@ const Login = (props: LoginProps) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [resendOtpCountdown]);
 
   // Remember the last login mode
   useEffect(() => {
@@ -196,7 +196,7 @@ const Login = (props: LoginProps) => {
   });
 
   // Login form validation
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
     const fieldValue = Object.assign({}, form);
     const errorField = Object.assign({}, errors);
