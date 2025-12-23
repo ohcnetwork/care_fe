@@ -33,6 +33,7 @@ export default {
     path: "/api/v1/patient/{id}/",
     method: HttpMethod.GET,
     TRes: Type<PatientRead>(),
+    TQuery: Type<{ facility?: string }>(),
   },
 
   // Patient Search
