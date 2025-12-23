@@ -81,6 +81,7 @@ export function ObservationInterpretation<
   name = "qualified_ranges",
   onCancel,
   onSheetOpen,
+  facilityId,
 }: {
   form: UseFormReturn<TFieldValues>;
   qualifiedRanges: QualifiedRange[];
@@ -91,6 +92,7 @@ export function ObservationInterpretation<
   name?: string;
   onSheetOpen?: () => void;
   onCancel?: () => void;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -526,6 +528,7 @@ export function ObservationInterpretation<
               interpretationType={selectedInterpretationType}
               //handleTypeChange={handleTypeChange}
               fieldName={`${name}.${editedRange.id || 0}`}
+              facilityId={facilityId}
             />
           )}
         </SheetContent>
@@ -571,6 +574,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
   interpretationType,
   //handleTypeChange,
   fieldName,
+  facilityId,
 }: {
   form: UseFormReturn<TFieldValues>;
   editedRange: QualifiedRange;
@@ -584,6 +588,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
   interpretationType: InterpretationType;
   //handleTypeChange: (newType: InterpretationType) => void;
   fieldName: string;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
 
@@ -620,6 +625,7 @@ function QualifiedRangeEditor<TFieldValues extends FieldValues = FieldValues>({
           setConditions={handleSetConditions}
           form={form}
           fieldName={`${fieldName}.conditions`}
+          facilityId={facilityId}
         />
         {/* TODO: Hide interpretation type selector until BE is ready*/}
         {/*         <div>
@@ -692,6 +698,7 @@ export function RenderConditionInput({
   handleSetValueType,
   form,
   fieldName,
+  facilityId,
 }: {
   condition: Condition;
   index: number;
@@ -706,6 +713,7 @@ export function RenderConditionInput({
   handleSetValueType: (value: string, index: number) => void;
   form: UseFormReturn<any>;
   fieldName: string;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const operation = condition.operation;
@@ -1036,6 +1044,7 @@ export function RenderConditionInput({
                   <FormItem>
                     <FormControl>
                       <TagSelectorPopover
+                        facilityId={facilityId}
                         selected={selectedTags}
                         resource={tagResource}
                         onChange={(tags) => {
@@ -1066,11 +1075,13 @@ export function ConditionComponent<
   setConditions,
   form,
   fieldName,
+  facilityId,
 }: {
   conditions: Condition[];
   setConditions: (value: Condition[]) => void;
   form: UseFormReturn<TFieldValues>;
   fieldName: string;
+  facilityId?: string;
 }) {
   const { t } = useTranslation();
   const { data } = useQuery({
@@ -1288,6 +1299,7 @@ export function ConditionComponent<
                       handleSetValueType={handleSetValueType}
                       form={form}
                       fieldName={`${fieldName}.${index}`}
+                      facilityId={facilityId}
                     />
                   </div>
                 )}

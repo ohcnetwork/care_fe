@@ -39,6 +39,7 @@ interface CompactConditionEditorProps {
   availableMetrics: Metrics[];
   onChange: (conditions: ConditionForm[]) => void;
   className?: string;
+  facility?: string;
 }
 
 // Keep only TagSelector as a separate component since it needs to use a hook
@@ -46,10 +47,12 @@ function TagSelector({
   value,
   onChange,
   resource,
+  facility,
 }: {
   value: TagOperationValue;
   onChange: (value: TagOperationValue) => void;
   resource: TagResource;
+  facility?: string;
 }) {
   const { tagIds } = extractTagInformation(value);
 
@@ -76,6 +79,7 @@ function TagSelector({
         resource={resource}
         onChange={handleChange}
         className="h-9 w-full"
+        facilityId={facility}
       />
     </div>
   );
@@ -85,10 +89,12 @@ function RenderInput({
   metric,
   operation,
   form,
+  facility,
 }: {
   metric: string;
   operation: ConditionOperation;
   form: UseFormReturn<ConditionForm, unknown, ConditionForm>;
+  facility?: string;
 }) {
   const { t } = useTranslation();
   // For patient_gender with equality operation
@@ -285,6 +291,7 @@ function RenderInput({
                   field.onChange(value);
                 }}
                 resource={tagResource}
+                facility={facility}
               />
             </FormControl>
           </FormItem>
@@ -367,6 +374,7 @@ export function CompactConditionEditor({
   availableMetrics,
   onChange,
   className = "",
+  facility,
 }: CompactConditionEditorProps) {
   const { t } = useTranslation();
   const [isAdding, setIsAdding] = useState(false);
@@ -537,7 +545,12 @@ export function CompactConditionEditor({
                 )}
               />
 
-              <RenderInput metric={metric} operation={operation} form={form} />
+              <RenderInput
+                metric={metric}
+                operation={operation}
+                form={form}
+                facility={facility}
+              />
             </div>
             {/* Error Summary */}
             {Object.keys(form.formState.errors).length > 0 && (
