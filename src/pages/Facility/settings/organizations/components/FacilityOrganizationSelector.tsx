@@ -45,6 +45,7 @@ export default function FacilityOrganizationSelector(
 ) {
   const { t } = useTranslation();
   const {
+    value,
     onChange,
     facilityId,
     currentOrganizations,
@@ -94,6 +95,19 @@ export default function FacilityOrganizationSelector(
     })),
   });
 
+  useEffect(() => {
+    if (value && value.length > 0) {
+      const resolvedOrganizations = value
+        .map((id) => currentOrganizations?.find((org) => org.id === id))
+        .filter((org) => org !== undefined);
+      if (resolvedOrganizations.length > 0) {
+        setSelectedOrganizations(resolvedOrganizations);
+      }
+    } else {
+      setSelectedOrganizations([]);
+    }
+  }, [value, currentOrganizations, showAllOrgs]);
+
   const handleSelect = (org: FacilityOrganizationRead) => {
     const isAlreadySelected = !!currentOrganizations?.find(
       (o) => o.id === org.id,
@@ -114,7 +128,9 @@ export default function FacilityOrganizationSelector(
   const handleConfirmSelection = useCallback(
     (org: FacilityOrganizationRead) => {
       if (!selectedOrganizations.includes(org)) {
-        const newSelection = [...selectedOrganizations, org];
+        const newSelection = singleSelection
+          ? [org]
+          : [...selectedOrganizations, org];
         setSelectedOrganizations(newSelection);
         onChange(newSelection.map((org) => org.id));
         setAlreadySelected(true);
@@ -139,7 +155,6 @@ export default function FacilityOrganizationSelector(
     setSelectedOrganizations([]);
     setCurrentSelection(null);
     setNavigationLevels([]);
-    onChange(null);
   };
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -384,6 +399,57 @@ export default function FacilityOrganizationSelector(
       <div className="space-y-3">
         <div className="space-y-3">
           <div className="flex flex-col gap-2">
+            {isMobile ? (
+              <>
+                <Drawer open={open} onOpenChange={setOpen}>
+                  <DrawerTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={open}
+                      className="w-full justify-between border-dashed"
+                      onClick={() => setOpen(true)}
+                      type="button" // Prevents unintended form submission
+                    >
+                      <span className="truncate text-gray-500">
+                        {currentSelection
+                          ? currentSelection.name
+                          : t("select_department")}
+                      </span>
+                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </DrawerTrigger>
+                  <DrawerContent className="min-h-[50vh] max-h-[85vh]">
+                    {renderOrganizationCommand()}
+                  </DrawerContent>
+                </Drawer>
+              </>
+            ) : (
+              <Popover open={open} onOpenChange={handleOpenChange}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-full justify-between border-dashed"
+                  >
+                    <span className="truncate text-gray-500">
+                      {currentSelection
+                        ? currentSelection.name
+                        : t("select_department")}
+                    </span>
+                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="start"
+                  sideOffset={4}
+                  className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
+                >
+                  {renderOrganizationCommand()}
+                </PopoverContent>
+              </Popover>
+            )}
             {selectedOrganizations.map((org, index) => (
               <div
                 key={index}
@@ -406,59 +472,6 @@ export default function FacilityOrganizationSelector(
                 </Button>
               </div>
             ))}
-            {(!singleSelection ||
-              (singleSelection && selectedOrganizations.length < 1)) &&
-              (isMobile ? (
-                <>
-                  <Drawer open={open} onOpenChange={setOpen}>
-                    <DrawerTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={open}
-                        className="w-full justify-between border-dashed"
-                        onClick={() => setOpen(true)}
-                        type="button" // Prevents unintended form submission
-                      >
-                        <span className="truncate text-gray-500">
-                          {currentSelection
-                            ? currentSelection.name
-                            : t("select_department")}
-                        </span>
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </DrawerTrigger>
-                    <DrawerContent className="min-h-[50vh] max-h-[85vh]">
-                      {renderOrganizationCommand()}
-                    </DrawerContent>
-                  </Drawer>
-                </>
-              ) : (
-                <Popover open={open} onOpenChange={handleOpenChange}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={open}
-                      className="w-full justify-between border-dashed"
-                    >
-                      <span className="truncate text-gray-500">
-                        {currentSelection
-                          ? currentSelection.name
-                          : t("select_department")}
-                      </span>
-                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    align="start"
-                    sideOffset={4}
-                    className="p-0 w-[var(--radix-popover-trigger-width)] max-h-[80vh] overflow-auto"
-                  >
-                    {renderOrganizationCommand()}
-                  </PopoverContent>
-                </Popover>
-              ))}
           </div>
         </div>
       </div>
