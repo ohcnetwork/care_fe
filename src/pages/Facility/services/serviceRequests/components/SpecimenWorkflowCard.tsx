@@ -70,10 +70,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import mutate from "@/Utils/request/mutate";
 import { formatName } from "@/Utils/utils";
 import { ProcessSpecimen } from "@/pages/Facility/services/serviceRequests/components/ProcessSpecimen";
-import {
-  EDITABLE_SERVICE_REQUEST_STATUSES,
-  ServiceRequestReadSpec,
-} from "@/types/emr/serviceRequest/serviceRequest";
+import { ServiceRequestReadSpec } from "@/types/emr/serviceRequest/serviceRequest";
 import {
   ProcessingSpec,
   SPECIMEN_DISCARD_REASONS,
@@ -102,12 +99,14 @@ interface SpecimenWorkflowCardProps {
   specimen?: SpecimenRead; // Collected specimen is optional
   onCollect: () => void; // Function to trigger collection form
   request: ServiceRequestReadSpec;
+  disableEdit?: boolean; // Disable edits (status-based or read-only context)
 }
 
 export function SpecimenWorkflowCard({
   facilityId,
   serviceRequestId,
   requirement,
+  disableEdit = false,
   specimen,
   onCollect,
   request,
@@ -119,9 +118,6 @@ export function SpecimenWorkflowCard({
   const collectedSpecimen = !isDraft ? specimen : undefined;
   const container = requirement.type_tested?.container;
   const hasCollected = !!collectedSpecimen;
-  const disableEdit = !EDITABLE_SERVICE_REQUEST_STATUSES.includes(
-    request.status,
-  );
 
   // --- Mutations (specific to the collected specimen) ---
   const { mutate: updateProcessing } = useMutation({

@@ -61,6 +61,7 @@ const FacilityRoutes: AppRoutes = {
     <ServiceRequestShow
       facilityId={facilityId}
       serviceRequestId={serviceRequestId}
+      readOnly={true}
     />
   ),
 

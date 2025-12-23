@@ -67,12 +67,14 @@ interface ServiceRequestShowProps {
   facilityId: string;
   serviceRequestId: string;
   locationId?: string;
+  readOnly?: boolean; // Disable editing when accessed from encounter (doctors view)
 }
 
 export default function ServiceRequestShow({
   facilityId,
   serviceRequestId,
   locationId,
+  readOnly = false,
 }: ServiceRequestShowProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -325,7 +327,7 @@ export default function ServiceRequestShow({
                 request?.diagnostic_reports?.[0]?.status ===
                   DiagnosticReportStatus.final) && (
                 <div className="flex items-center gap-2">
-                  {!disableEdit && (
+                  {!disableEdit && !readOnly && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
@@ -443,7 +445,7 @@ export default function ServiceRequestShow({
               serviceResourceType={ChargeItemServiceResource.service_request}
               sourceUrl={`/facility/${facilityId}${locationId ? `/locations/${locationId}` : ""}/service_requests/${serviceRequestId}`}
               patientId={request.encounter.patient.id}
-              viewOnly={disableEdit}
+              viewOnly={disableEdit || readOnly}
             />
           </div>
 
@@ -461,7 +463,11 @@ export default function ServiceRequestShow({
                       variant="outline"
                       size="sm"
                       onClick={preparePrintAllQRCodes}
-                      disabled={isCreatingDraftSpecimen || isPrintingAllQRCodes}
+                      disabled={
+                        isCreatingDraftSpecimen ||
+                        isPrintingAllQRCodes ||
+                        readOnly
+                      }
                     >
                       <PrinterIcon className="size-4" />
                       {isPrintingAllQRCodes ? (
@@ -528,6 +534,7 @@ export default function ServiceRequestShow({
                     serviceRequestId={serviceRequestId}
                     requirement={requirement}
                     specimen={collectedSpecimen}
+                    disableEdit={disableEdit || readOnly}
                     onCollect={() => {
                       createDraftSpecimen(requirement);
                       setSelectedSpecimenDefinition(requirement);
@@ -561,7 +568,7 @@ export default function ServiceRequestShow({
                     selectedSpecimenDefinition.slug,
                   )}
                   serviceRequestId={serviceRequestId}
-                  disableEdit={disableEdit}
+                  disableEdit={disableEdit || readOnly}
                 />
               </CardContent>
             </Card>
@@ -608,7 +615,7 @@ export default function ServiceRequestShow({
                 diagnosticReports={diagnosticReports}
                 activityDefinition={activityDefinition}
                 specimens={request.specimens || []}
-                disableEdit={disableEdit}
+                disableEdit={disableEdit || readOnly}
               />
             )}
           </div>
@@ -619,7 +626,7 @@ export default function ServiceRequestShow({
               patientId={request.encounter.patient.id}
               serviceRequestId={serviceRequestId}
               diagnosticReports={diagnosticReports}
-              disableEdit={disableEdit}
+              disableEdit={disableEdit || readOnly}
             />
           )}
         </div>
