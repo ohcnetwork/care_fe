@@ -34,7 +34,7 @@ import supplyDeliveriesJson from "./data/stock.json";
 dotenv.config({ path: [".env.local", ".env"] });
 
 const FACILITY_ID = process.env.FACILITY_ID!;
-const FALLBACK_LOCATION_ID = process.env.CARE_LOCATION_ID!;
+
 type ItemRow = {
   ID: number;
   ITEM_SHORTCODE: string;
@@ -54,7 +54,7 @@ type SupplyDeliveryRow = {
   CARE_LOCATION_ID: string;
 };
 
-const items = itemsJson as ItemRow[];
+const items = (itemsJson as ItemRow[]).slice(0, 400);
 const stock = supplyDeliveriesJson as SupplyDeliveryRow[];
 
 export const getResourceCategoriesToImport = () => {
@@ -140,7 +140,8 @@ export const getChargeItemDefinitionsToImport =
       getResourceCategoriesToImport()
         .filter(
           (c) =>
-            c.resource_type === ResourceCategoryResourceType.product_knowledge,
+            c.resource_type ===
+            ResourceCategoryResourceType.charge_item_definition,
         )
         .map((c) => [c.meta.ssmm_pharm_category_id, c]),
     );
@@ -184,45 +185,50 @@ export const getProductToImport = () => {
 
 export const getDeliveryOrdersToImport = () => {
   const deliveryOrders = new Map(
-    stock.map((stock) => {
-      const item = items.find((item) => item.ID === stock.ITEM_ID);
-      if (!item) {
-        throw new Error(`Item not found for stock: ${stock.ITEM_ID}`);
-      }
-      const destinationId = "1aa28206-5a5d-4411-9596-17c0745bb41b";
-      return [
-        destinationId,
-        {
-          name: `Bulk Import Delivery Order`,
-          destination: destinationId,
-          status: DeliveryOrderStatus.pending,
-          note: "This delivery order was created by a bulk import script",
-          extensions: {},
-        } satisfies DeliveryOrderCreate,
-      ];
-    }),
+    stock
+      .filter(
+        (stock) =>
+          !!stock.CARE_LOCATION_ID &&
+          items.find((item) => item.ID === stock.ITEM_ID),
+      )
+      .map(() => {
+        const destinationId = "ccfc4ed4-f317-4935-84b7-e9770358883f";
+        return [
+          destinationId,
+          {
+            name: `Bulk Import Delivery Order`,
+            destination: destinationId,
+            status: DeliveryOrderStatus.pending,
+            note: "This delivery order was created by a bulk import script",
+            extensions: {},
+          } satisfies DeliveryOrderCreate,
+        ];
+      }),
   );
   return Array.from(deliveryOrders.values());
 };
 
 export const getSupplyDeliveriesToImport = () => {
-  return stock.map((stock) => {
-    const item = items.find((item) => item.ID === stock.ITEM_ID);
-    if (!item) {
-      throw new Error(`Item not found for stock: ${stock.ITEM_ID}`);
-    }
-    const destinationId = "1aa28206-5a5d-4411-9596-17c0745bb41b";
-    return {
-      status: SupplyDeliveryStatus.completed,
-      supplied_item_type: SupplyDeliveryType.product,
-      supplied_item_quantity: stock.QTY,
-      $supplied_item__product_knowledge: `f-${FACILITY_ID}-${getProductKnowledgeSlug(item)}`,
-      $supplied_item__charge_item_definition: `f-${FACILITY_ID}-${getChargeItemDefinitionSlug(item)}`,
-      $order__destination: destinationId,
-      destination: destinationId,
-      extensions: {},
-    };
-  });
+  return stock
+    .filter(
+      (stock) =>
+        !!stock.CARE_LOCATION_ID &&
+        items.find((item) => item.ID === stock.ITEM_ID),
+    )
+    .map((stock) => {
+      const item = items.find((item) => item.ID === stock.ITEM_ID)!;
+      const destinationId = "ccfc4ed4-f317-4935-84b7-e9770358883f";
+      return {
+        status: SupplyDeliveryStatus.completed,
+        supplied_item_type: SupplyDeliveryType.product,
+        supplied_item_quantity: stock.QTY,
+        $supplied_item__product_knowledge: `f-${FACILITY_ID}-${getProductKnowledgeSlug(item)}`,
+        $supplied_item__charge_item_definition: `f-${FACILITY_ID}-${getChargeItemDefinitionSlug(item)}`,
+        $order__destination: destinationId,
+        destination: destinationId,
+        extensions: {},
+      };
+    });
 };
 
 const getExistingPaginatedData = async <TInput, TOutput>(
