@@ -27,7 +27,7 @@ import query from "@/Utils/request/query";
 import { useView } from "@/Utils/useView";
 import { LocationTreeNode } from "@/pages/Facility/locations/LocationNavbar";
 import facilityApi from "@/types/facility/facilityApi";
-import { LocationList as LocationListType } from "@/types/location/location";
+import { LocationRead as LocationListType } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import LocationMap from "./LocationMap";

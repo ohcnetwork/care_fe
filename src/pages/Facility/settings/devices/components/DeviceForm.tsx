@@ -34,6 +34,7 @@ import ErrorBoundary from "@/components/Common/ErrorBoundary";
 import useAppHistory from "@/hooks/useAppHistory";
 
 import mutate from "@/Utils/request/mutate";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   usePluginDevice,
   usePluginDevices,
@@ -604,14 +605,20 @@ const PluginDeviceConfigureForm = ({
   metadata: Record<string, unknown>;
   onChange: (metadata: Record<string, unknown>) => void;
 }) => {
-  const pluginDevice = usePluginDevice(type);
+  const { isLoading, device } = usePluginDevice(type);
 
-  if (!pluginDevice.configureForm) {
+  if (isLoading) {
+    return <Skeleton className="w-full aspect-video" />;
+  }
+
+  const ConfigureForm = device.configureForm;
+
+  if (!ConfigureForm) {
     return null;
   }
 
   return (
-    <pluginDevice.configureForm
+    <ConfigureForm
       facilityId={facilityId}
       metadata={metadata}
       onChange={onChange}

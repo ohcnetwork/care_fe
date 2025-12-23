@@ -1,3 +1,4 @@
+import { booleanFromString } from "@/common/utils";
 import { AnimatedCounter } from "@/components/Common/AnimatedCounter";
 import BackButton from "@/components/Common/BackButton";
 import Loading from "@/components/Common/Loading";
@@ -45,6 +46,7 @@ import { TokenStatus } from "@/types/tokens/token/token";
 import tokenQueueApi from "@/types/tokens/tokenQueue/tokenQueueApi";
 import query from "@/Utils/request/query";
 import { dateQueryString } from "@/Utils/utils";
+import careConfig from "@careConfig";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { ChevronLeft, Edit3, InfoIcon, SettingsIcon } from "lucide-react";
@@ -70,8 +72,8 @@ export function ManageQueuePage({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const resource = useScheduleResource();
-  const [{ autoRefresh }, setQueryParams] = useQueryParams<{
-    autoRefresh: string;
+  const [qParams, setQueryParams] = useQueryParams<{
+    autoRefresh?: string;
   }>();
   const { data: queue, isLoading: isQueueLoading } = useQuery({
     queryKey: ["tokenQueue", facilityId, queueId],
@@ -105,6 +107,11 @@ export function ManageQueuePage({
     // TODO: build appropriate loading skeleton...
     return <Loading />;
   }
+
+  const shouldAutoRefresh = booleanFromString(
+    qParams.autoRefresh ?? "",
+    careConfig.enableAutoRefresh,
+  );
 
   return (
     <Page
@@ -162,7 +169,7 @@ export function ManageQueuePage({
           <div className="flex gap-5 items-center justify-center">
             <div className="hidden sm:flex flex-col-reverse sm:flex-row gap-2 items-center text-black font-medium text-md">
               <Switch
-                checked={autoRefresh === "true"}
+                checked={shouldAutoRefresh}
                 onCheckedChange={(checked) =>
                   setQueryParams({
                     autoRefresh: checked ? "true" : "false",
@@ -178,7 +185,12 @@ export function ManageQueuePage({
                         <InfoIcon className="size-4 text-gray-500" />
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>{t("auto_refresh_tooltip")}</TooltipContent>
+                    <TooltipContent>
+                      {t("auto_refresh_tooltip", {
+                        interval:
+                          careConfig.appointmentAndQueueRefreshInterval / 1000,
+                      })}
+                    </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
@@ -196,7 +208,7 @@ export function ManageQueuePage({
                       {t("auto_refresh")}
                     </Label>
                     <Switch
-                      checked={autoRefresh === "true"}
+                      checked={shouldAutoRefresh}
                       onCheckedChange={(checked) =>
                         setQueryParams({
                           autoRefresh: checked ? "true" : "false",
@@ -267,7 +279,7 @@ export function ManageQueuePage({
           onTabChange={(tab) => {
             navigate(tab, {
               query: {
-                autoRefresh,
+                autoRefresh: shouldAutoRefresh.toString(),
               },
             });
           }}

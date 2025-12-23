@@ -44,6 +44,7 @@ import useFileUpload from "@/hooks/useFileUpload";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { formatName } from "@/Utils/utils";
 import { Code } from "@/types/base/code/code";
 import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
@@ -53,8 +54,8 @@ import {
 import diagnosticReportApi from "@/types/emr/diagnosticReport/diagnosticReportApi";
 import {
   ObservationComponent,
-  ObservationFromDefinitionCreate,
   ObservationStatus,
+  ObservationUpsertRequest,
   QuestionnaireSubmitResultValue,
 } from "@/types/emr/observation/observation";
 import observationApi from "@/types/emr/observation/observationApi";
@@ -543,111 +544,109 @@ export function DiagnosticReportForm({
         return;
       }
 
-      const formattedObservations: ObservationFromDefinitionCreate[] =
-        Object.entries(observations)
-          .flatMap(([definitionId, obsList]) =>
-            obsList.map((obsData) => {
-              const observationDefinition = observationDefinitions.find(
-                (def) => def.id === definitionId,
+      const formattedObservations: ObservationUpsertRequest[] = Object.entries(
+        observations,
+      )
+        .flatMap(([definitionId, obsList]) =>
+          obsList.map((obsData): ObservationUpsertRequest | null => {
+            const observationDefinition = observationDefinitions.find(
+              (def) => def.id === definitionId,
+            );
+
+            // If it's a component-based observation (like blood pressure), we should check if components have values
+            const hasComponents =
+              observationDefinition?.component &&
+              observationDefinition.component.length > 0;
+            const hasComponentValues =
+              hasComponents &&
+              Object.values(obsData.components).some(
+                (comp) => comp.value.trim() !== "",
               );
 
-              // If it's a component-based observation (like blood pressure), we should check if components have values
-              const hasComponents =
-                observationDefinition?.component &&
-                observationDefinition.component.length > 0;
-              const hasComponentValues =
-                hasComponents &&
-                Object.values(obsData.components).some(
-                  (comp) => comp.value.trim() !== "",
-                );
+            // For observations marked for deletion, always include them if they have an ID
+            const isMarkedForDeletion =
+              obsData.status === ObservationStatus.ENTERED_IN_ERROR &&
+              obsData.id;
 
-              // For observations marked for deletion, always include them if they have an ID
-              const isMarkedForDeletion =
-                obsData.status === ObservationStatus.ENTERED_IN_ERROR &&
-                obsData.id;
-
-              // For regular observations, skip if no value is entered
-              // For component-based observations, check component values
-              // But always include observations marked for deletion
-              if (!isMarkedForDeletion) {
-                if (!hasComponents && !obsData.value.trim()) {
-                  return null;
-                }
-
-                if (hasComponents && !hasComponentValues) {
-                  return null;
-                }
+            // For regular observations, skip if no value is entered
+            // For component-based observations, check component values
+            // But always include observations marked for deletion
+            if (!isMarkedForDeletion) {
+              if (!hasComponents && !obsData.value.trim()) {
+                return null;
               }
 
-              const value: QuestionnaireSubmitResultValue = {
-                value: obsData.value,
+              if (hasComponents && !hasComponentValues) {
+                return null;
+              }
+            }
+
+            const value: QuestionnaireSubmitResultValue = {
+              value: obsData.value,
+            };
+
+            if (obsData.unit && observationDefinition?.permitted_unit) {
+              value.unit = {
+                code: obsData.unit,
+                system: observationDefinition.permitted_unit.system,
+                display:
+                  observationDefinition.permitted_unit.display || obsData.unit,
               };
+            }
 
-              if (obsData.unit && observationDefinition?.permitted_unit) {
-                value.unit = {
-                  code: obsData.unit,
-                  system: observationDefinition.permitted_unit.system,
-                  display:
-                    observationDefinition.permitted_unit.display ||
-                    obsData.unit,
-                };
-              }
+            // Create observation components if they exist and have values
+            const components: ObservationComponent[] = [];
 
-              // Create observation components if they exist and have values
-              const components: ObservationComponent[] = [];
+            if (hasComponents && observationDefinition) {
+              observationDefinition.component.forEach(
+                (componentDef: ObservationDefinitionComponentSpec) => {
+                  const componentCode = componentDef.code.code;
+                  const componentData = obsData.components[componentCode];
 
-              if (hasComponents && observationDefinition) {
-                observationDefinition.component.forEach(
-                  (componentDef: ObservationDefinitionComponentSpec) => {
-                    const componentCode = componentDef.code.code;
-                    const componentData = obsData.components[componentCode];
+                  if (componentData && componentData.value.trim()) {
+                    const componentValue: QuestionnaireSubmitResultValue = {
+                      value: componentData.value,
+                    };
 
-                    if (componentData && componentData.value.trim()) {
-                      const componentValue: QuestionnaireSubmitResultValue = {
-                        value: componentData.value,
+                    if (componentData.unit && componentDef.permitted_unit) {
+                      componentValue.unit = {
+                        code: componentData.unit,
+                        system: componentDef.permitted_unit.system,
+                        display:
+                          componentDef.permitted_unit.display ||
+                          componentData.unit,
                       };
-
-                      if (componentData.unit && componentDef.permitted_unit) {
-                        componentValue.unit = {
-                          code: componentData.unit,
-                          system: componentDef.permitted_unit.system,
-                          display:
-                            componentDef.permitted_unit.display ||
-                            componentData.unit,
-                        };
-                      }
-
-                      components.push({
-                        code: componentDef.code,
-                        value: componentValue,
-                      });
                     }
-                  },
-                );
-              }
 
-              return {
-                ...(obsData.id
-                  ? { observation_id: obsData.id }
-                  : { observation_definition: observationDefinition?.slug }),
-                observation: {
-                  status:
-                    obsData.status === ObservationStatus.ENTERED_IN_ERROR
-                      ? ObservationStatus.ENTERED_IN_ERROR
-                      : ObservationStatus.FINAL,
-                  subject_type: "patient",
-                  value_type:
-                    observationDefinition?.permitted_data_type || "float",
-                  effective_datetime: new Date().toISOString(),
-                  value,
-                  encounter: null,
-                  interpretation: obsData.interpretation || "",
-                  component: components.length > 0 ? components : undefined,
+                    components.push({
+                      code: componentDef.code,
+                      value: componentValue,
+                    });
+                  }
                 },
-              };
-            }),
-          )
-          .filter(Boolean) as ObservationFromDefinitionCreate[];
+              );
+            }
+
+            return {
+              ...(obsData.id
+                ? { observation_id: obsData.id }
+                : { observation_definition: observationDefinition?.slug }),
+              observation: {
+                status:
+                  obsData.status === ObservationStatus.ENTERED_IN_ERROR
+                    ? ObservationStatus.ENTERED_IN_ERROR
+                    : ObservationStatus.FINAL,
+                value_type:
+                  observationDefinition?.permitted_data_type || "decimal",
+                effective_datetime: new Date().toISOString(),
+                value,
+                interpretation: obsData.interpretation || "",
+                component: components.length > 0 ? components : undefined,
+              },
+            };
+          }),
+        )
+        .filter((obs): obs is ObservationUpsertRequest => obs !== null);
 
       if (fullReport) {
         // Upsert observations
@@ -858,17 +857,12 @@ export function DiagnosticReportForm({
                 {hasReport && fullReport?.created_by && (
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-5 w-full sm:w-auto">
                     <Avatar
-                      name={
-                        fullReport.created_by.first_name ||
-                        fullReport.created_by.username ||
-                        ""
-                      }
+                      name={formatName(fullReport.created_by, true)}
                       className="size-5"
                       imageUrl={fullReport.created_by.profile_picture_url}
                     />
                     <span className="text-sm/9 text-gray-700 font-medium">
-                      {fullReport.created_by.first_name || ""}{" "}
-                      {fullReport.created_by.last_name || ""}
+                      {formatName(fullReport.created_by)}
                     </span>
                   </div>
                 )}

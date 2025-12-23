@@ -38,6 +38,7 @@ export enum TagResource {
   PRESCRIPTION = "medication_request_prescription",
   DELIVERY_ORDER = "supply_delivery_order",
   REQUEST_ORDER = "supply_request_order",
+  ACCOUNT = "account",
 }
 
 export interface TagConfigBase {

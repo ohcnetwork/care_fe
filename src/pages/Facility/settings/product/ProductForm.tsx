@@ -39,8 +39,6 @@ import {
 import Page from "@/components/Common/Page";
 import { FormSkeleton } from "@/components/Common/SkeletonLoading";
 
-import mutate from "@/Utils/request/mutate";
-import query from "@/Utils/request/query";
 import { ProductKnowledgeSelect } from "@/pages/Facility/services/inventory/ProductKnowledgeSelect";
 import { ChargeItemDefinitionForm } from "@/pages/Facility/settings/chargeItemDefinitions/ChargeItemDefinitionForm";
 import { ResourceCategoryResourceType } from "@/types/base/resourceCategory/resourceCategory";
@@ -61,7 +59,8 @@ import {
   ProductKnowledgeStatus,
 } from "@/types/inventory/productKnowledge/productKnowledge";
 import productKnowledgeApi from "@/types/inventory/productKnowledge/productKnowledgeApi";
-
+import mutate from "@/Utils/request/mutate";
+import query from "@/Utils/request/query";
 const formSchema = z.object({
   status: z.nativeEnum(ProductStatusOptions),
   product_knowledge: z.string().min(1, "Product Knowledge is required"),
@@ -73,7 +72,6 @@ const formSchema = z.object({
     .required(),
   expiration_date: z.date(),
 });
-
 export default function ProductForm({
   facilityId,
   productId,
@@ -84,9 +82,7 @@ export default function ProductForm({
   onSuccess?: (product: ProductRead) => void;
 }) {
   const { t } = useTranslation();
-
   const isEditMode = Boolean(productId);
-
   const { data: existingData, isFetching } = useQuery({
     queryKey: ["product", productId],
     queryFn: query(productApi.retrieveProduct, {
@@ -97,7 +93,6 @@ export default function ProductForm({
     }),
     enabled: isEditMode,
   });
-
   if (isEditMode && isFetching) {
     return (
       <Page title={t("edit_product")} hideTitleOnPage>
@@ -112,7 +107,6 @@ export default function ProductForm({
       </Page>
     );
   }
-
   return (
     <Page
       title={isEditMode ? t("edit_product") : t("create_product")}
@@ -140,15 +134,21 @@ export default function ProductForm({
     </Page>
   );
 }
-
 export function ProductFormContent({
   facilityId,
   productId,
   existingData,
   slug,
   containerClassName,
-  onSuccess = () => navigate(`/facility/${facilityId}/settings/product`),
-  onCancel = () => navigate(`/facility/${facilityId}/settings/product`),
+  onSuccess = (product: ProductRead) =>
+    navigate(`/facility/${facilityId}/settings/product/${product.id}`),
+  onCancel = () => {
+    if (productId) {
+      navigate(`/facility/${facilityId}/settings/product/${productId}`);
+    } else {
+      navigate(`/facility/${facilityId}/settings/product`);
+    }
+  },
   disableButtons = false,
   enabled = true,
   ref,
@@ -188,7 +188,6 @@ export function ProductFormContent({
     }),
     enabled,
   });
-
   const { data: existingProductKnowledge } = useQuery({
     queryKey: ["productKnowledge", slug],
     queryFn: query(productKnowledgeApi.retrieveProductKnowledge, {
@@ -201,7 +200,6 @@ export function ProductFormContent({
     }),
     enabled: !!slug && enabled,
   });
-
   // Add selected product knowledge to the product knowledge list if it's not already there
   const productKnowledgeData: ProductKnowledgeBase[] =
     productKnowledgeResponse?.results.find(
@@ -231,7 +229,6 @@ export function ProductFormContent({
             product_knowledge: slug,
           },
   });
-
   const { mutate: createProduct, isPending: isCreating } = useMutation({
     mutationFn: mutate(productApi.createProduct, {
       pathParams: { facilityId },
@@ -242,7 +239,6 @@ export function ProductFormContent({
       onSuccess?.(product);
     },
   });
-
   const { mutate: updateProduct, isPending: isUpdating } = useMutation({
     mutationFn: mutate(productApi.updateProduct, {
       pathParams: {
@@ -250,22 +246,20 @@ export function ProductFormContent({
         productId: productId || "",
       },
     }),
-    onSuccess: () => {
+    onSuccess: (product: ProductRead) => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({
         queryKey: ["product", productId],
       });
       toast.success(t("product_updated_successfully"));
-      navigate(`/facility/${facilityId}/settings/product`);
+      onSuccess(product);
     },
   });
-
   useImperativeHandle(ref, () => ({
     createNewProduct: () => {
       form.handleSubmit(onSubmit)();
     },
   }));
-
   const isPending = isCreating || isUpdating;
   function onSubmit(data: z.infer<typeof formSchema>) {
     // Format the data for API submission
@@ -275,7 +269,6 @@ export function ProductFormContent({
         ? format(data.expiration_date, "yyyy-MM-dd")
         : undefined,
     };
-
     if (isEditMode && productId) {
       const updatePayload: ProductUpdate = {
         id: productId,
@@ -284,6 +277,7 @@ export function ProductFormContent({
         expiration_date: formattedData.expiration_date,
         charge_item_definition: formattedData.charge_item_definition,
         product_knowledge: formattedData.product_knowledge,
+        extensions: {},
       };
       updateProduct(updatePayload);
     } else {
@@ -293,11 +287,11 @@ export function ProductFormContent({
         expiration_date: formattedData.expiration_date,
         product_knowledge: formattedData.product_knowledge,
         charge_item_definition: formattedData.charge_item_definition,
+        extensions: {},
       };
       createProduct(createPayload);
     }
   }
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -330,7 +324,6 @@ export function ProductFormContent({
                 </FormItem>
               )}
             />
-
             {!isEditMode && !existingProductKnowledge && (
               <FormField
                 control={form.control}
@@ -357,7 +350,6 @@ export function ProductFormContent({
                 )}
               />
             )}
-
             <FormField
               control={form.control}
               name="batch.lot_number"
@@ -378,7 +370,6 @@ export function ProductFormContent({
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="expiration_date"
@@ -407,7 +398,6 @@ export function ProductFormContent({
             />
           </div>
         </div>
-
         <div className="rounded-lg border border-gray-200 bg-white p-6">
           <div className="mb-4">
             <h2 className="text-lg font-medium text-gray-900">
@@ -502,13 +492,15 @@ export function ProductFormContent({
             />
           </div>
         </div>
-
         {!disableButtons && (
           <div className="flex justify-end gap-4">
             <Button type="button" variant="outline" onClick={onCancel}>
               {t("cancel")}
             </Button>
-            <Button type="submit" disabled={isPending}>
+            <Button
+              type="submit"
+              disabled={isPending || !form.formState.isDirty}
+            >
               {isPending ? t("saving") : isEditMode ? t("update") : t("create")}
             </Button>
           </div>

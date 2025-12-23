@@ -188,9 +188,7 @@ export const PrescriptionPreview = ({
               className="h-10 w-auto object-contain mb-2 sm:mb-0 sm:order-2"
             />
             <div className="text-center sm:text-left sm:order-1">
-              <h1 className="text-3xl font-semibold">
-                {encounter?.facility?.name}
-              </h1>
+              <h1 className="text-2xl font-semibold mb-1">{facility?.name}</h1>
               {facility?.address && (
                 <div className="text-gray-500 whitespace-pre-wrap break-words text-sm">
                   {facility.address}

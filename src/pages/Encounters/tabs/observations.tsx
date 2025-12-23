@@ -9,14 +9,14 @@ import { Card } from "@/components/ui/card";
 import { formatValue } from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
-import { ObservationWithUser } from "@/types/emr/observation";
-import patientApi from "@/types/emr/patient/patientApi";
+import { ObservationListRead } from "@/types/emr/observation/observation";
+import observationApi from "@/types/emr/observation/observationApi";
 import query from "@/Utils/request/query";
 import { HTTPError, PaginatedResponse } from "@/Utils/request/types";
 import { formatName } from "@/Utils/utils";
 
 interface GroupedObservations {
-  [key: string]: ObservationWithUser[];
+  [key: string]: ObservationListRead[];
 }
 
 function getDateKey(date: string) {
@@ -56,7 +56,7 @@ function formatDisplayTime(dateStr: string) {
 }
 
 function groupObservationsByDate(
-  observations: ObservationWithUser[],
+  observations: ObservationListRead[],
 ): GroupedObservations {
   return observations.reduce((groups: GroupedObservations, observation) => {
     const dateKey = getDateKey(observation.effective_datetime);
@@ -78,10 +78,10 @@ export const EncounterObservationsTab = () => {
   const { ref, inView } = useInView();
 
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
-    useInfiniteQuery<PaginatedResponse<ObservationWithUser>, HTTPError>({
+    useInfiniteQuery<PaginatedResponse<ObservationListRead>, HTTPError>({
       queryKey: ["infinite-observations", patientId, encounterId],
       queryFn: async ({ pageParam = 0 }) => {
-        const response = await query(patientApi.listObservations, {
+        const response = await query(observationApi.list, {
           pathParams: { patientId },
           queryParams: {
             encounter: encounterId,
@@ -90,7 +90,7 @@ export const EncounterObservationsTab = () => {
             offset: String(pageParam),
           },
         })({ signal: new AbortController().signal });
-        return response as PaginatedResponse<ObservationWithUser>;
+        return response;
       },
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
@@ -130,76 +130,68 @@ export const EncounterObservationsTab = () => {
   const dates = Object.keys(groupedObservations).sort().reverse();
 
   return (
-    <div className="mt-4 flex w-full flex-col gap-4">
-      <div className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
-        {dates.map((date, index) => (
-          <div key={date}>
-            <div className="mb-3 text-base font-semibold text-gray-700">
-              {formatDisplayDate(date)}
-            </div>
-            <div className="flex flex-col gap-3">
-              {groupedObservations[date]
-                .sort(
-                  (a, b) =>
-                    new Date(b.effective_datetime).getTime() -
-                    new Date(a.effective_datetime).getTime(),
-                )
-                .map((item: ObservationWithUser) => (
-                  <div key={item.id} className="flex gap-4">
-                    <div className="p-1 h-fit text-sm text-gray-700 bg-gray-100 rounded-md font-medium">
-                      {formatDisplayTime(item.effective_datetime)}:
-                    </div>
-                    <Card className="flex-1 p-3 border-gray-100 shadow-none bg-gray-50">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          {item.value.value && (
-                            <div className="mt-1 font-semibold whitespace-pre-wrap text-lg text-gray-950">
-                              {formatValue(item.value.value, item.value_type)}
-                            </div>
-                          )}
-                          {item.value.value_quantity && (
-                            <div className="mt-1 font-medium">
-                              {item.value.value_quantity.value}{" "}
-                              <div className="text-xs text-gray-600">
-                                {item.value.value_quantity.code.display}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        {item.note && (
-                          <div className="mt-1 text-sm text-gray-500">
-                            {item.note}
-                          </div>
-                        )}
-                        <div className="font-medium text-sm text-gray-600">
-                          {item.main_code.display || item.main_code.code}
-                        </div>
-                        {item.data_entered_by && (
-                          <div className="text-gray-600 text-sm">
-                            {t("filed_by")}{" "}
-                            <span className="font-medium text-gray-800">
-                              {formatName(item.data_entered_by)}
-                            </span>
+    <div className="flex flex-col mt-4 w-full max-h-[85vh] gap-4 px-3">
+      {dates.map((date, index) => (
+        <div key={date}>
+          <div className="mb-3 text-base font-semibold text-gray-700">
+            {formatDisplayDate(date)}
+          </div>
+          <div className="flex flex-col gap-3">
+            {groupedObservations[date]
+              .sort(
+                (a, b) =>
+                  new Date(b.effective_datetime).getTime() -
+                  new Date(a.effective_datetime).getTime(),
+              )
+              .map((item: ObservationListRead) => (
+                <div key={item.id} className="flex gap-4">
+                  <div className="p-1 h-fit text-sm text-gray-700 bg-gray-100 rounded-md font-medium">
+                    {formatDisplayTime(item.effective_datetime)}:
+                  </div>
+                  <Card className="flex-1 p-3 border-gray-100 shadow-none bg-gray-50">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        {item.value.value && (
+                          <div className="mt-1 font-semibold whitespace-pre-wrap text-lg text-gray-950">
+                            {formatValue(item.value.value, item.value_type)}
                           </div>
                         )}
                       </div>
-                    </Card>
-                  </div>
-                ))}
-            </div>
-            {index < dates.length - 1 && (
-              <div className="my-4 border-b border-dashed border-gray-200" />
-            )}
+                      {item.note && (
+                        <div className="mt-1 text-sm text-gray-500">
+                          {item.note}
+                        </div>
+                      )}
+                      <div className="font-medium text-sm text-gray-600">
+                        {item.main_code?.display ||
+                          item.main_code?.code ||
+                          t("unknown")}
+                      </div>
+                      {item.data_entered_by && (
+                        <div className="text-gray-600 text-sm">
+                          {t("filed_by")}{" "}
+                          <span className="font-medium text-gray-800">
+                            {formatName(item.data_entered_by)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                </div>
+              ))}
           </div>
-        ))}
-        {hasNextPage && (
-          <div ref={ref} className="flex justify-center p-4">
-            <div className="text-sm text-gray-500">
-              {isFetchingNextPage ? t("loading") : t("load_more")}
-            </div>
+          {index < dates.length - 1 && (
+            <div className="my-4 border-b border-dashed border-gray-200" />
+          )}
+        </div>
+      ))}
+      {hasNextPage && (
+        <div ref={ref} className="flex justify-center p-4">
+          <div className="text-sm text-gray-500">
+            {isFetchingNextPage ? t("loading") : t("load_more")}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

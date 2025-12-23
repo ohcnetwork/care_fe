@@ -26,8 +26,8 @@ import { stringifyNestedObject } from "@/Utils/utils";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   LocationForm,
-  LocationList,
   LocationMode,
+  LocationRead,
 } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
@@ -35,9 +35,9 @@ interface LocationSearchProps {
   facilityId: string;
   mode?: LocationMode;
   form?: LocationForm;
-  onSelect: (location: LocationList) => void;
+  onSelect: (location: LocationRead) => void;
   disabled?: boolean;
-  value: LocationList | null;
+  value: LocationRead | null;
 }
 
 export function LocationSearch({
@@ -63,7 +63,7 @@ export function LocationSearch({
     enabled: facilityId !== "preview",
   });
   const commandContent = (
-    <Command className="pt-1">
+    <Command className="pt-1" shouldFilter={false}>
       <CommandInput
         placeholder="Search locations..."
         value={search}
@@ -76,7 +76,7 @@ export function LocationSearch({
         {locations?.results.map((location) => (
           <CommandItem
             key={location.id}
-            value={location.name}
+            value={location.id}
             onSelect={() => {
               onSelect(location);
               setOpen(false);

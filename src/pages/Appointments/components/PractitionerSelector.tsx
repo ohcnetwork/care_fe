@@ -85,19 +85,25 @@ export const PractitionerSelector = ({
   const [currentOrganizationId, setCurrentOrganizationId] = useState<
     string | null
   >(null);
+  const [showAllOrgs, setShowAllOrgs] = useState(false);
   const isMobile = useBreakpoints({ default: true, sm: false });
 
-  // Fetch root organizations
+  // Fetch root organizations - default to user's departments only
   const { data: organizationsResponse } = useQuery({
-    queryKey: ["facilityOrganizations", facilityId],
-    queryFn: query(facilityOrganizationApi.list, {
-      pathParams: { facilityId },
-      queryParams: {
-        parent: "",
-        active: true,
-        limit: 100,
+    queryKey: ["facilityOrganizations", facilityId, showAllOrgs],
+    queryFn: query(
+      showAllOrgs
+        ? facilityOrganizationApi.list
+        : facilityOrganizationApi.listMine,
+      {
+        pathParams: { facilityId },
+        queryParams: {
+          parent: "",
+          active: true,
+          limit: 100,
+        },
       },
-    }),
+    ),
     enabled: open,
   });
 
@@ -141,10 +147,17 @@ export const PractitionerSelector = ({
 
   // Fetch all practitioners for search functionality
   const { data: allPractitioners } = useQuery({
-    queryKey: ["allPractitioners", facilityId, searchQuery],
+    queryKey: ["allPractitioners", facilityId, searchQuery, showAllOrgs],
     queryFn: query(scheduleApi.appointments.availableUsers, {
       pathParams: { facilityId },
-      queryParams: { limit: 10 },
+      queryParams: {
+        limit: 10,
+        ...(showAllOrgs
+          ? {}
+          : {
+              organization_ids: organizations.map((org) => org.id).join(","),
+            }),
+      },
     }),
     enabled: open && !!searchQuery && searchQuery.length > 0,
   });
@@ -285,11 +298,21 @@ export const PractitionerSelector = ({
         <div className="flex-1 flex flex-col">
           {/* Header */}
           <div className="px-4 py-3 border-b bg-gray-50 rounded-t-md">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-600">
-                {t("select_practitioners")}
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-600">
+                  {t("select_practitioners")}
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAllOrgs(!showAllOrgs)}
+                className="h-7 text-xs"
+              >
+                {showAllOrgs ? t("all_dept") : t("my_dept")}
+              </Button>
             </div>
           </div>
 
@@ -305,7 +328,7 @@ export const PractitionerSelector = ({
               </div>
             </div>
 
-            <CommandList className="max-h-[400px]">
+            <CommandList className="md:max-h-[30dvh] overflow-y-auto">
               <CommandEmpty>
                 {searchQuery ? (
                   <div className="p-6 text-center text-gray-500">
@@ -690,6 +713,7 @@ export const PractitionerSelector = ({
           <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
           <PopoverContent
             align="start"
+            side="bottom"
             className={cn(
               "p-0",
               !multiple && "w-[var(--radix-popover-trigger-width)]",

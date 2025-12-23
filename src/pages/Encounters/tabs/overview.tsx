@@ -3,12 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { ObservationPlotConfig } from "@/components/Common/Charts/ObservationChart";
 import QuestionnaireResponsesList from "@/components/Facility/ConsultationDetails/QuestionnaireResponsesList";
 import { AllergyList } from "@/components/Patient/allergy/list";
 import { DiagnosisList } from "@/components/Patient/diagnosis/list";
 import { SymptomsList } from "@/components/Patient/symptoms/list";
 import { VitalsList } from "@/components/Patient/vitals/list";
+import { ObservationPlotConfig } from "@/types/emr/observation/observation";
 
 import { ClinicalHistoryOverview } from "@/pages/Encounters/tabs/overview/clinical-history-overview";
 import { QuickActions } from "@/pages/Encounters/tabs/overview/quick-actions";
@@ -23,11 +23,13 @@ export const EncounterOverviewTab = () => {
     selectedEncounterId: encounterId,
     canReadSelectedEncounter: canAccess,
     canWriteSelectedEncounter: canWrite,
+    canReadClinicalData,
   } = useEncounter();
 
   const { data: plotsConfig } = useQuery<ObservationPlotConfig>({
     queryKey: ["plots-config"],
     queryFn: () => fetch(careConfig.plotsConfigUrl).then((res) => res.json()),
+    enabled: canReadClinicalData,
   });
 
   const vitalGroups =
@@ -35,50 +37,56 @@ export const EncounterOverviewTab = () => {
 
   return (
     <div className="flex gap-3 @max-md:w-full">
-      <div className="flex-1 xl:pr-3 overflow-y-auto xl:h-[calc(100vh-14rem-var(--encounter-header-offset))]">
-        <div className="flex flex-col gap-6">
-          {canWrite && <QuickActions />}
-          <ClinicalHistoryOverview />
-          <div className="xl:hidden">
-            <SummaryPanel />
-          </div>
+      {canReadClinicalData && (
+        <div className="flex-1 xl:pr-3 overflow-y-auto xl:h-[calc(100vh-14rem-var(--encounter-header-offset))]">
+          <div className="flex flex-col gap-6">
+            {canWrite && <QuickActions />}
+            {<ClinicalHistoryOverview />}
+            <div className="xl:hidden">
+              <SummaryPanel />
+            </div>
 
-          <div className="flex flex-col gap-8 overflow-x-auto">
-            {/* Show preview of devices associated with the encounter */}
-            {encounter && <EncounterOverviewDevices encounter={encounter} />}
-            {/* Clinical informations */}
-            <AllergyList
-              patientId={patientId}
-              encounterId={encounterId}
-              readOnly={!canWrite}
-              encounterStatus={encounter?.status}
-              showViewEncounter={false}
-            />
-            <SymptomsList
-              patientId={patientId}
-              encounterId={encounterId}
-              readOnly={!canWrite}
-              showViewEncounter={false}
-            />
-            <DiagnosisList
-              patientId={patientId}
-              encounterId={encounterId}
-              readOnly={!canWrite}
-              showViewEncounter={false}
-            />
-            <VitalsList
-              patientId={patientId}
-              encounterId={encounterId}
-              codeGroups={vitalGroups}
-            />
-            <QuestionnaireResponsesList
-              encounterId={encounterId}
-              patientId={patientId}
-              canAccess={canAccess}
-            />
+            {
+              <div className="flex flex-col gap-8 overflow-x-auto">
+                {/* Show preview of devices associated with the encounter */}
+                {encounter && (
+                  <EncounterOverviewDevices encounter={encounter} />
+                )}
+                {/* Clinical informations */}
+                <AllergyList
+                  patientId={patientId}
+                  encounterId={encounterId}
+                  readOnly={!canWrite}
+                  encounterStatus={encounter?.status}
+                  showViewEncounter={false}
+                />
+                <SymptomsList
+                  patientId={patientId}
+                  encounterId={encounterId}
+                  readOnly={!canWrite}
+                  showViewEncounter={false}
+                />
+                <DiagnosisList
+                  patientId={patientId}
+                  encounterId={encounterId}
+                  readOnly={!canWrite}
+                  showViewEncounter={false}
+                />
+                <VitalsList
+                  patientId={patientId}
+                  encounterId={encounterId}
+                  codeGroups={vitalGroups}
+                />
+                <QuestionnaireResponsesList
+                  encounterId={encounterId}
+                  patientId={patientId}
+                  canAccess={canAccess}
+                />
+              </div>
+            }
           </div>
         </div>
-      </div>
+      )}
 
       <ScrollArea className="w-72 hidden xl:block h-[calc(100vh-14rem-var(--encounter-header-offset))]">
         <SummaryPanel />
