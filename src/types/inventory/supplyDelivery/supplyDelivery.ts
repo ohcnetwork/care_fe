@@ -58,6 +58,7 @@ export interface SupplyDeliveryUpsert extends Omit<SupplyDeliveryBase, "id"> {
 export interface SupplyDeliveryUpdate {
   status: SupplyDeliveryStatus;
   supplied_item_condition?: SupplyDeliveryCondition;
+  extensions: Record<string, unknown>;
 }
 
 export interface SupplyDeliveryRead extends SupplyDeliveryBase {

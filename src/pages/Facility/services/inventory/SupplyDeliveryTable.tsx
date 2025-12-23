@@ -81,13 +81,15 @@ export function SupplyDeliveryTable({
     mutationFn: ({
       deliveryId,
       status,
+      extensions,
     }: {
       deliveryId: string;
       status: SupplyDeliveryStatus;
+      extensions: Record<string, unknown>;
     }) => {
       return mutate(supplyDeliveryApi.updateSupplyDelivery, {
         pathParams: { supplyDeliveryId: deliveryId },
-      })({ status });
+      })({ status, extensions: extensions || {} });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["supplyDeliveries"] });
@@ -301,6 +303,7 @@ export function SupplyDeliveryTable({
                             updateDeliveryStatus({
                               deliveryId: delivery.id,
                               status: SupplyDeliveryStatus.entered_in_error,
+                              extensions: delivery.extensions,
                             })
                           }
                           className="w-full flex justify-stretch"
@@ -316,6 +319,7 @@ export function SupplyDeliveryTable({
                             updateDeliveryStatus({
                               deliveryId: delivery.id,
                               status: SupplyDeliveryStatus.abandoned,
+                              extensions: delivery.extensions,
                             })
                           }
                           className="w-full flex justify-stretch"
