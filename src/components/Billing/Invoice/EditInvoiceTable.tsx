@@ -270,7 +270,10 @@ export function EditInvoiceTable({
         conditions:
           selectedComponent.conditions?.map((condition) => ({
             ...condition,
-            _conditionType: `${condition.metric}_${condition.operation}`,
+            _conditionType: getConditionDiscriminatorValue(
+              condition.metric,
+              condition.operation,
+            ),
           })) || [],
       });
     }
