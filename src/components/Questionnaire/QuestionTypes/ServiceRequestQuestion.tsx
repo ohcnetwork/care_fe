@@ -126,8 +126,8 @@ interface ServiceRequestFormProps {
   questionId?: string;
   index?: number;
   isPreview?: boolean;
+  activityDefinition?: ActivityDefinitionReadSpec;
   facilityId?: string;
-  activityDefinitionData?: ActivityDefinitionReadSpec;
 }
 
 function ServiceRequestForm({
@@ -140,8 +140,8 @@ function ServiceRequestForm({
   questionId,
   index,
   isPreview = false,
+  activityDefinition,
   facilityId = "",
-  activityDefinitionData,
 }: ServiceRequestFormProps) {
   const { t } = useTranslation();
 
@@ -193,13 +193,13 @@ function ServiceRequestForm({
           </Badge>
         </div>
       )}
-      {activityDefinitionData?.locations &&
-        activityDefinitionData.locations.length > 0 && (
+      {activityDefinition?.locations &&
+        activityDefinition.locations.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap col-span-1 sm:col-span-2 xl:col-span-4">
             <span className="font-medium text-sm text-gray-700">
               {t("locations")}:
             </span>
-            {activityDefinitionData.locations.map((location) => (
+            {activityDefinition.locations.map((location) => (
               <Badge
                 key={location.id}
                 variant="outline"
@@ -441,13 +441,6 @@ function ServiceRequestForm({
   );
 }
 
-const normalizeLocations = (
-  locations: string[] | Array<{ id: string }> | undefined,
-): string[] => {
-  if (!locations) return [];
-  return locations.map((loc) => (typeof loc === "string" ? loc : loc.id));
-};
-
 export function ServiceRequestQuestion({
   questionnaireResponse,
   updateQuestionnaireResponseCB,
@@ -562,14 +555,13 @@ export function ServiceRequestQuestion({
       (sr: ServiceRequestApplyActivityDefinitionSpec, i: number) => {
         if (i !== index) return sr;
 
+        const { locations: _locations, ...otherUpdates } = updates;
+
         return {
           ...sr,
           service_request: {
             ...sr.service_request,
-            ...updates,
-            locations: updates.locations
-              ? normalizeLocations(updates.locations)
-              : sr.service_request.locations,
+            ...otherUpdates,
           },
         };
       },
@@ -588,14 +580,13 @@ export function ServiceRequestQuestion({
   ) => {
     if (!previewServiceRequest) return;
 
+    const { locations: _locations, ...otherUpdates } = updates;
+
     setPreviewServiceRequest({
       ...previewServiceRequest,
       service_request: {
         ...previewServiceRequest.service_request,
-        ...updates,
-        locations: updates.locations
-          ? normalizeLocations(updates.locations)
-          : previewServiceRequest.service_request.locations,
+        ...otherUpdates,
       },
     });
   };
@@ -638,7 +629,7 @@ export function ServiceRequestQuestion({
           questionId={questionnaireResponse.question_id}
           index={index}
           facilityId={facilityId}
-          activityDefinitionData={
+          activityDefinition={
             activityDefinitionsMap[serviceRequest.activity_definition]
           }
         />
@@ -667,6 +658,7 @@ export function ServiceRequestQuestion({
       {previewServiceRequest && !isLoadingSelectedAD && (
         <ServiceRequestForm
           serviceRequest={previewServiceRequest}
+          activityDefinition={selectedActivityDefinitionData}
           onUpdate={handlePreviewServiceRequestUpdate}
           onRemove={() => {
             setPreviewServiceRequest(null);
@@ -676,11 +668,6 @@ export function ServiceRequestQuestion({
           disabled={disabled}
           isPreview
           facilityId={facilityId}
-          activityDefinitionData={
-            selectedActivityDefinition
-              ? activityDefinitionsMap[selectedActivityDefinition]
-              : undefined
-          }
         />
       )}
 
