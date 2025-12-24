@@ -64,7 +64,7 @@ function extractVitals(
         const vitalField = ob.find(
           (fields) => fields.main_code?.code === code.code,
         );
-        vitalsObject[String(code.display!)] = {
+        vitalsObject[code.display] = {
           value: vitalField?.value.value ?? undefined,
           unit: vitalField?.value.unit?.code,
         };
