@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import {
   PatientListRead,
   PatientRead,
@@ -39,7 +40,10 @@ export const PatientTagsDisplay = ({
 
   return (
     <div
-      className={`flex flex-col gap-1 text-sm font-medium w-full ${className}`}
+      className={cn(
+        "flex flex-col gap-1 text-sm font-medium w-full",
+        className,
+      )}
     >
       {showLabel && <span className="text-gray-700">{t("patient_tags")}:</span>}
       <div className="flex flex-wrap gap-2 text-sm whitespace-nowrap">

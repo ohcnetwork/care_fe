@@ -30,7 +30,9 @@ export const PatientInfoHoverCard = ({
   const hasPatientTags =
     "instance_tags" in patient &&
     (patient.instance_tags.length > 0 ||
-      (patient.facility_tags && patient.facility_tags.length > 0));
+      ("facility_tags" in patient &&
+        patient.facility_tags &&
+        patient.facility_tags.length > 0));
 
   return (
     <>
