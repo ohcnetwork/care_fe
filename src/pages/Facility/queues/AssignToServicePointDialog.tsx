@@ -91,34 +91,37 @@ export function AssignToServicePointDialog({
           onValueChange={setSelectedSubQueueId}
         >
           {assignedServicePoints.map((subQueue) => (
-            <Label
+            <div
               key={subQueue.id}
-              htmlFor={subQueue.id}
               className={cn(
                 "flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer",
                 subQueue.id === token.sub_queue?.id && "hidden",
               )}
+              onClick={() => setSelectedSubQueueId(subQueue.id)}
             >
               <RadioGroupItem value={subQueue.id} id={subQueue.id} />
-              <span className="flex-1 text-sm font-medium">
+              <Label
+                htmlFor={subQueue.id}
+                className="flex-1 text-sm font-medium cursor-pointer"
+              >
                 {subQueue.name}
-              </span>
+              </Label>
               <span className="text-sm text-gray-600">
                 {preferredServicePointCategories?.[subQueue.id]?.name ??
                   t("all")}
               </span>
-            </Label>
+            </div>
           ))}
           {assignedServicePoints.length === 0 && (
-            <Label
-              htmlFor="none"
-              className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-not-allowed"
-            >
+            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-not-allowed">
               <RadioGroupItem value="none" id="none" disabled />
-              <span className="flex-1 text-sm font-medium text-gray-500">
+              <Label
+                htmlFor="none"
+                className="flex-1 text-sm font-medium text-gray-500 cursor-not-allowed"
+              >
                 {t("no_service_points_available")}
-              </span>
-            </Label>
+              </Label>
+            </div>
           )}
         </RadioGroup>
         <div className="flex">
