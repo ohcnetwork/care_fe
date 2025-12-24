@@ -23,7 +23,7 @@ export function PatientHeader({
   const { t } = useTranslation();
 
   return (
-    <Card
+    <div
       className={cn(
         "p-2 rounded-none shadow-none border-none flex flex-col md:flex-row md:justify-between bg-transparent gap-6",
         className,
@@ -74,7 +74,7 @@ export function PatientHeader({
           )}
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
 
