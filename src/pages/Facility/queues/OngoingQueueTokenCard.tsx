@@ -56,11 +56,7 @@ export function OngoingQueueTokenCard({
     useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
-  const {
-    mutate: updateToken,
-    mutateAsync: updateTokenAsync,
-    isPending,
-  } = useMutation({
+  const { mutate: updateToken, isPending } = useMutation({
     mutationFn: mutate(tokenApi.update, {
       pathParams: {
         facility_id: facilityId,
@@ -91,7 +87,7 @@ export function OngoingQueueTokenCard({
     },
   });
 
-  const handleAssignToServicePoint = async () => {
+  const handleAssignToServicePoint = () => {
     if (!token) return;
 
     const availableServicePoints = assignedServicePoints.filter(
@@ -99,7 +95,7 @@ export function OngoingQueueTokenCard({
     );
 
     if (availableServicePoints.length === 1) {
-      await updateTokenAsync({
+      updateToken({
         sub_queue: availableServicePoints[0].id,
         status: TokenStatus.CREATED,
         note: token.note,
