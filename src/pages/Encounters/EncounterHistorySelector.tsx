@@ -428,7 +428,7 @@ const EncounterSheetTrigger = () => {
 
   return (
     <Card className="relative rounded-md cursor-pointer w-full lg:w-80 bg-white border-primary-600">
-      <CardContent className="flex flex-col px-3 py-2 gap-1">
+      <CardContent className="flex flex-col px-4 py-3 gap-2">
         <div className="absolute right-0 h-8 w-1 bg-primary-600 rounded-l inset-y-1/2 -translate-y-1/2" />
         <div className="flex justify-between items-start">
           <div className="flex flex-col items-start gap-1">
