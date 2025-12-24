@@ -85,7 +85,7 @@ export function OngoingQueueTokenCard({
       <ContextMenuTrigger ref={contextMenuTriggerRef}>
         <div
           className={cn(
-            "relative flex items-center bg-gray-50 rounded-lg shadow p-1",
+            "relative grid grid-cols-[1fr_auto_auto] bg-gray-50 rounded-lg shadow p-1",
             token?.status === TokenStatus.IN_PROGRESS &&
               "border border-primary-500",
           )}
@@ -106,7 +106,7 @@ export function OngoingQueueTokenCard({
                   ).toString()}`
                 : "#"
             }
-            className="flex gap-3 items-center p-3 flex-1 min-w-0 hover:bg-gray-100 transition-colors rounded-l-lg"
+            className="flex gap-3 items-center p-3 min-w-0 hover:bg-gray-100 transition-colors rounded-l-lg"
           >
             <div className="flex flex-col min-w-0 flex-1">
               {token ? (
@@ -159,14 +159,11 @@ export function OngoingQueueTokenCard({
               {options}
             </div>
           </Link>
-          <Separator
-            orientation="vertical"
-            className="data-[orientation=vertical]:h-24 mx-1"
-          />
+          <Separator orientation="vertical" className="self-stretch mx-1" />
           <Button
             variant="ghost"
             size="icon"
-            className="py-12"
+            className="h-full rounded-r-lg"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
