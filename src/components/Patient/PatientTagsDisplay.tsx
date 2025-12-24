@@ -19,11 +19,10 @@ interface PatientTagsDisplayProps {
 export const PatientTagsDisplay = ({
   patient,
   showLabel = true,
-  className = "",
+  className,
 }: PatientTagsDisplayProps) => {
   const { t } = useTranslation();
 
-  // Combine instance and facility tags
   const allTags: TagConfig[] = [];
 
   if ("instance_tags" in patient) {
@@ -34,7 +33,6 @@ export const PatientTagsDisplay = ({
     allTags.push(...patient.facility_tags);
   }
 
-  // Don't render if no tags
   if (allTags.length === 0) {
     return null;
   }

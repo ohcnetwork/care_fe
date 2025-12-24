@@ -56,13 +56,7 @@ export function PatientHeader({
                   </span>
                 </div>
               ))}
-          {"instance_tags" in patient &&
-            (patient.instance_tags.length > 0 ||
-              ("facility_tags" in patient &&
-                patient.facility_tags &&
-                patient.facility_tags.length > 0)) && (
-              <PatientTagsDisplay patient={patient} className="text-xs" />
-            )}
+          <PatientTagsDisplay patient={patient} className="text-xs flex-1" />
         </div>
       </div>
       {actions}

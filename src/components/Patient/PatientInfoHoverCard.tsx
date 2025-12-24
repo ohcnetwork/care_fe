@@ -27,6 +27,11 @@ export const PatientInfoHoverCard = ({
     `/facility/${facilityId}/patients/verify`,
   );
 
+  const hasPatientTags =
+    "instance_tags" in patient &&
+    (patient.instance_tags.length > 0 ||
+      (patient.facility_tags && patient.facility_tags.length > 0));
+
   return (
     <>
       <div className="flex justify-between">
@@ -134,15 +139,11 @@ export const PatientInfoHoverCard = ({
             </div>
           </div>
         </div>
-        {"instance_tags" in patient &&
-          (patient.instance_tags.length > 0 ||
-            ("facility_tags" in patient &&
-              patient.facility_tags &&
-              patient.facility_tags.length > 0)) && (
-            <div className="flex items-start border-t border-gray-200 pt-2">
-              <PatientTagsDisplay patient={patient} />
-            </div>
-          )}
+        {hasPatientTags && (
+          <div className="flex items-start border-t border-gray-200 pt-2">
+            <PatientTagsDisplay patient={patient} />
+          </div>
+        )}
       </div>
     </>
   );
