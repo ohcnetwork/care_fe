@@ -440,7 +440,6 @@ const EncounterSheetTrigger = () => {
             </span>
           </div>
           <div className="flex flex-col items-start">
-            {/* TOP ROW Ongoing Chevron */}
             <div className="flex items-center gap-1 -mt-2">
               <span className="text-sm text-gray-600 whitespace-nowrap">
                 {encounter.period.start && (
@@ -459,8 +458,6 @@ const EncounterSheetTrigger = () => {
                   <span> - {t("ongoing")}</span>
                 )}
               </span>
-
-              {/* Chevron */}
               <div
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "icon" }),
@@ -470,8 +467,6 @@ const EncounterSheetTrigger = () => {
                 <ChevronDown />
               </div>
             </div>
-
-            {/* SECOND ROW Badge */}
             <Badge
               variant={ENCOUNTER_STATUS_COLORS[encounter.status]}
               size="sm"
