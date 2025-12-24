@@ -8,13 +8,18 @@ type BackButtonProps = {
   to?: string;
 } & React.ComponentProps<typeof Button>;
 
-export default function BackButton({ to, ...props }: BackButtonProps) {
+export default function BackButton({
+  to,
+  "aria-label": ariaLabel,
+  ...props
+}: BackButtonProps) {
   const { goBack } = useAppHistory();
 
   return (
     <Button
       variant="outline"
       data-shortcut-id="go-back"
+      {...(ariaLabel ? { "aria-label": ariaLabel } : {})}
       onClick={() => {
         if (to) {
           navigate(to);

@@ -205,7 +205,7 @@ export default function AppointmentDetail(props: Props) {
     <Page title={t("appointment_details")} hideTitleOnPage>
       <div className="container mx-auto max-w-7xl mt-4">
         <div className="flex gap-2 items-center mb-2">
-          <BackButton size="icon" variant="ghost">
+          <BackButton size="icon" variant="ghost" aria-label={t("go_back")}>
             <ChevronLeft />
           </BackButton>
           <h4 className="font-semibold text-gray-800">
@@ -844,7 +844,7 @@ const AppointmentActions = ({
         {/* Actions Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" aria-label={t("open_menu")}>
               <DotsVerticalIcon className="size-4" />
             </Button>
           </DropdownMenuTrigger>

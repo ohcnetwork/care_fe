@@ -36,18 +36,22 @@ export const LoginHeader = () => {
   if (isLoggedIn) {
     return (
       <header className="w-full">
-        <div className="flex justify-end items-center gap-2">
+        <div className="flex items-center justify-end gap-2">
           <Button
             variant="ghost"
-            className="text-sm font-medium hover:bg-gray-100 px-6"
+            className="px-6 text-sm font-medium hover:bg-gray-100"
             onClick={() => navigate("/patient/home")}
           >
             {t("home")}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Avatar name={"User"} className="size-7 rounded-full" />
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t("open_user_menu")}
+              >
+                <Avatar name="User" className="size-7 rounded-full" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -55,7 +59,7 @@ export const LoginHeader = () => {
                 <span className="font-medium">{tokenData.phoneNumber}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="text-red-600 focus:text-red-600 cursor-pointer"
+                className="cursor-pointer text-red-600 focus:text-red-600"
                 onClick={signOut}
               >
                 <CareIcon icon="l-signout" className="mr-2 size-4" />

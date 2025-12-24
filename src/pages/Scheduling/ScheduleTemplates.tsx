@@ -163,7 +163,7 @@ const ScheduleTemplateItem = ({
                 setQParams({ ...qParams, edit: open ? template.id : null })
               }
               trigger={
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" aria-label={t("edit")}>
                   <Edit3Icon className="size-4" />
                 </Button>
               }

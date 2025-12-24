@@ -100,7 +100,12 @@ export function ClinicalHistoryPage({
           )}
         </div>
         <div>
-          <Button variant="outline" onClick={handleClose} size="icon">
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            size="icon"
+            aria-label="close"
+          >
             <X className="size-4" />
           </Button>
         </div>
