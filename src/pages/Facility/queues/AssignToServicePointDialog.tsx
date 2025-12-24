@@ -110,12 +110,15 @@ export function AssignToServicePointDialog({
             </Label>
           ))}
           {assignedServicePoints.length === 0 && (
-            <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-not-allowed">
+            <Label
+              htmlFor="none"
+              className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-not-allowed"
+            >
               <RadioGroupItem value="none" id="none" disabled />
               <span className="flex-1 text-sm font-medium text-gray-500">
                 {t("no_service_points_available")}
               </span>
-            </div>
+            </Label>
           )}
         </RadioGroup>
         <div className="flex">
