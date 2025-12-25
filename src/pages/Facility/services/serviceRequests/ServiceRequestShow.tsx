@@ -562,6 +562,7 @@ export default function ServiceRequestShow({
                   )}
                   serviceRequestId={serviceRequestId}
                   disableEdit={disableEdit}
+                  observationRequirements={observationRequirements}
                 />
               </CardContent>
             </Card>

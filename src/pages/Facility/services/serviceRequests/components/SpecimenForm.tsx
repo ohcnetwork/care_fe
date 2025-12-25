@@ -23,6 +23,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 
 import mutate from "@/Utils/request/mutate";
 import { Code } from "@/types/base/code/code";
+import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
 import {
   CollectionSpec,
   SpecimenFromDefinitionCreate,
@@ -39,6 +40,7 @@ interface SpecimenFormProps {
   draftSpecimen: SpecimenRead | undefined;
   serviceRequestId: string;
   disableEdit: boolean;
+  observationRequirements?: ObservationDefinitionReadSpec[];
 }
 
 export function SpecimenForm({
@@ -48,11 +50,14 @@ export function SpecimenForm({
   draftSpecimen,
   serviceRequestId,
   disableEdit,
+  observationRequirements = [],
 }: SpecimenFormProps) {
   const { t } = useTranslation();
   const authUser = useAuthUser();
   const currentUserId = authUser.id;
   const queryClient = useQueryClient();
+  const defaultPermittedUnit =
+    observationRequirements[0]?.permitted_unit || null;
 
   const [identifierMode, setIdentifierMode] = useState<"scan" | "generate">(
     "generate",
@@ -83,7 +88,9 @@ export function SpecimenForm({
         body_site: null,
         collector: currentUserId || null, // Use user ID, default to null if not available yet
         collected_date_time: new Date().toISOString(),
-        quantity: null,
+        quantity: defaultPermittedUnit
+          ? { value: 0, unit: defaultPermittedUnit }
+          : null,
         procedure: null,
         fasting_status_codeable_concept: null,
         fasting_status_duration: null,
