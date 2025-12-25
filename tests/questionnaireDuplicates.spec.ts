@@ -86,128 +86,99 @@ test.describe("Questionnaire Duplicate Checks", () => {
     });
 
     // Mock Empty Lists initially
-    await page.route("**/api/v1/patient/*/allergy_intolerance/**", (route) =>
-      route.fulfill({ json: { results: [] } }),
+    // Mock Mutation endpoints (POST/PUT)
+    await page.route(
+      "**/api/v1/patient/*/allergy_intolerance/**",
+      async (route) => {
+        if (route.request().method() !== "GET") {
+          await route.fulfill({ status: 200, json: {} });
+        } else {
+          await route.fulfill({ json: { results: [] } });
+        }
+      },
     );
-    await page.route("**/api/v1/patient/*/diagnosis/**", (route) =>
-      route.fulfill({ json: { results: [] } }),
-    );
-    await page.route("**/api/v1/patient/*/symptom/**", (route) =>
-      route.fulfill({ json: { results: [] } }),
-    );
+    await page.route("**/api/v1/patient/*/diagnosis/**", async (route) => {
+      if (route.request().method() !== "GET") {
+        await route.fulfill({ status: 200, json: {} });
+      } else {
+        await route.fulfill({ json: { results: [] } });
+      }
+    });
+    await page.route("**/api/v1/patient/*/symptom/**", async (route) => {
+      if (route.request().method() !== "GET") {
+        await route.fulfill({ status: 200, json: {} });
+      } else {
+        await route.fulfill({ json: { results: [] } });
+      }
+    });
 
     await page.goto(
       "/facility/preview_facility_id/patient/preview_patient_id/encounter/preview_encounter_id/questionnaire/preview_questionnaire_id",
     );
   });
 
-  test("should prevent duplicate allergies unless resolved", async ({
-    page,
-  }) => {
-    // Mock the questionnaire response to already have an allergy
-    await page.evaluate((_allergy) => {
-      // Simulate existing data if possible, or we just add one then try adding again
-    }, {}); // Passing an empty object as existingAllergy is no longer used
+  const testDuplicateCheck = async (page: any, type: string, label: string) => {
+    const addText = `Add ${label}`;
+    const alreadyExistsText = `${label} already exists!`;
 
-    // Since we can't easily inject state into the React component from here without complex mocking of the response prop,
-    // we will simulate user interaction to add the same allergy twice.
-
-    // 1. Add first allergy
-    await page.getByText("Add Allergy", { exact: false }).click();
+    // 1. Add first item
+    await page.getByText(addText, { exact: false }).click();
     await page.getByPlaceholder("Search").fill("Test");
     await page.getByText("Test Condition 1").click(); // leveraging the valueset mock
-    // Wait for it to be added
     await expect(page.getByText("Test Condition 1")).toBeVisible();
 
-    // 2. Try to add the same allergy again
-    await page.getByText("Add Allergy", { exact: false }).click();
+    // 2. Try to add the same item again
+    await page.getByText(addText, { exact: false }).click();
     await page.getByPlaceholder("Search").fill("Test");
     await page.getByText("Test Condition 1").click();
 
     // Expect warning toast
-    await expect(page.getByText("Allergy already exists!")).toBeVisible();
-    await page
-      .getByLabel("Close")
-      .first()
-      .click({ timeout: 5000 })
-      .catch(() => {}); // Close drawer/dialog if open
+    await expect(page.getByText(alreadyExistsText)).toBeVisible();
 
-    // 3. Mark the existing allergy as resolved
-    await page.getByRole("button", { name: "Mark Resolved" }).first().click(); // Assuming there is a button/menu item for this directly or via menu
-    // If it's in a menu:
-    // await page.getByRole("button", { name: "Actions" }).click();
-    // await page.getByText("Mark Resolved").click();
+    // Close any dialogs if present (without swallowing potential errors indiscriminately)
+    const closeButton = page.getByLabel("Close").first();
+    if (await closeButton.isVisible()) {
+      await closeButton.click();
+    }
+
+    // 3. Mark the existing item as resolved
+    // For Allergy, it might be a button. For others, it's a status dropdown.
+    if (type === "Allergy") {
+      await page.getByRole("button", { name: "Mark Resolved" }).first().click();
+    } else {
+      await page.getByText("Active").first().click();
+      await page.getByText("Resolved").click();
+    }
+
+    // Verify status changed to Resolved
+    if (type !== "Allergy") {
+      await expect(page.getByText("Resolved").first()).toBeVisible();
+    }
 
     // 4. Try to add it again - should succeed now
-    await page.getByText("Add Allergy", { exact: false }).click();
+    await page.getByText(addText, { exact: false }).click();
     await page.getByPlaceholder("Search").fill("Test");
     await page.getByText("Test Condition 1").click();
 
-    // Expect two instances now (or at least no warning) and 1 resolved, 1 active
+    // Expect two instances now
     await expect(page.getByText("Test Condition 1")).toHaveCount(2);
+  };
+
+  test("should prevent duplicate allergies unless resolved", async ({
+    page,
+  }) => {
+    await testDuplicateCheck(page, "Allergy", "Allergy");
   });
 
   test("should prevent duplicate diagnoses unless resolved", async ({
     page,
   }) => {
-    // 1. Add first diagnosis
-    await page.getByText("Add Diagnosis", { exact: false }).click();
-    await page.getByPlaceholder("Search").fill("Test");
-    await page.getByText("Test Condition 1").click();
-    await expect(page.getByText("Test Condition 1")).toBeVisible();
-
-    // 2. Try to add again
-    await page.getByText("Add Diagnosis", { exact: false }).click();
-    await page.getByPlaceholder("Search").fill("Test");
-    await page.getByText("Test Condition 1").click();
-    await expect(page.getByText("Diagnosis already exists!")).toBeVisible();
-
-    // 3. Resolve existing
-    // Need to find how to resolve. Diagnosis has a status dropdown.
-    // Actually DiagnosisQuestion uses our custom Select component which might be hard to select by standard html select.
-    // It renders as a Trigger.
-    // Let's assume there is a way to change status.
-    // Based on code: <ClinicalStatusSelect ... /> -> SelectTrigger -> SelectContent
-
-    // Find the status selector for the first row
-    // It should currently say "Active"
-    await page.getByText("Active").first().click();
-    await page.getByText("Resolved").click();
-
-    // 4. Try add again
-    await page.getByText("Add Diagnosis", { exact: false }).click();
-    await page.getByPlaceholder("Search").fill("Test");
-    await page.getByText("Test Condition 1").click();
-
-    // Should succeed
-    await expect(page.getByText("Test Condition 1")).toHaveCount(2);
+    await testDuplicateCheck(page, "Diagnosis", "Diagnosis");
   });
 
   test("should prevent duplicate symptoms unless resolved", async ({
     page,
   }) => {
-    // 1. Add first symptom
-    await page.getByText("Add Symptom", { exact: false }).click();
-    await page.getByPlaceholder("Search").fill("Test");
-    await page.getByText("Test Condition 1").click();
-    await expect(page.getByText("Test Condition 1")).toBeVisible();
-
-    // 2. Try to add again
-    await page.getByText("Add Symptom", { exact: false }).click();
-    await page.getByPlaceholder("Search").fill("Test");
-    await page.getByText("Test Condition 1").click();
-    await expect(page.getByText("Symptom already exists!")).toBeVisible();
-
-    // 3. Resolve existing
-    await page.getByText("Active").first().click();
-    await page.getByText("Resolved").click();
-
-    // 4. Try add again
-    await page.getByText("Add Symptom", { exact: false }).click();
-    await page.getByPlaceholder("Search").fill("Test");
-    await page.getByText("Test Condition 1").click();
-
-    // Should succeed
-    await expect(page.getByText("Test Condition 1")).toHaveCount(2);
+    await testDuplicateCheck(page, "Symptom", "Symptom");
   });
 });
