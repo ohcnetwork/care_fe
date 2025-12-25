@@ -57,7 +57,7 @@ export function SpecimenForm({
   const currentUserId = authUser.id;
   const queryClient = useQueryClient();
   const defaultPermittedUnit =
-    observationRequirements[0]?.permitted_unit || null;
+    observationRequirements[0]?.permitted_unit ?? null;
 
   const [identifierMode, setIdentifierMode] = useState<"scan" | "generate">(
     "generate",
