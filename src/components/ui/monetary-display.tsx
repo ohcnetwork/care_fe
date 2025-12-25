@@ -77,9 +77,11 @@ function MonetaryAmountInput({
   };
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="relative">
       {!hideCurrency && (
-        <span className="text-lg font-medium">{CURRENCY_SYMBOL}</span>
+        <span className="font-medium absolute left-3 top-1/2 -translate-y-1/2 text-gray-600">
+          {CURRENCY_SYMBOL}
+        </span>
       )}
       <Input
         type="text"
@@ -89,7 +91,7 @@ function MonetaryAmountInput({
         data-care-input="monetary-amount"
         {...props}
         onChange={handleChange}
-        className={cn("text-right", props.className)}
+        className={cn(!hideCurrency && "pl-8", props.className)}
       />
     </div>
   );
