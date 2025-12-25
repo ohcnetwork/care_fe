@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { type Page, expect, test } from "@playwright/test";
 
 test.describe("Questionnaire Duplicate Checks", () => {
   test.beforeEach(async ({ page }) => {
@@ -91,7 +91,21 @@ test.describe("Questionnaire Duplicate Checks", () => {
       "**/api/v1/patient/*/allergy_intolerance/**",
       async (route) => {
         if (route.request().method() !== "GET") {
-          await route.fulfill({ status: 200, json: {} });
+          await route.fulfill({
+            status: 200,
+            json: {
+              id: "mock-allergy-id",
+              code: {
+                code: "code1",
+                display: "Test Condition 1",
+                system: "http://snomed.info/sct",
+              },
+              clinical_status: "active",
+              verification_status: "confirmed",
+              category: "medication",
+              criticality: "low",
+            },
+          });
         } else {
           await route.fulfill({ json: { results: [] } });
         }
@@ -99,14 +113,41 @@ test.describe("Questionnaire Duplicate Checks", () => {
     );
     await page.route("**/api/v1/patient/*/diagnosis/**", async (route) => {
       if (route.request().method() !== "GET") {
-        await route.fulfill({ status: 200, json: {} });
+        await route.fulfill({
+          status: 200,
+          json: {
+            id: "mock-diagnosis-id",
+            code: {
+              code: "code1",
+              display: "Test Condition 1",
+              system: "http://snomed.info/sct",
+            },
+            clinical_status: "active",
+            verification_status: "confirmed",
+            severity: "moderate",
+            category: "encounter_diagnosis",
+          },
+        });
       } else {
         await route.fulfill({ json: { results: [] } });
       }
     });
     await page.route("**/api/v1/patient/*/symptom/**", async (route) => {
       if (route.request().method() !== "GET") {
-        await route.fulfill({ status: 200, json: {} });
+        await route.fulfill({
+          status: 200,
+          json: {
+            id: "mock-symptom-id",
+            code: {
+              code: "code1",
+              display: "Test Condition 1",
+              system: "http://snomed.info/sct",
+            },
+            clinical_status: "active",
+            verification_status: "confirmed",
+            severity: "moderate",
+          },
+        });
       } else {
         await route.fulfill({ json: { results: [] } });
       }
@@ -117,7 +158,11 @@ test.describe("Questionnaire Duplicate Checks", () => {
     );
   });
 
-  const testDuplicateCheck = async (page: any, type: string, label: string) => {
+  const testDuplicateCheck = async (
+    page: Page,
+    type: string,
+    label: string,
+  ) => {
     const addText = `Add ${label}`;
     const alreadyExistsText = `${label} already exists!`;
 
@@ -151,7 +196,11 @@ test.describe("Questionnaire Duplicate Checks", () => {
     }
 
     // Verify status changed to Resolved
-    if (type !== "Allergy") {
+    if (type === "Allergy") {
+      await expect(
+        page.getByRole("button", { name: "Mark Active" }).first(),
+      ).toBeVisible();
+    } else {
       await expect(page.getByText("Resolved").first()).toBeVisible();
     }
 
