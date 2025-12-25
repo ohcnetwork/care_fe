@@ -83,8 +83,8 @@ test.describe("Encounter Status Dropdown Logic", () => {
       // Verify dropdown is locked
       await expect(page.getByTestId("encounter-status-select")).toBeDisabled();
 
-      // Verify output shows Discharged
-      await expect(page.getByTestId("encounter-status")).toHaveText(
+      // Verify dropdown shows Discharged
+      await expect(page.getByTestId("encounter-status-select")).toHaveText(
         "Discharged",
       );
     });
