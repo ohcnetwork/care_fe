@@ -61,7 +61,7 @@ import {
 } from "./templateUtils";
 
 const templateBuilderSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(1, t("field_required")),
   slug_value: z
     .string()
     .trim()
@@ -77,9 +77,9 @@ const templateBuilderSchema = z.object({
   status: z.enum(TemplateStatuses),
   template_type: z.enum(TemplateTypes),
   default_format: z.enum(TemplateFormats),
-  context: z.string().min(1),
+  context: z.string().min(1, t("field_required")),
   description: z.string().optional(),
-  template_data: z.string().min(1),
+  template_data: z.string().min(1, t("field_required")),
 });
 
 export default function TemplateBuilder({
@@ -200,6 +200,8 @@ export default function TemplateBuilder({
   useEffect(() => {
     if (template && availableContexts) {
       setSelectedContext(availableContexts[template.context]);
+    } else if (availableContexts) {
+      setSelectedContext(availableContexts[0]);
     }
   }, [template, availableContexts]);
 
@@ -366,7 +368,13 @@ export default function TemplateBuilder({
             >
               {t("preview_template")}
             </Button>
-            <Button type="button" onClick={handleSaveTemplate}>
+            <Button
+              type="button"
+              onClick={() => {
+                form.handleSubmit(handleSaveTemplate)();
+                handleSaveTemplate();
+              }}
+            >
               {t("save_template")}
             </Button>
           </div>
@@ -380,10 +388,7 @@ export default function TemplateBuilder({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {t("template_name")}
-                    <span className="text-destructive ml-1">*</span>
-                  </FormLabel>
+                  <FormLabel>{t("template_name")}</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder={t("enter_template_name")} />
                   </FormControl>
@@ -397,10 +402,7 @@ export default function TemplateBuilder({
               name="slug_value"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {t("slug")}
-                    <span className="text-destructive ml-1">*</span>
-                  </FormLabel>
+                  <FormLabel>{t("slug")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -418,10 +420,7 @@ export default function TemplateBuilder({
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {t("status")}
-                    <span className="text-destructive ml-1">*</span>
-                  </FormLabel>
+                  <FormLabel>{t("status")}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
@@ -446,10 +445,7 @@ export default function TemplateBuilder({
               name="default_format"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    {t("default_format")}
-                    <span className="text-destructive ml-1">*</span>
-                  </FormLabel>
+                  <FormLabel>{t("default_format")}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
@@ -475,10 +471,7 @@ export default function TemplateBuilder({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t("report_type")}</FormLabel>
-                  <Select
-                    value={field.value || "discharge_summary"}
-                    onValueChange={field.onChange}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder={t("select_report_type")} />
