@@ -371,7 +371,7 @@ export default function TemplateBuilder({
             <Button
               type="button"
               onClick={() => {
-                form.handleSubmit(handleSaveTemplate);
+                form.handleSubmit(handleSaveTemplate)();
                 handleSaveTemplate();
               }}
             >
