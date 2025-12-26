@@ -1,4 +1,4 @@
-import { Link } from "raviger";
+// import { Link } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -10,25 +10,25 @@ import { useTimer } from "@/hooks/useTimer";
 
 import useVoiceRecorder from "@/Utils/useVoiceRecorder";
 
-const getMicrophonePermissionHelpLink = () => {
-  const ua = navigator.userAgent.toLowerCase();
+// const getMicrophonePermissionHelpLink = () => {
+//   const ua = navigator.userAgent.toLowerCase();
 
-  if (ua.includes("firefox")) {
-    return "https://support.mozilla.org/en-US/kb/how-manage-your-camera-and-microphone-permissions";
-  }
+//   if (ua.includes("firefox")) {
+//     return "https://support.mozilla.org/en-US/kb/how-manage-your-camera-and-microphone-permissions";
+//   }
 
-  if (ua.includes("edg")) {
-    return "https://support.microsoft.com/en-us/windows/windows-camera-microphone-and-privacy-a83257bc-e990-d54a-d212-b5e41beba857";
-  }
+//   if (ua.includes("edg")) {
+//     return "https://support.microsoft.com/en-us/windows/windows-camera-microphone-and-privacy-a83257bc-e990-d54a-d212-b5e41beba857";
+//   }
 
-  if (ua.includes("safari") && !ua.includes("chrome")) {
-    return "https://support.apple.com/guide/safari/websites-ibrwe2159f50/mac";
-  }
+//   if (ua.includes("safari") && !ua.includes("chrome")) {
+//     return "https://support.apple.com/guide/safari/websites-ibrwe2159f50/mac";
+//   }
 
-  return "https://support.google.com/chrome/answer/2693767";
-};
+//   return "https://support.google.com/chrome/answer/2693767";
+// };
 
-const helpLink = getMicrophonePermissionHelpLink();
+// const helpLink = getMicrophonePermissionHelpLink();
 
 export interface AudioCaptureDialogProps {
   show: boolean;
@@ -146,13 +146,6 @@ export default function AudioCaptureDialog(props: AudioCaptureDialogProps) {
           </h2>
           <div className="text-secondary-200">
             {t("audio__allow_permission_helper")}{" "}
-            <Link
-              href={helpLink}
-              target="_blank"
-              className="text-blue-400 underline"
-            >
-              {t("audio__allow_permission_button")}
-            </Link>
           </div>
         </div>
       )}
