@@ -26,7 +26,7 @@ let code: string;
 let system: string;
 let codeName: string;
 
-test.describe("ValueSet Edit", () => {
+test.describe("ValueSet Create", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/admin/valuesets");
     name = faker.commerce.productName();
