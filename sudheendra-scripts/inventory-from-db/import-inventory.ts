@@ -313,9 +313,9 @@ async function main() {
   await importResourceCategories();
   await importProductKnowledge();
   await importChargeItemDefinitions();
-  const products = await importProducts();
+  // const products = await importProducts();
 
-  const deliveryOrders = await importDeliveryOrders(products);
+  // const deliveryOrders = await importDeliveryOrders(products);
 
   progress.stop();
 }
