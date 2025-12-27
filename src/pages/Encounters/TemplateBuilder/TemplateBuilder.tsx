@@ -77,7 +77,7 @@ const templateBuilderSchema = z.object({
   status: z.enum(TemplateStatuses),
   template_type: z.enum(TemplateTypes),
   default_format: z.enum(TemplateFormats),
-  context: z.string().min(1, t("field_required")),
+  context: z.string().optional(),
   description: z.string().optional(),
   template_data: z.string().min(1, t("field_required")),
 });
@@ -372,7 +372,6 @@ export default function TemplateBuilder({
               type="button"
               onClick={() => {
                 form.handleSubmit(handleSaveTemplate)();
-                handleSaveTemplate();
               }}
             >
               {t("save_template")}
@@ -388,7 +387,7 @@ export default function TemplateBuilder({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("template_name")}</FormLabel>
+                  <FormLabel aria-required>{t("template_name")}</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder={t("enter_template_name")} />
                   </FormControl>
@@ -402,7 +401,7 @@ export default function TemplateBuilder({
               name="slug_value"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("slug")}</FormLabel>
+                  <FormLabel aria-required>{t("slug")}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -470,7 +469,7 @@ export default function TemplateBuilder({
               name="template_type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("report_type")}</FormLabel>
+                  <FormLabel aria-required>{t("report_type")}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
