@@ -1,0 +1,1182 @@
+[
+  {
+    "OBJECTINFO_ID": 600808,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5121,
+    "CATEGORY": "TABLET",
+    "FB_DESCRIPTION": "TABLET"
+  },
+  {
+    "OBJECTINFO_ID": 600809,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5122,
+    "CATEGORY": "CAPSULE",
+    "FB_DESCRIPTION": "CAPSULE"
+  },
+  {
+    "OBJECTINFO_ID": 600810,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5123,
+    "CATEGORY": "SOLUTION",
+    "FB_DESCRIPTION": "SOLUTION"
+  },
+  {
+    "OBJECTINFO_ID": 600811,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5124,
+    "CATEGORY": "INJECTION",
+    "FB_DESCRIPTION": "INJECTION"
+  },
+  {
+    "OBJECTINFO_ID": 600812,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5125,
+    "CATEGORY": "LIQUID",
+    "FB_DESCRIPTION": "LIQUID"
+  },
+  {
+    "OBJECTINFO_ID": 600813,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5126,
+    "CATEGORY": "SUSPENSION",
+    "FB_DESCRIPTION": "SUSPENSION"
+  },
+  {
+    "OBJECTINFO_ID": 600814,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5127,
+    "CATEGORY": "NASAL SPRAY",
+    "FB_DESCRIPTION": "NASAL SPRAY"
+  },
+  {
+    "OBJECTINFO_ID": 600815,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5128,
+    "CATEGORY": "OINTMENT",
+    "FB_DESCRIPTION": "OINTMENT"
+  },
+  {
+    "OBJECTINFO_ID": 600816,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5129,
+    "CATEGORY": "MOUTH WASH",
+    "FB_DESCRIPTION": "MOUTH WASH"
+  },
+  {
+    "OBJECTINFO_ID": 600817,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5130,
+    "CATEGORY": "CREAM",
+    "FB_DESCRIPTION": "CREAM"
+  },
+  {
+    "OBJECTINFO_ID": 600818,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5131,
+    "CATEGORY": "SPRAY",
+    "FB_DESCRIPTION": "SPRAY"
+  },
+  {
+    "OBJECTINFO_ID": 600819,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5132,
+    "CATEGORY": "JAR",
+    "FB_DESCRIPTION": "JAR"
+  },
+  {
+    "OBJECTINFO_ID": 600820,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5133,
+    "CATEGORY": "INFUSION",
+    "FB_DESCRIPTION": "INFUSION"
+  },
+  {
+    "OBJECTINFO_ID": 600821,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5134,
+    "CATEGORY": "INHALER",
+    "FB_DESCRIPTION": "INHALER"
+  },
+  {
+    "OBJECTINFO_ID": 600822,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5135,
+    "CATEGORY": "DEVICE",
+    "FB_DESCRIPTION": "DEVICE"
+  },
+  {
+    "OBJECTINFO_ID": 600823,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5136,
+    "CATEGORY": "POWDER",
+    "FB_DESCRIPTION": "POWDER"
+  },
+  {
+    "OBJECTINFO_ID": 600824,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5137,
+    "CATEGORY": "SACHET",
+    "FB_DESCRIPTION": "SACHET"
+  },
+  {
+    "OBJECTINFO_ID": 600825,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5138,
+    "CATEGORY": "ENEMA",
+    "FB_DESCRIPTION": "ENEMA"
+  },
+  {
+    "OBJECTINFO_ID": 600826,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5139,
+    "CATEGORY": "APPLICATOR",
+    "FB_DESCRIPTION": "APPLICATOR"
+  },
+  {
+    "OBJECTINFO_ID": 600827,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5140,
+    "CATEGORY": "SOAP",
+    "FB_DESCRIPTION": "SOAP"
+  },
+  {
+    "OBJECTINFO_ID": 600828,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5141,
+    "CATEGORY": "NEEDLE",
+    "FB_DESCRIPTION": "NEEDLE"
+  },
+  {
+    "OBJECTINFO_ID": 600829,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5142,
+    "CATEGORY": "SYRUP",
+    "FB_DESCRIPTION": "SYRUP"
+  },
+  {
+    "OBJECTINFO_ID": 600830,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5143,
+    "CATEGORY": "DROPS",
+    "FB_DESCRIPTION": "DROPS"
+  },
+  {
+    "OBJECTINFO_ID": 600831,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5144,
+    "CATEGORY": "SYRINGE",
+    "FB_DESCRIPTION": "SYRINGE"
+  },
+  {
+    "OBJECTINFO_ID": 600832,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5145,
+    "CATEGORY": "GEL",
+    "FB_DESCRIPTION": "GEL"
+  },
+  {
+    "OBJECTINFO_ID": 600833,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5146,
+    "CATEGORY": "PASTE",
+    "FB_DESCRIPTION": "PASTE"
+  },
+  {
+    "OBJECTINFO_ID": 600834,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5147,
+    "CATEGORY": "JELLY",
+    "FB_DESCRIPTION": "JELLY"
+  },
+  {
+    "OBJECTINFO_ID": 600835,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5148,
+    "CATEGORY": "CAPLET",
+    "FB_DESCRIPTION": "CAPLET"
+  },
+  {
+    "OBJECTINFO_ID": 600836,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5149,
+    "CATEGORY": "MISCELLANEOUS",
+    "FB_DESCRIPTION": "MISCELLANEOUS"
+  },
+  {
+    "OBJECTINFO_ID": 600837,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5150,
+    "CATEGORY": "KITS & BAGS",
+    "FB_DESCRIPTION": "KITS & BAGS"
+  },
+  {
+    "OBJECTINFO_ID": 600838,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5151,
+    "CATEGORY": "GRANULES",
+    "FB_DESCRIPTION": "GRANULES"
+  },
+  {
+    "OBJECTINFO_ID": 600839,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5152,
+    "CATEGORY": "SUPPOSSITORIES",
+    "FB_DESCRIPTION": "SUPPOSSITORIES"
+  },
+  {
+    "OBJECTINFO_ID": 600840,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5153,
+    "CATEGORY": "BOTTLE",
+    "FB_DESCRIPTION": "BOTTLE"
+  },
+  {
+    "OBJECTINFO_ID": 600841,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5154,
+    "CATEGORY": "LOTION",
+    "FB_DESCRIPTION": "LOTION"
+  },
+  {
+    "OBJECTINFO_ID": 600842,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5155,
+    "CATEGORY": "CONCENTRATION",
+    "FB_DESCRIPTION": "CONCENTRATION"
+  },
+  {
+    "OBJECTINFO_ID": 600843,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5156,
+    "CATEGORY": "SIMVASTATIN",
+    "FB_DESCRIPTION": "SIMVASTATIN"
+  },
+  {
+    "OBJECTINFO_ID": 600844,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5157,
+    "CATEGORY": "OIL",
+    "FB_DESCRIPTION": "OIL"
+  },
+  {
+    "OBJECTINFO_ID": 600845,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5158,
+    "CATEGORY": "VETERINARY",
+    "FB_DESCRIPTION": "VETERINARY"
+  },
+  {
+    "OBJECTINFO_ID": 600846,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5159,
+    "CATEGORY": "SYP",
+    "FB_DESCRIPTION": "SYP"
+  },
+  {
+    "OBJECTINFO_ID": 600847,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5160,
+    "CATEGORY": "DESLORATADINE",
+    "FB_DESCRIPTION": "DESLORATADINE"
+  },
+  {
+    "OBJECTINFO_ID": 600848,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5161,
+    "CATEGORY": "PADS & MATS",
+    "FB_DESCRIPTION": "PADS & MATS"
+  },
+  {
+    "OBJECTINFO_ID": 600849,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5162,
+    "CATEGORY": "MAYER",
+    "FB_DESCRIPTION": "MAYER"
+  },
+  {
+    "OBJECTINFO_ID": 600850,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5163,
+    "CATEGORY": "CATHETERS",
+    "FB_DESCRIPTION": "CATHETERS"
+  },
+  {
+    "OBJECTINFO_ID": 600851,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5164,
+    "CATEGORY": "MECH",
+    "FB_DESCRIPTION": "MECH"
+  },
+  {
+    "OBJECTINFO_ID": 600852,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5165,
+    "CATEGORY": "CITADEL",
+    "FB_DESCRIPTION": "CITADEL"
+  },
+  {
+    "OBJECTINFO_ID": 600853,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5166,
+    "CATEGORY": "ALEM",
+    "FB_DESCRIPTION": "ALEM"
+  },
+  {
+    "OBJECTINFO_ID": 600854,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5167,
+    "CATEGORY": "SOMA",
+    "FB_DESCRIPTION": "SOMA"
+  },
+  {
+    "OBJECTINFO_ID": 600855,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5168,
+    "CATEGORY": "SARAB",
+    "FB_DESCRIPTION": "SARAB"
+  },
+  {
+    "OBJECTINFO_ID": 600856,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5169,
+    "CATEGORY": "LITAKA",
+    "FB_DESCRIPTION": "LITAKA"
+  },
+  {
+    "OBJECTINFO_ID": 600857,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5170,
+    "CATEGORY": ".",
+    "FB_DESCRIPTION": "."
+  },
+  {
+    "OBJECTINFO_ID": 600858,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5171,
+    "CATEGORY": "INSULIN",
+    "FB_DESCRIPTION": "INSULIN"
+  },
+  {
+    "OBJECTINFO_ID": 600859,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5172,
+    "CATEGORY": "IV & VEIN SET",
+    "FB_DESCRIPTION": "IV & VEIN SET"
+  },
+  {
+    "OBJECTINFO_ID": 600860,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5173,
+    "CATEGORY": "PIPERACILIN+TAZOBACTAM",
+    "FB_DESCRIPTION": "PIPERACILIN+TAZOBACTAM"
+  },
+  {
+    "OBJECTINFO_ID": 600861,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5174,
+    "CATEGORY": "INHALOR",
+    "FB_DESCRIPTION": "INHALOR"
+  },
+  {
+    "OBJECTINFO_ID": 600862,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5175,
+    "CATEGORY": "ALLER",
+    "FB_DESCRIPTION": "ALLER"
+  },
+  {
+    "OBJECTINFO_ID": 600863,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5176,
+    "CATEGORY": "AYU",
+    "FB_DESCRIPTION": "AYU"
+  },
+  {
+    "OBJECTINFO_ID": 600864,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5177,
+    "CATEGORY": "DISPENSERY",
+    "FB_DESCRIPTION": "DISPENSERY"
+  },
+  {
+    "OBJECTINFO_ID": 600865,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5178,
+    "CATEGORY": "OBSERVATION  CHARGES",
+    "FB_DESCRIPTION": "OBSERVATION  CHARGES"
+  },
+  {
+    "OBJECTINFO_ID": 600866,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5179,
+    "CATEGORY": "DRESSING CHARGE.",
+    "FB_DESCRIPTION": "DRESSING CHARGE."
+  },
+  {
+    "OBJECTINFO_ID": 600867,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5180,
+    "CATEGORY": "SLING CHARGE",
+    "FB_DESCRIPTION": "SLING CHARGE"
+  },
+  {
+    "OBJECTINFO_ID": 600868,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5181,
+    "CATEGORY": "DIALYSIS",
+    "FB_DESCRIPTION": "DIALYSIS"
+  },
+  {
+    "OBJECTINFO_ID": 600869,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5182,
+    "CATEGORY": "DENTAL ITEMS",
+    "FB_DESCRIPTION": "DENTAL ITEMS"
+  },
+  {
+    "OBJECTINFO_ID": 600870,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5183,
+    "CATEGORY": "HOSPITAL ITEMS",
+    "FB_DESCRIPTION": "HOSPITAL ITEMS"
+  },
+  {
+    "OBJECTINFO_ID": 600871,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5184,
+    "CATEGORY": "SURGICAL ITEMS",
+    "FB_DESCRIPTION": "SURGICAL ITEMS"
+  },
+  {
+    "OBJECTINFO_ID": 600872,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5185,
+    "CATEGORY": "ENDOSCOPY  ITEMS",
+    "FB_DESCRIPTION": "ENDOSCOPY  ITEMS"
+  },
+  {
+    "OBJECTINFO_ID": 600873,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5186,
+    "CATEGORY": "DIALYSIS ITEMS",
+    "FB_DESCRIPTION": "DIALYSIS ITEMS"
+  },
+  {
+    "OBJECTINFO_ID": 600874,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5187,
+    "CATEGORY": "GASTRO ENTROLOGY DEPARTMENT",
+    "FB_DESCRIPTION": "GASTRO ENTROLOGY DEPARTMENT"
+  },
+  {
+    "OBJECTINFO_ID": 600875,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5188,
+    "CATEGORY": "PLASTER",
+    "FB_DESCRIPTION": "PLASTER"
+  },
+  {
+    "OBJECTINFO_ID": 600876,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5189,
+    "CATEGORY": "ECG ITEMS",
+    "FB_DESCRIPTION": "ECG ITEMS"
+  },
+  {
+    "OBJECTINFO_ID": 600877,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5190,
+    "CATEGORY": "BANDAGE & PLASTERS",
+    "FB_DESCRIPTION": "BANDAGE & PLASTERS"
+  },
+  {
+    "OBJECTINFO_ID": 600878,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5191,
+    "CATEGORY": "EXTERNAL FITTINGS",
+    "FB_DESCRIPTION": "EXTERNAL FITTINGS"
+  },
+  {
+    "OBJECTINFO_ID": 600879,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5192,
+    "CATEGORY": "GLOVES-MASK-APRON",
+    "FB_DESCRIPTION": "GLOVES-MASK-APRON"
+  },
+  {
+    "OBJECTINFO_ID": 600880,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5193,
+    "CATEGORY": "RESULT RECORDING STATIONERY",
+    "FB_DESCRIPTION": "RESULT RECORDING STATIONERY"
+  },
+  {
+    "OBJECTINFO_ID": 600881,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5194,
+    "CATEGORY": "WIRES",
+    "FB_DESCRIPTION": "WIRES"
+  },
+  {
+    "OBJECTINFO_ID": 600882,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5195,
+    "CATEGORY": "GENERAL",
+    "FB_DESCRIPTION": "GENERAL"
+  },
+  {
+    "OBJECTINFO_ID": 600883,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5196,
+    "CATEGORY": "NEURO ITEMS",
+    "FB_DESCRIPTION": "NEURO ITEMS"
+  },
+  {
+    "OBJECTINFO_ID": 600884,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5197,
+    "CATEGORY": "ROTACAPS",
+    "FB_DESCRIPTION": "ROTACAPS"
+  },
+  {
+    "OBJECTINFO_ID": 600885,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5198,
+    "CATEGORY": "CARDIOLOGY",
+    "FB_DESCRIPTION": "CARDIOLOGY"
+  },
+  {
+    "OBJECTINFO_ID": 600886,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5199,
+    "CATEGORY": "PLASTERING ITEMS",
+    "FB_DESCRIPTION": "PLASTERING ITEMS"
+  },
+  {
+    "OBJECTINFO_ID": 600887,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:53",
+    "ID": 5200,
+    "CATEGORY": "SYRINGES & NEEDLES",
+    "FB_DESCRIPTION": "SYRINGES & NEEDLES"
+  },
+  {
+    "OBJECTINFO_ID": 600888,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5201,
+    "CATEGORY": "LOZENGES",
+    "FB_DESCRIPTION": "LOZENGES"
+  },
+  {
+    "OBJECTINFO_ID": 600889,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5202,
+    "CATEGORY": "HYPERTONIC SALINE.",
+    "FB_DESCRIPTION": "HYPERTONIC SALINE."
+  },
+  {
+    "OBJECTINFO_ID": 600890,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5203,
+    "CATEGORY": "NEBULASATION",
+    "FB_DESCRIPTION": "NEBULASATION"
+  },
+  {
+    "OBJECTINFO_ID": 600891,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5204,
+    "CATEGORY": "CLEANERS",
+    "FB_DESCRIPTION": "CLEANERS"
+  },
+  {
+    "OBJECTINFO_ID": 600892,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5205,
+    "CATEGORY": "BANDS",
+    "FB_DESCRIPTION": "BANDS"
+  },
+  {
+    "OBJECTINFO_ID": 600893,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5206,
+    "CATEGORY": "TUBES",
+    "FB_DESCRIPTION": "TUBES"
+  },
+  {
+    "OBJECTINFO_ID": 600894,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5207,
+    "CATEGORY": "DISPENSARY CHARGES",
+    "FB_DESCRIPTION": "DISPENSARY CHARGES"
+  },
+  {
+    "OBJECTINFO_ID": 600895,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5208,
+    "CATEGORY": "ROOM RENT",
+    "FB_DESCRIPTION": "ROOM RENT"
+  },
+  {
+    "OBJECTINFO_ID": 600896,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5209,
+    "CATEGORY": "OBSERVATION.",
+    "FB_DESCRIPTION": "OBSERVATION."
+  },
+  {
+    "OBJECTINFO_ID": 600897,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5210,
+    "CATEGORY": "DEVELOPER",
+    "FB_DESCRIPTION": "DEVELOPER"
+  },
+  {
+    "OBJECTINFO_ID": 600898,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5211,
+    "CATEGORY": "FIXER",
+    "FB_DESCRIPTION": "FIXER"
+  },
+  {
+    "OBJECTINFO_ID": 600899,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5212,
+    "CATEGORY": "DRESSING.",
+    "FB_DESCRIPTION": "DRESSING."
+  },
+  {
+    "OBJECTINFO_ID": 600900,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5213,
+    "CATEGORY": "LABORATORY ITEMS",
+    "FB_DESCRIPTION": "LABORATORY ITEMS"
+  },
+  {
+    "OBJECTINFO_ID": 600901,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5214,
+    "CATEGORY": "OTHER",
+    "FB_DESCRIPTION": "OTHER"
+  },
+  {
+    "OBJECTINFO_ID": 600902,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5215,
+    "CATEGORY": "THEATRE MEDICINE",
+    "FB_DESCRIPTION": "THEATRE MEDICINE"
+  },
+  {
+    "OBJECTINFO_ID": 600903,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5216,
+    "CATEGORY": "LABOUR ROOM ITEMS",
+    "FB_DESCRIPTION": "LABOUR ROOM ITEMS"
+  },
+  {
+    "OBJECTINFO_ID": 600904,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5217,
+    "CATEGORY": "NEBULIZATION CHARGES",
+    "FB_DESCRIPTION": "NEBULIZATION CHARGES"
+  },
+  {
+    "OBJECTINFO_ID": 600905,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5218,
+    "CATEGORY": "SAVLON",
+    "FB_DESCRIPTION": "SAVLON"
+  },
+  {
+    "OBJECTINFO_ID": 600906,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5219,
+    "CATEGORY": "SAVLON SLN",
+    "FB_DESCRIPTION": "SAVLON SLN"
+  },
+  {
+    "OBJECTINFO_ID": 600907,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5220,
+    "CATEGORY": "DRESSING  CHARGE",
+    "FB_DESCRIPTION": "DRESSING  CHARGE"
+  },
+  {
+    "OBJECTINFO_ID": 600908,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5221,
+    "CATEGORY": "X - RAY ITEMS",
+    "FB_DESCRIPTION": "X - RAY ITEMS"
+  },
+  {
+    "OBJECTINFO_ID": 600909,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5222,
+    "CATEGORY": "OPHTHALMIC ITEMS",
+    "FB_DESCRIPTION": "OPHTHALMIC ITEMS"
+  },
+  {
+    "OBJECTINFO_ID": 600910,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5223,
+    "CATEGORY": "CANULA",
+    "FB_DESCRIPTION": "CANULA"
+  },
+  {
+    "OBJECTINFO_ID": 600911,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5224,
+    "CATEGORY": "IMPLANTS",
+    "FB_DESCRIPTION": "IMPLANTS"
+  },
+  {
+    "OBJECTINFO_ID": 600912,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5225,
+    "CATEGORY": "SUITURES",
+    "FB_DESCRIPTION": "SUITURES"
+  },
+  {
+    "OBJECTINFO_ID": 600913,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5226,
+    "CATEGORY": "TOOLS AND APPARATUS",
+    "FB_DESCRIPTION": "TOOLS AND APPARATUS"
+  },
+  {
+    "OBJECTINFO_ID": 600914,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5227,
+    "CATEGORY": "CAP & MASK",
+    "FB_DESCRIPTION": "CAP & MASK"
+  },
+  {
+    "OBJECTINFO_ID": 600915,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5228,
+    "CATEGORY": "LEHAYAM",
+    "FB_DESCRIPTION": "LEHAYAM"
+  },
+  {
+    "OBJECTINFO_ID": 600916,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5229,
+    "CATEGORY": "GULIKA",
+    "FB_DESCRIPTION": "GULIKA"
+  },
+  {
+    "OBJECTINFO_ID": 600917,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5230,
+    "CATEGORY": "KHRITHAM",
+    "FB_DESCRIPTION": "KHRITHAM"
+  },
+  {
+    "OBJECTINFO_ID": 600918,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5231,
+    "CATEGORY": "KUZHAMB",
+    "FB_DESCRIPTION": "KUZHAMB"
+  },
+  {
+    "OBJECTINFO_ID": 600919,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5232,
+    "CATEGORY": "KERAM",
+    "FB_DESCRIPTION": "KERAM"
+  },
+  {
+    "OBJECTINFO_ID": 600920,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5233,
+    "CATEGORY": "CHOORNAM",
+    "FB_DESCRIPTION": "CHOORNAM"
+  },
+  {
+    "OBJECTINFO_ID": 600921,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5234,
+    "CATEGORY": "THAILAM",
+    "FB_DESCRIPTION": "THAILAM"
+  },
+  {
+    "OBJECTINFO_ID": 600922,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5235,
+    "CATEGORY": "KASHAYAM",
+    "FB_DESCRIPTION": "KASHAYAM"
+  },
+  {
+    "OBJECTINFO_ID": 600923,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5236,
+    "CATEGORY": "ARISHTAM",
+    "FB_DESCRIPTION": "ARISHTAM"
+  },
+  {
+    "OBJECTINFO_ID": 600924,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5237,
+    "CATEGORY": "GHRITHAM",
+    "FB_DESCRIPTION": "GHRITHAM"
+  },
+  {
+    "OBJECTINFO_ID": 600925,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:09:54",
+    "ID": 5238,
+    "CATEGORY": "KIZHI CONSUMABLES",
+    "FB_DESCRIPTION": "KIZHI CONSUMABLES"
+  }
+]

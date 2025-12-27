@@ -1,0 +1,142 @@
+[
+  {
+    "OBJECTINFO_ID": 600790,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:06:38",
+    "ID": 521,
+    "CATEGORY": "ORTHO IMPLANTS",
+    "D2KCODE": null
+  },
+  {
+    "OBJECTINFO_ID": 600791,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:06:38",
+    "ID": 522,
+    "CATEGORY": "NON SURGICAL",
+    "D2KCODE": null
+  },
+  {
+    "OBJECTINFO_ID": 600792,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:06:38",
+    "ID": 523,
+    "CATEGORY": "MEDICINES",
+    "D2KCODE": null
+  },
+  {
+    "OBJECTINFO_ID": 600793,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:06:38",
+    "ID": 524,
+    "CATEGORY": "GENERAL",
+    "D2KCODE": null
+  },
+  {
+    "OBJECTINFO_ID": 600794,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:06:38",
+    "ID": 525,
+    "CATEGORY": "ORTHO",
+    "D2KCODE": null
+  },
+  {
+    "OBJECTINFO_ID": 600795,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:06:38",
+    "ID": 526,
+    "CATEGORY": "GYNEC",
+    "D2KCODE": null
+  },
+  {
+    "OBJECTINFO_ID": 600796,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:06:38",
+    "ID": 527,
+    "CATEGORY": "PAEDIATRIC",
+    "D2KCODE": null
+  },
+  {
+    "OBJECTINFO_ID": 600797,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:06:38",
+    "ID": 528,
+    "CATEGORY": "CARDIOLOGY",
+    "D2KCODE": null
+  },
+  {
+    "OBJECTINFO_ID": 600798,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:06:38",
+    "ID": 529,
+    "CATEGORY": "LAB MATERIALS",
+    "D2KCODE": null
+  },
+  {
+    "OBJECTINFO_ID": 600799,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:06:38",
+    "ID": 530,
+    "CATEGORY": "SURGICAL",
+    "D2KCODE": null
+  },
+  {
+    "OBJECTINFO_ID": 600800,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:06:38",
+    "ID": 531,
+    "CATEGORY": "X-RAY",
+    "D2KCODE": null
+  },
+  {
+    "OBJECTINFO_ID": 600801,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:06:38",
+    "ID": 532,
+    "CATEGORY": "AYURVEDAM",
+    "D2KCODE": null
+  },
+  {
+    "OBJECTINFO_ID": 600802,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2018-07-30 12:06:38",
+    "ID": 533,
+    "CATEGORY": "HOMEO",
+    "D2KCODE": null
+  },
+  {
+    "OBJECTINFO_ID": 2056032,
+    "VERSION_NO": 0,
+    "LEVEL_ID": 0,
+    "UPDATED_BY": 1,
+    "UPDATED_DATE": "2019-02-08 17:00:04",
+    "ID": 541,
+    "CATEGORY": "NEURO IMPLANTS",
+    "D2KCODE": null
+  }
+]
