@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { Box, ChevronLeft, Edit, Hash, Truck } from "lucide-react";
 import { Link } from "raviger";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -106,22 +106,26 @@ function AllSupplyDeliveriesComponent({
 
   const isLoadingAllSupplyDeliveries = deliveryQueries.some((q) => q.isLoading);
 
-  const allSupplyDeliveries = deliveryQueries
-    .flatMap((q) => q.data?.results || [])
-    .reduce((acc, current) => {
-      const x = acc.find((item) => item.id === current.id);
-      if (!x) {
-        return acc.concat([current]);
-      } else {
-        return acc;
+  const allSupplyDeliveries = useMemo(() => {
+    const seen = new Set<string>();
+    const result: SupplyDeliveryRead[] = [];
+    const flatDeliveries = deliveryQueries.flatMap(
+      (q) => q.data?.results || [],
+    );
+    for (const item of flatDeliveries) {
+      if (!seen.has(item.id)) {
+        seen.add(item.id);
+        result.push(item);
       }
-    }, [] as SupplyDeliveryRead[]);
+    }
+    return result;
+  }, [deliveryQueries]);
 
   return (
     <div className="space-y-4 max-h-[68vh] overflow-y-auto px-4 pt-4">
       {isLoadingAllSupplyDeliveries ? (
         <TableSkeleton count={3} />
-      ) : allSupplyDeliveries && allSupplyDeliveries.length > 0 ? (
+      ) : allSupplyDeliveries.length > 0 ? (
         <SupplyDeliveryTable
           deliveries={allSupplyDeliveries}
           internal={internal}
@@ -205,6 +209,11 @@ export function RequestOrderShow({
     });
 
   const deliveryOrders = deliveryOrdersData?.results || [];
+
+  const deliveryOrderIds = useMemo(
+    () => deliveryOrders.map((delivery) => delivery.id),
+    [deliveryOrders],
+  );
 
   const pendingDeliveryOrderCount =
     deliveryOrders.filter(
@@ -762,9 +771,7 @@ export function RequestOrderShow({
                     </div>
                     <AllSupplyDeliveriesComponent
                       facilityId={facilityId}
-                      deliveryOrderIds={deliveryOrders.map(
-                        (delivery) => delivery.id,
-                      )}
+                      deliveryOrderIds={deliveryOrderIds}
                       internal={internal}
                       selectedProductKnowledge={selectedProductKnowledge}
                       isRequester={isRequester}
