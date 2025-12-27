@@ -6,7 +6,7 @@ import {
   getChargeItemDefinitionsToImport,
   getDeliveryOrdersToImport,
   getProductKnowledgeToImport,
-  getProductToImport,
+  getProductsToImport,
   getResourceCategoriesToImport,
   getSupplyDeliveriesToImport,
 } from "sudheendra-scripts/inventory-from-db/utils";
@@ -32,7 +32,7 @@ async function main() {
     "resource-categories": getResourceCategoriesToImport(),
     "product-knowledges": getProductKnowledgeToImport(),
     "charge-item-definitions": getChargeItemDefinitionsToImport(),
-    products: getProductToImport(),
+    products: getProductsToImport(),
     "delivery-orders": getDeliveryOrdersToImport(),
     "supply-deliveries": getSupplyDeliveriesToImport(),
   });

@@ -9,6 +9,7 @@ import {
   ResourceCategoryResourceType,
   ResourceCategorySubType,
 } from "@/types/base/resourceCategory/resourceCategory";
+import { addMinutes } from "date-fns";
 
 dotenv.config({ path: [".env.local", ".env"] });
 
@@ -404,6 +405,64 @@ export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const CARE_API_URL = process.env.REACT_CARE_API_URL ?? "http://127.0.0.1:8000";
 
+export interface AuthorizationCache {
+  access: string;
+  refresh: string;
+  expiresAt: Date;
+}
+
+let authorizationCache: AuthorizationCache | null = null;
+
+/**
+ * Login to Care API and cache the token
+ */
+async function login() {
+  const response = await fetch(`${CARE_API_URL}/api/v1/auth/login/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      username: process.env.USERNAME,
+      password: process.env.PASSWORD,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Authentication failed: ${response.status} - ${error}`);
+  }
+
+  const data = await response.json();
+
+  // Check if MFA is required
+  if ("temp_token" in data) {
+    throw new Error(
+      "MFA authentication is not supported in token display mode",
+    );
+  }
+
+  // Cache the token with expiration (JWT tokens typically expire in 1 hour)
+  // We'll refresh 5 minutes before expiration
+
+  return {
+    access: data.access,
+    refresh: data.refresh,
+    expiresAt: addMinutes(new Date(), 5),
+  };
+}
+
+async function getAuthorizationToken() {
+  const now = new Date();
+
+  if (authorizationCache == null || now > authorizationCache.expiresAt) {
+    authorizationCache = await login();
+  }
+
+  return authorizationCache.access;
+}
+
 /**
  * Make a request to the CARE API
  * @param url - The URL to make the request to
@@ -424,16 +483,14 @@ export const request = async <TResponse = unknown>(
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      Authorization:
-        process.env.AUTHORIZATION ??
-        `Basic ${btoa(`${process.env.USERNAME}:${process.env.PASSWORD}`)}`,
+      Authorization: `Bearer ${await getAuthorizationToken()}`,
     },
   });
 
   if (!response.ok) {
     if (canRetry) {
       await sleep(1000);
-      return request(url, method, body, false);
+      return await request(url, method, body, false);
     }
 
     throw new Error(
@@ -444,7 +501,7 @@ export const request = async <TResponse = unknown>(
   return response.json();
 };
 
-const CARE_API_WORKERS = parseInt(process.env.CARE_API_WORKERS ?? "4");
+export const CARE_API_WORKERS = parseInt(process.env.CARE_API_WORKERS ?? "2");
 
 /**
  * Batch a request to the CARE API
