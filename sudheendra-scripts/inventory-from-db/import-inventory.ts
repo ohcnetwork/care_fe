@@ -158,7 +158,7 @@ async function importProductKnowledge() {
       progress.tick(uploading, datapoints.length);
       return results as ProductKnowledgeBase[];
     },
-    100,
+    1,
   );
 
   progress.status(uploading, "done");
@@ -190,7 +190,7 @@ async function importChargeItemDefinitions() {
       progress.tick(uploading, datapoints.length);
       return results as ChargeItemDefinitionBase[];
     },
-    10,
+    1,
   );
 
   progress.status(uploading, "done");
