@@ -113,49 +113,57 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
 
   return (
     <div className="flex flex-col flex-wrap lg:flex-nowrap sm:flex-row gap-3">
-      <Select
-        value={selectedFacilityType?.text || ""}
-        onValueChange={(value) => {
-          setSelectedFacilityType(
-            FACILITY_TYPES.find((type) => type.text === value),
-          );
-          onChange({
-            facility_type: FACILITY_TYPES.find((type) => type.text === value)
-              ?.id,
-          });
-        }}
-        disabled={!selected}
-      >
-        <SelectTrigger className="sm:max-w-56 h-[38px]">
-          <SelectValue
-            placeholder={
-              !selected ? t("select_location_first") : t("select_facility_type")
-            }
-          />
-        </SelectTrigger>
-        <SelectContent>
-          {FACILITY_TYPES.map((type) => (
-            <SelectItem key={type.id} value={type.text}>
-              {type.text}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
       <div className="flex flex-col gap-2 lg:gap-0 sm:flex-row lg:rounded-md lg:border-1 lg:border-secondary-400 overflow-clip sm:w-fit w-[calc(100vw-2rem)]">
-        {[...Array(Math.min(orgTypes.length + 1, DEFAULT_ORG_LEVELS))].map(
-          (_, index) => (
-            <OrganizationLevel
-              key={`organization-level-${index}`}
-              index={index}
-              skip={skipLevels?.includes(index) || false}
-              selectedLevels={selectedLevels}
-              orgTypes={orgTypes}
-              setOrgTypes={setOrgTypes}
-              onChange={onChange}
-            />
+        {[
+          ...Array(
+            selectedLevels.length
+              ? Math.min(selectedLevels.length + 1, DEFAULT_ORG_LEVELS)
+              : 1,
           ),
-        )}
+        ].map((_, index) => (
+          <OrganizationLevel
+            key={`organization-level-${index}`}
+            index={index}
+            skip={skipLevels?.includes(index) || false}
+            selectedLevels={selectedLevels}
+            orgTypes={orgTypes}
+            setOrgTypes={setOrgTypes}
+            onChange={onChange}
+          />
+        ))}
       </div>
+      {selected && (
+        <Select
+          value={selectedFacilityType?.text || ""}
+          onValueChange={(value) => {
+            setSelectedFacilityType(
+              FACILITY_TYPES.find((type) => type.text === value),
+            );
+            onChange({
+              facility_type: FACILITY_TYPES.find((type) => type.text === value)
+                ?.id,
+            });
+          }}
+          disabled={!selected}
+        >
+          <SelectTrigger className="sm:max-w-56 h-[38px]">
+            <SelectValue
+              placeholder={
+                !selected
+                  ? t("select_location_first")
+                  : t("select_facility_type")
+              }
+            />
+          </SelectTrigger>
+          <SelectContent>
+            {FACILITY_TYPES.map((type) => (
+              <SelectItem key={type.id} value={type.text}>
+                {type.text}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
       <Button
         onClick={clearSelections}
         variant="ghost"
