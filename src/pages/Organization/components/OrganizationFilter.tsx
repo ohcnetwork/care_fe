@@ -110,17 +110,13 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
     setSelectedLevels([]);
     onChange({ organization: undefined, facility_type: undefined });
   };
-
+  const levelCount = selectedLevels.length
+    ? Math.min(selectedLevels.length + 1, DEFAULT_ORG_LEVELS)
+    : 1;
   return (
     <div className="flex flex-col flex-wrap lg:flex-nowrap sm:flex-row gap-3">
       <div className="flex flex-col gap-2 lg:gap-0 sm:flex-row lg:rounded-md lg:border-1 lg:border-secondary-400 overflow-clip sm:w-fit w-[calc(100vw-2rem)]">
-        {[
-          ...Array(
-            selectedLevels.length
-              ? Math.min(selectedLevels.length + 1, DEFAULT_ORG_LEVELS)
-              : 1,
-          ),
-        ].map((_, index) => (
+        {[...Array(levelCount)].map((_, index) => (
           <OrganizationLevel
             key={`organization-level-${index}`}
             index={index}
