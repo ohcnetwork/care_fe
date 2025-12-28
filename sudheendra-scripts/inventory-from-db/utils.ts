@@ -39,6 +39,7 @@ import supplyDeliveriesJson from "./data/stock.json";
 dotenv.config({ path: [".env.local", ".env"] });
 
 const FACILITY_ID = process.env.FACILITY_ID!;
+const SUPPLIER_ID = process.env.SUPPLIER_ID!;
 
 type ItemRow = {
   ID: number;
@@ -202,6 +203,7 @@ export const getDeliveryOrdersToImport = () => {
             status: DeliveryOrderStatus.pending,
             note: "This delivery order was created by a bulk import script",
             extensions: {},
+            supplier: SUPPLIER_ID,
           } satisfies DeliveryOrderCreate,
         ];
       }),

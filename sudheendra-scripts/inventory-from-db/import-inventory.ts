@@ -310,12 +310,12 @@ async function importDeliveryOrders(products: ProductRead[]) {
 async function main() {
   progress.start();
 
-  await importResourceCategories();
-  await importProductKnowledge();
-  await importChargeItemDefinitions();
-  // const products = await importProducts();
+  // await importResourceCategories();
+  // await importProductKnowledge();
+  // await importChargeItemDefinitions();
+  const products = await importProducts();
 
-  // const deliveryOrders = await importDeliveryOrders(products);
+  const deliveryOrders = await importDeliveryOrders(products);
 
   progress.stop();
 }
