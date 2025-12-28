@@ -224,7 +224,7 @@ async function importProducts() {
       progress.tick(uploading, datapoints.length);
       return results as ProductRead[];
     },
-    10,
+    1,
   );
 
   progress.status(uploading, "done");
@@ -252,7 +252,7 @@ async function importDeliveryOrders(products: ProductRead[]) {
       progress.tick(creating, datapoints.length);
       return results as DeliveryOrderRetrieve[];
     },
-    10,
+    1,
   );
 
   progress.status(creating, "done");
@@ -273,7 +273,7 @@ async function importDeliveryOrders(products: ProductRead[]) {
       progress.tick(creatingSupplyDeliveries, datapoints.length);
       return results as SupplyDeliveryRead[];
     },
-    10,
+    1,
   );
   progress.status(creatingSupplyDeliveries, "done");
 
@@ -302,7 +302,7 @@ async function importDeliveryOrders(products: ProductRead[]) {
       progress.tick(completing, datapoints.length);
       return results as DeliveryOrderRetrieve[];
     },
-    10,
+    1,
   );
   progress.status(completing, "done");
 }
