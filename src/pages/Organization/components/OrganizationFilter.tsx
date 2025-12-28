@@ -136,12 +136,12 @@ export default function OrganizationFilter(props: OrganizationFilterProps) {
         <Select
           value={selectedFacilityType?.text || ""}
           onValueChange={(value) => {
-            setSelectedFacilityType(
-              FACILITY_TYPES.find((type) => type.text === value),
+            const facilityType = FACILITY_TYPES.find(
+              (type) => type.text === value,
             );
+            setSelectedFacilityType(facilityType);
             onChange({
-              facility_type: FACILITY_TYPES.find((type) => type.text === value)
-                ?.id,
+              facility_type: facilityType?.id,
             });
           }}
         >
