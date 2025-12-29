@@ -55,6 +55,8 @@ export interface MonetaryComponentSelectorProps {
   displayMode?: "inline" | "full" | "short";
   /** Additional CSS classes */
   className?: string;
+  /** Facility ID for facility-scoped tag filtering */
+  facilityId?: string;
 }
 
 /**
@@ -91,6 +93,7 @@ export function MonetaryComponentSelector({
   disabled = false,
   displayMode = "full",
   className = "",
+  facilityId,
 }: MonetaryComponentSelectorProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -449,6 +452,7 @@ export function MonetaryComponentSelector({
                         )
                       }
                       className="mt-3"
+                      facilityId={facilityId}
                     />
                   )}
                 </div>
