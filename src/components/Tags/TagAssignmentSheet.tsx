@@ -135,10 +135,10 @@ export default function TagAssignmentSheet({
     tag: TagConfig,
     operation: "set" | "remove",
   ) => {
-    const isFacility = entityType === "patient" && isFacilityTag(tag);
+    const isFacilityPatientTag = entityType === "patient" && isFacilityTag(tag);
     const patientConfig = entityConfig as typeof ENTITY_CONFIG.patient;
 
-    const apiEndpoint = isFacility
+    const apiEndpoint = isFacilityPatientTag
       ? operation === "set"
         ? patientConfig.setFacilityTagsApi
         : patientConfig.removeFacilityTagsApi
@@ -147,7 +147,7 @@ export default function TagAssignmentSheet({
         : entityConfig.removeTagsApi;
 
     const createBodyPayload = (tags: string[]) =>
-      isFacility ? { tags, facility: facilityId || null } : { tags };
+      isFacilityPatientTag ? { tags, facility: facilityId || null } : { tags };
 
     return { apiEndpoint, createBodyPayload };
   };
