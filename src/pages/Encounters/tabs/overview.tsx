@@ -96,7 +96,7 @@ export const EncounterOverviewTab = () => {
             icon={<ShieldAlert className="text-gray-400 size-8" />}
             title={t("no_permission_to_view_clinical_data")}
             description={t("no_permission_to_view_clinical_data_description")}
-            className="max-w-md"
+            className="h-full w-full bg-transparent"
           />
         </div>
       )}
