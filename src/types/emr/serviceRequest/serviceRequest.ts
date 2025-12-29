@@ -8,7 +8,7 @@ import { EncounterRead } from "@/types/emr/encounter/encounter";
 import { ObservationRead } from "@/types/emr/observation/observation";
 import { SpecimenRead } from "@/types/emr/specimen/specimen";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import { UserReadMinimal } from "@/types/user/user";
 
 export enum Status {
@@ -103,7 +103,7 @@ export interface ServiceRequestUpdateSpec extends BaseServiceRequestSpec {
 
 export interface ServiceRequestReadSpec extends BaseServiceRequestSpec {
   version?: number;
-  locations: LocationList[];
+  locations: LocationRead[];
   encounter: EncounterRead;
   activity_definition: ActivityDefinitionReadSpec;
   specimens: SpecimenRead[];
