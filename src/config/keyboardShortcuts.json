@@ -115,7 +115,10 @@
     { "key": "l", "action": "load-from-order", "description": "Load from Order", "when": "always" }
   ],
   "facility:service": [
-    { "key": "s", "action": "scan-button", "description": "Scan the QR code", "when": "always" }
+    { "key": "s", "action": "scan-button", "description": "Scan the QR code", "when": "always" },
+    { "key": "c", "action": "collect-specimen", "description": "Collect Specimen", "when": "always" },
+    { "key": "m", "action": "mark-as-complete", "description": "Mark as Complete", "when": "always" },
+    { "key": "r", "action": "view-report", "description": "View Report", "when": "always" }
   ],
 
   "encounter": [

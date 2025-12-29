@@ -21,7 +21,6 @@ import SpecimenIDScanDialog from "@/components/Scan/SpecimenIDScanDialog";
 // Change to default import
 import useAuthUser from "@/hooks/useAuthUser";
 
-import mutate from "@/Utils/request/mutate";
 import { Code } from "@/types/base/code/code";
 import {
   CollectionSpec,
@@ -31,6 +30,8 @@ import {
 } from "@/types/emr/specimen/specimen";
 import specimenApi from "@/types/emr/specimen/specimenApi";
 import type { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import mutate from "@/Utils/request/mutate";
 
 interface SpecimenFormProps {
   specimenDefinition: SpecimenDefinitionRead;
@@ -534,6 +535,7 @@ export function SpecimenForm({
               </Button>
               <Button type="submit" disabled={disableEdit || isPending}>
                 {t("collect")}
+                <ShortcutBadge actionId="submit-action" />
               </Button>
             </div>
           </div>
