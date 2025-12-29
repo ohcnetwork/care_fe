@@ -24,10 +24,12 @@ export const DispenseButton = ({
   open,
   setOpen,
   facilityId,
+  onSuccess,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
   facilityId: string;
+  onSuccess?: () => void;
 }) => {
   const [location, setLocation] = useState<LocationRead | undefined>(undefined);
   const [showDrawer, setShowDrawer] = useState(false);
@@ -105,6 +107,7 @@ export const DispenseButton = ({
           }}
           onDispenseComplete={async (chargeItems: ChargeItemRead[]) => {
             setShowDrawer(false);
+            onSuccess?.();
 
             if (!careConfig.enableAutoInvoiceAfterDispense) {
               return;
