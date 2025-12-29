@@ -28,6 +28,7 @@ import { PatientInfoCard } from "@/components/Patient/PatientInfoCard";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import { QuickAction } from "@/pages/Encounters/tabs/overview/quick-actions";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
+import { PLUGIN_Component } from "@/PluginEngine";
 import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
 
@@ -101,6 +102,14 @@ export default function VerifyPatient() {
                       ],
                     });
                   }}
+                  children={
+                    <PLUGIN_Component
+                      __name="PatientInfoCardActions"
+                      patient={patientData}
+                      facilityId={facilityId}
+                      className="flex justify-end"
+                    />
+                  }
                 />
               </div>
 
