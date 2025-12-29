@@ -95,21 +95,13 @@ test.describe("Facility Creation", () => {
     pinCode = `67${faker.string.numeric(4)}`;
     address = faker.location.streetAddress();
 
-    await page.goto("/", { waitUntil: "domcontentloaded", timeout: 15000 });
-    
-    const governanceTab = page.getByRole("tab", { name: "Governance" });
-    await governanceTab.waitFor({ state: "visible", timeout: 10000 });
-    await governanceTab.click();
-    
-    const governmentLink = page
+    await page.goto("/");
+    await page.getByRole("tab", { name: "Governance" }).click();
+    await page
       .getByRole("link", { name: /Government$/ })
-      .first();
-    await governmentLink.waitFor({ state: "visible", timeout: 10000 });
-    await governmentLink.click();
-    
-    const facilitiesMenuItem = page.getByRole("menuitem", { name: "Facilities" });
-    await facilitiesMenuItem.waitFor({ state: "visible", timeout: 10000 });
-    await facilitiesMenuItem.click();
+      .first()
+      .click();
+    await page.getByRole("menuitem", { name: "Facilities" }).click();
   });
 
   test("Create a new facility with all fields", async ({ page }) => {
