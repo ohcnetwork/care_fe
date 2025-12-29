@@ -10,13 +10,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CardGridSkeleton } from "@/components/Common/SkeletonLoading";
 
 import query from "@/Utils/request/query";
-import { LocationList, LocationTypeIcons } from "@/types/location/location";
+import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 interface LocationTreeNodeProps {
-  location: LocationList;
+  location: LocationRead;
   selectedLocationId: string | null;
-  onSelect: (location: LocationList) => void;
+  onSelect: (location: LocationRead) => void;
   expandedLocations: Set<string>;
   onToggleExpand: (locationId: string) => void;
   level?: number;
@@ -121,7 +121,7 @@ interface LocationNavbarProps {
   facilityId: string;
   selectedLocationId: string | null;
   expandedLocations: Set<string>;
-  onLocationSelect: (location: LocationList) => void;
+  onLocationSelect: (location: LocationRead) => void;
   onToggleExpand: (locationId: string) => void;
 }
 

@@ -46,9 +46,17 @@ export function QRScanDialog({
     const signal = new AbortController().signal;
 
     try {
-      const result = await query(specimenApi.getSpecimen, {
-        pathParams: { facilityId, specimenId: scannedId },
-      })({ signal });
+      let result;
+      try {
+        result = await query(specimenApi.retrieveByAccessionIdentifier, {
+          pathParams: { facilityId },
+          body: { accession_identifier: scannedId },
+        })({ signal });
+      } catch {
+        result = await query(specimenApi.getSpecimen, {
+          pathParams: { facilityId, specimenId: scannedId },
+        })({ signal });
+      }
 
       setSpecimenData(result);
       setShowSuccess(true);

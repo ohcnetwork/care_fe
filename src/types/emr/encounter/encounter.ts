@@ -23,8 +23,8 @@ import { Permissions } from "@/types/emr/permission/permission";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
 import { FacilityBareMinimum } from "@/types/facility/facility";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
-import { LocationAssociationStatus } from "@/types/location/association";
-import { LocationList } from "@/types/location/location";
+import { LocationAssociationRead } from "@/types/location/association";
+import { LocationRead } from "@/types/location/location";
 import { AppointmentRead } from "@/types/scheduling/schedule";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -204,14 +204,6 @@ export type StatusHistory = {
   history: History[];
 };
 
-export type LocationHistory = {
-  id: string;
-  start_datetime: string;
-  location: LocationList;
-  status: LocationAssociationStatus;
-  end_datetime?: string;
-};
-
 export interface EncounterBase {
   status: EncounterStatus;
   encounter_class: EncounterClass;
@@ -238,8 +230,8 @@ export interface EncounterRead
   appointment: AppointmentRead | null;
   patient: PatientRead;
   organizations: FacilityOrganizationRead[];
-  current_location: LocationList | null;
-  location_history: LocationHistory[];
+  current_location: LocationRead | null;
+  location_history: LocationAssociationRead[];
   care_team: CareTeamResponse[];
   tags: TagConfig[];
   created_by: UserReadMinimal;
