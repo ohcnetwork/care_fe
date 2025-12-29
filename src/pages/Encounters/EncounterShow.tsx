@@ -220,6 +220,7 @@ export const EncounterShow = (props: Props) => {
             : "0rem",
         } as React.CSSProperties
       }
+      hideBreadcrumbs
     >
       {primaryEncounter.appointment && canViewAppointmentEncounterHeader && (
         <div className="flex items-center justify-center -mt-2 mb-2">

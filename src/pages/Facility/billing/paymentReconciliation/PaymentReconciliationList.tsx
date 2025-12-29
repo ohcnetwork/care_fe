@@ -26,7 +26,7 @@ export function PaymentReconciliationList({
   const { open: isSidebarOpen } = useSidebar();
 
   return (
-    <Page title={t("payment_reconciliations")} hideTitleOnPage>
+    <Page title={t("payment_reconciliations")} hideTitleOnPage hideBreadcrumbs>
       <div
         className={cn(
           "w-full mt-3 overflow-y-auto",

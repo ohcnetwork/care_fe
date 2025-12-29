@@ -94,7 +94,7 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
   const shortcuts = [...defaultShortcuts, ...customDashboardLinks];
 
   return (
-    <Page title="">
+    <Page title="" hideBreadcrumbs>
       <div className="container mx-auto space-y-8">
         {/* Welcome Header */}
         <div className="rounded-lg">

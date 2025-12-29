@@ -159,6 +159,7 @@ export function AccountList({
       title={t("accounts")}
       hideTitleOnPage={hideTitleOnPage}
       className={cn(hideTitleOnPage && "md:px-0", className)}
+      hideBreadcrumbs
     >
       <div className={cn("mx-auto", !hideTitleOnPage && "mt-2")}>
         <div className="mb-4">

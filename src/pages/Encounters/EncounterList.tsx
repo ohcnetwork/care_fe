@@ -268,6 +268,7 @@ export function EncounterList({
               })}
         </Badge>
       }
+      hideBreadcrumbs
     >
       <div className="space-y-4 mt-4 flex flex-col">
         <div className="rounded-lg border border-gray-200 bg-card shadow-xs flex flex-col overflow-auto">

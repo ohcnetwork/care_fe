@@ -88,6 +88,7 @@ export const PatientHome = (props: {
           )}
         </>
       }
+      hideBreadcrumbs
     >
       <div
         className={cn(

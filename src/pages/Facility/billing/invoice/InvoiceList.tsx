@@ -42,7 +42,7 @@ export function InvoiceList({
   });
 
   return (
-    <Page title={t("invoices")} hideTitleOnPage>
+    <Page title={t("invoices")} hideTitleOnPage hideBreadcrumbs>
       <div className="container mx-auto">
         <div className="mb-4">
           <div className="mb-4 flex items-center justify-between">

@@ -53,7 +53,7 @@ import { ChargeItemStatus } from "@/types/billing/chargeItem/chargeItem";
 import chargeItemApi from "@/types/billing/chargeItem/chargeItemApi";
 
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
-import BackButton from "@/components/Common/BackButton";
+import Page from "@/components/Common/Page";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
 import AccountSheet from "./AccountSheet";
@@ -258,38 +258,95 @@ export function AccountShow({
   };
 
   return (
-    <div className="space-y-3">
-      <BackButton size="xs">
-        <CareIcon icon="l-arrow-left" className="size-4" />
-        {t("back")}
-      </BackButton>
-      <PatientHeader
-        patient={account.patient}
-        facilityId={facilityId}
-        className="md:p-0 p-0"
-        actions={
-          <div className="flex gap-2">
-            <div className="hidden lg:flex gap-2">
+    <Page title={t("account")} hideTitleOnPage className="md:px-0">
+      <div className="space-y-3">
+        <PatientHeader
+          patient={account.patient}
+          facilityId={facilityId}
+          className="md:p-0 p-0"
+          actions={
+            <div className="flex gap-2">
+              <div className="hidden lg:flex gap-2">
+                {account.status === AccountStatus.active &&
+                  !isAccountBillingClosed && (
+                    <Button
+                      variant="ghost"
+                      className="text-gray-950 gap-1 flex flex-row items-center justify-between"
+                      onClick={() =>
+                        setCloseAccountStatus({
+                          ...closeAccountStatus,
+                          sheetOpen: true,
+                        })
+                      }
+                    >
+                      <CareIcon icon="l-check" className="size-5" />
+                      <span className="underline">{t("settle_close")}</span>
+                      <ShortcutBadge actionId="settle-close-account" />
+                    </Button>
+                  )}
+                {account.status === AccountStatus.active &&
+                  !isAccountBillingClosed && (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="border-gray-400 text-gray-950"
+                        onClick={() =>
+                          navigate(
+                            `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
+                          )
+                        }
+                      >
+                        <CareIcon icon="l-plus" className="mr-2 size-4" />
+                        {t("create_invoice")}
+                        <ShortcutBadge actionId="create-invoice" />
+                      </Button>
+
+                      <div className="flex gap-2">
+                        <Button
+                          variant="primary"
+                          onClick={() =>
+                            setPaymentSheet({
+                              isOpen: true,
+                              isCreditNote: false,
+                            })
+                          }
+                        >
+                          <CareIcon icon="l-plus" className="size-4" />
+                          {t("record_payment")}
+                          <ShortcutBadge actionId="record-payment-account" />
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="border-gray-400"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() =>
+                                setPaymentSheet({
+                                  isOpen: true,
+                                  isCreditNote: true,
+                                })
+                              }
+                            >
+                              <CareIcon icon="l-plus" className="mr-2 size-4" />
+                              {t("record_credit_note")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </>
+                  )}
+              </div>
+
               {account.status === AccountStatus.active &&
                 !isAccountBillingClosed && (
-                  <Button
-                    variant="ghost"
-                    className="text-gray-950 gap-1 flex flex-row items-center justify-between"
-                    onClick={() =>
-                      setCloseAccountStatus({
-                        ...closeAccountStatus,
-                        sheetOpen: true,
-                      })
-                    }
-                  >
-                    <CareIcon icon="l-check" className="size-5" />
-                    <span className="underline">{t("settle_close")}</span>
-                    <ShortcutBadge actionId="settle-close-account" />
-                  </Button>
-                )}
-              {account.status === AccountStatus.active &&
-                !isAccountBillingClosed && (
-                  <>
+                  <div className="lg:hidden w-full flex justify-end gap-2">
                     <Button
                       variant="outline"
                       className="border-gray-400 text-gray-950"
@@ -299,375 +356,328 @@ export function AccountShow({
                         )
                       }
                     >
-                      <CareIcon icon="l-plus" className="mr-2 size-4" />
-                      {t("create_invoice")}
+                      <CareIcon icon="l-plus" className="size-4" />
+                      {t("invoice")}
                       <ShortcutBadge actionId="create-invoice" />
                     </Button>
 
-                    <div className="flex gap-2">
-                      <Button
-                        variant="primary"
-                        onClick={() =>
-                          setPaymentSheet({
-                            isOpen: true,
-                            isCreditNote: false,
-                          })
-                        }
-                      >
-                        <CareIcon icon="l-plus" className="size-4" />
-                        {t("record_payment")}
-                        <ShortcutBadge actionId="record-payment-account" />
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="border-gray-400"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() =>
-                              setPaymentSheet({
-                                isOpen: true,
-                                isCreditNote: true,
-                              })
-                            }
-                          >
-                            <CareIcon icon="l-plus" className="mr-2 size-4" />
-                            {t("record_credit_note")}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </>
+                    <Button
+                      variant="primary"
+                      onClick={() =>
+                        setPaymentSheet({
+                          isOpen: true,
+                          isCreditNote: false,
+                        })
+                      }
+                    >
+                      <CareIcon icon="l-plus" className="size-4" />
+                      {t("payment")}
+                      <ShortcutBadge actionId="record-payment-account" />
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="border-gray-400"
+                        >
+                          <MoreVertical className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {account.status === AccountStatus.active &&
+                          !isAccountBillingClosed && (
+                            <DropdownMenuItem
+                              onClick={() =>
+                                setCloseAccountStatus({
+                                  ...closeAccountStatus,
+                                  sheetOpen: true,
+                                })
+                              }
+                            >
+                              {t("settle_close")}
+                              <ShortcutBadge actionId="settle-close-account" />
+                            </DropdownMenuItem>
+                          )}
+                        <DropdownMenuItem
+                          onClick={() =>
+                            setPaymentSheet({
+                              isOpen: true,
+                              isCreditNote: true,
+                            })
+                          }
+                        >
+                          {t("record_credit_note")}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 )}
             </div>
-
-            {account.status === AccountStatus.active &&
-              !isAccountBillingClosed && (
-                <div className="lg:hidden w-full flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    className="border-gray-400 text-gray-950"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/billing/account/${accountId}/invoices/create`,
-                      )
-                    }
-                  >
-                    <CareIcon icon="l-plus" className="size-4" />
-                    {t("invoice")}
-                    <ShortcutBadge actionId="create-invoice" />
-                  </Button>
-
-                  <Button
-                    variant="primary"
-                    onClick={() =>
-                      setPaymentSheet({
-                        isOpen: true,
-                        isCreditNote: false,
-                      })
-                    }
-                  >
-                    <CareIcon icon="l-plus" className="size-4" />
-                    {t("payment")}
-                    <ShortcutBadge actionId="record-payment-account" />
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+          }
+        />
+        <div className="bg-gray-100 p-3 space-y-4 rounded-lg">
+          <div className="bg-gray-100 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+              <div>
+                <p className="text-sm text-gray-700 font-medium">
+                  {t("account")}
+                </p>
+                <p className="font-medium text-base text-gray-950">
+                  {account.name}
+                </p>
+              </div>
+              <div className="flex md:items-center gap-6">
+                <div>
+                  <p className="text-sm text-gray-700 font-medium">
+                    {t("status")}
+                  </p>
+                  <Badge variant={ACCOUNT_STATUS_COLORS[account.status]}>
+                    {t(account.status)}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-700 font-medium">
+                    {t("start_date")}
+                  </p>
+                  <p className="font-medium text-base text-gray-950">
+                    {account.service_period?.start
+                      ? formatDate(account.service_period?.start)
+                      : formatDate(account.created_date)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-700 font-medium">
+                    {t("end_date")}
+                  </p>
+                  <p className="font-medium text-base text-gray-950">
+                    {account.service_period?.end
+                      ? formatDate(account.service_period?.end)
+                      : t("ongoing")}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-700 font-medium">
+                  {t("tags_other")}
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  <TagAssignmentSheet
+                    entityType="account"
+                    entityId={accountId}
+                    facilityId={facilityId}
+                    currentTags={account.tags ?? []}
+                    onUpdate={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: ["account", accountId],
+                      });
+                    }}
+                    patientId={account.patient.id}
+                    trigger={
                       <Button
                         variant="outline"
-                        size="icon"
-                        className="border-gray-400"
+                        size="xs"
+                        className="rounded-sm"
                       >
-                        <MoreVertical className="size-4" />
+                        <Hash />
+                        {account.tags && account.tags.length > 0
+                          ? t("manage_tags")
+                          : t("add_tags")}
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {account.status === AccountStatus.active &&
-                        !isAccountBillingClosed && (
-                          <DropdownMenuItem
-                            onClick={() =>
-                              setCloseAccountStatus({
-                                ...closeAccountStatus,
-                                sheetOpen: true,
-                              })
-                            }
-                          >
-                            {t("settle_close")}
-                            <ShortcutBadge actionId="settle-close-account" />
-                          </DropdownMenuItem>
-                        )}
-                      <DropdownMenuItem
-                        onClick={() =>
-                          setPaymentSheet({
-                            isOpen: true,
-                            isCreditNote: true,
-                          })
-                        }
-                      >
-                        {t("record_credit_note")}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    }
+                  />
+                  {account.tags?.map((tag) => (
+                    <Badge key={tag.id} variant="secondary" className="text-xs">
+                      {tag.display}
+                    </Badge>
+                  ))}
                 </div>
-              )}
-          </div>
-        }
-      />
-      <div className="bg-gray-100 p-3 space-y-4 rounded-lg">
-        <div className="bg-gray-100 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
-            <div>
-              <p className="text-sm text-gray-700 font-medium">
-                {t("account")}
-              </p>
-              <p className="font-medium text-base text-gray-950">
-                {account.name}
-              </p>
-            </div>
-            <div className="flex md:items-center gap-6">
-              <div>
-                <p className="text-sm text-gray-700 font-medium">
-                  {t("status")}
-                </p>
-                <Badge variant={ACCOUNT_STATUS_COLORS[account.status]}>
-                  {t(account.status)}
-                </Badge>
-              </div>
-              <div>
-                <p className="text-sm text-gray-700 font-medium">
-                  {t("start_date")}
-                </p>
-                <p className="font-medium text-base text-gray-950">
-                  {account.service_period?.start
-                    ? formatDate(account.service_period?.start)
-                    : formatDate(account.created_date)}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-700 font-medium">
-                  {t("end_date")}
-                </p>
-                <p className="font-medium text-base text-gray-950">
-                  {account.service_period?.end
-                    ? formatDate(account.service_period?.end)
-                    : t("ongoing")}
-                </p>
               </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-700 font-medium">
-                {t("tags_other")}
-              </p>
-              <div className="flex flex-wrap gap-1">
-                <TagAssignmentSheet
-                  entityType="account"
-                  entityId={accountId}
-                  facilityId={facilityId}
-                  currentTags={account.tags ?? []}
-                  onUpdate={() => {
-                    queryClient.invalidateQueries({
-                      queryKey: ["account", accountId],
-                    });
-                  }}
-                  patientId={account.patient.id}
-                  trigger={
-                    <Button variant="outline" size="xs" className="rounded-sm">
-                      <Hash />
-                      {account.tags && account.tags.length > 0
-                        ? t("manage_tags")
-                        : t("add_tags")}
-                    </Button>
-                  }
-                />
-                {account.tags?.map((tag) => (
-                  <Badge key={tag.id} variant="secondary" className="text-xs">
-                    {tag.display}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="link" asChild className="text-gray-950 underline">
-              <Link
-                href={`/facility/${facilityId}/patient/${account.patient.id}/accounts`}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="link"
+                asChild
+                className="text-gray-950 underline"
               >
-                {t("past_accounts")}
-              </Link>
-            </Button>
+                <Link
+                  href={`/facility/${facilityId}/patient/${account.patient.id}/accounts`}
+                >
+                  {t("past_accounts")}
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
+                className="border-gray-400 gap-1"
+                onClick={() => setSheetOpen(true)}
+              >
+                <CareIcon
+                  icon="l-edit"
+                  className="size-5 stroke-gray-450 stroke-1"
+                />
+                {t("edit")}
+                <ShortcutBadge actionId="edit-account" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Financial Summary Section */}
+          <div className="flex flex-col md:flex-row rounded-lg border border-gray-200 bg-white flex-wrap">
+            <div className="flex-1 p-6 border-b md:border-r border-gray-200">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-gray-500">
+                  {t("amount_due")}
+                </p>
+                <div className="flex items-end">
+                  <p
+                    className={cn("text-3xl font-bold", {
+                      "text-red-500": Number(account.total_balance) > 0,
+                      "text-green-700": Number(account.total_balance) <= 0,
+                    })}
+                  >
+                    <MonetaryDisplay amount={account.total_balance} />
+                  </p>
+                </div>
+                <p className="text-xs text-gray-500">
+                  {Number(account.total_balance) >= 0
+                    ? t("pending_from_patient")
+                    : t("overpaid_amount")}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex-1 p-6 border-b md:border-r border-gray-200">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-gray-500">
+                  {t("total_paid")}
+                </p>
+                <div className="flex items-end">
+                  <p className="text-3xl font-bold text-gray-900">
+                    <MonetaryDisplay amount={account.total_paid} />
+                  </p>
+                </div>
+                <p className="text-xs text-gray-500">
+                  {t("payments_received")}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex-1 p-6">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-gray-500">
+                  {t("billed_gross")}
+                </p>
+                <div className="flex items-end">
+                  <p className="text-3xl font-bold text-gray-900">
+                    <MonetaryDisplay amount={account.total_gross} />
+                  </p>
+                </div>
+                <p className="text-xs text-gray-500">
+                  {t("total_billed_before_adjustments")}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
             <Button
               variant="outline"
-              className="border-gray-400 gap-1"
-              onClick={() => setSheetOpen(true)}
+              className="gap-2 border-gray-400 text-gray-950 hidden"
             >
-              <CareIcon
-                icon="l-edit"
-                className="size-5 stroke-gray-450 stroke-1"
-              />
-              {t("edit")}
-              <ShortcutBadge actionId="edit-account" />
+              <CareIcon icon="l-eye" className="size-4" />
+              {t("view_statement")}
+            </Button>
+            <Button
+              variant="link"
+              className="gap-2 underline"
+              disabled={rebalanceMutation.isPending}
+              onClick={() => rebalanceMutation.mutate({})}
+            >
+              <CareIcon icon="l-refresh" className="size-4" />
+              {rebalanceMutation.isPending ? t("rebalancing") : t("rebalance")}
             </Button>
           </div>
         </div>
 
-        {/* Financial Summary Section */}
-        <div className="flex flex-col md:flex-row rounded-lg border border-gray-200 bg-white flex-wrap">
-          <div className="flex-1 p-6 border-b md:border-r border-gray-200">
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500">
-                {t("amount_due")}
-              </p>
-              <div className="flex items-end">
-                <p
-                  className={cn("text-3xl font-bold", {
-                    "text-red-500": Number(account.total_balance) > 0,
-                    "text-green-700": Number(account.total_balance) <= 0,
-                  })}
-                >
-                  <MonetaryDisplay amount={account.total_balance} />
-                </p>
-              </div>
-              <p className="text-xs text-gray-500">
-                {Number(account.total_balance) >= 0
-                  ? t("pending_from_patient")
-                  : t("overpaid_amount")}
-              </p>
-            </div>
-          </div>
+        {/* Tabs Section */}
+        <NavTabs
+          className="w-full mt-4"
+          tabContentClassName="mt-6"
+          tabs={tabs}
+          currentTab={tab}
+          onTabChange={(value) => navigate(navigatePath(value))}
+          setPageTitle={false}
+          showMoreAfterIndex={showMoreAfterIndex}
+        />
 
-          <div className="flex-1 p-6 border-b md:border-r border-gray-200">
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500">
-                {t("total_paid")}
-              </p>
-              <div className="flex items-end">
-                <p className="text-3xl font-bold text-gray-900">
-                  <MonetaryDisplay amount={account.total_paid} />
-                </p>
-              </div>
-              <p className="text-xs text-gray-500">{t("payments_received")}</p>
-            </div>
-          </div>
+        <AccountSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          facilityId={facilityId}
+          initialValues={account}
+          isEdit
+        />
 
-          <div className="flex-1 p-6">
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500">
-                {t("billed_gross")}
-              </p>
-              <div className="flex items-end">
-                <p className="text-3xl font-bold text-gray-900">
-                  <MonetaryDisplay amount={account.total_gross} />
-                </p>
-              </div>
-              <p className="text-xs text-gray-500">
-                {t("total_billed_before_adjustments")}
-              </p>
-            </div>
-          </div>
-        </div>
+        <PaymentReconciliationSheet
+          open={paymentSheet.isOpen}
+          onOpenChange={(isOpen) =>
+            setPaymentSheet({ ...paymentSheet, isOpen })
+          }
+          facilityId={facilityId}
+          accountId={accountId}
+          isCreditNote={paymentSheet.isCreditNote}
+          account={account}
+        />
 
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            className="gap-2 border-gray-400 text-gray-950 hidden"
-          >
-            <CareIcon icon="l-eye" className="size-4" />
-            {t("view_statement")}
-          </Button>
-          <Button
-            variant="link"
-            className="gap-2 underline"
-            disabled={rebalanceMutation.isPending}
-            onClick={() => rebalanceMutation.mutate({})}
-          >
-            <CareIcon icon="l-refresh" className="size-4" />
-            {rebalanceMutation.isPending ? t("rebalancing") : t("rebalance")}
-          </Button>
-        </div>
-      </div>
-
-      {/* Tabs Section */}
-      <NavTabs
-        className="w-full mt-4"
-        tabContentClassName="mt-6"
-        tabs={tabs}
-        currentTab={tab}
-        onTabChange={(value) => navigate(navigatePath(value))}
-        setPageTitle={false}
-        showMoreAfterIndex={showMoreAfterIndex}
-      />
-
-      <AccountSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        facilityId={facilityId}
-        initialValues={account}
-        isEdit
-      />
-
-      <PaymentReconciliationSheet
-        open={paymentSheet.isOpen}
-        onOpenChange={(isOpen) => setPaymentSheet({ ...paymentSheet, isOpen })}
-        facilityId={facilityId}
-        accountId={accountId}
-        isCreditNote={paymentSheet.isCreditNote}
-        account={account}
-      />
-
-      <Dialog
-        open={closeAccountStatus.sheetOpen}
-        onOpenChange={(open) =>
-          setCloseAccountStatus({ ...closeAccountStatus, sheetOpen: open })
-        }
-      >
-        <DialogHeader></DialogHeader>
-        <DialogContent>
-          <DialogTitle>{t("close_account")}</DialogTitle>
-          <DialogDescription className="text-xs text-gray-500 -mt-1">
-            {t(
-              closedStatusText[
-                closeAccountStatus.reason as keyof typeof closedStatusText
-              ],
+        <Dialog
+          open={closeAccountStatus.sheetOpen}
+          onOpenChange={(open) =>
+            setCloseAccountStatus({ ...closeAccountStatus, sheetOpen: open })
+          }
+        >
+          <DialogHeader></DialogHeader>
+          <DialogContent>
+            <DialogTitle>{t("close_account")}</DialogTitle>
+            <DialogDescription className="text-xs text-gray-500 -mt-1">
+              {t(
+                closedStatusText[
+                  closeAccountStatus.reason as keyof typeof closedStatusText
+                ],
+              )}
+            </DialogDescription>
+            <Select
+              value={closeAccountStatus.reason}
+              onValueChange={(value) =>
+                setCloseAccountStatus({
+                  ...closeAccountStatus,
+                  reason: value as AccountBillingStatus,
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(closeBillingStatusColorMap).map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {t(key)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <ClosedCallout balance={Number(account.total_balance)} />
+            {hasBillableItems && (
+              <span className="text-warning-500 bg-warning-50 text-xs p-2 rounded block -mt-3">
+                {t("close_account_with_pending_items_caution_message")}
+              </span>
             )}
-          </DialogDescription>
-          <Select
-            value={closeAccountStatus.reason}
-            onValueChange={(value) =>
-              setCloseAccountStatus({
-                ...closeAccountStatus,
-                reason: value as AccountBillingStatus,
-              })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.keys(closeBillingStatusColorMap).map((key) => (
-                <SelectItem key={key} value={key}>
-                  {t(key)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <ClosedCallout balance={Number(account.total_balance)} />
-          {hasBillableItems && (
-            <span className="text-warning-500 bg-warning-50 text-xs p-2 rounded block -mt-3">
-              {t("close_account_with_pending_items_caution_message")}
-            </span>
-          )}
-          <Button variant="destructive" onClick={handleCloseAccount}>
-            {t("close_account")}
-          </Button>
-        </DialogContent>
-      </Dialog>
-    </div>
+            <Button variant="destructive" onClick={handleCloseAccount}>
+              {t("close_account")}
+            </Button>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </Page>
   );
 }
 

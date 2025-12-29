@@ -107,6 +107,7 @@ export default function ResourceList({ facilityId }: { facilityId: string }) {
               })}
         </Badge>
       }
+      hideBreadcrumbs
     >
       <div className="space-y-4 mt-4">
         <div className="border border-gray-200 rounded-lg">

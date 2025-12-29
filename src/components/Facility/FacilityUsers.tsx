@@ -82,6 +82,7 @@ export default function FacilityUsers(props: { facilityId: string }) {
               })}
         </Badge>
       }
+      hideBreadcrumbs
     >
       <hr className="mt-4 border-gray-200" />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 m-5 ml-0">

@@ -305,7 +305,7 @@ export default function QueuesIndex({
   const isPast = dayjs(qParams.date).isBefore(dayjs(), "day");
 
   return (
-    <Page title={t("token_queues")} hideTitleOnPage>
+    <Page title={t("token_queues")} hideTitleOnPage hideBreadcrumbs>
       <div className="container mx-auto px-4 py-6">
         {/* Header Section - Date, Practitioner, Create Queue */}
         <div className="mb-8 flex flex-wrap gap-4 items-end bg-white p-4 rounded-lg border border-gray-200">

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 
+import { Breadcrumbs } from "@/components/Common/Breadcrumbs";
 import PageTitle, { PageTitleProps } from "@/components/Common/PageTitle";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 
@@ -11,6 +12,7 @@ interface PageProps extends PageTitleProps {
   hideTitleOnPage?: boolean;
   shortCutContext?: string;
   style?: React.CSSProperties;
+  hideBreadcrumbs?: boolean;
 }
 
 export default function Page(props: PageProps) {
@@ -18,6 +20,7 @@ export default function Page(props: PageProps) {
 
   return (
     <div className={cn("md:px-6 py-0", props.className)} style={props.style}>
+      {!props.hideBreadcrumbs && <Breadcrumbs />}
       <div className="flex flex-col justify-between gap-2 px-3 md:flex-row md:items-center md:gap-6 md:px-0">
         <PageTitle
           changePageMetadata={props.changePageMetadata}
