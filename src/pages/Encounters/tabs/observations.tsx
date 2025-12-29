@@ -70,11 +70,7 @@ function groupObservationsByDate(
 
 export const EncounterObservationsTab = () => {
   const { t } = useTranslation();
-  const {
-    selectedEncounterId: encounterId,
-    patientId,
-    canReadClinicalData,
-  } = useEncounter();
+  const { selectedEncounterId: encounterId, patientId } = useEncounter();
   const { ref, inView } = useInView();
 
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
@@ -97,7 +93,6 @@ export const EncounterObservationsTab = () => {
         const currentOffset = allPages.length * 20;
         return currentOffset < lastPage.count ? currentOffset : null;
       },
-      enabled: canReadClinicalData,
     });
 
   useEffect(() => {
