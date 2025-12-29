@@ -266,16 +266,12 @@ export const Demography = (props: PatientProps) => {
           canWrite={canWritePatient}
         />
       ),
-      details: [
-        ...patientData.instance_tags.map((t) => ({
+      details: [...patientData.instance_tags, ...patientData.facility_tags].map(
+        (t) => ({
           label: t.parent ? t.parent.display : t.display,
           value: t.display,
-        })),
-        ...patientData.facility_tags.map((t) => ({
-          label: t.parent ? t.parent.display : t.display,
-          value: t.display,
-        })),
-      ],
+        }),
+      ),
     },
   ];
 
