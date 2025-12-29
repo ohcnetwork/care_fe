@@ -21,6 +21,9 @@ export default defineConfig({
     timeout: 10000,
   },
 
+  /* Global setup - refreshes tokens before test run */
+  globalSetup: require.resolve("./tests/globalSetup"),
+
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
