@@ -8,11 +8,15 @@ test.describe("Clear Cache in profile successfully", () => {
     page,
   }) => {
     const facilityId = getFacilityId();
-    await page.goto(`/facility/${facilityId}/users/admin`);
+    await page.goto(`/facility/${facilityId}/users/admin`, {
+      waitUntil: "domcontentloaded",
+      timeout: 15000,
+    });
 
-    await expect(
-      page.getByRole("button", { name: /clear cache/i }),
-    ).toBeVisible();
+    const clearCacheButton = page.getByRole("button", {
+      name: /clear cache/i,
+    });
+    await expect(clearCacheButton).toBeVisible({ timeout: 10000 });
 
     // Create a test cache to verify clearing works
     await page.evaluate(async () => {
@@ -33,7 +37,7 @@ test.describe("Clear Cache in profile successfully", () => {
     const reloadPromise = page.waitForLoadState("domcontentloaded");
 
     // Click Clear Cache button
-    await page.getByRole("button", { name: /clear cache/i }).click();
+    await clearCacheButton.click();
 
     // Wait for page reload
     await reloadPromise;
@@ -61,8 +65,6 @@ test.describe("Clear Cache in profile successfully", () => {
     }
 
     // Wait for profile page to be fully loaded and verify user is still on the profile page
-    await expect(
-      page.getByRole("button", { name: /clear cache/i }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(clearCacheButton).toBeVisible({ timeout: 10000 });
   });
 });

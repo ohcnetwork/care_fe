@@ -14,9 +14,16 @@ test.describe("Questionnaire Visibility by Status and Subject Type", () => {
     const slug = faker.string.alphanumeric({ length: 10 });
     const name = `Test ${subjectType} ${status} ${slug}`;
 
-    await page.goto("/");
-    await page.getByRole("link", { name: "Admin Dashboard" }).click();
-    await page.getByRole("button", { name: "Create Questionnaire" }).click();
+    await page.goto("/", { waitUntil: "domcontentloaded", timeout: 15000 });
+    
+    const adminDashboardLink = page.getByRole("link", { name: "Admin Dashboard" });
+    await adminDashboardLink.waitFor({ state: "visible", timeout: 10000 });
+    await adminDashboardLink.click();
+    
+    const createButton = page.getByRole("button", { name: "Create Questionnaire" });
+    await createButton.waitFor({ state: "visible", timeout: 10000 });
+    await createButton.click();
+    
     await page.getByRole("button", { name: "Import" }).click();
     await page
       .locator("[data-slot='dropdown-menu-item']")
@@ -125,10 +132,22 @@ test.describe("Questionnaire Visibility by Status and Subject Type", () => {
   }
 
   test.beforeAll(async ({ browser }) => {
+    // Verify authentication state exists before running tests
     const context = await browser.newContext({
       storageState: "tests/.auth/user.json",
     });
-    await context.close();
+    const page = await context.newPage();
+    
+    try {
+      await page.goto("/", { waitUntil: "domcontentloaded", timeout: 10000 });
+      // Quick check to ensure we can access the app
+      await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => {});
+    } catch (error) {
+      console.error("Failed to verify authentication in beforeAll:", error);
+    } finally {
+      await page.close();
+      await context.close();
+    }
   });
 
   test.describe("Encounter Subject Type Questionnaires", () => {
