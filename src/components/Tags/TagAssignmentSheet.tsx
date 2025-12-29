@@ -106,7 +106,6 @@ interface TagAssignmentSheetProps {
   entityId: string;
   facilityId?: string;
   currentTags: TagConfig[];
-  currentFacilityTags?: TagConfig[];
   onUpdate: () => void;
   patientId?: string;
   canWrite?: boolean;
@@ -118,7 +117,6 @@ export default function TagAssignmentSheet({
   entityId,
   facilityId,
   currentTags,
-  currentFacilityTags,
   onUpdate,
   patientId,
   canWrite = true,
@@ -129,22 +127,8 @@ export default function TagAssignmentSheet({
 
   const entityConfig = ENTITY_CONFIG[entityType];
 
-  const addFacilityTagFlags = (tags: TagConfig[]) =>
-    tags.map((tag) => ({
-      ...tag,
-      meta: {
-        ...tag.meta,
-        is_facility_tag: true,
-      },
-    }));
-
-  const getCombinedTags = () => [
-    ...currentTags,
-    ...addFacilityTagFlags(currentFacilityTags || []),
-  ];
-
   const isFacilityTag = (tag: TagConfig) => {
-    return !!tag.meta?.is_facility_tag;
+    return !!tag.facility;
   };
 
   const getTagMutationConfig = (
@@ -216,9 +200,8 @@ export default function TagAssignmentSheet({
 
   // Initialize selected tags from current entity tags
   useEffect(() => {
-    setSelectedTags(getCombinedTags());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTags, currentFacilityTags]);
+    setSelectedTags(currentTags);
+  }, [currentTags]);
 
   if (!entityConfig) {
     console.error(`Unsupported entity type: ${entityType}`);
@@ -255,7 +238,7 @@ export default function TagAssignmentSheet({
     } catch (error) {
       console.error("Tag operation failed:", error);
       // Revert local state on error
-      setSelectedTags(getCombinedTags());
+      setSelectedTags(currentTags);
     }
   };
 

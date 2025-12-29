@@ -72,109 +72,40 @@ export function MultiFilterStyleTagSelector({
   const isMobile = useIsMobile();
   const { t } = useTranslation();
 
-  // Fetch top-level tags (instance)
-  const { data: instanceTags, isLoading: isLoadingInstance } = useQuery({
-    queryKey: ["tags", "instance", resource, search],
+  // Fetch top-level tags (both instance and facility tags in one call)
+  const { data: rootTags, isLoading: isLoadingRoot } = useQuery({
+    queryKey: ["tags", resource, search, facilityId],
     queryFn: query.debounced(tagConfigApi.list, {
       queryParams: {
         resource,
         status: "active",
         ...(search ? { display: search } : { parent_is_null: true }),
+        ...(facilityId && { facility: facilityId }),
       },
     }),
     enabled: open || mobileDrawerOpen,
   });
 
-  // Fetch top-level tags (facility)
-  const { data: facilityTags, isLoading: isLoadingFacility } = useQuery({
-    queryKey: ["tags", "facility", resource, search, facilityId],
-    queryFn: query.debounced(tagConfigApi.list, {
+  // Fetch children for active group popover (both instance and facility tags in one call)
+  const { data: childTags, isLoading: isLoadingChildren } = useQuery({
+    queryKey: [
+      "tags",
+      resource,
+      "parent",
+      groupPopoverOpen || selectedGroup?.id,
+      facilityId,
+    ],
+    queryFn: query(tagConfigApi.list, {
       queryParams: {
         resource,
+        parent: groupPopoverOpen || selectedGroup?.id,
         status: "active",
-        ...(search ? { display: search } : { parent_is_null: true }),
-        facility: facilityId,
-        facility_only: true,
+        ...(facilityId && { facility: facilityId }),
       },
     }),
-    enabled: (open || mobileDrawerOpen) && !!facilityId,
+    enabled:
+      (open && !!groupPopoverOpen) || (childDrawerOpen && !!selectedGroup),
   });
-
-  const rootTags = {
-    results: [
-      ...(instanceTags?.results || []),
-      ...(facilityTags?.results || []).map((tag) => ({
-        ...tag,
-        meta: {
-          ...tag.meta,
-          is_facility_tag: true,
-        },
-      })),
-    ],
-  };
-  const isLoadingRoot = isLoadingInstance || isLoadingFacility;
-
-  // Fetch children for active group popover
-  const { data: instanceChildTags, isLoading: isLoadingInstanceChildren } =
-    useQuery({
-      queryKey: [
-        "tags",
-        "instance",
-        resource,
-        "parent",
-        groupPopoverOpen || selectedGroup?.id,
-      ],
-      queryFn: query(tagConfigApi.list, {
-        queryParams: {
-          resource,
-          parent: groupPopoverOpen || selectedGroup?.id,
-          status: "active",
-        },
-      }),
-      enabled:
-        (open && !!groupPopoverOpen) || (childDrawerOpen && !!selectedGroup),
-    });
-
-  // Fetch facility children tags
-  const { data: facilityChildTags, isLoading: isLoadingFacilityChildren } =
-    useQuery({
-      queryKey: [
-        "tags",
-        "facility",
-        resource,
-        "parent",
-        groupPopoverOpen || selectedGroup?.id,
-        facilityId,
-      ],
-      queryFn: query(tagConfigApi.list, {
-        queryParams: {
-          resource,
-          parent: groupPopoverOpen || selectedGroup?.id,
-          status: "active",
-          facility: facilityId,
-          facility_only: true,
-        },
-      }),
-      enabled:
-        ((open && !!groupPopoverOpen) ||
-          (childDrawerOpen && !!selectedGroup)) &&
-        !!facilityId,
-    });
-
-  const childTags = {
-    results: [
-      ...(instanceChildTags?.results || []),
-      ...(facilityChildTags?.results || []).map((tag) => ({
-        ...tag,
-        meta: {
-          ...tag.meta,
-          is_facility_tag: true,
-        },
-      })),
-    ],
-  };
-  const isLoadingChildren =
-    isLoadingInstanceChildren || isLoadingFacilityChildren;
 
   // Select/deselect tag
   const handleSelect = (tag: TagConfig) => {

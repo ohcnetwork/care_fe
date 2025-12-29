@@ -254,8 +254,10 @@ export const Demography = (props: PatientProps) => {
           entityType="patient"
           entityId={patientId}
           facilityId={facilityId}
-          currentTags={patientData.instance_tags}
-          currentFacilityTags={patientData.facility_tags}
+          currentTags={[
+            ...patientData.instance_tags,
+            ...patientData.facility_tags,
+          ]}
           onUpdate={() => {
             queryClient.invalidateQueries({
               queryKey: ["patient", patientId],
