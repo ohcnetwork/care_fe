@@ -106,8 +106,8 @@ export async function selectFromRequirements(
     if (await input.isVisible().catch(() => false)) {
       await input.fill("");
       await input.fill(search);
-      // Wait for search results to update
-      await scope.waitForLoadState("networkidle").catch(() => {});
+      // Wait for search results to update by waiting for network to be idle
+      await page.waitForLoadState("networkidle").catch(() => {});
     }
   }
 
@@ -130,7 +130,7 @@ export async function selectFromRequirements(
 
   // Wait for selection to register (multi-select, so it stays open)
   // Use a small delay to ensure the UI has updated
-  await scope.waitForLoadState("domcontentloaded").catch(() => {});
+  await page.waitForLoadState("domcontentloaded").catch(() => {});
 }
 
 interface SelectFromValueSetOptions {
