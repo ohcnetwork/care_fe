@@ -44,28 +44,27 @@ interface MultiSelectProps {
   translationBasekey?: string;
 }
 
-export function MultiSelect({
-  options,
-  onValueChange,
-  value = [],
-  placeholder,
-  className,
-  ref,
-  selectionSummary,
+function ListContent({
   translationBasekey,
-  ...props
-}: ButtonProps & MultiSelectProps) {
-  const [selectedValues, setSelectedValues] = React.useState<string[]>(value);
-  const [open, setOpen] = React.useState(false);
-  const isMobile = useBreakpoints({ default: true, sm: false });
-
-  React.useEffect(() => {
-    setSelectedValues(value);
-  }, [value, open]);
-  React.useEffect(() => {
-    if (open == false) onValueChange(selectedValues);
-  }, [open]);
-
+  options,
+  value,
+  selectedValues,
+  setSelectedValues,
+  onValueChange,
+  setOpen,
+}: {
+  translationBasekey?: string;
+  options: {
+    label: string;
+    value: string;
+    icon?: IconName;
+  }[];
+  value: string[];
+  selectedValues: string[];
+  setSelectedValues: React.Dispatch<React.SetStateAction<string[]>>;
+  onValueChange: (value: string[]) => void;
+  setOpen: (open: boolean) => void;
+}) {
   const { t } = useTranslation();
 
   const handleToggleOption = (option: string) => {
@@ -81,40 +80,7 @@ export function MultiSelect({
       return options.map((o) => o.value);
     });
   };
-
-  const triggerButton = (
-    <Button
-      variant="outline"
-      ref={ref}
-      role="combobox"
-      onClick={() => setOpen((open) => !open)}
-      className={cn(
-        "flex w-full p-1 rounded-md border items-center justify-between",
-        open && "ring-2 ring-blue-500 border-0",
-        className,
-      )}
-      {...props}
-    >
-      <div className="flex justify-between items-center w-full">
-        {value.length == 0 ? (
-          <span className="text-sm text-gray-500 mx-3">{placeholder}</span>
-        ) : (
-          <Badge className="m-1" variant="secondary">
-            {selectionSummary
-              ? selectionSummary
-              : t("options_selected", { count: value.length })}
-          </Badge>
-        )}
-        {open ? (
-          <ChevronUp className="h-4 mx-2 cursor-pointer text-black" />
-        ) : (
-          <ChevronDown className="h-4 mx-2 cursor-pointer text-black" />
-        )}
-      </div>
-    </Button>
-  );
-
-  const listContent = (
+  return (
     <div className="flex flex-col h-full overflow-hidden">
       <Command className="flex-1 overflow-hidden min-h-0">
         <div className="border border-gray-200 rounded-md m-1 mb-2">
@@ -228,15 +194,80 @@ export function MultiSelect({
       </div>
     </div>
   );
+}
+
+export function MultiSelect({
+  options,
+  onValueChange,
+  value = [],
+  placeholder,
+  className,
+  ref,
+  selectionSummary,
+  translationBasekey,
+  ...props
+}: ButtonProps & MultiSelectProps) {
+  const [selectedValues, setSelectedValues] = React.useState<string[]>(value);
+  const [open, setOpen] = React.useState(false);
+  const isMobile = useBreakpoints({ default: true, sm: false });
+
+  React.useEffect(() => {
+    setSelectedValues(value);
+  }, [value, open]);
+  React.useEffect(() => {
+    if (open == false) onValueChange(selectedValues);
+  }, [open]);
+
+  const { t } = useTranslation();
 
   if (isMobile) {
     return (
       <div className="w-full">
         <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
+          <DrawerTrigger asChild>
+            <Button
+              variant="outline"
+              ref={ref}
+              role="combobox"
+              onClick={() => setOpen((open) => !open)}
+              className={cn(
+                "flex w-full p-1 rounded-md border items-center justify-between",
+                open && "ring-2 ring-blue-500 border-0",
+                className,
+              )}
+              {...props}
+            >
+              <div className="flex justify-between items-center w-full">
+                {value.length == 0 ? (
+                  <span className="text-sm text-gray-500 mx-3">
+                    {placeholder}
+                  </span>
+                ) : (
+                  <Badge className="m-1" variant="secondary">
+                    {selectionSummary
+                      ? selectionSummary
+                      : t("options_selected", { count: value.length })}
+                  </Badge>
+                )}
+                {open ? (
+                  <ChevronUp className="h-4 mx-2 cursor-pointer text-black" />
+                ) : (
+                  <ChevronDown className="h-4 mx-2 cursor-pointer text-black" />
+                )}
+              </div>
+            </Button>
+          </DrawerTrigger>
           <DrawerContent className="px-0 pt-2 flex flex-col h-[50vh]">
             <div className="mt-3 pb-[env(safe-area-inset-bottom)] flex flex-col flex-1 overflow-hidden">
-              {listContent}
+              <ListContent
+                translationBasekey={translationBasekey}
+                options={options}
+                value={value}
+                setSelectedValues={setSelectedValues}
+                selectedValues={selectedValues}
+                onValueChange={onValueChange}
+                setOpen={setOpen}
+              />
             </div>
           </DrawerContent>
         </Drawer>
@@ -247,12 +278,52 @@ export function MultiSelect({
   return (
     <div className="w-full">
       <Popover open={open} onOpenChange={setOpen} modal>
-        <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            ref={ref}
+            role="combobox"
+            onClick={() => setOpen((open) => !open)}
+            className={cn(
+              "flex w-full p-1 rounded-md border items-center justify-between",
+              open && "ring-2 ring-blue-500 border-0",
+              className,
+            )}
+            {...props}
+          >
+            <div className="flex justify-between items-center w-full">
+              {value.length == 0 ? (
+                <span className="text-sm text-gray-500 mx-3">
+                  {placeholder}
+                </span>
+              ) : (
+                <Badge className="m-1" variant="secondary">
+                  {selectionSummary
+                    ? selectionSummary
+                    : t("options_selected", { count: value.length })}
+                </Badge>
+              )}
+              {open ? (
+                <ChevronUp className="h-4 mx-2 cursor-pointer text-black" />
+              ) : (
+                <ChevronDown className="h-4 mx-2 cursor-pointer text-black" />
+              )}
+            </div>
+          </Button>
+        </PopoverTrigger>
         <PopoverContent
           className="p-0 w-(--radix-popover-trigger-width) max-h-[35vh] flex flex-col overflow-hidden"
           align="center"
         >
-          {listContent}
+          <ListContent
+            translationBasekey={translationBasekey}
+            options={options}
+            value={value}
+            setSelectedValues={setSelectedValues}
+            selectedValues={selectedValues}
+            onValueChange={onValueChange}
+            setOpen={setOpen}
+          />
         </PopoverContent>
       </Popover>
     </div>
