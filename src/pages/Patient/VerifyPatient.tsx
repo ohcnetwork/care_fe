@@ -102,15 +102,14 @@ export default function VerifyPatient() {
                       ],
                     });
                   }}
-                  children={
-                    <PLUGIN_Component
-                      __name="PatientInfoCardActions"
-                      patient={patientData}
-                      facilityId={facilityId}
-                      className="flex justify-end"
-                    />
-                  }
-                />
+                >
+                  <PLUGIN_Component
+                    __name="PatientInfoCardActions"
+                    patient={patientData}
+                    facilityId={facilityId}
+                    className="flex justify-end"
+                  />
+                </PatientInfoCard>
               </div>
 
               <div className="grid gap-4 grid-cols-2  lg:grid-cols-3">
