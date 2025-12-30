@@ -829,17 +829,13 @@ export default function UserForm({
             createPending
           }
         >
-          {updatePending || createPending ? (
-            <>
-              <CareIcon icon="l-spinner" className="mr-2 size-4 animate-spin" />
-
-              {t("saving")}
-            </>
-          ) : isEditMode ? (
-            t("update_user")
-          ) : (
-            t("create_user")
-          )}
+          {updatePending || createPending
+            ? isEditMode
+              ? t("updating")
+              : t("creating")
+            : isEditMode
+              ? t("update_user")
+              : t("create_user")}
         </Button>
       </form>
     </Form>
