@@ -67,7 +67,7 @@ test.describe("Charge Item Definition Edit operations", () => {
     await expect(page.getByText(mrp)).toBeVisible();
     await expect(page.getByText(purchasePrice)).toBeVisible();
 
-    await page.getByRole("button", { name: "Back" }).click();
+    await page.getByRole("link", { name: "Back" }).click();
 
     await page
       .getByRole("textbox", { name: /search/i })
