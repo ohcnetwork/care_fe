@@ -27,6 +27,7 @@ import { tagFilter } from "@/components/ui/multi-filter/filterConfigs";
 import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
 import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
 import { createFilterConfig } from "@/components/ui/multi-filter/utils/Utils";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import {
   Priority,
   SERVICE_REQUEST_PRIORITY_COLORS,
@@ -38,6 +39,7 @@ import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
 import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import locationApi from "@/types/location/locationApi";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import query from "@/Utils/request/query";
 
 function EmptyState() {
@@ -119,7 +121,7 @@ function ServiceRequestCard({
                       currentTags={request.tags}
                       onUpdate={() => {
                         queryClient.invalidateQueries({
-                          queryKey: ["serviceRequests", facilityId, locationId],
+                          queryKey: ["serviceRequests", facilityId],
                         });
                       }}
                       patientId={request.encounter.patient.id}
@@ -136,10 +138,10 @@ function ServiceRequestCard({
                     entityType="service_request"
                     entityId={request.id}
                     facilityId={facilityId}
-                    currentTags={[]}
+                    currentTags={request.tags}
                     onUpdate={() => {
                       queryClient.invalidateQueries({
-                        queryKey: ["serviceRequests", facilityId, locationId],
+                        queryKey: ["serviceRequests", facilityId],
                       });
                     }}
                     patientId={request.encounter.patient.id}
@@ -187,6 +189,7 @@ export default function ServiceRequestList({
     },
   });
   const [isBarcodeOpen, setBarcodeOpen] = useState(false);
+  useShortcutSubContext("facility:service");
 
   const tagIds = qParams.tags?.split(",") || [];
   const tagQueries = useTagConfigs({ ids: tagIds, facilityId });
@@ -244,7 +247,7 @@ export default function ServiceRequestList({
   });
 
   const { data: response, isLoading } = useQuery({
-    queryKey: ["serviceRequests", facilityId, locationId, qParams],
+    queryKey: ["serviceRequests", facilityId, { ...qParams, locationId }],
     queryFn: query.debounced(serviceRequestApi.listServiceRequest, {
       pathParams: { facilityId },
       queryParams: {
@@ -287,6 +290,7 @@ export default function ServiceRequestList({
               >
                 <ScanQrCode className="size-4" />
                 {t("scan_qr")}
+                <ShortcutBadge actionId="scan-button" className="ml-2" />
               </Button>
             </div>
           </div>

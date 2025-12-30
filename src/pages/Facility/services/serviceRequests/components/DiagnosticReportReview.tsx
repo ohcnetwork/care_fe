@@ -31,6 +31,7 @@ import { FileListTable } from "@/components/Files/FileListTable";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
+import { formatName } from "@/Utils/utils";
 import { DiagnosticReportResultsTable } from "@/pages/Facility/services/diagnosticReports/components/DiagnosticReportResultsTable";
 import {
   DIAGNOSTIC_REPORT_STATUS_COLORS,
@@ -105,7 +106,7 @@ export function DiagnosticReportReview({
         },
       }),
       onSuccess: () => {
-        toast.success("Diagnostic report approved successfully");
+        toast.success(t("diagnostic_report_approved_successfully"));
         // Invalidate all related queries to update workflow status
         queryClient.invalidateQueries({
           queryKey: ["serviceRequest"],
@@ -153,10 +154,11 @@ export function DiagnosticReportReview({
     );
   }
 
-  // Don't show the report review if there are no observations and no files
+  // Don't show the report review if there are no observations and no files and no conclusion
   if (
     (!fullReport?.observations || fullReport.observations.length === 0) &&
-    (!files?.results || files.results.length === 0)
+    (!files?.results || files.results.length === 0) &&
+    !fullReport?.conclusion
   ) {
     return null;
   }
@@ -175,7 +177,7 @@ export function DiagnosticReportReview({
               <div className="flex items-center gap-2">
                 <CardTitle>
                   <p className="flex items-center gap-1.5">
-                    <FileCheck2 className="size-[24px] text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
+                    <FileCheck2 className="size-6 text-gray-950 font-normal text-base stroke-[1.5px]" />{" "}
                     <span className="text-base/9 text-gray-950 font-medium">
                       {t("result_review")}
                     </span>
@@ -186,17 +188,12 @@ export function DiagnosticReportReview({
                 {fullReport?.created_by && (
                   <div className="flex items-center gap-2">
                     <Avatar
-                      name={
-                        fullReport.created_by.first_name ||
-                        fullReport.created_by.username ||
-                        ""
-                      }
+                      name={formatName(fullReport.created_by, true)}
                       className="size-5"
                       imageUrl={fullReport.created_by.profile_picture_url}
                     />
                     <span className="text-sm/9 text-gray-700 font-medium">
-                      {fullReport.created_by.first_name || ""}{" "}
-                      {fullReport.created_by.last_name || ""}
+                      {formatName(fullReport.created_by)}
                     </span>
                   </div>
                 )}

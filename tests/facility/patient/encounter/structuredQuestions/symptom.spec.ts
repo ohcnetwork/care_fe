@@ -126,6 +126,10 @@ test.describe("Symptom Questionnaire", () => {
     await page.getByRole("option", { name: symptomName, exact: true }).click();
     await page.getByRole("button", { name: "Submit" }).click();
 
+    await expect(
+      page.getByText("Questionnaire submitted successfully"),
+    ).toBeVisible();
+
     await page.goto(questionnaireUrl);
     await page.waitForLoadState("networkidle");
 

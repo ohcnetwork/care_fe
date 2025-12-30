@@ -2,7 +2,7 @@ import { LocationSearch } from "@/components/Location/LocationSearch";
 import { PractitionerSelector } from "@/pages/Appointments/components/PractitionerSelector";
 import { HealthcareServiceSelector } from "@/pages/Facility/services/HealthcareServiceSelector";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -12,7 +12,7 @@ export type ScheduleResourceFormState =
       resource_type: SchedulableResourceType.Practitioner;
     }
   | {
-      resource: LocationList | null;
+      resource: LocationRead | null;
       resource_type: SchedulableResourceType.Location;
     }
   | {

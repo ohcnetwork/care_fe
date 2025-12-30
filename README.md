@@ -72,7 +72,71 @@ Administrator   administrator_2_0       Coronasafe@123
 Facility Admin  facility_admin_2_0      Coronasafe@123
 ```
 
-#### 📱 Patient Login in Staging
+## Multitenancy for Development
+
+When developing or testing against multiple backend environments (local, staging, production), you can configure the frontend to automatically connect to different backends based on which URL you access it from.
+
+**Configure API URL Mapping in `.env.local`:**
+
+```env
+# Map different frontend origins to different backend URLs
+REACT_CARE_URL_MAP='{"http://localhost:4000": "https://careapi.ohc.network", "http://care.localhost": "https://careapi.ohc.network", "http://develop.localhost": "https://develop-api.ohc.network", "http://dev.localhost": "http://localhost:9000"}'
+
+# Fallback for any unmatched origins
+REACT_CARE_API_URL=https://careapi.ohc.network
+```
+
+**Set up Nginx reverse proxy:**
+
+### On macOS
+
+We'll use [Homebrew](https://brew.sh/) to fetch most of the packages on macOS:
+
+- nginx - `brew install nginx`. Start Nginx server after installation.
+
+**Important**: Make sure that you start Nginx after you install them. Instructions on how to do that will
+be printed to the command-line after it's successfully installed.
+
+### On Ubuntu
+
+The following command should install the required dependencies on Ubuntu. If you're using another _flavour_ of Linux, adapt the command to work with the package manager available with your distribution.
+
+    sudo apt-get install nginx
+
+1. Create a new Nginx server configuration file...
+   - `/opt/homebrew/etc/nginx/servers/care` (macOS)
+   - `/etc/nginx/sites-enabled/care` (Linux)
+
+   ...and save the following configuration inside it:
+
+   ```
+   server {
+     listen 80;
+     server_name care.localhost develop.localhost dev.localhost plugs.localhost;
+
+     location / {
+       proxy_pass http://localhost:4000/;
+       proxy_set_header Host $host;
+     }
+   }
+   ```
+
+2. Restart `nginx` so that it picks up the new configuration.
+
+   ```
+   # macOS
+   brew services restart nginx
+
+   # Ubuntu
+   sudo service nginx restart
+   ```
+
+   On Debian/Ubuntu, NGINX comes with a `sites-enabled/default` file which may need to be removed before the Care will begin responding to requests.
+
+If your Nginx reverse-proxy has been set up correctly, then visit the school using your browser at
+`http://care.localhost`.
+
+## 📱 Patient Login in Staging
 
 For patient login via phone number:
 
@@ -80,7 +144,7 @@ For patient login via phone number:
 - In staging environment, to save costs, SMS messages are not actually sent
 - For testing purposes in staging, use the hardcoded OTP: `45612`
 
-#### Contributing to CARE
+## Contributing to CARE
 
 - Create a branch with branch name of the format `issues/{issue#}/{short-name}` (example `issues/7001/edit-prescriptions`) from the latest [`develop`](https://github.com/ohcnetwork/care_fe/tree/develop) branch when starting to work on an issue.
 - Once the changes are pushed to the branch, make a pull request with a meaningful title (example: "💊 Adds support for editing prescriptions" #6369)
@@ -88,7 +152,7 @@ For patient login via phone number:
 - Once the code review is done, the PR will be marked with a "Needs Testing" label where it'll be queued for QA testing.
 - Once tested, the PR would be marked with a "Tested" label and would be queued for merge.
 
-### Translations
+## Translations
 
 All strings must be encased in i18n translations. New translation strings must be specified in `src`->`Locale`->`en`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
 

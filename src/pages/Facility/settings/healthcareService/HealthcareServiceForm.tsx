@@ -202,14 +202,14 @@ function HealthcareServiceFormContent({
         ...data,
         facility: facilityId,
         locations: data.locations.map((loc) => loc.id),
-        managing_organization: data.managing_organization || undefined,
+        managing_organization: data.managing_organization || null,
       } as HealthcareServiceUpdateSpec);
     } else {
       const payload: HealthcareServiceCreateSpec = {
         ...data,
         facility: facilityId,
         locations: data.locations.map((loc) => loc.id),
-        managing_organization: data.managing_organization || undefined,
+        managing_organization: data.managing_organization || null,
       };
       createHealthcareService(payload);
     }
@@ -340,7 +340,7 @@ function HealthcareServiceFormContent({
                 <FormField
                   control={form.control}
                   name="locations"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormControl>
                         <RequirementsSelector
@@ -368,6 +368,9 @@ function HealthcareServiceFormContent({
                               value={field.value}
                               onChange={field.onChange}
                             />
+                          }
+                          triggerBtnClassName={
+                            fieldState.error ? "border-red-500" : undefined
                           }
                         />
                       </FormControl>

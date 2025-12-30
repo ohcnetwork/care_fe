@@ -30,7 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 import query from "@/Utils/request/query";
-import { LocationList, LocationTypeIcons } from "@/types/location/location";
+import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 interface LocationBreadcrumb {
@@ -40,8 +40,8 @@ interface LocationBreadcrumb {
 
 interface LocationPickerProps {
   facilityId: string;
-  value?: LocationList | null;
-  onValueChange: (location: LocationList | null) => void;
+  value?: LocationRead | null;
+  onValueChange: (location: LocationRead | null) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -101,11 +101,11 @@ export function LocationPicker({
   useEffect(() => {
     if (open && value?.parent) {
       const breadcrumbChain: LocationBreadcrumb[] = [];
-      let current: LocationList | null = value.parent;
+      let current: LocationRead | null = value.parent;
 
       while (current?.id) {
         breadcrumbChain.unshift({ id: current.id, name: current.name });
-        current = current.parent as LocationList | null;
+        current = current.parent as LocationRead | null;
       }
 
       setBreadcrumbs(breadcrumbChain);
@@ -116,7 +116,7 @@ export function LocationPicker({
     }
   }, [open]);
 
-  const handleLocationSelect = (location: LocationList) => {
+  const handleLocationSelect = (location: LocationRead) => {
     if (location.has_children) {
       // Navigate to sublocation
       setBreadcrumbs((prev) => [
