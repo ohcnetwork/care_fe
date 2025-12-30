@@ -45,7 +45,7 @@ interface QuestionnairePropertiesProps {
     field: K,
     value: QuestionnaireRead[K],
   ) => void;
-  id?: string;
+  slug?: string;
   organizations?: OrganizationResponse;
   organizationSelection: {
     selectedOrgs: Organization[];
@@ -156,17 +156,17 @@ function SubjectTypeSelector({
 }
 
 function OrganizationSelector({
-  id,
+  slug,
   organizations,
   selection,
 }: {
-  id?: string;
+  slug?: string;
   organizations?: OrganizationResponse;
   selection: QuestionnairePropertiesProps["organizationSelection"];
 }) {
   const { t } = useTranslation();
 
-  if (id) {
+  if (slug) {
     return (
       <>
         <div className="flex flex-wrap gap-2 mb-2">
@@ -185,7 +185,7 @@ function OrganizationSelector({
           )}
         </div>
         <ManageQuestionnaireOrganizationsSheet
-          questionnaireId={id}
+          questionnaireSlug={slug}
           trigger={
             <Button variant="outline" className="w-full justify-start">
               <Building className="mr-2 size-4" />
@@ -244,18 +244,18 @@ function OrganizationSelector({
 }
 
 function TagSelector({
-  id,
+  slug,
   selection,
   form,
 }: {
-  id?: string;
+  slug?: string;
   selection: QuestionnairePropertiesProps["tagSelection"];
   form: UseFormReturn<QuestionnaireRead>;
 }) {
   const { t } = useTranslation();
   const tags = useWatch({ control: form.control, name: "tags" });
 
-  if (id) {
+  if (slug) {
     return (
       <>
         <div className="flex flex-wrap gap-2 mb-2">
@@ -322,7 +322,7 @@ function TagSelector({
         tagOptions={selection.available}
       />
 
-      {!id && (
+      {!slug && (
         <CreateQuestionnaireTagSheet
           onTagCreated={(tag) => {
             selection.onTagCreated?.(tag);
@@ -342,7 +342,7 @@ function TagSelector({
 export function QuestionnaireProperties({
   form,
   updateQuestionnaireField,
-  id,
+  slug,
   organizations,
   organizationSelection,
   tagSelection,
@@ -372,16 +372,16 @@ export function QuestionnaireProperties({
             {t("organizations")} <span className="text-red-500">*</span>
           </Label>
           <OrganizationSelector
-            id={id}
+            slug={slug}
             organizations={organizations}
             selection={organizationSelection}
           />
         </div>
         <div className="space-y-2">
           <Label>{t("tags", { count: 2 })}</Label>
-          <TagSelector id={id} selection={tagSelection} form={form} />
+          <TagSelector slug={slug} selection={tagSelection} form={form} />
         </div>
-        {id && (
+        {slug && (
           <CloneQuestionnaireSheet
             form={form}
             trigger={
