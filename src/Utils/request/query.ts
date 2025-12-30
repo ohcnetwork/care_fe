@@ -45,7 +45,13 @@ export async function callApi<Route extends ApiRoute<unknown, unknown>>(
   try {
     res = await fetch(url, fetchOptions);
   } catch {
-    throw new Error("Network Error");
+    const networkError = new Error("Network Error");
+    const isSilent =
+      typeof options?.silent === "function"
+        ? options.silent({} as Response)
+        : (options?.silent ?? false);
+    (networkError as any).silent = isSilent;
+    throw networkError;
   }
 
   const data = await getResponseBody<Route["TRes"]>(res);
