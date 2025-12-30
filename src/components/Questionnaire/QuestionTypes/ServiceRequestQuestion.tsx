@@ -40,8 +40,6 @@ import {
   ServiceRequestReadSpec,
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
-import { LocationRead } from "@/types/location/location";
-import locationApi from "@/types/location/locationApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
@@ -209,24 +207,23 @@ function ServiceRequestForm({
           </Badge>
         </div>
       )}
-      <div className="flex items-center gap-2 flex-wrap w-full">
-        <span className="font-medium text-sm text-gray-700">
-          {t("locations")}:
-        </span>
-        {activityDefinition?.locations &&
-          activityDefinition?.locations.length > 0 &&
-          activityDefinition?.locations.map((location) => {
-            return (
+      {activityDefinition?.locations &&
+        activityDefinition.locations.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap w-full">
+            <span className="font-medium text-sm text-gray-700">
+              {t("locations")}:
+            </span>
+            {activityDefinition.locations.map((location) => (
               <Badge
                 key={location.id}
                 variant="outline"
                 className="bg-gray-50 text-gray-700 border-gray-200"
               >
-                {location?.name || location.id}
+                {location.name}
               </Badge>
-            );
-          })}
-      </div>
+            ))}
+          </div>
+        )}
     </div>
   );
 
@@ -479,16 +476,9 @@ export function ServiceRequestQuestion({
     (questionnaireResponse.values?.[0]
       ?.value as unknown as ServiceRequestApplyActivityDefinitionSpec[]) || [],
   );
-  const [activityDefinitions, setActivityDefinitions] = useState<
+  const [activityDefinitionsMap, setActivityDefinitionsMap] = useState<
     Record<string, ActivityDefinitionReadSpec>
   >({});
-  const { data: locations } = useQuery({
-    queryKey: ["locations", facilityId],
-    queryFn: query(locationApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: { limit: 100 },
-    }),
-  });
 
   const {
     data: selectedActivityDefinitionData,
@@ -530,6 +520,11 @@ export function ServiceRequestQuestion({
       };
 
       setPreviewServiceRequest(newServiceRequest);
+
+      setActivityDefinitionsMap((prev) => ({
+        ...prev,
+        [selectedActivityDefinition]: selectedActivityDefinitionData,
+      }));
     }
   }, [
     selectedActivityDefinition,
@@ -542,8 +537,8 @@ export function ServiceRequestQuestion({
     if (!previewServiceRequest || !selectedActivityDefinitionData) return;
 
     setServiceRequests([...serviceRequests, previewServiceRequest]);
-    setActivityDefinitions({
-      ...activityDefinitions,
+    setActivityDefinitionsMap({
+      ...activityDefinitionsMap,
       [selectedActivityDefinitionData.slug]: selectedActivityDefinitionData,
     });
     updateQuestionnaireResponseCB(
@@ -578,46 +573,15 @@ export function ServiceRequestQuestion({
       (sr: ServiceRequestApplyActivityDefinitionSpec, i: number) => {
         if (i !== index) return sr;
 
-        // Handle locations update specifically to ensure correct typing
-        const updatedLocations = updates.locations
-          ? ((Array.isArray(updates.locations)
-              ? updates.locations.map((loc) => {
-                  if (typeof loc === "string") {
-                    const location = locations?.results.find(
-                      (l: LocationRead) => l.id === loc,
-                    );
+        const { locations: _locations, ...otherUpdates } = updates;
 
-                    return {
-                      id: loc,
-                      has_children: false,
-                      status: "active",
-                      operational_status: "O",
-                      name: location?.name || loc,
-                      description: "",
-                      form: location?.form || "si",
-                      mode: "instance",
-                      availability_status: "available",
-                      sort_index: location?.sort_index || 0,
-                    } as LocationRead;
-                  }
-                  return loc;
-                })
-              : updates.locations) as LocationRead[])
-          : sr.service_request.locations || [];
-
-        // Create updated service request with proper type handling
-        const updatedServiceRequest = {
+        return {
           ...sr,
           service_request: {
             ...sr.service_request,
-            ...updates,
-            locations: updatedLocations.map((loc) =>
-              typeof loc === "string" ? loc : loc.id,
-            ),
+            ...otherUpdates,
           },
         };
-
-        return updatedServiceRequest;
       },
     );
 
@@ -634,21 +598,13 @@ export function ServiceRequestQuestion({
   ) => {
     if (!previewServiceRequest) return;
 
-    // Handle locations update specifically
-    const updatedLocations = updates.locations
-      ? Array.isArray(updates.locations)
-        ? updates.locations.map((loc) =>
-            typeof loc === "string" ? loc : loc.id,
-          )
-        : updates.locations
-      : previewServiceRequest.service_request.locations;
+    const { locations: _locations, ...otherUpdates } = updates;
 
     setPreviewServiceRequest({
       ...previewServiceRequest,
       service_request: {
         ...previewServiceRequest.service_request,
-        ...updates,
-        locations: updatedLocations,
+        ...otherUpdates,
       },
     });
   };
@@ -683,9 +639,6 @@ export function ServiceRequestQuestion({
         <ServiceRequestForm
           key={`${serviceRequest.service_request.code.code}-${index}`}
           serviceRequest={serviceRequest}
-          activityDefinition={
-            activityDefinitions[serviceRequest.activity_definition]
-          }
           onUpdate={(updates) => handleUpdateServiceRequest(index, updates)}
           onRemove={() => handleRemoveServiceRequest(index)}
           onAdd={handleAddServiceRequest}
@@ -694,6 +647,9 @@ export function ServiceRequestQuestion({
           questionId={questionnaireResponse.question_id}
           index={index}
           facilityId={facilityId}
+          activityDefinition={
+            activityDefinitionsMap[serviceRequest.activity_definition]
+          }
         />
       ))}
 

@@ -214,7 +214,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
       queryClient.invalidateQueries({
         queryKey: ["questionnaire", questionnaireId, "organizations"],
       });
-      toast.success("Organizations updated successfully");
+      toast.success(t("organizations_updated_successfully"));
       setOpen(false);
     },
   });
