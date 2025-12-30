@@ -59,7 +59,7 @@ export default function OrganizationLayout({
   const careApps = useCareApps();
 
   const hasOrganizationPlugins = careApps.some(
-    (c) => !c.isLoading && c.organizationNavItems,
+    (c) => !c.isLoading && c.organizationTabs,
   );
 
   const baseUrl = navOrganizationId

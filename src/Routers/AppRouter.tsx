@@ -12,12 +12,12 @@ import ErrorPage from "@/components/ErrorPages/DefaultErrorPage";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
 import useAuthUser from "@/hooks/useAuthUser";
-import { usePluginRoutes } from "@/hooks/useCareApps";
+import { useOrganizationRoutes, usePluginRoutes } from "@/hooks/useCareApps";
 import useSidebarState from "@/hooks/useSidebarState";
 
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
 import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
-import OrganizationRoutes from "@/Routers/routes/OrganizationRoutes";
+import { default as OrganizationRoutes } from "@/Routers/routes/OrganizationRoutes";
 import PatientRoutes from "@/Routers/routes/PatientRoutes";
 import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
@@ -89,6 +89,7 @@ const AdminRouter: AppRoutes = {
 
 export default function AppRouter() {
   const pluginRoutes = usePluginRoutes();
+  const organizationRoutes = useOrganizationRoutes();
   let routes = Routes;
 
   useRedirect("/user", "/users");
@@ -96,6 +97,7 @@ export default function AppRouter() {
   // Merge in Plugin Routes
   routes = {
     ...pluginRoutes,
+    ...organizationRoutes,
     ...routes,
   };
 
