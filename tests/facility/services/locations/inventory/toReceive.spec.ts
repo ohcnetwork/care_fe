@@ -94,9 +94,7 @@ test.describe("Facility To-Receive Orders Inventory Flow", () => {
       .getByRole("button", { name: "Mark as Approved" })
       .click({ timeout: 5000 });
     await page
-      .locator(".flex.flex-col.sm\\:flex-row")
-      .getByRole("button")
-      .nth(1)
+      .locator('[data-slot="dropdown-menu-trigger"]:has(.care-l-ellipsis-v)')
       .click();
     await page.getByRole("menuitem", { name: "Mark as Completed" }).click();
     await page.goto(bioChembasePath + "/inventory/internal/receive");

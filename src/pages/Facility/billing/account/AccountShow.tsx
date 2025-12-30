@@ -1,6 +1,6 @@
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { MoreVertical } from "lucide-react";
+import { Hash, MoreVertical } from "lucide-react";
 import { Link, navigate, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/select";
 
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
@@ -421,7 +422,7 @@ export function AccountShow({
       </Card>
       <div className="bg-gray-100 p-3 space-y-4 rounded-lg">
         <div className="bg-gray-100 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex flex-col md:flex-row md:items-center gap-4">
+          <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
             <div>
               <p className="text-sm text-gray-700 font-medium">
                 {t("account")}
@@ -430,7 +431,7 @@ export function AccountShow({
                 {account.name}
               </p>
             </div>
-            <div className="flex md:items-center gap-8">
+            <div className="flex md:items-center gap-6">
               <div>
                 <p className="text-sm text-gray-700 font-medium">
                   {t("status")}
@@ -458,6 +459,38 @@ export function AccountShow({
                     ? formatDate(account.service_period?.end)
                     : t("ongoing")}
                 </p>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm text-gray-700 font-medium">
+                {t("tags_other")}
+              </p>
+              <div className="flex flex-wrap gap-1">
+                <TagAssignmentSheet
+                  entityType="account"
+                  entityId={accountId}
+                  facilityId={facilityId}
+                  currentTags={account.tags ?? []}
+                  onUpdate={() => {
+                    queryClient.invalidateQueries({
+                      queryKey: ["account", accountId],
+                    });
+                  }}
+                  patientId={account.patient.id}
+                  trigger={
+                    <Button variant="outline" size="xs" className="rounded-sm">
+                      <Hash />
+                      {account.tags && account.tags.length > 0
+                        ? t("manage_tags")
+                        : t("add_tags")}
+                    </Button>
+                  }
+                />
+                {account.tags?.map((tag) => (
+                  <Badge key={tag.id} variant="secondary" className="text-xs">
+                    {tag.display}
+                  </Badge>
+                ))}
               </div>
             </div>
           </div>
@@ -585,6 +618,7 @@ export function AccountShow({
         facilityId={facilityId}
         accountId={accountId}
         isCreditNote={paymentSheet.isCreditNote}
+        account={account}
       />
 
       <Dialog
@@ -625,15 +659,11 @@ export function AccountShow({
           </Select>
           <ClosedCallout balance={Number(account.total_balance)} />
           {hasBillableItems && (
-            <span className="text-red-500 bg-red-50 text-xs p-2 rounded block -mt-3">
-              {t("cannot_close_account_with_pending_items")}
+            <span className="text-warning-500 bg-warning-50 text-xs p-2 rounded block -mt-3">
+              {t("close_account_with_pending_items_caution_message")}
             </span>
           )}
-          <Button
-            variant="destructive"
-            onClick={handleCloseAccount}
-            disabled={hasBillableItems}
-          >
+          <Button variant="destructive" onClick={handleCloseAccount}>
             {t("close_account")}
           </Button>
         </DialogContent>

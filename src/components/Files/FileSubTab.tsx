@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 
 import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -32,6 +31,7 @@ import { TooltipComponent } from "@/components/ui/tooltip";
 import Loading from "@/components/Common/Loading";
 import ArchivedFileDialog from "@/components/Files/ArchivedFileDialog";
 import AudioPlayerDialog from "@/components/Files/AudioPlayerDialog";
+import { FilterBadges, FilterButton } from "@/components/Files/FileFilters";
 import FileUploadDialog from "@/components/Files/FileUploadDialog";
 
 import useFileManager from "@/hooks/useFileManager";
@@ -85,13 +85,13 @@ export const FilesPage = ({
     hasPermission,
     patient?.permissions ?? [],
   );
-  const { canViewEncounter } = getPermissions(
+  const { canReadEncounterClinicalData, canReadEncounter } = getPermissions(
     hasPermission,
     encounter?.permissions ?? [],
   );
   const canAccess =
     type === "encounter"
-      ? canViewClinicalData || canViewEncounter
+      ? canReadEncounterClinicalData || canReadEncounter
       : canViewClinicalData;
 
   const { data: files, isLoading: filesLoading } = useQuery({
@@ -268,60 +268,6 @@ export const FilesPage = ({
           </DropdownMenu>
         </div>
       </>
-    );
-  };
-
-  const FilterButton = () => {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="secondary" className="text-sm text-secondary-800">
-            <span className="flex flex-row items-center gap-1">
-              <CareIcon icon="l-filter" />
-              <span>{t("filter")}</span>
-            </span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="start"
-          className="w-[calc(100vw-2.5rem)] sm:w-[calc(100%-2rem)]"
-        >
-          <DropdownMenuItem
-            className="text-primary-900"
-            onClick={() => {
-              updateQuery({ is_archived: "false" });
-            }}
-          >
-            <span>{t("active_files")}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-primary-900"
-            onClick={() => {
-              updateQuery({ is_archived: "true" });
-            }}
-          >
-            <span>{t("archived_files")}</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  };
-
-  const FilterBadges = () => {
-    if (typeof qParams.is_archived === "undefined") return null;
-    return (
-      <div className="flex flex-row gap-2 mt-2 mx-2">
-        <Badge
-          variant="outline"
-          className="cursor-pointer"
-          onClick={() => updateQuery({ is_archived: undefined })}
-        >
-          {t(
-            qParams.is_archived === "false" ? "active_files" : "archived_files",
-          )}
-          <CareIcon icon="l-times-circle" />
-        </Badge>
-      </div>
     );
   };
 
@@ -606,7 +552,11 @@ export const FilesPage = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <FilterButton />
+          <FilterButton
+            onFilterChange={(filter) => updateQuery(filter)}
+            activeLabel={t("active_files")}
+            archivedLabel={t("archived_files")}
+          />
           {/* {type === "encounter" && (
             <>
               <Button
@@ -660,7 +610,12 @@ export const FilesPage = ({
           <FileUploadButtons />
         </div>
       </div>
-      <FilterBadges />
+      <FilterBadges
+        isArchived={qParams.is_archived}
+        onClearFilter={() => updateQuery({ is_archived: undefined })}
+        activeLabel="active_files"
+        archivedLabel="archived_files"
+      />
       <RenderTable />
       <RenderCard />
 

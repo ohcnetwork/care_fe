@@ -11,9 +11,9 @@ import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
 import { formatDateTime, formatName } from "@/Utils/utils";
-import patientApi from "@/types/emr/patient/patientApi";
 import { QuestionnaireResponse as Response } from "@/types/questionnaire/form";
 import { Question } from "@/types/questionnaire/question";
+import questionnaireResponseApi from "@/types/questionnaire/questionnaireResponseApi";
 
 export default function QuestionnaireResponseView({
   responseId,
@@ -25,7 +25,7 @@ export default function QuestionnaireResponseView({
   const { t } = useTranslation();
   const { data: formResponse, isLoading } = useQuery({
     queryKey: ["getQuestionnaireResponse", patientId, responseId],
-    queryFn: query(patientApi.getQuestionnaireResponse, {
+    queryFn: query(questionnaireResponseApi.get, {
       pathParams: { patientId, responseId },
     }),
   });

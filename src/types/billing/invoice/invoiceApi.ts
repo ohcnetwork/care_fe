@@ -2,9 +2,9 @@ import { HttpMethod, Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
 
 import {
-  InvoiceBase,
   InvoiceCancel,
   InvoiceCreate,
+  InvoiceList,
   InvoiceRead,
 } from "./invoice";
 
@@ -12,7 +12,7 @@ export default {
   listInvoice: {
     path: "/api/v1/facility/{facilityId}/invoice/",
     method: HttpMethod.GET,
-    TRes: Type<PaginatedResponse<InvoiceBase>>(),
+    TRes: Type<PaginatedResponse<InvoiceList>>(),
     defaultQueryParams: {
       ordering: "-created_date",
     },
@@ -39,5 +39,15 @@ export default {
     method: HttpMethod.POST,
     TRes: Type<InvoiceRead>(),
     TBody: Type<InvoiceCancel>(),
+  },
+  lockInvoice: {
+    path: "/api/v1/facility/{facilityId}/invoice/{invoiceId}/lock/",
+    method: HttpMethod.POST,
+    TRes: Type<InvoiceRead>(),
+  },
+  unlockInvoice: {
+    path: "/api/v1/facility/{facilityId}/invoice/{invoiceId}/unlock/",
+    method: HttpMethod.POST,
+    TRes: Type<InvoiceRead>(),
   },
 } as const;
