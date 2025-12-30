@@ -36,7 +36,7 @@ interface Props {
   isPrintPreview?: boolean;
   onlyUnstructured?: boolean;
   canAccess?: boolean;
-  questionnaireId?: string;
+  questionnaireSlug?: string;
   renderItem?: (response: QuestionnaireResponse) => React.ReactNode;
   subjectType?: string;
 }
@@ -459,7 +459,7 @@ export function ResponseCard({
 }: {
   item: QuestionnaireResponse;
   isPrintPreview?: boolean;
-  onTitleClick?: (questionnaireId: string) => void;
+  onTitleClick?: (questionnaireSlug: string) => void;
   showTitle?: boolean;
 }) {
   const isStructured = !item.questionnaire;
@@ -507,7 +507,7 @@ export default function QuestionnaireResponsesList({
   isPrintPreview = false,
   onlyUnstructured,
   canAccess = true,
-  questionnaireId,
+  questionnaireSlug,
   renderItem,
   subjectType = "encounter",
 }: Props) {
@@ -519,7 +519,7 @@ export default function QuestionnaireResponsesList({
       queryKey: [
         "questionnaireResponses",
         patientId,
-        questionnaireId,
+        questionnaireSlug,
         encounterId,
       ],
       queryFn: async ({ pageParam = 0, signal }) => {
@@ -533,7 +533,9 @@ export default function QuestionnaireResponsesList({
             encounter: encounterId,
             only_unstructured: onlyUnstructured,
             subject_type: subjectType,
-            ...(questionnaireId ? { questionnaire: questionnaireId } : {}),
+            ...(questionnaireSlug
+              ? { questionnaire_slug: questionnaireSlug }
+              : {}),
           },
         })({ signal });
 
