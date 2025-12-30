@@ -54,9 +54,34 @@ const customShortcutsSchemaString = jsonAsStringSchema
   .transform((val) => JSON.parse(val))
   .pipe(customShortcutSchema);
 
+/**
+ * Schema for API URL map - validates that all keys are valid origins
+ * and all values are valid URLs
+ */
+const apiUrlMapSchema = jsonAsStringSchema
+  .transform((val) => JSON.parse(val) as Record<string, string>)
+  .refine(
+    (map) => {
+      return Object.entries(map).every(([origin, url]) => {
+        try {
+          new URL(origin);
+          new URL(url);
+          return true;
+        } catch {
+          return false;
+        }
+      });
+    },
+    {
+      message:
+        "All keys must be valid origins and all values must be valid URLs",
+    },
+  );
+
 const envSchema = z
   .object({
-    REACT_CARE_API_URL: z.string().url(),
+    REACT_CARE_API_URL: z.string().url().optional(),
+    REACT_CARE_URL_MAP: apiUrlMapSchema.optional(),
     REACT_APP_TITLE: z.string(),
     REACT_APP_META_DESCRIPTION: z.string(),
     REACT_PUBLIC_URL: z.string().url(),
@@ -118,6 +143,16 @@ const envSchema = z
     REACT_AUTO_REFRESH_BY_DEFAULT: booleanAsStringSchema.optional(),
   })
   .superRefine(async (data, ctx) => {
+    // Ensure at least one API URL configuration is provided
+    if (!data.REACT_CARE_API_URL && !data.REACT_CARE_URL_MAP) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "Either REACT_CARE_API_URL or REACT_CARE_URL_MAP must be provided",
+        path: ["REACT_CARE_API_URL"],
+      });
+    }
+
     const allowedClasses =
       data.REACT_ALLOWED_ENCOUNTER_CLASSES || ENCOUNTER_CLASS;
 
@@ -146,15 +181,24 @@ const envSchema = z
     }
 
     if (data.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG) {
-      const response = await fetch(
-        `${data.REACT_CARE_API_URL}/api/v1/govt/organization/${data.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG}/`,
-      );
-      if (!response.ok) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Invalid geo organization",
-          path: ["REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG"],
-        });
+      // Use REACT_CARE_API_URL for validation, or first URL from map
+      const apiUrl =
+        data.REACT_CARE_API_URL ||
+        (data.REACT_CARE_URL_MAP
+          ? Object.values(data.REACT_CARE_URL_MAP)[0]
+          : null);
+
+      if (apiUrl) {
+        const response = await fetch(
+          `${apiUrl}/api/v1/govt/organization/${data.REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG}/`,
+        );
+        if (!response.ok) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Invalid geo organization",
+            path: ["REACT_PATIENT_REGISTRATION_DEFAULT_GEO_ORG"],
+          });
+        }
       }
     }
     if (

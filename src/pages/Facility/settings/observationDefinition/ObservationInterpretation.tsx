@@ -43,6 +43,7 @@ import {
   ConditionOperationInRangeValue,
   ConditionOperationSummary,
   extractTagInformation,
+  getConditionDiscriminatorValue,
   getConditionValue,
   getDefaultCondition,
   Metrics,
@@ -294,7 +295,10 @@ export function ObservationInterpretation<
           ...r,
           conditions: r.conditions.map((condition) => ({
             ...condition,
-            _conditionType: `${condition.metric}_${condition.operation}`,
+            _conditionType: getConditionDiscriminatorValue(
+              condition.metric,
+              condition.operation,
+            ),
           })),
         })),
       ];

@@ -106,7 +106,7 @@ export function DiagnosticReportReview({
         },
       }),
       onSuccess: () => {
-        toast.success("Diagnostic report approved successfully");
+        toast.success(t("diagnostic_report_approved_successfully"));
         // Invalidate all related queries to update workflow status
         queryClient.invalidateQueries({
           queryKey: ["serviceRequest"],
