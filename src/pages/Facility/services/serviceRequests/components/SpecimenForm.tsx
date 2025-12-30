@@ -425,7 +425,7 @@ export function SpecimenForm({
                 </Label>
                 <ValueSetSelect
                   system="system-fasting-status-code"
-                  placeholder={t("fasting_status_placeholder")}
+                  placeholder={t("select_status")}
                   onSelect={(code: Code | null) =>
                     handleCollectionChange(
                       "fasting_status_codeable_concept",
