@@ -58,8 +58,8 @@ export default function OrganizationLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const careApps = useCareApps();
 
-  const hasOrganizationPlugins = careApps.some(
-    (c) => !c.isLoading && c.organizationTabs,
+  const organizationTabs = careApps.flatMap(
+    (c) => (!c.isLoading && c.organizationTabs) || [],
   );
 
   const baseUrl = navOrganizationId
@@ -115,15 +115,14 @@ export default function OrganizationLayout({
         org.org_type === OrgType.GOVT &&
         hasPermission("can_read_facility", org.permissions),
     },
-    {
-      url: `${baseUrl}/${id}/analytics`,
-      name: "Analytics",
-      icon: <CareIcon icon="l-chart-line" />,
+    ...organizationTabs.map((tab) => ({
+      url: `${baseUrl}/${id}/${tab.slug}`,
+      name: tab.name,
+      icon: tab.icon,
       visibility:
-        hasOrganizationPlugins &&
         org.org_type === OrgType.GOVT &&
         hasPermission("can_read_facility", org.permissions),
-    },
+    })),
   ];
 
   const visibleNavItems = navItems.filter((item) => item.visibility);

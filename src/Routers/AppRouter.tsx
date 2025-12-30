@@ -17,7 +17,7 @@ import useSidebarState from "@/hooks/useSidebarState";
 
 import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
 import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
-import { default as OrganizationRoutes } from "@/Routers/routes/OrganizationRoutes";
+import OrganizationRoutes from "@/Routers/routes/OrganizationRoutes";
 import PatientRoutes from "@/Routers/routes/PatientRoutes";
 import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
 import ScheduleRoutes from "@/Routers/routes/ScheduleRoutes";
