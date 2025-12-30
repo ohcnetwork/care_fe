@@ -43,6 +43,7 @@ import { CodeSchema } from "@/types/base/code/code";
 import {
   ConditionForm,
   conditionSchema,
+  getConditionDiscriminatorValue,
 } from "@/types/base/condition/condition";
 import {
   isSameComponentCode,
@@ -243,7 +244,10 @@ export function ChargeItemDefinitionForm({
             conditions:
               component.conditions?.map((condition) => ({
                 ...condition,
-                _conditionType: `${condition.metric}_${condition.operation}`,
+                _conditionType: getConditionDiscriminatorValue(
+                  condition.metric,
+                  condition.operation,
+                ),
               })) || [],
           })) || [],
     };
@@ -421,7 +425,10 @@ export function ChargeItemDefinitionForm({
       conditions:
         component.conditions?.map((condition) => ({
           ...condition,
-          _conditionType: `${condition.metric}_${condition.operation}`,
+          _conditionType: getConditionDiscriminatorValue(
+            condition.metric,
+            condition.operation,
+          ),
         })) || [],
     }));
 
@@ -451,7 +458,10 @@ export function ChargeItemDefinitionForm({
       ...newComponents[componentIndex],
       conditions: conditions?.map((condition) => ({
         ...condition,
-        _conditionType: `${condition.metric}_${condition.operation}`,
+        _conditionType: getConditionDiscriminatorValue(
+          condition.metric,
+          condition.operation,
+        ),
       })),
     };
 

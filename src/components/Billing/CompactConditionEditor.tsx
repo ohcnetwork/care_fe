@@ -28,6 +28,7 @@ import {
   ConditionOperationSummary,
   conditionSchema,
   extractTagInformation,
+  getConditionDiscriminatorValue,
   getConditionValue,
   getDefaultCondition,
   Metrics,
@@ -398,9 +399,12 @@ export function CompactConditionEditor({
     if (!isValid) return;
 
     let updatedConditions = [...conditions, form.getValues()];
-    updatedConditions = updatedConditions.map((cond) => ({
-      ...cond,
-      _conditionType: `${cond.metric}_${cond.operation}`,
+    updatedConditions = updatedConditions.map((condition) => ({
+      ...condition,
+      _conditionType: getConditionDiscriminatorValue(
+        condition.metric,
+        condition.operation,
+      ),
     }));
     onChange(updatedConditions);
 
@@ -441,7 +445,7 @@ export function CompactConditionEditor({
     const metric = form.getValues("metric");
     const value = getConditionValue(metric, op);
     form.setValue("value", value);
-    form.setValue("_conditionType", `${metric}_${op}`);
+    form.setValue("_conditionType", getConditionDiscriminatorValue(metric, op));
   };
 
   return (
