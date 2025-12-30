@@ -184,13 +184,13 @@ export function EditInvoiceTable({
       pathParams: { facilityId },
     }),
     onSuccess: () => {
-      toast.success("Invoice updated successfully");
+      toast.success(t("invoice_updated_successfully"));
 
       onSuccess();
       onClose();
     },
     onError: () => {
-      toast.error("Failed to update invoice");
+      toast.error(t("failed_to_update_invoice"));
     },
   });
 

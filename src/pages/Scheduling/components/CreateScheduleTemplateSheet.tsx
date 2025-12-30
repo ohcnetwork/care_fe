@@ -203,7 +203,7 @@ export default function CreateScheduleTemplateSheet({
       pathParams: { facilityId },
     }),
     onSuccess: () => {
-      toast.success("Schedule template created successfully");
+      toast.success(t("schedule_template_created_successfully"));
       setQParams({ sheet: null });
       form.reset();
       queryClient.invalidateQueries({
