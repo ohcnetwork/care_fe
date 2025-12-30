@@ -520,27 +520,6 @@ export function PaymentReconciliationSheet({
 
               <FormField
                 control={form.control}
-                name="payment_datetime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-950">
-                      {t("payment_date")}
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="datetime-local"
-                        {...field}
-                        value={field.value ? field.value : ""}
-                        max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="reference_number"
                 render={({ field }) => (
                   <FormItem>
@@ -556,6 +535,27 @@ export function PaymentReconciliationSheet({
                     <FormDescription className="text-gray-700 italic -mt-1.5">
                       {!isCashPayment && t("reference_number_description")}
                     </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="payment_datetime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-950">
+                      {t("payment_date")}
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="datetime-local"
+                        {...field}
+                        value={field.value ? field.value : ""}
+                        max={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -28,9 +28,12 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { PLUGIN_Component } from "@/PluginEngine";
+import query from "@/Utils/request/query";
 import { useCareApps } from "@/hooks/useCareApps";
 import useQuestionnaireOptions from "@/hooks/useQuestionnaireOptions";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
+import questionnaireApi from "@/types/questionnaire/questionnaireApi";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 interface ActionItem {
@@ -60,7 +63,28 @@ export function EncounterCommandDialog({
   trigger,
 }: EncounterCommandDialogProps) {
   const { t } = useTranslation();
+  const [search, setSearch] = useState("");
+
   const questionnaireOptions = useQuestionnaireOptions("encounter_actions");
+
+  const { data: questionnaires } = useQuery({
+    queryKey: ["questionnaires", search, "encounter"],
+    queryFn: query.debounced(questionnaireApi.list, {
+      queryParams: {
+        title: search,
+        status: "active",
+        subject_type: "encounter",
+      },
+    }),
+    enabled: !!search,
+  });
+
+  useEffect(() => {
+    if (!open) {
+      setSearch("");
+    }
+  }, [open]);
+
   const getShortcutDisplay = useEncounterShortcutDisplays();
   const { handleAction } = useEncounterShortcuts();
 
@@ -273,7 +297,11 @@ export function EncounterCommandDialog({
       {
         group: t("questionnaire"),
         items: [
-          ...(questionnaireOptions?.results || []).map((option) => ({
+          ...(
+            (search.length > 0
+              ? questionnaires?.results
+              : questionnaireOptions?.results) || []
+          ).map((option) => ({
             id: `questionnaire-${option.slug}`,
             label: option.title,
             icon: <NotebookPen />,
@@ -282,7 +310,7 @@ export function EncounterCommandDialog({
         ],
       },
     ],
-    [t, questionnaireOptions, getShortcutDisplay],
+    [t, questionnaireOptions, questionnaires, search, getShortcutDisplay],
   );
 
   const findRecentActions = useCallback(
@@ -335,6 +363,7 @@ export function EncounterCommandDialog({
           <CommandInput
             placeholder={t("search_encounter_command")}
             className="border-none focus:ring-0 text-base sm:text-sm"
+            onValueChange={setSearch}
           />
         </div>
         <CommandList className="h-[80vh] max-h-[80vh] w-full">
@@ -345,7 +374,7 @@ export function EncounterCommandDialog({
                 {group.items.map((action) => (
                   <CommandItem
                     key={action.id}
-                    value={action.id}
+                    value={`${action.id} ${action.label}`}
                     onSelect={() => handleSelect(action.id)}
                     className="rounded-md cursor-pointer hover:bg-gray-100 flex justify-between aria-selected:bg-gray-100"
                     autoFocus={false}
