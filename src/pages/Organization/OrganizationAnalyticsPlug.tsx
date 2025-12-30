@@ -50,10 +50,6 @@ export default function OrganizationAnalyticsPlug({
     navigate(`${baseUrl}/analytics/${analyticsId}`);
   };
 
-  if (!id) {
-    return null;
-  }
-
   return (
     <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
       {() => {
