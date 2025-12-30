@@ -2,6 +2,18 @@ import { chromium, FullConfig } from "@playwright/test";
 import * as fs from "fs";
 import * as path from "path";
 
+// Token name constants
+const ACCESS_TOKEN_KEY = "care_access_token";
+const REFRESH_TOKEN_KEY = "care_refresh_token";
+
+/**
+ * Interface for localStorage items in Playwright storage state
+ */
+interface LocalStorageItem {
+  name: string;
+  value: string;
+}
+
 /**
  * Global setup that runs once before all tests.
  * Refreshes authentication tokens to ensure they're valid for the test run.
@@ -19,10 +31,17 @@ async function globalSetup(config: FullConfig) {
     // Read the current storage state
     const storageState = JSON.parse(fs.readFileSync(authFile, "utf-8"));
     
-    // Extract tokens from localStorage
-    const localStorage = storageState.origins?.[0]?.localStorage || [];
-    const accessTokenEntry = localStorage.find((item: any) => item.name === "care_access_token");
-    const refreshTokenEntry = localStorage.find((item: any) => item.name === "care_refresh_token");
+    // Validate that at least one origin exists in the storage state
+    if (!Array.isArray(storageState.origins) || storageState.origins.length === 0) {
+      console.log("⚠️ No origins found in storage state, skipping token refresh");
+      return;
+    }
+
+    const firstOrigin = storageState.origins[0];
+    // Extract tokens from localStorage of the first origin
+    const localStorage: LocalStorageItem[] = Array.isArray(firstOrigin.localStorage) ? firstOrigin.localStorage : [];
+    const accessTokenEntry = localStorage.find((item: LocalStorageItem) => item.name === ACCESS_TOKEN_KEY);
+    const refreshTokenEntry = localStorage.find((item: LocalStorageItem) => item.name === REFRESH_TOKEN_KEY);
     
     if (!accessTokenEntry || !refreshTokenEntry) {
       console.log("⚠️ No tokens found in storage state");
@@ -30,7 +49,7 @@ async function globalSetup(config: FullConfig) {
     }
 
     const refreshToken = refreshTokenEntry.value;
-    const apiURL = process.env.REACT_CARE_API_URL || "http://localhost:9000";
+    const apiUrl = process.env.REACT_CARE_API_URL || "http://localhost:9000";
 
     console.log("🔄 Refreshing authentication tokens...");
 
@@ -41,7 +60,7 @@ async function globalSetup(config: FullConfig) {
 
     try {
       // Call the token refresh endpoint
-      const response = await page.request.post(`${apiURL}/api/v1/auth/token/refresh/`, {
+      const response = await page.request.post(`${apiUrl}/api/v1/auth/token/refresh/`, {
         data: { refresh: refreshToken },
         headers: { "Content-Type": "application/json" },
       });
@@ -50,8 +69,8 @@ async function globalSetup(config: FullConfig) {
         const data = await response.json();
         
         // Update tokens in localStorage
-        const accessIndex = localStorage.findIndex((item: any) => item.name === "care_access_token");
-        const refreshIndex = localStorage.findIndex((item: any) => item.name === "care_refresh_token");
+        const accessIndex = localStorage.findIndex((item: LocalStorageItem) => item.name === ACCESS_TOKEN_KEY);
+        const refreshIndex = localStorage.findIndex((item: LocalStorageItem) => item.name === REFRESH_TOKEN_KEY);
         
         if (accessIndex !== -1) {
           localStorage[accessIndex].value = data.access;

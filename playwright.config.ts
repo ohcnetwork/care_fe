@@ -22,7 +22,7 @@ export default defineConfig({
   },
 
   /* Global setup - refreshes tokens before test run */
-  globalSetup: require.resolve("./tests/globalSetup"),
+  globalSetup: "./tests/globalSetup",
 
   /* Run tests in files in parallel */
   fullyParallel: true,
