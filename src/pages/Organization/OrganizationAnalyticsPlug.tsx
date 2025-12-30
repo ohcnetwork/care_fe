@@ -33,23 +33,13 @@ export default function OrganizationAnalyticsPlug({
   });
   const resultsPerPage = 15;
 
-  const allData = careApps.flatMap((c) =>
+  const analytics = careApps.flatMap((c) =>
     !c.isLoading &&
     c.organizationNavItems &&
     c.organizationNavItems(id, qParams, resultsPerPage)
       ? c.organizationNavItems(id, qParams, resultsPerPage)
       : [],
   );
-
-  const filteredData = allData.filter((item) => {
-    if (!qParams.name) return true;
-    const name = (item.name as string) || "";
-    return name.toLowerCase().includes(qParams.name.toLowerCase());
-  });
-
-  const startIndex = ((qParams.page ?? 1) - 1) * resultsPerPage;
-  const endIndex = startIndex + resultsPerPage;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
 
   const isFetching = careApps.some((c) => c.isLoading);
 
@@ -73,7 +63,7 @@ export default function OrganizationAnalyticsPlug({
               <div className="mt-1 flex flex-col justify-start space-y-2 md:flex-row md:justify-between md:space-y-0">
                 <EntityBadge
                   title={t("analytics")}
-                  count={filteredData.length}
+                  count={analytics.length}
                   isFetching={isFetching}
                   customTranslation="analytics_count"
                 />
@@ -103,14 +93,14 @@ export default function OrganizationAnalyticsPlug({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {isFetching ? (
                 <CardGridSkeleton count={6} />
-              ) : paginatedData.length === 0 ? (
+              ) : analytics.length === 0 ? (
                 <Card className="col-span-full">
                   <CardContent className="p-6 text-center text-gray-500">
                     {t("no_analytics_found")}
                   </CardContent>
                 </Card>
               ) : (
-                paginatedData.map((item: Record<string, unknown>) => (
+                analytics.map((item: Record<string, unknown>) => (
                   <Card
                     key={item.id as string}
                     className="overflow-hidden bg-white rounded-lg transition-all hover:shadow-lg cursor-pointer hover:scale-[1.02]"
@@ -139,7 +129,7 @@ export default function OrganizationAnalyticsPlug({
                 ))
               )}
             </div>
-            <Pagination totalCount={filteredData.length} />
+            <Pagination totalCount={analytics.length} />
           </div>
         );
       }}
