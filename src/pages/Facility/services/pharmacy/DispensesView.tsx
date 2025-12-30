@@ -31,7 +31,11 @@ import { formatDateTime } from "@/Utils/utils";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
+import { PrescriptionSummary } from "@/types/emr/prescription/prescription";
+import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
+import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
 import mutate from "@/Utils/request/mutate";
+import { PaginatedResponse } from "@/Utils/request/types";
 import { toast } from "sonner";
 import DispensedMedicationList from "./DispensedMedicationList";
 
@@ -111,6 +115,19 @@ export default function DispensesView({
     enabled: !!dispenseOrder?.patient.id,
   });
 
+  const { data: prescriptionTags } = useQuery({
+    queryKey: ["prescriptionQueue", facilityId, dispenseOrder?.patient.id],
+    queryFn: query(prescriptionApi.summary, {
+      pathParams: { facilityId },
+      queryParams: {
+        patient_external_id: dispenseOrder?.patient.id,
+      },
+    }),
+    select: (data: PaginatedResponse<PrescriptionSummary>) =>
+      data.results.flatMap((item) => item.tags),
+    enabled: !!dispenseOrder?.patient.id,
+  });
+
   if (isLoadingOrder) {
     return <TableSkeleton count={5} />;
   }
@@ -138,8 +155,27 @@ export default function DispensesView({
         </Button>
       </div>
       {patientData && (
-        <Card className="mb-4 p-4 rounded-none shadow-none bg-gray-100">
+        <Card className="flex gap-4 mb-4 p-4 rounded-none shadow-none bg-gray-100">
           <PatientHeader patient={patientData} facilityId={facilityId} />
+          {prescriptionTags && prescriptionTags.length > 0 && (
+            <div className="flex flex-col gap-1 items-start mt-5">
+              <span className="text-xs text-gray-700">
+                {t("prescription_tags")}:
+              </span>
+              <div className="flex flex-wrap items-start gap-2 text-sm whitespace-nowrap">
+                {prescriptionTags.map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    variant="secondary"
+                    className="capitalize"
+                    title={tag.description}
+                  >
+                    {getTagHierarchyDisplay(tag)}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </Card>
       )}
 

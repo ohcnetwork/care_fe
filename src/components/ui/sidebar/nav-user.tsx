@@ -41,9 +41,9 @@ export function FacilityNavUser({
   const { signOut } = useAuthContext();
   const careApps = useCareApps();
   const { newVersion, updateApp } = useAppUpdates(false, undefined, true);
-  const pluginNavItems = careApps
-    .filter((c) => !!c.userNavItems)
-    .flatMap((c) => c.userNavItems) as NavigationLink[];
+  const pluginNavItems = careApps.flatMap((c) =>
+    !c.isLoading && c.userNavItems ? c.userNavItems : [],
+  ) as NavigationLink[];
 
   return (
     <SidebarMenu>
