@@ -3933,6 +3933,7 @@
   "prescription_status__cancelled": "Cancelled",
   "prescription_status__completed": "Completed",
   "prescription_status_updated_successfully": "Prescription status updated successfully",
+  "prescription_tags": "Prescription Tags",
   "prescriptions": "Prescriptions",
   "prescriptions__dosage_frequency": "Dosage & Frequency",
   "prescriptions__medicine": "Medicine",
