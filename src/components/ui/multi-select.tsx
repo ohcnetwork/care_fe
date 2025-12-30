@@ -88,7 +88,7 @@ function ListContent({
             placeholder={
               translationBasekey
                 ? t(`search_${translationBasekey}`)
-                : t("search_options_here")
+                : t("search_options")
             }
             className="outline-hidden border-none ring-0 shadow-none -ml-3"
             autoFocus
