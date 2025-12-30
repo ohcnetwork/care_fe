@@ -77,7 +77,7 @@ const templateBuilderSchema = z.object({
   status: z.enum(TemplateStatuses),
   template_type: z.enum(TemplateTypes),
   default_format: z.enum(TemplateFormats),
-  context: z.string().optional(),
+  context: z.string().min(1, t("field_required")),
   description: z.string().optional(),
   template_data: z.string().min(1, t("field_required")),
 });
@@ -508,35 +508,49 @@ export default function TemplateBuilder({
         {/* Sidebar - 1/4 of screen */}
         <div className="flex-1 border-l p-4 overflow-auto flex flex-col gap-4">
           {/* Context Selector */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">{t("select_context")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Select
-                value={selectedContext?.slug}
-                onValueChange={(value) =>
-                  setSelectedContext(availableContexts[value])
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("select_context")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(availableContexts).map((context) => (
-                    <SelectItem key={context.slug} value={context.slug}>
-                      {context.display_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedContext?.description && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  {selectedContext.description}
-                </p>
-              )}
-            </CardContent>
-          </Card>
+          <Form {...form}>
+            <FormField
+              control={form.control}
+              name="context"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel aria-required>{t("select_context")}</FormLabel>
+
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setSelectedContext(availableContexts[value] ?? null);
+                      }}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("select_context")} />
+                        </SelectTrigger>
+                      </FormControl>
+
+                      <SelectContent>
+                        {Object.values(availableContexts).map((context) => (
+                          <SelectItem key={context.slug} value={context.slug}>
+                            {context.display_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {selectedContext?.description && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {selectedContext.description}
+                      </p>
+                    )}
+
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+          </Form>
 
           {/* Fields List */}
           {selectedContext && (
