@@ -10,6 +10,7 @@ import {
 } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 import { UserReadMinimal } from "@/types/user/user";
+import { QueryParam } from "raviger";
 import { LazyExoticComponent } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
@@ -128,6 +129,11 @@ export type PluginManifest = {
   navItems?: NavigationLink[];
   userNavItems?: NavigationLink[];
   adminNavItems?: NavigationLink[];
+  organizationNavItems?: (
+    id: string,
+    qParams: QueryParam,
+    resultsPerPage: number,
+  ) => Record<string, unknown>[];
   components?: PluginComponentMap;
   encounterTabs?: Record<
     string,

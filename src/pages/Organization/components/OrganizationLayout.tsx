@@ -29,6 +29,7 @@ import Page from "@/components/Common/Page";
 
 import query from "@/Utils/request/query";
 import { usePermissions } from "@/context/PermissionContext";
+import { useCareApps } from "@/hooks/useCareApps";
 import OrganizationLayoutSkeleton from "@/pages/Organization/components/OrganizationLayoutSkeleton";
 import {
   Organization,
@@ -55,6 +56,11 @@ export default function OrganizationLayout({
   const { t } = useTranslation();
   const { hasPermission } = usePermissions();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const careApps = useCareApps();
+
+  const hasOrganizationPlugins = careApps.some(
+    (c) => !c.isLoading && c.organizationNavItems,
+  );
 
   const baseUrl = navOrganizationId
     ? `/organization/${navOrganizationId}/children`
@@ -106,6 +112,15 @@ export default function OrganizationLayout({
       name: "Facilities",
       icon: <CareIcon icon="d-hospital" />,
       visibility:
+        org.org_type === OrgType.GOVT &&
+        hasPermission("can_read_facility", org.permissions),
+    },
+    {
+      url: `${baseUrl}/${id}/analytics`,
+      name: "Analytics",
+      icon: <CareIcon icon="l-chart-line" />,
+      visibility:
+        hasOrganizationPlugins &&
         org.org_type === OrgType.GOVT &&
         hasPermission("can_read_facility", org.permissions),
     },

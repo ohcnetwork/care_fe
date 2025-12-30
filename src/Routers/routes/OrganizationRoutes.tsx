@@ -1,4 +1,5 @@
 import { AppRoutes } from "@/Routers/AppRouter";
+import OrganizationAnalyticsPlug from "@/pages/Organization/OrganizationAnalyticsPlug";
 import OrganizationFacilities from "@/pages/Organization/OrganizationFacilities";
 import OrganizationIndex from "@/pages/Organization/OrganizationIndex";
 import OrganizationPatients from "@/pages/Organization/OrganizationPatients";
@@ -12,6 +13,9 @@ const OrganizationRoutes: AppRoutes = {
   "/organization/:id/patients": ({ id }) => <OrganizationPatients id={id} />,
   "/organization/:id/facilities": ({ id }) => (
     <OrganizationFacilities id={id} />
+  ),
+  "/organization/:id/analytics": ({ id }) => (
+    <OrganizationAnalyticsPlug id={id} />
   ),
   "/organization/:navOrganizationId/children/:id": ({
     navOrganizationId,
@@ -30,6 +34,12 @@ const OrganizationRoutes: AppRoutes = {
     id,
   }) => (
     <OrganizationFacilities id={id} navOrganizationId={navOrganizationId} />
+  ),
+  "/organization/:navOrganizationId/children/:id/analytics": ({
+    navOrganizationId,
+    id,
+  }) => (
+    <OrganizationAnalyticsPlug id={id} navOrganizationId={navOrganizationId} />
   ),
 };
 
