@@ -537,10 +537,6 @@ export function ServiceRequestQuestion({
     if (!previewServiceRequest || !selectedActivityDefinitionData) return;
 
     setServiceRequests([...serviceRequests, previewServiceRequest]);
-    setActivityDefinitionsMap({
-      ...activityDefinitionsMap,
-      [selectedActivityDefinitionData.slug]: selectedActivityDefinitionData,
-    });
     updateQuestionnaireResponseCB(
       [
         {
