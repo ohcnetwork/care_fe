@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import mutate from "@/Utils/request/mutate";
+import accountApi from "@/types/billing/account/accountApi";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
@@ -26,7 +27,8 @@ export type TagEntityType =
   | "prescription"
   | "service_request"
   | "delivery_order"
-  | "request_order";
+  | "request_order"
+  | "account";
 
 // Mapping from entity types to tag resources
 const ENTITY_TO_RESOURCE_MAP = {
@@ -37,6 +39,7 @@ const ENTITY_TO_RESOURCE_MAP = {
   service_request: TagResource.SERVICE_REQUEST,
   delivery_order: TagResource.DELIVERY_ORDER,
   request_order: TagResource.REQUEST_ORDER,
+  account: TagResource.ACCOUNT,
 } as const;
 
 // Configuration for different entity types using their respective API files
@@ -76,6 +79,11 @@ const ENTITY_CONFIG = {
     setTagsApi: requestOrderApi.setTags,
     removeTagsApi: requestOrderApi.removeTags,
     displayName: "request_order",
+  },
+  account: {
+    setTagsApi: accountApi.setTags,
+    removeTagsApi: accountApi.removeTags,
+    displayName: "account",
   },
   // TODO: Add more entity configurations here
 
