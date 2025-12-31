@@ -164,7 +164,7 @@ export default function MedicationDispenseHistory({
                       className="font-semibold"
                       onClick={() => {
                         navigate(
-                          `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${item.id}/preparation`,
+                          `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${item.id}?status=preparation`,
                         );
                       }}
                     >

@@ -32,7 +32,6 @@ import { PrintDispenseOrder } from "@/pages/Facility/services/pharmacy/PrintDisp
 import { PrintPharmacyPrescription } from "@/pages/Facility/services/pharmacy/PrintPharmacyPrescription";
 import ServiceRequestList from "@/pages/Facility/services/serviceRequests/ServiceRequestList";
 import ServiceRequestShow from "@/pages/Facility/services/serviceRequests/ServiceRequestShow";
-import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
 import { SchedulableResourceType } from "@/types/scheduling/schedule";
 
 interface LocationLayoutProps {
@@ -99,18 +98,12 @@ const getRoutes = (facilityId: string, locationId: string) => ({
       locationId={locationId}
     />
   ),
-  "/medication_dispense/order/:dispenseOrderId/:status": ({
+  "/medication_dispense/order/:dispenseOrderId": ({
     dispenseOrderId,
-    status,
   }: {
     dispenseOrderId: string;
-    status: string;
   }) => (
-    <DispensesView
-      facilityId={facilityId}
-      dispenseOrderId={dispenseOrderId}
-      status={status as MedicationDispenseStatus}
-    />
+    <DispensesView facilityId={facilityId} dispenseOrderId={dispenseOrderId} />
   ),
 
   // Laboratory

@@ -1003,7 +1003,7 @@ export default function MedicationBillForm({ patientId }: Props) {
       if (chargeItems.length === 0) {
         if (dispenseOrderId) {
           navigate(
-            `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/preparation?payment_status=unpaid`,
+            `/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}?status=preparation&payment_status=unpaid`,
           );
         }
       } else {
@@ -2195,10 +2195,10 @@ export default function MedicationBillForm({ patientId }: Props) {
             onSuccess={() => {
               setIsInvoiceSheetOpen(false);
               navigate(
-                `/facility/${facilityId}/locations/${locationId}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}/preparation` : ""}`,
+                `/facility/${facilityId}/locations/${locationId}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}?status=preparation` : ""}`,
               );
             }}
-            sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}/preparation` : ""}`}
+            sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/${dispenseOrderId ? `order/${dispenseOrderId}?status=preparation` : ""}`}
             locationId={locationId}
             dispenseOrderId={dispenseOrderId ?? undefined}
           />

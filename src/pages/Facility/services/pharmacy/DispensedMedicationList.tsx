@@ -1,3 +1,6 @@
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import { createFilterConfig } from "@/components/ui/multi-filter/utils/Utils";
 import {
   Select,
   SelectContent,
@@ -31,16 +34,14 @@ import {
   MedicationDispenseUpsert,
 } from "@/types/emr/medicationDispense/medicationDispense";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
-import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import useFilters from "@/hooks/useFilters";
 import { groupItemsByTime } from "@/lib/time";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import ViewDefaultAccountButton from "@/pages/Facility/billing/account/ViewDefaultAccountButton";
@@ -274,8 +275,10 @@ interface Props {
   facilityId: string;
   patientId: string;
   locationId: string;
-  status: MedicationDispenseStatus;
+  status: MedicationDispenseStatus | undefined;
   dispenseOrderId: string;
+  medications: MedicationDispenseRead[];
+  updateQuery: (query: Record<string, any>) => void;
 }
 
 export default function DispensedMedicationList({
@@ -284,32 +287,49 @@ export default function DispensedMedicationList({
   locationId,
   status,
   dispenseOrderId,
+  medications,
+  updateQuery,
 }: Props) {
   useShortcutSubContext("facility:pharmacy");
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [selectedMedications, setSelectedMedications] = useState<string[]>([]);
-  const { qParams, Pagination, resultsPerPage, updateQuery } = useFilters({
-    limit: 100,
-    disableCache: true,
-  });
-  const paymentFilter = (qParams.payment_status as "paid" | "unpaid") || "all";
+  const [paymentFilter, setPaymentFilter] = useState<"paid" | "unpaid" | "all">(
+    "all",
+  );
   const [billableChargeItems, setBillableChargeItems] = useState<
     ChargeItemRead[]
   >([]);
   const [createInvoiceSheetOpen, setCreateInvoiceSheetOpen] = useState(false);
 
-  const { data: response, isLoading } = useQuery({
-    queryKey: ["medication_dispense", dispenseOrderId, qParams, status],
-    queryFn: query(medicationDispenseApi.list, {
-      queryParams: {
-        location: locationId,
-        limit: resultsPerPage,
-        offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        status: status ?? qParams.status,
-        order: dispenseOrderId,
-      },
-    }),
+  const filters = useMemo(
+    () => [
+      createFilterConfig(
+        "status",
+        t("status"),
+        "command",
+        Object.values(MedicationDispenseStatus).map((s) => ({
+          value: s,
+          label: t(s),
+          color: MEDICATION_DISPENSE_STATUS_COLORS[s],
+        })),
+      ),
+    ],
+    [t],
+  );
+
+  const onFilterUpdate = (query: Record<string, any>) => {
+    updateQuery(query);
+  };
+
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useMultiFilterState(filters, onFilterUpdate, {
+    status: status,
   });
 
   const { data: account } = useQuery({
@@ -328,16 +348,16 @@ export default function DispensedMedicationList({
 
   // set all medicines as selectedMedications
   useEffect(() => {
-    if (response?.results) {
-      setSelectedMedications(response.results.map((med) => med.id));
+    if (medications) {
+      setSelectedMedications(medications.map((med) => med.id));
     }
-  }, [response?.results]);
+  }, [medications]);
 
   const { mutate: completeMedications, isPending } = useMutation({
     mutationFn: async ({ signal }: { signal: AbortSignal }) => {
-      if (!response?.results) return;
+      if (!medications) return;
 
-      const selectedDispenses = response.results.filter((med) =>
+      const selectedDispenses = medications.filter((med) =>
         selectedMedications.includes(med.id),
       );
 
@@ -371,7 +391,7 @@ export default function DispensedMedicationList({
     );
   };
 
-  const filteredMedications = response?.results?.filter((med) => {
+  const filteredMedications = medications?.filter((med) => {
     if (paymentFilter === "paid")
       return med.charge_item?.paid_invoice?.status === InvoiceStatus.balanced;
     if (paymentFilter === "unpaid")
@@ -458,10 +478,12 @@ export default function DispensedMedicationList({
         </div>
       </div>
 
-      <div className="mb-4">
+      <div className="flex flex-row gap-4 mb-4">
         <Tabs
           value={paymentFilter}
-          onValueChange={(value) => updateQuery({ payment_status: value })}
+          onValueChange={(value) =>
+            setPaymentFilter(value as "paid" | "unpaid" | "all")
+          }
           className="w-full"
         >
           <TabsList>
@@ -470,11 +492,21 @@ export default function DispensedMedicationList({
             <TabsTrigger value="unpaid">{t("unpaid")}</TabsTrigger>
           </TabsList>
         </Tabs>
+        <MultiFilter
+          selectedFilters={selectedFilters}
+          onFilterChange={handleFilterChange}
+          onOperationChange={handleOperationChange}
+          onClearAll={handleClearAll}
+          onClearFilter={handleClearFilter}
+          placeholder={t("filter")}
+          facilityId={facilityId}
+          className="flex-row flex-row-reverse"
+          triggerButtonClassName="self-start sm:self-center"
+          align="end"
+        />
       </div>
 
-      {isLoading ? (
-        <TableSkeleton count={5} />
-      ) : !filteredMedications?.length ? (
+      {!filteredMedications?.length ? (
         <EmptyState
           title={t("no_medications_found")}
           description={t("no_medications_found_description")}
@@ -603,10 +635,6 @@ export default function DispensedMedicationList({
               </div>
             )}
           </div>
-
-          <div className="mt-4">
-            <Pagination totalCount={response?.count || 0} />
-          </div>
         </div>
       )}
 
@@ -617,7 +645,7 @@ export default function DispensedMedicationList({
           open={createInvoiceSheetOpen}
           onOpenChange={setCreateInvoiceSheetOpen}
           preSelectedChargeItems={billableChargeItems}
-          sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}/preparation`}
+          sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}?status=preparation`}
           onSuccess={() => {
             setCreateInvoiceSheetOpen(false);
             setBillableChargeItems([]);

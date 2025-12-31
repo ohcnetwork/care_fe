@@ -440,6 +440,7 @@
   "add_interpretation": "Add Interpretation",
   "add_item": "Add Item",
   "add_items": "Add Items",
+  "dispense_order_updated": "Dispense order has been updated",
   "add_items_to_delivery": "Add items to this delivery order",
   "add_items_to_delivery_description": "Load all items from the request or pick only what you want to dispatch.",
   "add_items_to_dispense_now_no_invoice": "Add items to dispense now. No invoice will be created.",
