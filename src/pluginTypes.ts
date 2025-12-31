@@ -3,10 +3,14 @@ import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
 import { InvoiceRead } from "@/types/billing/invoice/invoice";
 import { DeviceDetail } from "@/types/device/device";
 import { EncounterRead } from "@/types/emr/encounter/encounter";
-import { PatientRead } from "@/types/emr/patient/patient";
+import {
+  PatientListRead,
+  PatientRead,
+  PublicPatientRead,
+} from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 import { UserReadMinimal } from "@/types/user/user";
-import { LazyExoticComponent } from "react";
+import { LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { pluginMap } from "./pluginMap";
@@ -68,6 +72,12 @@ export type PatientSearchActionsComponentType = React.FC<{
   className?: string;
 }>;
 
+export type PatientInfoCardActionsComponentType = React.FC<{
+  facilityId: string;
+  patient: PatientRead | PatientListRead | PublicPatientRead;
+  className?: string;
+}>;
+
 // Define supported plugin components
 export type SupportedPluginComponents = {
   DoctorConnectButtons: DoctorConnectButtonComponentType;
@@ -81,6 +91,7 @@ export type SupportedPluginComponents = {
   PatientDetailsTabDemographyGeneralInfo: PatientDetailsTabDemographyGeneralInfoComponentType;
   InvoiceRecordPaymentOptions: InvoiceRecordPaymentOptionsComponentType;
   PatientSearchActions: PatientSearchActionsComponentType;
+  PatientInfoCardActions: PatientInfoCardActionsComponentType;
 };
 
 // Create a type for lazy-loaded components
@@ -92,6 +103,13 @@ export type PluginComponentMap = {
   [K in keyof SupportedPluginComponents]?: LazyComponent<
     SupportedPluginComponents[K]
   >;
+};
+
+export type PluginOrganizationTab = {
+  name: string;
+  slug: string;
+  icon: ReactNode;
+  component: React.FC<{ contextId: string; navOrganizationId?: string }>;
 };
 
 export type PluginDeviceManifest = {
@@ -117,6 +135,7 @@ export type PluginManifest = {
   navItems?: NavigationLink[];
   userNavItems?: NavigationLink[];
   adminNavItems?: NavigationLink[];
+  organizationTabs?: PluginOrganizationTab[];
   components?: PluginComponentMap;
   encounterTabs?: Record<
     string,
