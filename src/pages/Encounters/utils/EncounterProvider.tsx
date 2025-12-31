@@ -12,7 +12,6 @@ import query from "@/Utils/request/query";
 import { DispenseButton } from "@/components/Consumable/DispenseButton";
 import { usePermissions } from "@/context/PermissionContext";
 import { MarkEncounterAsCompletedDialog } from "@/pages/Encounters/MarkEncounterAsCompletedDialog";
-import { DispenseMedicineButton } from "@/pages/Encounters/tabs/overview/summary-panel-details-tab/dispense-medicine";
 import {
   EncounterRead,
   inactiveEncounterStatus,
@@ -89,7 +88,7 @@ export function EncounterProvider({
 
   const { data: patient, isLoading: isPatientLoading } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: { id: patientId },
       silent: true,
     }),
@@ -141,35 +140,30 @@ export function EncounterProvider({
     patient?.permissions ?? [],
   );
 
-  // User can access the selected encounter if they have canViewEncounter or canViewClinicalData permission
+  // User can access the selected encounter if they have read encounter
   const canReadSelectedEncounter =
-    selectedEncounterPermissions.canViewEncounter ||
-    selectedEncounterPermissions.canViewClinicalData;
+    selectedEncounterPermissions.canReadEncounter;
+
+  // User can access clinical data if they have canViewClinicalData permission or canViewEncounter permission
+  const canReadClinicalData =
+    patientPermissions.canViewClinicalData ||
+    selectedEncounterPermissions.canReadEncounterClinicalData;
 
   // User can edit the selected encounter if it was accessed via facility scope, is the same as the primary encounter in view, and is active
   const canWriteSelectedEncounter =
-    canReadSelectedEncounter &&
     !!facilityId &&
     selectedEncounterId === primaryEncounterId &&
     !!selectedEncounter &&
     !inactiveEncounterStatus.includes(selectedEncounter.status);
 
-  // User can access the current encounter if they have canViewEncounter or canViewClinicalData permission
-  const canReadPrimaryEncounter =
-    primaryEncounterPermissions.canViewEncounter ||
-    primaryEncounterPermissions.canViewClinicalData;
-
+  // User can access the current encounter if they have canReadEncounter permission
+  const canReadPrimaryEncounter = primaryEncounterPermissions.canReadEncounter;
   // User can edit the current encounter if it was accessed via facility scope and is active
   const canWritePrimaryEncounter =
     canReadPrimaryEncounter &&
     !!facilityId &&
     !!primaryEncounter &&
     !inactiveEncounterStatus.includes(primaryEncounter.status);
-
-  // User can access clinical data if they have canViewClinicalData permission or canViewEncounter permission
-  const canReadClinicalData =
-    patientPermissions.canViewClinicalData ||
-    selectedEncounterPermissions.canViewEncounter;
 
   // User can write clinical data if they have canViewClinicalData permission and can write the selected encounter
   const canWriteClinicalData = canReadClinicalData && canWriteSelectedEncounter;
@@ -280,19 +274,15 @@ export function EncounterProvider({
         />
       )}
 
-      <DispenseMedicineButton
-        open={activeAction === EncounterAction.DispenseMedicine}
-        setOpen={(open) => {
-          setActiveAction(open ? EncounterAction.DispenseMedicine : null);
-        }}
-      />
-
-      <DispenseButton
-        open={activeAction === EncounterAction.Dispense}
-        setOpen={(open) => {
-          setActiveAction(open ? EncounterAction.Dispense : null);
-        }}
-      />
+      {facilityId && (
+        <DispenseButton
+          open={activeAction === EncounterAction.Dispense}
+          setOpen={(open) => {
+            setActiveAction(open ? EncounterAction.Dispense : null);
+          }}
+          facilityId={facilityId}
+        />
+      )}
     </encounterContext.Provider>
   );
 }

@@ -22,7 +22,6 @@
 
 ![Code scanning - action](https://github.com/ohcnetwork/care_fe/workflows/Code%20scanning%20-%20action/badge.svg)
 ![OSSAR](https://github.com/ohcnetwork/care_fe/workflows/OSSAR/badge.svg)
-[![Cypress Tests](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/wf7d2m/develop&style=flat&logo=cypress)](https://cloud.cypress.io/projects/wf7d2m/runs)
 ![Staging Release](https://github.com/ohcnetwork/care_fe/workflows/CARE%20Develop%20Registry/badge.svg)
 ![Production Release](https://github.com/ohcnetwork/care_fe/workflows/Production%20Release/badge.svg)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/200482ab117e4b5397ff3f5ae5719aa2)](https://www.codacy.com/gh/ohcnetwork/care_fe?utm_source=github.com&utm_medium=referral&utm_content=ohcnetwork/care_fe&utm_campaign=Badge_Grade)
@@ -73,7 +72,71 @@ Administrator   administrator_2_0       Coronasafe@123
 Facility Admin  facility_admin_2_0      Coronasafe@123
 ```
 
-#### 📱 Patient Login in Staging
+## Multitenancy for Development
+
+When developing or testing against multiple backend environments (local, staging, production), you can configure the frontend to automatically connect to different backends based on which URL you access it from.
+
+**Configure API URL Mapping in `.env.local`:**
+
+```env
+# Map different frontend origins to different backend URLs
+REACT_CARE_URL_MAP='{"http://localhost:4000": "https://careapi.ohc.network", "http://care.localhost": "https://careapi.ohc.network", "http://develop.localhost": "https://develop-api.ohc.network", "http://dev.localhost": "http://localhost:9000"}'
+
+# Fallback for any unmatched origins
+REACT_CARE_API_URL=https://careapi.ohc.network
+```
+
+**Set up Nginx reverse proxy:**
+
+### On macOS
+
+We'll use [Homebrew](https://brew.sh/) to fetch most of the packages on macOS:
+
+- nginx - `brew install nginx`. Start Nginx server after installation.
+
+**Important**: Make sure that you start Nginx after you install them. Instructions on how to do that will
+be printed to the command-line after it's successfully installed.
+
+### On Ubuntu
+
+The following command should install the required dependencies on Ubuntu. If you're using another _flavour_ of Linux, adapt the command to work with the package manager available with your distribution.
+
+    sudo apt-get install nginx
+
+1. Create a new Nginx server configuration file...
+   - `/opt/homebrew/etc/nginx/servers/care` (macOS)
+   - `/etc/nginx/sites-enabled/care` (Linux)
+
+   ...and save the following configuration inside it:
+
+   ```
+   server {
+     listen 80;
+     server_name care.localhost develop.localhost dev.localhost plugs.localhost;
+
+     location / {
+       proxy_pass http://localhost:4000/;
+       proxy_set_header Host $host;
+     }
+   }
+   ```
+
+2. Restart `nginx` so that it picks up the new configuration.
+
+   ```
+   # macOS
+   brew services restart nginx
+
+   # Ubuntu
+   sudo service nginx restart
+   ```
+
+   On Debian/Ubuntu, NGINX comes with a `sites-enabled/default` file which may need to be removed before the Care will begin responding to requests.
+
+If your Nginx reverse-proxy has been set up correctly, then visit the school using your browser at
+`http://care.localhost`.
+
+## 📱 Patient Login in Staging
 
 For patient login via phone number:
 
@@ -81,7 +144,7 @@ For patient login via phone number:
 - In staging environment, to save costs, SMS messages are not actually sent
 - For testing purposes in staging, use the hardcoded OTP: `45612`
 
-#### Contributing to CARE
+## Contributing to CARE
 
 - Create a branch with branch name of the format `issues/{issue#}/{short-name}` (example `issues/7001/edit-prescriptions`) from the latest [`develop`](https://github.com/ohcnetwork/care_fe/tree/develop) branch when starting to work on an issue.
 - Once the changes are pushed to the branch, make a pull request with a meaningful title (example: "💊 Adds support for editing prescriptions" #6369)
@@ -89,7 +152,7 @@ For patient login via phone number:
 - Once the code review is done, the PR will be marked with a "Needs Testing" label where it'll be queued for QA testing.
 - Once tested, the PR would be marked with a "Tested" label and would be queued for merge.
 
-### Translations
+## Translations
 
 All strings must be encased in i18n translations. New translation strings must be specified in `src`->`Locale`->`en`. Do not add translations for languages other than english through pull requests. Other language translations can be contributed through [Crowdin](https://crowdin.com/project/ohccarefe)
 
@@ -135,46 +198,19 @@ With the above, the app serves:
 
 To ensure the quality of our pull requests, we use a variety of tools:
 
-- **Automated E2E Testing:** We use Cypress and Playwright for end-to-end testing to automatically verify the functionality and performance of our code.
+- **Automated E2E Testing:** We use Playwright for end-to-end testing to automatically verify the functionality and performance of our code.
 - **Manual Real Device Testing:** We use BrowserStack to manually test our code on real devices, ensuring compatibility and functionality across different platforms and browsers.
 
-#### 🧪 Run cypress tests
+#### 🎭 Run Playwright tests
 
-To run cypress tests locally, you'll need to setup the backend to run locally and load dummy data required for cypress to the database. See [docs](https://github.com/ohcnetwork/care#self-hosting).
+To run Playwright tests locally, you'll need to setup the backend to run locally and load dummy data required for the tests. See [docs](https://github.com/ohcnetwork/care#self-hosting).
 
-Once backend is running locally, you'll have to ensure your local front-end is connected to local backend, by setting the `REACT_CARE_API_URL` env.
+Once backend is running locally, ensure your local front-end is connected to local backend by setting the `REACT_CARE_API_URL` environment variable:
 
 ```env
 #.env
 REACT_CARE_API_URL=http://127.0.0.1:9000
 ```
-
-Once done, start the development server by running
-
-```sh
-npm run dev
-```
-
-Once development server is running, then run the cypress tests in either of the ways described below.
-
-```sh
-npm run cypress:run        # To run all tests in headless mode.
-```
-
-```sh
-npm run cypress:run:gui    # To run all tests in headed mode.
-```
-
-```sh
-npm run cypress:open       # To debug and run tests individually.
-```
-
-- Failed test screenshots are saved in `cypress/screenshots`
-- All test videos are saved in `cypress/videos`
-
-#### 🎭 Run Playwright tests
-
-To run Playwright tests locally, follow the same backend setup steps as Cypress above.
 
 First, install Playwright browsers:
 

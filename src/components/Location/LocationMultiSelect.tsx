@@ -12,19 +12,20 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import query from "@/Utils/request/query";
-import { LocationList, LocationTypeIcons } from "@/types/location/location";
+import useBreakpoints from "@/hooks/useBreakpoints";
+import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 interface BaseLocationTreeNodeProps {
-  location: LocationList;
+  location: LocationRead;
   selectedLocations: LocationValue[];
   onSelect: (locationId: string) => void;
   expandedLocations: Set<string>;
   onToggleExpand: (locationId: string) => void;
   level?: number;
   facilityId: string;
-  addLocationsToMap: (locations: LocationList[]) => void;
-  renderLocationInfo: (location: LocationList) => React.ReactNode;
+  addLocationsToMap: (locations: LocationRead[]) => void;
+  renderLocationInfo: (location: LocationRead) => React.ReactNode;
   getPaddingLeft: (level: number) => string;
   className?: string;
 }
@@ -44,6 +45,7 @@ function BaseLocationTreeNode({
 }: BaseLocationTreeNodeProps) {
   const isExpanded = expandedLocations.has(location.id);
   const isSelected = selectedLocations.some((loc) => loc.id === location.id);
+  const isMobile = useBreakpoints({ default: true, sm: false });
 
   // Fetch children when expanded
   const { data: children, isLoading } = useQuery({
@@ -82,9 +84,10 @@ function BaseLocationTreeNode({
     <div className="space-y-1">
       <div
         className={cn(
-          "group flex items-center py-1 px-2 rounded-md hover:bg-gray-50 transition-colors my-1",
+          "group flex items-center py-1 rounded-md hover:bg-gray-50 transition-colors my-1",
           isSelected && "bg-primary-100/50 border border-primary-200",
           shouldShowExpand && "cursor-pointer hover:bg-gray-100",
+          isMobile ? "mr-3" : "mr-5",
           className,
         )}
         style={{ paddingLeft: getPaddingLeft(level) }}
@@ -169,14 +172,14 @@ function BaseLocationTreeNode({
 }
 
 interface LocationTreeNodeProps {
-  location: LocationList;
+  location: LocationRead;
   selectedLocations: LocationValue[];
   onSelect: (locationId: string) => void;
   expandedLocations: Set<string>;
   onToggleExpand: (locationId: string) => void;
   level?: number;
   facilityId: string;
-  addLocationsToMap: (locations: LocationList[]) => void;
+  addLocationsToMap: (locations: LocationRead[]) => void;
 }
 
 function LocationTreeNode({
@@ -192,7 +195,7 @@ function LocationTreeNode({
   const Icon =
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons];
 
-  const renderLocationInfo = (location: LocationList) => (
+  const renderLocationInfo = (location: LocationRead) => (
     <div className="flex items-center flex-1 text-sm gap-2 h-8 w-0">
       <Icon className="size-4 shrink-0" />
       <span className="truncate font-medium">{location.name}</span>
@@ -218,14 +221,14 @@ function LocationTreeNode({
 }
 
 interface SearchResultTreeNodeProps {
-  location: LocationList;
+  location: LocationRead;
   selectedLocations: LocationValue[];
   onSelect: (locationId: string) => void;
   expandedLocations: Set<string>;
   onToggleExpand: (locationId: string) => void;
   level?: number;
   facilityId: string;
-  addLocationsToMap: (locations: LocationList[]) => void;
+  addLocationsToMap: (locations: LocationRead[]) => void;
   path: string[];
 }
 
@@ -243,7 +246,7 @@ function SearchResultTreeNode({
   const Icon =
     LocationTypeIcons[location.form as keyof typeof LocationTypeIcons];
 
-  const renderLocationInfo = (location: LocationList) => (
+  const renderLocationInfo = (location: LocationRead) => (
     <div className="flex items-center flex-1 text-sm gap-2 min-w-0">
       <Icon className="size-4 shrink-0 text-gray-600" />
       <div className="flex flex-col min-w-0 justify-center flex-1 h-8 w-0">
@@ -273,7 +276,6 @@ function SearchResultTreeNode({
       addLocationsToMap={addLocationsToMap}
       renderLocationInfo={renderLocationInfo}
       getPaddingLeft={getPaddingLeft}
-      className="px-3"
     />
   );
 }
@@ -342,7 +344,7 @@ export default function LocationMultiSelect({
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [allFetchedLocations, setAllFetchedLocations] = useState<
-    Map<string, LocationList>
+    Map<string, LocationRead>
   >(new Map());
 
   // Query for top-level locations
@@ -383,7 +385,7 @@ export default function LocationMultiSelect({
   }, [topLevelLocations?.results, searchResultsData?.results]);
 
   // Function to add locations to the global map (used by LocationTreeNode)
-  const addLocationsToMap = useCallback((locations: LocationList[]) => {
+  const addLocationsToMap = useCallback((locations: LocationRead[]) => {
     setAllFetchedLocations((prev) => {
       const newMap = new Map(prev);
       locations.forEach((loc) => {
@@ -397,13 +399,13 @@ export default function LocationMultiSelect({
     if (!searchQuery.trim() || !searchResultsData?.results) return [];
 
     const results: Array<{
-      location: LocationList;
+      location: LocationRead;
       level: number;
       path: string[];
     }> = [];
 
     // Function to build path from root to a location
-    const buildPath = (location: LocationList): string[] => {
+    const buildPath = (location: LocationRead): string[] => {
       const path: string[] = [];
       let currentParent = location.parent;
 
@@ -426,7 +428,7 @@ export default function LocationMultiSelect({
 
   // Create a map of all available locations for quick lookup
   const locationsMap = useMemo(() => {
-    const map = new Map<string, LocationList>();
+    const map = new Map<string, LocationRead>();
 
     // Add all fetched locations
     allFetchedLocations.forEach((loc) => {
@@ -474,7 +476,7 @@ export default function LocationMultiSelect({
 
       if (searchResults.length > 0) {
         return (
-          <div className="space-y-1">
+          <div className="overflow-y-auto max-h-[55dvh] md:max-h-[50dvh] lg:max-h-[40dvh]">
             {searchResults.map((result) => (
               <SearchResultTreeNode
                 key={result.location.id}

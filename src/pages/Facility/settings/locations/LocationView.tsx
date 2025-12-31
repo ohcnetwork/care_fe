@@ -30,7 +30,7 @@ import LinkDepartmentsSheet from "@/components/Patient/LinkDepartmentsSheet";
 import { useLocationManagement } from "@/hooks/useLocationManagement";
 
 import query from "@/Utils/request/query";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 import LocationSheet from "./LocationSheet";
@@ -42,7 +42,7 @@ interface Props {
   facilityId: string;
   isNested?: boolean;
   onBackToParent?: () => void;
-  onSelectLocation?: (location: LocationList) => void;
+  onSelectLocation?: (location: LocationRead) => void;
 }
 
 export default function LocationView({
@@ -54,7 +54,7 @@ export default function LocationView({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const limit = 12;
+  const limit = 14;
 
   const { data: location, isLoading: isLocationLoading } = useQuery({
     queryKey: ["location", facilityId, id],
@@ -96,7 +96,7 @@ export default function LocationView({
     setPage(1);
   }, [id, setPage]);
 
-  const handleViewLocation = (location: LocationList) => {
+  const handleViewLocation = (location: LocationRead) => {
     if (isNested && onSelectLocation) {
       onSelectLocation(location);
     } else {
@@ -110,7 +110,7 @@ export default function LocationView({
     if (breadcrumbId === id) return;
 
     if (onSelectLocation) {
-      const locationForNavigation = { id: breadcrumbId } as LocationList;
+      const locationForNavigation = { id: breadcrumbId } as LocationRead;
       onSelectLocation(locationForNavigation);
     } else if (onBackToParent) {
       onBackToParent();
@@ -139,8 +139,8 @@ export default function LocationView({
 
   const breadcrumbs = location ? generateBreadcrumbs(location) : [];
 
-  const handleMoveUp = (location: LocationList) => handleMove(location, "up");
-  const handleMoveDown = (location: LocationList) =>
+  const handleMoveUp = (location: LocationRead) => handleMove(location, "up");
+  const handleMoveDown = (location: LocationRead) =>
     handleMove(location, "down");
 
   return (
@@ -228,7 +228,6 @@ export default function LocationView({
             <div className="flex flex-col xl:flex-row justify-between items-start w-full gap-4">
               <div className="w-full xl:w-72">
                 <Input
-                  data-cy="location-child-search-input"
                   placeholder={t("search_by_name")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -241,7 +240,6 @@ export default function LocationView({
                   "mode" in location &&
                   location.mode === "kind" && (
                     <Button
-                      data-cy="add-child-location-button"
                       variant="primary"
                       onClick={handleAddLocation}
                       className="w-full sm:w-auto"
@@ -319,11 +317,7 @@ export default function LocationView({
                   {currentPageItems?.length ? (
                     <div className="flex flex-col gap-4">
                       {currentPageItems.map((child, index) => (
-                        <AnimatedWrapper
-                          key={child.id}
-                          keyValue={child.id}
-                          data-testid={`location-card-${child.id}`}
-                        >
+                        <AnimatedWrapper key={child.id} keyValue={child.id}>
                           <LocationCard
                             location={child}
                             onEdit={handleEditLocation}

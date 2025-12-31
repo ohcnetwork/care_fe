@@ -34,18 +34,18 @@ import {
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import mutate from "@/Utils/request/mutate";
-import { LocationList, LocationTypeIcons } from "@/types/location/location";
+import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 // Animated version of TableRow
 const AnimatedTableRow = motion.create(TableRow);
 
 interface Props {
-  locations: LocationList[];
-  onEdit?: (location: LocationList) => void;
-  onView?: (location: LocationList) => void;
-  onMoveUp?: (location: LocationList) => void;
-  onMoveDown?: (location: LocationList) => void;
+  locations: LocationRead[];
+  onEdit?: (location: LocationRead) => void;
+  onView?: (location: LocationRead) => void;
+  onMoveUp?: (location: LocationRead) => void;
+  onMoveDown?: (location: LocationRead) => void;
   facilityId: string;
   isFirstPage?: boolean;
   isLastPage?: boolean;
@@ -67,7 +67,7 @@ export function LocationTable({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [locationToDelete, setLocationToDelete] = useState<LocationList | null>(
+  const [locationToDelete, setLocationToDelete] = useState<LocationRead | null>(
     null,
   );
 
@@ -133,7 +133,6 @@ export function LocationTable({
                   canView && "cursor-pointer",
                 )}
                 onClick={canView ? () => onView?.(location) : undefined}
-                data-cy="view-location-row"
               >
                 <TableCell>
                   <div className="font-medium flex items-center gap-2 py-2">
@@ -199,7 +198,6 @@ export function LocationTable({
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => onMoveUp(location)}
-                                data-cy="move-up-location-button"
                               >
                                 <ArrowUp className="size-4" />
                               </Button>
@@ -222,7 +220,6 @@ export function LocationTable({
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => onMoveDown(location)}
-                                data-cy="move-down-location-button"
                               >
                                 <ArrowDown className="size-4" />
                               </Button>
@@ -244,7 +241,6 @@ export function LocationTable({
                             variant="ghost"
                             size="icon"
                             onClick={() => onEdit(location)}
-                            data-cy="edit-location-button"
                           >
                             <PenLine className="size-4" />
                           </Button>
@@ -262,7 +258,6 @@ export function LocationTable({
                                 size="icon"
                                 className="text-destructive hover:text-destructive"
                                 onClick={() => setLocationToDelete(location)}
-                                data-cy="delete-location-button"
                               >
                                 <Trash className="size-4" />
                               </Button>

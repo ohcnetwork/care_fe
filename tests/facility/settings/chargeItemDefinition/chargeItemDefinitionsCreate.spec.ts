@@ -84,6 +84,8 @@ test.describe("Charge Item Definition Creation", () => {
   });
 
   test("create charge item definition with all fields", async ({ page }) => {
+    const cgstRate = "9";
+    const sgstRate = "6";
     await page.getByRole("button", { name: /add definition/i }).click();
     await page.getByRole("textbox", { name: /title/i }).fill(title);
     await page.getByRole("textbox", { name: /slug/i }).fill(slug);
@@ -101,8 +103,28 @@ test.describe("Charge Item Definition Creation", () => {
       .filter({ hasText: /^Add tax$/ })
       .first()
       .click();
-    await page.locator("div").filter({ hasText: /^9 %$/ }).first().click();
-    await page.locator("div").filter({ hasText: /^6 %$/ }).nth(2).click();
+
+    await page
+      .getByRole("textbox", { name: "Search for tax code" })
+      .fill(cgstRate);
+
+    // Select 9% under CGST section - find exact "cgst" text, navigate to container, find radio button
+    await page
+      .getByText("cgst", { exact: true })
+      .locator("../..")
+      .locator(`button[role="radio"][value="${cgstRate}"]`)
+      .click();
+
+    await page
+      .getByRole("textbox", { name: "Search for tax code" })
+      .fill(sgstRate);
+
+    // Select 6% under SGST section - find exact "sgst" text, navigate to container, find radio button
+    await page
+      .getByText("sgst", { exact: true })
+      .locator("../..")
+      .locator(`button[role="radio"][value="${sgstRate}"]`)
+      .click();
     const doneButton = page.getByRole("button", { name: "Done" });
     await doneButton.scrollIntoViewIfNeeded();
     await doneButton.click();
@@ -115,12 +137,15 @@ test.describe("Charge Item Definition Creation", () => {
     await page.getByRole("checkbox").first().click();
     await page.getByRole("button", { name: "Done" }).click();
     await page.getByRole("button", { name: "Add Condition" }).click();
-    await page.getByRole("combobox").filter({ hasText: "Metric" }).click();
+    await page
+      .getByRole("combobox")
+      .filter({ hasText: /^Metric|Patient Age$/ })
+      .click();
     await page.getByRole("option", { name: "Patient Age" }).click();
-    await page.getByRole("combobox").filter({ hasText: "equality" }).click();
-    await page.getByRole("option", { name: "in_range" }).click();
-    await page.getByPlaceholder("Min Value").fill("60");
-    await page.getByPlaceholder("Max Value").fill("120");
+    await page.getByRole("combobox").filter({ hasText: "In range" }).click();
+    await page.getByRole("option", { name: "In range" }).click();
+    await page.getByPlaceholder("Min").fill("60");
+    await page.getByPlaceholder("Max").fill("120");
     await page.getByRole("button", { name: "Add" }).click();
 
     await page.getByRole("button", { name: /create/i }).click();
@@ -141,6 +166,8 @@ test.describe("Charge Item Definition Creation", () => {
     await expect(page.getByText(purchasePrice)).toBeVisible();
     await expect(page.getByText("9%")).toBeVisible();
     await expect(page.getByText("6%")).toBeVisible();
-    await expect(page.getByText("Age In Range 60 - 120")).toBeVisible();
+    await expect(
+      page.getByText("Patient Age is in range 60 to 120 years"),
+    ).toBeVisible();
   });
 });

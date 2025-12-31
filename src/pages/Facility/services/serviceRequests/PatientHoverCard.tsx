@@ -7,13 +7,17 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { PatientRead } from "@/types/emr/patient/patient";
+import {
+  PatientListRead,
+  PatientRead,
+  PublicPatientRead,
+} from "@/types/emr/patient/patient";
 import { formatPatientAge } from "@/Utils/utils";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface PatientHoverCardProps {
-  patient: PatientRead;
+  patient: PublicPatientRead | PatientListRead | PatientRead;
   facilityId?: string;
   disabled?: boolean;
 }
@@ -65,7 +69,7 @@ export function PatientHoverCard({
 }
 
 interface PatientHoverCardTriggerProps {
-  patient: PatientRead;
+  patient: PublicPatientRead | PatientListRead | PatientRead;
   disabled?: boolean;
 }
 

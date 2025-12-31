@@ -35,6 +35,7 @@ import {
 } from "@/types/device/device";
 import deviceApi from "@/types/device/deviceApi";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import DeviceEncounterHistory from "./DeviceEncounterHistory";
 import DeviceServiceHistory from "./components/DeviceServiceHistory";
 import ManageLocationSheet from "./components/ManageLocationSheet";
@@ -127,16 +128,12 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 xl:gap-6" data-cy="device-details">
+      <div className="flex flex-col gap-4 xl:gap-6">
         <Card>
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle>{t("device_information")}</CardTitle>
             <Link href={`/devices/${deviceId}/edit`}>
-              <Button
-                variant="outline_primary"
-                size="sm"
-                data-cy="edit-device-button"
-              >
+              <Button variant="outline_primary" size="sm">
                 <CareIcon icon="l-pen" className="size-4" />
                 {t("edit")}
               </Button>
@@ -424,7 +421,6 @@ export default function DeviceShow({ facilityId, deviceId }: Props) {
               </div>
               <Button
                 variant="destructive"
-                data-cy="delete-device-button"
                 className="w-fit"
                 onClick={() => setShowDeleteDialog(true)}
               >
@@ -455,10 +451,17 @@ const PluginDeviceShowCard = ({
   device: DeviceDetail & { care_type: string };
   facilityId: string;
 }) => {
-  const pluginDevice = usePluginDevice(device.care_type);
-  if (!pluginDevice.showPageCard) {
+  const plugin = usePluginDevice(device.care_type);
+
+  if (plugin.isLoading) {
+    return <Skeleton className="w-full aspect-video" />;
+  }
+
+  const ShowPageCard = plugin.device.showPageCard;
+
+  if (!ShowPageCard) {
     return null;
   }
 
-  return <pluginDevice.showPageCard device={device} facilityId={facilityId} />;
+  return <ShowPageCard device={device} facilityId={facilityId} />;
 };

@@ -5,7 +5,7 @@ import { ChargeItemDefinitionRead } from "@/types/billing/chargeItemDefinition/c
 import { ObservationDefinitionReadSpec } from "@/types/emr/observationDefinition/observationDefinition";
 import { SpecimenDefinitionRead } from "@/types/emr/specimenDefinition/specimenDefinition";
 import { HealthcareServiceReadSpec } from "@/types/healthcareService/healthcareService";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 export enum Status {
   draft = "draft",
@@ -48,8 +48,10 @@ export interface BaseActivityDefinitionSpec {
   slug_config: SlugConfig;
 }
 
-export interface ActivityDefinitionCreateSpec
-  extends Omit<BaseActivityDefinitionSpec, "id" | "slug_config" | "slug"> {
+export interface ActivityDefinitionCreateSpec extends Omit<
+  BaseActivityDefinitionSpec,
+  "id" | "slug_config" | "slug"
+> {
   slug_value: string;
   facility: string;
   specimen_requirements: string[];
@@ -60,11 +62,10 @@ export interface ActivityDefinitionCreateSpec
   healthcare_service: string | null;
 }
 
-export interface ActivityDefinitionUpdateSpec
-  extends Omit<
-    BaseActivityDefinitionSpec,
-    "category" | "slug_config" | "slug"
-  > {
+export interface ActivityDefinitionUpdateSpec extends Omit<
+  BaseActivityDefinitionSpec,
+  "category" | "slug_config" | "slug"
+> {
   slug_value: string;
   facility: string;
   specimen_requirements: string[];
@@ -80,7 +81,7 @@ export interface ActivityDefinitionReadSpec extends BaseActivityDefinitionSpec {
   specimen_requirements: SpecimenDefinitionRead[];
   charge_item_definitions: ChargeItemDefinitionRead[];
   observation_result_requirements: ObservationDefinitionReadSpec[];
-  locations: LocationList[];
+  locations: LocationRead[];
   category: ResourceCategoryRead;
   healthcare_service: HealthcareServiceReadSpec;
 }

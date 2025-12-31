@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { Check, LocateFixed, XIcon } from "lucide-react";
+import { Check, Loader2, LocateFixed, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
@@ -26,7 +26,7 @@ import {
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -129,8 +129,10 @@ export default function DispenseDrawer({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { facilityId } = useCurrentFacility();
-
-  const [currentLocation, setCurrentLocation] = useState<LocationList>(
+  const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
+    `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
+  );
+  const [currentLocation, setCurrentLocation] = useState<LocationRead>(
     () =>
       ({
         id: selectedLocation.id,
@@ -143,7 +145,7 @@ export default function DispenseDrawer({
         form: "ward",
         mode: "instance",
         parent: null,
-      }) as unknown as LocationList,
+      }) as unknown as LocationRead,
   );
 
   const [isLocationSelectorOpen, setIsLocationSelectorOpen] = useState(false);
@@ -214,6 +216,28 @@ export default function DispenseDrawer({
     fetchMissingInventories();
   }, [productKnowledgeInventoriesMap, facilityId, currentLocation.id]);
 
+  // Auto-select single lot if only one inventory is available
+  useEffect(() => {
+    fields.forEach((field, index) => {
+      const inventories =
+        productKnowledgeInventoriesMap[field.productKnowledge?.id];
+      const currentLots = form.getValues(`items.${index}.lots`);
+
+      if (
+        inventories !== undefined &&
+        inventories?.length === 1 &&
+        !currentLots.some((lot) => lot.selectedInventoryId)
+      ) {
+        form.setValue(`items.${index}.lots`, [
+          {
+            selectedInventoryId: inventories[0].id,
+            quantity: 1,
+          },
+        ]);
+      }
+    });
+  }, [productKnowledgeInventoriesMap, fields, form]);
+
   const { mutate: dispense, isPending } = useMutation({
     mutationFn: mutate(batchApi.batchRequest),
     onSuccess: (response) => {
@@ -235,9 +259,9 @@ export default function DispenseDrawer({
   });
 
   //path builder
-  const buildLocationPath = useCallback((location: LocationList): string => {
+  const buildLocationPath = useCallback((location: LocationRead): string => {
     const pathParts: string[] = [];
-    let currentLocation: LocationList | undefined = location;
+    let currentLocation: LocationRead | undefined = location;
 
     while (currentLocation && currentLocation.name) {
       pathParts.unshift(currentLocation.name);
@@ -247,7 +271,7 @@ export default function DispenseDrawer({
         currentLocation.parent.id &&
         currentLocation.parent.name
       ) {
-        currentLocation = currentLocation.parent as LocationList;
+        currentLocation = currentLocation.parent as LocationRead;
       } else {
         break;
       }
@@ -260,7 +284,7 @@ export default function DispenseDrawer({
   }, []);
 
   const handleLocationChange = useCallback(
-    (newLocation: LocationList) => {
+    (newLocation: LocationRead) => {
       setCurrentLocation(newLocation);
       setIsLocationSelectorOpen(false);
       setProductKnowledgeInventoriesMap({});
@@ -404,6 +428,9 @@ export default function DispenseDrawer({
             quantity: lot.quantity,
             days_supply: 1,
             fully_dispensed: true,
+            create_dispense_order: {
+              alternate_identifier: alternateIdentifier,
+            },
           };
 
           requests.push({
@@ -645,9 +672,23 @@ export default function DispenseDrawer({
                                 <TableCell className="font-medium text-gray-950 text-base">
                                   {productKnowledge.name}
                                 </TableCell>
-                                {!productKnowledgeInventoriesMap[
+                                {productKnowledgeInventoriesMap[
                                   productKnowledge.id
-                                ]?.length ? (
+                                ] === undefined ? (
+                                  <TableCell
+                                    colSpan={4}
+                                    className="text-center"
+                                  >
+                                    <div className="flex items-center justify-center py-3 gap-2">
+                                      <Loader2 className="size-4 animate-spin" />
+                                      <span className="text-sm text-gray-500">
+                                        {t("loading_stock")}
+                                      </span>
+                                    </div>
+                                  </TableCell>
+                                ) : !productKnowledgeInventoriesMap[
+                                    productKnowledge.id
+                                  ]?.length ? (
                                   <TableCell
                                     colSpan={4}
                                     className="text-center"

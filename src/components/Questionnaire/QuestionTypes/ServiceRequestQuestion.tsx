@@ -40,18 +40,15 @@ import {
   ServiceRequestReadSpec,
   Status,
 } from "@/types/emr/serviceRequest/serviceRequest";
-import { LocationList } from "@/types/location/location";
-import locationApi from "@/types/location/locationApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
 import { QuestionnaireResponse } from "@/types/questionnaire/form";
 import { CurrentUserRead, UserReadMinimal } from "@/types/user/user";
 
 // Extend the base type to use UserReadMinimal for requester
-interface ServiceRequestApplyActivityDefinitionSpec
-  extends Omit<
-    BaseServiceRequestApplyActivityDefinitionSpec,
-    "service_request"
-  > {
+interface ServiceRequestApplyActivityDefinitionSpec extends Omit<
+  BaseServiceRequestApplyActivityDefinitionSpec,
+  "service_request"
+> {
   service_request: Omit<
     BaseServiceRequestApplyActivityDefinitionSpec["service_request"],
     "requester"
@@ -196,24 +193,23 @@ function ServiceRequestForm({
           </Badge>
         </div>
       )}
-      <div className="flex items-center gap-2 flex-wrap col-span-1 sm:col-span-2 xl:col-span-4">
-        <span className="font-medium text-sm text-gray-700">
-          {t("locations")}:
-        </span>
-        {activityDefinition?.locations &&
-          activityDefinition?.locations.length > 0 &&
-          activityDefinition?.locations.map((location) => {
-            return (
+      {activityDefinition?.locations &&
+        activityDefinition.locations.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap col-span-1 sm:col-span-2 xl:col-span-4">
+            <span className="font-medium text-sm text-gray-700">
+              {t("locations")}:
+            </span>
+            {activityDefinition.locations.map((location) => (
               <Badge
                 key={location.id}
                 variant="outline"
                 className="bg-gray-50 text-gray-700 border-gray-200"
               >
-                {location?.name || location.id}
+                {location.name}
               </Badge>
-            );
-          })}
-      </div>
+            ))}
+          </div>
+        )}
     </div>
   );
 
@@ -234,12 +230,7 @@ function ServiceRequestForm({
           {renderInfoSection()}
           <div className="flex w-full justify-end items-center mt-2 gap-2">
             {onRemove && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onRemove}
-                data-cy="remove-service-request"
-              >
+              <Button variant="ghost" size="icon" onClick={onRemove}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
@@ -323,9 +314,7 @@ function ServiceRequestForm({
         </div>
         {isPreview && (
           <div className="flex justify-end">
-            <Button onClick={onAdd} data-cy="add-service-request">
-              {t("add")}
-            </Button>
+            <Button onClick={onAdd}>{t("add")}</Button>
           </div>
         )}
       </div>
@@ -358,7 +347,6 @@ function ServiceRequestForm({
                   onRemove();
                 }}
                 disabled={disabled}
-                data-cy="remove-service-request"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -474,13 +462,9 @@ export function ServiceRequestQuestion({
     (questionnaireResponse.values?.[0]
       ?.value as unknown as ServiceRequestApplyActivityDefinitionSpec[]) || [],
   );
-  const { data: locations } = useQuery({
-    queryKey: ["locations", facilityId],
-    queryFn: query(locationApi.list, {
-      pathParams: { facility_id: facilityId },
-      queryParams: { limit: 100 },
-    }),
-  });
+  const [activityDefinitionsMap, setActivityDefinitionsMap] = useState<
+    Record<string, ActivityDefinitionReadSpec>
+  >({});
 
   const {
     data: selectedActivityDefinitionData,
@@ -495,10 +479,6 @@ export function ServiceRequestQuestion({
     }),
     enabled: !!selectedActivityDefinition,
   });
-
-  useEffect(() => {
-    console.log("selectedActivityDefinition", selectedActivityDefinition);
-  }, [selectedActivityDefinition]);
 
   useEffect(() => {
     if (selectedActivityDefinition && selectedActivityDefinitionData) {
@@ -526,6 +506,11 @@ export function ServiceRequestQuestion({
       };
 
       setPreviewServiceRequest(newServiceRequest);
+
+      setActivityDefinitionsMap((prev) => ({
+        ...prev,
+        [selectedActivityDefinition]: selectedActivityDefinitionData,
+      }));
     }
   }, [
     selectedActivityDefinition,
@@ -570,46 +555,15 @@ export function ServiceRequestQuestion({
       (sr: ServiceRequestApplyActivityDefinitionSpec, i: number) => {
         if (i !== index) return sr;
 
-        // Handle locations update specifically to ensure correct typing
-        const updatedLocations = updates.locations
-          ? ((Array.isArray(updates.locations)
-              ? updates.locations.map((loc) => {
-                  if (typeof loc === "string") {
-                    const location = locations?.results.find(
-                      (l: LocationList) => l.id === loc,
-                    );
+        const { locations: _locations, ...otherUpdates } = updates;
 
-                    return {
-                      id: loc,
-                      has_children: false,
-                      status: "active",
-                      operational_status: "O",
-                      name: location?.name || loc,
-                      description: "",
-                      form: location?.form || "si",
-                      mode: "instance",
-                      availability_status: "available",
-                      sort_index: location?.sort_index || 0,
-                    } as LocationList;
-                  }
-                  return loc;
-                })
-              : updates.locations) as LocationList[])
-          : sr.service_request.locations || [];
-
-        // Create updated service request with proper type handling
-        const updatedServiceRequest = {
+        return {
           ...sr,
           service_request: {
             ...sr.service_request,
-            ...updates,
-            locations: updatedLocations.map((loc) =>
-              typeof loc === "string" ? loc : loc.id,
-            ),
+            ...otherUpdates,
           },
         };
-
-        return updatedServiceRequest;
       },
     );
 
@@ -626,21 +580,13 @@ export function ServiceRequestQuestion({
   ) => {
     if (!previewServiceRequest) return;
 
-    // Handle locations update specifically
-    const updatedLocations = updates.locations
-      ? Array.isArray(updates.locations)
-        ? updates.locations.map((loc) =>
-            typeof loc === "string" ? loc : loc.id,
-          )
-        : updates.locations
-      : previewServiceRequest.service_request.locations;
+    const { locations: _locations, ...otherUpdates } = updates;
 
     setPreviewServiceRequest({
       ...previewServiceRequest,
       service_request: {
         ...previewServiceRequest.service_request,
-        ...updates,
-        locations: updatedLocations,
+        ...otherUpdates,
       },
     });
   };
@@ -683,6 +629,9 @@ export function ServiceRequestQuestion({
           questionId={questionnaireResponse.question_id}
           index={index}
           facilityId={facilityId}
+          activityDefinition={
+            activityDefinitionsMap[serviceRequest.activity_definition]
+          }
         />
       ))}
 

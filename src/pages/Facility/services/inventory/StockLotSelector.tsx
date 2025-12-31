@@ -136,7 +136,10 @@ export default function StockLotSelector({
                     key={lot.selectedInventoryId}
                     className="flex items-center justify-between w-full bg-gray-50 px-px py-0.5 border-gray-200 border-1 rounded-sm text-gray-950 gap-1"
                   >
-                    <span className="font-medium text-sm ml-1">
+                    <span
+                      className="font-medium text-sm ml-1 truncate max-w-24"
+                      title={selectedInventory?.product.batch?.lot_number}
+                    >
                       {selectedInventory?.product.batch?.lot_number}
                     </span>
                     <div className="flex items-center gap-1">
@@ -222,7 +225,7 @@ export default function StockLotSelector({
                   className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent"
                   onClick={() => toggleLotSelection(inv.id)}
                 >
-                  <Checkbox checked={isSelected} className="mr-2" />
+                  <Checkbox checked={isSelected} />
                   <div className="flex-1 flex items-center justify-between gap-2">
                     <span>{inv.product.batch?.lot_number}</span>
                     <div className="flex items-center gap-1">

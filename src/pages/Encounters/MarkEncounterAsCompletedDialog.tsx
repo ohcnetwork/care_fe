@@ -18,6 +18,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { PLUGIN_Component } from "@/PluginEngine";
 import mutate from "@/Utils/request/mutate";
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
+import { EncounterStatus } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 
 export function MarkEncounterAsCompletedDialog(
@@ -61,8 +62,7 @@ export function MarkEncounterAsCompletedDialog(
             onClick={() => {
               updateEncounter({
                 ...encounter,
-                status: "completed",
-                patient: encounter.patient.id,
+                status: EncounterStatus.COMPLETED,
                 encounter_class: encounter.encounter_class,
                 period: {
                   start: encounter.period.start,
@@ -73,7 +73,6 @@ export function MarkEncounterAsCompletedDialog(
                 hospitalization: encounter.hospitalization,
                 priority: encounter.priority,
                 external_identifier: encounter.external_identifier,
-                facility: encounter.facility.id,
                 discharge_summary_advice: encounter.discharge_summary_advice,
               });
             }}

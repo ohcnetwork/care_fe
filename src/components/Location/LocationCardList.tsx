@@ -8,12 +8,12 @@ import { Card, CardHeader } from "@/components/ui/card";
 
 import {
   LOCATION_TYPE_BADGE_COLORS,
-  LocationList,
+  LocationRead,
 } from "@/types/location/location";
 
 interface LocationCardListProps {
-  locations: LocationList[];
-  onLocationClick: (location: LocationList) => void;
+  locations: LocationRead[];
+  onLocationClick: (location: LocationRead) => void;
   className?: string;
 }
 
@@ -26,7 +26,7 @@ export function LocationCardList({
 
   return (
     <div className={cn("grid grid-cols-1 lg:grid-cols-3 gap-4", className)}>
-      {locations.map((location) => (
+      {locations?.map((location) => (
         <Card
           key={location.id}
           className="cursor-pointer hover:bg-gray-50 transition-colors"

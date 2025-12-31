@@ -14,11 +14,11 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import {
-  QuestionnaireDetail,
+  QuestionnaireRead,
   QuestionStatus,
   SubjectType,
 } from "@/types/questionnaire/questionnaire";
-import { QuestionnaireTagModel } from "@/types/questionnaire/tags";
+import { QuestionnaireTagRead } from "@/types/questionnaire/tags";
 
 import CloneQuestionnaireSheet from "./CloneQuestionnaireSheet";
 import CreateQuestionnaireTagSheet from "./CreateQuestionnaireTagSheet";
@@ -40,12 +40,12 @@ interface OrganizationResponse {
 }
 
 interface QuestionnairePropertiesProps {
-  form: UseFormReturn<QuestionnaireDetail>;
-  updateQuestionnaireField: <K extends keyof QuestionnaireDetail>(
+  form: UseFormReturn<QuestionnaireRead>;
+  updateQuestionnaireField: <K extends keyof QuestionnaireRead>(
     field: K,
-    value: QuestionnaireDetail[K],
+    value: QuestionnaireRead[K],
   ) => void;
-  id?: string;
+  slug?: string;
   organizations?: OrganizationResponse;
   organizationSelection: {
     selectedOrgs: Organization[];
@@ -57,15 +57,15 @@ interface QuestionnairePropertiesProps {
     error: string | undefined;
     setError: (error?: string) => void;
   };
-  tags?: QuestionnaireTagModel[];
+  tags?: QuestionnaireTagRead[];
   tagSelection: {
-    selectedTags: QuestionnaireTagModel[];
+    selectedTags: QuestionnaireTagRead[];
     onToggle: (tagId: string) => void;
     searchQuery: string;
     setSearchQuery: (query: string) => void;
-    available?: QuestionnaireTagModel[];
+    available?: QuestionnaireTagRead[];
     isLoading?: boolean;
-    onTagCreated?: (tag: QuestionnaireTagModel) => void;
+    onTagCreated?: (tag: QuestionnaireTagRead) => void;
   };
 }
 
@@ -97,7 +97,6 @@ function StatusSelector({
           >
             <RadioGroupItem value={status} id={`status-${status}`} />
             <Label
-              data-cy={`questionnaire-status-${status}`}
               htmlFor={`status-${status}`}
               className="text-sm mx-1 font-normal text-gray-950"
             >
@@ -157,17 +156,17 @@ function SubjectTypeSelector({
 }
 
 function OrganizationSelector({
-  id,
+  slug,
   organizations,
   selection,
 }: {
-  id?: string;
+  slug?: string;
   organizations?: OrganizationResponse;
   selection: QuestionnairePropertiesProps["organizationSelection"];
 }) {
   const { t } = useTranslation();
 
-  if (id) {
+  if (slug) {
     return (
       <>
         <div className="flex flex-wrap gap-2 mb-2">
@@ -186,13 +185,9 @@ function OrganizationSelector({
           )}
         </div>
         <ManageQuestionnaireOrganizationsSheet
-          questionnaireId={id}
+          questionnaireSlug={slug}
           trigger={
-            <Button
-              variant="outline"
-              className="w-full justify-start"
-              data-cy="manage-organisation-questionnaire"
-            >
+            <Button variant="outline" className="w-full justify-start">
               <Building className="mr-2 size-4" />
               {t("manage_organization_other")}
             </Button>
@@ -249,18 +244,18 @@ function OrganizationSelector({
 }
 
 function TagSelector({
-  id,
+  slug,
   selection,
   form,
 }: {
-  id?: string;
+  slug?: string;
   selection: QuestionnairePropertiesProps["tagSelection"];
-  form: UseFormReturn<QuestionnaireDetail>;
+  form: UseFormReturn<QuestionnaireRead>;
 }) {
   const { t } = useTranslation();
   const tags = useWatch({ control: form.control, name: "tags" });
 
-  if (id) {
+  if (slug) {
     return (
       <>
         <div className="flex flex-wrap gap-2 mb-2">
@@ -327,7 +322,7 @@ function TagSelector({
         tagOptions={selection.available}
       />
 
-      {!id && (
+      {!slug && (
         <CreateQuestionnaireTagSheet
           onTagCreated={(tag) => {
             selection.onTagCreated?.(tag);
@@ -347,7 +342,7 @@ function TagSelector({
 export function QuestionnaireProperties({
   form,
   updateQuestionnaireField,
-  id,
+  slug,
   organizations,
   organizationSelection,
   tagSelection,
@@ -377,16 +372,16 @@ export function QuestionnaireProperties({
             {t("organizations")} <span className="text-red-500">*</span>
           </Label>
           <OrganizationSelector
-            id={id}
+            slug={slug}
             organizations={organizations}
             selection={organizationSelection}
           />
         </div>
         <div className="space-y-2">
           <Label>{t("tags", { count: 2 })}</Label>
-          <TagSelector id={id} selection={tagSelection} form={form} />
+          <TagSelector slug={slug} selection={tagSelection} form={form} />
         </div>
-        {id && (
+        {slug && (
           <CloneQuestionnaireSheet
             form={form}
             trigger={

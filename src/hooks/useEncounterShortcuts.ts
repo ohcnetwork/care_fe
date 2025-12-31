@@ -106,8 +106,6 @@ export function useEncounterShortcuts() {
         ),
       "treatment-summary": () =>
         navigate(buildEncounterUrl("/treatment_summary")),
-      "discharge-summary": () =>
-        navigate(buildEncounterUrl("/files?file=discharge_summary")),
       "encounter-overview": () => navigate(buildEncounterUrl("/updates")),
       "add-questionnaire": () => {
         document.dispatchEvent(new CustomEvent("open-forms-dialog"));
@@ -125,7 +123,7 @@ export function useEncounterShortcuts() {
       "view-location-history": () => actions.viewLocationHistory(),
       "manage-care-team": () => actions.manageCareTeam(),
       "manage-departments": () => actions.manageDepartments(),
-      "dispense-medicine": () => actions.dispenseMedicine(),
+      dispense: () => actions.dispense(),
       "open-command-dialog": () => {
         document.dispatchEvent(
           new CustomEvent("open-encounter-command-dialog"),

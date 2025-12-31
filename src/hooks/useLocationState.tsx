@@ -1,7 +1,7 @@
 import { navigate } from "raviger";
 import { useCallback, useState } from "react";
 
-import { LocationList as LocationListType } from "@/types/location/location";
+import { LocationRead as LocationListType } from "@/types/location/location";
 
 type LocationPathType = "encounters" | "beds";
 

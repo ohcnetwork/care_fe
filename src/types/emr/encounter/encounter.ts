@@ -18,11 +18,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 import { CareTeamResponse } from "@/types/careTeam/careTeam";
-import { PatientRead } from "@/types/emr/patient/patient";
+import { PatientListRead, PatientRead } from "@/types/emr/patient/patient";
+import { Permissions } from "@/types/emr/permission/permission";
 import { TagConfig } from "@/types/emr/tagConfig/tagConfig";
+import { FacilityBareMinimum } from "@/types/facility/facility";
 import { FacilityOrganizationRead } from "@/types/facilityOrganization/facilityOrganization";
-import { LocationAssociationStatus } from "@/types/location/association";
-import { LocationList } from "@/types/location/location";
+import { LocationAssociationRead } from "@/types/location/association";
+import { LocationRead } from "@/types/location/location";
 import { AppointmentRead } from "@/types/scheduling/schedule";
 import { UserReadMinimal } from "@/types/user/user";
 
@@ -108,17 +110,17 @@ export const ENCOUNTER_PRIORITY_COLORS = {
   React.ComponentProps<typeof Badge>["variant"]
 >;
 
-export const ENCOUNTER_STATUS = [
-  "planned",
-  "in_progress",
-  "on_hold",
-  "discharged",
-  "completed",
-  "cancelled",
-  "discontinued",
-  "entered_in_error",
-  "unknown",
-] as const;
+export enum EncounterStatus {
+  PLANNED = "planned",
+  IN_PROGRESS = "in_progress",
+  ON_HOLD = "on_hold",
+  DISCHARGED = "discharged",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
+  DISCONTINUED = "discontinued",
+  ENTERED_IN_ERROR = "entered_in_error",
+  UNKNOWN = "unknown",
+}
 
 export const ENCOUNTER_STATUS_COLORS = {
   planned: "blue",
@@ -177,8 +179,6 @@ export type EncounterDischargeDisposition =
 
 export type EncounterPriority = (typeof ENCOUNTER_PRIORITY)[number];
 
-export type EncounterStatus = (typeof ENCOUNTER_STATUS)[number];
-
 export type Period = {
   start?: string;
   end?: string;
@@ -204,56 +204,53 @@ export type StatusHistory = {
   history: History[];
 };
 
-export type LocationHistory = {
-  id: string;
-  start_datetime: string;
-  location: LocationList;
-  status: LocationAssociationStatus;
-  end_datetime?: string;
-};
-
 export interface EncounterBase {
-  id: string;
-  patient: string;
-  facility: string;
   status: EncounterStatus;
   encounter_class: EncounterClass;
   period: Period;
   hospitalization?: Hospitalization | null;
   priority: EncounterPriority;
-  external_identifier?: string;
-  discharge_summary_advice?: string | null;
+  external_identifier: string | null;
+  discharge_summary_advice: string | null;
+}
+
+export interface EncounterListRead extends EncounterBase {
+  id: string;
+  patient: PatientListRead;
+  facility: FacilityBareMinimum;
+  status_history: StatusHistory;
+  encounter_class_history: EncounterClassHistory;
+  created_date: string;
+  modified_date: string;
+  tags: TagConfig[];
 }
 
 export interface EncounterRead
-  extends Omit<EncounterBase, "patient" | "facility"> {
+  extends Omit<EncounterListRead, "patient">, Permissions {
+  appointment: AppointmentRead | null;
   patient: PatientRead;
-  facility: {
-    id: string;
-    name: string;
-  };
-  created_by: UserReadMinimal;
-  updated_by: UserReadMinimal;
-  created_date: string;
-  modified_date: string;
-  encounter_class_history: EncounterClassHistory;
-  status_history: StatusHistory;
   organizations: FacilityOrganizationRead[];
-  current_location: LocationList;
-  location_history: LocationHistory[];
-  permissions: string[];
+  current_location: LocationRead | null;
+  location_history: LocationAssociationRead[];
   care_team: CareTeamResponse[];
   tags: TagConfig[];
-  appointment: AppointmentRead | null;
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
 }
-
-export interface EncounterCreate extends Omit<EncounterBase, "id"> {
+export interface EncounterCreate extends Omit<
+  EncounterBase,
+  "discharge_summary_advice" | "external_identifier"
+> {
+  patient: string;
+  facility: string;
   organizations: string[];
   tags?: string[];
   appointment?: string;
+  external_identifier?: string;
+  discharge_summary_advice?: string;
 }
 
-export type EncounterEdit = Omit<EncounterBase, "id">;
+export type EncounterEdit = EncounterBase;
 
 export const completedEncounterStatus = ["completed"];
 export const inactiveEncounterStatus = [

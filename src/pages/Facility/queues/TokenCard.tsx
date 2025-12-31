@@ -49,11 +49,11 @@ const TokenCard = ({
         @media print {
           body * { visibility: hidden; }
           #print-token-${tokenId}, #print-token-${tokenId} * { visibility: visible; }
-          #print-token-${tokenId} { 
-            position: absolute; 
-            left: 0; 
-            top: 0; 
-            width: 100% !important; 
+          #print-token-${tokenId} {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100% !important;
           }
         }
       `;
@@ -77,7 +77,7 @@ const TokenCard = ({
 
       <div className="relative z-10">
         <div className="flex flex-row items-start justify-between gap-4">
-          <div className="pt-2 items-start gap-4">
+          <div className="items-start gap-4 pt-2">
             <div>
               {token.patient && (
                 <div className="flex-1 min-w-0">
@@ -87,7 +87,7 @@ const TokenCard = ({
                   <p className="font-semibold break-words">
                     {token.patient.name}
                   </p>
-                  <p className="text-sm text-gray-700 font-medium">
+                  <p className="text-sm font-medium text-gray-700">
                     {`${formatPatientAge(token.patient, true)}, ${t(`GENDER__${token.patient.gender}`)}`}
                   </p>
                 </div>
@@ -117,20 +117,20 @@ const TokenCard = ({
             </div>
             <Separator className="my-2.5" />
             <div className="flex-1 min-w-0">
-              <div className="text-lg font-bold tracking-tight break-words">
+              <div className="text-lg font-bold tracking-tight">
                 {facility.name}
               </div>
-              <div className="text-sm text-gray-600">
-                <span>{facility.address}</span>
+              <div className="text-sm text-gray-600 whitespace-pre-wrap wrap-break-word">
+                <span>{facility.address?.replace(/,\s*/g, ", ")}</span>
                 <div className="whitespace-normal">{`Ph.: ${facility.phone_number}`}</div>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 items-end">
+          <div className="flex flex-col items-end gap-2">
             <div className="flex items-end justify-between gap-4">
               <div className="flex-shrink-0">
-                <div className="text-sm whitespace-nowrap text-center bg-gray-100 px-2 py-2 font-medium rounded-b-md text-gray-500 border">
+                <div className="px-2 py-2 text-sm font-medium text-center text-gray-500 bg-gray-100 border whitespace-nowrap rounded-b-md">
                   <p>{token.category.name}</p>
                 </div>
               </div>
@@ -142,13 +142,13 @@ const TokenCard = ({
               </p>
             </div>
 
-            <div className="mt-4 flex-col items-end justify-between gap-4">
+            <div className="flex-col items-end justify-between gap-4 mt-4">
               <div className="mt-2">
                 <div>
-                  <Label className="text-sm font-normal text-gray-600 justify-end">
+                  <Label className="justify-end text-sm font-normal text-gray-600">
                     {t("token_no")}
                   </Label>
-                  <div className="flex text-2xl font-bold leading-none justify-end">
+                  <div className="flex justify-end text-2xl font-bold leading-none">
                     {renderTokenNumber(token)}
                   </div>
                 </div>
@@ -172,7 +172,7 @@ const TokenCard = ({
               <Button
                 variant="link"
                 asChild
-                className="underline font-semibold text-base capitalize text-gray-950"
+                className="text-base font-semibold underline capitalize text-gray-950"
               >
                 <Link
                   href={`/facility/${facility.id}/${resourceTypeToResourcePathSlug[token.resource_type]}/${token.resource.id}/queues/${token.queue.id}`}
@@ -183,9 +183,9 @@ const TokenCard = ({
               <Button
                 variant="outline"
                 onClick={() => printToken(token.id)}
-                className="text-base text-gray-950 font-semibold"
+                className="text-base font-semibold text-gray-950"
               >
-                <PrinterIcon className="size-4 mr-2" />
+                <PrinterIcon className="mr-2 size-4" />
                 {t("print")}
                 <ShortcutBadge actionId="print-button" />
               </Button>

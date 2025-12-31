@@ -4,13 +4,16 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import mutate from "@/Utils/request/mutate";
+import accountApi from "@/types/billing/account/accountApi";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import patientApi from "@/types/emr/patient/patientApi";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import serviceRequestApi from "@/types/emr/serviceRequest/serviceRequestApi";
 import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import scheduleApis from "@/types/scheduling/scheduleApi";
 
+import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
 import { MultiFilterStyleTagSelector } from "./MultiFilterStyleTagSelector";
 
 // Export the new component for backward compatibility
@@ -22,7 +25,10 @@ export type TagEntityType =
   | "encounter"
   | "appointment"
   | "prescription"
-  | "service_request";
+  | "service_request"
+  | "delivery_order"
+  | "request_order"
+  | "account";
 
 // Mapping from entity types to tag resources
 const ENTITY_TO_RESOURCE_MAP = {
@@ -31,6 +37,9 @@ const ENTITY_TO_RESOURCE_MAP = {
   appointment: TagResource.APPOINTMENT,
   prescription: TagResource.PRESCRIPTION,
   service_request: TagResource.SERVICE_REQUEST,
+  delivery_order: TagResource.DELIVERY_ORDER,
+  request_order: TagResource.REQUEST_ORDER,
+  account: TagResource.ACCOUNT,
 } as const;
 
 // Configuration for different entity types using their respective API files
@@ -60,6 +69,21 @@ const ENTITY_CONFIG = {
     setTagsApi: serviceRequestApi.setTags,
     removeTagsApi: serviceRequestApi.removeTags,
     displayName: "service_request",
+  },
+  delivery_order: {
+    setTagsApi: deliveryOrderApi.setTags,
+    removeTagsApi: deliveryOrderApi.removeTags,
+    displayName: "delivery_order",
+  },
+  request_order: {
+    setTagsApi: requestOrderApi.setTags,
+    removeTagsApi: requestOrderApi.removeTags,
+    displayName: "request_order",
+  },
+  account: {
+    setTagsApi: accountApi.setTags,
+    removeTagsApi: accountApi.removeTags,
+    displayName: "account",
   },
   // TODO: Add more entity configurations here
 

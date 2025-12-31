@@ -33,13 +33,13 @@ import useBreakpoints from "@/hooks/useBreakpoints";
 
 import query from "@/Utils/request/query";
 import { conditionalAttribute, isAppleDevice } from "@/Utils/utils";
-import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import type { QuestionnaireRead } from "@/types/questionnaire/questionnaire";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface QuestionnaireSearchProps {
   placeholder?: string;
   trigger?: React.ReactNode;
-  onSelect?: (questionnaire: QuestionnaireDetail) => void;
+  onSelect?: (questionnaire: QuestionnaireRead) => void;
   subjectType?: string;
   disabled?: boolean;
   size?: React.ComponentProps<typeof Button>["size"];
@@ -100,7 +100,7 @@ export function QuestionnaireSearch({
         </CommandEmpty>
 
         <CommandGroup>
-          {(questionnaires?.results ?? []).map((item: QuestionnaireDetail) => (
+          {(questionnaires?.results ?? []).map((item: QuestionnaireRead) => (
             <CommandItem
               key={item.id}
               value={item.title}
@@ -124,7 +124,6 @@ export function QuestionnaireSearch({
         <DrawerTrigger asChild>
           {trigger || (
             <Button
-              data-cy="add-questionnaire-button"
               variant="outline"
               role="combobox"
               disabled={disabled || isLoading}
@@ -161,7 +160,6 @@ export function QuestionnaireSearch({
         {trigger || (
           <Button
             size={size}
-            data-cy="add-questionnaire-button"
             variant="outline"
             role="combobox"
             className="w-full border border-primary-600"

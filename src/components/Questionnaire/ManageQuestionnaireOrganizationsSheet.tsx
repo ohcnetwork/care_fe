@@ -40,7 +40,7 @@ import organizationApi from "@/types/organization/organizationApi";
 import questionnaireApi from "@/types/questionnaire/questionnaireApi";
 
 interface Props {
-  questionnaireId: string;
+  questionnaireSlug: string;
   trigger?: React.ReactNode;
 }
 
@@ -79,7 +79,6 @@ export function OrgSelector({
 
   const triggerButton = (
     <Button
-      data-cy="manage-organisation-search"
       variant="outline"
       className={cn(
         "w-full justify-start text-left font-normal",
@@ -175,7 +174,7 @@ export function OrgSelector({
 }
 
 export default function ManageQuestionnaireOrganizationsSheet({
-  questionnaireId,
+  questionnaireSlug,
   trigger,
 }: Props) {
   const queryClient = useQueryClient();
@@ -188,9 +187,9 @@ export default function ManageQuestionnaireOrganizationsSheet({
   const isMobile = useBreakpoints({ default: true, sm: false });
 
   const { data: organizations, isLoading } = useQuery({
-    queryKey: ["questionnaire", questionnaireId, "organizations"],
+    queryKey: ["questionnaire", questionnaireSlug, "organizations"],
     queryFn: query(questionnaireApi.getOrganizations, {
-      pathParams: { id: questionnaireId },
+      pathParams: { slug: questionnaireSlug },
     }),
     enabled: open,
   });
@@ -209,13 +208,13 @@ export default function ManageQuestionnaireOrganizationsSheet({
 
   const { mutate: setOrganizations, isPending: isUpdating } = useMutation({
     mutationFn: mutate(questionnaireApi.setOrganizations, {
-      pathParams: { id: questionnaireId },
+      pathParams: { slug: questionnaireSlug },
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["questionnaire", questionnaireId, "organizations"],
+        queryKey: ["questionnaire", questionnaireSlug, "organizations"],
       });
-      toast.success("Organizations updated successfully");
+      toast.success(t("organizations_updated_successfully"));
       setOpen(false);
     },
   });
@@ -320,11 +319,7 @@ export default function ManageQuestionnaireOrganizationsSheet({
       >
         {t("cancel")}
       </Button>
-      <Button
-        onClick={handleSave}
-        disabled={isUpdating || !hasChanges}
-        data-cy="save-manage-organization"
-      >
+      <Button onClick={handleSave} disabled={isUpdating || !hasChanges}>
         {isUpdating ? (
           <>
             <Loader2 className="mr-2 size-4 animate-spin" />

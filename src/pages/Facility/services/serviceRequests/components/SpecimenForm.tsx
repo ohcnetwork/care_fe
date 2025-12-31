@@ -92,7 +92,7 @@ export function SpecimenForm({
     },
   });
 
-  const { mutate: updateSpecimen } = useMutation({
+  const { mutate: updateSpecimen, isPending } = useMutation({
     mutationFn: mutate(specimenApi.updateSpecimen, {
       pathParams: {
         facilityId,
@@ -425,7 +425,7 @@ export function SpecimenForm({
                 </Label>
                 <ValueSetSelect
                   system="system-fasting-status-code"
-                  placeholder={t("fasting_status_placeholder")}
+                  placeholder={t("select_status")}
                   onSelect={(code: Code | null) =>
                     handleCollectionChange(
                       "fasting_status_codeable_concept",
@@ -532,7 +532,7 @@ export function SpecimenForm({
               <Button type="button" variant="outline" onClick={onCancel}>
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={disableEdit}>
+              <Button type="submit" disabled={disableEdit || isPending}>
                 {t("collect")}
               </Button>
             </div>

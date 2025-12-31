@@ -57,23 +57,11 @@ import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 import { PaginatedResponse } from "@/Utils/request/types";
 import { formatDateTime, formatName, isTouchDevice } from "@/Utils/utils";
-import patientApi from "@/types/emr/patient/patientApi";
-import { Message } from "@/types/notes/messages";
-import { Thread } from "@/types/notes/threads";
+import { NoteRead } from "@/types/notes/messages";
+import { ThreadRead, threadTemplates } from "@/types/notes/thread";
+import threadApi from "@/types/notes/threadApi";
 
 const MESSAGES_LIMIT = 20;
-
-// Thread templates for quick selection
-
-const threadTemplates = [
-  "Treatment Plan",
-  "Medication Notes",
-  "Care Coordination",
-  "General Notes",
-  "Patient History",
-  "Referral Notes",
-  "Lab Results Discussion",
-] as const;
 
 // Info tooltip component for help text
 const InfoTooltip = ({ content }: { content: string }) => (
@@ -88,7 +76,7 @@ const ThreadItem = ({
   isSelected,
   onClick,
 }: {
-  thread: Thread;
+  thread: ThreadRead;
   isSelected: boolean;
   onClick: () => void;
 }) => (
@@ -100,7 +88,6 @@ const ThreadItem = ({
         : "hover:bg-gray-100 hover:border-gray-200",
     )}
     onClick={onClick}
-    data-cy="thread-title"
   >
     <div className="flex items-start justify-between gap-3">
       <div className="flex-1 min-w-0">
@@ -119,7 +106,7 @@ function MessageItem({
   message,
   className,
   ...props
-}: React.ComponentProps<"div"> & { message: Message }) {
+}: React.ComponentProps<"div"> & { message: NoteRead }) {
   const authUser = useAuthUser();
   const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
   const isCurrentUser = authUser?.id === message.created_by.id;
@@ -258,7 +245,6 @@ const NewThreadDialog = ({
               placeholder={t("notes__enter_discussion_title")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              data-cy="new-thread-title-input"
             />
           </div>
         </div>
@@ -271,7 +257,6 @@ const NewThreadDialog = ({
           <Button
             onClick={() => onCreate(title)}
             disabled={!title.trim() || isCreating}
-            data-cy="create-thread-button"
           >
             {isCreating ? (
               <Loader2 className="size-4 animate-spin mr-2" />
@@ -358,7 +343,7 @@ export function NoteManager({
   // Fetch threads
   const { data: threadsData, isLoading: threadsLoading } = useQuery({
     queryKey: ["threads", encounterId],
-    queryFn: query(patientApi.listThreads, {
+    queryFn: query(threadApi.list, {
       pathParams: { patientId: patientId },
       queryParams: {
         ...(hideEncounterNotes
@@ -376,10 +361,10 @@ export function NoteManager({
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery<PaginatedResponse<Message>>({
+  } = useInfiniteQuery<PaginatedResponse<NoteRead>>({
     queryKey: ["messages", selectedThread],
     queryFn: async ({ pageParam = 0 }) => {
-      const response = await query(patientApi.getMessages, {
+      const response = await query(threadApi.listNotes, {
         pathParams: {
           patientId,
           threadId: selectedThread!,
@@ -389,7 +374,7 @@ export function NoteManager({
           offset: String(pageParam),
         },
       })({ signal: new AbortController().signal });
-      return response as PaginatedResponse<Message>;
+      return response;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
@@ -406,13 +391,13 @@ export function NoteManager({
 
   // Create thread mutation
   const createThreadMutation = useMutation({
-    mutationFn: mutate(patientApi.createThread, {
+    mutationFn: mutate(threadApi.create, {
       pathParams: { patientId },
     }),
-    onSuccess: (newThread) => {
+    onSuccess: (newThread: ThreadRead) => {
       queryClient.invalidateQueries({ queryKey: ["threads"] });
       setShowNewThreadDialog(false);
-      setSelectedThread((newThread as Thread).id);
+      setSelectedThread(newThread.id);
       toast.success(t("notes__thread_created"));
     },
     onError: () => {
@@ -422,7 +407,7 @@ export function NoteManager({
 
   // Create message mutation
   const createMessageMutation = useMutation({
-    mutationFn: mutate(patientApi.postMessage, {
+    mutationFn: mutate(threadApi.createNote, {
       pathParams: { patientId, threadId: selectedThread! },
     }),
     onSuccess: () => {
@@ -503,7 +488,7 @@ export function NoteManager({
   const totalMessages = messagesData?.pages[0]?.count ?? 0;
 
   return (
-    <div className="flex h-[calc(100vh-13rem)] overflow-hidden lg:h-[calc(100vh-13rem)]">
+    <div className="flex h-[calc(100vh-15rem)] overflow-hidden">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-80 lg:flex-col lg:border-r border-gray-200">
         <div className="p-4 border-b border-gray-200">
@@ -514,7 +499,6 @@ export function NoteManager({
             </div>
             {canWrite && (
               <Button
-                data-cy="new-thread-button"
                 variant="outline"
                 size="sm"
                 onClick={() => setShowNewThreadDialog(true)}
@@ -655,10 +639,7 @@ export function NoteManager({
                   {/* Messages List */}
                   {isMobile ? (
                     <div className="flex-1 overflow-y-auto overscroll-y-contain -mx-2 px-2">
-                      <div
-                        className="flex flex-col-reverse py-2 min-h-full"
-                        data-cy="chat-messages"
-                      >
+                      <div className="flex flex-col-reverse py-2 min-h-full">
                         {messages.map((message, i) => (
                           <MessageItem
                             key={message.id}
@@ -683,10 +664,7 @@ export function NoteManager({
                     </div>
                   ) : (
                     <ScrollArea className="flex-1 px-4 h-[calc(100vh-16rem)] overflow-y-auto">
-                      <div
-                        className="flex flex-col-reverse py-4 min-h-full"
-                        data-cy="chat-messages"
-                      >
+                      <div className="flex flex-col-reverse py-4 min-h-full">
                         {messages.map((message, i) => (
                           <MessageItem
                             key={message.id}
@@ -717,7 +695,6 @@ export function NoteManager({
                       <form onSubmit={handleSendMessage}>
                         <div className="flex gap-2">
                           <AutoExpandingTextarea
-                            data-cy="encounter-notes-chat-message-input"
                             placeholder={t("notes__type_message")}
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
@@ -733,7 +710,7 @@ export function NoteManager({
                             className="flex-1 min-h-10 max-h-[50vh]"
                           />
                           <Button
-                            data-cy="send-chat-message-button"
+                            aria-label="send message"
                             type="submit"
                             size="icon"
                             disabled={

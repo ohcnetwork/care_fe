@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRightSquare, EditIcon } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowUpRightSquare, EditIcon, Hash, PlusIcon } from "lucide-react";
 import { navigate } from "raviger";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -11,16 +11,18 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Input } from "@/components/ui/input";
 import { MonetaryDisplay } from "@/components/ui/monetary-display";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+  accountBillingStatusFilter,
+  accountStatusFilter,
+  dateFilter,
+} from "@/components/ui/multi-filter/filterConfigs";
+import MultiFilter from "@/components/ui/multi-filter/MultiFilter";
+import useMultiFilterState from "@/components/ui/multi-filter/utils/useMultiFilterState";
+import {
+  FilterDateRange,
+  longDateRangeOptions,
+} from "@/components/ui/multi-filter/utils/Utils";
 
 import { Avatar } from "@/components/Common/Avatar";
 import Page from "@/components/Common/Page";
@@ -33,16 +35,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/Common/Table";
+import PatientIdentifierFilter from "@/components/Patient/PatientIdentifierFilter";
+import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import useFilters from "@/hooks/useFilters";
 
-import query from "@/Utils/request/query";
 import {
   ACCOUNT_BILLING_STATUS_COLORS,
   ACCOUNT_STATUS_COLORS,
   type AccountRead,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
+import query from "@/Utils/request/query";
+import { dateTimeQueryString } from "@/Utils/utils";
 
 import AccountSheet from "./AccountSheet";
 
@@ -69,12 +74,66 @@ export function AccountList({
   className?: string;
 }) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [sheetOpen, setSheetOpen] = React.useState(false);
   const [editingAccount, setEditingAccount] =
     React.useState<AccountRead | null>(null);
   const { qParams, updateQuery, Pagination, resultsPerPage } = useFilters({
     limit: 15,
     disableCache: true,
+    defaultQueryParams: { status: "active" },
+  });
+
+  const { created_date_after, created_date_before } = qParams;
+
+  const filters = [
+    accountStatusFilter("status"),
+    dateFilter("created_date", t("period"), longDateRangeOptions, false),
+    accountBillingStatusFilter("billing_status"),
+  ];
+
+  const onFilterUpdate = (query: Record<string, unknown>) => {
+    for (const [key, value] of Object.entries(query)) {
+      switch (key) {
+        case "created_date":
+          {
+            const dateRange = value as FilterDateRange;
+            query = {
+              ...query,
+              created_date: undefined,
+              created_date_after: dateRange?.from
+                ? dateTimeQueryString(dateRange?.from as Date)
+                : undefined,
+              created_date_before: dateRange?.to
+                ? dateTimeQueryString(dateRange?.to as Date, true)
+                : undefined,
+            };
+          }
+          break;
+      }
+    }
+    updateQuery(query);
+  };
+
+  const {
+    selectedFilters,
+    handleFilterChange,
+    handleOperationChange,
+    handleClearAll,
+    handleClearFilter,
+  } = useMultiFilterState(filters, onFilterUpdate, {
+    ...qParams,
+    status: qParams.status ? [qParams.status] : undefined,
+    created_date:
+      created_date_after || created_date_before
+        ? {
+            from: created_date_after ? new Date(created_date_after) : undefined,
+            to: created_date_before ? new Date(created_date_before) : undefined,
+          }
+        : undefined,
+    billing_status: qParams.billing_status
+      ? [qParams.billing_status]
+      : undefined,
   });
 
   const { data: response, isLoading } = useQuery({
@@ -82,12 +141,13 @@ export function AccountList({
     queryFn: query.debounced(accountApi.listAccount, {
       pathParams: { facilityId },
       queryParams: {
-        patient: patientId,
+        patient: patientId || qParams.patient_filter,
         limit: resultsPerPage,
         offset: ((qParams.page ?? 1) - 1) * resultsPerPage,
-        name: qParams.search,
         status: qParams.status,
         billing_status: qParams.billing_status,
+        created_date_after: qParams.created_date_after,
+        created_date_before: qParams.created_date_before,
       },
     }),
   });
@@ -113,101 +173,45 @@ export function AccountList({
             initialValues={editingAccount ? editingAccount : undefined}
             isEdit={!!editingAccount}
           />
-          <div className="mb-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-between gap-4">
-            <div className="flex flex-wrap gap-4">
-              <Tabs
-                value={qParams.status ?? "all"}
-                onValueChange={(value) =>
-                  updateQuery({ status: value === "all" ? undefined : value })
+          <div className="flex flex-col md:flex-row items-start gap-2">
+            <div className="w-full md:w-auto">
+              <PatientIdentifierFilter
+                onSelect={(patientId, patientName) =>
+                  updateQuery({
+                    patient_filter: patientId,
+                    patient_name: patientName,
+                  })
                 }
-                className="overflow-y-auto max-w-[calc(100%)] max-sm:hidden text-gray-950"
-              >
-                <TabsList>
-                  <TabsTrigger value="all">{t("all_accounts")}</TabsTrigger>
-                  {Object.keys(ACCOUNT_STATUS_COLORS).map((key) => (
-                    <TabsTrigger key={key} value={key}>
-                      <span className="text-gray-950 font-medium text-sm">
-                        {t(key)}
-                      </span>
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-
-              <Select
-                defaultValue={qParams.status ?? "all"}
-                onValueChange={(value) =>
-                  updateQuery({ status: value === "all" ? undefined : value })
-                }
-              >
-                <SelectTrigger className="sm:hidden">
-                  <SelectValue placeholder={t("filter_by_status")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    <span className="text-gray-950 font-medium text-sm">
-                      {t("all")}
-                    </span>
-                  </SelectItem>
-                  {Object.keys(ACCOUNT_STATUS_COLORS).map((key) => (
-                    <SelectItem key={key} value={key}>
-                      {t(key)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="border-1 border-gray-300 rounded-md relative sm:max-w-xs w-[calc(100%)]">
-                <Select
-                  value={qParams.billing_status ?? "all"}
-                  onValueChange={(value) =>
-                    updateQuery({
-                      billing_status: value === "all" ? undefined : value,
-                    })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("all_billing_statuses")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">
-                      <span className="text-gray-950 font-medium text-sm">
-                        {t("all_billing_statuses")}
-                      </span>
-                    </SelectItem>
-                    {Object.keys(ACCOUNT_BILLING_STATUS_COLORS).map((key) => (
-                      <SelectItem key={key} value={key}>
-                        <span className="text-gray-950 font-medium text-sm">
-                          {t(key)}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="relative sm:max-w-xs w-[calc(100%)]">
-              <CareIcon
-                icon="l-search"
-                className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500"
+                placeholder={t("filter_by_identifier")}
+                className="w-full sm:w-auto sm:max-w-xs rounded-md h-9 text-gray-500 shadow-sm"
+                patientId={qParams.patient_filter}
+                patientName={qParams.patient_name}
               />
-              <Input
-                placeholder={t("search_accounts")}
-                value={qParams.search || ""}
-                onChange={(e) =>
-                  updateQuery({ search: e.target.value || undefined })
-                }
-                className="pl-10"
+            </div>
+            <div className="flex flex-col sm:flex-row">
+              <MultiFilter
+                selectedFilters={selectedFilters}
+                onFilterChange={handleFilterChange}
+                onOperationChange={handleOperationChange}
+                onClearAll={handleClearAll}
+                onClearFilter={handleClearFilter}
+                className="flex sm:flex-row flex-wrap sm:items-center"
+                triggerButtonClassName="self-start sm:self-center"
+                clearAllButtonClassName="self-center"
+                facilityId={facilityId}
               />
             </div>
           </div>
-          <div className="flex flex-wrap gap-4">
-            <div>
-              {patientId && (
-                <Button onClick={() => setSheetOpen(true)}>
-                  {t("create_account")}
-                </Button>
-              )}
-            </div>
+          <div className="justify-end flex">
+            {patientId && (
+              <Button
+                className="w-full sm:w-auto mt-2"
+                onClick={() => setSheetOpen(true)}
+              >
+                {t("create_account")}
+                <PlusIcon />
+              </Button>
+            )}
           </div>
         </div>
         {isLoading ? (
@@ -227,6 +231,7 @@ export function AccountList({
                 <TableHead>{t("account_status")}</TableHead>
                 <TableHead>{t("billing_status")}</TableHead>
                 <TableHead>{t("period")}</TableHead>
+                <TableHead>{t("tags_other")}</TableHead>
                 <TableHead>{t("action")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -235,10 +240,7 @@ export function AccountList({
                 <TableRow key={account.id}>
                   <TableCell className="whitespace-normal">
                     <div className="flex items-center gap-3">
-                      <Avatar
-                        name={account.name}
-                        className="size-8 flex-shrink-0"
-                      />
+                      <Avatar name={account.name} className="size-8 shrink-0" />
                       <div className="min-w-0 flex-1">
                         <div className="text-base font-semibold leading-6 break-words">
                           {account.name}
@@ -283,6 +285,43 @@ export function AccountList({
                       {account.service_period?.end &&
                         ` - ${formatDate(account.service_period?.end)}`}
                     </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      <TagAssignmentSheet
+                        entityType="account"
+                        entityId={account.id}
+                        facilityId={facilityId}
+                        currentTags={account.tags ?? []}
+                        onUpdate={() => {
+                          queryClient.invalidateQueries({
+                            queryKey: ["accounts", qParams],
+                          });
+                        }}
+                        patientId={account.patient.id}
+                        trigger={
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            className="rounded-sm"
+                          >
+                            <Hash strokeWidth={1.5} />
+                            {account.tags && account.tags.length > 0
+                              ? t("manage_tags")
+                              : t("add_tags")}
+                          </Button>
+                        }
+                      />
+                      {account.tags?.map((tag) => (
+                        <Badge
+                          key={tag.id}
+                          variant="secondary"
+                          className="text-xs"
+                        >
+                          {tag.display}
+                        </Badge>
+                      ))}
+                    </div>
                   </TableCell>
                   <TableCell className="whitespace-normal">
                     <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">

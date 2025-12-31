@@ -410,10 +410,7 @@ export function QuestionInput({
   const error = errors.find((e) => e.question_id === question.id)?.error;
 
   return (
-    <div
-      className="space-y-2"
-      data-cy={`question-${question.text?.toLowerCase().replace(/\s+/g, "-")}`}
-    >
+    <div className="space-y-2">
       {renderInput()}
       {error && <p className="text-sm font-medium text-red-500">{error}</p>}
     </div>

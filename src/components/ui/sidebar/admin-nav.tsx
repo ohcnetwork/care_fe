@@ -67,6 +67,11 @@ function generateAdminLinks(
         },
       ],
     },
+    {
+      name: "Apps",
+      url: `${baseUrl}/apps`,
+      icon: <CareIcon icon="l-apps" />,
+    },
     ...pluginNavItems,
   ];
 
@@ -77,9 +82,9 @@ export function AdminNav() {
   const { t } = useTranslation();
 
   const careApps = useCareApps();
-  const pluginNavItems = careApps
-    .filter((c) => !!c.adminNavItems)
-    .flatMap((c) => c.adminNavItems) as NavigationLink[];
+  const pluginNavItems = careApps.flatMap((c) =>
+    !c.isLoading && c.adminNavItems ? c.adminNavItems : [],
+  ) as NavigationLink[];
 
   return <NavMain links={generateAdminLinks(t, pluginNavItems)} />;
 }

@@ -6,10 +6,10 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Badge } from "@/components/ui/badge";
 
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 
 interface LocationPathProps {
-  location: LocationList;
+  location: LocationRead;
   startTime?: string;
   endTime?: string;
   isLatest?: boolean;
@@ -17,7 +17,7 @@ interface LocationPathProps {
 }
 
 interface LocationNodeProps {
-  location: LocationList;
+  location: LocationRead;
   isLast: boolean;
   startTime?: string;
 
@@ -105,6 +105,8 @@ export function LocationTree({
   isLatest,
   showTimeline = false,
 }: LocationPathProps) {
+  const isCompleted = !!endTime;
+
   return (
     <div
       className={`relative flex ${showTimeline ? "gap-8 pl-12" : ""}  pt-0.5`}
@@ -115,11 +117,11 @@ export function LocationTree({
             className={`absolute w-px bg-gray-200 h-full ${isLatest ? "top-3" : "-top-3"}`}
           />
           <div
-            className={`size-6 rounded-full ${isLatest ? "bg-green-100" : "bg-gray-100"} flex items-center justify-center z-10`}
+            className={`size-6 rounded-full ${isCompleted ? "bg-gray-100" : isLatest ? "bg-green-100" : "bg-gray-100"} flex items-center justify-center z-10`}
           >
             <CareIcon
-              icon={isLatest ? "l-location-point" : "l-check"}
-              className={`size-4 ${isLatest ? "text-green-600" : "text-gray-600"}`}
+              icon={isCompleted ? "l-check" : "l-location-point"}
+              className={`size-4 ${isCompleted ? "text-gray-600" : isLatest ? "text-green-600" : "text-gray-600"}`}
             />
           </div>
           {!isLatest && <div className="flex-1 w-px bg-gray-200" />}

@@ -55,7 +55,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
       queryClient.invalidateQueries({
         queryKey: ["patientUsers", patientId],
       });
-      toast.success("User added to patient successfully");
+      toast.success(t("user_added_to_patient_successfully"));
       setOpen(false);
       setSelectedUser(undefined);
       setSelectedRole(undefined);
@@ -64,7 +64,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
 
   const handleAddUser = () => {
     if (!selectedUser || !selectedRole) {
-      toast.error("Please select both user and role");
+      toast.error(t("please_select_user_and_role"));
       return;
     }
 
@@ -82,7 +82,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline_primary" data-cy="assign-user-button">
+        <Button variant="outline_primary">
           <CareIcon icon="l-plus" className="mr-2 size-4" />
           {t("assign_user")}
         </Button>
@@ -93,7 +93,7 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
           <SheetDescription>{t("search_user_description")}</SheetDescription>
         </SheetHeader>
         <div className="space-y-6 py-4">
-          <div className="space-y-4" data-cy="patient-user-selector-container">
+          <div className="space-y-4">
             <h3 className="text-sm font-medium">{t("search_user")}</h3>
             <UserSelector
               selected={selectedUser}
@@ -160,7 +160,6 @@ function AddUserSheet({ patientId }: AddUserSheetProps) {
               </div>
 
               <Button
-                data-cy="patient-user-assign-button"
                 className="w-full"
                 onClick={handleAddUser}
                 disabled={!selectedRole}
@@ -206,7 +205,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
       queryClient.invalidateQueries({
         queryKey: ["patientUsers", patientId],
       });
-      toast.success("User removed successfully");
+      toast.success(t("user_removed_successfully"));
     },
   });
 
@@ -253,7 +252,6 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  data-cy="patient-user-remove-button"
                   className="absolute top-0 right-0"
                   onClick={() => setUserToRemove(user)}
                 >
@@ -302,7 +300,7 @@ export const PatientUsers = ({ patientData }: PatientProps) => {
   };
 
   return (
-    <div className="mt-4 px-4 md:px-0" data-cy="patient-users">
+    <div className="mt-4 px-4 md:px-0">
       <div className="group my-2 w-full">
         <div className="h-full space-y-2">
           <div className="flex flex-row items-center justify-between">

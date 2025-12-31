@@ -2,6 +2,7 @@ import { MonetaryComponent } from "@/types/base/monetaryComponent/monetaryCompon
 import { AccountRead } from "@/types/billing/account/Account";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
 import { PaymentReconciliationRead } from "@/types/billing/paymentReconciliation/paymentReconciliation";
+import { UserReadMinimal } from "@/types/user/user";
 
 export enum InvoiceStatus {
   draft = "draft",
@@ -27,20 +28,34 @@ export interface InvoiceBase {
   payment_terms?: string;
   note?: string;
   issue_date?: string;
+  locked: boolean;
 }
 
-export interface InvoiceCreate extends Omit<InvoiceBase, "id" | "number"> {
+export interface InvoiceCreate extends Omit<
+  InvoiceBase,
+  "id" | "number" | "locked"
+> {
   account: string;
   charge_items: string[];
 }
 
-export interface InvoiceRead extends InvoiceBase {
+export interface InvoiceList extends InvoiceBase {
   account: AccountRead;
-  charge_items: ChargeItemRead[];
-  total_price_components: MonetaryComponent[];
   total_net: number;
   total_gross: number;
+  title: string;
+  created_date: string;
+  modified_date: string;
+}
+
+export interface InvoiceRead extends InvoiceList {
+  charge_items: ChargeItemRead[];
+  total_price_components: MonetaryComponent[];
   payment_reconciliations?: PaymentReconciliationRead[];
+  created_by: UserReadMinimal;
+  updated_by: UserReadMinimal;
+  total_payments: number;
+  payments: PaymentReconciliationRead[];
 }
 
 export interface InvoiceCancel {

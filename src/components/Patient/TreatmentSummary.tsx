@@ -71,7 +71,7 @@ export default function TreatmentSummary({
 
   const { data: patient } = useQuery({
     queryKey: ["patient", patientId],
-    queryFn: query(patientApi.getPatient, {
+    queryFn: query(patientApi.get, {
       pathParams: {
         id: patientId,
       },
@@ -84,12 +84,12 @@ export default function TreatmentSummary({
     hasPermission,
     patient?.permissions ?? [],
   );
-  const { canViewEncounter } = getPermissions(
+  const { canReadEncounter } = getPermissions(
     hasPermission,
     encounter?.permissions ?? [],
   );
 
-  const canAccess = canViewEncounter || canViewClinicalData;
+  const canAccess = canReadEncounter || canViewClinicalData;
 
   const { data: allergies, isLoading: allergiesLoading } = useQuery({
     queryKey: ["allergies", patientId, encounterId],

@@ -24,7 +24,7 @@ import {
   ENCOUNTER_DIET_PREFERENCE,
   ENCOUNTER_DISCHARGE_DISPOSITION,
   ENCOUNTER_PRIORITY,
-  ENCOUNTER_STATUS,
+  EncounterStatus,
   type EncounterAdmitSources,
   type EncounterClass,
   type EncounterDietPreference,
@@ -32,7 +32,6 @@ import {
   type EncounterEdit,
   type EncounterPriority,
   type EncounterRead,
-  type EncounterStatus,
 } from "@/types/emr/encounter/encounter";
 import encounterApi from "@/types/emr/encounter/encounterApi";
 import { QuestionValidationError } from "@/types/questionnaire/batch";
@@ -95,7 +94,6 @@ export function EncounterQuestion({
   disabled,
   clearError,
   encounterId,
-  patientId = "",
   facilityId,
   errors = [],
 }: EncounterQuestionProps) {
@@ -115,7 +113,7 @@ export function EncounterQuestion({
   );
 
   const [encounter, setEncounter] = useState<EncounterEdit>({
-    status: "unknown",
+    status: EncounterStatus.UNKNOWN,
     encounter_class: careConfig.defaultEncounterType,
     period: {
       start: new Date().toISOString(),
@@ -129,8 +127,7 @@ export function EncounterQuestion({
       discharge_disposition: careConfig.defaultDischargeDisposition,
       diet_preference: "none",
     },
-    facility: "",
-    patient: "",
+    discharge_summary_advice: null,
   });
 
   useEffect(() => {
@@ -162,7 +159,7 @@ export function EncounterQuestion({
   // Transform EncounterRead to EncounterEdit format
   const transformEncounterForUpdate = (
     read: EncounterRead,
-  ): Partial<Omit<EncounterEdit, "organizations" | "patient">> => {
+  ): Partial<EncounterEdit> => {
     return {
       status: read.status,
       encounter_class: read.encounter_class,
@@ -192,9 +189,7 @@ export function EncounterQuestion({
     }
   }, [questionnaireResponse]);
 
-  const handleUpdateEncounter = (
-    updates: Partial<Omit<EncounterEdit, "patient">>,
-  ) => {
+  const handleUpdateEncounter = (updates: Partial<EncounterEdit>) => {
     clearError();
     const newEncounter = { ...encounter, ...updates };
     if (["amb", "vr", "hh"].includes(newEncounter.encounter_class)) {
@@ -222,7 +217,6 @@ export function EncounterQuestion({
     // Create the full encounter request object
     const encounterRequest: EncounterEdit = {
       ...newEncounter,
-      patient: patientId,
     };
 
     // Create the response value with the encounter request
@@ -260,11 +254,13 @@ export function EncounterQuestion({
               <SelectValue placeholder={t("select_status")} />
             </SelectTrigger>
             <SelectContent>
-              {ENCOUNTER_STATUS.map((encounterStatus) => (
-                <SelectItem key={encounterStatus} value={encounterStatus}>
-                  {t(`encounter_status__${encounterStatus}`)}
-                </SelectItem>
-              ))}
+              {Object.values(EncounterStatus).map(
+                (encounterStatus: EncounterStatus) => (
+                  <SelectItem key={encounterStatus} value={encounterStatus}>
+                    {t(`encounter_status__${encounterStatus}`)}
+                  </SelectItem>
+                ),
+              )}
             </SelectContent>
           </Select>
         </div>

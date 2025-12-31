@@ -23,6 +23,7 @@ import PrintTable from "@/components/Common/PrintTable";
 
 import query from "@/Utils/request/query";
 import {
+  formatName,
   formatPatientAge,
   getWeeklyIntervalsFromTodayTill,
 } from "@/Utils/utils";
@@ -284,7 +285,7 @@ export const PrintMedicationAdministration = (props: {
                       new Date(administration.occurrence_period_start),
                       "dd MMM yyyy, hh:mm a",
                     ),
-                    administered_by: `Dr. ${administration.created_by.first_name} ${administration.created_by.last_name}`,
+                    administered_by: formatName(administration.created_by),
                     notes: administration.note,
                   };
                 })}
@@ -298,7 +299,7 @@ export const PrintMedicationAdministration = (props: {
                 return (
                   <div key={administraterId} className="text-center">
                     <p className="text-sm text-gray-600 font-semibold">
-                      Dr. {administrater.first_name} {administrater.last_name}
+                      {formatName(administrater)}
                     </p>
                   </div>
                 );

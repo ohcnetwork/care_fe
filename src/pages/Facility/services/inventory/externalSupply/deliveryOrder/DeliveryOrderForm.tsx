@@ -8,6 +8,9 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import Page from "@/components/Common/Page";
+import { FormSkeleton } from "@/components/Common/SkeletonLoading";
+import { TagSelectorPopover } from "@/components/Tags/TagAssignmentSheet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -21,13 +24,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import Page from "@/components/Common/Page";
-import { FormSkeleton } from "@/components/Common/SkeletonLoading";
-
 import BackButton from "@/components/Common/BackButton";
 import Autocomplete from "@/components/ui/autocomplete";
 import { Badge } from "@/components/ui/badge";
 import { getInventoryBasePath } from "@/pages/Facility/services/inventory/externalSupply/utils/inventoryUtils";
+import { TagConfig, TagResource } from "@/types/emr/tagConfig/tagConfig";
+import useTagConfigs from "@/types/emr/tagConfig/useTagConfig";
 import {
   DELIVERY_ORDER_STATUS_COLORS,
   DeliveryOrderRetrieve,
@@ -35,7 +37,7 @@ import {
 } from "@/types/inventory/deliveryOrder/deliveryOrder";
 import deliveryOrderApi from "@/types/inventory/deliveryOrder/deliveryOrderApi";
 import requestOrderApi from "@/types/inventory/requestOrder/requestOrderApi";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 import organizationApi from "@/types/organization/organizationApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
@@ -57,6 +59,7 @@ const createDeliveryOrderFormSchema = (
       ? z.string().min(1, t("origin_required"))
       : z.string().optional(),
     destination: z.string().min(1, t("destination_required")),
+    tags: z.array(z.string()),
   });
 
 type FormValues = z.infer<ReturnType<typeof createDeliveryOrderFormSchema>>;
@@ -142,7 +145,7 @@ export default function DeliveryOrderForm({
         ordering: "sort_index",
       },
     }),
-    select: (data: PaginatedResponse<LocationList>) => {
+    select: (data: PaginatedResponse<LocationRead>) => {
       // Filter out the current location
       return data.results.filter((location) => location.id !== locationId);
     },
@@ -168,6 +171,7 @@ export default function DeliveryOrderForm({
       supplier: undefined,
       origin: internal ? locationId : undefined,
       destination: internal ? "" : locationId,
+      tags: [],
     },
   });
 
@@ -179,6 +183,7 @@ export default function DeliveryOrderForm({
         supplier: existingData.supplier?.id || undefined,
         origin: existingData.origin?.id || undefined,
         destination: existingData.destination.id,
+        tags: existingData.tags.map((tag) => tag.id),
       });
     } else if (!isEditMode && supplyOrderData) {
       // Prefill form with supply order data
@@ -188,9 +193,15 @@ export default function DeliveryOrderForm({
         supplier: supplyOrderData.supplier?.id || undefined,
         origin: supplyOrderData.origin?.id || undefined,
         destination: supplyOrderData.destination.id,
+        tags: supplyOrderData.tags.map((tag) => tag.id),
       });
     }
   }, [isEditMode, existingData, supplyOrderData, form]);
+
+  const tagIds = form.watch("tags");
+  const selectedTags = useTagConfigs({ ids: tagIds, facilityId })
+    .map(({ data }) => data)
+    .filter(Boolean) as TagConfig[];
 
   const { mutate: createDeliveryOrder, isPending: isCreating } = useMutation({
     mutationFn: mutate(deliveryOrderApi.createDeliveryOrder, {
@@ -249,6 +260,7 @@ export default function DeliveryOrderForm({
       createDeliveryOrder({
         ...data,
         status: DeliveryOrderStatus.draft,
+        extensions: {},
       });
     }
   }
@@ -386,6 +398,28 @@ export default function DeliveryOrderForm({
                     </FormItem>
                   )}
                 />
+                {!isEditMode && (
+                  <FormField
+                    control={form.control}
+                    name="tags"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("tags_other")}</FormLabel>
+                        <FormControl>
+                          <TagSelectorPopover
+                            selected={selectedTags}
+                            onChange={(tags) =>
+                              field.onChange(tags.map((tag) => tag.id))
+                            }
+                            resource={TagResource.DELIVERY_ORDER}
+                            facilityId={facilityId}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </CardContent>
             </Card>
 

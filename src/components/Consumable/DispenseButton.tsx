@@ -9,14 +9,13 @@ import { LocationSelectorDialog } from "@/components/ui/sidebar/facility/locatio
 import { useEncounter } from "@/pages/Encounters/utils/EncounterProvider";
 import { buildEncounterUrl } from "@/pages/Encounters/utils/utils";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
-import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import {
   AccountBillingStatus,
   AccountStatus,
 } from "@/types/billing/account/Account";
 import accountApi from "@/types/billing/account/accountApi";
 import { ChargeItemRead } from "@/types/billing/chargeItem/chargeItem";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import query from "@/Utils/request/query";
 
 import DispenseDrawer from "./DispenseDrawer";
@@ -24,11 +23,13 @@ import DispenseDrawer from "./DispenseDrawer";
 export const DispenseButton = ({
   open,
   setOpen,
+  facilityId,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
+  facilityId: string;
 }) => {
-  const [location, setLocation] = useState<LocationList | undefined>(undefined);
+  const [location, setLocation] = useState<LocationRead | undefined>(undefined);
   const [showDrawer, setShowDrawer] = useState(false);
   const [isInvoiceSheetOpen, setIsInvoiceSheetOpen] = useState(false);
   const [extractedChargeItems, setExtractedChargeItems] = useState<
@@ -36,7 +37,6 @@ export const DispenseButton = ({
   >([]);
   const [accountId, setAccountId] = useState<string | undefined>(undefined);
   const { selectedEncounter } = useEncounter();
-  const { facilityId } = useCurrentFacility();
 
   const { refetch: refetchAccount } = useQuery({
     queryKey: ["accounts", selectedEncounter?.patient.id],
@@ -51,13 +51,13 @@ export const DispenseButton = ({
     enabled: !!facilityId && !!selectedEncounter?.patient.id,
   });
 
-  const handleLocationSelect = (selectedLocation: LocationList) => {
+  const handleLocationSelect = (selectedLocation: LocationRead) => {
     setLocation(selectedLocation);
     setOpen(false);
     setShowDrawer(true);
   };
 
-  const getLocationPath = (location: LocationList): string => {
+  const getLocationPath = (location: LocationRead): string => {
     const path = [location.name];
     let current = location.parent;
     while (current && current.id) {

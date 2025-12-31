@@ -115,7 +115,9 @@ interface ResourceDefinitionCategoryPickerProps<T> {
   };
   ref?: React.Ref<HTMLButtonElement>;
   hideClearButton?: boolean;
+  hideSelectedDisplay?: boolean;
   alignContent?: "start" | "center" | "end";
+  defaultOpen?: boolean;
 }
 
 export function ResourceDefinitionCategoryPicker<T>({
@@ -134,14 +136,16 @@ export function ResourceDefinitionCategoryPicker<T>({
   enableFavorites = false,
   favoritesConfig,
   ref,
+  hideSelectedDisplay = false,
   hideClearButton = false,
   alignContent = "start",
+  defaultOpen = false,
 }: ResourceDefinitionCategoryPickerProps<T>) {
   const shouldHideClearButton = allowMultiple || hideClearButton;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const isMobile = useBreakpoints({ default: true, sm: false });
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [activeTab, setActiveTab] = useState("search");
   const [favSubTab, setFavSubTab] = useState("recent");
   const [breadcrumbs, setBreadcrumbs] = useState<CategoryBreadcrumb[]>([]);
@@ -1071,7 +1075,7 @@ export function ResourceDefinitionCategoryPicker<T>({
           </PopoverContent>
         </Popover>
       )}
-      {allowMultiple && (
+      {allowMultiple && !hideSelectedDisplay && (
         <div className="space-y-2">
           {Array.isArray(value) && value.length > 0 && (
             <div className="flex flex-col gap-2">

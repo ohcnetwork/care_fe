@@ -209,7 +209,7 @@ export function SpecimenWorkflowCard({
       };
       updateProcessing(updatedProcessing);
     } else {
-      toast.error("Attempted to update non-existent processing step");
+      toast.error(t("attempted_update_nonexistent_step"));
     }
   };
 
@@ -703,7 +703,8 @@ export function SpecimenWorkflowCard({
                               </TableHead>
                               <TableCell className="text-gray-950 font-semibold">
                                 {new Date(
-                                  collectedSpecimen.collection.collected_date_time,
+                                  collectedSpecimen.collection
+                                    .collected_date_time,
                                 ).toLocaleString()}
                               </TableCell>
                             </TableRow>

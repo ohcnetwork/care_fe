@@ -1,9 +1,10 @@
+import { type VariantProps } from "class-variance-authority";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import { Badge } from "@/components/ui/badge";
+import { Badge, badgeVariants } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -69,7 +70,7 @@ export default function GenericFilter({
       {handleBack && <FilterHeader label={filter.label} onBack={handleBack} />}
       <div className="p-3 max-h-[30vh] overflow-y-auto">
         <Input
-          placeholder="Search options..."
+          placeholder={t("search_options")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="h-8 text-sm mb-3"
@@ -185,16 +186,18 @@ export const GenericSelectedBadge = ({
   selectedValue,
   selectedLength,
   className,
+  variant,
 }: {
   selectedValue: string;
   selectedLength: number;
   className?: string;
+  variant?: VariantProps<typeof badgeVariants>["variant"];
 }) => {
   const { t } = useTranslation();
   return (
     <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
       <Badge
-        variant="outline"
+        variant={variant || "outline"}
         className={cn("whitespace-nowrap rounded-sm", className)}
       >
         {t(selectedValue)}
