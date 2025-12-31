@@ -346,6 +346,15 @@ export default function UserForm({
     }
   }, [org, userData, isEditMode]);
 
+  const buttonLabel =
+    updatePending || createPending
+      ? isEditMode
+        ? "updating"
+        : "creating"
+      : isEditMode
+        ? "update_user"
+        : "create_user";
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -829,7 +838,7 @@ export default function UserForm({
             createPending
           }
         >
-          {isEditMode ? t("update_user") : t("create_user")}
+          {t(buttonLabel)}
         </Button>
       </form>
     </Form>

@@ -125,7 +125,8 @@ export function PatientRegistration(props: PatientRegistrationProps) {
           },
         );
       },
-      onError: (_error) => {
+      onError: (error) => {
+        console.error("Appointment creation failed:", error);
         toast.error(t("failed_to_create_appointment"));
         navigate("/patient/home", { replace: true });
       },
