@@ -63,24 +63,6 @@ export class HTTPError extends Error {
   }
 }
 
-export class NetworkError extends Error {
-  silent: boolean;
-
-  constructor({
-    message,
-    silent = false,
-    cause,
-  }: {
-    message: string;
-    silent?: boolean;
-    cause?: unknown;
-  }) {
-    super(message, { cause });
-    this.name = "NetworkError";
-    this.silent = silent;
-  }
-}
-
 export interface PaginatedResponse<TItem> {
   count: number;
   results: TItem[];

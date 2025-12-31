@@ -6,7 +6,6 @@ import {
   ApiCallOptions,
   ApiRoute,
   HTTPError,
-  NetworkError,
   PaginatedResponse,
 } from "@/Utils/request/types";
 import { getResponseBody, makeHeaders, makeUrl } from "@/Utils/request/utils";
@@ -42,17 +41,11 @@ export async function callApi<Route extends ApiRoute<unknown, unknown>>(
   }
 
   let res: Response;
+
   try {
     res = await fetch(url, fetchOptions);
   } catch {
-    const isSilent =
-      typeof options?.silent === "function"
-        ? false // Network errors have no Response; default to non-silent
-        : (options?.silent ?? false);
-    throw new NetworkError({
-      message: "Network Error",
-      silent: isSilent,
-    });
+    throw new Error("Network Error");
   }
 
   const data = await getResponseBody<Route["TRes"]>(res);
