@@ -10,7 +10,7 @@ import {
 } from "@/types/emr/patient/patient";
 import { FacilityRead } from "@/types/facility/facility";
 import { UserReadMinimal } from "@/types/user/user";
-import { LazyExoticComponent } from "react";
+import { LazyExoticComponent, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { QuestionnaireFormState } from "./components/Questionnaire/QuestionnaireForm";
 import { pluginMap } from "./pluginMap";
@@ -105,6 +105,13 @@ export type PluginComponentMap = {
   >;
 };
 
+export type PluginOrganizationTab = {
+  name: string;
+  slug: string;
+  icon: ReactNode;
+  component: React.FC<{ contextId: string; navOrganizationId?: string }>;
+};
+
 export type PluginDeviceManifest = {
   type: string; // This matches the `care_type` of the device
   icon?: React.FC<React.HTMLAttributes<HTMLElement>>;
@@ -128,6 +135,7 @@ export type PluginManifest = {
   navItems?: NavigationLink[];
   userNavItems?: NavigationLink[];
   adminNavItems?: NavigationLink[];
+  organizationTabs?: PluginOrganizationTab[];
   components?: PluginComponentMap;
   encounterTabs?: Record<
     string,
