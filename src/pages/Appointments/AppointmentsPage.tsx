@@ -351,6 +351,7 @@ export default function AppointmentsPage({ resourceType, resourceId }: Props) {
           </TabsList>
         </Tabs>
       }
+      hideBreadcrumbs
     >
       <div className="mt-4 py-4 flex flex-col lg:flex-row gap-4 justify-between border-t border-gray-200">
         <div className="flex flex-col xl:flex-row gap-4 items-start md:items-start md:w-xs">
