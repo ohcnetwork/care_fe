@@ -186,6 +186,32 @@ export function InvoiceShow({
     },
   });
 
+  const { mutate: lockInvoice, isPending: isLockPending } = useMutation({
+    mutationFn: mutate(invoiceApi.lockInvoice, {
+      pathParams: { facilityId, invoiceId },
+    }),
+    onSuccess: () => {
+      toast.success(t("invoice_locked_successfully"));
+      queryClient.invalidateQueries({ queryKey: ["invoice", invoiceId] });
+    },
+    onError: () => {
+      toast.error(t("failed_to_lock_invoice"));
+    },
+  });
+
+  const { mutate: unlockInvoice, isPending: isUnlockPending } = useMutation({
+    mutationFn: mutate(invoiceApi.unlockInvoice, {
+      pathParams: { facilityId, invoiceId },
+    }),
+    onSuccess: () => {
+      toast.success(t("invoice_unlocked_successfully"));
+      queryClient.invalidateQueries({ queryKey: ["invoice", invoiceId] });
+    },
+    onError: () => {
+      toast.error(t("failed_to_unlock_invoice"));
+    },
+  });
+
   const handleRemoveChargeItem = () => {
     if (chargeItemToRemove) {
       removeChargeItem({ charge_item: chargeItemToRemove });
@@ -288,8 +314,10 @@ export function InvoiceShow({
     return t("appointment_invoice_alert");
   })();
 
-  const isInvoiceRecordPaymentPluginsPresent = useCareApps().some(
-    (plugin) => plugin.components?.InvoiceRecordPaymentOptions,
+  const careApps = useCareApps();
+  const isInvoiceRecordPaymentPluginsPresent = careApps.some(
+    (plugin) =>
+      !plugin.isLoading && plugin.components?.InvoiceRecordPaymentOptions,
   );
 
   if (isLoading) {
@@ -449,6 +477,12 @@ export function InvoiceShow({
             <Badge variant={INVOICE_STATUS_COLORS[invoice.status]}>
               {t(invoice.status)}
             </Badge>
+            {invoice.locked && (
+              <Badge variant="secondary" className="gap-1">
+                <CareIcon icon="l-lock" className="size-3" />
+                {t("locked")}
+              </Badge>
+            )}
           </div>
           <div className="flex flex-row gap-2">
             {invoice.status === InvoiceStatus.draft && (
@@ -482,6 +516,31 @@ export function InvoiceShow({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {invoice.locked ? (
+                    <DropdownMenuItem asChild className="text-primary-900">
+                      <Button
+                        variant="ghost"
+                        onClick={() => unlockInvoice({})}
+                        disabled={isUnlockPending}
+                        className="w-full flex flex-row justify-stretch items-center"
+                      >
+                        <CareIcon icon="l-unlock" className="mr-1" />
+                        <span>{t("unlock_invoice")}</span>
+                      </Button>
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem asChild className="text-primary-900">
+                      <Button
+                        variant="ghost"
+                        onClick={() => lockInvoice({})}
+                        disabled={isLockPending}
+                        className="w-full flex flex-row justify-stretch items-center"
+                      >
+                        <CareIcon icon="l-lock" className="mr-1" />
+                        <span>{t("lock_invoice")}</span>
+                      </Button>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild className="text-primary-900">
                     <Button
                       variant="ghost"

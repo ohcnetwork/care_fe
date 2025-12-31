@@ -71,7 +71,7 @@ export default function LinkUserSheet({
       queryClient.invalidateQueries({
         queryKey: ["organizationUsers", organizationId],
       });
-      toast.success("User added to organization successfully");
+      toast.success(t("user_added_to_organization_successfully"));
       setOpen(false);
       setSelectedUser(undefined);
       setSelectedRole(undefined);
@@ -80,7 +80,7 @@ export default function LinkUserSheet({
 
   const handleAddUser = () => {
     if (!selectedUser || !selectedRole) {
-      toast.error("Please select both user and role");
+      toast.error(t("please_select_user_and_role"));
       return;
     }
 

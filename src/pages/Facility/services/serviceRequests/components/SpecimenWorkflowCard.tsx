@@ -209,7 +209,7 @@ export function SpecimenWorkflowCard({
       };
       updateProcessing(updatedProcessing);
     } else {
-      toast.error("Attempted to update non-existent processing step");
+      toast.error(t("attempted_update_nonexistent_step"));
     }
   };
 

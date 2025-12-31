@@ -3,10 +3,16 @@ import { Suspense, createContext, useContext } from "react";
 
 import { PluginErrorBoundary } from "@/components/Common/PluginErrorBoundary";
 import { PluginEncounterTabProps } from "@/pages/Encounters/EncounterShow";
+import OrganizationLayout from "@/pages/Organization/components/OrganizationLayout";
 import { PluginManifest } from "@/pluginTypes";
+import { PlugConfig } from "@/types/plugConfig";
 import { t } from "i18next";
 
-export const CareAppsContext = createContext<PluginManifest[]>([]);
+export type CareAppsContextType = Array<
+  PlugConfig & (({ isLoading: false } & PluginManifest) | { isLoading: true })
+>;
+
+export const CareAppsContext = createContext<CareAppsContextType | null>(null);
 
 export const useCareApps = () => {
   const ctx = useContext(CareAppsContext);
@@ -72,6 +78,10 @@ export const useCareAppEncounterTabs = () => {
 
   return careApps.reduce<Record<string, React.FC<PluginEncounterTabProps>>>(
     (acc, app) => {
+      if (app.isLoading) {
+        return acc;
+      }
+
       const appTabs = Object.entries(app.encounterTabs ?? {}).reduce(
         (acc, [key, Component]) => {
           return { ...acc, [key]: withSuspense(Component, app.plugin) };
@@ -89,6 +99,10 @@ export const useCareAppEncounterTabs = () => {
 export function usePluginRoutes() {
   const careApps = useCareApps();
   const routes = careApps.reduce((acc, plugin) => {
+    if (plugin.isLoading) {
+      return acc;
+    }
+
     return { ...acc, ...(plugin.routes ?? {}) };
   }, {});
   if (!routes) {
@@ -96,3 +110,45 @@ export function usePluginRoutes() {
   }
   return routes;
 }
+
+export const useOrganizationRoutes = () => {
+  const careApps = useCareApps();
+
+  const pluginTabs = careApps.flatMap(
+    (c) => (!c.isLoading && c.organizationTabs) || [],
+  );
+
+  return {
+    ...Object.fromEntries(
+      pluginTabs.flatMap((t) => [
+        [
+          `/organization/:id/${t.slug}`,
+          ({ id }: { id: string }) => (
+            <OrganizationLayout id={id}>
+              {() => <t.component contextId={id} />}
+            </OrganizationLayout>
+          ),
+        ],
+        [
+          `/organization/:navOrganizationId/children/:id/${t.slug}`,
+          ({
+            navOrganizationId,
+            id,
+          }: {
+            navOrganizationId: string;
+            id: string;
+          }) => (
+            <OrganizationLayout id={id} navOrganizationId={navOrganizationId}>
+              {() => (
+                <t.component
+                  contextId={id}
+                  navOrganizationId={navOrganizationId}
+                />
+              )}
+            </OrganizationLayout>
+          ),
+        ],
+      ]),
+    ),
+  };
+};
