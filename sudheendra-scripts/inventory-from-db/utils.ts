@@ -252,7 +252,7 @@ export const getSupplyDeliveriesToImport = (
     });
 };
 
-const getExistingPaginatedData = async <TInput, TOutput>(
+export const getExistingPaginatedData = async <TInput, TOutput>(
   url: string,
   queryParams: Record<string, string>,
   transform: (data: TInput) => TOutput,
