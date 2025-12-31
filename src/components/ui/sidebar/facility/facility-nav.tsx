@@ -210,7 +210,7 @@ export function FacilityNav({ selectedFacility }: FacilityNavProps) {
   const pluginNavItems = careApps.flatMap((c) =>
     !c.isLoading && c.navItems ? c.navItems : [],
   ) as NavigationLink[];
-  
+
   const { facility } = useCurrentFacility();
 
   const {
