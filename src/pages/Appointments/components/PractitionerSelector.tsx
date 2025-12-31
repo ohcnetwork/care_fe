@@ -147,10 +147,17 @@ export const PractitionerSelector = ({
 
   // Fetch all practitioners for search functionality
   const { data: allPractitioners } = useQuery({
-    queryKey: ["allPractitioners", facilityId, searchQuery],
+    queryKey: ["allPractitioners", facilityId, searchQuery, showAllOrgs],
     queryFn: query(scheduleApi.appointments.availableUsers, {
       pathParams: { facilityId },
-      queryParams: { limit: 10 },
+      queryParams: {
+        limit: 10,
+        ...(showAllOrgs
+          ? {}
+          : {
+              organization_ids: organizations.map((org) => org.id).join(","),
+            }),
+      },
     }),
     enabled: open && !!searchQuery && searchQuery.length > 0,
   });
@@ -321,7 +328,7 @@ export const PractitionerSelector = ({
               </div>
             </div>
 
-            <CommandList className="max-h-[400px]">
+            <CommandList className="md:max-h-[30dvh] overflow-y-auto">
               <CommandEmpty>
                 {searchQuery ? (
                   <div className="p-6 text-center text-gray-500">
@@ -706,6 +713,7 @@ export const PractitionerSelector = ({
           <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
           <PopoverContent
             align="start"
+            side="bottom"
             className={cn(
               "p-0",
               !multiple && "w-[var(--radix-popover-trigger-width)]",

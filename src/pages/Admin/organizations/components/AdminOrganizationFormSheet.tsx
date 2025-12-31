@@ -116,7 +116,7 @@ export default function AdminOrganizationFormSheet({
       queryClient.invalidateQueries({
         queryKey: ["organization", org?.id],
       });
-      toast.success(t("organization_updated_successfully"));
+      toast.success(t("organizations_updated_successfully"));
       setOpen(false);
     },
   });
