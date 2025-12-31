@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon, PrinterIcon } from "lucide-react";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -6,22 +6,13 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import Page from "@/components/Common/Page";
 import { TableSkeleton } from "@/components/Common/SkeletonLoading";
 
 import useFilters from "@/hooks/useFilters";
 import useCurrentLocation from "@/pages/Facility/locations/utils/useCurrentLocation";
-import {
-  DISPENSE_ORDER_STATUS_STYLES,
-  DispenseOrderStatus,
-} from "@/types/emr/dispenseOrder/dispenseOrder";
+import { DISPENSE_ORDER_STATUS_STYLES } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
 import { MedicationDispenseStatus } from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
@@ -29,15 +20,11 @@ import patientApi from "@/types/emr/patient/patientApi";
 import query from "@/Utils/request/query";
 import { formatDateTime } from "@/Utils/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
-import batchApi from "@/types/base/batch/batchApi";
 import { PrescriptionSummary } from "@/types/emr/prescription/prescription";
 import prescriptionApi from "@/types/emr/prescription/prescriptionApi";
 import { getTagHierarchyDisplay } from "@/types/emr/tagConfig/tagConfig";
-import mutate from "@/Utils/request/mutate";
 import { PaginatedResponse } from "@/Utils/request/types";
-import { toast } from "sonner";
 import DispensedMedicationList from "./DispensedMedicationList";
 
 interface Props {
@@ -48,7 +35,6 @@ interface Props {
 export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
   const { t } = useTranslation();
   const { locationId } = useCurrentLocation();
-  const queryClient = useQueryClient();
 
   const { qParams, updateQuery } = useFilters({
     disableCache: true,
@@ -75,23 +61,6 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
         },
       }),
       enabled: !!dispenseOrderId && !!locationId,
-    });
-
-  const { mutate: updateDispenseOrder, isPending: isUpdatingDispenseOrder } =
-    useMutation({
-      mutationFn: mutate(batchApi.batchRequest),
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ["dispenseOrder", facilityId, dispenseOrderId],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["medication_dispense", dispenseOrderId, locationId],
-        });
-        toast.success(t("dispense_order_updated"));
-      },
-      onError: () => {
-        toast.error(t("error_updating_dispense_order"));
-      },
     });
 
   const { data: patientData } = useQuery({
@@ -122,56 +91,6 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
   if (!dispenseOrder) {
     return null;
   }
-
-  const handleUpdateDispenseOrder = (
-    newDispenseOrderStatus: DispenseOrderStatus,
-  ) => {
-    const requests: Array<{
-      url: string;
-      method: string;
-      reference_id: string;
-      body: any;
-    }> = [
-      {
-        url: `/api/v1/facility/${facilityId}/order/dispense/${dispenseOrderId}/`,
-        method: "PATCH",
-        reference_id: `update_dispense_order_${dispenseOrderId}`,
-        body: { status: newDispenseOrderStatus },
-      },
-    ];
-
-    if (
-      newDispenseOrderStatus === DispenseOrderStatus.in_progress ||
-      newDispenseOrderStatus === DispenseOrderStatus.completed
-    ) {
-      const statusFilters = [MedicationDispenseStatus.preparation];
-      if (newDispenseOrderStatus === DispenseOrderStatus.completed) {
-        statusFilters.push(MedicationDispenseStatus.in_progress);
-      }
-      const newMedicationDispenseStatus =
-        newDispenseOrderStatus === DispenseOrderStatus.completed
-          ? MedicationDispenseStatus.completed
-          : MedicationDispenseStatus.in_progress;
-
-      const dispensesToUpdate =
-        medicationDispensesResponse?.results?.filter((dispense) =>
-          statusFilters.includes(dispense.status),
-        ) || [];
-
-      dispensesToUpdate.forEach((dispense) => {
-        requests.push({
-          url: `/api/v1/medication/dispense/${dispense.id}/`,
-          method: "PATCH",
-          reference_id: `update_medication_dispense_${dispense.id}`,
-          body: {
-            status: newMedicationDispenseStatus,
-          },
-        });
-      });
-    }
-
-    updateDispenseOrder({ requests });
-  };
 
   // Filter medications by current status
   const filteredMedications =
@@ -252,29 +171,6 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
               {t("status")}:{" "}
               {t(`dispense_order_status__${dispenseOrder.status}`)}
             </Badge>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="border-gray-400 px-2">
-                  <CareIcon icon="l-ellipsis-v" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {Object.values(DispenseOrderStatus)
-                  .filter((status) => status !== dispenseOrder.status)
-                  .map((status) => (
-                    <DropdownMenuItem asChild key={status}>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleUpdateDispenseOrder(status)}
-                        className="w-full flex flex-row justify-stretch items-center"
-                        disabled={isUpdatingDispenseOrder}
-                      >
-                        {t(`mark_as_${status}`)}
-                      </Button>
-                    </DropdownMenuItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
             <Button
               variant="outline"
               className="border-gray-400 font-semibold"
@@ -296,7 +192,7 @@ export default function DispensesView({ facilityId, dispenseOrderId }: Props) {
         patientId={dispenseOrder.patient.id}
         locationId={locationId}
         status={medicationDispenseStatus}
-        dispenseOrderId={dispenseOrderId}
+        dispenseOrder={dispenseOrder}
         medications={filteredMedications}
         updateQuery={updateQuery}
       />

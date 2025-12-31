@@ -40,13 +40,24 @@ import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { groupItemsByTime } from "@/lib/time";
 import { CreateInvoiceSheet } from "@/pages/Facility/billing/account/components/CreateInvoiceSheet";
 import ViewDefaultAccountButton from "@/pages/Facility/billing/account/ViewDefaultAccountButton";
+import batchApi from "@/types/base/batch/batchApi";
 import accountApi from "@/types/billing/account/accountApi";
 import { InvoiceStatus } from "@/types/billing/invoice/invoice";
+import {
+  DispenseOrderRead,
+  DispenseOrderStatus,
+} from "@/types/emr/dispenseOrder/dispenseOrder";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import mutate from "@/Utils/request/mutate";
@@ -276,7 +287,7 @@ interface Props {
   patientId: string;
   locationId: string;
   status: MedicationDispenseStatus | undefined;
-  dispenseOrderId: string;
+  dispenseOrder: DispenseOrderRead;
   medications: MedicationDispenseRead[];
   updateQuery: (query: Record<string, any>) => void;
 }
@@ -286,7 +297,7 @@ export default function DispensedMedicationList({
   patientId,
   locationId,
   status,
-  dispenseOrderId,
+  dispenseOrder,
   medications,
   updateQuery,
 }: Props) {
@@ -353,35 +364,104 @@ export default function DispensedMedicationList({
     }
   }, [medications]);
 
-  const { mutate: completeMedications, isPending } = useMutation({
-    mutationFn: async ({ signal }: { signal: AbortSignal }) => {
-      if (!medications) return;
+  const { mutate: updateDispenseOrder, isPending: isUpdatingDispenseOrder } =
+    useMutation({
+      mutationFn: mutate(batchApi.batchRequest),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["dispenseOrder", facilityId, dispenseOrder.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["medication_dispense", dispenseOrder.id, locationId],
+        });
+        toast.success(t("medication_dispense_updated"));
+      },
+      onError: () => {
+        toast.error(t("error_updating_medication_dispenses"));
+      },
+    });
 
-      const selectedDispenses = medications.filter((med) =>
-        selectedMedications.includes(med.id),
-      );
+  const handleUpdateDispenseOrder = (
+    newDispenseOrderStatus: DispenseOrderStatus = DispenseOrderStatus.completed,
+    clearSelection: boolean = false,
+  ) => {
+    const medicationsDispenses =
+      medications.filter((med) => selectedMedications.includes(med.id)) || [];
+    if (medicationsDispenses.length === 0) {
+      return;
+    }
+    const requests: Array<{
+      url: string;
+      method: string;
+      reference_id: string;
+      body: any;
+    }> = [
+      {
+        url: `/api/v1/facility/${facilityId}/order/dispense/${dispenseOrder.id}/`,
+        method: "PATCH",
+        reference_id: `update_dispense_order_${dispenseOrder.id}`,
+        body: { status: newDispenseOrderStatus },
+      },
+    ];
 
-      const updates: MedicationDispenseUpsert[] = selectedDispenses.map(
+    let newMedicationDispenseStatus = MedicationDispenseStatus.in_progress;
+    switch (newDispenseOrderStatus) {
+      case DispenseOrderStatus.draft:
+        newMedicationDispenseStatus = MedicationDispenseStatus.preparation;
+        break;
+      case DispenseOrderStatus.abandoned:
+        newMedicationDispenseStatus = MedicationDispenseStatus.cancelled;
+        break;
+      case DispenseOrderStatus.entered_in_error:
+        newMedicationDispenseStatus = MedicationDispenseStatus.entered_in_error;
+        break;
+      case DispenseOrderStatus.completed:
+        newMedicationDispenseStatus = MedicationDispenseStatus.completed;
+        break;
+      default:
+        newMedicationDispenseStatus = MedicationDispenseStatus.in_progress;
+        break;
+    }
+    if (newDispenseOrderStatus !== DispenseOrderStatus.completed) {
+      const updates: MedicationDispenseUpsert[] = medicationsDispenses.map(
         (dispense) => ({
           id: dispense.id,
-          status: MedicationDispenseStatus.completed,
+          status: newMedicationDispenseStatus,
           category: MedicationDispenseCategory.outpatient,
           when_prepared: dispense.when_prepared,
           dosage_instruction: dispense.dosage_instruction,
         }),
       );
-
-      return query(medicationDispenseApi.upsert, {
-        signal,
+      requests.push({
+        url: `/api/v1/medication/dispense/upsert/`,
+        method: "POST",
+        reference_id: `update_medication_dispenses`,
         body: { datapoints: updates },
-      })({ signal });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["medication_dispense"] });
+      });
+    } else if (newDispenseOrderStatus === DispenseOrderStatus.completed) {
+      const updates: MedicationDispenseUpsert[] = medicationsDispenses.map(
+        (dispense) => ({
+          id: dispense.id,
+          status: newMedicationDispenseStatus,
+          category: MedicationDispenseCategory.outpatient,
+          when_prepared: dispense.when_prepared,
+          dosage_instruction: dispense.dosage_instruction,
+        }),
+      );
+      requests.push({
+        url: `/api/v1/medication/dispense/upsert/`,
+        method: "POST",
+        reference_id: `update_medication_dispenses`,
+        body: { datapoints: updates },
+      });
+    }
+
+    updateDispenseOrder({ requests });
+    if (clearSelection) {
       setSelectedMedications([]);
-      toast.success(t("medicine_dispensed"));
-    },
-  });
+    }
+    updateQuery({ status: newMedicationDispenseStatus });
+  };
 
   const handleSelectionChange = (id: string) => {
     setSelectedMedications((prev) =>
@@ -421,6 +501,10 @@ export default function DispensedMedicationList({
     }
   };
 
+  const showCheckbox =
+    status === MedicationDispenseStatus.preparation ||
+    status === MedicationDispenseStatus.in_progress;
+
   return (
     <div>
       <div className="mb-6">
@@ -457,8 +541,41 @@ export default function DispensedMedicationList({
               <ViewDefaultAccountButton
                 facilityId={facilityId}
                 patientId={patientId}
-                disabled={isPending}
+                disabled={isUpdatingDispenseOrder}
               />
+              {showCheckbox && selectedMedications.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="border-gray-400 px-2">
+                      <CareIcon icon="l-ellipsis-v" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {Object.values(DispenseOrderStatus)
+                      .filter((status) => status !== dispenseOrder.status)
+                      .filter(
+                        (status) => status !== DispenseOrderStatus.completed,
+                      )
+                      .map((status) => (
+                        <DropdownMenuItem asChild key={status}>
+                          <Button
+                            variant="ghost"
+                            onClick={() =>
+                              handleUpdateDispenseOrder(
+                                status,
+                                status === DispenseOrderStatus.entered_in_error,
+                              )
+                            }
+                            className="w-full flex flex-row justify-stretch items-center"
+                            disabled={isUpdatingDispenseOrder}
+                          >
+                            {t(`mark_as_${status}`)}
+                          </Button>
+                        </DropdownMenuItem>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </div>
 
@@ -467,9 +584,9 @@ export default function DispensedMedicationList({
               status === MedicationDispenseStatus.in_progress) && (
               <Button
                 onClick={() =>
-                  completeMedications({ signal: new AbortController().signal })
+                  handleUpdateDispenseOrder(DispenseOrderStatus.completed, true)
                 }
-                disabled={isPending}
+                disabled={isUpdatingDispenseOrder}
               >
                 {t("complete_dispense")}
                 <ShortcutBadge actionId="dispense-button" />
@@ -527,10 +644,7 @@ export default function DispensedMedicationList({
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
-                  showCheckbox={
-                    status === MedicationDispenseStatus.preparation ||
-                    status === MedicationDispenseStatus.in_progress
-                  }
+                  showCheckbox={showCheckbox}
                 />
               </div>
             )}
@@ -547,10 +661,7 @@ export default function DispensedMedicationList({
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
-                  showCheckbox={
-                    status === MedicationDispenseStatus.preparation ||
-                    status === MedicationDispenseStatus.in_progress
-                  }
+                  showCheckbox={showCheckbox}
                 />
               </div>
             )}
@@ -567,10 +678,7 @@ export default function DispensedMedicationList({
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
-                  showCheckbox={
-                    status === MedicationDispenseStatus.preparation ||
-                    status === MedicationDispenseStatus.in_progress
-                  }
+                  showCheckbox={showCheckbox}
                 />
               </div>
             )}
@@ -587,10 +695,7 @@ export default function DispensedMedicationList({
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
-                  showCheckbox={
-                    status === MedicationDispenseStatus.preparation ||
-                    status === MedicationDispenseStatus.in_progress
-                  }
+                  showCheckbox={showCheckbox}
                 />
               </div>
             )}
@@ -607,10 +712,7 @@ export default function DispensedMedicationList({
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
-                  showCheckbox={
-                    status === MedicationDispenseStatus.preparation ||
-                    status === MedicationDispenseStatus.in_progress
-                  }
+                  showCheckbox={showCheckbox}
                 />
               </div>
             )}
@@ -627,10 +729,7 @@ export default function DispensedMedicationList({
                   selectedMedications={selectedMedications}
                   onSelectionChange={handleSelectionChange}
                   onSelectAll={handleSelectAll}
-                  showCheckbox={
-                    status === MedicationDispenseStatus.preparation ||
-                    status === MedicationDispenseStatus.in_progress
-                  }
+                  showCheckbox={showCheckbox}
                 />
               </div>
             )}
@@ -645,7 +744,7 @@ export default function DispensedMedicationList({
           open={createInvoiceSheetOpen}
           onOpenChange={setCreateInvoiceSheetOpen}
           preSelectedChargeItems={billableChargeItems}
-          sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrderId}?status=preparation`}
+          sourceUrl={`/facility/${facilityId}/locations/${locationId}/medication_dispense/order/${dispenseOrder.id}?status=preparation`}
           onSuccess={() => {
             setCreateInvoiceSheetOpen(false);
             setBillableChargeItems([]);
