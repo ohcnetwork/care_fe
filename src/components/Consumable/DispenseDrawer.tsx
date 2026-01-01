@@ -26,7 +26,7 @@ import {
 import { InventoryRead } from "@/types/inventory/product/inventory";
 import inventoryApi from "@/types/inventory/product/inventoryApi";
 import { ProductKnowledgeBase } from "@/types/inventory/productKnowledge/productKnowledge";
-import { LocationList } from "@/types/location/location";
+import { LocationRead } from "@/types/location/location";
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
 
@@ -132,7 +132,7 @@ export default function DispenseDrawer({
   const [alternateIdentifier, _setAlternateIdentifier] = useState<string>(
     `${encounterId}-${new Date().toISOString().replace(/[:.]/g, "-")}`,
   );
-  const [currentLocation, setCurrentLocation] = useState<LocationList>(
+  const [currentLocation, setCurrentLocation] = useState<LocationRead>(
     () =>
       ({
         id: selectedLocation.id,
@@ -145,7 +145,7 @@ export default function DispenseDrawer({
         form: "ward",
         mode: "instance",
         parent: null,
-      }) as unknown as LocationList,
+      }) as unknown as LocationRead,
   );
 
   const [isLocationSelectorOpen, setIsLocationSelectorOpen] = useState(false);
@@ -259,9 +259,9 @@ export default function DispenseDrawer({
   });
 
   //path builder
-  const buildLocationPath = useCallback((location: LocationList): string => {
+  const buildLocationPath = useCallback((location: LocationRead): string => {
     const pathParts: string[] = [];
-    let currentLocation: LocationList | undefined = location;
+    let currentLocation: LocationRead | undefined = location;
 
     while (currentLocation && currentLocation.name) {
       pathParts.unshift(currentLocation.name);
@@ -271,7 +271,7 @@ export default function DispenseDrawer({
         currentLocation.parent.id &&
         currentLocation.parent.name
       ) {
-        currentLocation = currentLocation.parent as LocationList;
+        currentLocation = currentLocation.parent as LocationRead;
       } else {
         break;
       }
@@ -284,7 +284,7 @@ export default function DispenseDrawer({
   }, []);
 
   const handleLocationChange = useCallback(
-    (newLocation: LocationList) => {
+    (newLocation: LocationRead) => {
       setCurrentLocation(newLocation);
       setIsLocationSelectorOpen(false);
       setProductKnowledgeInventoriesMap({});

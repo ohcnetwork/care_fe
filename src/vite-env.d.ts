@@ -9,7 +9,8 @@ interface ImportMetaEnv {
   readonly REACT_APP_COVER_IMAGE_ALT: string;
   readonly REACT_PUBLIC_URL: string;
   readonly REACT_SBOM_BASE_URL?: string;
-  readonly REACT_CARE_API_URL: string;
+  readonly REACT_CARE_API_URL?: string;
+  readonly REACT_CARE_URL_MAP?: string;
   readonly REACT_GITHUB_URL?: string;
   readonly REACT_OHCN_URL?: string;
   readonly REACT_MAIN_LOGO?: string;
@@ -33,6 +34,9 @@ interface ImportMetaEnv {
   readonly REACT_DISABLE_PATIENT_LOGIN?: string;
   readonly REACT_CUSTOM_REMOTE_I18N_URL?: string;
   readonly REACT_ENABLE_AUTO_INVOICE_AFTER_DISPENSE?: string;
+  readonly REACT_INVENTORY_DEFAULT_TAX_INCLUSIVE?: string;
+  readonly REACT_AUTO_REFRESH_INTERVAL?: string;
+  readonly REACT_AUTO_REFRESH_BY_DEFAULT?: string;
 
   // Plugins related envs...
   readonly REACT_SENTRY_DSN?: string;

@@ -179,7 +179,7 @@ const ScheduleTemplateEditor = ({
       pathParams: { facilityId, id: template.id },
     }),
     onSuccess: () => {
-      toast.success("Schedule template updated successfully");
+      toast.success(t("schedule_template_updated_successfully"));
       queryClient.invalidateQueries({
         queryKey: ["schedule", facilityId, { resourceType, resourceId }],
       });

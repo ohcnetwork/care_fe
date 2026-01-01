@@ -34,18 +34,18 @@ import {
 import ConfirmActionDialog from "@/components/Common/ConfirmActionDialog";
 
 import mutate from "@/Utils/request/mutate";
-import { LocationList, LocationTypeIcons } from "@/types/location/location";
+import { LocationRead, LocationTypeIcons } from "@/types/location/location";
 import locationApi from "@/types/location/locationApi";
 
 // Animated version of TableRow
 const AnimatedTableRow = motion.create(TableRow);
 
 interface Props {
-  locations: LocationList[];
-  onEdit?: (location: LocationList) => void;
-  onView?: (location: LocationList) => void;
-  onMoveUp?: (location: LocationList) => void;
-  onMoveDown?: (location: LocationList) => void;
+  locations: LocationRead[];
+  onEdit?: (location: LocationRead) => void;
+  onView?: (location: LocationRead) => void;
+  onMoveUp?: (location: LocationRead) => void;
+  onMoveDown?: (location: LocationRead) => void;
   facilityId: string;
   isFirstPage?: boolean;
   isLastPage?: boolean;
@@ -67,7 +67,7 @@ export function LocationTable({
 }: Props) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [locationToDelete, setLocationToDelete] = useState<LocationList | null>(
+  const [locationToDelete, setLocationToDelete] = useState<LocationRead | null>(
     null,
   );
 
