@@ -156,14 +156,6 @@ export const EncounterObservationsTab = () => {
                             {formatValue(item.value.value, item.value_type)}
                           </div>
                         )}
-                        {item.value.value && (
-                          <div className="mt-1 font-medium">
-                            {item.value.value}{" "}
-                            <div className="text-xs text-gray-600">
-                              {item.value.unit?.display || "-"}
-                            </div>
-                          </div>
-                        )}
                       </div>
                       {item.note && (
                         <div className="mt-1 text-sm text-gray-500">
