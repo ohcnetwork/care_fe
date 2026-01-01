@@ -147,7 +147,7 @@ export default function Autocomplete({
         placeholder={inputPlaceholder}
         disabled={disabled}
         onValueChange={handleInputChange}
-        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
+        className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm md:pr-0"
         autoFocus={!isAppleDevice}
       />
       <CommandList className="overflow-y-auto">
