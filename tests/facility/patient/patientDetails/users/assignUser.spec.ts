@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@/tests/support/coverage";
+import { type Page } from "@playwright/test";
 import { format, subDays } from "date-fns";
 import { getFacilityId } from "tests/support/facilityId";
 

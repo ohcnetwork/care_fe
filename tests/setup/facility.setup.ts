@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "@/tests/support/coverage";
 import fs from "fs";
 
 test.use({ storageState: "tests/.auth/user.json" });

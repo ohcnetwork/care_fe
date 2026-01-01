@@ -1,4 +1,4 @@
-import { expect, test as setup } from "@playwright/test";
+import { expect, test as setup } from "@/tests/support/coverage";
 
 const authFile = "tests/.auth/facilityAdmin.json";
 

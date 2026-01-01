@@ -1,5 +1,5 @@
+import { expect, test } from "@/tests/support/coverage";
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
 import {
   INT_MAX,
   MIN_SLUG_LENGTH,

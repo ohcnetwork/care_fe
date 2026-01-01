@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "@/tests/support/coverage";
 
 import { createActivityDefinition } from "tests/facility/settings/activityDefinition/activityDefinition";
 import { expectToast } from "tests/helper/ui";

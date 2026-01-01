@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "@/tests/support/coverage";
 import { format, subDays } from "date-fns";
 import fs from "fs";
 import { getFacilityId } from "tests/support/facilityId";

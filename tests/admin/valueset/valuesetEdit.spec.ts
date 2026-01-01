@@ -1,5 +1,6 @@
+import { expect, test } from "@/tests/support/coverage";
 import { faker } from "@faker-js/faker";
-import { expect, Page, test } from "@playwright/test";
+import { type Page } from "@playwright/test";
 import { expectedSlug } from "tests/helper/utils";
 import {
   LOINC_CODE_NAME,

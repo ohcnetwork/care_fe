@@ -1,5 +1,5 @@
+import { expect, test } from "@/tests/support/coverage";
 import { faker } from "@faker-js/faker";
-import { expect, test } from "@playwright/test";
 import { format, subDays } from "date-fns";
 import { getFacilityId } from "tests/support/facilityId";
 import {

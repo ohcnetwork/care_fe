@@ -1,5 +1,5 @@
+import { test } from "@/tests/support/coverage";
 import { faker } from "@faker-js/faker";
-import { test } from "@playwright/test";
 import fs from "fs";
 import path from "path";
 import { getFacilityId } from "tests/support/facilityId";

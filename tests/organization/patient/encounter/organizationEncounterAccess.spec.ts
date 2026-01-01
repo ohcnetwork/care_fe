@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "@/tests/support/coverage";
 
 import { navigateToOrganizationPatient } from "tests/organization/patient/helpers";
 

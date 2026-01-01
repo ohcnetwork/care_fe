@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "@/tests/support/coverage";
 
 // Use the authenticated state
 test.use({ storageState: "tests/.auth/user.json" });
