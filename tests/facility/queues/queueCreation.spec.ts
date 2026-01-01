@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
 import { expectToast } from "tests/helper/ui";
+import { expect, test } from "tests/support/coverage";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });
