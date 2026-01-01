@@ -384,7 +384,7 @@ export default function QuestionnaireEditor({
     onSuccess: (data: QuestionnaireRead) => {
       toast.success(t("questionnaire_created_successfully"));
       queryClient.invalidateQueries({
-        queryKey: ["questionnaireDetail", slug],
+        queryKey: ["questionnaireDetail", data.slug],
       });
       navigate(`/admin/questionnaire/${data.slug}/edit`);
     },
@@ -401,7 +401,7 @@ export default function QuestionnaireEditor({
       toast.success(t("questionnaire_updated_successfully"));
       navigate(`/admin/questionnaire/${data.slug}/edit`);
       queryClient.invalidateQueries({
-        queryKey: ["questionnaireDetail", slug],
+        queryKey: ["questionnaireDetail", data.slug],
       });
     },
     onError: (error) =>
@@ -1055,7 +1055,7 @@ export default function QuestionnaireEditor({
                 <QuestionnaireProperties
                   form={form}
                   updateQuestionnaireField={updateQuestionnaireField}
-                  id={slug}
+                  slug={slug}
                   organizations={organizations}
                   organizationSelection={{
                     selectedOrgs: selectedOrgs,
@@ -1307,7 +1307,7 @@ export default function QuestionnaireEditor({
               <QuestionnaireProperties
                 form={form}
                 updateQuestionnaireField={updateQuestionnaireField}
-                id={slug}
+                slug={slug}
                 organizations={organizations}
                 organizationSelection={{
                   selectedOrgs: selectedOrgs,
