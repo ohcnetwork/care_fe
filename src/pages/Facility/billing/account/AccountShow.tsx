@@ -39,6 +39,8 @@ import TagAssignmentSheet from "@/components/Tags/TagAssignmentSheet";
 
 import mutate from "@/Utils/request/mutate";
 import query from "@/Utils/request/query";
+import { getPermissions } from "@/common/Permissions";
+import { usePermissions } from "@/context/PermissionContext";
 import { useShortcutSubContext } from "@/context/ShortcutContext";
 import PaymentReconciliationSheet from "@/pages/Facility/billing/PaymentReconciliationSheet";
 import InvoicesData from "@/pages/Facility/billing/invoice/InvoicesData";
@@ -57,6 +59,7 @@ import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
 import BackButton from "@/components/Common/BackButton";
 import { PatientHeader } from "@/components/Patient/PatientHeader";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import AccountSheet from "./AccountSheet";
 import BedChargeItemsTable from "./components/BedChargeItemsTable";
 import ChargeItemsTable from "./components/ChargeItemsTable";
@@ -101,6 +104,13 @@ export function AccountShow({
     reason: AccountBillingStatus;
   }>({ sheetOpen: false, reason: AccountBillingStatus.closed_baddebt });
   const [{ encounterId }] = useQueryParams();
+  const { facility } = useCurrentFacility();
+  const { hasPermission } = usePermissions();
+
+  const { canUpdateAccount } = getPermissions(
+    hasPermission,
+    facility?.permissions || [],
+  );
 
   useShortcutSubContext("facility:account:show");
 
@@ -502,18 +512,20 @@ export function AccountShow({
                 {t("past_accounts")}
               </Link>
             </Button>
-            <Button
-              variant="outline"
-              className="border-gray-400 gap-1"
-              onClick={() => setSheetOpen(true)}
-            >
-              <CareIcon
-                icon="l-edit"
-                className="size-5 stroke-gray-450 stroke-1"
-              />
-              {t("edit")}
-              <ShortcutBadge actionId="edit-account" />
-            </Button>
+            {canUpdateAccount && (
+              <Button
+                variant="outline"
+                className="border-gray-400 gap-1"
+                onClick={() => setSheetOpen(true)}
+              >
+                <CareIcon
+                  icon="l-edit"
+                  className="size-5 stroke-gray-450 stroke-1"
+                />
+                {t("edit")}
+                <ShortcutBadge actionId="edit-account" />
+              </Button>
+            )}
           </div>
         </div>
 
@@ -581,15 +593,17 @@ export function AccountShow({
             <CareIcon icon="l-eye" className="size-4" />
             {t("view_statement")}
           </Button>
-          <Button
-            variant="link"
-            className="gap-2 underline"
-            disabled={rebalanceMutation.isPending}
-            onClick={() => rebalanceMutation.mutate({})}
-          >
-            <CareIcon icon="l-refresh" className="size-4" />
-            {rebalanceMutation.isPending ? t("rebalancing") : t("rebalance")}
-          </Button>
+          {canUpdateAccount && (
+            <Button
+              variant="link"
+              className="gap-2 underline"
+              disabled={rebalanceMutation.isPending}
+              onClick={() => rebalanceMutation.mutate({})}
+            >
+              <CareIcon icon="l-refresh" className="size-4" />
+              {rebalanceMutation.isPending ? t("rebalancing") : t("rebalance")}
+            </Button>
+          )}
         </div>
       </div>
 
