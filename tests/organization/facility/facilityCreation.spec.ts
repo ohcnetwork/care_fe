@@ -1,6 +1,6 @@
-import { expect, test } from "@/tests/support/coverage";
 import { faker } from "@faker-js/faker";
 import { type Page } from "@playwright/test";
+import { expect, test } from "tests/support/coverage";
 
 test.use({ storageState: "tests/.auth/user.json" });
 

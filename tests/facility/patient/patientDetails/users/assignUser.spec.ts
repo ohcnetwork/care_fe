@@ -1,6 +1,6 @@
-import { expect, test } from "@/tests/support/coverage";
 import { type Page } from "@playwright/test";
 import { format, subDays } from "date-fns";
+import { expect, test } from "tests/support/coverage";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });

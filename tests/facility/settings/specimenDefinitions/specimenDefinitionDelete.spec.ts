@@ -1,10 +1,10 @@
-import { expect, test } from "@/tests/support/coverage";
 import { faker } from "@faker-js/faker";
 import {
   DELETED_STATUS,
   STATUS_OPTIONS,
   typeCollectedOptions,
 } from "tests/facility/settings/specimenDefinitions/specimenDefinitionConstants";
+import { expect, test } from "tests/support/coverage";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });

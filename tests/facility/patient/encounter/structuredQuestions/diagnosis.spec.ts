@@ -1,6 +1,6 @@
-import { expect, test } from "@/tests/support/coverage";
 import { faker } from "@faker-js/faker";
 import { type Page } from "@playwright/test";
+import { expect, test } from "tests/support/coverage";
 import { getEncounterId } from "tests/support/encounterId";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";

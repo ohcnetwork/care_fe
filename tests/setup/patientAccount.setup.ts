@@ -1,7 +1,7 @@
-import { test } from "@/tests/support/coverage";
 import { faker } from "@faker-js/faker";
 import fs from "fs";
 import path from "path";
+import { test } from "tests/support/coverage";
 import { getFacilityId } from "tests/support/facilityId";
 import { getPatientId } from "tests/support/patientId";
 

@@ -1,4 +1,3 @@
-import { expect, test } from "@/tests/support/coverage";
 import { faker } from "@faker-js/faker";
 import {
   capOptions,
@@ -12,6 +11,7 @@ import {
   typeCollectedOptions,
 } from "tests/facility/settings/specimenDefinitions/specimenDefinitionConstants";
 import { getFieldErrorMessage } from "tests/helper/error";
+import { expect, test } from "tests/support/coverage";
 import { getFacilityId } from "tests/support/facilityId";
 
 // Use the authenticated state

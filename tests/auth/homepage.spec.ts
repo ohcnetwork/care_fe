@@ -1,4 +1,4 @@
-import { expect, test } from "@/tests/support/coverage";
+import { expect, test } from "tests/support/coverage";
 
 test.describe("Homepage", () => {
   test("should load successfully", async ({ page }) => {

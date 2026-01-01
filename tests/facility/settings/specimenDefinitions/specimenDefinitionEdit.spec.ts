@@ -1,4 +1,3 @@
-import { expect, test } from "@/tests/support/coverage";
 import { faker } from "@faker-js/faker";
 import {
   INT_MAX,
@@ -10,6 +9,7 @@ import {
   preparationOptions,
   typeCollectedOptions,
 } from "tests/facility/settings/specimenDefinitions/specimenDefinitionConstants";
+import { expect, test } from "tests/support/coverage";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });

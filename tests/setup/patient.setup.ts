@@ -1,6 +1,6 @@
-import { test } from "@/tests/support/coverage";
 import { format, subDays } from "date-fns";
 import fs from "fs";
+import { test } from "tests/support/coverage";
 import { getFacilityId } from "tests/support/facilityId";
 
 test.use({ storageState: "tests/.auth/user.json" });

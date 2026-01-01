@@ -1,5 +1,5 @@
-import { test } from "@/tests/support/coverage";
 import fs from "fs";
+import { test } from "tests/support/coverage";
 
 test.use({ storageState: "tests/.auth/user.json" });
 

@@ -1,4 +1,4 @@
-import { expect, test } from "@/tests/support/coverage";
+import { expect, test } from "tests/support/coverage";
 
 import {
   createActivityDefinition,

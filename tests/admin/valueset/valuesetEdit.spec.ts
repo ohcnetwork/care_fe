@@ -1,7 +1,7 @@
-import { expect, test } from "@/tests/support/coverage";
 import { faker } from "@faker-js/faker";
 import { type Page } from "@playwright/test";
 import { expectedSlug } from "tests/helper/utils";
+import { expect, test } from "tests/support/coverage";
 import {
   LOINC_CODE_NAME,
   SNOMED_CODE_NAME,

@@ -1,4 +1,4 @@
-import { expect, test } from "@/tests/support/coverage";
+import { expect, test } from "tests/support/coverage";
 
 import { getFacilityId } from "tests/support/facilityId";
 

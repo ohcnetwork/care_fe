@@ -1,5 +1,5 @@
-import { expect, test } from "@/tests/support/coverage";
 import { type Locator, type Page } from "@playwright/test";
+import { expect, test } from "tests/support/coverage";
 
 test.use({ storageState: "tests/.auth/user.json" });
 

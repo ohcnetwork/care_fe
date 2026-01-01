@@ -1,4 +1,4 @@
-import { expect, test } from "@/tests/support/coverage";
+import { expect, test } from "tests/support/coverage";
 
 test.describe("Login", () => {
   test("should navigate to login page", async ({ page }) => {
