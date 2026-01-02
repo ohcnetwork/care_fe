@@ -108,7 +108,6 @@ export function PatientRegistration(props: PatientRegistrationProps) {
         headers: {
           Authorization: `Bearer ${tokenData.token}`,
         },
-        silent: true,
       }),
       onSuccess: (data: PublicAppointment) => {
         toast.success(t("appointment_created_success"));
@@ -125,8 +124,7 @@ export function PatientRegistration(props: PatientRegistrationProps) {
           },
         );
       },
-      onError: (error) => {
-        console.error("Appointment creation failed:", error);
+      onError: (_error) => {
         toast.error(t("failed_to_create_appointment"));
         navigate("/patient/home", { replace: true });
       },
