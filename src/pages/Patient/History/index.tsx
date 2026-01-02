@@ -88,6 +88,7 @@ export function ClinicalHistoryPage({
           : t("loading")
       }
       hideTitleOnPage
+      hideBreadcrumbs
     >
       <div className="flex justify-between items-center bg-gray-100 -mx-3 -mt-8 md:-mt-8 md:-mx-9 px-3 md:px-6 pb-3 pt-2 md:rounded-t-lg">
         <div>

@@ -21,7 +21,7 @@ interface BreadcrumbItemProps {
 const RESOURCE_LABELS: Record<string, string> = {
   account: "account",
   invoices: "invoices",
-  patient: "patient",
+  patient: "patients",
   encounter: "encounter",
   locations: "location",
   services: "service",
@@ -90,9 +90,10 @@ function buildBreadcrumbs(segments: string[]): BreadcrumbItemProps[] {
     // Handle resource name followed by UUID
     // Add the resource collection page (e.g., /billing/account)
     if (isResourceName(segment) && nextSegment && isUuid(nextSegment)) {
-      const currentPath = `/${segments.slice(0, i + 1).join("/")}`;
+      const segmentLabel = RESOURCE_LABELS[segment];
+      const currentPath = `/${segments.slice(0, i).join("/")}/${segmentLabel}`;
       breadcrumbs.push({
-        label: RESOURCE_LABELS[segment] || segment.replace(/_/g, " "),
+        label: segmentLabel,
         href: currentPath,
       });
       continue;
@@ -100,9 +101,10 @@ function buildBreadcrumbs(segments: string[]): BreadcrumbItemProps[] {
 
     // Handle standalone resource names (e.g. account, patients, charge_items)
     if (isResourceName(segment)) {
-      const currentPath = `/${segments.slice(0, i + 1).join("/")}`;
+      const segmentLabel = RESOURCE_LABELS[segment];
+      const currentPath = `/${segments.slice(0, i).join("/")}/${segmentLabel}`;
       breadcrumbs.push({
-        label: RESOURCE_LABELS[segment],
+        label: segmentLabel,
         href: currentPath,
       });
     }

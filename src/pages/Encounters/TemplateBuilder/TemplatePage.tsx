@@ -33,6 +33,7 @@ export default function TemplatePage({ facilityId }: TemplatePageProps) {
           </Button>
         )
       }
+      hideBreadcrumbs
     >
       <TemplateList
         facilityId={facilityId}
