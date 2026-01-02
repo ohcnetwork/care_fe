@@ -33,6 +33,7 @@ import { usePermissions } from "@/context/PermissionContext";
 import { useCareApps } from "@/hooks/useCareApps";
 import facilityApi from "@/types/facility/facilityApi";
 import careConfig from "@careConfig";
+import { useMemo } from "react";
 
 interface FacilityOverviewProps {
   facilityId: string;
@@ -50,8 +51,13 @@ export function FacilityOverview({ facilityId }: FacilityOverviewProps) {
     }),
   });
 
-  const isAnalyticsEnabled = useCareApps().some(
-    (plugin) => plugin.plugin === "care_analytics_fe",
+  const careApps = useCareApps();
+  const isAnalyticsEnabled = useMemo(
+    () =>
+      careApps.some(
+        (app) => !app.isLoading && app.plugin === "care_analytics_fe",
+      ),
+    [careApps],
   );
 
   const { canViewAppointments, canListEncounters } = getPermissions(
