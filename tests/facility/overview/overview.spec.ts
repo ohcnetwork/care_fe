@@ -5,7 +5,7 @@ test.use({ storageState: "tests/.auth/user.json" });
 
 let facilityId: string;
 
-test.describe("Payment Reconciliation", () => {
+test.describe("Facility Overview", () => {
   facilityId = getFacilityId();
 
   test.beforeEach(async ({ page }) => {
