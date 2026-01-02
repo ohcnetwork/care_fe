@@ -65,7 +65,7 @@ export function LocationSearch({
   const commandContent = (
     <Command className="pt-1" shouldFilter={false}>
       <CommandInput
-        placeholder="Search locations..."
+        placeholder={t("search_locations")}
         value={search}
         className="outline-hidden border-none ring-0 shadow-none text-base sm:text-sm"
         onValueChange={setSearch}
