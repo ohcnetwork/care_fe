@@ -50,7 +50,7 @@ test.describe("ValueSet Create", () => {
     }
   });
 
-  test("create valuset with all fields and verify it appears in preview and list", async ({
+  test("create valueset with all fields and verify it appears in preview and list", async ({
     page,
   }) => {
     await page.getByRole("link", { name: "Create ValueSet" }).click();
