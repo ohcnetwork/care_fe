@@ -16,13 +16,15 @@ import { Textarea } from "@/components/ui/textarea";
 
 import ValueSetSelect from "@/components/Questionnaire/ValueSetSelect";
 
-import { formatName } from "@/Utils/utils";
+import { useShortcutSubContext } from "@/context/ShortcutContext";
 import { Code } from "@/types/base/code/code";
 import { DiagnosticReportRead } from "@/types/emr/diagnosticReport/diagnosticReport";
 import {
   ProcessingReadSpec,
   ProcessingSpec,
 } from "@/types/emr/specimen/specimen";
+import { ShortcutBadge } from "@/Utils/keyboardShortcutComponents";
+import { formatName } from "@/Utils/utils";
 
 interface ProcessSpecimenProps {
   onAddProcessing: (processing: ProcessingSpec) => void;
@@ -50,6 +52,13 @@ export function ProcessSpecimen({
     description: "",
     method: null,
   });
+
+  useShortcutSubContext(
+    noteDialog.open ? "patient:search:-global" : undefined,
+    {
+      ignoreInputFields: noteDialog.open,
+    },
+  );
 
   const handleSelectStep = (code: Code | null) => {
     if (!code) return;
@@ -246,6 +255,7 @@ export function ProcessSpecimen({
             </Button>
             <Button type="button" onClick={handleUpdateNote}>
               {noteDialog.index === -1 ? t("add") : t("update")}
+              <ShortcutBadge actionId="submit-action" />
             </Button>
           </DialogFooter>
         </DialogContent>
