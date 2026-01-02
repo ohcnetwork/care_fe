@@ -226,13 +226,10 @@ const Login = (props: LoginProps) => {
     const err: LoginFormErrors = { ...errors };
 
     // Validate username
-    if (typeof form.username === "string") {
-      if (!form.username.match(/\w/)) {
-        hasError = true;
-        err.username = "field_required";
-      }
-    }
-    if (!form.username) {
+    if (
+      !form.username ||
+      (typeof form.username === "string" && !form.username.match(/\w/))
+    ) {
       hasError = true;
       err.username = "field_required";
     }
@@ -270,13 +267,10 @@ const Login = (props: LoginProps) => {
     let hasError = false;
     const err = Object.assign({}, errors);
 
-    if (typeof form.username === "string") {
-      if (!form.username.match(/\w/)) {
-        hasError = true;
-        err.username = "field_required";
-      }
-    }
-    if (!form.username) {
+    if (
+      !form.username ||
+      (typeof form.username === "string" && !form.username.match(/\w/))
+    ) {
       hasError = true;
       err.username = "field_required";
     }
