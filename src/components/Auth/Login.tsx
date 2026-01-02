@@ -383,7 +383,6 @@ const Login = (props: LoginProps) => {
                             id="username"
                             name="username"
                             type="text"
-                            data-cy="username"
                             autoComplete="username"
                             value={form.username}
                             onChange={handleChange}
@@ -403,7 +402,6 @@ const Login = (props: LoginProps) => {
                           <PasswordInput
                             id="password"
                             name="password"
-                            data-cy="password"
                             autoComplete="current-password"
                             value={form.password}
                             onChange={handleChange}
@@ -441,7 +439,6 @@ const Login = (props: LoginProps) => {
                           type="submit"
                           className="w-full"
                           variant="primary"
-                          data-cy="submit"
                           disabled={isLoading}
                         >
                           {isLoading ? (
@@ -545,7 +542,6 @@ const Login = (props: LoginProps) => {
                               id="username"
                               name="username"
                               type="text"
-                              data-cy="username"
                               autoComplete="username"
                               value={form.username}
                               onChange={handleChange}
@@ -565,7 +561,6 @@ const Login = (props: LoginProps) => {
                             <PasswordInput
                               id="password"
                               name="password"
-                              data-cy="password"
                               autoComplete="current-password"
                               value={form.password}
                               onChange={handleChange}
@@ -603,7 +598,6 @@ const Login = (props: LoginProps) => {
                             type="submit"
                             className="w-full"
                             variant="primary"
-                            data-cy="submit"
                             disabled={isLoading}
                           >
                             {isLoading ? (
