@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import careConfig from "@careConfig";
 
@@ -24,12 +24,10 @@ export const DispenseButton = ({
   open,
   setOpen,
   facilityId,
-  onSuccess,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
   facilityId: string;
-  onSuccess?: () => void;
 }) => {
   const [location, setLocation] = useState<LocationRead | undefined>(undefined);
   const [showDrawer, setShowDrawer] = useState(false);
@@ -39,6 +37,7 @@ export const DispenseButton = ({
   >([]);
   const [accountId, setAccountId] = useState<string | undefined>(undefined);
   const { selectedEncounter } = useEncounter();
+  const queryClient = useQueryClient();
 
   const { refetch: refetchAccount } = useQuery({
     queryKey: ["accounts", selectedEncounter?.patient.id],
@@ -107,18 +106,27 @@ export const DispenseButton = ({
           }}
           onDispenseComplete={async (chargeItems: ChargeItemRead[]) => {
             setShowDrawer(false);
-            onSuccess?.();
 
-            if (!careConfig.enableAutoInvoiceAfterDispense) {
-              return;
-            }
-            setExtractedChargeItems(chargeItems);
-            const result = await refetchAccount();
-            const fetchedAccountId = result.data?.results?.[0]?.id;
+            queryClient.invalidateQueries({
+              queryKey: [
+                "medication_dispense",
+                selectedEncounter.patient.id,
+                selectedEncounter.id,
+              ],
+            });
 
-            if (fetchedAccountId) {
-              setAccountId(fetchedAccountId);
-              setIsInvoiceSheetOpen(true);
+            if (
+              careConfig.enableAutoInvoiceAfterDispense &&
+              chargeItems.length > 0
+            ) {
+              setExtractedChargeItems(chargeItems);
+              const result = await refetchAccount();
+              const fetchedAccountId = result.data?.results?.[0]?.id;
+
+              if (fetchedAccountId) {
+                setAccountId(fetchedAccountId);
+                setIsInvoiceSheetOpen(true);
+              }
             }
           }}
         />

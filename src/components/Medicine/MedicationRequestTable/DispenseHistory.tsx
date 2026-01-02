@@ -1,6 +1,6 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "raviger";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +34,6 @@ interface DispenseButtonSectionProps {
   facilityId?: string;
   isDispenseOpen: boolean;
   setIsDispenseOpen: (open: boolean) => void;
-  onSuccess: () => void;
 }
 
 function DispenseButtonSection({
@@ -42,7 +41,6 @@ function DispenseButtonSection({
   facilityId,
   isDispenseOpen,
   setIsDispenseOpen,
-  onSuccess,
 }: DispenseButtonSectionProps) {
   const { t } = useTranslation();
 
@@ -65,7 +63,6 @@ function DispenseButtonSection({
           open={isDispenseOpen}
           setOpen={setIsDispenseOpen}
           facilityId={facilityId}
-          onSuccess={onSuccess}
         />
       )}
     </>
@@ -89,7 +86,6 @@ export function DispenseHistory({
 }: Props) {
   const { t } = useTranslation();
   const [isDispenseOpen, setIsDispenseOpen] = useState(false);
-  const queryClient = useQueryClient();
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["medication_dispense", patientId, encounterId],
@@ -104,13 +100,6 @@ export function DispenseHistory({
   });
 
   const medications = response?.results || [];
-
-  const handleDispenseComplete = useCallback(() => {
-    queryClient.invalidateQueries({
-      queryKey: ["medication_dispense", patientId, encounterId],
-    });
-    setIsDispenseOpen(false);
-  }, [queryClient, patientId, encounterId]);
 
   if (isLoading) {
     return (
@@ -131,7 +120,6 @@ export function DispenseHistory({
             facilityId={facilityId}
             isDispenseOpen={isDispenseOpen}
             setIsDispenseOpen={setIsDispenseOpen}
-            onSuccess={handleDispenseComplete}
           />
         }
         className="h-full"
@@ -146,7 +134,6 @@ export function DispenseHistory({
         facilityId={facilityId}
         isDispenseOpen={isDispenseOpen}
         setIsDispenseOpen={setIsDispenseOpen}
-        onSuccess={handleDispenseComplete}
       />
 
       <div className="overflow-hidden rounded-md border-2 border-white shadow-md">
