@@ -34,12 +34,11 @@ import {
   MedicationDispenseUpsert,
 } from "@/types/emr/medicationDispense/medicationDispense";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,20 +69,9 @@ import { toast } from "sonner";
 interface MedicationTableProps {
   facilityId: string;
   medications: MedicationDispenseRead[];
-  selectedMedications: string[];
-  onSelectionChange: (id: string) => void;
-  onSelectAll: () => void;
-  showCheckbox?: boolean;
 }
 
-function MedicationTable({
-  facilityId,
-  medications,
-  selectedMedications,
-  onSelectionChange,
-  onSelectAll,
-  showCheckbox = true,
-}: MedicationTableProps) {
+function MedicationTable({ facilityId, medications }: MedicationTableProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
@@ -107,7 +95,14 @@ function MedicationTable({
   const editableStatuses = [
     MedicationDispenseStatus.preparation,
     MedicationDispenseStatus.in_progress,
-    MedicationDispenseStatus.on_hold,
+    MedicationDispenseStatus.completed,
+  ];
+
+  const statusOptions = [
+    MedicationDispenseStatus.preparation,
+    MedicationDispenseStatus.in_progress,
+    MedicationDispenseStatus.completed,
+    MedicationDispenseStatus.declined,
   ];
 
   return (
@@ -115,18 +110,6 @@ function MedicationTable({
       <Table className="rounded-md">
         <TableHeader className="bg-gray-100 text-gray-700">
           <TableRow className="divide-x">
-            {showCheckbox && (
-              <TableHead className="w-[50px] pl-4">
-                <Checkbox
-                  checked={
-                    selectedMedications.length === medications.length &&
-                    medications.length > 0
-                  }
-                  onCheckedChange={onSelectAll}
-                  className="mb-2 checked:mb-0"
-                />
-              </TableHead>
-            )}
             <TableHead className="text-gray-700">{t("medicine")}</TableHead>
             <TableHead className="text-gray-700">{t("dosage")}</TableHead>
             <TableHead className="text-gray-700">{t("frequency")}</TableHead>
@@ -152,27 +135,12 @@ function MedicationTable({
             const isPaid =
               medication.charge_item?.paid_invoice?.status ===
               InvoiceStatus.balanced;
-            const shouldShowCheckbox = showCheckbox;
 
             return (
               <TableRow
                 key={medication.id}
                 className="hover:bg-gray-50 divide-x"
               >
-                {shouldShowCheckbox && (
-                  <TableCell className="text-gray-950 p-0">
-                    <span className="flex items-center justify-center p-2">
-                      {shouldShowCheckbox && (
-                        <Checkbox
-                          checked={selectedMedications.includes(medication.id)}
-                          onCheckedChange={() =>
-                            onSelectionChange(medication.id)
-                          }
-                        />
-                      )}
-                    </span>
-                  </TableCell>
-                )}
                 <TableCell className="text-gray-950 font-semibold">
                   {medication.item.product.product_knowledge.name}
                 </TableCell>
@@ -209,29 +177,13 @@ function MedicationTable({
                         <SelectValue placeholder={t("select_status")} />
                       </SelectTrigger>
                       <SelectContent>
-                        {Object.values(MedicationDispenseStatus)
-                          .filter(
-                            (status) =>
-                              status !== MedicationDispenseStatus.completed,
-                          )
-                          .filter(
-                            (status) =>
-                              !(
-                                medication.status ===
-                                  MedicationDispenseStatus.in_progress &&
-                                status === MedicationDispenseStatus.preparation
-                              ),
-                          )
-                          .map((status) => {
-                            return (
-                              <SelectItem
-                                key={status}
-                                value={status.toString()}
-                              >
-                                {t(status)}
-                              </SelectItem>
-                            );
-                          })}
+                        {statusOptions.map((status) => {
+                          return (
+                            <SelectItem key={status} value={status.toString()}>
+                              {t(status)}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   ) : (
@@ -289,7 +241,7 @@ interface Props {
   status: MedicationDispenseStatus | undefined;
   dispenseOrder: DispenseOrderRead;
   medications: MedicationDispenseRead[];
-  updateQuery: (query: Record<string, any>) => void;
+  updateQuery: ({ status }: { status: MedicationDispenseStatus }) => void;
 }
 
 export default function DispensedMedicationList({
@@ -304,7 +256,6 @@ export default function DispensedMedicationList({
   useShortcutSubContext("facility:pharmacy");
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [selectedMedications, setSelectedMedications] = useState<string[]>([]);
   const [paymentFilter, setPaymentFilter] = useState<"paid" | "unpaid" | "all">(
     "all",
   );
@@ -330,7 +281,7 @@ export default function DispensedMedicationList({
   );
 
   const onFilterUpdate = (query: Record<string, any>) => {
-    updateQuery(query);
+    updateQuery(query as { status: MedicationDispenseStatus });
   };
 
   const {
@@ -357,13 +308,6 @@ export default function DispensedMedicationList({
     }),
   });
 
-  // set all medicines as selectedMedications
-  useEffect(() => {
-    if (medications) {
-      setSelectedMedications(medications.map((med) => med.id));
-    }
-  }, [medications]);
-
   const { mutate: updateDispenseOrder, isPending: isUpdatingDispenseOrder } =
     useMutation({
       mutationFn: mutate(batchApi.batchRequest),
@@ -383,13 +327,7 @@ export default function DispensedMedicationList({
 
   const handleUpdateDispenseOrder = (
     newDispenseOrderStatus: DispenseOrderStatus = DispenseOrderStatus.completed,
-    clearSelection: boolean = false,
   ) => {
-    const medicationsDispenses =
-      medications.filter((med) => selectedMedications.includes(med.id)) || [];
-    if (medicationsDispenses.length === 0) {
-      return;
-    }
     const requests: Array<{
       url: string;
       method: string;
@@ -403,72 +341,69 @@ export default function DispensedMedicationList({
         body: { status: newDispenseOrderStatus },
       },
     ];
+    const medicationsDispenses =
+      medications.filter(
+        (med) =>
+          med.status === MedicationDispenseStatus.preparation ||
+          med.status === MedicationDispenseStatus.in_progress,
+      ) || [];
 
-    let newMedicationDispenseStatus = MedicationDispenseStatus.in_progress;
-    switch (newDispenseOrderStatus) {
-      case DispenseOrderStatus.draft:
-        newMedicationDispenseStatus = MedicationDispenseStatus.preparation;
-        break;
-      case DispenseOrderStatus.abandoned:
-        newMedicationDispenseStatus = MedicationDispenseStatus.cancelled;
-        break;
-      case DispenseOrderStatus.entered_in_error:
-        newMedicationDispenseStatus = MedicationDispenseStatus.entered_in_error;
-        break;
-      case DispenseOrderStatus.completed:
-        newMedicationDispenseStatus = MedicationDispenseStatus.completed;
-        break;
-      default:
-        newMedicationDispenseStatus = MedicationDispenseStatus.in_progress;
-        break;
-    }
-    if (newDispenseOrderStatus !== DispenseOrderStatus.completed) {
-      const updates: MedicationDispenseUpsert[] = medicationsDispenses.map(
-        (dispense) => ({
-          id: dispense.id,
-          status: newMedicationDispenseStatus,
-          category: MedicationDispenseCategory.outpatient,
-          when_prepared: dispense.when_prepared,
-          dosage_instruction: dispense.dosage_instruction,
-        }),
-      );
-      requests.push({
-        url: `/api/v1/medication/dispense/upsert/`,
-        method: "POST",
-        reference_id: `update_medication_dispenses`,
-        body: { datapoints: updates },
-      });
-    } else if (newDispenseOrderStatus === DispenseOrderStatus.completed) {
-      const updates: MedicationDispenseUpsert[] = medicationsDispenses.map(
-        (dispense) => ({
-          id: dispense.id,
-          status: newMedicationDispenseStatus,
-          category: MedicationDispenseCategory.outpatient,
-          when_prepared: dispense.when_prepared,
-          dosage_instruction: dispense.dosage_instruction,
-        }),
-      );
-      requests.push({
-        url: `/api/v1/medication/dispense/upsert/`,
-        method: "POST",
-        reference_id: `update_medication_dispenses`,
-        body: { datapoints: updates },
-      });
+    if (medicationsDispenses.length > 0) {
+      let newMedicationDispenseStatus = MedicationDispenseStatus.in_progress;
+      switch (newDispenseOrderStatus) {
+        case DispenseOrderStatus.draft:
+          newMedicationDispenseStatus = MedicationDispenseStatus.preparation;
+          break;
+        case DispenseOrderStatus.abandoned:
+          newMedicationDispenseStatus = MedicationDispenseStatus.cancelled;
+          break;
+        case DispenseOrderStatus.entered_in_error:
+          newMedicationDispenseStatus =
+            MedicationDispenseStatus.entered_in_error;
+          break;
+        case DispenseOrderStatus.completed:
+          newMedicationDispenseStatus = MedicationDispenseStatus.completed;
+          break;
+        default:
+          newMedicationDispenseStatus = MedicationDispenseStatus.in_progress;
+          break;
+      }
+      if (newDispenseOrderStatus !== DispenseOrderStatus.completed) {
+        const updates: MedicationDispenseUpsert[] = medicationsDispenses.map(
+          (dispense) => ({
+            id: dispense.id,
+            status: newMedicationDispenseStatus,
+            category: MedicationDispenseCategory.outpatient,
+            when_prepared: dispense.when_prepared,
+            dosage_instruction: dispense.dosage_instruction,
+          }),
+        );
+        requests.push({
+          url: `/api/v1/medication/dispense/upsert/`,
+          method: "POST",
+          reference_id: `update_medication_dispenses`,
+          body: { datapoints: updates },
+        });
+      } else if (newDispenseOrderStatus === DispenseOrderStatus.completed) {
+        const updates: MedicationDispenseUpsert[] = medicationsDispenses.map(
+          (dispense) => ({
+            id: dispense.id,
+            status: newMedicationDispenseStatus,
+            category: MedicationDispenseCategory.outpatient,
+            when_prepared: dispense.when_prepared,
+            dosage_instruction: dispense.dosage_instruction,
+          }),
+        );
+        requests.push({
+          url: `/api/v1/medication/dispense/upsert/`,
+          method: "POST",
+          reference_id: `update_medication_dispenses`,
+          body: { datapoints: updates },
+        });
+      }
     }
 
     updateDispenseOrder({ requests });
-    if (clearSelection) {
-      setSelectedMedications([]);
-    }
-    updateQuery({ status: newMedicationDispenseStatus });
-  };
-
-  const handleSelectionChange = (id: string) => {
-    setSelectedMedications((prev) =>
-      prev.includes(id)
-        ? prev.filter((medicationId) => medicationId !== id)
-        : [...prev, id],
-    );
   };
 
   const filteredMedications = medications?.filter((med) => {
@@ -491,19 +426,6 @@ export default function DispensedMedicationList({
       return med.charge_item?.status === ChargeItemStatus.billable;
     })
     .map((med) => med.charge_item);
-
-  const handleSelectAll = () => {
-    const allMedicationIds = filteredMedications?.map((med) => med.id) || [];
-    if (selectedMedications.length === allMedicationIds.length) {
-      setSelectedMedications([]);
-    } else {
-      setSelectedMedications(allMedicationIds);
-    }
-  };
-
-  const showCheckbox =
-    status === MedicationDispenseStatus.preparation ||
-    status === MedicationDispenseStatus.in_progress;
 
   return (
     <div>
@@ -543,55 +465,47 @@ export default function DispensedMedicationList({
                 patientId={patientId}
                 disabled={isUpdatingDispenseOrder}
               />
-              {showCheckbox && selectedMedications.length > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="border-gray-400 px-2">
-                      <CareIcon icon="l-ellipsis-v" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {Object.values(DispenseOrderStatus)
-                      .filter((status) => status !== dispenseOrder.status)
-                      .filter(
-                        (status) => status !== DispenseOrderStatus.completed,
-                      )
-                      .map((status) => (
-                        <DropdownMenuItem asChild key={status}>
-                          <Button
-                            variant="ghost"
-                            onClick={() =>
-                              handleUpdateDispenseOrder(
-                                status,
-                                status === DispenseOrderStatus.entered_in_error,
-                              )
-                            }
-                            className="w-full flex flex-row justify-stretch items-center"
-                            disabled={isUpdatingDispenseOrder}
-                          >
-                            {t(`mark_as_${status}`)}
-                          </Button>
-                        </DropdownMenuItem>
-                      ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="border-gray-400 px-2">
+                    <CareIcon icon="l-ellipsis-v" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {Object.values(DispenseOrderStatus)
+                    .filter((status) => status !== dispenseOrder.status)
+                    .filter(
+                      (status) => status !== DispenseOrderStatus.completed,
+                    )
+                    .map((status) => (
+                      <DropdownMenuItem asChild key={status}>
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleUpdateDispenseOrder(status)}
+                          className="w-full flex flex-row justify-stretch items-center"
+                          disabled={isUpdatingDispenseOrder}
+                        >
+                          {t(`mark_as_${status}`)}
+                        </Button>
+                      </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
-          {selectedMedications.length > 0 &&
-            (status === MedicationDispenseStatus.preparation ||
-              status === MedicationDispenseStatus.in_progress) && (
-              <Button
-                onClick={() =>
-                  handleUpdateDispenseOrder(DispenseOrderStatus.completed, true)
-                }
-                disabled={isUpdatingDispenseOrder}
-              >
-                {t("complete_dispense")}
-                <ShortcutBadge actionId="dispense-button" />
-              </Button>
-            )}
+          {(dispenseOrder.status === DispenseOrderStatus.draft ||
+            dispenseOrder.status === DispenseOrderStatus.in_progress) && (
+            <Button
+              onClick={() =>
+                handleUpdateDispenseOrder(DispenseOrderStatus.completed)
+              }
+              disabled={isUpdatingDispenseOrder}
+            >
+              {t("complete_dispense")}
+              <ShortcutBadge actionId="dispense-button" />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -641,10 +555,6 @@ export default function DispensedMedicationList({
                 <MedicationTable
                   facilityId={facilityId}
                   medications={groupedMedications.today}
-                  selectedMedications={selectedMedications}
-                  onSelectionChange={handleSelectionChange}
-                  onSelectAll={handleSelectAll}
-                  showCheckbox={showCheckbox}
                 />
               </div>
             )}
@@ -658,10 +568,6 @@ export default function DispensedMedicationList({
                 <MedicationTable
                   facilityId={facilityId}
                   medications={groupedMedications.yesterday}
-                  selectedMedications={selectedMedications}
-                  onSelectionChange={handleSelectionChange}
-                  onSelectAll={handleSelectAll}
-                  showCheckbox={showCheckbox}
                 />
               </div>
             )}
@@ -675,10 +581,6 @@ export default function DispensedMedicationList({
                 <MedicationTable
                   facilityId={facilityId}
                   medications={groupedMedications.thisWeek}
-                  selectedMedications={selectedMedications}
-                  onSelectionChange={handleSelectionChange}
-                  onSelectAll={handleSelectAll}
-                  showCheckbox={showCheckbox}
                 />
               </div>
             )}
@@ -692,10 +594,6 @@ export default function DispensedMedicationList({
                 <MedicationTable
                   facilityId={facilityId}
                   medications={groupedMedications.thisMonth}
-                  selectedMedications={selectedMedications}
-                  onSelectionChange={handleSelectionChange}
-                  onSelectAll={handleSelectAll}
-                  showCheckbox={showCheckbox}
                 />
               </div>
             )}
@@ -709,10 +607,6 @@ export default function DispensedMedicationList({
                 <MedicationTable
                   facilityId={facilityId}
                   medications={groupedMedications.thisYear}
-                  selectedMedications={selectedMedications}
-                  onSelectionChange={handleSelectionChange}
-                  onSelectAll={handleSelectAll}
-                  showCheckbox={showCheckbox}
                 />
               </div>
             )}
@@ -726,10 +620,6 @@ export default function DispensedMedicationList({
                 <MedicationTable
                   facilityId={facilityId}
                   medications={groupedMedications.older}
-                  selectedMedications={selectedMedications}
-                  onSelectionChange={handleSelectionChange}
-                  onSelectAll={handleSelectAll}
-                  showCheckbox={showCheckbox}
                 />
               </div>
             )}

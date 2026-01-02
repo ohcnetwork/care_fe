@@ -15,7 +15,10 @@ import { formatPatientAge } from "@/Utils/utils";
 import useCurrentFacility from "@/pages/Facility/utils/useCurrentFacility";
 import { DispenseOrderRead } from "@/types/emr/dispenseOrder/dispenseOrder";
 import dispenseOrderApi from "@/types/emr/dispenseOrder/dispenseOrderApi";
-import { MedicationDispenseRead } from "@/types/emr/medicationDispense/medicationDispense";
+import {
+  MedicationDispenseRead,
+  MedicationDispenseStatus,
+} from "@/types/emr/medicationDispense/medicationDispense";
 import medicationDispenseApi from "@/types/emr/medicationDispense/medicationDispenseApi";
 import { PatientRead } from "@/types/emr/patient/patient";
 import patientApi from "@/types/emr/patient/patientApi";
@@ -73,8 +76,8 @@ const DispenseOrderContent = ({
               { key: "dosage" },
               { key: "frequency" },
               { key: "quantity" },
-              { key: "item_location" },
-              { key: "status" },
+              { key: "lot_batch_number" },
+              { key: "expiry_date" },
               { key: "prepared_date" },
             ]}
             rows={dispenses.map((dispense) => {
@@ -93,8 +96,13 @@ const DispenseOrderContent = ({
                     }`
                   : frequency?.display || "-",
                 quantity: dispense.quantity?.toString() || "-",
-                item_location: dispense.item.location.name || "-",
-                status: t(`medication_dispense_status__${dispense.status}`),
+                batch_number: dispense.item.product.batch?.lot_number || "-",
+                expiry_date: dispense.item.product?.expiration_date
+                  ? format(
+                      new Date(dispense.item.product.expiration_date),
+                      "dd/MM/yyyy",
+                    )
+                  : "-",
                 prepared_date: new Date(
                   dispense.when_prepared,
                 ).toLocaleDateString(),
@@ -246,6 +254,7 @@ export const PrintDispenseOrder = ({
       queryParams: {
         order: dispenseOrderId,
         location: locationId,
+        status: MedicationDispenseStatus.completed,
       },
     }),
     enabled: !!dispenseOrderId,
