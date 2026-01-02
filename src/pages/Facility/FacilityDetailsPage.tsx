@@ -19,6 +19,7 @@ import useFilters from "@/hooks/useFilters";
 
 import query from "@/Utils/request/query";
 import publicFacilityApi from "@/types/facility/publicFacilityApi";
+import scheduleApis from "@/types/scheduling/scheduleApi";
 
 import { FeatureBadge } from "./Utils";
 import { UserCard } from "./components/UserCard";
@@ -42,11 +43,14 @@ export function FacilityDetailsPage({ id }: Props) {
   });
 
   const { data: docResponse, error: docError } = useQuery({
-    queryKey: [publicFacilityApi.listSchedulableUsers, id],
-    queryFn: query(publicFacilityApi.listSchedulableUsers, {
-      pathParams: { facilityId: id },
-      silent: true,
-    }),
+    queryKey: ["facilityUsersPublic", id],
+    queryFn: query(
+      scheduleApis.appointments.getPublicScheduleableFacilityUsers,
+      {
+        pathParams: { facility_id: id },
+        silent: true,
+      },
+    ),
   });
 
   if (docError) {
