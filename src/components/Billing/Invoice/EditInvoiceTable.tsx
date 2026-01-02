@@ -32,7 +32,10 @@ import {
 } from "@/components/ui/table";
 
 import { useShortcutSubContext } from "@/context/ShortcutContext";
-import { conditionSchema } from "@/types/base/condition/condition";
+import {
+  conditionSchema,
+  getConditionDiscriminatorValue,
+} from "@/types/base/condition/condition";
 import {
   MonetaryComponent,
   MonetaryComponentType,
@@ -153,6 +156,13 @@ export function EditInvoiceTable({
         const discounts = discountComponents.map((component) => ({
           ...component,
           amount: component.amount ? String(component.amount) : undefined,
+          conditions: component.conditions?.map((condition) => ({
+            ...condition,
+            _conditionType: getConditionDiscriminatorValue(
+              condition.metric,
+              condition.operation,
+            ),
+          })),
         }));
 
         return {
@@ -174,13 +184,13 @@ export function EditInvoiceTable({
       pathParams: { facilityId },
     }),
     onSuccess: () => {
-      toast.success("Invoice updated successfully");
+      toast.success(t("invoice_updated_successfully"));
 
       onSuccess();
       onClose();
     },
     onError: () => {
-      toast.error("Failed to update invoice");
+      toast.error(t("failed_to_update_invoice"));
     },
   });
 
@@ -260,7 +270,10 @@ export function EditInvoiceTable({
         conditions:
           selectedComponent.conditions?.map((condition) => ({
             ...condition,
-            _conditionType: `${condition.metric}_${condition.operation}`,
+            _conditionType: getConditionDiscriminatorValue(
+              condition.metric,
+              condition.operation,
+            ),
           })) || [],
       });
     }

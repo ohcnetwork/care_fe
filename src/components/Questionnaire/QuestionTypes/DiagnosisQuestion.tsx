@@ -637,7 +637,11 @@ export function DiagnosisQuestion({
               },
             ],
             queryKey: ["diagnoses_and_chronic_conditions", patientId],
-            queryFn: async (limit: number, offset: number) => {
+            queryFn: async (
+              limit: number,
+              offset: number,
+              signal: AbortSignal,
+            ) => {
               const response = await query(diagnosisApi.listDiagnosis, {
                 pathParams: { patientId },
                 queryParams: {
@@ -646,7 +650,7 @@ export function DiagnosisQuestion({
                   exclude_verification_status: "entered_in_error",
                   category: "encounter_diagnosis,chronic_condition",
                 },
-              })({ signal: new AbortController().signal });
+              })({ signal });
               return response;
             },
           },

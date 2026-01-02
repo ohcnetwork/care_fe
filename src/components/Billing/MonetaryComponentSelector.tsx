@@ -17,7 +17,11 @@ import { CompactConditionEditor } from "@/components/Billing/CompactConditionEdi
 
 import { cn } from "@/lib/utils";
 
-import { ConditionForm, Metrics } from "@/types/base/condition/condition";
+import {
+  ConditionForm,
+  getConditionDiscriminatorValue,
+  Metrics,
+} from "@/types/base/condition/condition";
 import {
   formatComponentValue,
   getComponentNumericValue,
@@ -438,7 +442,10 @@ export function MonetaryComponentSelector({
                       conditions={
                         component.conditions?.map((condition) => ({
                           ...condition,
-                          _conditionType: `${condition.metric}_${condition.operation}`,
+                          _conditionType: getConditionDiscriminatorValue(
+                            condition.metric,
+                            condition.operation,
+                          ),
                         })) || []
                       }
                       availableMetrics={availableMetrics}
