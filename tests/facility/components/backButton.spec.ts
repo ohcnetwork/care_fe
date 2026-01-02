@@ -39,7 +39,7 @@ test.describe("Back button should not appear when page is opened in a new tab wi
     await page.getByRole("button", { name: "Go to account" }).first().click();
 
     // Verify back button IS visible (has history)
-    const backButtonOriginal = page.getByRole("link", { name: /back/i });
+    const backButtonOriginal = await page.getByText("Back");
     await expect(backButtonOriginal).toBeVisible();
 
     // Get the current URL
@@ -50,7 +50,7 @@ test.describe("Back button should not appear when page is opened in a new tab wi
     await newPage.goto(accountUrl);
 
     // Verify back button is NOT visible (no history)
-    const backButton = newPage.getByRole("link", { name: /back/i });
+    const backButton = await newPage.getByText("Back");
     await expect(backButton).not.toBeVisible();
   });
 });

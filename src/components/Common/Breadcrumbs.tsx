@@ -115,7 +115,7 @@ function buildBreadcrumbs(segments: string[]): BreadcrumbItemProps[] {
 
 export function Breadcrumbs() {
   const { t } = useTranslation();
-  const { goBack } = useAppHistory();
+  const { history } = useAppHistory();
   const { facilityId } = usePathParams("/facility/:facilityId/*") ?? {};
   const path = usePath();
   const segments = path?.split("/").filter(Boolean) || [];
@@ -132,20 +132,28 @@ export function Breadcrumbs() {
     breadcrumbs.push(...additionalBreadcrumbs);
   }
 
+  const to = history[1];
+
   if (breadcrumbs.length === 0) return null;
 
   return (
     <div className="flex items-center gap-4 mb-3">
-      <div className="flex items-center gap-2">
-        <ChevronLeft className="size-4" />
-        <span
-          onClick={() => goBack()}
-          className="text-sm text-gray-500 hover:cursor-pointer"
-        >
-          {t("back")}
-        </span>
-      </div>
-      <Separator orientation="vertical" className="h-6 w-px bg-gray-200" />
+      {to ? (
+        <>
+          <div className="flex items-center gap-2">
+            <ChevronLeft className="size-4" />
+            <span
+              onClick={() => navigate(to)}
+              className="text-sm text-gray-500 hover:cursor-pointer"
+            >
+              {t("back")}
+            </span>
+          </div>
+          <Separator orientation="vertical" className="h-6 w-px bg-gray-200" />
+        </>
+      ) : (
+        <span></span>
+      )}
       <Breadcrumb>
         <BreadcrumbList>
           {breadcrumbs.map((breadcrumb, index) => (
