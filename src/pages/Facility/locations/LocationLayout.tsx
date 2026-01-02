@@ -46,15 +46,6 @@ const getRoutes = (facilityId: string, locationId: string) => ({
   "/medication_requests": () => (
     <MedicationRequestList facilityId={facilityId} locationId={locationId} />
   ),
-  "/medication_requests/patient/:patientId": ({
-    patientId,
-  }: {
-    patientId: string;
-  }) => (
-    <Redirect
-      to={`/facility/${facilityId}/locations/${locationId}/medication_requests/patient/${patientId}/pending`}
-    />
-  ),
   "/medication_requests/patient/:patientId/prescription/:prescriptionId": ({
     patientId,
     prescriptionId,
